@@ -1938,10 +1938,14 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
     return result;
 }
 
-SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
+SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len)
 {
-    /* Creates a new NodeId (and guid/string) */
-    SOPC_NodeId* pNid = NULL;
+    if (NULL == pNid)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Creates a new guid/string */
     char* sz = NULL; /* Safe copy of the cString */
     char* p = NULL;
     SOPC_IdentifierType type = SOPC_IdentifierType_Numeric;
@@ -2020,14 +2024,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
         }
     }
 
-    /* Now that it is valid and we now where to find the string/guid/bstring, create the NodeId */
     if (SOPC_STATUS_OK == status)
-    {
-        pNid = SOPC_Malloc(sizeof(SOPC_NodeId));
-        SOPC_NodeId_Initialize(pNid);
-    }
-
-    if (NULL != pNid)
     {
         pNid->IdentifierType = type;
         pNid->Namespace = ns;
@@ -2040,16 +2037,11 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
             status = SOPC_String_InitializeFromCString(&pNid->Data.String, p);
             break;
         case SOPC_IdentifierType_Guid:
-            pNid->Data.Guid = pGuid;
-
             status = SOPC_Guid_FromCString(pGuid, p, (size_t)(len - (p - sz)));
 
-            /* May be failed, but pGuid is allocated */
-            if (SOPC_STATUS_OK != status)
+            if (SOPC_STATUS_OK == status)
             {
-                SOPC_Free(pGuid);
-                pGuid = NULL;
-                status = SOPC_STATUS_NOK;
+                pNid->Data.Guid = pGuid;
             }
             break;
         case SOPC_IdentifierType_ByteString:
@@ -2059,20 +2051,34 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
         default:
             break;
         }
-
-        /* Something could have failed but the NodeId is already allocated */
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Free(pNid);
-            pNid = NULL;
-        }
     }
-    else
+
+    if (SOPC_STATUS_OK != status)
     {
+        SOPC_NodeId_Clear(pNid);
         SOPC_Free(pGuid);
     }
 
     SOPC_Free(sz);
+
+    return status;
+}
+
+SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
+{
+    SOPC_NodeId* pNid = SOPC_Malloc(sizeof(SOPC_NodeId));
+    if (NULL == pNid)
+    {
+        return NULL;
+    }
+
+    SOPC_NodeId_Initialize(pNid);
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(pNid, cString, len);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pNid);
+        pNid = NULL;
+    }
 
     return pNid;
 }
