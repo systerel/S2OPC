@@ -2025,18 +2025,21 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
                 SOPC_NodeId_InitializeFromCString(&req->MethodId, creq->methodNodeId, (int) strlen(creq->methodNodeId));
         }
 
-        req->InputArguments = SOPC_Calloc((size_t) creq->nbOfInputParams, sizeof(SOPC_Variant));
-        if (NULL == req->InputArguments)
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        else
-        {
-            for (int32_t j = 0; j < creq->nbOfInputParams; j++)
+            req->InputArguments = SOPC_Calloc((size_t) creq->nbOfInputParams, sizeof(SOPC_Variant));
+            if (NULL == req->InputArguments)
             {
-                SOPC_Variant_Move(&req->InputArguments[j], &creq->inputParams[j]);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
             }
-            req->NoOfInputArguments = creq->nbOfInputParams;
+            else
+            {
+                for (int32_t j = 0; j < creq->nbOfInputParams; j++)
+                {
+                    SOPC_Variant_Move(&req->InputArguments[j], &creq->inputParams[j]);
+                }
+                req->NoOfInputArguments = creq->nbOfInputParams;
+            }
         }
     }
 
