@@ -63,7 +63,7 @@ DEFINITIONS
         IsRangeDefined, /* <=> range string != NULL */
         IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
         HasRange_VariantIndex, /* Valid index range but has no range in  Variant */
-        
+
         /* LocalizedText supported locales */
         IsSupportedLocales_Variant
 
@@ -98,7 +98,7 @@ DEFINITIONS
 
         a_ValueRank : t_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-        
+
         a_ArrayDimensions : t_Node +-> t_ArrayDimensions &
         dom(a_ArrayDimensions) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
@@ -736,7 +736,7 @@ OPERATIONS
                          p_access_level = a_AccessLevel(p_node))
     END
     ;
-    
+
     p_bool <-- get_Executable(p_node) =
     PRE
         p_node : t_Node_i &
@@ -824,7 +824,7 @@ OPERATIONS
         bres := IsRangeDefined(p_index_range)
     END
     ;
-    
+
     p_input_arg <-- get_InputArguments(p_node) =
     PRE
         p_node : t_Node_i &
@@ -834,16 +834,16 @@ OPERATIONS
         p_input_arg :: t_Variant_i
     END
     ;
-    
+
     p_valueRank <-- get_conv_Variant_ValueRank(p_variant) =
     PRE
         p_variant : t_Variant_i &
-        p_variant : t_Variant 
+        p_variant : t_Variant
     THEN
         p_valueRank :: t_ConcreteValueRank
     END
     ;
-    
+
     p_type <-- get_conv_Variant_Type(p_variant) =
     PRE
         p_variant : t_Variant_i &

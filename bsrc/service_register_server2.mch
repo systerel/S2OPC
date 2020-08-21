@@ -24,10 +24,10 @@ SEES
     constants,
     constants_statuscodes_bs,
     service_set_discovery_server_data_bs
- 
+
 DEFINITIONS
 
-    d_variables == 
+    d_variables ==
     RegisteredServer2_CounterResetTime,
     RegisteredServer2_Counter,
     s_RegisteredServer2,
@@ -76,7 +76,7 @@ DEFINITIONS
     d_init_set_it ==
     s_registered_server2_to_iterate_it :(s_registered_server2_to_iterate_it = {}) ||
     s_registered_server2_iterated_it :(s_registered_server2_iterated_it = {})
-        
+
 ABSTRACT_VARIABLES
     d_variables,
     d_variables_set_it
@@ -128,11 +128,11 @@ OPERATIONS
                         RegisteredServer2_Counter = RegisteredServer2_Counter$0 + 1 &
                         /* Create new server info: */
                         s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
-                        a_RegisteredServer2_RecordId = 
+                        a_RegisteredServer2_RecordId =
                           a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> RegisteredServer2_Counter} &
-                        a_RegisteredServer2_RegisteredServer = 
+                        a_RegisteredServer2_RegisteredServer =
                           a_RegisteredServer2_RegisteredServer$0 <+ {l_registerInfo |-> p_registered_server} &
-                        a_RegisteredServer2_mDNSconfig = 
+                        a_RegisteredServer2_mDNSconfig =
                           a_RegisteredServer2_mDNSconfig$0 <+ {l_registerInfo |-> p_mdns_config}
                     )
                 )
@@ -170,9 +170,9 @@ OPERATIONS
                 and add the new record in each relation */
                 a_RegisteredServer2_RecordId =
                 s_RegisteredServer2 <| a_RegisteredServer2_RecordId$0 &
-                a_RegisteredServer2_RegisteredServer = 
+                a_RegisteredServer2_RegisteredServer =
                 s_RegisteredServer2 <| a_RegisteredServer2_RegisteredServer$0 &
-                a_RegisteredServer2_mDNSconfig = 
+                a_RegisteredServer2_mDNSconfig =
                 s_RegisteredServer2 <| a_RegisteredServer2_mDNSconfig$0
             )
         )
@@ -187,7 +187,7 @@ OPERATIONS
 
     /* PROMOTED */
     /* iterator on set */
-    
+
     continue <-- init_iter_registered_server2_set =
     BEGIN
         s_registered_server2_to_iterate_it,
@@ -248,7 +248,7 @@ OPERATIONS
         p_registeredServerInfo : t_RegisteredServer2Info_i &
         p_registeredServerInfo : s_RegisteredServer2
     THEN
-        p_registered_server 
+        p_registered_server
         :(p_registered_server : t_RegisteredServer_i &
           p_registered_server = a_RegisteredServer2_RegisteredServer (p_registeredServerInfo))
     END

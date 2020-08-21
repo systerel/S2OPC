@@ -64,7 +64,7 @@ LOCAL_OPERATIONS
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        IF  p_channel : s_channel_connected & 
+        IF  p_channel : s_channel_connected &
             p_channel /: dom(a_endpoint) /* Client side only: */
         THEN
             s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(p_channel)}
@@ -155,7 +155,7 @@ OPERATIONS
         l_card_used <-- get_card_channel_used;
         l_card_channel <-- get_card_t_channel;
         /* It is possible to have no slot at all when channels are already disconnecting due to auto close, wait a channel slot to be freed */
-        IF l_card_used /= l_card_channel THEN 
+        IF l_card_used /= l_card_channel THEN
             /* Check we keep at least one channel slot to allow auto close channel to be evaluated later in services layer.
             If we accept a connection and reach cardinal the secure channel layer will not accept any new connection and
             service layer will not be aware of next connections attempts to evaluate possible auto close.
@@ -213,7 +213,7 @@ OPERATIONS
         IF  l_con = FALSE &
             l_dom = FALSE &
             l_allowed_new_sc = TRUE
-        THEN                
+        THEN
             l_current_time <-- get_current_TimerReference;
             add_channel_connected(channel, l_current_time);
             set_config(channel, channel_config_idx);
@@ -312,7 +312,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_auto_closed_active <-- is_auto_close_channel_active =
     VAR
         l_card_used,

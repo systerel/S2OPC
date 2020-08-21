@@ -270,7 +270,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_timeref <-- get_connection_time(p_channel) =
     BEGIN
         p_timeref := a_channel_connected_time_i(p_channel)

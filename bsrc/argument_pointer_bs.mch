@@ -19,18 +19,18 @@
 
 MACHINE
     argument_pointer_bs
-    
+
 SEES
     constants,
     constants_statuscodes_bs
-    
+
 DEFINITIONS
     d_variables ==
     Variant_Arguments,
     Argument_DataType,
     Argument_ValueRank
     ;
-    
+
     d_inv ==
     (
         Variant_Arguments : t_Variant +-> seq(t_Argument) &
@@ -38,21 +38,21 @@ DEFINITIONS
         / Null value return NodeId(i=0) */
         Argument_ValueRank : t_Argument --> t_ConcreteValueRank
     );
-    
+
     d_init ==
     d_inv
-    
+
 ABSTRACT_VARIABLES
     d_variables
-    
+
 INVARIANT
     d_inv
-    
+
 INITIALISATION
     d_variables :( d_init )
-    
+
 OPERATIONS
-    
+
     p_nb <-- read_variant_nb_argument(p_variant) =
     PRE
         p_variant: t_Variant_i &
@@ -66,7 +66,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_arg <-- read_variant_argument(p_variant, p_index) =
     PRE
         p_variant: t_Variant_i &
@@ -81,23 +81,23 @@ OPERATIONS
         )
     END
     ;
-    
+
     p_type <-- read_argument_type(p_arg)=
     PRE
         p_arg : t_Argument_i &
         p_arg : t_Argument
     THEN
         p_type :(p_type : t_NodeId_i & p_type = Argument_DataType(p_arg))
-        
+
     END
     ;
     p_vr <-- read_argument_valueRank(p_arg)=
     PRE
         p_arg : t_Argument_i &
-        p_arg : t_Argument        
+        p_arg : t_Argument
     THEN
         p_vr := Argument_ValueRank(p_arg)
-        
+
     END
-    
+
 END

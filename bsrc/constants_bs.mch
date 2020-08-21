@@ -92,7 +92,7 @@ SETS
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
-    
+
     k_n_read_resp_max,
     k_n_WriteResponse_max,
     k_n_BrowseResponse_max,
@@ -242,7 +242,7 @@ ABSTRACT_CONSTANTS
 
 PROPERTIES
     c_Server_Nano_Extended : BOOL &
-    
+
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
     k_n_BrowseResponse_max : NAT &
@@ -454,7 +454,7 @@ PROPERTIES
 
     c_ContinuationPointId_indet : t_ContinuationPointId_i &
     t_ContinuationPointId = t_ContinuationPointId_i - {c_ContinuationPointId_indet} &
-    
+
     c_ArrayDimensions_indet : t_ArrayDimensions_i &
     t_ArrayDimensions = t_ArrayDimensions_i - {c_ArrayDimensions_indet} &
 
@@ -465,7 +465,7 @@ PROPERTIES
 
     c_RegisteredServer_indet : t_RegisteredServer_i &
     t_RegisteredServer = t_RegisteredServer_i - {c_RegisteredServer_indet} &
-    
+
     c_ApplicationDescription_indet : t_ApplicationDescription_i &
     t_ApplicationDescription = t_ApplicationDescription_i - {c_ApplicationDescription_indet} &
 
@@ -492,13 +492,13 @@ PROPERTIES
     t_RelativePathElt <: t_RelativePathElt_i &
     c_RelativePathElt_indet : t_RelativePathElt_i &
     c_RelativePathElt_indet /: t_RelativePathElt &
-    
+
     t_CallMethod <: t_CallMethod_i &
     c_CallMethod_indet : t_CallMethod_i &
     c_CallMethod_indet /: t_CallMethod &
     cast_t_CallMethod : NAT +-> t_CallMethod_i &
     cast_t_CallMethod : perm(t_CallMethod) &
-    
+
     t_Argument <: t_Argument_i &
     c_Argument_indet : t_Argument_i &
     c_Argument_indet /: t_Argument

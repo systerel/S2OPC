@@ -86,7 +86,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    /* Check if auto-closing should be activated and 
+    /* Check if auto-closing should be activated and
        close oldest secure channel without session if available */
     l_is_one_sc_closing <-- l_may_close_secure_channel_without_session =
     BEGIN
@@ -278,7 +278,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     l_is_one_sc_closing <-- l_may_close_secure_channel_without_session =
     VAR
         l_is_active,
@@ -298,7 +298,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* END OF LOCAL OPERATIONS */
 
     valid_msg <-- receive_msg_buffer (channel, buffer, request_context) =
@@ -399,7 +399,7 @@ OPERATIONS
                         /* Client receiving a request: close secure channel since it is not expected from server */
                         close_secure_channel (channel)
                     END;
-                    valid_msg := l_valid_resp                    
+                    valid_msg := l_valid_resp
                 ELSE
                     valid_msg := FALSE;
                     /* Unknown message type: close the secure channel since it is not expected */

@@ -146,7 +146,7 @@ DEFINITIONS
                                TRUE |-> {FALSE |-> {FALSE |-> e_sc_bad_not_writable,
                                                     TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
                                                               TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
-                                                             }(bool(e_operation_type_write |-> nid |-> aid |-> user : 
+                                                             }(bool(e_operation_type_write |-> nid |-> aid |-> user :
                                                                     s_AuthorizedOperations))
                                                    }(conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid)))),
                                          TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
@@ -228,7 +228,7 @@ LOCAL_OPERATIONS
                     (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE)
                     =>
                         a_Value_StatusCode = a_Value_StatusCode$0) &
- 
+
                     (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE
                     =>
                         a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
@@ -239,7 +239,7 @@ LOCAL_OPERATIONS
                         a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
                 )
             ) &
-            (not (ResponseWrite_StatusCode(p_wvi) = e_sc_ok) 
+            (not (ResponseWrite_StatusCode(p_wvi) = e_sc_ok)
             =>
                 a_Value = a_Value$0 &
                 a_Value_StatusCode = a_Value_StatusCode$0 &
@@ -301,7 +301,7 @@ LOCAL_OPERATIONS
                     DataValue_StatusCode(prev_dataValue) = a_Value_StatusCode$0(a_NodeId~(nid)) &
                     DataValue_SourceTimestamp(prev_dataValue) = a_Value_SourceTimestamp$0(a_NodeId~(nid)) &
 
-                    a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} & 
+                    a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
 
                     (local_service_treatment /= 0
                     =>
@@ -320,7 +320,7 @@ LOCAL_OPERATIONS
                         (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE)
                         =>
                             a_Value_StatusCode = a_Value_StatusCode$0) &
- 
+
                         (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE
                         =>
                             a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
@@ -867,7 +867,7 @@ OPERATIONS
         reset_ResponseWrite
     END
     ;
-    
+
     statusCode, node <-- check_nodeId_isValid(nodeid) =
     VAR
         l_isvalid
@@ -886,7 +886,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
 	btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)
 END

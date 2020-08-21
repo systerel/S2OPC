@@ -29,7 +29,7 @@ SEES
 
 DEFINITIONS
     d_variables ==
-    
+
     s_cli_channel_connecting,
     s_cli_channel_disconnecting,
     s_channel_connected,
@@ -57,7 +57,7 @@ OPERATIONS
        IF  config_idx /: dom(a_config~) &
            card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
            (card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) - 1
-            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation 
+            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation
                                                  (if a SC is already auto closing it is used because 1 will be released soon) */
        THEN
            s_cli_channel_connecting := s_cli_channel_connecting \/ {config_idx} ||
@@ -74,7 +74,7 @@ OPERATIONS
             channel_config_idx /: ran(a_config) &
             card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
            (card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) - 1
-            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation 
+            or is_one_sc_auto_closing = TRUE)  /* 1 slot is always kept for auto closing evaluation
                                                  (if a SC is already auto closing it is used because 1 will be released soon) */
         THEN
             s_channel_connected := s_channel_connected \/ {channel} ||

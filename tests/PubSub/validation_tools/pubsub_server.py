@@ -41,7 +41,7 @@ class PubSubServer:
         self.nodeConfiguration =self.client.get_node(self.nid_configuration)
         self.nodeStartStop = self.client.get_node(self.nid_start_stop)
         self.nodeStatus = self.client.get_node(self.nid_status)
-        
+
     # Is connected to Pub/Sub server
     def isConnected(self):
         try:
@@ -50,7 +50,7 @@ class PubSubServer:
         except:
             return False
 
-    # Disconnect to the Pub/Sub server    
+    # Disconnect to the Pub/Sub server
     def disconnect(self):
         self.client.disconnect()
         print('Disconnected')
@@ -66,7 +66,7 @@ class PubSubServer:
                 timeout = timeout - PUBSUBSERVER_TIMEOUT_STEP
         except e:
             print('Client not connected to PubSubServer')
-            
+
     # Is Pub/Sub module started
     def isStart(self):
         try:
@@ -74,12 +74,12 @@ class PubSubServer:
         except:
             print('Client not connected to PubSubServer')
             return False
-        
+
     # Start the Pub/Sub module
     # Wait until status changes or timeout expires
     def start(self):
         self.__setStartStop(1)
-        
+
     # Stop the Pub/Sub module
     # Wait until status changes or timeout expires
     def stop(self):
@@ -94,7 +94,7 @@ class PubSubServer:
         except:
             print('Client not connected to PubSubServer')
             return 0
-        
+
     # Set the Pub/Sub module configuration
     # Value is a XML in a string
     def setConfiguration(self, value):
@@ -123,4 +123,4 @@ class PubSubServer:
     def setValue(self, nid, varianttype, value):
         node = self.client.get_node(nid)
         node.set_value(value=value, varianttype=varianttype)
-    
+

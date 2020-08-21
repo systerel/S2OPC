@@ -42,7 +42,7 @@ DEFINITIONS
     /* a_RegisteredServer2_RecordId restricted to the mDNSconfig and recordIds compatible with the FindServersOnNetwork request */
     a_FindServersOnNetworkCompat_RecordId ==
       (dom(a_FindServersOnNetworkCompat_mDNSconfig) <| a_RegisteredServer2_RecordId |> FindServersOnNetworkReq_StartingRecordId..MAXINT);
-      
+
     /* a_RegisteredServer2_RegisteredServer restricted to the ServerURI compatible with the FindServers request */
     a_FindServersCompat_RegisteredServer ==
       (a_RegisteredServer2_RegisteredServer |> dom(RegisteredServer_ServerUri |> ServerUriArray_HasServerUri[{FindServersReq_ServerUris}]))
@@ -79,7 +79,7 @@ LOCAL_OPERATIONS
         p_nb_servers : NAT &
         p_nb_servers = FindServersOnNetworkResp_NbServers &
         p_nb_servers > 0 &
-        p_nb_servers = min({FindServersOnNetworkReq_MaxRecordsToReturn, 
+        p_nb_servers = min({FindServersOnNetworkReq_MaxRecordsToReturn,
                            card(a_FindServersOnNetworkCompat_RecordId)})
     THEN
         FindServersOnNetworkResp_ServerRecordId,
@@ -93,7 +93,7 @@ LOCAL_OPERATIONS
             ran(FindServersOnNetworkResp_ServerRecordId) <: ran(a_FindServersOnNetworkCompat_RecordId) &
             /* In case we do not use all compatible records we shall return the first compatible recordIds in numerical order */
             (ran(FindServersOnNetworkResp_ServerRecordId) /= ran(a_FindServersOnNetworkCompat_RecordId) =>
-                max(ran(FindServersOnNetworkResp_ServerRecordId)) 
+                max(ran(FindServersOnNetworkResp_ServerRecordId))
                 < min(ran(a_FindServersOnNetworkCompat_RecordId) - ran(FindServersOnNetworkResp_ServerRecordId))) &
             /* We set the config associated to each recordId returned */
             !p_index.(p_index : 0 .. p_nb_servers - 1 =>
@@ -125,7 +125,7 @@ LOCAL_OPERATIONS
         END
     END
     ;
-    
+
     p_compatSelf, p_appDesc, p_nbServersOut
       <-- local_add_self_server_to_return (p_endpoint_config_idx, p_nbServerUri, p_ServerUris, p_nbServersIn) =
     PRE
@@ -174,7 +174,7 @@ LOCAL_OPERATIONS
         :(
             ret : {e_sc_ok, e_sc_bad_out_of_memory} &
             FindServersResp_ApplicationDescription : seq(t_ApplicationDescription) &
-            (ret = e_sc_ok => 
+            (ret = e_sc_ok =>
                 /* No filter: all RegisteredServer config are returned */
                 (p_nbServerUri <= 0 =>
                     ran(FindServersResp_ApplicationDescription)
@@ -253,22 +253,22 @@ OPERATIONS
             l_continue = bool(s_registered_server2_to_iterate_it /= {}) &
             l_nb_servers = card(s_registered_server2_iterated_it <| a_FindServersOnNetworkCompat_RecordId) &
             l_nb_servers <= p_nb_servers &
-            
-            
+
+
             /* Response contains all compatible recordId iterated */
             ran(FindServersOnNetworkResp_ServerRecordId) = ran(s_registered_server2_iterated_it <| a_FindServersOnNetworkCompat_RecordId) &
 
             /* Iterated recordId values shall be the first compatible recordIds in numerical order */
             (ran(s_registered_server2_iterated_it <| a_FindServersOnNetworkCompat_RecordId) /= {} &
              ran(s_registered_server2_to_iterate_it <| a_FindServersOnNetworkCompat_RecordId) /= {} =>
-                max(ran(s_registered_server2_iterated_it <| a_FindServersOnNetworkCompat_RecordId)) 
+                max(ran(s_registered_server2_iterated_it <| a_FindServersOnNetworkCompat_RecordId))
                 < min(ran(s_registered_server2_to_iterate_it <| a_FindServersOnNetworkCompat_RecordId))) &
-            
+
             /* We set the config associated to each recordId returned */
             !p_index.(p_index : 0 .. l_nb_servers - 1 =>
                 FindServersOnNetworkResp_ServerRecordId(p_index) : a_RegisteredServer2_RecordId[s_registered_server2_iterated_it] &
                 /* Numercial order compliant */
-                (p_index > 0 => 
+                (p_index > 0 =>
                   FindServersOnNetworkResp_ServerRecordId(p_index) > max(FindServersOnNetworkResp_ServerRecordId[0..p_index-1])) &
                 /* For a given index we have the configuration associated to the recordId */
                 FindServersOnNetworkResp_ServerRegisteredConfig(p_index) =
@@ -341,7 +341,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret <-- local_set_servers_to_return (p_resp, p_localeIds, p_nbServerUri, p_ServerUris, p_nb_servers) =
     VAR
         l_continue,
@@ -422,7 +422,7 @@ OPERATIONS
     ret <-- treat_register_server2_request (req_msg, resp_msg) =
     VAR
         l_is_online,
-        l_nb_discovery_config, 
+        l_nb_discovery_config,
         l_mdns_config_index,
         l_registered_server,
         l_mdns_config
@@ -459,10 +459,10 @@ OPERATIONS
         l_LocaleIds, l_nbServerUri, l_ServerUris <-- get_find_servers_req_params (req_msg);
         l_nbServers <-- local_get_nb_servers_to_return (l_nbServerUri, l_ServerUris);
         // Check if we add the current endpoint server information
-        l_isCurrentCompat, l_appDesc, l_nbServersPlusSelf 
+        l_isCurrentCompat, l_appDesc, l_nbServersPlusSelf
           <-- local_add_self_server_to_return (endpoint_config_idx, l_nbServerUri, l_ServerUris, l_nbServers);
-        
-        IF l_nbServersPlusSelf > 0 
+
+        IF l_nbServersPlusSelf > 0
         THEN
             l_allocSuccess <-- alloc_find_servers (resp_msg, l_nbServersPlusSelf);
             IF l_allocSuccess = TRUE

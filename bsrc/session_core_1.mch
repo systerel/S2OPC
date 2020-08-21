@@ -290,7 +290,7 @@ OPERATIONS
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        p_session 
+        p_session
         :(p_session : t_session_i &
             (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
             (p_channel /: dom(a_channel~) => p_session = c_session_indet)
@@ -572,7 +572,7 @@ OPERATIONS
     drop_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session & 
+        p_session : t_session &
         p_session : dom(a_NonceClient)
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient

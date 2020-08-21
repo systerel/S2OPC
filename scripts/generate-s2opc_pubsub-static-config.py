@@ -119,7 +119,7 @@ def handlePubSub(pubSub, result):
 
     pubConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_PUBLISHER))
     subConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_SUBSCRIBER))
-    
+
     ##
     # Create configuration and define local variable
     ##
@@ -134,12 +134,12 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         result.add("""
     SOPC_PubSubConnection* connection;
     """ )
-    
+
     if len(pubConnections) > 0:
 
         # publisher shall have a publisher id
         assert pubid > 0
-        
+
         ##
         # PUBLISHERS
         ##
@@ -232,12 +232,12 @@ def handlePubConnection(publisherId, connection, index, result):
 def handlePubMessage(message, index, result):
     global IS_DEFINED_C_WRITER
     global IS_DEFINED_C_DATASET
-    
+
     id = int(message.get(ATTRIBUTE_MESSAGE_ID), 10)
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
     interval = int(message.get(ATTRIBUTE_MESSAGE_INTERVAL), 10)
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
-    
+
     variables = message.findall(TAG_VARIABLE)
 
     result.add("""
@@ -249,7 +249,7 @@ def handlePubMessage(message, index, result):
     SOPC_DataSetWriter* writer = NULL;
         """)
     IS_DEFINED_C_WRITER = True
-    
+
     result.add("""
     if (alloc)
     {
@@ -265,7 +265,7 @@ def handlePubMessage(message, index, result):
     SOPC_PublishedDataSet* dataset = NULL;
     """)
         IS_DEFINED_C_DATASET = True
-    
+
         result.add("""
     if (alloc)
     {
@@ -288,7 +288,7 @@ def handlePubMessage(message, index, result):
 def handleVariable(mode, variable, index, result):
     global DEFINE_C_SETPUBVARIABLEAT
     global DEFINE_C_SETSUBVARIABLEAT
-    
+
     nodeId = variable.get(ATTRIBUTE_VARIABLE_NODEID)
     datatype = variable.get(ATTRIBUTE_VARIABLE_TYPE)
     assert datatype in TYPE_IDS
@@ -338,7 +338,7 @@ def handleSubConnection(publisherId, connection, index, result):
 def handleSubMessage(message, index, result):
     global IS_DEFINED_C_READER
     global DEFINE_C_SETSUBNBVARIABLES
-    
+
     for attr in [ATTRIBUTE_MESSAGE_ID,
                  ATTRIBUTE_MESSAGE_VERSION,
                  ATTRIBUTE_MESSAGE_INTERVAL,
@@ -537,7 +537,7 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
 """)
 
     cFile.add(tmpCFile.data)
-    
+
 
     c_file_out.write(cFile.data)
 

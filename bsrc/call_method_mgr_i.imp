@@ -21,7 +21,7 @@ IMPLEMENTATION
     call_method_mgr_i
 REFINES
     call_method_mgr
-    
+
 SEES
     address_space,
     constants,
@@ -31,19 +31,19 @@ SEES
     message_out_bs,
     request_handle_bs,
     session_mgr
-    
+
 DEFINITIONS
     "definitions.def"
-    
+
 IMPORTS
     call_method_bs,
     call_method_it,
     call_method_result_it,
     msg_call_method_bs,
     argument_pointer_bs
-    
+
 LOCAL_OPERATIONS
-    
+
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
     PRE
         p_session : t_session_i &
@@ -75,7 +75,7 @@ LOCAL_OPERATIONS
                 e_sc_bad_invalid_argument,
                 e_sc_bad_method_invalid,
                 e_sc_bad_not_executable} &
-            
+
             CallMethodRes_Msg                    : t_msg_i &
             CallMethodRes_status                 : t_CallMethod --> t_StatusCode_i      &
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
@@ -84,7 +84,7 @@ LOCAL_OPERATIONS
             CallMethodRes_OutputArgument         : t_CallMethod --> seq(t_Variant)    &
             dom(CallMethodRes_status) = dom(CallMethodRes_InputArgumentResult)          &
             dom(CallMethodRes_status) = dom(CallMethodRes_OutputArgument) &
-            
+
             {p_callMethod} <<| CallMethodRes_status = {p_callMethod} <<| CallMethodRes_status$0 &
             CallMethodRes_status(p_callMethod) = StatusCode &
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
@@ -94,7 +94,7 @@ LOCAL_OPERATIONS
             {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument =
             {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
             {p_callMethod} <<| CallMethodRes_OutputArgument = {p_callMethod} <<| CallMethodRes_OutputArgument$0 &
-            
+
             ( StatusCode /= e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
@@ -103,7 +103,7 @@ LOCAL_OPERATIONS
             ( StatusCode = e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
-                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod))
             ) &
             ( StatusCode /= e_sc_ok
                 =>
@@ -111,12 +111,12 @@ LOCAL_OPERATIONS
                 CallMethodRes_OutputArgument(p_callMethod) = {}
             )
 
-            
+
         )
-        
+
     END
     ;
-    
+
     /*
     Check object, method and inputArgument
     */
@@ -147,15 +147,15 @@ LOCAL_OPERATIONS
                 e_sc_bad_not_executable,
                 e_sc_ok
             } &
-            
+
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
             CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
-            
+
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
             {p_callMethod} <<| CallMethodRes_InputArgumentResult =
             {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
-            
+
             ( StatusCode /= e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
@@ -164,12 +164,12 @@ LOCAL_OPERATIONS
             ( StatusCode = e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
-                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod))
             )
         )
     END
     ;
-    
+
     /**
 	* Verify the Arguments against Method description
     */
@@ -198,15 +198,15 @@ LOCAL_OPERATIONS
                 e_sc_bad_invalid_argument,
                 e_sc_ok
             } &
-            
+
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
             CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
-            
+
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
             {p_callMethod} <<| CallMethodRes_InputArgumentResult =
             {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
-            
+
             ( StatusCode /= e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
@@ -215,12 +215,12 @@ LOCAL_OPERATIONS
             ( StatusCode = e_sc_bad_invalid_argument
                 =>
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
-                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod)) 
+                size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod))
             )
         )
     END
     ;
-    
+
     StatusCode <-- check_method_call_one_argument_type (p_value, p_arg) =
     PRE
         p_value : t_Variant_i &
@@ -261,7 +261,7 @@ LOCAL_OPERATIONS
             (StatusCode = e_sc_ok
                 =>
                 CallMethodRes_AllocatedOutputArgument(p_callMethod) = size(exec_result) &
-                CallMethodRes_OutputArgument(p_callMethod) = exec_result 
+                CallMethodRes_OutputArgument(p_callMethod) = exec_result
             ) &
             (StatusCode = e_sc_bad_out_of_memory
                 =>
@@ -272,8 +272,8 @@ LOCAL_OPERATIONS
     END
 
 OPERATIONS
-    
-    
+
+
     StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
     VAR
         l_endpoint_config_idx ,
@@ -318,15 +318,15 @@ OPERATIONS
         END
     END
     ;
-    
-    
+
+
     /* LOCAL OPERATIONS */
-    
+
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
     BEGIN
         StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg);
         IF StatusCode  = e_sc_ok THEN
-            
+
             StatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx);
             IF StatusCode  = e_sc_ok THEN
                 StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)
@@ -338,7 +338,7 @@ OPERATIONS
         write_CallMethod_Res_Status(p_res_msg, p_callMethod, StatusCode)
     END
     ;
-            
+
     StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg)=
     VAR
         l_object,
@@ -377,12 +377,12 @@ OPERATIONS
             ELSE
                 /* Since invalid and unknown are reserved for objectId, use method invalid */
                 StatusCode := e_sc_bad_method_invalid
-            END            
+            END
         END
-        
+
     END
     ;
-    
+
     /**
 	* Verify the Arguments against Method description
     */
@@ -397,7 +397,7 @@ OPERATIONS
         l_val,
         l_arg_status
     IN
-        
+
         l_input_arg_variant <-- get_InputArguments(p_method_node);
         l_nb_method_arg <-- read_variant_nb_argument(l_input_arg_variant);
         l_nb_req_arg <-- read_CallMethod_Nb_InputArguments (p_req_msg, p_callMethod);
@@ -427,31 +427,31 @@ OPERATIONS
                         StatusCode := e_sc_bad_invalid_argument
                     END
                 INVARIANT
-                    
+
                     callMethodResultIdx_to_iterate <: NAT1 &
                     callMethodResultIdx_iterated   <: NAT1 &
                     callMethodResultIdx_to_iterate /\ callMethodResultIdx_iterated = {} &
                     size(CallMethod_InputArguments(p_callMethod)) = card(callMethodResultIdx_to_iterate \/ callMethodResultIdx_iterated) &
-                    
+
                     callMethodResultIdx_iterated   = 1 .. l_index &
                     callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
                     l_continue                     = bool(l_index /= nb_callMethodResultIdx_max_refs) &
-                    
+
                     StatusCode : { e_sc_ok, e_sc_bad_invalid_argument } &
-                    
+
                     CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
                     CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
-                    
+
                     /* TODO $0 is not allowed..
                     {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
                     {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
                     {p_callMethod} <<| CallMethodRes_InputArgumentResult =
                     {p_callMethod} <<| CallMethodRes_InputArgumentResult$0 &
                     */
-                    
+
                     CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
                     size(CallMethodRes_InputArgumentResult(p_callMethod)) = card(callMethodResultIdx_iterated)
-                    
+
                 VARIANT
                     card(callMethodResultIdx_to_iterate)
                 END
@@ -463,7 +463,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode <-- check_method_call_one_argument_type (p_value, p_arg) =
     VAR
         l_value_type,
@@ -473,17 +473,17 @@ OPERATIONS
         l_bool,
         l_compat_with_conv
     IN
-        
+
         l_value_type <-- get_conv_Variant_Type(p_value);
         l_value_valueRank <-- get_conv_Variant_ValueRank(p_value);
-        
+
         l_arg_type <-- read_argument_type(p_arg);
         l_arg_valueRank <-- read_argument_valueRank(p_arg);
-        
+
         l_bool, l_compat_with_conv
         <-- read_variable_compat_type(l_value_type, l_value_valueRank, l_arg_type, l_arg_valueRank);
         /* l_compat_with_conv is not used */
-        
+
         IF l_bool = FALSE THEN
             StatusCode := e_sc_bad_type_mismatch
         ELSE
@@ -491,7 +491,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode <-- copy_exec_result (p_res_msg, p_callMethod) =
     VAR
         l_continue,
@@ -506,7 +506,7 @@ OPERATIONS
             StatusCode := e_sc_ok
         ELSE
             StatusCode <-- alloc_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod, l_nb);
-            l_continue := bool(StatusCode = e_sc_ok); 
+            l_continue := bool(StatusCode = e_sc_ok);
             WHILE l_continue = TRUE
             DO
                 l_continue, l_index <-- continue_iter_callMethodResultIdx;
@@ -514,24 +514,24 @@ OPERATIONS
                 write_CallMethod_Res_OutputArgument(p_res_msg, p_callMethod, l_index, l_value);
                 l_continue := bool(l_continue = TRUE)
             INVARIANT
-                
+
                 callMethodResultIdx_to_iterate <: NAT1 &
                 callMethodResultIdx_iterated   <: NAT1 &
                 callMethodResultIdx_to_iterate /\ callMethodResultIdx_iterated = {} &
                 nb_callMethodResultIdx_max_refs = card(callMethodResultIdx_to_iterate \/ callMethodResultIdx_iterated) &
-                
+
                 callMethodResultIdx_iterated   = 1 .. l_index &
                 callMethodResultIdx_to_iterate = l_index + 1 .. nb_callMethodResultIdx_max_refs &
                 l_continue                     = bool(callMethodResultIdx_to_iterate /= {}) &
-                
+
                 /* TODO $0 is not allowed..
                 {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument =
                 {p_callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
                 {p_callMethod} <<| CallMethodRes_OutputArgument = {p_callMethod} <<| CallMethodRes_OutputArgument$0 &
                 */
                 CallMethodRes_AllocatedOutputArgument(p_callMethod) = size(exec_result) &
-                CallMethodRes_OutputArgument(p_callMethod) = callMethodResultIdx_iterated <| exec_result 
-                
+                CallMethodRes_OutputArgument(p_callMethod) = callMethodResultIdx_iterated <| exec_result
+
             VARIANT
                 card(callMethodResultIdx_to_iterate)
             END

@@ -29,7 +29,7 @@ SEES
 
 IMPORTS
     service_register_server2_set_bs
-    
+
 PROMOTES
     init_iter_registered_server2_set,
     clear_iter_registered_server2_set,
@@ -46,7 +46,7 @@ CONCRETE_VARIABLES
 INVARIANT
     RegisteredServer2_Counter_i : NAT &
     RegisteredServer2_Counter_i = RegisteredServer2_Counter
-    
+
 INITIALISATION
     RegisteredServer2_Counter_i := 0
 
@@ -70,7 +70,7 @@ LOCAL_OPERATIONS
                    /* <: t_RegisteredServer s_RegisteredServer2 with same serverUri: there is only one element by construction */
                    a_RegisteredServer2_RegisteredServer~[
                      /*<: t_RegisteredServer with same serverUri*/
-                     RegisteredServer_ServerUri~[{RegisteredServer_ServerUri(p_registered_server)}]]] 
+                     RegisteredServer_ServerUri~[{RegisteredServer_ServerUri(p_registered_server)}]]]
             THEN
                 recordId := serverUriRecordId
             END
@@ -102,10 +102,10 @@ OPERATIONS
                 recordId <-- get_registered_server2_recordId (l_registeredServerInfo)
             END
         INVARIANT
-            hasServerUri = 
+            hasServerUri =
               bool(RegisteredServer_ServerUri(p_registered_server) :
                     RegisteredServer_ServerUri[a_RegisteredServer2_RegisteredServer[s_registered_server2_iterated_it]]) &
-            (hasServerUri = TRUE => 
+            (hasServerUri = TRUE =>
                 /* since we stop iteration once found, there is only one element, moreover there is only 1 by construction */
                 card(a_RegisteredServer2_RegisteredServer~
                       [RegisteredServer_ServerUri~
@@ -150,7 +150,7 @@ OPERATIONS
 
     register_server2_remove (p_registered_server) =
     VAR
-        l_hasAlreadyServerUri, 
+        l_hasAlreadyServerUri,
         l_recordIdToRemove
     IN
         l_hasAlreadyServerUri, l_recordIdToRemove <-- local_need_register_server2_update (p_registered_server);

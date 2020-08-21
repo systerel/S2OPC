@@ -102,7 +102,7 @@ OPERATIONS
                 MonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
-                => 
+                =>
                 p_sc : {e_sc_bad_decoding_error, e_sc_bad_nothing_to_do,
                         e_sc_bad_timestamps_to_return_invalid,
                         e_sc_bad_too_many_ops} &

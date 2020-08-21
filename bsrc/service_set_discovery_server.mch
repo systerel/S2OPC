@@ -24,7 +24,7 @@ SEES
     constants_statuscodes_bs,
     message_in_bs,
     message_out_bs
-    
+
 OPERATIONS
 
     ret <-- treat_find_servers_request (req_msg, resp_msg, endpoint_config_idx) =
@@ -43,7 +43,7 @@ OPERATIONS
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
-    
+
     ret <-- treat_find_servers_on_network_request (req_msg, resp_msg) =
     PRE
         req_msg : t_msg_i &
@@ -58,7 +58,7 @@ OPERATIONS
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
-    
+
     ret <-- treat_register_server2_request (req_msg, resp_msg) =
     PRE
         req_msg : t_msg_i &

@@ -83,10 +83,10 @@ PROMOTES
     is_valid_subscription,
     server_subscription_data_changed,
     server_subscription_publish_timeout
-    
+
 DEFINITIONS
-    
-    d_treat_session_service_req == 
+
+    d_treat_session_service_req ==
         a_Value,
         nb_WriteValue,
         WriteValue_NodeId,
@@ -123,8 +123,8 @@ DEFINITIONS
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
             ResponseWrite_allocated  : BOOL
         )
-    
-    
+
+
 LOCAL_OPERATIONS
 
     resp_msg_typ <-- get_response_type (req_msg_typ) =
@@ -219,7 +219,7 @@ LOCAL_OPERATIONS
 
     END
     ;
-    
+
     StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -240,8 +240,8 @@ LOCAL_OPERATIONS
         d_treat_session_service_req
     END
     ;
-    
-    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session, req_typ, 
+
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session, req_typ,
                                                                                     req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -269,7 +269,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, 
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ,
                                                                       req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -522,7 +522,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg) =
     VAR
         l_user,
@@ -559,18 +559,18 @@ OPERATIONS
         END
     END
     ;
-    
-    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session, 
-                                                                                    req_typ, req_handle, req_ctx, 
+
+    StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req (endpoint_config_idx, session,
+                                                                                    req_typ, req_handle, req_ctx,
                                                                                     req_header, req_msg, resp_msg) =
     VAR
         l_user
     IN
         async_resp_msg := FALSE;
         CASE req_typ OF
-            EITHER e_msg_attribute_read_req, e_msg_attribute_write_req, e_msg_view_browse_req, 
-                   e_msg_view_browse_next_req, e_msg_view_translate_browse_paths_to_node_ids_req, 
-                   e_msg_view_register_nodes_req, e_msg_view_unregister_nodes_req 
+            EITHER e_msg_attribute_read_req, e_msg_attribute_write_req, e_msg_view_browse_req,
+                   e_msg_view_browse_next_req, e_msg_view_translate_browse_paths_to_node_ids_req,
+                   e_msg_view_register_nodes_req, e_msg_view_unregister_nodes_req
             THEN
                 /* Nano profile services */
                 StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg)
@@ -602,15 +602,15 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, req_handle, 
+    StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, req_handle,
                                                                       req_ctx, req_header, req_msg, resp_msg) =
     BEGIN
         async_resp_msg := FALSE;
         IF c_Server_Nano_Extended = TRUE
         THEN
-            StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req 
+            StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req
              (endpoint_config_idx, session, req_typ, req_handle, req_ctx, req_header, req_msg, resp_msg)
-        ELSE            
+        ELSE
             StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg)
         END
     END

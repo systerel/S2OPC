@@ -320,7 +320,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_req
     THEN
-        /* Note: p_localeIds shall be either indet (NULL) 
+        /* Note: p_localeIds shall be either indet (NULL)
         or contain at least one element (not empty) */
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds /= c_LocaleIds_empty)
     END

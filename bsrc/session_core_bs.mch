@@ -362,7 +362,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     // Nonce client only used by client
     drop_NonceClient(p_session) =
     PRE

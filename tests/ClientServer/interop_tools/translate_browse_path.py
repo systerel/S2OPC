@@ -109,7 +109,7 @@ def translate_browse_paths_to_node_ids_tests(client, logger):
     # Variable with common path name (but different qualified name or different final target node)
     tbpaths.clear()
     simple_paths.clear()
-    expected_node_ids.clear() 
+    expected_node_ids.clear()
     not_expected_node_ids.clear()
     organized_path = "1:15361.1:BLOCKs.1:B_1.1:RM"
     component_qname = "1:LeftSubRoute"

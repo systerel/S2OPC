@@ -19,16 +19,16 @@
 
 MACHINE
     call_method_mgr
-    
+
 SEES
     constants,
     constants_statuscodes_bs,
     message_in_bs,
     message_out_bs,
     request_handle_bs
-    
+
 OPERATIONS
-    
+
     StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &
@@ -47,5 +47,5 @@ OPERATIONS
             StatusCode_service : t_StatusCode
         )
     END
-    
+
 END

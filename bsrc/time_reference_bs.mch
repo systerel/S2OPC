@@ -22,7 +22,7 @@ MACHINE
 
 SEES
     constants
-    
+
 ABSTRACT_VARIABLES
     TimeReference_IsLessThan
 INVARIANT
@@ -30,13 +30,13 @@ INVARIANT
 INITIALISATION
     TimeReference_IsLessThan :(TimeReference_IsLessThan : t_timeref <-> t_timeref)
 OPERATIONS
-    
+
     p_timeref <-- get_current_TimerReference =
     BEGIN
         p_timeref :(p_timeref : t_timeref_i & p_timeref : t_timeref)
     END
     ;
-    
+
     p_is_oldest <-- is_less_than_TimeReference (p_left, p_right) =
     PRE
         p_left : t_timeref_i &

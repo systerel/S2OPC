@@ -74,7 +74,7 @@ OPERATIONS
         p_bool := bool(p_mdns_config |-> p_server_capabilities : MdnsDiscoveryConfig_HasServerCapabilities)
     END
     ;
-    
+
     p_bool <-- has_ServerUri (p_singleServerUri, p_nbServerUri, p_ServerUris) =
     PRE
         p_singleServerUri : t_ServerUri &
@@ -96,7 +96,7 @@ OPERATIONS
           p_app_desc : t_ApplicationDescription)
     END
     ;
-    
+
     p_ServerUri <-- get_ApplicationDescription_ServerUri (p_app_desc) =
     PRE
         p_app_desc : t_ApplicationDescription_i &

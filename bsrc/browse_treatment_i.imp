@@ -53,7 +53,7 @@ DEFINITIONS
         nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
         nextBrowseResult : NAT1
     )
-    
+
 
 LOCAL_OPERATIONS
 
@@ -264,7 +264,7 @@ LOCAL_OPERATIONS
                     /* Compatible reference, add it in a available reference index of the browse result */
                     p_continue,
                     browseResult_iterated, browseResult_to_iterate, nextBrowseResult,
-                    out_BrowseResult_NodeId, 
+                    out_BrowseResult_NodeId,
                     out_BrowseResult_nb_References,
                     out_BrowseResult_BrowseName,
                     out_BrowseResult_DisplayName,
@@ -309,7 +309,7 @@ LOCAL_OPERATIONS
 
                             (p_resultMask : mask_hasNodeClass =>
                                 out_BrowseResult_NodeClass = out_BrowseResult_NodeClass$0 <+
-                                    {l_browseResultIdx |-> 
+                                    {l_browseResultIdx |->
                                      a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))}
                             ) &
                             (not(p_resultMask : mask_hasNodeClass) =>
@@ -594,7 +594,7 @@ OPERATIONS
                 out_BrowseResult_DisplayName : browseResult_iterated --> t_LocalizedText_i &
                 out_BrowseResult_NodeClass : browseResult_iterated --> t_NodeClass_i &
                 out_BrowseResult_TypeDefinition : browseResult_iterated --> t_ExpandedNodeId_i &
- 
+
                 out_BrowseResult_nb_References = card(browseResult_iterated)
             )
         VARIANT

@@ -51,9 +51,9 @@ OPERATIONS
     THEN
         p_sc,
         p_is_online,
-        p_nb_discovery_config, 
-        p_mdns_discovery_config_index, 
-        p_registered_server, 
+        p_nb_discovery_config,
+        p_mdns_discovery_config_index,
+        p_registered_server,
         p_mdns_config,
         RegisterServer2_NbDiscoveryConfigs,
         RegisterServer2_MdnsDiscoveryConfigIdx
@@ -72,7 +72,7 @@ OPERATIONS
           p_mdns_config : t_MdnsDiscoveryConfig_i &
           RegisterServer2_NbDiscoveryConfigs : NAT &
           RegisterServer2_MdnsDiscoveryConfigIdx : NAT &
-          (p_sc = e_sc_ok => 
+          (p_sc = e_sc_ok =>
               p_nb_discovery_config > 0 &
               p_mdns_discovery_config_index : 0 .. p_nb_discovery_config - 1 &
               p_registered_server : t_RegisteredServer &
@@ -86,7 +86,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     /* Set the unique mDNS config to GOOD status and all others to UNSUPPORTED */
     p_sc <-- set_register_server2_resp_configuration_results (p_resp, p_nb_discovery_config, p_mdns_discovery_config_index) =
     PRE

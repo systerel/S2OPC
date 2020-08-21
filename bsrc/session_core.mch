@@ -810,12 +810,12 @@ OPERATIONS
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
     END
     ;
-    
+
     p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
     BEGIN
         p_has_channel_to_close,
         p_channel_to_close
-        :(p_has_channel_to_close : BOOL & 
+        :(p_has_channel_to_close : BOOL &
             p_channel_to_close : t_channel_i &
             p_has_channel_to_close = bool(s_channel_connected - ran(a_channel) /= {}) &
             (p_has_channel_to_close = TRUE => p_channel_to_close : s_channel_connected - ran(a_channel)) &
@@ -823,7 +823,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     bres, channel <-- getall_valid_session_channel (session) =
     PRE
         session  : t_session_i

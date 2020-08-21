@@ -95,9 +95,9 @@ LOCAL_OPERATIONS
         a_state(p_session) := p_state
     END
     ;
-    
-    l_reset_server_session_preferred_locales(p_session) = 
-    PRE 
+
+    l_reset_server_session_preferred_locales(p_session) =
+    PRE
         p_session : t_session_i &
         p_session : dom(a_state)
     THEN
@@ -118,7 +118,7 @@ OPERATIONS
     END
     ;
 
-    l_reset_server_session_preferred_locales(p_session) = 
+    l_reset_server_session_preferred_locales(p_session) =
     VAR
         l_old_localeIds
     IN
@@ -239,7 +239,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     set_server_session_preferred_locales_or_indet(p_session, p_localesIds) =
     VAR
         l_old_localeIds

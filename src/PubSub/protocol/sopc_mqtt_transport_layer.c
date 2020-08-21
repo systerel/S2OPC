@@ -438,7 +438,7 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
 
 /***** State machine documentation *****/
 
-static pFsmCallback tabFsmMqttClient[E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX][E_MQTT_TRANSPORT_CONTEXT_EVENT_MAX]=                                                                                                                            
+static pFsmCallback tabFsmMqttClient[E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX][E_MQTT_TRANSPORT_CONTEXT_EVENT_MAX]=
 {
         /*  Not init <------| DISCONNECTED |-----Disconnecting <---------------------------------------------------------.                                                                  */ //
         /*      |                                        ^                                                               |                                                                  */ //

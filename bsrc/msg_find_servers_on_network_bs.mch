@@ -31,7 +31,7 @@ ABSTRACT_VARIABLES
     FindServersOnNetworkReq_StartingRecordId,
     FindServersOnNetworkReq_MaxRecordsToReturn,
     FindServersOnNetworkReq_ServerCapabilities,
-    
+
     FindServersOnNetworkResp,
     FindServersOnNetworkResp_LastCounterResetTime,
     FindServersOnNetworkResp_NbServers,
@@ -44,7 +44,7 @@ INVARIANT
     FindServersOnNetworkReq_StartingRecordId : NAT &
     FindServersOnNetworkReq_MaxRecordsToReturn : NAT &
     FindServersOnNetworkReq_ServerCapabilities : t_ServerCapabilities &
-    
+
     FindServersOnNetworkResp : t_msg_i &
     FindServersOnNetworkResp_LastCounterResetTime : t_Timestamp &
     FindServersOnNetworkResp_NbServers : NAT &
@@ -60,7 +60,7 @@ INITIALISATION
     FindServersOnNetworkReq_StartingRecordId := 0 ||
     FindServersOnNetworkReq_MaxRecordsToReturn := 0 ||
     FindServersOnNetworkReq_ServerCapabilities :(FindServersOnNetworkReq_ServerCapabilities : t_ServerCapabilities) ||
-    
+
     FindServersOnNetworkResp := c_msg_indet ||
     FindServersOnNetworkResp_LastCounterResetTime := c_Timestamp_null ||
     FindServersOnNetworkResp_NbServers := 0 ||
@@ -76,8 +76,8 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_discovery_find_servers_on_network_req
     THEN
-        p_startingRecordId, 
-        p_maxRecordsToReturn, 
+        p_startingRecordId,
+        p_maxRecordsToReturn,
         p_serverCapabilities,
         FindServersOnNetworkReq,
         FindServersOnNetworkReq_StartingRecordId,
@@ -115,7 +115,7 @@ OPERATIONS
         FindServersOnNetworkReq = c_msg_in &
         FindServersOnNetworkResp = p_resp &
         p_nb_servers : NAT &
-        (FindServersOnNetworkReq_MaxRecordsToReturn /= 0 => 
+        (FindServersOnNetworkReq_MaxRecordsToReturn /= 0 =>
             p_nb_servers <= FindServersOnNetworkReq_MaxRecordsToReturn)
     THEN
         p_allocSuccess,

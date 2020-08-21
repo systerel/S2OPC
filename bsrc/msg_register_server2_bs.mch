@@ -39,7 +39,7 @@ OPERATIONS
                               p_registered_server : t_RegisteredServer)
     END
     ;
-   
+
     p_valid_server_uri <-- check_registered_server_uri (p_registered_server) =
     PRE
         p_registered_server : t_RegisteredServer_i &
@@ -103,8 +103,8 @@ OPERATIONS
         /* <=> IsOnline */
     END;
 
-    p_has_discovery_configuration, p_has_one_and_only_one_mdns_config, 
-    p_mdns_discovery_configuration, p_nb_discovery_config, p_mdns_discovery_config_index 
+    p_has_discovery_configuration, p_has_one_and_only_one_mdns_config,
+    p_mdns_discovery_configuration, p_nb_discovery_config, p_mdns_discovery_config_index
       <-- getall_register_server2_req_msdn_discovery_config (p_req) =
     PRE
         p_req : t_msg_i &
@@ -112,11 +112,11 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_discovery_register_server2_req
     THEN
-        p_has_discovery_configuration, 
-        p_has_one_and_only_one_mdns_config, 
-        p_mdns_discovery_configuration, 
-        p_nb_discovery_config, 
-        p_mdns_discovery_config_index 
+        p_has_discovery_configuration,
+        p_has_one_and_only_one_mdns_config,
+        p_mdns_discovery_configuration,
+        p_nb_discovery_config,
+        p_mdns_discovery_config_index
         :(
             p_has_discovery_configuration : BOOL &
             p_has_one_and_only_one_mdns_config : BOOL &
@@ -125,10 +125,10 @@ OPERATIONS
             p_mdns_discovery_config_index : NAT &
             (not (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = TRUE) =>
                 p_mdns_discovery_configuration = c_MdnsDiscoveryConfig_indet) &
-            (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = TRUE => 
+            (p_has_discovery_configuration = TRUE & p_has_one_and_only_one_mdns_config = TRUE =>
                 p_mdns_discovery_configuration : t_MdnsDiscoveryConfig &
                 /* There must be a unique mdns config but not supported configuration might exist too */
-                p_nb_discovery_config > 0 & 
+                p_nb_discovery_config > 0 &
                 p_mdns_discovery_config_index : 0 .. p_nb_discovery_config - 1
             )
         )
@@ -152,7 +152,7 @@ OPERATIONS
         /* <=> valid server capabilities identifiers from spec part 12 */
     END
     ;
-    
+
     /* Set the unique mDNS config to GOOD status and all others to UNSUPPORTED */
     p_sc <-- set_register_server2_resp_configuration_results (p_resp, p_nb_discovery_config, p_mdns_discovery_config_index) =
     PRE

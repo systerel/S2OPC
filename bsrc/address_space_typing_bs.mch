@@ -68,7 +68,7 @@ OPERATIONS
         bres := bool(p_subtype |-> p_parent_type : Type_IsTransitiveSubtype)
     END
     ;
-    
+
     bres <-- is_compatible_simple_type_or_enumeration(p_value_type, p_data_type) =
     PRE
         p_value_type : t_NodeId_i &
@@ -88,7 +88,7 @@ OPERATIONS
         bres := bool(p_nodeId : Type_IsReferenceTypeIdValid)
     END
     ;
-    
+
     p_bool <-- check_object_has_method(p_object, p_method) =
     PRE
         p_method : t_NodeId_i &

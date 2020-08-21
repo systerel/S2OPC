@@ -375,7 +375,7 @@ def generate_type_node_info(source, out, max_nodeId):
                 del subtypes_backward[0]
             # Set NodeClass unspecified for 'NULL' NodeId
             type_node_nodeclass[0] = "OpcUa_NodeClass_Unspecified"
-            
+
             while index <= max_nodeId:
                 node_class = type_node_nodeclass.get(index, "OpcUa_NodeClass_Unspecified")
                 if(index in subtypes_backward):

@@ -336,7 +336,7 @@ class Argument(ExtensionObject):
         self.valuerank = valuerank
         self.arraydimensions = arraydimensions
         self.description = description
-        
+
 def expect_element(source, name=None):
     ev, n = next(source)
 
@@ -495,10 +495,10 @@ def parse_localized_text(n):
     text = n.find(UA_VALUE_TEXT_TAG)
     locale_text = None if locale is None else locale.text
     text_text = None if text is None else text.text
-    return LocalizedText(locale_text, text_text)   
+    return LocalizedText(locale_text, text_text)
 
 # Extension object values: manage some extensions objects
-    
+
 def parse_argument_body(n):
     argument = n.find(UA_VALUE_ARGUMENT_TAG)
     if argument is None:
@@ -522,7 +522,7 @@ def parse_argument_body(n):
         arraydimensions_list = collect_list_items(arraydimensions, UA_VALUE_TYPE_UINT32, True, int)
     if descriptions is not None:
         descriptions = parse_localized_text(descriptions)
-    
+
     return Argument(name.text, datatype_nodeid, int(valuerank.text), arraydimensions_list, descriptions)
 
 def parse_enum_value_type_body(n):
@@ -556,7 +556,7 @@ def get_extension_object_type(n):
         datatype_or_encoding_nodeid = parse_node_id(typeid)
         _ , ty = get_extension_object_parser_and_type(datatype_or_encoding_nodeid)
     return ty
-    
+
 def parse_extension_object(n):
     typeid = n.find(UA_VALUE_TYPEID_TAG)
     body = n.find(UA_VALUE_BODY_TAG)
@@ -568,7 +568,7 @@ def parse_extension_object(n):
         if extension_object_parser is None:
             raise ParseError('TypeId or Body missing in ExtensionObject value')
         return extension_object_parser(body)
-    
+
 # Returns a VariableValue object
 def collect_variable_value(n):
 
@@ -584,9 +584,9 @@ def collect_variable_value(n):
     value = list(value_node)[0]
     base_type, is_array = parse_value_tag(value.tag)
 
-    # is_simple_type == True => value is just the text tag content 
+    # is_simple_type == True => value is just the text tag content
     is_simple_type = True
-    
+
     if base_type == UA_VALUE_TYPE_BOOL:
         ty = VALUE_TYPE_BOOL
         parse_func = parse_boolean_value
@@ -732,7 +732,7 @@ def generate_nodeid(nodeid):
     return '{%s, %d, %s = %s}' % (id_type, nodeid.ns or 0, data_struct_field, data_struct_val)
 
 def generate_nodeid_pointer(val):
-    return '(SOPC_NodeId[]) {%s}' % generate_nodeid(val)    
+    return '(SOPC_NodeId[]) {%s}' % generate_nodeid(val)
 
 def generate_localized_text(text):
     if text is None:
@@ -751,16 +751,16 @@ def generate_variant(type_id, c_type, field, val, is_array, generate_func):
         field += 'Arr'
         c_array = '(%s[]){%s}' % (c_type, ','.join(map(generate_func, val))) if val else 'NULL'
         return '''
-                  {true, 
-                   %s, 
-                   SOPC_VariantArrayType_Array, 
-                   {.Array = 
+                  {true,
+                   %s,
+                   SOPC_VariantArrayType_Array,
+                   {.Array =
                      {%d, {.%s = %s}}}}''' % (type_id, len(val), field, c_array)
     else:
         return '''
-                  {true, 
-                   %s, 
-                   SOPC_VariantArrayType_SingleValue, 
+                  {true,
+                   %s,
+                   SOPC_VariantArrayType_SingleValue,
                    {.%s = %s}}''' % (type_id, field, generate_func(val))
 
 # Generic extension object generator
@@ -769,12 +769,12 @@ def generate_extension_object(ext_obj, gen=None, is_array=False):
     encoding = 'SOPC_ExtObjBodyEncoding_Object'
     body = '.Body.Object = {%s, %s}' % (gen(ext_obj), ext_obj.extobj_objtype)
     ext_obj = '{%s,%s,%s}' % (type_id_field, encoding, body)
-    if is_array:        
+    if is_array:
         return ext_obj
     else:
         # extension object is a pointer in variant, trick the compiler using a 1-element array
         return '''
-                  (SOPC_ExtensionObject[]) 
+                  (SOPC_ExtensionObject[])
                   {%s}
                ''' % ext_obj
 
@@ -784,13 +784,13 @@ def generate_argument_ext_obj(obj):
     array_dimensions =('(uint32_t[]){%s}' % ','.join(obj.arraydimensions)
                        if obj.arraydimensions not in (None, []) else 'NULL')
     return ('''
-               (OpcUa_Argument[]) 
-               {{%s, 
-                 %s, 
-                 %s, 
-                 %d, 
-                 %d, 
-                 %s, 
+               (OpcUa_Argument[])
+               {{%s,
+                 %s,
+                 %s,
+                 %d,
+                 %d,
+                 %s,
                  %s}}
             ''' %
             (obj.extobj_objtype,
@@ -802,7 +802,7 @@ def generate_argument_ext_obj(obj):
              generate_localized_text(obj.description)
             )
            )
-    
+
 def generate_value_variant(val):
     if val is None:
         return '{true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
@@ -847,7 +847,7 @@ def generate_value_variant(val):
         # Partial evaluation of generate_extension_object to make it compatible with generate_variant
         extension_object_generator = partial(generate_extension_object,
                                              gen=generate_argument_ext_obj, is_array=val.is_array)
-        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject', 
+        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
                                 val.val, val.is_array, extension_object_generator)
     elif val.ty in UNSUPPORTED_POINTER_VARIANT_TYPES:
         # FIXME: The variant requires a pointer here, we need to wrap the value inside a 1-sized
@@ -883,7 +883,7 @@ def parse_uanode(xml_node, source, aliases):
             node.data_type = NodeId(0,0,0)
 
         node.value_rank = parse_value_rank_attribute(xml_node)
-        
+
         accesslevel = xml_node.get('AccessLevel', None)
 
         if accesslevel is not None:
@@ -967,7 +967,7 @@ def default_variable_status(ua_node):
         # Keep OPC UA default namespace nodes with a Good status, necessary to pass UACTT
         # othewise keep Good status only if a value is defined
         value_status='OpcUa_UncertainInitialValue'
-    return value_status  
+    return value_status
 
 def generate_item_variable(is_const_addspace, ua_node):
     value_status = default_variable_status(ua_node)

@@ -900,7 +900,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres, channel <-- getall_valid_session_channel (session) =
     BEGIN
         bres <-- is_valid_session (session);
@@ -910,5 +910,5 @@ OPERATIONS
         ELSE
             bres, channel <-- getall_session_channel (session)
         END
-    END    
+    END
 END

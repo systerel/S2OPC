@@ -815,7 +815,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* Get access to server configuration */
     endpoint_config_idx <-- session_get_endpoint_config(p_session) =
     VAR

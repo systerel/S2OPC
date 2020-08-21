@@ -24,7 +24,7 @@ SEES
     constants
 
 DEFINITIONS
-    d_variables_set == 
+    d_variables_set ==
     RegisteredServer2_CounterResetTime,
     s_RegisteredServer2,
     a_RegisteredServer2_RecordId,
@@ -55,7 +55,7 @@ DEFINITIONS
     s_registered_server2_to_iterate_it,
     s_registered_server2_iterated_it
     ;
-    
+
     d_inv_set_it ==
     s_registered_server2_to_iterate_it <: s_RegisteredServer2 &
     s_registered_server2_iterated_it <: s_RegisteredServer2 &
@@ -83,11 +83,11 @@ INVARIANT
 
 INITIALISATION
     d_init_set ||
-    
+
     d_init_set_it
 
 OPERATIONS
-    
+
     /* Iterator on set */
 
     continue <-- init_iter_registered_server2_set =
@@ -129,14 +129,14 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* Operations on set */
     reset_registered_server2_set =
     BEGIN
         d_init_set
     END
     ;
-    
+
     remove_from_registered_server2_set (p_recordId) =
     PRE
         p_recordId : NAT &
@@ -175,18 +175,18 @@ OPERATIONS
                 :(d_inv_set &
                     RegisteredServer2_CounterResetTime = RegisteredServer2_CounterResetTime$0 &
                     s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
-                    a_RegisteredServer2_RecordId = 
+                    a_RegisteredServer2_RecordId =
                       a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> p_recordId} &
-                    a_RegisteredServer2_RegisteredServer = 
+                    a_RegisteredServer2_RegisteredServer =
                       a_RegisteredServer2_RegisteredServer$0  <+ {l_registerInfo |-> p_registered_server} &
-                    a_RegisteredServer2_mDNSconfig = 
+                    a_RegisteredServer2_mDNSconfig =
                       a_RegisteredServer2_mDNSconfig$0 <+ {l_registerInfo |-> p_mdns_config}
                 )
             END
         END
     END
     ;
-    
+
     card_set <-- get_card_register2_set =
     BEGIN
         card_set := card(s_RegisteredServer2)
@@ -206,7 +206,7 @@ OPERATIONS
         p_registeredServerInfo : t_RegisteredServer2Info_i &
         p_registeredServerInfo : s_RegisteredServer2
     THEN
-        p_registered_server 
+        p_registered_server
         :(p_registered_server : t_RegisteredServer_i &
           p_registered_server = a_RegisteredServer2_RegisteredServer (p_registeredServerInfo))
     END

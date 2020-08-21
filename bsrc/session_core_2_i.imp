@@ -137,7 +137,7 @@ OPERATIONS
         channel := a_channel_i(session)
     END
     ;
-    
+
     p_session <-- get_channel_session (p_channel) =
     BEGIN
         p_session := a_reverse_channel_i(p_channel)
@@ -174,7 +174,7 @@ OPERATIONS
         a_server_client_locales_i(p_session) := p_localesIds
     END
     ;
-    
+
     p_localeIds <-- get_server_session_preferred_locales(p_session) =
     BEGIN
         p_localeIds := a_server_client_locales_i(p_session)

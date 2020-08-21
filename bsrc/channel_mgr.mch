@@ -42,10 +42,10 @@ DEFINITIONS
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
-    /* a_endpoint is used to retrieve the endpoint configuration index 
+    /* a_endpoint is used to retrieve the endpoint configuration index
        on which channel is connected (server side only):
-       channel :  dom(a_endpoint) => channels connected onto current server instance & 
-       channel /: dom(a_endpoint) => channels of the current client instance 
+       channel :  dom(a_endpoint) => channels connected onto current server instance &
+       channel /: dom(a_endpoint) => channels of the current client instance
     */
     a_endpoint : s_channel_connected +-> t_endpoint_config_idx &
     a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy
@@ -167,7 +167,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     send_channel_error_msg (channel, status_code, request_context) =
     PRE
         channel         : t_channel_i &
@@ -307,7 +307,7 @@ OPERATIONS
         p_timeref :(p_timeref : t_timeref_i & p_timeref = a_channel_connected_time(p_channel))
     END
     ;
-    
+
     p_auto_closed_active <-- is_auto_close_channel_active =
     BEGIN
         p_auto_closed_active := bool(card(s_cli_channel_connecting) + card(s_channel_connected) >= c_max_channels_connected)

@@ -19,31 +19,31 @@
 
 MACHINE
     call_method_bs
-    
+
 SEES
     constants,
     constants_statuscodes_bs,
     message_in_bs,
     message_out_bs,
     request_handle_bs
-    
+
 ABSTRACT_VARIABLES
-    
+
     exec_result
-    
+
 INVARIANT
-    
+
     exec_result : seq(t_Variant_i)
-    
+
 INITIALISATION
-    
+
     exec_result
     :(
         exec_result = {}
     )
-    
+
 OPERATIONS
-    
+
     statusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx) =
     PRE
         p_req_msg : t_msg_i   &
@@ -57,18 +57,18 @@ OPERATIONS
         exec_result
         :(
             statusCode : t_StatusCode_i &
-            statusCode : t_StatusCode   & 
+            statusCode : t_StatusCode   &
             exec_result : seq(t_Variant_i)
         )
     END
     ;
-    
+
     free_exec_result =
     BEGIN
         exec_result :( exec_result = {} )
     END
     ;
-    
+
     nb <-- read_nb_exec_result =
 	BEGIN
 	    nb
@@ -78,7 +78,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     value <-- read_exec_result(index) =
     PRE
         index : NAT1 &

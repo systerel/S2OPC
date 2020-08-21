@@ -39,7 +39,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* Check if there is a user token policy available in the endpoint config compatible with the channel config */
     p_user_token_policy_available <-- has_user_token_policy_available (p_channel_config_idx, p_endpoint_config_idx) =
     PRE

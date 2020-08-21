@@ -518,7 +518,7 @@ OPERATIONS
             a_pendingNotificationQueue, a_publishRequestQueue, a_notifRepublishQueue,
             a_monitoredItemQueue, a_publishTimer,
             /* case of e_sc_bad_out_of_memory */
-            a_monitored_item_notifications, 
+            a_monitored_item_notifications,
             a_publish_responses,
             a_republish_notification, a_notification_seq_num,
             a_defined_monitored_items:(
@@ -542,7 +542,7 @@ OPERATIONS
                     (   StatusCode_service = e_sc_bad_out_of_memory &
                         subscription = c_subscription_indet &
                         s_subscription = s_subscription$0
-                    )                     
+                    )
                 ) &
                 /* Transition #1 + #2 */
                 (not(t_monitoredItemQueue /= s_monitoredItemQueue$0 &

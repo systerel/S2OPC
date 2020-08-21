@@ -172,7 +172,7 @@ OPERATIONS
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        p_session 
+        p_session
         :(p_session : t_session_i &
             (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
             (p_channel /: dom(a_channel~) => p_session = c_session_indet)
@@ -263,7 +263,7 @@ OPERATIONS
     THEN
         /* Retrieve recorded localeIds if not the empty one (constant value) and reset to empty one */
         p_localeIds,
-        a_server_client_locales 
+        a_server_client_locales
         :(p_localeIds : t_LocaleIds_i &
           a_server_client_locales : t_session --> t_LocaleIds &
           (a_server_client_locales$0(p_session) = c_LocaleIds_empty => p_localeIds = c_LocaleIds_indet) &

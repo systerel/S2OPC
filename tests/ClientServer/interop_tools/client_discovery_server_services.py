@@ -26,7 +26,7 @@ allServerCapabilities = ["DA",  "HD",  "AC",   "HE",  "GDS", "LDS", "DI", "ADI",
 
 def register_server2_test(client, logger):
     # RegisterServer2 test
-    
+
     # Nominal behavior: IsOnline = True
     params = ua.RegisterServer2Parameters()
     params.Server.ServerUri = "urn:S2OPC:RegisteredServer"
@@ -36,13 +36,13 @@ def register_server2_test(client, logger):
     serverName.Text = "MyServer registered"
     params.Server.ServerNames.append(serverName)
     params.Server.DiscoveryUrls.append("opc.tcp://localhost:4841")
-    
+
     mdnsConfig = ua.MdnsDiscoveryConfiguration()
     mdnsConfig.MdnsServerName = "MyServer registered with mDNS config"
     # all authorized identifier capabilities
     mdnsConfig.ServerCapabilities = allServerCapabilities
-    params.DiscoveryConfiguration.append(mdnsConfig)  
-    
+    params.DiscoveryConfiguration.append(mdnsConfig)
+
     try:
         configResults = client.uaclient.register_server2(params)
     except:
@@ -53,7 +53,7 @@ def register_server2_test(client, logger):
         logger.add_test('RegisterServer2 test - nominal register IsOnline=True. Expecting Good == 0x{:02X}'
                     .format(configResults[0].value),
                     ua.uatypes.StatusCode("Good") == configResults[0])
-    
+
     # Nominal behavior: IsOnline = False
     copyParams = copy.deepcopy(params)
     copyParams.Server.IsOnline = False
@@ -67,7 +67,7 @@ def register_server2_test(client, logger):
         logger.add_test('RegisterServer2 test - nominal register IsOnline=False. Expecting Good == 0x{:02X}'
                     .format(configResults[0].value),
                     ua.uatypes.StatusCode("Good") == configResults[0])
-    
+
     # Empty server Uri
     degParams = copy.deepcopy(params)
     degParams.Server.ServerUri = None
@@ -82,7 +82,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - empty ServerUri register failed. Expected BadServerUri != Good',
                         False)
-    
+
     # Empty product Uri
     degParams = copy.deepcopy(params)
     degParams.Server.ProductUri = None
@@ -97,7 +97,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - empty ProductUri register failed. Expected BadInvalidArgument != Good',
                         False)
-    
+
     # Empty server names
     degParams = copy.deepcopy(params)
     degParams.Server.ServerNames = []
@@ -112,7 +112,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - empty ServerNames register failed. Expected BadServerNameMissing != Good',
                         False)
-    
+
     # Invalid ApplicationType (client)
     degParams = copy.deepcopy(params)
     degParams.Server.ServerType = ua.uaprotocol_auto.ApplicationType.Client
@@ -127,7 +127,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - invalid ApplicationType (client) register failed. Expected BadInvalidArgument != Good',
                         False)
-    
+
     # Empty discovery URLs
     degParams = copy.deepcopy(params)
     degParams.Server.DiscoveryUrls = []
@@ -142,7 +142,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - empty ServerNames register failed. Expected BadDiscoveryUrlMissing != Good',
                         False)
-    
+
     # Define unsupported semaphoreFilePAth
     degParams = copy.deepcopy(params)
     degParams.Server.SemaphoreFilePath = "/tmp/MyServerSemaphoreFile"
@@ -157,8 +157,8 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - unsupported SemaphoreFilePath register failed. Expected BadSemaphoreFileMissing != Good',
                         False)
-    
-    # Define no discovery configuration 
+
+    # Define no discovery configuration
     degParams = copy.deepcopy(params)
     degParams.DiscoveryConfiguration = []
     try:
@@ -172,9 +172,9 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - no discovery configuration register failed. Expected BadInvalidArgument != Good',
                         False)
-    
-    
-    # Define several discovery configuration (no mDNS)        
+
+
+    # Define several discovery configuration (no mDNS)
     degParams = copy.deepcopy(params)
     degParams.DiscoveryConfiguration = []
     degParams.DiscoveryConfiguration.append(ua.UserIdentityToken())
@@ -190,8 +190,8 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - no mDNS discovery configuration register failed. Expected BadInvalidArgument != Good',
                         False)
-    
-    # Define several discovery configuration (several mDNS)        
+
+    # Define several discovery configuration (several mDNS)
     degParams = copy.deepcopy(params)
     degParams.DiscoveryConfiguration.append(ua.UserIdentityToken())
     degParams.DiscoveryConfiguration.append(ua.UserIdentityToken())
@@ -207,14 +207,14 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - several mDNS discovery configuration register failed. Expected BadInvalidArgument != Good',
                         False)
-    
+
     # Define several discovery configuration (only one mDNS)
     degParams = copy.deepcopy(params)
     degParams.DiscoveryConfiguration.append(ua.UserIdentityToken())
     degParams.DiscoveryConfiguration.append(ua.UserIdentityToken())
     try:
         configResults = client.uaclient.register_server2(degParams)
-        
+
     except:
         logger.add_test('RegisterServer2 test - several discovery with only 1 mDNS configuration register. Expected Good != {}'
                         .format(sys.exc_info()[0]),
@@ -242,7 +242,7 @@ def register_server2_test(client, logger):
     else:
         logger.add_test('RegisterServer2 test - mDNS discovery config with invalid capability register failed. Expected BadInvalidArgument != Good',
                         False)
-    
+
     # Restore empty record: IsOnline = False
     copyParams = copy.deepcopy(params)
     copyParams.Server.IsOnline = False
@@ -273,7 +273,7 @@ def local_register_server2(client, logger, name, address, capabilities, isOnline
     mdnsConfig.MdnsServerName = name
     # all authorized identifier capabilities
     mdnsConfig.ServerCapabilities = capabilities
-    params.DiscoveryConfiguration.append(mdnsConfig)  
+    params.DiscoveryConfiguration.append(mdnsConfig)
 
     try:
         configResults = client.uaclient.register_server2(params)
@@ -291,7 +291,7 @@ def find_servers_on_network_test(client, logger):
     defaultAddress = "opc.tcp://localhost:4841"
     # No filters in FindServersOnNetworkRequest by default
     params = ua.FindServersOnNetworkParameters()
-    
+
     # Register 1 server and retrieve it
     local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
     results = client.uaclient.find_servers_on_network(params)
@@ -353,7 +353,7 @@ def find_servers_on_network_test(client, logger):
                      "TestServer1" == results.Servers[0].ServerName and
                      allServerCapabilities == results.Servers[0].ServerCapabilities)
                     )
-    
+
     # Filter using the capabilities: request 'LDS' capability only
     params.ServerCapabilityFilter = ["LDS"]
     results = client.uaclient.find_servers_on_network(params)
@@ -376,7 +376,7 @@ def find_servers_on_network_test(client, logger):
     recordIdServer1 = results.Servers[0].RecordId
     recordIdServer2 = results.Servers[1].RecordId
     recordIdServer3 = results.Servers[2].RecordId
-   
+
     # Request from recordId of 1st server
     params.StartingRecordId = recordIdServer1
     results = client.uaclient.find_servers_on_network(params)
@@ -479,7 +479,7 @@ def check_self_in_find_servers_response(defaultAddress, server):
 
 def find_servers_test(client, logger):
     # Note: LocaleIds are not tested here because it is already done in UACTT
-    
+
     defaultAddress = "opc.tcp://localhost:4841"
     # No filters in FindServers by default
     params = ua.FindServersParameters()
@@ -491,7 +491,7 @@ def find_servers_test(client, logger):
                     (1 == len(Servers) and
                      check_self_in_find_servers_response(defaultAddress, Servers[0]))
                     )
-    
+
     # Register 1 server and retrieve it
     local_register_server2(client, logger, "TestServer1", defaultAddress, allServerCapabilities, True)
     Servers = client.uaclient.find_servers(params)
@@ -567,7 +567,7 @@ def find_servers_test(client, logger):
                      "urn:S2OPC:TestServer1" == Servers[0].ApplicationUri and
                      "urn:S2OPC:TestServer2" == Servers[1].ApplicationUri)
                     )
-   
+
     # Filter using the serverUri: request server 1 & 2 & 3
     params.ServerUris = ["urn:S2OPC:TestServer1", "urn:S2OPC:TestServer2", "urn:S2OPC:TestServer3"]
     Servers = client.uaclient.find_servers(params)
@@ -582,7 +582,7 @@ def find_servers_test(client, logger):
     local_register_server2(client, logger, "TestServer1", defaultAddress, [], False)
     local_register_server2(client, logger, "TestServer2", defaultAddress, [], False)
     local_register_server2(client, logger, "TestServer3", defaultAddress, [], False)
-    
+
 
 def discovery_server_tests(client, logger):
     register_server2_test(client, logger)

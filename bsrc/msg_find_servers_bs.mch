@@ -31,7 +31,7 @@ ABSTRACT_VARIABLES
     FindServersReq_LocaleIds,
     FindServersReq_NbServerUri,
     FindServersReq_ServerUris,
-    
+
     FindServersResp,
     FindServersResp_NbServers,
     FindServersResp_ApplicationDescription,
@@ -43,7 +43,7 @@ INVARIANT
     FindServersReq_LocaleIds : t_LocaleIds_i &
     FindServersReq_NbServerUri : INT &
     FindServersReq_ServerUris : t_ServerUris &
-    
+
     FindServersResp : t_msg_i &
     FindServersResp_NbServers : NAT &
     FindServersResp_ApplicationDescription : seq(t_ApplicationDescription) &
@@ -56,12 +56,12 @@ INITIALISATION
     FindServersReq_LocaleIds := c_LocaleIds_indet ||
     FindServersReq_NbServerUri := 0 ||
     FindServersReq_ServerUris :(FindServersReq_ServerUris : t_ServerUris) ||
-    
+
     FindServersResp := c_msg_indet ||
     FindServersResp_NbServers := 0 ||
     FindServersResp_ApplicationDescription :(FindServersResp_ApplicationDescription = {}) ||
-    
-    FindServers_RegisteredServerToApplicationDesc 
+
+    FindServers_RegisteredServerToApplicationDesc
       :(FindServers_RegisteredServerToApplicationDesc : t_RegisteredServer --> t_ApplicationDescription)
 
 OPERATIONS
@@ -110,7 +110,7 @@ OPERATIONS
           FindServersResp_NbServers : NAT &
           FindServersResp_ApplicationDescription : seq(t_ApplicationDescription) &
           (p_allocSuccess = TRUE =>
-             FindServersResp = p_resp & 
+             FindServersResp = p_resp &
              FindServersResp_NbServers = p_nb_servers
           ) &
           (p_allocSuccess = FALSE =>
@@ -140,7 +140,7 @@ OPERATIONS
           FindServersResp_ApplicationDescription (p_srv_index) = FindServers_RegisteredServerToApplicationDesc(p_registered_server))
     END
     ;
-    
+
     /* Duplicate of set_find_servers_server used only for setting the current endpoint application description */
     ret <-- set_find_servers_server_ApplicationDescription (p_resp, p_srv_index, p_localeIds, p_endpoint_config_idx, p_app_desc) =
     PRE

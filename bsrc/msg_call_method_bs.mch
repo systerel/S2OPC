@@ -19,15 +19,15 @@
 
 MACHINE
     msg_call_method_bs
-    
+
 SEES
     constants,
     constants_statuscodes_bs,
     message_in_bs,
     message_out_bs,
     request_handle_bs
-    
-    
+
+
 DEFINITIONS
     d_variables_in ==
     CallMethods,
@@ -36,7 +36,7 @@ DEFINITIONS
     CallMethod_MethodId,
     CallMethod_InputArguments
     ;
-    
+
     d_variables_out ==
     CallMethodRes_Msg,
     CallMethodRes_status,
@@ -45,7 +45,7 @@ DEFINITIONS
     CallMethodRes_AllocatedOutputArgument,
     CallMethodRes_OutputArgument
     ;
-    
+
     d_inv_in ==
     CallMethod_Msg     : t_msg_i         &
     CallMethods               <: t_CallMethod   &
@@ -54,7 +54,7 @@ DEFINITIONS
     CallMethod_MethodId       : CallMethods --> t_NodeId_i &
     CallMethod_InputArguments : CallMethods --> seq(t_Variant_i)
     ;
-    
+
     d_inv_out ==
     CallMethodRes_Msg                    : t_msg_i &
     CallMethodRes_status                 : t_CallMethod --> t_StatusCode_i      &
@@ -64,19 +64,19 @@ DEFINITIONS
     CallMethodRes_OutputArgument         : t_CallMethod --> seq(t_Variant)    & /* Effective data */
     dom(CallMethodRes_status) = dom(CallMethodRes_InputArgumentResult)          &
     dom(CallMethodRes_status) = dom(CallMethodRes_OutputArgument)
-    
+
 ABSTRACT_VARIABLES
     d_variables_in,
     d_variables_out
-    
-    
+
+
 INVARIANT
-    
+
     d_inv_in &
     d_inv_out
-    
+
 INITIALISATION
-    
+
     d_variables_in,
     d_variables_out
     :
@@ -86,7 +86,7 @@ INITIALISATION
         CallMethod_ObjectId = {} &
         CallMethod_MethodId = {} &
         CallMethod_InputArguments = {} &
-        
+
         CallMethodRes_Msg = c_msg_indet &
         CallMethodRes_status = {} &
         CallMethodRes_AllocatedInputArgumentResult = {} &
@@ -95,7 +95,7 @@ INITIALISATION
         CallMethodRes_OutputArgument = {}
     )
 OPERATIONS
-    
+
     Status, p_nb <-- read_call_method_request (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -123,7 +123,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     p_nb <-- read_nb_CallMethods (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -133,7 +133,7 @@ OPERATIONS
         p_nb :(p_nb : NAT & p_nb = card(CallMethods))
     END
     ;
-    
+
     p_objectid <-- read_CallMethod_Objectid (p_req_msg, p_callMethod) =
     PRE
         p_req_msg : t_msg_i &
@@ -145,7 +145,7 @@ OPERATIONS
         p_objectid :( p_objectid : t_NodeId_i & p_objectid = CallMethod_ObjectId(p_callMethod))
     END
     ;
-    
+
     p_methodid <-- read_CallMethod_MethodId (p_req_msg, p_callMethod) =
     PRE
         p_req_msg : t_msg_i &
@@ -157,7 +157,7 @@ OPERATIONS
         p_methodid :( p_methodid : t_NodeId_i & p_methodid = CallMethod_MethodId(p_callMethod))
     END
     ;
-    
+
     p_nb <-- read_CallMethod_Nb_InputArguments (p_req_msg, p_callMethod) =
     PRE
         p_req_msg : t_msg_i &
@@ -169,7 +169,7 @@ OPERATIONS
         p_nb :(p_nb = size(CallMethod_InputArguments(p_callMethod)))
     END
     ;
-    
+
     p_arg <-- read_CallMethod_InputArguments (p_req_msg, p_callMethod, p_index_arg) =
     PRE
         p_req_msg : t_msg_i &
@@ -183,7 +183,7 @@ OPERATIONS
         p_arg :(p_arg = CallMethod_InputArguments(p_callMethod)(p_index_arg))
     END
     ;
-    
+
     statusCode <-- alloc_CallMethod_Result(p_res_msg, nb) =
     PRE
         p_res_msg : t_msg_i   &
@@ -216,7 +216,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     write_CallMethod_Res_Status(p_res_msg, callMethod, statusCode) =
     PRE
         p_res_msg : t_msg_i &
@@ -232,7 +232,7 @@ OPERATIONS
         CallMethodRes_status(callMethod) := statusCode
     END
     ;
-    
+
     statusCode <-- alloc_CallMethod_Res_InputArgumentResult(p_res_msg, callMethod, nb) =
     PRE
         p_res_msg : t_msg_i   &
@@ -262,7 +262,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     free_CallMethod_Res_InputArgument(p_res_msg, callMethod) =
     PRE
         p_res_msg : t_msg_i   &
@@ -276,7 +276,7 @@ OPERATIONS
         CallMethodRes_InputArgumentResult(callMethod) := {}
     END
     ;
-    
+
     write_CallMethod_Res_InputArgumentResult(p_res_msg, callMethod, index, statusCode) =
     PRE
         p_res_msg : t_msg_i &
@@ -295,7 +295,7 @@ OPERATIONS
         CallMethodRes_InputArgumentResult(callMethod)(index) := statusCode
     END
     ;
-    
+
     /* Allocate nb element in OutputArgument but still no effective variant */
     statusCode <-- alloc_CallMethod_Res_OutputArgument(p_res_msg, callMethod, nb) =
     PRE
@@ -328,7 +328,7 @@ OPERATIONS
         )
     END
     ;
-    
+
     free_CallMethod_Res_OutputArgument(p_res_msg, callMethod) =
     PRE
         p_res_msg : t_msg_i   &
@@ -342,7 +342,7 @@ OPERATIONS
         CallMethodRes_OutputArgument(callMethod) := {}
     END
     ;
-    
+
     /* Variant are copied in response */
     write_CallMethod_Res_OutputArgument(p_res_msg, callMethod, index, value) =
     PRE

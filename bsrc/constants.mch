@@ -292,7 +292,7 @@ SETS
 
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
-    
+
     t_ArrayDimensions_i; /* int32 array size and content with product of values <= INT32_MAX */
     t_LocaleIds_i; /* char* array NULL terminated of locales ids */
     t_RegisteredServer_i; /* (OpcUa_RegisteredServer*) */
@@ -305,7 +305,7 @@ SETS
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
-    
+
     /*AddS,*/
     k_n_read_resp_max,
     k_n_WriteResponse_max,
@@ -678,13 +678,13 @@ PROPERTIES
     c_RelativePathElt_indet /: t_RelativePathElt &
 
     t_BrowsePathResPerElt_i = 0..k_n_BrowsePathResPerElt_max &
-    
+
     t_CallMethod <: t_CallMethod_i &
     c_CallMethod_indet : t_CallMethod_i &
     c_CallMethod_indet /: t_CallMethod &
     cast_t_CallMethod : NAT +-> t_CallMethod_i &
     cast_t_CallMethod : perm(t_CallMethod) &
-    
+
     t_Argument <: t_Argument_i &
     c_Argument_indet : t_Argument_i &
     c_Argument_indet /: t_Argument &
@@ -825,7 +825,7 @@ PROPERTIES
 
     c_ArrayDimensions_indet : t_ArrayDimensions_i &
     t_ArrayDimensions = t_ArrayDimensions_i - {c_ArrayDimensions_indet} &
-    
+
     c_LocaleIds_indet : t_LocaleIds_i &
     t_LocaleIds = t_LocaleIds_i - {c_LocaleIds_indet} &
     c_LocaleIds_empty : t_LocaleIds_i &
@@ -1208,7 +1208,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     free_LocaleIds(p_in) =
     PRE
         p_in : t_LocaleIds_i &
@@ -1225,7 +1225,7 @@ OPERATIONS
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
     END
     ;
-    
+
     p_currentTs <-- get_CurrentTimestamp =
     BEGIN
         p_currentTs :(p_currentTs : t_Timestamp & p_currentTs /= c_Timestamp_null)
