@@ -230,22 +230,23 @@ To build the Toolkit library and tests with default configuration on current sta
   set CHECK_BUILD_DIR="%CHECK_DIR%\build"
   set MBEDTLS_DIR=[path to mbedtls source directory]
   set MBEDTLS_BUILD_DIR="%MBEDTLS_DIR%\build"
+  set CONFIG=RelWithDebInfo
 
   REM Build Check
   cd %CHECK_DIR%
   rm -rf build
   mkdir build
   cd build
-  cmake .. -DS2OPC_CLIENTSERVER_ONLY=1 -G "Visual Studio 15 2017 Win64"
-  cmake --build . --target ALL_BUILD --config RelWithDebInfo
+  cmake ..
+  cmake --build . --target ALL_BUILD
 
   REM Build MbedTLS
   cd %MBEDTLS_DIR%
   rm -rf build
   mkdir build
   cd build
-  cmake .. -G "Visual Studio 15 2017 Win64"
-  cmake --build . --target ALL_BUILD --config RelWithDebInfo
+  cmake ..
+  cmake --build . --target ALL_BUILD
 
   REM Configure S2OPC Project
   cd %CURRENT_DIR%
@@ -253,10 +254,10 @@ To build the Toolkit library and tests with default configuration on current sta
   mkdir build
   cd build
 
-  cmake -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/Debug/mbedcrypto.lib -DCHECK_INCLUDE_DIR=%CHECK_BUILD_DIR%\;%CHECK_BUILD_DIR%/src -DCHECK_LIBRARY=%CHECK_BUILD_DIR%/src/debug/check.lib\;%CHECK_BUILD_DIR%/lib/Debug/compat.lib .. -G "Visual Studio 15 2017 Win64"
+  cmake -DS2OPC_CLIENTSERVER_ONLY=1 -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%CHECK_BUILD_DIR% ..
 
   REM Build S2OPC Project
-  cmake --build . --config RelWithDebInfo
+  cmake --build .
 ```
 The project file S2OPC.sln can be imported in Visual Studio environment.
 
