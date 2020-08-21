@@ -29,9 +29,9 @@ class Response:
     Adds a reference to the request and the timestamp of the received time.
 
     Args:
-        payload: An OpcUa_*Response. The payload is optional. If the payload is given, its content
-                 is shallow copied, if known. The payload is not given for known responses, such
-                 as `ReadResponse`, `WriteResponse`, or `BrowseResponse`.
+        payload: An `OpcUa_*Response` or None. When the type of the response is known (such as is the case for
+                 `ReadResponse`, `WriteResponse`, or `BrowseResponse`), the payload is None. Otherwise, the response
+                 is left as given by the s2opc toolkit, that is to say an `OpcUa_*Response`.
     """
     def __init__(self, payload):
         self.timestampReceived = None  # The receiver sets the timestamp
