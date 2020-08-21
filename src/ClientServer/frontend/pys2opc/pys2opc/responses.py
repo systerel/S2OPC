@@ -93,3 +93,9 @@ class BrowseResponse(Response):
         payload = ffi.cast('OpcUa_BrowseResponse*', payload)
         assert payload.encodeableType == EncodeableType.BrowseResponse
         self.results = [BrowseResult(payload.Results[i]) for i in range(payload.NoOfResults)]
+
+    def is_ok(self):
+        """
+        Returns True if all browses were done successfully.
+        """
+        return all(res.status == StatusCode.Good for res in self.results)
