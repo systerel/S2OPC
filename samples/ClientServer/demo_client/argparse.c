@@ -294,25 +294,29 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
             self->optvalue = arg + 1;
             switch (argparse_short_opt(self, self->options))
             {
+            case 0:
+                break;
             case -1:
                 break;
             case -2:
                 goto unknown;
             default:
-            	assert(false);
-            	break;
+                assert(false);
+                break;
             }
             while (self->optvalue)
             {
                 switch (argparse_short_opt(self, self->options))
                 {
+                case 0:
+                    break;
                 case -1:
                     break;
                 case -2:
                     goto unknown;
                 default:
-                	assert(false);
-                	break;
+                    assert(false);
+                    break;
                 }
             }
             continue;
@@ -327,13 +331,15 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
         // long option
         switch (argparse_long_opt(self, self->options))
         {
+        case 0:
+            break;
         case -1:
             break;
         case -2:
             goto unknown;
         default:
-        	assert(false);
-        	break;
+            assert(false);
+            break;
         }
         continue;
 
