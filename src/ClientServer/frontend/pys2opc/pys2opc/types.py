@@ -1229,6 +1229,8 @@ class Reference:
         self.nodeClass       = nodeClass
         self.typeDefinition  = typeDefinition
 
+    def __repr__(self):
+        return "Reference(type=%r, forward=%r) to node(id=%r, name=%r, class=%r, type=%r)"  % (self.referenceTypeId, bool(self.isForward), self.nodeId, self.browseName[1], NodeClass.get_name_from_id(self.nodeClass), self.typeDefinition)
 
 class SecurityPolicy(NamedMembers):
     """
@@ -1322,3 +1324,6 @@ if __name__ == '__main__':
 
     # Thu Nov 30 04:57:25.694287 2034 UTC, unix timestamp is 2048471845.694287
     assert ntp_to_python(18285654237264005879) == 2048471845.694287  # Hopefully with this one there is no float-rounding errors.
+
+    print(Reference("i=1000", True, "i=10001000", [0, "bla"], None, 1, "i=2"))
+    
