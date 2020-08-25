@@ -25,6 +25,7 @@ Example script: this script initializes the toolkit as a server.
 
 
 import time
+import argparse
 
 from pys2opc import PyS2OPC_Server as PyS2OPC, BaseAddressSpaceHandler, DataValue, StatusCode, AttributeId#, Variant, VariantType
 #from _connection_configuration import configuration_parameters_no_subscription
@@ -39,15 +40,23 @@ if __name__ == '__main__':
     print(PyS2OPC.get_version())
     print()
 
+    parser = argparse.ArgumentParser('Configurable server')
+    parser.add_argument('--config-path', default='S2OPC_Server_Demo_Config.xml',
+                        help='The path to the XML configuration of the server endpoints')
+    parser.add_argument('--addspace-path', default='s2opc.xml',
+                        help='The path to the XML configuration of the server address space')
+    parser.add_argument('--log-path', default='/tmp/pys2opc_logs',)
+    args = parser.parse_args()
+
     with PyS2OPC.initialize(logPath='/tmp/pys2opc_logs'):
         # Thread safety on callbacks?
-        PyS2OPC.load_address_space('s2opc.xml')
-        PyS2OPC.load_configuration('S2OPC_Server_Demo_Config.xml',
+        PyS2OPC.load_address_space(args.addspace_path)
+        PyS2OPC.load_configuration(args.config_path,
                                    address_space_handler=AddressSpaceHandler(),
                                    user_handler=None,
                                    method_handler=None,
                                    pki_handler=None)
         PyS2OPC.mark_configured()
-        #PyS2OPC.serve_forever()  # Should return exit reason
-        with PyS2OPC.serve():
-            time.sleep(1.)
+        PyS2OPC.serve_forever()  # Should return exit reason
+        #with PyS2OPC.serve():
+        #    time.sleep(1.)
