@@ -202,7 +202,7 @@ typedef struct
     char* nodeId;
     char* browseName;
     char* displayName;
-    int32_t nodeClass;
+    OpcUa_NodeClass nodeClass;
 } SOPC_ClientHelper_BrowseResultReference;
 
 /**
@@ -356,10 +356,10 @@ typedef struct
  @param log_level
     Minimum level of log traces to be printed in the log files
     The list of accepted values is:
-    - 0: ERROR,
-    - 1: WARNING,
-    - 2: INFO,
-    - 3: DEBUG.
+    - SOPC_LOG_LEVEL_ERROR,
+    - SOPC_LOG_LEVEL_WARNING,
+    - SOPC_LOG_LEVEL_INFO,
+    - SOPC_LOG_LEVEL_DEBUG.
     This list is decreasing. It means ERROR level is the maximum value and DEBUG level is the minimum value.
     If level is not an accepted value, DEBUG is used by default.
  @param disconnect_callback
@@ -369,7 +369,7 @@ typedef struct
    '-2' if toolkit not initialized
  */
 int32_t SOPC_ClientHelper_Initialize(const char* log_path,
-                                     int32_t log_level,
+                                     SOPC_Log_Level log_level,
                                      const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 
 /**

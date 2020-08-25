@@ -289,7 +289,7 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
 
 // Return 0 if succeeded
 int32_t SOPC_ClientHelper_Initialize(const char* log_path,
-                                     int32_t log_level,
+                                     SOPC_Log_Level log_level,
                                      const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
     SOPC_Log_Level level = SOPC_LOG_LEVEL_DEBUG;
@@ -298,17 +298,11 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
 
     switch (log_level)
     {
-    case 0:
-        level = SOPC_LOG_LEVEL_ERROR;
-        break;
-    case 1:
-        level = SOPC_LOG_LEVEL_WARNING;
-        break;
-    case 2:
-        level = SOPC_LOG_LEVEL_INFO;
-        break;
-    case 3:
-        level = SOPC_LOG_LEVEL_DEBUG;
+    case SOPC_LOG_LEVEL_ERROR:
+    case SOPC_LOG_LEVEL_WARNING:
+    case SOPC_LOG_LEVEL_INFO:
+    case SOPC_LOG_LEVEL_DEBUG:
+        level = log_level;
         break;
     default:
         log_level_set = false;
@@ -330,7 +324,8 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
 
     if (!log_level_set)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Invalid log level provided, set to level 3 (debug) by default.");
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING,
+                    "Invalid log level provided, set to level SOPC_LOG_LEVEL_DEBUG by default.");
     }
 
     if (!log_path_set)
@@ -853,7 +848,7 @@ static void GenericCallbackHelper_Browse(SOPC_StatusCode status, const void* res
                     ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
                 resultReference.isForward = reference->IsForward;
-                resultReference.nodeClass = (int32_t) reference->NodeClass;
+                resultReference.nodeClass = reference->NodeClass;
                 bool result = SOPC_Array_Append(ctx->browseResults[i], resultReference);
                 if (!result)
                 {
@@ -944,7 +939,7 @@ static void GenericCallbackHelper_BrowseNext(SOPC_StatusCode status, const void*
                     ctx->status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
                 resultReference.isForward = reference->IsForward;
-                resultReference.nodeClass = (int32_t) reference->NodeClass;
+                resultReference.nodeClass = reference->NodeClass;
                 bool result = SOPC_Array_Append(ctx->browseResults[index], resultReference);
                 if (!result)
                 {
