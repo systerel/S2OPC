@@ -224,6 +224,25 @@ typedef struct
 } SOPC_ClientHelper_BrowseResult;
 
 /**
+ @brief
+    Move the content of the SOPC_ClientHelper_BrowseResultReference from source to destination.
+    Note: after use of move function, clearing source has no effect on destination structure content
+          since source does not point to allocated data anymore.
+
+ @param dest  A pointer to the SOPC_ClientHelper_BrowseResultReference structure to use as destination
+ @param src   A pointer to the SOPC_ClientHelper_BrowseResultReference structure to use as source
+ */
+void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResultReference* dest,
+                                                  SOPC_ClientHelper_BrowseResultReference* src);
+/**
+ @brief
+    Clears the content of the SOPC_ClientHelper_BrowseResultReference structure pointed by \p brr
+
+ @param br  A pointer to the SOPC_ClientHelper_BrowseResultReference structure to clear.
+ */
+void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr);
+
+/**
  * @struct SOPC_ClientHelper_CallMethodRequest
  * @brief
  *   structure containing the requested method to call and input parameters
@@ -576,7 +595,6 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
                                SOPC_DataValue** values);
-
 /**
  @brief
     Free the result provided by SOPC_ClientHelper_Read.
@@ -631,6 +649,17 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
+/**
+ @brief
+    Clears the content of the SOPC_ClientHelper_BrowseResult[] \p results.
+    The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_Browse.
+
+    SOPC_ClientHelper_BrowseResultReference_Move might be use to keep partial result before calling this function.
+
+ @param nbElements  The number of elements in the browse result array
+ @param results     The SOPC_ClientHelper_BrowseResult array to clear.
+ */
+void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results);
 
 /**
  @brief

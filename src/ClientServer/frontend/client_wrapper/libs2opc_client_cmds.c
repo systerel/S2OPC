@@ -1613,6 +1613,44 @@ static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
     return status;
 }
 
+void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResultReference* dest,
+                                                  SOPC_ClientHelper_BrowseResultReference* src)
+{
+    if (NULL == dest || NULL == src)
+    {
+        return;
+    }
+
+    *dest = *src;
+    memset(src, 0, sizeof(SOPC_ClientHelper_BrowseResultReference));
+}
+
+void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr)
+{
+    if (NULL == brr)
+    {
+        return;
+    }
+    SOPC_Free(brr->browseName);
+    SOPC_Free(brr->displayName);
+    SOPC_Free(brr->nodeId);
+    SOPC_Free(brr->referenceTypeId);
+    memset(brr, 0, sizeof(SOPC_ClientHelper_BrowseResultReference));
+}
+
+static void SOPC_ClientHelper_BrowseResult_Clear(SOPC_ClientHelper_BrowseResult* br)
+{
+    if (NULL == br)
+    {
+        return;
+    }
+    for (int32_t i = 0; i < br->nbOfReferences; i++)
+    {
+        SOPC_ClientHelper_BrowseResultReference_Clear(&br->references[i]);
+    }
+    SOPC_Free(br->references);
+}
+
 int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
@@ -1803,6 +1841,18 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     else
     {
         return -100;
+    }
+}
+
+void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results)
+{
+    if (NULL == results || 0 == nbElements)
+    {
+        return;
+    }
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        SOPC_ClientHelper_BrowseResult_Clear(&results[i]);
     }
 }
 
