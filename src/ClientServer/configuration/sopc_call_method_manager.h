@@ -143,7 +143,8 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
  * This function should be used only with the basic implementation of SOPC_MethodCallManager provided by the toolkit.
  *
  * \param mcm   a valid pointer on a SOPC_MethodCallManager returned by SOPC_MethodCallManager_Create().
- * \param methodId        a valid pointer on a SOPC_NodeId of the method.
+ * \param methodId        a valid pointer on a SOPC_NodeId of the method
+ *                        (\p mcm will manage its deallocation, do not reuse this nodeId after call)
  * \param methodFunc      a valid pointer on a C function to associate with the given methodId.
  * \param param           a pointer on data to give as parameter when call methodFunc. Can be NULL.
  * \param fnFree          a pointer on a C function to free param. Can be NULL.

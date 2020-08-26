@@ -149,10 +149,6 @@ typedef enum
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
-/* NodeIds of method for Call Method Service */
-SOPC_NodeId* methodIds[4] = {NULL};
-uint32_t nbMethodIds = 0;
-
 static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* serverConfig);
 
 /*---------------------------------------------------------------------------
@@ -960,8 +956,6 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
             methodFunc = &SOPC_Method_Func_Test_Generic;
             status =
                 SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "No input, no output", NULL);
@@ -978,8 +972,6 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
             methodFunc = &SOPC_Method_Func_Test_Generic;
             status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "Only input, no output",
                                                       NULL);
@@ -997,8 +989,6 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
             methodFunc = &SOPC_Method_Func_Test_Generic;
             status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "No input, only output",
                                                       NULL);
@@ -1016,8 +1006,6 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodIds[nbMethodIds] = methodId;
-            nbMethodIds++;
             methodFunc = &SOPC_Method_Func_Test_CreateSigningRequest;
             status = SOPC_MethodCallManager_AddMethod(serverConfig->mcm, methodId, methodFunc, "Input, output", NULL);
         }
@@ -1282,17 +1270,6 @@ int main(int argc, char* argv[])
     else
     {
         printf("<Test_Server_Toolkit final result: NOK with status = '%d'\n", status);
-    }
-
-    /* Deallocate all locally created structures: */
-
-    for (uint32_t i = 0; i < nbMethodIds; i++)
-    {
-        if (NULL != methodIds[i])
-        {
-            SOPC_NodeId_Clear(methodIds[i]);
-            SOPC_Free(methodIds[i]);
-        }
     }
 
     SOPC_AddressSpace_Delete(address_space);

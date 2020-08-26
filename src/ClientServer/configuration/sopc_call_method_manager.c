@@ -72,7 +72,7 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
         return NULL;
     }
 
-    mcm->pUserData = SOPC_NodeId_Dict_Create(false, &SOPC_MethodCallManager_Free_MF);
+    mcm->pUserData = SOPC_NodeId_Dict_Create(true, &SOPC_MethodCallManager_Free_MF);
     if (NULL == mcm->pUserData)
     {
         SOPC_Free(mcm);
