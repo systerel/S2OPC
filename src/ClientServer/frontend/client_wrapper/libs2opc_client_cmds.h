@@ -671,7 +671,7 @@ void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_
     An array of SOPC_ClientHelper_CallMethodRequest describing the method called with input parameters
     Note: inputParams are moved using SOPC_Variant_Move and should not be used after this function call
  @param nbOfElements
-    number of elements in the \p callRequests and \p callResults arrays
+    number of elements in the \p callRequests and \p callResults arrays. It should be between 1 and INT32_MAX.
  @param[out] callResults
     A pre-allocated array of SOPC_ClientHelper_CallMethodeResult structures
 
@@ -684,7 +684,20 @@ void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_
 */
 int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
                                      SOPC_ClientHelper_CallMethodRequest* callRequests,
-                                     int32_t nbOfElements,
+                                     size_t nbOfElements,
                                      SOPC_ClientHelper_CallMethodResult* callResults);
+
+/**
+ @brief
+    Clears the content of the SOPC_ClientHelper_CallMethodResult[] \p results.
+    The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_CallMethod.
+
+    Note: the variant values to keep after this call shall have been copied or moved using corresponding SOPC_Variant_*
+          function.
+
+ @param nbElements  The number of elements in the call method result array
+ @param results     The SOPC_ClientHelper_CallMethodResult array to clear.
+ */
+void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHelper_CallMethodResult* results);
 
 #endif /* LIBS2OPC_CLIENT_CMDS_H_ */

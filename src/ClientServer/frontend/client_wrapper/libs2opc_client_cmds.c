@@ -1412,7 +1412,6 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     {
         return -3;
     }
-
     OpcUa_WriteRequest* request = (OpcUa_WriteRequest*) SOPC_Malloc(sizeof(OpcUa_WriteRequest));
     if (NULL == request)
     {
@@ -1996,7 +1995,7 @@ static bool ContainsContinuationPoints(SOPC_ByteString** continuationPointsArray
 
 int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
                                      SOPC_ClientHelper_CallMethodRequest* callRequests,
-                                     int32_t nbOfElements,
+                                     size_t nbOfElements,
                                      SOPC_ClientHelper_CallMethodResult* callResults)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -2006,14 +2005,14 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
         return -1;
     }
 
-    if (nbOfElements <= 0 || NULL == callRequests || NULL == callResults)
+    if (nbOfElements <= 0 || nbOfElements > INT32_MAX || NULL == callRequests || NULL == callResults)
     {
         return -2;
     }
 
     CallMethodContext ctx;
     OpcUa_CallRequest* callReqs = SOPC_Malloc(sizeof(OpcUa_CallRequest));
-    OpcUa_CallMethodRequest* lrs = SOPC_Calloc((size_t) nbOfElements, sizeof(OpcUa_CallMethodRequest));
+    OpcUa_CallMethodRequest* lrs = SOPC_Calloc(nbOfElements, sizeof(OpcUa_CallMethodRequest));
     if (NULL == callReqs || NULL == lrs)
     {
         SOPC_Free(callReqs);
@@ -2023,9 +2022,9 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
 
     OpcUa_CallRequest_Initialize(callReqs);
     callReqs->MethodsToCall = lrs;
-    callReqs->NoOfMethodsToCall = nbOfElements;
+    callReqs->NoOfMethodsToCall = (int32_t) nbOfElements;
 
-    for (int32_t i = 0; SOPC_STATUS_OK == status && i < nbOfElements; i++)
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < nbOfElements; i++)
     {
         SOPC_ClientHelper_CallMethodRequest* creq = &callRequests[i];
         OpcUa_CallMethodRequest* req = &lrs[i];
@@ -2070,7 +2069,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
     if (SOPC_STATUS_OK == status)
     {
         SOPC_CallMethodContext_Initialization(&ctx);
-        ctx.nbElements = nbOfElements;
+        ctx.nbElements = (int32_t) nbOfElements;
         ctx.results = callResults;
     }
 
@@ -2108,4 +2107,22 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
     }
 
     return 0;
+}
+
+void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHelper_CallMethodResult* results)
+{
+    if (0 == nbElements || NULL == results)
+    {
+        return;
+    }
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        for (int32_t j = 0; j < results[i].nbOfOuputParams; j++)
+        {
+            assert(NULL != results[i].outputParams);
+            SOPC_Variant_Clear(&results[i].outputParams[j]);
+        }
+        SOPC_Free(results[i].outputParams);
+        memset(&results[i], 0, sizeof(SOPC_ClientHelper_CallMethodResult));
+    }
 }
