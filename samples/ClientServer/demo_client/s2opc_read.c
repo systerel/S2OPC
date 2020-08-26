@@ -330,6 +330,6 @@ static void PrintReadResponse(OpcUa_ReadResponse* pResp)
 
         pVal = &pResp->Results[i];
         printf("StatusCode: 0x%08X\n", pVal->Status);
-        util_variant__print_SOPC_Variant(&(pVal->Value));
+        SOPC_Variant_Print(&(pVal->Value));
     }
 }

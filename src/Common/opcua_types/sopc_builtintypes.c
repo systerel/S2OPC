@@ -31,6 +31,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_time.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -4807,6 +4808,169 @@ void SOPC_Variant_Delete(SOPC_Variant* variant)
 
     SOPC_Variant_Clear(variant);
     SOPC_Free(variant);
+}
+
+void SOPC_Variant_Print(SOPC_Variant* pvar)
+{
+    size_t i;
+    uint8_t c;
+    printf("Variant @%p", (void*) pvar);
+    char* s = NULL;
+
+    if (NULL == pvar)
+        return;
+
+    int32_t dimensions = -1;
+    switch (pvar->ArrayType)
+    {
+    case SOPC_VariantArrayType_SingleValue:
+        dimensions = 0;
+        break;
+    case SOPC_VariantArrayType_Array:
+        dimensions = 1;
+        break;
+    case SOPC_VariantArrayType_Matrix:
+        dimensions = pvar->Value.Matrix.Dimensions;
+        break;
+    default:
+        break;
+    }
+
+    printf(":\n  TypeId %i [dim=%" PRIi32 "]: ", (int) pvar->BuiltInTypeId, dimensions);
+
+    if (0 != dimensions)
+    {
+        printf("[...]\n");
+        return;
+    }
+
+    switch (pvar->BuiltInTypeId)
+    {
+    case SOPC_Null_Id:
+        printf("Null\n");
+        break;
+    case SOPC_Boolean_Id:
+        printf("Boolean\n  Value: %" PRIu8 "\n", pvar->Value.Boolean);
+        break;
+    case SOPC_SByte_Id:
+        printf("SByte\n  Value: %" PRIi8 "\n", pvar->Value.Sbyte);
+        break;
+    case SOPC_Byte_Id:
+        printf("Byte\n  Value: %" PRIu8 "\n", pvar->Value.Byte);
+        break;
+    case SOPC_Int16_Id:
+        printf("Int16\n  Value: %" PRIi16 "\n", pvar->Value.Int16);
+        break;
+    case SOPC_UInt16_Id:
+        printf("UInt16\n  Value: %" PRIu16 "\n", pvar->Value.Uint16);
+        break;
+    case SOPC_Int32_Id:
+        printf("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
+        break;
+    case SOPC_UInt32_Id:
+        printf("UInt32\n  Value: %" PRIu32 "\n", pvar->Value.Uint32);
+        break;
+    case SOPC_Int64_Id:
+        printf("Int64\n  Value: %" PRIi64 "\n", pvar->Value.Int64);
+        break;
+    case SOPC_UInt64_Id:
+        printf("UInt64\n  Value: %" PRIu64 "\n", pvar->Value.Uint64);
+        break;
+    case SOPC_Float_Id:
+        printf("Float\n  Value: %g\n", pvar->Value.Floatv);
+        break;
+    case SOPC_Double_Id:
+        printf("Double\n  Value: %g\n", pvar->Value.Doublev);
+        break;
+    case SOPC_String_Id:
+        printf("String\n  Value: \"%*.*s\"\n", pvar->Value.String.Length, pvar->Value.String.Length,
+               pvar->Value.String.Data);
+        break;
+    case SOPC_ByteString_Id:
+        printf("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);
+        /* Pretty print */
+        for (i = 0; i < (size_t) pvar->Value.Bstring.Length; ++i)
+        {
+            c = pvar->Value.Bstring.Data[i];
+            if (0x20 <= c && c < 0x80)
+                /* Displayable ascii range */
+                printf("%c", c);
+            else
+                /* Special char */
+                printf("\\x%02" PRIX8, c);
+        }
+        printf("\"\n");
+        break;
+    case SOPC_XmlElement_Id:
+        printf("XmlElement\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.XmlElt.Length);
+        /* Pretty print */
+        for (i = 0; i < (size_t) pvar->Value.XmlElt.Length; ++i)
+        {
+            c = pvar->Value.XmlElt.Data[i];
+            if (0x20 <= c && c < 0x80)
+                /* Displayable ascii range */
+                printf("%c", c);
+            else
+                /* Special char */
+                printf("\\x%02" PRIX8, c);
+        }
+        printf("\"\n");
+        break;
+    case SOPC_NodeId_Id:
+        s = SOPC_NodeId_ToCString(pvar->Value.NodeId);
+        printf("NodeId\n  Value: %s\n", s);
+        SOPC_Free(s);
+        s = NULL;
+        break;
+    case SOPC_StatusCode_Id:
+        printf("StatusCode\n  Value: %" PRIX32 "\n", pvar->Value.Status);
+        break;
+    case SOPC_DateTime_Id:
+        s = SOPC_Time_GetString(pvar->Value.Date, true, false);
+        printf("DateTime = %s\n", s);
+        SOPC_Free(s);
+        s = NULL;
+        break;
+    case SOPC_Guid_Id:
+        printf("Guid = %" PRIX32 "-%" PRIX16 "-%" PRIX16 "-%" PRIX8 "%" PRIX8 "-%" PRIX8 "%" PRIX8 "%" PRIX8 "%" PRIX8
+               "%" PRIX8 "%" PRIX8 "\n",
+               pvar->Value.Guid->Data1, pvar->Value.Guid->Data2, pvar->Value.Guid->Data3, pvar->Value.Guid->Data4[0],
+               pvar->Value.Guid->Data4[1], pvar->Value.Guid->Data4[2], pvar->Value.Guid->Data4[3],
+               pvar->Value.Guid->Data4[4], pvar->Value.Guid->Data4[5], pvar->Value.Guid->Data4[6],
+               pvar->Value.Guid->Data4[7]);
+        break;
+    case SOPC_ExpandedNodeId_Id:
+        s = SOPC_NodeId_ToCString(&pvar->Value.ExpNodeId->NodeId);
+        printf("ExpandedNodeId\n  NsURI: %s\n  NodeId: %s\n  ServerIdx: %" PRIu32 "\n",
+               SOPC_String_GetRawCString(&pvar->Value.ExpNodeId->NamespaceUri), s, pvar->Value.ExpNodeId->ServerIndex);
+        SOPC_Free(s);
+        s = NULL;
+        break;
+    case SOPC_QualifiedName_Id:
+        printf("QualifiedName = %" PRIu16 ":%s\n", pvar->Value.Qname->NamespaceIndex,
+               SOPC_String_GetRawCString(&pvar->Value.Qname->Name));
+        break;
+    case SOPC_LocalizedText_Id:
+        printf("LocalizedText (default only) = [%s] %s\n",
+               SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultLocale),
+               SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultText));
+        break;
+    case SOPC_ExtensionObject_Id:
+        printf("ExtensionObject: <print not implemented>\n");
+        break;
+    case SOPC_DataValue_Id:
+        printf("DataValue: <print not implemented>\n");
+        break;
+    case SOPC_Variant_Id: /* This one does not have an implementation at all */
+        printf("Variant: <print not implemented>\n");
+        break;
+    case SOPC_DiagnosticInfo_Id:
+        printf("DiagnosticInfo: <print not implemented>\n");
+        break;
+    default:
+        printf("<print not implemented>\n");
+        break;
+    }
 }
 
 void SOPC_DataValue_InitializeAux(void* value)

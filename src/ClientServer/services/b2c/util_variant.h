@@ -93,10 +93,4 @@ SOPC_Variant* util_variant__new_Variant_from_double(double f);
  */
 SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf);
 
-/**
- * Quick and dirty print.
- * I don't do arrays...
- */
-void util_variant__print_SOPC_Variant(SOPC_Variant* pvar);
-
 #endif /* UTIL_VARIANT_H_ */

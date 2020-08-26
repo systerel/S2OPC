@@ -77,7 +77,7 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
         {
             /* Note: Status is a B-StatusCode */
             printf("pReadResp->Results[%" PRIi32 "].Status: 0x%08" PRIX32 "\n", i, pReadResp->Results[i].Status);
-            util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
+            SOPC_Variant_Print(&pReadResp->Results[i].Value);
         }
     }
 
@@ -107,9 +107,9 @@ bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode s
         if (verbose > 1)
         {
             printf("-- Comparing pvar:\n");
-            util_variant__print_SOPC_Variant(pvar);
+            SOPC_Variant_Print(pvar);
             printf("-- with response[%d]:\n", i);
-            util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
+            SOPC_Variant_Print(&pReadResp->Results[i].Value);
             if (bTestOk)
                 printf("-- ok\n");
             else

@@ -331,10 +331,10 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
                    "value:\n",
                    i, i, status, cmp);
             printf("Value status = 0x%X\n", pWriteReq->NodesToWrite[i].Value.Status);
-            util_variant__print_SOPC_Variant(&pWriteReq->NodesToWrite[i].Value.Value);
+            SOPC_Variant_Print(&pWriteReq->NodesToWrite[i].Value.Value);
             printf("+ Read value:\n");
             printf("Value status = 0x%X\n", pReadResp->Results[i].Status);
-            util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
+            SOPC_Variant_Print(&pReadResp->Results[i].Value);
             bVerif = false;
         }
     }
