@@ -34,9 +34,9 @@ CURDIR=`pwd`
 EXEC_DIR=bin
 
 if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
-    BUILD_DIR=build_toolchain
+    BUILD_DIR=${BUILD_DIR:-build_toolchain}
 else
-    BUILD_DIR=build
+    BUILD_DIR=${BUILD_DIR:-build}
 fi
 
 # Check if the option which name is $1 is defined in env,
@@ -74,7 +74,6 @@ else
     append_cmake_option WITH_NANO_EXTENDED
     append_cmake_option WARNINGS_AS_ERRORS
     append_cmake_option PUBSUB_STATIC_CONFIG
-    append_cmake_option PUBSUB_SECURITY_ENABLED
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
     append_cmake_option CMAKE_C_FLAGS
     append_cmake_option CMAKE_EXE_LINKER_FLAGS

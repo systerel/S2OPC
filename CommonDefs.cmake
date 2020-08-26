@@ -29,7 +29,8 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 ## Manage static/shared property of external libraries
 
 # Make CMake use static version of all dependencies by default
-option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static version of external libraries " ON)
+option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static version of external libraries" ON)
+option(BUILD_SHARED_LIBS "Build dynamic libraries for S2OPC instead of static libraries" OFF)
 if(USE_STATIC_EXT_LIBS)
   set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
@@ -54,6 +55,8 @@ if (USE_STATIC_EXPAT_LIB)
   endif()
 endif()
 
+option(S2OPC_CLIENTSERVER_ONLY "Only build the common library and client server libraries, tests, and samples (effectively excludes pubsub)." OFF)
+option(S2OPC_PUBSUB_ONLY "Only build the common library and the pubsub library, tests, and samples (effectively excludes clientserver)." OFF)
 if(S2OPC_CLIENTSERVER_ONLY AND NOT WITH_PYS2OPC)
   find_package(expat CONFIG) # if not found XML loaders will not be compiled
 else()
@@ -110,6 +113,7 @@ list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2>)
 list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wl,-z,relro,-z,now>)
 
 # If PIE explicitly requested, activate it for binaries linking
+option(POSITION_INDEPENDENT_EXECUTABLE "Build position independent executable (-pie) which is a security good practice, but requires dependencies to be compiled with position independent code (-fPIC)" OFF)
 if (POSITION_INDEPENDENT_EXECUTABLE)
   # necessary to build binaries as PIE (see CMake CMP0083)
   list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-pie>)
@@ -166,6 +170,8 @@ option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
+# option to put non-writeable data in const part of the memory
+option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attributes are const" OFF)
 
 # Check project and option(s) are compatible
 
