@@ -23,6 +23,7 @@
 #include "sopc_array.h"
 #include "sopc_builtintypes.h"
 #include "sopc_log_manager.h"
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
@@ -253,8 +254,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
-                                               SOPC_ClientHelper_ReadValue* readValues,
-                                               SOPC_DataValue** values);
+                                               SOPC_ClientHelper_ReadValue* readValues);
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                                                       SOPC_ReturnStatus status,
                                                       OpcUa_WriteValue* nodesToWrite,
@@ -743,18 +743,16 @@ static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* respo
     }
     if (SOPC_STATUS_OK == ctx->status)
     {
-        for (int32_t i = 0; i < readResp->NoOfResults && SOPC_STATUS_OK == ctx->status; i++)
-        {
-            ctx->status = SOPC_DataValue_Copy(ctx->values[i], &readResp->Results[i]);
-        }
-        if (ctx->status == SOPC_STATUS_NOK)
-        {
-            for (int32_t i = 0; i < readResp->NoOfResults; i++)
-            {
-                SOPC_DataValue_Clear(ctx->values[i]);
-            }
-            ctx->nbElements = 0;
-        }
+        *ctx->values = readResp->Results;
+        // TODO: the const constraint on response should be released since it is not necessary
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_DataValue** setToNull = (SOPC_DataValue**) &readResp->Results;
+        int32_t* setToZero = (int32_t*) &readResp->NoOfResults;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+
+        // Empty the read response to avoid deallocation of data we transfered to context
+        *setToNull = NULL;
+        *setToZero = 0;
     }
     ctx->finish = true;
 
@@ -1037,8 +1035,7 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
-                                               SOPC_ClientHelper_ReadValue* readValues,
-                                               SOPC_DataValue** values)
+                                               SOPC_ClientHelper_ReadValue* readValues)
 {
     if (SOPC_STATUS_OK == status)
     {
@@ -1071,30 +1068,6 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                     SOPC_NodeId_Clear(nodeId);
                     SOPC_Free(nodeId);
                 }
-            }
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        /* alloc values */
-        int i = 0;
-        for (i = 0; i < (int) nbElements && SOPC_STATUS_OK == status; i++)
-        {
-            values[i] = SOPC_Malloc(sizeof(SOPC_DataValue));
-            if (NULL == values[i])
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                SOPC_DataValue_Initialize(values[i]);
-            }
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            for (int j = 0; j < i + 1; j++)
-            {
-                SOPC_Free(values[j]);
             }
         }
     }
@@ -1158,7 +1131,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    status = ReadHelper_Initialize(status, nbElements, nodesToRead, readValues, values);
+    status = ReadHelper_Initialize(status, nbElements, nodesToRead, readValues);
     /* set context */
     if (SOPC_STATUS_OK == status)
     {
@@ -1228,6 +1201,12 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     {
         return -100;
     }
+}
+
+void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue** values)
+{
+    int32_t nb = (int32_t) nbElements;
+    SOPC_Clear_Array(&nb, (void**) values, sizeof(SOPC_DataValue), SOPC_DataValue_ClearAux);
 }
 
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)

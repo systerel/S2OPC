@@ -558,11 +558,12 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
  @param nbElements
     Number of elements to read. It should be between 1 and INT32_MAX
  @param[out] values
-    A pre-allocated array to the output list of pointers of Attribute values.
-    It should be at least \p nElements long.
+    Address of pointer to which the resulting SOPC_DataValue[] array will be set (do not pre-allocate).
+    It will be \p nElements long.
     When return, the order of this list matches the order of \p readValues.
-    The ownership of the data moved to caller which should freed the content of this array,
-    i.e. user should free all attribute values
+    The ownership of the data moved to caller which should free this array and its content using
+ SOPC_ClientHelper_ReadResult_Free.
+
  @return
    '0' if operation succeed
    '-1' if connectionId not valid
@@ -575,6 +576,22 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
                                SOPC_DataValue** values);
+
+/**
+ @brief
+    Free the result provided by SOPC_ClientHelper_Read.
+
+    If some data of the result shall be kept, either:
+    - make a shallow copy of the SOPC_DataValue structure and reset data in array item with SOPC_DataValue_Initialize
+    - make a deep copy of it using SOPC_DataValue_Copy
+
+ @param nbElements
+    Number of elements in result. It should be between 1 and INT32_MAX
+ @param[out] values
+    Address of pointer to which the resulting SOPC_DataValue[] array has been set.
+    It shall be \p nElements long.
+*/
+void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue** values);
 
 /**
  @brief
