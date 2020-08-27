@@ -16,3 +16,9 @@ else()
   # Client wrapper
   include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
 endif()
+
+# Trigger find_package(expat ...) when using find_package(s2opc CONFIG)
+if(@expat_FOUND@)
+include(CMakeFindDependencyMacro)
+find_dependency(expat)
+endif()
