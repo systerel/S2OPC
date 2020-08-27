@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <expat.h>
+#include "expat.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_mem_alloc.h"

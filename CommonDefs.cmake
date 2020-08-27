@@ -73,8 +73,6 @@ endif()
 if(expat_FOUND)
   if(WIN32 AND NOT MINGW)
     set(expat_LIB expat::libexpat)
-    # Windows definition of cmake-expat lacks the headers
-    target_include_directories(${expat_LIB} INTERFACE "${expat_DIR}\\..\\..\\..\\include")
     if (USE_STATIC_EXPAT_LIB)
       target_compile_definitions(${expat_LIB} INTERFACE "XML_STATIC")
     endif()

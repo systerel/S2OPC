@@ -133,6 +133,9 @@ if (expat_FOUND)
   target_compile_options(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
   target_link_libraries(s2opc_clientserver-xml-loaders-expat PUBLIC s2opc_clientserver PRIVATE ${expat_LIB})
+  # Note: the following line is a hack since it seems expat does not export its include directory.
+  #       It might not be necessary if other library includes target the same directory.
+  target_include_directories(s2opc_clientserver-xml-loaders-expat PRIVATE "${expat_DIR}/../../../include")
   set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES
       "${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders"
       "${CMAKE_CURRENT_SOURCE_DIR}/loaders/config_loaders"
