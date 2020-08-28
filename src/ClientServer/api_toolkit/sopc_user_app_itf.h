@@ -166,44 +166,53 @@ typedef struct SOPC_S2OPC_Config
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE = 0x700, /* id = internal session id (or 0 if not yet defined)
-                                      params = (SOPC_StatusCode)(uintptr_t) status code reason
-                                      auxParam = user application session context
-                                   */
-    SE_ACTIVATED_SESSION,                  /* id = internal session id
-                                              auxParam = user application session context
-                                           */
-    SE_SESSION_REACTIVATING,               /* automatic new SC or manual new user on same SC */
-                                           /* id = internal session id
-                                              auxParam = user application session context
-                                           */
-    SE_RCV_SESSION_RESPONSE,               /* id = internal session id
-                                              params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                              (deallocated by toolkit after callback call ends)
-                                              auxParam = user application request context
-                                           */
-    SE_CLOSED_SESSION,                     /* id = internal session id
-                                              params = (SOPC_StatusCode)(uintptr_t) status code reason
-                                              auxParam = user application session context
+    SE_SESSION_ACTIVATION_FAILURE = 0x700, /**< (Client)
+                                            *   id = internal session id (or 0 if not yet defined)
+                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason
+                                            *   auxParam = user application session context
                                             */
-    SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
-                                  (deallocated by toolkit after callback call ends)
-                                  auxParam = user application request context
-                                */
+    SE_ACTIVATED_SESSION,                  /**< (Client)
+                                            *   id = internal session id
+                                            *   auxParam = user application session context
+                                            */
+    SE_SESSION_REACTIVATING,               /**< (Client) automatic new SC or manual new user on same SC */
+                                           /**< (Client)
+                                            *   id = internal session id
+                                            *   auxParam = user application session context
+                                            */
+    SE_RCV_SESSION_RESPONSE,               /**< (Client)
+                                            *   id = internal session id
+                                            *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                                            *   (deallocated by toolkit after callback call ends)
+                                            *   auxParam = user application request context
+                                            */
+    SE_CLOSED_SESSION,                     /**< (Client)
+                                            *   id = internal session id
+                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason
+                                            *   auxParam = user application session context
+                                            */
+    SE_RCV_DISCOVERY_RESPONSE,             /**< (Client)
+                                            *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload
+                                            *   structure (deallocated by toolkit after callback call ends) auxParam = user
+                                            *   application request context
+                                            */
 
-    SE_SND_REQUEST_FAILED, /* idOrStatus = (SOPC_ReturnStatus) status,
-                              params = (SOPC_EncodeableType*) request type (shall not be deallocated)
-                              auxParam = user application request context
+    SE_SND_REQUEST_FAILED, /**< (Client)
+                            *   idOrStatus = (SOPC_ReturnStatus) status,
+                            *   params = (SOPC_EncodeableType*) request type (shall not be deallocated)
+                            *   auxParam = user application request context
                             */
 
     /* Server application events */
-    SE_CLOSED_ENDPOINT,       /* id = endpoint configuration index,
-                                 auxParam = SOPC_ReturnStatus
-                              */
-    SE_LOCAL_SERVICE_RESPONSE /* id = endpoint configuration index,
-                                 params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                 (deallocated by toolkit after callback call ends)
-                                 auxParam = user application request context
+    SE_CLOSED_ENDPOINT,       /**< (Server)
+                               *   id = endpoint configuration index,
+                               *   auxParam = SOPC_ReturnStatus
+                               */
+    SE_LOCAL_SERVICE_RESPONSE /**< (Server)
+                               *   id = endpoint configuration index,
+                               *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
+                               *   (deallocated by toolkit after callback call ends)
+                               *   auxParam = user application request context
                                */
 } SOPC_App_Com_Event;
 
