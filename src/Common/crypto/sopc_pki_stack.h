@@ -58,7 +58,7 @@
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
-                                               struct SOPC_CRLList* pRevocationList,
+                                               SOPC_CRLList* pRevocationList,
                                                SOPC_PKIProvider** ppPKI);
 
 /**
