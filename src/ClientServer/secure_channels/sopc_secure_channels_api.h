@@ -18,11 +18,11 @@
  */
 
 /**
- *  \file sopc_secure_channels_api.h
+ * \file sopc_secure_channels_api.h
  *
- *  \brief Event oriented API of the Secure Channel layer.
+ * \brief Event oriented API of the Secure Channel layer.
  *
- *         This module is in charge of the event dispatcher thread management.
+ *   This module is in charge of the event dispatcher thread management.
  */
 
 #ifndef SOPC_SECURE_CHANNELS_API_H_

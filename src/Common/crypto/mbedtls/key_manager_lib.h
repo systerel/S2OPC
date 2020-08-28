@@ -36,8 +36,8 @@
 /**
  * \brief   The asymmetric key representation.
  *
- *          It should be treated as an abstract handle.
- *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
+ *   It should be treated as an abstract handle.
+ *   The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
 struct SOPC_AsymmetricKey
 {
@@ -49,15 +49,15 @@ struct SOPC_AsymmetricKey
 /**
  * \brief   The signed public key representation, or a chained list of such keys.
  *
- *          It should be treated as an abstract handle.
- *          The certificate structure is mainly lib-specific.
- *          mbedtls certificates are chained.
- *          This structures represents a chained list of certificates.
+ *   It should be treated as an abstract handle.
+ *   The certificate structure is mainly lib-specific.
+ *   mbedtls certificates are chained.
+ *   This structures represents a chained list of certificates.
  *
- *          Usually, the CertificateList has length 1 when working with asymmetric cryptographic primitives,
- *          and the CertificateList has length > 1 when working with certificate validation.
- *          In the latter case, the certificates are in fact certificate authorities.
- *          See SOPC_KeyManager_Certificate_GetListLength.
+ *   Usually, the CertificateList has length 1 when working with asymmetric cryptographic primitives,
+ *   and the CertificateList has length > 1 when working with certificate validation.
+ *   In the latter case, the certificates are in fact certificate authorities.
+ *   See SOPC_KeyManager_Certificate_GetListLength.
  */
 struct SOPC_CertificateList
 {
@@ -67,13 +67,13 @@ struct SOPC_CertificateList
 /**
  * \brief   A list of Certificate Revocation Lists.
  *
- *          It should be treated as an abstract handle.
- *          The revocation list structure is mainly lib-specific.
- *          mbedtls revocation lists are chained.
+ *   It should be treated as an abstract handle.
+ *   The revocation list structure is mainly lib-specific.
+ *   mbedtls revocation lists are chained.
  *
- *          Usually, this structure is a list of known revocation lists for the trusted certificates.
- *          Each revocation list in the list is associated to one certificate authority in the
- *          trusted certificate chain.
+ *   Usually, this structure is a list of known revocation lists for the trusted certificates.
+ *   Each revocation list in the list is associated to one certificate authority in the
+ *   trusted certificate chain.
  */
 struct SOPC_CRLList
 {
@@ -87,7 +87,7 @@ struct SOPC_CRLList
  *                  and the key must not be used after the SOPC_CertificateList is freed by
  *                  SOPC_KeyManager_Certificate_Free().
  *
- *                  A special flag \p isBorrowedFromCert is set to !FALSE in this case in the SOPC_AsymmetricKey.
+ * \warning         A special flag \p isBorrowedFromCert is set to !FALSE in this case in the SOPC_AsymmetricKey.
  *
  * \param pCert     A valid pointer to the signed public key.
  * \param pKey      A valid pointer to the SOPC_AsymmetricKey which will be rewritten to contain the public key.

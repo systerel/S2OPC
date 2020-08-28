@@ -23,8 +23,8 @@
  * \brief This module provides an asynchronous API to request toolkit services
  *        It is required to configure the toolkit before calling any service.
  *
- *        Service responses are always provided asynchronously through the callback
- *        defined during toolkit configuration.
+ *   Service responses are always provided asynchronously through the callback
+ *   defined during toolkit configuration.
  */
 
 #ifndef SOPC_TOOLKIT_ASYNC_API_H_
@@ -39,35 +39,38 @@
 
 /**
  * \brief Request to open a connection listener for the given endpoint description configuration as a server.
- *        In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
- *        otherwise the listener could be considered as opened.
+ *
+ *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
+ *   otherwise the listener could be considered as opened.
  *
  * \param endpointConfigIdx  Endpoint description configuration index provided by
- * SOPC_ToolkitServer_AddEndpointConfig()
+ *                           SOPC_ToolkitServer_AddEndpointConfig()
  *
  */
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx);
 
 /**
  * \brief Request to close a connection listener for the given endpoint description configuration.
- *        In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
- *        once triggered if the listener was opened it could be now considered closed.
+ *
+ *   In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
+ *   once triggered if the listener was opened it could be now considered closed.
  *
  * \param endpointConfigIdx  Endpoint description configuration index provided to
- * SOPC_ToolkitServer_AsyncOpenEndpoint()
+ *                           SOPC_ToolkitServer_AsyncOpenEndpoint()
  *
  */
 void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
 
 /**
  * \brief Request to execute locally the given service request on server and receive response.
- *        The SE_LOCAL_SERVICE_RESPONSE event will be triggered to SOPC_ComEvent_Fct(),
- *        once service request evaluated.
+ *
+ *   The SE_LOCAL_SERVICE_RESPONSE event will be triggered to SOPC_ComEvent_Fct(),
+ *   once service request evaluated.
  *
  * \param endpointConfigIdx  Endpoint description configuration index provided to
- * \param requestStruct           OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by
- * toolkit.
- * \param requestContext          A context value, it will be provided with corresponding response
+ * \param requestStruct      OPC UA message payload structure pointer (OpcUa_<MessageStruct>*).
+ *                           Deallocated by the toolkit.
+ * \param requestContext     A context value, it will be provided with corresponding response
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
@@ -77,18 +80,19 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
 
 /**
  * \brief Request to activate a new session for the given endpoint connection configuration as client.
- *        When requesting activation of a session the following steps are automatically done:
- *        - Establish a new secure channel for the endpoint connection configuration provided if not existing
- *        - When secure channel established, request creation of a session
- *        - When session is created, request activation of the session
- *        - When session is activated, notify session is active
  *
- *        In case of failure SE_SESSION_ACTIVATION_FAILURE event will be triggered to SOPC_ComEvent_Fct(),
- *        otherwise SE_ACTIVATED_SESSION event will be triggered when session is activated provided the session Id
- *        for other operations on session.
+ *   When requesting activation of a session the following steps are automatically done:
+ *   - Establish a new secure channel for the endpoint connection configuration provided if not existing
+ *   - When secure channel established, request creation of a session
+ *   - When session is created, request activation of the session
+ *   - When session is activated, notify session is active
  *
- *        See helper functions SOPC_ToolkitClient_AsyncActivateSession_Anonymous(),
- *        SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword().
+ *   In case of failure SE_SESSION_ACTIVATION_FAILURE event will be triggered to SOPC_ComEvent_Fct(),
+ *   otherwise SE_ACTIVATED_SESSION event will be triggered when session is activated provided the session Id
+ *   for other operations on session.
+ *
+ *   See helper functions SOPC_ToolkitClient_AsyncActivateSession_Anonymous(),
+ *   SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword().
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()
@@ -144,8 +148,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
 
 /**
  * \brief Request to send a service request on given active session.
- *        In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to
- * SOPC_ComEvent_Fct().
+ *
+ *   In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  * \param requestStruct  OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by toolkit.
@@ -158,7 +162,8 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requ
 
 /**
  * \brief Request to close the given session.
- *        When the session is closed, the SE_CLOSED_SESSION event will be triggered to SOPC_ComEvent_Fct().
+ *
+ *   When the session is closed, the SE_CLOSED_SESSION event will be triggered to SOPC_ComEvent_Fct().
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  */
@@ -166,14 +171,14 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
 
 /**
  * \brief Request to send a discovery service request without using session.
- *        In case of service response received, the SE_RCV_DISCOVERY_RESPONSE event will be triggered to
- * SOPC_ComEvent_Fct().
+ *
+ *   In case of service response received, the SE_RCV_DISCOVERY_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  * \param discoveryReqStruct     OPC UA Discovery message request payload structure pointer (OpcUa_<MessageStruct>*).
- * Deallocated by toolkit.
+ *                               Deallocated by toolkit.
  * \param requestContext         A context value, it will be provided with corresponding response or in case of sending
- * error notification
+ *                               error notification
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */

@@ -36,10 +36,10 @@
  * \brief           Creates the minimal validation implementation provided by the stack,
  *                  which fulfills the SOPC_PKIProvider interface.
  *
- *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
- *                  with a single certificate authority, and its revocation list.
- *                  Certificate authority requirements depend on the chosen OPC UA security policy.
- *                  The CRL must be the CRL of the certificate authority.
+ *   This verifies the certificate in the safest manner (whole certificate chain, with date validation),
+ *   with a single certificate authority, and its revocation list.
+ *   Certificate authority requirements depend on the chosen OPC UA security policy.
+ *   The CRL must be the CRL of the certificate authority.
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *
@@ -64,36 +64,36 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 /**
  * \brief           Creates a SOPC_PKIProviderStack using lists of paths.
  *
- *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation,
- *                  mandatory certificate revocation lists).
- *                  Certificate Authority (CA) requirements (such as the hash algorithm used for the signature)
- *                  depend on the chosen OPC UA security policy.
+ *   This verifies the certificate in the safest manner (whole certificate chain, with date validation,
+ *   mandatory certificate revocation lists).
+ *   Certificate Authority (CA) requirements (such as the hash algorithm used for the signature)
+ *   depend on the chosen OPC UA security policy.
  *
- *                  There are 3 types of certificates to provide to the PKI:
- *                  - The "trusted issuers" are CAs which issued certificates are also trusted.
- *                    All the certificates of the signing chain including the root CA must be provided.
- *                  - The "issued certificates" are certificates issued by untrusted CA.
- *                    These certificates are considered trustworthy.
- *                    The difference between trusted issuers and trusted issued certificates is that issued
- *                    certificates are trusted on a one by one basis, whereas the trusted issuer may emit a large
- *                    number of trusted certificates.
- *                  - The "untrusted issuers" are CAs that are used to verify the signing chain of the
- *                    "issued certificates". Each issued certificate must have its whole signing CA chain in the
- *                    untrusted issuers or the trusted issuers up to the root CA.
+ *   There are 3 types of certificates to provide to the PKI:
+ *   - The "trusted issuers" are CAs which issued certificates are also trusted.
+ *     All the certificates of the signing chain including the root CA must be provided.
+ *   - The "issued certificates" are certificates issued by untrusted CA.
+ *     These certificates are considered trustworthy.
+ *     The difference between trusted issuers and trusted issued certificates is that issued
+ *     certificates are trusted on a one by one basis, whereas the trusted issuer may emit a large
+ *     number of trusted certificates.
+ *   - The "untrusted issuers" are CAs that are used to verify the signing chain of the
+ *     "issued certificates". Each issued certificate must have its whole signing CA chain in the
+ *     untrusted issuers or the trusted issuers up to the root CA.
  *
- *                  In addition, there are two more concepts:
- *                  - A link CA is part of the certificate validation chain.
- *                    All links between a certificate and a root certificate must be provided.
- *                  - A root CA is all always trusted, even if there are other root CAs that signed it.
- *                    Hence the parent of root CAs will never be checked, and the validation stops on root CAs.
+ *   In addition, there are two more concepts:
+ *   - A link CA is part of the certificate validation chain.
+ *     All links between a certificate and a root certificate must be provided.
+ *   - A root CA is all always trusted, even if there are other root CAs that signed it.
+ *     Hence the parent of root CAs will never be checked, and the validation stops on root CAs.
  *
- *                  The list of Certificate Revocation List (CRL) must contain exactly one list for each CA of the
- *                  provided CAs, either link or root, trusted or untrusted.
+ *   The list of Certificate Revocation List (CRL) must contain exactly one list for each CA of the
+ *   provided CAs, either link or root, trusted or untrusted.
  *
- *                  Issued certificates should not have CRLs, as they cannot be used to trust any other certificate.
- *                  When an issued certificate is used to protect a Secure Channel, it's signing chain will be verified.
- *                  For instance, if the certificate is not self signed and appears on the CRL of its signing CA,
- *                  the connection will fail as the certificate is in fact invalid.
+ *   Issued certificates should not have CRLs, as they cannot be used to trust any other certificate.
+ *   When an issued certificate is used to protect a Secure Channel, it's signing chain will be verified.
+ *   For instance, if the certificate is not self signed and appears on the CRL of its signing CA,
+ *   the connection will fail as the certificate is in fact invalid.
  *
  * \param lPathTrustedIssuerRoots   A pointer to an array of paths to root trusted issuers of the validation chains.
  *                  The array must contain a NULL pointer to indicate its end.

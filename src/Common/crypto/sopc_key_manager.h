@@ -58,11 +58,10 @@ typedef SOPC_Buffer SOPC_SerializedCertificate;
 /**
  * \brief           Creates an asymmetric key (usually a private key) from in-memory buffer \p buffer.
  *
- *                  \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
+ *   \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
+ *   Public keys are usually extracted from Certificate, see
+ *   SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
  * \param lenBuf    The length in bytes of the DER/PEM description of the key.
@@ -83,12 +82,11 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 /**
  * \brief           Creates an asymmetric key (usually a private key) from a file in the DER or PEM format.
  *
- *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
- *                  The key may be described in the DER of PEM format.
+ *   \p szPath is the path to the file containing the key. It should be zero-terminated.
+ *   The key may be described in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
+ *   Public keys are usually extracted from Certificate, see SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or
+ *   SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param szPath    The path to the DER/PEM file.
  * \param ppKey     A handle to the created key. This object must be freed with a call to
@@ -141,11 +139,11 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
 /**
  * \brief           Encodes the \p pKey as a DER buffer, and writes the result in \p pDest.
  *
- *                  The encoding process is not predictable, and a buffer of sufficient length
- *                  must be provided. A rule of thumb is to provide a buffer which is at least
- *                  8 times longer than the key (8*SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes()).
+ *   The encoding process is not predictable, and a buffer of sufficient length
+ *   must be provided. A rule of thumb is to provide a buffer which is at least
+ *   8 times longer than the key (8*SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes()).
  *
- *                  When SOPC_STATUS_NOK is returned, the function may be called again with a larger buffer.
+ *   When SOPC_STATUS_NOK is returned, the function may be called again with a larger buffer.
  *
  * \param pKey         A valid pointer to the asymmetric key (public/private) to encode.
  * \param is_public    Whether the key is public or private.
@@ -217,7 +215,7 @@ void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey
  * \brief           Creates a new Certificate (signed public key) from a DER encoded buffer,
  *                  or add it to an existing certificate list.
  *
- *                  \p bufferDER is \p lenDER long, and describes the certificate in the DER format.
+ *   \p bufferDER is \p lenDER long, and describes the certificate in the DER format.
  *
  * \param bufferDER A valid pointer to the buffer containing the DER description.
  * \param lenDER    The length in bytes of the DER description of the certificate.
@@ -240,8 +238,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
  * \brief           Creates a new Certificate (signed public key) from a file in the DER or PEM format,
  *                  or add it to an existing certificate list.
  *
- *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
- *                  The key may be described in the DER of PEM format.
+ *   \p szPath is the path to the file containing the key. It should be zero-terminated.
+ *   The key may be described in the DER of PEM format.
  *
  * \param szPath    The path to the DER/PEM file.
  * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
@@ -292,10 +290,10 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
 /**
  * \brief           Computes and writes the thumbprint of \p pCert to \p pDest.
  *
- *                  The computation of the thumbprint and its size depends on the current security policy.
- *                  The thumbprint is usually a SHA digest of the DER representation of the certificate.
+ *   The computation of the thumbprint and its size depends on the current security policy.
+ *   The thumbprint is usually a SHA digest of the DER representation of the certificate.
  *
- *                  The size of the thumbprint is provided by SOPC_CryptoProvider_CertificateGetLength_Thumbprint().
+ *   The size of the thumbprint is provided by SOPC_CryptoProvider_CertificateGetLength_Thumbprint().
  *
  * \param pProvider An initialized cryptographic context.
  * \param pCert     A valid pointer to the signed public key to thumbprint.
@@ -318,8 +316,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
 /**
  * \brief           Verify the application URI embedded in a certificate.
  *
- * This function does a strict, case sensitive comparison of the URIs and does not respect the URI comparison rules from
- * RFC3986 (the URI scheme comparison for example is case sensitive).
+ *   This function does a strict, case sensitive comparison of the URIs and does not respect the URI comparison rules
+ *   from RFC3986 (the URI scheme comparison for example is case sensitive).
  *
  * \warning         Some limitations apply, see \p SOPC_KeyManager_Certificate_GetMaybeApplicationUri.
  *
@@ -372,8 +370,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  * \brief           Removes (and frees) certificates from \p pCert that do not have exactly one revocation list
  *                  in \p pCRL.
  *
- *                  This function does not set match to false if there are CRL that do not match any Certificate.
- *                  This function skips certificates in /p pCert that are not authorities.
+ *   This function does not set match to false if there are CRL that do not match any Certificate.
+ *   This function skips certificates in /p pCert that are not authorities.
  *
  * \param pCert     A valid pointer to the Certificate list.
  * \param pCRL      A valid pointer to the CRL list.
@@ -472,7 +470,7 @@ void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* ce
  * \brief           Creates a new Certificate Revocation List (CRL) from a DER encoded buffer,
  *                  or add it to an existing CRL list.
  *
- *                  \p bufferDER is \p lenDER long, and describes one CRL in the DER format.
+ *   \p bufferDER is \p lenDER long, and describes one CRL in the DER format.
  *
  * \param bufferDER A valid pointer to the buffer containing the DER description.
  * \param lenDER    The length in bytes of the DER description of the certificate.
@@ -495,8 +493,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  * \brief           Creates a new Certificate Revocation List (CRL) from a file in the DER or PEM format,
  *                  or add it to an existing CRL list.
  *
- *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
- *                  The key may be described in the DER of PEM format.
+ *   \p szPath is the path to the file containing the key. It should be zero-terminated.
+ *   The key may be described in the DER of PEM format.
  *
  * \param szPath    The path to the DER/PEM file.
  * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.

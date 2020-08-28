@@ -165,9 +165,9 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey)
 /**
  * \brief   Creates a DER from the AsymmetricKey \p pKey and copies it to \p pDest.
  *
- *          This function does not allocate the buffer containing the DER. The operation may fail if the allocated
- * buffer is not large enough. The required length cannot be precisely calculated, but a value of 8 times the key length
- * in bytes is recommended.
+ *   This function does not allocate the buffer containing the DER.
+ *   The operation may fail if the allocated buffer is not large enough.
+ *   The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
                                                       bool is_public,

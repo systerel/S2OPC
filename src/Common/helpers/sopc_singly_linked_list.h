@@ -74,10 +74,11 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
 
 /**
  * \brief           Insert element in sorted list in correct index regarding compare function.
- *                  The element will be inserted before the element for which the compare function return that new
- * element is < to the existing element (compare returns -1 when new element is left operand and < to right operand).
  *
- *                  Important note: the provided list shall be sorted regarding the same compare function.
+ *   The element will be inserted before the element for which the compare function return that new element is < to the
+ *   existing element (compare returns -1 when new element is left operand and < to right operand).
+ *
+ * \note            Important: the provided list shall be sorted regarding the same compare function.
  *
  * \param list      Pointer to the linked list
  * \param id        Identifier of the given value
@@ -124,8 +125,8 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
 /**
  * \brief           Apply a function to the value of each element of the list.
  *
- *                  An example is the SOPC_SLinkedList_EltGenericFree() function which frees the \p void* \p value
- *                  of each element of the list.
+ *   An example is the SOPC_SLinkedList_EltGenericFree() function which frees the \p void* \p value
+ *   of each element of the list.
  *
  * \param list      Pointer to the linked list
  * \param pFn       Function pointer which takes the id and the value of each element

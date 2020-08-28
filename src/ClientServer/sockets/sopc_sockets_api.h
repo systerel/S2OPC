@@ -18,11 +18,11 @@
  */
 
 /**
- *  \file sopc_sockets_api.h
+ * \file sopc_sockets_api.h
  *
- *  \brief Event oriented API of the Sockets layer.
+ * \brief Event oriented API of the Sockets layer.
  *
- *         This module is in charge of the event dispatcher thread management.
+ *   This module is in charge of the event dispatcher thread management.
  */
 
 #ifndef SOPC_SOCKETS_API_H_

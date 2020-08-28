@@ -20,7 +20,7 @@
 /** \file sopc_pki.h
  *
  * \brief Defines the common interface that a PKI should provide. This is a minimal interface, as the main
- * API for certificate and key manipulation is provided by SOPC_KeyManager.
+ *        API for certificate and key manipulation is provided by SOPC_KeyManager.
  *
  * The stack will not provide a full-blown configurable PKI.
  * The stack provides only a minimal, always safe validating PKI.
@@ -74,18 +74,17 @@ struct SOPC_PKIProvider
      */
     const SOPC_PKIProvider_Free_Func pFnFree;
 
-    /**
-     *  \brief          The validation function, which is wrapped by SOPC_CryptoProvider_Certificate_Validate().
+    /** \brief The validation function, which is wrapped by SOPC_CryptoProvider_Certificate_Validate().
      *
-     *                  It implements the validation of the certificate. The SOPC_CryptoProvider_Certificate_Validate()
-     * assumes that a SOPC_STATUS_OK from this function means that the certificate can be trusted. Parameters are
-     * validated by SOPC_CryptoProvider_Certificate_Validate().
+     *   It implements the validation of the certificate. The SOPC_CryptoProvider_Certificate_Validate()
+     *   assumes that a SOPC_STATUS_OK from this function means that the certificate can be trusted. Parameters are
+     *   validated by SOPC_CryptoProvider_Certificate_Validate().
      *
-     *  \param pPKI     A valid pointer to the PKIProvider.
-     *  \param pToValidate  A valid pointer to the Certificate to validate.
+     * \param pPKI     A valid pointer to the PKIProvider.
+     * \param pToValidate  A valid pointer to the Certificate to validate.
      *
-     *  \return         SOPC_STATUS_OK when the certificate is successfully validated, and
-     * SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+     * \return         SOPC_STATUS_OK when the certificate is successfully validated, and
+     *                 SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
      */
     const SOPC_FnValidateCertificate pFnValidateCertificate;
 

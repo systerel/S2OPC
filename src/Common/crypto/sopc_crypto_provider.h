@@ -74,8 +74,8 @@ struct SOPC_CryptoProvider
  * \brief       Creates an initialized SOPC_CryptoProvider context for a client-server connection
  *              from a string containing the desired security policy URI.
  *
- *              The SOPC_CryptoProvider contains the SOPC_CryptoProfile corresponding to the security policy.
- *              It should never be modified.
+ *   The SOPC_CryptoProvider contains the SOPC_CryptoProfile corresponding to the security policy.
+ *   It should never be modified.
  *
  * \param uri   The URI describing the security policy. Should not be NULL.
  *              Should describe only client-server security policies.
@@ -90,8 +90,8 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri);
  * \brief       Creates an initialized SOPC_CryptoProvider context for PubSub exchanges
  *              from a string containing the desired security policy URI.
  *
- *              The SOPC_CryptoProvider contains the SOPC_CryptoProfile_PubSub corresponding to the security policy.
- *              It should never be modified.
+ *   The SOPC_CryptoProvider contains the SOPC_CryptoProfile_PubSub corresponding to the security policy.
+ *   It should never be modified.
  *
  * \param uri   The URI describing the security policy. Should not be NULL.
  *              Should only describe PubSub security policies.
@@ -149,7 +149,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProvider_GetProfilePubSub(const SOPC
 /**
  * \brief           Writes the length in bytes in \p pLength of the key used for symmetric encryption/decryption.
  *
- *                  The length of the key depends on the security policy associated with \p pProvider.
+ *   The length of the key depends on the security policy associated with \p pProvider.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
@@ -204,7 +204,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Decryption(const SOPC_C
 /**
  * \brief           Writes the length in bytes in \p pLength of the key used for symmetric signature.
  *
- *                  The length of the key depends on the security policy associated with \p pProvider.
+ *   The length of the key depends on the security policy associated with \p pProvider.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
@@ -236,8 +236,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_Signature(const SOPC_Cr
 /**
  * \brief           Provides the lengths in bytes of the blocks used in the symmetric encryption process.
  *
- *                  These lengths are useful to predict the padding sizes required by the symmetric
- *                  encryption process.
+ *   These lengths are useful to predict the padding sizes required by the symmetric
+ *   encryption process.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pCipherTextBlockSize  An optional pointer to the length in bytes of the block size used by
@@ -296,8 +296,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider
 /**
  * \brief           Writes the length in bits in \p pLenKeyBits of the asymmetric key \p pKey.
  *
- *                  The main purpose of this function is to verify the length of the modulus of the
- *                  asymmetric key \p pKey with respect to the security policy.
+ *   The main purpose of this function is to verify the length of the modulus of the
+ *   asymmetric key \p pKey with respect to the security policy.
  *
  * \param pProvider    An initialized cryptographic context.
  * \param pKey         A valid pointer to an SOPC_AsymmetricKey.
@@ -318,8 +318,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_Cry
 /**
  * \brief           Writes the length in bytes in \p pLenKeyBytes of the asymmetric key \p pKey.
  *
- *                  The main purpose of this function is to verify the length of the modulus of the
- *                  asymmetric key \p pKey with respect to the security policy.
+ *   The main purpose of this function is to verify the length of the modulus of the
+ *   asymmetric key \p pKey with respect to the security policy.
  *
  * \param pProvider     An initialized cryptographic context.
  * \param pKey          A valid pointer to an SOPC_AsymmetricKey.
@@ -358,8 +358,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SO
 /**
  * \brief           Provides the lengths in bytes of the messages used in asymmetric encryption process.
  *
- *                  These lengths are useful to predict the padding sizes required by the asymmetric
- *                  encryption process.
+ *   These lengths are useful to predict the padding sizes required by the asymmetric
+ *   encryption process.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
@@ -420,7 +420,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SO
 /** \brief          Calculates the size of the required output buffer to cipher lengthIn bytes through
  *                  asymmetric encryption.
  *
- *                  Hence, the computation takes into account the padding, but it does not include any signature length.
+ *   Hence, the computation takes into account the padding, but it does not include any signature length.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
@@ -442,7 +442,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Encryption(const SOPC_
  * \brief           Calculates the size of the required output buffer to decipher lengthIn bytes through
  *                  asymmetric decryption.
  *
- *                  Hence, the computation takes into account the padding, but it does not include any signature length.
+ *   Hence, the computation takes into account the padding, but it does not include any signature length.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
@@ -463,7 +463,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Decryption(const SOPC_
 /**
  * \brief           Calculates the size of the required output buffer to contain the asymmetric signature.
  *
- *                  It is a single ciphered-message long.
+ *   It is a single ciphered-message long.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
@@ -508,7 +508,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC
 /**
  * \brief           Writes the length in bytes in \p pLength of the key nonce used for PubSub encryption/decryption.
  *
- *                  The length of the nonce depends on the security policy associated with \p pProvider.
+ *   The length of the nonce depends on the security policy associated with \p pProvider.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
@@ -525,7 +525,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_KeyNonce(const SOPC_Crypto
 /**
  * \brief           Writes the length in bytes in \p pLength of the random bytes used for PubSub encryption/decryption.
  *
- *                  This length depends on the security policy associated with \p pProvider.
+ *   This length depends on the security policy associated with \p pProvider.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
@@ -548,12 +548,12 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_MessageRandom(const SOPC_C
 /**
  * \brief           Encrypts a padded payload \p pInput of \p lenPlainText bytes.
  *
- *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
- *                  Does not apply a padding scheme, which must be done before calling this function.
- *                  To calculate the padded size, use SOPC_CryptoProvider_SymmetricGetLength_Blocks().
+ *   Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *   Does not apply a padding scheme, which must be done before calling this function.
+ *   To calculate the padded size, use SOPC_CryptoProvider_SymmetricGetLength_Blocks().
  *
- *                  The key and initialization vectors are usually derived from shared secrets
- *                  with SOPC_CryptoProvider_DeriveKeySets().
+ *   The key and initialization vectors are usually derived from shared secrets
+ *   with SOPC_CryptoProvider_DeriveKeySets().
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to cipher. The payload must be padded.
@@ -583,13 +583,13 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
 /**
  * \brief           Decrypts a payload \p pInput of \p lenPlainText bytes into a padded deciphered payload \p pOutput.
  *
- *                  Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
- *                  Does not use a padding scheme, which must be done after calling this function
- *                  to obtain the initial message.
- *                  To calculate the padded size, use SOPC_CryptoProvider_SymmetricGetLength_Blocks().
+ *   Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
+ *   Does not use a padding scheme, which must be done after calling this function
+ *   to obtain the initial message.
+ *   To calculate the padded size, use SOPC_CryptoProvider_SymmetricGetLength_Blocks().
  *
- *                  The encryption key and initialization vectors are usually derived from shared secrets
- *                  with SOPC_CryptoProvider_DeriveKeySets().
+ *   The encryption key and initialization vectors are usually derived from shared secrets
+ *   with SOPC_CryptoProvider_DeriveKeySets().
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to decipher.
@@ -620,10 +620,10 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
 /**
  * \brief           Encrypts or Decrypts a payload \p pInput of \p lenInput bytes.
  *
- *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
- *                  The length of the output must be the same as the input.
+ *   Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *   The length of the output must be the same as the input.
  *
- *                  This mode of operation does not require block alignment or padding.
+ *   This mode of operation does not require block alignment or padding.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to cipher/decipher.
@@ -664,11 +664,11 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
  * \brief           Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput
  *                  bytes.
  *
- *                  The signature is as long as the underlying hash digest, which size is computed with
- *                  SOPC_CryptoProvider_SymmetricGetLength_Signature().
- *                  Usually, the unpadded plain text message is signed.
+ *   The signature is as long as the underlying hash digest, which size is computed with
+ *   SOPC_CryptoProvider_SymmetricGetLength_Signature().
+ *   Usually, the unpadded plain text message is signed.
  *
- *                  The signing key is usually derived from shared secrets with SOPC_CryptoProvider_DeriveKeySets().
+ *   The signing key is usually derived from shared secrets with SOPC_CryptoProvider_DeriveKeySets().
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to sign.
@@ -696,13 +696,13 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
 /**
  * \brief           Verifies the signature \p pSignature of the payload \p pInput of \p lenInput bytes.
  *
- *                  The signature is as long as the underlying hash digest, which size is computed with
- *                  SOPC_CryptoProvider_SymmetricGetLength_Signature().
- *                  Usually, the unpadded plain text message is signed.
- *                  The signature verification process computes the signature from \p pInput and
- *                  compares it with the content of \p pSignature.
+ *   The signature is as long as the underlying hash digest, which size is computed with
+ *   SOPC_CryptoProvider_SymmetricGetLength_Signature().
+ *   Usually, the unpadded plain text message is signed.
+ *   The signature verification process computes the signature from \p pInput and
+ *   compares it with the content of \p pSignature.
  *
- *                  The signing key is usually derived from shared secrets with SOPC_CryptoProvider_DeriveKeySets().
+ *   The signing key is usually derived from shared secrets with SOPC_CryptoProvider_DeriveKeySets().
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to sign.
@@ -735,8 +735,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
 /**
  * \brief           Generates truly random data of arbitrary length.
  *
- *                  Uses the entropy generator provided by the underlying cryptographic library.
- *                  The new ExposedBuffer is to be freed by the caller.
+ *   Uses the entropy generator provided by the underlying cryptographic library.
+ *   The new ExposedBuffer is to be freed by the caller.
  *
  * \note            Prefer the functions SOPC_CryptoProvider_GenerateSecureChannelNonce()
  *                  and SOPC_CryptoProvider_GenerateRandomID().
@@ -760,9 +760,9 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
 /**
  * \brief           Generates a single truly random nonce for the SecureChannel creation.
  *
- *                  The length of the nonce is defined by the current security policy (see *TBD*).
- *                  Uses the entropy generator provided by the underlying cryptographic library.
- *                  The new SecretBuffer is to be freed by the caller.
+ *   The length of the nonce is defined by the current security policy (see *TBD*).
+ *   Uses the entropy generator provided by the underlying cryptographic library.
+ *   The new SecretBuffer is to be freed by the caller.
  *
  * \param pProvider An initialized cryptographic context.
  * \param ppNonce   A valid handle to the newly created SecretBuffer.
@@ -845,8 +845,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* p
 /**
  * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
  *
- *                  This function is similar to SOPC_CryptoProvider_DeriveKeySets but uses the client nonce as a
- * SecretBuffer.
+ *   This function is similar to SOPC_CryptoProvider_DeriveKeySets but uses the client nonce as a SecretBuffer.
  *
  * \param pProvider         An initialized cryptographic context.
  * \param pClientNonce      A valid pointer to the client nonce as a SecretBuffer.
@@ -875,8 +874,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvi
 /**
  * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
  *
- *                  This function is similar to SOPC_CryptoProvider_DeriveKeySets but uses the server nonce as a
- * SecretBuffer.
+ *   This function is similar to SOPC_CryptoProvider_DeriveKeySets but uses the server nonce as a SecretBuffer.
  *
  * \param pProvider         An initialized cryptographic context.
  * \param pClientNonce      A valid pointer to the client nonce buffer, the client part of the secret.
@@ -910,15 +908,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvi
 /**
  * \brief           Encrypts a payload \p pInput of \p lenInput bytes.
  *
- *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
- *                  The message may be padded. Depending on the chosen security policy, optimal padding
- *                  is performed if \p lenPlainText is less than the maximum message size (computed with
- *                  SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText()).
- *                  If the payload is larger than the maximum message size for a single encryption pass,
- *                  it is split in several smaller messages of at most that maximum length.
+ *   Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *   The message may be padded. Depending on the chosen security policy, optimal padding
+ *   is performed if \p lenPlainText is less than the maximum message size (computed with
+ *   SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText()).
+ *   If the payload is larger than the maximum message size for a single encryption pass,
+ *   it is split in several smaller messages of at most that maximum length.
  *
- *                  The key is usually taken from a signed public key (Certificate,
- *                  SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the receiver.
+ *   The key is usually taken from a signed public key (Certificate,
+ *   SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the receiver.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to cipher. The payload may be padded by the function, if necessary.
@@ -948,15 +946,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
 /**
  * \brief           Decrypts a payload \p pInput of \p lenInput bytes.
  *
- *                  Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
- *                  Depending on the chosen security policy, when the message was padded with
- *                  SOPC_CryptoProvider_AsymmetricEncrypt(), the output is unpadded by this function and the initial
- *                  payload is written to \p pOutput. If the payload is larger than the maximum message size for a
- *                  single decryption pass, it is split in several smaller messages of at most that maximum length
- *                  (SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText()).
+ *   Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
+ *   Depending on the chosen security policy, when the message was padded with
+ *   SOPC_CryptoProvider_AsymmetricEncrypt(), the output is unpadded by this function and the initial
+ *   payload is written to \p pOutput. If the payload is larger than the maximum message size for a
+ *   single decryption pass, it is split in several smaller messages of at most that maximum length
+ *   (SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText()).
  *
- *                  The key is usually taken from a private key (Certificate,
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromFile()) and is the private key of the sender.
+ *   The key is usually taken from a private key (Certificate,
+ *   SOPC_KeyManager_AsymmetricKey_CreateFromFile()) and is the private key of the sender.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to cipher. The payload may be padded by the function, if necessary.
@@ -989,17 +987,17 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
 /**
  * \brief           Signs a payload \p pInput of \p lenInput bytes.
  *
- *                  Writes the signature to \p pSignature, which is exactly \p lenSignature bytes long.
- *                  The signature is as long as a single ciphered message, which size is computed with
- *                  SOPC_CryptoProvider_AsymmetricGetLength_Signature().
- *                  Usually, the unpadded plain text message is signed.
- *                  The asymmetric signature process first hashes the \p pInput.
+ *   Writes the signature to \p pSignature, which is exactly \p lenSignature bytes long.
+ *   The signature is as long as a single ciphered message, which size is computed with
+ *   SOPC_CryptoProvider_AsymmetricGetLength_Signature().
+ *   Usually, the unpadded plain text message is signed.
+ *   The asymmetric signature process first hashes the \p pInput.
  *
- *                  The key is usually taken from a private key (SOPC_KeyManager_AsymmetricKey_CreateFromFile())
- *                  and is the private key of the sender, which authenticates the sender as the signer.
+ *   The key is usually taken from a private key (SOPC_KeyManager_AsymmetricKey_CreateFromFile())
+ *   and is the private key of the sender, which authenticates the sender as the signer.
  *
- *                  The signature is already encrypted and does not require to be ciphered again before
- *                  being sent to the receiver.
+ *   The signature is already encrypted and does not require to be ciphered again before
+ *   being sent to the receiver.
  *
  * \note            The signature process may use the entropy source of the SOPC_CryptoProvider
  *                  (depending on the current security policy).
@@ -1033,16 +1031,16 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
 /**
  * \brief           Verifies the signature \p pSignature of a payload \p pInput of \p lenInput bytes.
  *
- *                  The signature \p pSignature is exactly \p lenSignature bytes long.
- *                  The signature is as long as a single ciphered message, which size is computed with
- *                  SOPC_CryptoProvider_AsymmetricGetLength_Signature().
- *                  The asymmetric verify process first deciphers the signature which should provide
- *                  the hash of \p pInput.
- *                  Usually, the unpadded plain text message is signed.
+ *   The signature \p pSignature is exactly \p lenSignature bytes long.
+ *   The signature is as long as a single ciphered message, which size is computed with
+ *   SOPC_CryptoProvider_AsymmetricGetLength_Signature().
+ *   The asymmetric verify process first deciphers the signature which should provide
+ *   the hash of \p pInput.
+ *   Usually, the unpadded plain text message is signed.
  *
- *                  The key is usually taken from a public key (Certificate,
- *                  SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the sender,
- *                  which authenticates the sender as the signer.
+ *   The key is usually taken from a public key (Certificate,
+ *   SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the sender,
+ *   which authenticates the sender as the signer.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the signed payload to verify.
@@ -1078,12 +1076,12 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
 /**
  * \brief           Validates the given Certificate \p pCert.
  *
- *                  This function first verifies that the signed public key respects the current
- *                  security policy (asymmetric key type and length, signature hash type, ...),
- *                  and then let the PKIProvider handle the signature validation.
- *                  The verification of the signature chain up to the certificate authority is
- *                  not endorsed by the SOPC_CryptoProvider, but by the PKIProvider, which must be
- *                  created and configured outside the stack.
+ *   This function first verifies that the signed public key respects the current
+ *   security policy (asymmetric key type and length, signature hash type, ...),
+ *   and then let the PKIProvider handle the signature validation.
+ *   The verification of the signature chain up to the certificate authority is
+ *   not endorsed by the SOPC_CryptoProvider, but by the PKIProvider, which must be
+ *   created and configured outside the stack.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pPKI      An initialized public key infrastructure (PKIProvider).
