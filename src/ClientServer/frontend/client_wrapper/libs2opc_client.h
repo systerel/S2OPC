@@ -255,6 +255,7 @@ typedef void (*SOPC_LibSub_EventCbk)(SOPC_LibSub_ConnectionId c_id,
                                      SOPC_StatusCode status,
                                      const void* response,
                                      uintptr_t responseContext);
+// TODO: the const constraint on response should be released since it is not necessary and by-passed
 
 /*
  =====================

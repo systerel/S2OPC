@@ -577,11 +577,9 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
  @param nbElements
     Number of elements to read. It should be between 1 and INT32_MAX
  @param[out] values
-    Address of pointer to which the resulting SOPC_DataValue[] array will be set (do not pre-allocate).
-    It will be \p nElements long.
+    A pre-allocated array of SOPC_DataValue, filled with the result of each read value.
+    It should not be NULL and be at least \p nbElements long.
     When return, the order of this list matches the order of \p readValues.
-    The ownership of the data moved to caller which should free this array and its content using
- SOPC_ClientHelper_ReadResult_Free.
 
  @return
    '0' if operation succeed
@@ -594,7 +592,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
-                               SOPC_DataValue** values);
+                               SOPC_DataValue* values);
 /**
  @brief
     Free the result provided by SOPC_ClientHelper_Read.
@@ -606,10 +604,10 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
  @param nbElements
     Number of elements in result. It should be between 1 and INT32_MAX
  @param[out] values
-    Address of pointer to which the resulting SOPC_DataValue[] array has been set.
+    Clear content of the SOPC_DataValue[] array. The array is not freed.
     It shall be \p nElements long.
 */
-void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue** values);
+void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue* values);
 
 /**
  @brief

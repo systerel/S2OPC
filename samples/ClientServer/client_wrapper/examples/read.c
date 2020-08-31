@@ -92,27 +92,17 @@ int main(int argc, char* const argv[])
         readValue.attributeId = 13; // value
         readValue.indexRange = NULL;
 
-        SOPC_DataValue* readDataValue = NULL;
+        SOPC_DataValue readDataValue;
 
         /* read the node id value */
         res = SOPC_ClientHelper_Read(connectionId, &readValue, 1, &readDataValue);
 
         if (0 == res)
         {
-            if (NULL == readDataValue)
-            {
-                printf("NULL\n");
-            }
-            else
-            {
-                SOPC_Variant variant = readDataValue->Value;
-                if (SOPC_UInt64_Id == variant.BuiltInTypeId)
-                {
-                    printf("NodeId:\"%s\" - Value: %" PRIu64 "\n", node_id, variant.Value.Uint64);
-                }
-            }
-            free(readDataValue);
+            printf("NodeId:\"%s\" - Value:\n", node_id);
+            SOPC_Variant_Print(&readDataValue.Value);
         }
+        SOPC_DataValue_Clear(&readDataValue);
     }
 
     if (connectionId > 0)

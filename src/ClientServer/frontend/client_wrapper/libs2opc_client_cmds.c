@@ -88,7 +88,7 @@ typedef struct
     Mutex mutex; /* protect this context */
     Condition condition;
 
-    SOPC_DataValue** values;
+    SOPC_DataValue* values;
     int32_t nbElements;
     SOPC_StatusCode status;
     bool finish;
@@ -743,16 +743,13 @@ static void GenericCallbackHelper_Read(SOPC_StatusCode status, const void* respo
     }
     if (SOPC_STATUS_OK == ctx->status)
     {
-        *ctx->values = readResp->Results;
-        // TODO: the const constraint on response should be released since it is not necessary
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_DataValue** setToNull = (SOPC_DataValue**) &readResp->Results;
-        int32_t* setToZero = (int32_t*) &readResp->NoOfResults;
-        SOPC_GCC_DIAGNOSTIC_RESTORE
-
-        // Empty the read response to avoid deallocation of data we transfered to context
-        *setToNull = NULL;
-        *setToZero = 0;
+        for (int32_t i = 0; i < readResp->NoOfResults; i++)
+        {
+            // Move each DataValue from response to request context
+            ctx->values[i] = readResp->Results[i];
+            // Tag variant as moved: see SOPC_Variant_Move
+            readResp->Results[i].Value.DoNotClear = true;
+        }
     }
     ctx->finish = true;
 
@@ -1077,7 +1074,7 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
 int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                SOPC_ClientHelper_ReadValue* readValues,
                                size_t nbElements,
-                               SOPC_DataValue** values)
+                               SOPC_DataValue* values)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -1203,10 +1200,16 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     }
 }
 
-void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue** values)
+void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue* values)
 {
-    int32_t nb = (int32_t) nbElements;
-    SOPC_Clear_Array(&nb, (void**) values, sizeof(SOPC_DataValue), SOPC_DataValue_ClearAux);
+    if (0 == nbElements || NULL == values)
+    {
+        return;
+    }
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        SOPC_DataValue_Clear(&values[i]);
+    }
 }
 
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
