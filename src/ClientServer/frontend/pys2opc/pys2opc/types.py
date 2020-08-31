@@ -1230,7 +1230,10 @@ class Reference:
         self.typeDefinition  = typeDefinition
 
     def __repr__(self):
-        return "Reference(type=%r, forward=%r) to node(id=%r, name=%r, class=%r, type=%r)"  % (self.referenceTypeId, bool(self.isForward), self.nodeId, self.browseName[1], NodeClass.get_name_from_id(self.nodeClass), self.typeDefinition)
+        return "Reference({!r}, {!r}, {!r}, {!r}, {!r},  {!r}, {!r})".format(self.referenceTypeId, self.isForward, self.nodeId, self.browseName, self.displayName, self.nodeClass, self.typeDefinition)
+
+    def __str__(self):
+        return "Reference(type='{}', forward={}) to node(id='{}', name='{}', class={}, type='{}')".format(self.referenceTypeId, bool(self.isForward), self.nodeId, self.browseName[1], NodeClass.get_name_from_id(self.nodeClass), self.typeDefinition)
 
 class SecurityPolicy(NamedMembers):
     """
