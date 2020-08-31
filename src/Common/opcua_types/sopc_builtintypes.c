@@ -1458,6 +1458,35 @@ SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t
     return status;
 }
 
+static void SOPC_Guid_IntoCString(const SOPC_Guid* guid, char* dest)
+{
+    if (NULL == guid || NULL == dest)
+    {
+        return;
+    }
+    int res = sprintf(dest,
+                      "g=%08" PRIX32 "-%04" PRIX16 "-%04" PRIX16 "-%02" PRIX8 "%02" PRIX8 "-%02" PRIX8 "%02" PRIX8
+                      "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
+                      guid->Data1, guid->Data2, guid->Data3, guid->Data4[0], guid->Data4[1], guid->Data4[2],
+                      guid->Data4[3], guid->Data4[4], guid->Data4[5], guid->Data4[6], guid->Data4[7]);
+    assert(res > 0);
+}
+
+char* SOPC_Guid_ToCString(const SOPC_Guid* guid)
+{
+    char* result = NULL;
+    if (guid != NULL)
+    {
+        // e.g.: "g=09087E75-8E5E-499B-954F-F2A9603DB28A\0"
+        result = SOPC_Calloc(39, sizeof(char));
+        if (result != NULL)
+        {
+            SOPC_Guid_IntoCString(guid, result);
+        }
+    }
+    return result;
+}
+
 void SOPC_Guid_Initialize(SOPC_Guid* guid)
 {
     if (guid != NULL)
@@ -1899,18 +1928,13 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
                     if (nodeId->Data.Guid != NULL)
                     {
-                        res = sprintf(&result[res], "g=%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-                                      nodeId->Data.Guid->Data1, nodeId->Data.Guid->Data2, nodeId->Data.Guid->Data3,
-                                      nodeId->Data.Guid->Data4[0], nodeId->Data.Guid->Data4[1],
-                                      nodeId->Data.Guid->Data4[2], nodeId->Data.Guid->Data4[3],
-                                      nodeId->Data.Guid->Data4[4], nodeId->Data.Guid->Data4[5],
-                                      nodeId->Data.Guid->Data4[6], nodeId->Data.Guid->Data4[7]);
+                        SOPC_Guid_IntoCString(nodeId->Data.Guid, &result[res]);
                     }
                     else
                     {
                         res = sprintf(&result[res], "g=");
+                        assert(res > 0);
                     }
-                    assert(res > 0);
                     break;
                 case SOPC_IdentifierType_ByteString:
                     // "b=<bstring>\0"
@@ -4932,12 +4956,10 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
         s = NULL;
         break;
     case SOPC_Guid_Id:
-        printf("Guid = %" PRIX32 "-%" PRIX16 "-%" PRIX16 "-%" PRIX8 "%" PRIX8 "-%" PRIX8 "%" PRIX8 "%" PRIX8 "%" PRIX8
-               "%" PRIX8 "%" PRIX8 "\n",
-               pvar->Value.Guid->Data1, pvar->Value.Guid->Data2, pvar->Value.Guid->Data3, pvar->Value.Guid->Data4[0],
-               pvar->Value.Guid->Data4[1], pvar->Value.Guid->Data4[2], pvar->Value.Guid->Data4[3],
-               pvar->Value.Guid->Data4[4], pvar->Value.Guid->Data4[5], pvar->Value.Guid->Data4[6],
-               pvar->Value.Guid->Data4[7]);
+        s = SOPC_Guid_ToCString(pvar->Value.Guid);
+        printf("Guid = '%s'\n", s);
+        SOPC_Free(s);
+        s = NULL;
         break;
     case SOPC_ExpandedNodeId_Id:
         s = SOPC_NodeId_ToCString(&pvar->Value.ExpNodeId->NodeId);

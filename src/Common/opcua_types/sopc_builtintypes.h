@@ -486,6 +486,7 @@ void SOPC_DateTime_ClearAux(void* value);
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
 void SOPC_Guid_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t len);
+char* SOPC_Guid_ToCString(const SOPC_Guid* guid);
 SOPC_ReturnStatus SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src);
 SOPC_ReturnStatus SOPC_Guid_CompareAux(const void* left, const void* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Guid_CopyAux(void* dest, const void* src);
