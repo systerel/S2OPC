@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('--log-path', default='/tmp/pys2opc_logs',)
     args = parser.parse_args()
 
-    with PyS2OPC.initialize(logPath='/tmp/pys2opc_logs'):
+    with PyS2OPC.initialize(logPath=args.log_path):
         # Thread safety on callbacks?
         PyS2OPC.load_address_space(args.addspace_path)
         PyS2OPC.load_configuration(args.config_path,
