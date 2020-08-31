@@ -1653,6 +1653,18 @@ static void SOPC_ClientHelper_BrowseResult_Clear(SOPC_ClientHelper_BrowseResult*
     SOPC_Free(br->references);
 }
 
+void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results)
+{
+    if (NULL == results || 0 == nbElements)
+    {
+        return;
+    }
+    for (size_t i = 0; i < nbElements; i++)
+    {
+        SOPC_ClientHelper_BrowseResult_Clear(&results[i]);
+    }
+}
+
 int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
@@ -1843,18 +1855,6 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     else
     {
         return -100;
-    }
-}
-
-void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results)
-{
-    if (NULL == results || 0 == nbElements)
-    {
-        return;
-    }
-    for (size_t i = 0; i < nbElements; i++)
-    {
-        SOPC_ClientHelper_BrowseResult_Clear(&results[i]);
     }
 }
 
@@ -2120,9 +2120,10 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
     }
     for (size_t i = 0; i < nbElements; i++)
     {
+        assert(NULL != results[i].outputParams);
+
         for (int32_t j = 0; j < results[i].nbOfOuputParams; j++)
         {
-            assert(NULL != results[i].outputParams);
             SOPC_Variant_Clear(&results[i].outputParams[j]);
         }
         SOPC_Free(results[i].outputParams);

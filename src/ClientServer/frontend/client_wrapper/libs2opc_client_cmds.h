@@ -243,6 +243,18 @@ void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResult
 void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr);
 
 /**
+ @brief
+    Clears the content of the SOPC_ClientHelper_BrowseResult[] \p results.
+    The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_Browse.
+
+    SOPC_ClientHelper_BrowseResultReference_Move might be use to keep partial result before calling this function.
+
+ @param nbElements  The number of elements in the browse result array
+ @param results     The SOPC_ClientHelper_BrowseResult array to clear.
+ */
+void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results);
+
+/**
  * @struct SOPC_ClientHelper_CallMethodRequest
  * @brief
  *   structure containing the requested method to call and input parameters
@@ -647,17 +659,6 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseRequest* browseRequests,
                                  size_t nbElements,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
-/**
- @brief
-    Clears the content of the SOPC_ClientHelper_BrowseResult[] \p results.
-    The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_Browse.
-
-    SOPC_ClientHelper_BrowseResultReference_Move might be use to keep partial result before calling this function.
-
- @param nbElements  The number of elements in the browse result array
- @param results     The SOPC_ClientHelper_BrowseResult array to clear.
- */
-void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results);
 
 /**
  @brief
