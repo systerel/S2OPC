@@ -63,6 +63,11 @@ else()
   find_package(expat REQUIRED CONFIG)
 endif()
 
+# Detect limitation on PubSub
+if(WIN32 AND NOT S2OPC_CLIENTSERVER_ONLY)
+  message(FATAL_ERROR "PubSub module requires platform dependent code not implemented yet on windows (see issue #747). Please set S2OPC_CLIENTSERVER_ONLY to exclude PubSub module.")
+endif()
+
 # Expat changes name under native windows
 # ${expat_LIB} contains the target name of the library to avoid misspells
 if(expat_FOUND)
