@@ -26,10 +26,8 @@
  */
 
 #include <assert.h>
-#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
