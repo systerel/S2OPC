@@ -19,6 +19,6 @@ endif()
 
 # Trigger find_package(expat ...) when using find_package(s2opc CONFIG)
 if(@expat_FOUND@)
-include(CMakeFindDependencyMacro)
-find_dependency(expat)
+  include(CMakeFindDependencyMacro)
+  find_dependency(expat)
 endif()
