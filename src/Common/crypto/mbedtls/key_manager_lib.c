@@ -748,6 +748,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
     }
 
     /* For each CA, find its CRL. If not found, log and match = false */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool list_match = true;
     mbedtls_x509_crt* crt = NULL != pCert ? &pCert->crt : NULL;
     mbedtls_x509_crt* prev = NULL; /* Parent of current cert */
@@ -808,8 +809,17 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
             crt->next = NULL;
             mbedtls_x509_crt_free(crt);
 
-            /* Set new next certificate */
-            if (NULL == prev)
+            /* Set new next certificate (if possible) */
+            if (NULL == prev && NULL == next)
+            {
+                /*
+                 * The list would be empty, but we cannot do it here.
+                 * We have no choice but failing with current design.
+                 */
+                crt = NULL; // make iteration stop
+                status = SOPC_STATUS_NOK;
+            }
+            else if (NULL == prev && NULL != next)
             {
                 /* Head of the chain is a special case */
                 pCert->crt = *next;
@@ -842,7 +852,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
         *pbMatch = list_match;
     }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,

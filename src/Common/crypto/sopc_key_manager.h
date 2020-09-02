@@ -372,6 +372,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  *
  *   This function does not set match to false if there are CRL that do not match any Certificate.
  *   This function skips certificates in /p pCert that are not authorities.
+ *   Warning: this function fails with SOPC_STATUS_NOK if there are only CA without CRL.
  *
  * \param pCert     A valid pointer to the Certificate list.
  * \param pCRL      A valid pointer to the CRL list.
@@ -383,7 +384,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  * \note            Content of \p pbMatch is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and SOPC_STATUS_NOK when there was an error.
+ *                  and SOPC_STATUS_NOK when all certificate are CA without CRL.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
                                                                      const SOPC_CRLList* pCRL,
