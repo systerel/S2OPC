@@ -477,7 +477,7 @@ static bool end_trusted_issuers(struct parse_context_t* ctx)
 {
     if (0 == SOPC_Array_Size(ctx->trustedRootIssuers))
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no trusted CA defined");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no trusted root CA defined");
         return false;
     }
     ctx->trustedIssuersSet = true;
@@ -585,7 +585,7 @@ static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attr
 
 static bool end_untrusted_issuers(struct parse_context_t* ctx)
 {
-    if (0 == SOPC_Array_Size(ctx->untrustedRootIssuers))
+    if (0 == SOPC_Array_Size(ctx->untrustedRootIssuers) && 0 == SOPC_Array_Size(ctx->untrustedIntermediateIssuers))
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no untrusted CA defined");
         return false;
