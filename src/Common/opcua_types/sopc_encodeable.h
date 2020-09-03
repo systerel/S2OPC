@@ -62,4 +62,14 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
                                                   SOPC_EncodeableType* encTyp,
                                                   void** encObject);
 
+/**
+ *  \brief           Moves content of \p srcObj to \p destObj, i.e. copy \p srcObj structure content to \p destObj and
+ *                   reset \p srcObj. Both parameters shall be EncodeableObject with same SOPC_EncodeableType.
+ *
+ *  \param destObj   Empty and initialized encodeable object in which content of \p srcObj will be copied.
+ *  \param srcObj    Source encodeable object from which content will be copied into \p destObj and then reset.
+ *  \return          SOPC_SOPC_STATUS_OK if move operation succeeded
+ */
+SOPC_ReturnStatus SOPC_Encodeable_Move(void* destObj, void* srcObj);
+
 #endif /* SOPC_ENCODEABLE_H_ */

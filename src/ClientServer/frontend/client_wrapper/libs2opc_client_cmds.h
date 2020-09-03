@@ -238,7 +238,7 @@ void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResult
  @brief
     Clears the content of the SOPC_ClientHelper_BrowseResultReference structure pointed by \p brr
 
- @param br  A pointer to the SOPC_ClientHelper_BrowseResultReference structure to clear.
+ @param brr  A pointer to the SOPC_ClientHelper_BrowseResultReference structure to clear.
  */
 void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr);
 
@@ -289,7 +289,7 @@ typedef struct
 typedef struct
 {
     SOPC_StatusCode status;
-    int32_t nbOfOuputParams;
+    int32_t nbOfOutputParams;
     SOPC_Variant* outputParams;
 } SOPC_ClientHelper_CallMethodResult;
 
@@ -439,10 +439,10 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
  @param security
     security configuration to use (policy, mode, certificates, ...)
  @return
-    If this operation succeeded, return a configuration id > 0.
+    If this operation succeeded, return a configuration id \verbatim>\endverbatim 0.
     If invalid endpointUrl detected, return -1.
-    If invalid security detected, return -<10+n> with <n> field number (starting from 1).
-    If configuration failed, return '-100'.
+    If invalid security detected, return \verbatim-<10+n>\endverbatim with \verbatim<n>\endverbatim field number
+ (starting from 1). If configuration failed, return '-100'.
  */
 int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security);
 

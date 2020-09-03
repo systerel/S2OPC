@@ -76,6 +76,7 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
     if (NULL == mcm->pUserData)
     {
         SOPC_Free(mcm);
+        mcm = NULL;
     }
     else
     {

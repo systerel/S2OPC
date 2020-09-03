@@ -169,7 +169,6 @@ else()
 endif()
 
 ## Subscribing client library ##
-
 set(LIBSUBSCRIBE_PATH "frontend/client_wrapper")
 add_library(s2opc_clientwrapper "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
@@ -187,7 +186,6 @@ target_include_directories(s2opc_clientwrapper
   $<INSTALL_INTERFACE:include}> # when installed
   )
 
-set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${LIBSUBSCRIBE_PATH}/libs2opc_client.h")
 install(TARGETS s2opc_clientwrapper
         EXPORT s2opc_clientserver-clientwrapper-export # export our project to be importable after install
         LIBRARY DESTINATION lib
@@ -203,6 +201,45 @@ install(EXPORT s2opc_clientserver-clientwrapper-export
 export(EXPORT s2opc_clientserver-clientwrapper-export
        FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
 
+## Server wrapper library ##
+set(SERVERWRAPPER_PATH "frontend/server_wrapper")
+# Set empty implementation and dependency if Expat not available
+set(SERVERWRAPPER_XML_CONFIG "")
+set(SERVERWRAPPER_XML_DEP "")
+if (expat_FOUND)
+  set(SERVERWRAPPER_XML_CONFIG "${SERVERWRAPPER_PATH}/libs2opc_server_config_xml.c")
+  set(SERVERWRAPPER_XML_DEP s2opc_clientserver-xml-loaders-expat)
+endif()
+
+add_library(s2opc_serverwrapper "${SERVERWRAPPER_PATH}/libs2opc_server.c"
+                                "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
+                                "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
+                                "${SERVERWRAPPER_PATH}/libs2opc_server_runtime_variables.c"
+                                ${SERVERWRAPPER_XML_CONFIG}
+                                )
+target_link_libraries(s2opc_serverwrapper PUBLIC s2opc_clientserver ${SERVERWRAPPER_XML_DEP})
+target_compile_options(s2opc_serverwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_serverwrapper PRIVATE ${S2OPC_DEFINITIONS})
+target_include_directories(s2opc_serverwrapper
+  PUBLIC # TODO: separate PUBLIC / PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
+  $<INSTALL_INTERFACE:include}> # when installed
+  )
+
+install(TARGETS s2opc_serverwrapper
+        EXPORT s2opc_clientserver-serverwrapper-export # export our project to be importable after install
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        PUBLIC_HEADER DESTINATION include)
+
+# install the export as a cmake file
+install(EXPORT s2opc_clientserver-serverwrapper-export
+        FILE s2opc_clientserver-serverwrapper-export.cmake
+        DESTINATION lib/cmake/s2opc)
+
+# export cmake file for use in build tree without install
+export(EXPORT s2opc_clientserver-serverwrapper-export
+       FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-serverwrapper-export.cmake")
 
 # Add the PyS2OPC folder lately, as it requires the above library
 add_subdirectory(frontend/pys2opc)

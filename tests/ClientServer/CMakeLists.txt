@@ -233,15 +233,13 @@ if(ENABLE_TESTING)
 
   # Client/Server test
   add_executable(toolkit_test_server_client
-      "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
       "validation_tests/client/toolkit_test_server_client.c"
       ${TEST_LIGHT_ADDRESS_SPACE_C})
   add_dependencies(toolkit_test_server_client make-light-address-space)
   target_link_libraries(toolkit_test_server_client PRIVATE
-    s2opc_clientserver
+    s2opc_serverwrapper 
     s2opc_clientserver-loader-embedded
     Check::check)
-  target_include_directories(toolkit_test_server_client PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/")
   target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_client PRIVATE ${S2OPC_DEFINITIONS})
   s2opc_unit_test(toolkit_test_server_client)
@@ -255,7 +253,7 @@ if(ENABLE_TESTING)
                                                    ${TEST_LIGHT_ADDRESS_SPACE_C})
   add_dependencies(toolkit_test_server_local_service make-light-address-space)
   target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client")
-  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
   s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
@@ -305,14 +303,13 @@ if(ENABLE_TESTING)
   endif()
 
   add_executable(${TOOLKIT_TEST_SERVER}
-                 "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/runtime_variables.c"
-                 "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server.c"
+                 "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server.c"
                  ${TEST_SERVER_ADDRESS_SPACE_C})
   add_dependencies(toolkit_test_server_local_service make-server-address-space)
-  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+  target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_ROOT_PATH}/tests/ClientServer/test_server)
   target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
-  target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "IS_TEST_SERVER") # activate UACTT certificates
   if (expat_FOUND)
     target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")

@@ -74,8 +74,8 @@ if(ENABLE_SAMPLES)
   if (WITH_STATIC_SECURITY_DATA)
     target_compile_definitions(pubsub_server PRIVATE "WITH_STATIC_SECURITY_DATA")
     # Reuse code of demo server
-  	set(S2OPC_SERVERDEMO_INCLUDES ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server)
-  	target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERDEMO_INCLUDES})
+  	set(S2OPC_SERVERTEST_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
+  	target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERTEST_INCLUDES})
   endif()
   
   

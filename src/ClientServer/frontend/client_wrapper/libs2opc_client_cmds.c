@@ -973,7 +973,7 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
     {
         SOPC_ClientHelper_CallMethodResult* cres = &ctx->results[i];
         OpcUa_CallMethodResult* res = &callRes->Results[i];
-        cres->nbOfOuputParams = res->NoOfOutputArguments;
+        cres->nbOfOutputParams = res->NoOfOutputArguments;
         cres->outputParams = res->OutputArguments;
         cres->status = res->StatusCode;
         // Clear values in original response to avoid deallocation
@@ -2120,7 +2120,7 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
     {
         assert(NULL != results[i].outputParams);
 
-        for (int32_t j = 0; j < results[i].nbOfOuputParams; j++)
+        for (int32_t j = 0; j < results[i].nbOfOutputParams; j++)
         {
             SOPC_Variant_Clear(&results[i].outputParams[j]);
         }

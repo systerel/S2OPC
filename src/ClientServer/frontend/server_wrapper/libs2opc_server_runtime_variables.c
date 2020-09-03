@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "runtime_variables.h"
+#include "libs2opc_server_runtime_variables.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -26,6 +26,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_array.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -38,10 +39,29 @@ static time_t parse_build_date(const char* build_date)
     struct tm time;
     memset(&time, 0, sizeof(struct tm));
 
-    if (sscanf(build_date, "%4d-%2d-%2d", &time.tm_year, &time.tm_mon, &time.tm_mday) != 3)
+    uint16_t year = 0;
+    uint8_t month = 0;
+    uint8_t day = 0;
+    // note: build_date format is YYYY-MM-DD
+    SOPC_ReturnStatus status = SOPC_strtouint16_t(build_date, &year, 10, '-');
+    if (SOPC_STATUS_OK != status)
     {
         return 0;
     }
+    status = SOPC_strtouint8_t(build_date + 5, &month, 10, '-');
+    if (SOPC_STATUS_OK != status)
+    {
+        return 0;
+    }
+    status = SOPC_strtouint8_t(build_date + 8, &day, 10, '\0');
+    if (SOPC_STATUS_OK != status)
+    {
+        return 0;
+    }
+
+    time.tm_year = (int) year;
+    time.tm_mon = (int) month;
+    time.tm_mday = (int) day;
 
     if (time.tm_year < 1900 || time.tm_mon < 0 || time.tm_mon > 11 || time.tm_mday < 0 || time.tm_mday > 31)
     {
@@ -54,13 +74,13 @@ static time_t parse_build_date(const char* build_date)
     return mktime(&time);
 }
 
-RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
-                                         SOPC_Server_Config* server_config,
-                                         const char* manufacturer_name)
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info build_info,
+                                                         SOPC_Server_Config* server_config,
+                                                         const char* manufacturer_name)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    RuntimeVariables runtimeVariables;
+    SOPC_Server_RuntimeVariables runtimeVariables;
 
     runtimeVariables.serverConfig = server_config;
 
@@ -268,7 +288,7 @@ static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_Ser
     return true;
 }
 
-static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables* vars)
+static bool set_write_value_server_status(OpcUa_WriteValue* wv, SOPC_Server_RuntimeVariables* vars)
 {
     const OpcUa_BuildInfo* build_info = &vars->build_info;
     /* create extension object */
@@ -310,7 +330,7 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, RuntimeVariables
     return true;
 }
 
-static bool set_server_server_status_variables(SOPC_Array* write_values, RuntimeVariables* vars)
+static bool set_server_server_status_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
     return values != NULL &&
@@ -473,7 +493,8 @@ static bool set_server_capabilities_max_variables(SOPC_Array* write_values)
     return true;
 }
 
-static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write_values, RuntimeVariables* vars)
+static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write_values,
+                                                               SOPC_Server_RuntimeVariables* vars)
 {
     size_t nbNodesToSet = 5;
 #if 0 != WITH_NANO_EXTENDED
@@ -534,7 +555,7 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
     return true;
 }
 
-static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* vars)
+static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 8);
     return values != NULL &&
@@ -552,7 +573,9 @@ static bool set_server_variables(SOPC_Array* write_values, RuntimeVariables* var
            set_server_capabilities_operation_limits_variables(write_values, vars);
 }
 
-bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
+bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
+                               SOPC_Server_RuntimeVariables* vars,
+                               uintptr_t asyncRespContext)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
@@ -572,12 +595,14 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
     request->NoOfNodesToWrite = (int32_t) n_values;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, 0);
+    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, asyncRespContext);
 
     return true;
 }
 
-bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
+bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
+                                              SOPC_Server_RuntimeVariables* vars,
+                                              uintptr_t asyncRespContext)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
@@ -597,7 +622,7 @@ bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, Runtim
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
     request->NoOfNodesToWrite = (int32_t) n_values;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, 0);
+    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, asyncRespContext);
 
     return true;
 }

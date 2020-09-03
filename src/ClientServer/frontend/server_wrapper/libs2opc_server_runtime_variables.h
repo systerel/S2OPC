@@ -17,6 +17,13 @@
  * under the License.
  */
 
+/** \file
+ *
+ * \privatesection
+ *
+ * \brief Internal module used to manage the server runtime node variable changes (Server information nodes)
+ */
+
 #ifndef SOPC_RUNTIME_VARIABLES_H
 #define SOPC_RUNTIME_VARIABLES_H
 
@@ -24,7 +31,7 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
-typedef struct _RuntimeVariables
+typedef struct SOPC_Server_RuntimeVariables
 {
     SOPC_Server_Config* serverConfig;
     uint32_t secondsTillShutdown;
@@ -34,7 +41,7 @@ typedef struct _RuntimeVariables
     SOPC_Byte service_level;
     bool auditing;
     uint32_t maximum_operation_per_request;
-} RuntimeVariables;
+} SOPC_Server_RuntimeVariables;
 
 /**
  * \brief Builds the structure containing the values for runtime variables in the address space.
@@ -48,9 +55,9 @@ typedef struct _RuntimeVariables
  * \return structure containing all runtime variables.
  *
  */
-RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
-                                         SOPC_Server_Config* server_config,
-                                         const char* manufacturer_name);
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info build_info,
+                                                         SOPC_Server_Config* server_config,
+                                                         const char* manufacturer_name);
 
 /**
  * \brief Sets the values for runtime variables in the address space.
@@ -58,6 +65,10 @@ RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
  * \param endpoint_config_idx  Config index of the endpoint where to send the
  *                             write request.
  * \param vars                 Values of the runtime variables.
+ *
+ * \param asyncRespContext     Context to use when sending asynchronous local service request
+ *                             to set the runtime variables.
+ *
  * \return \c TRUE on success, \c FALSE in case of failure.
  *
  * This function gathers all the runtime values passed as parameters into a
@@ -69,7 +80,9 @@ RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
  * might be a delay between when this function returns, and when the values are
  * observable in the address space.
  */
-bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars);
+bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
+                               SOPC_Server_RuntimeVariables* vars,
+                               uintptr_t asyncRespContext);
 
 /**
  * \brief Update the server status values runtime variables in the address space.
@@ -88,8 +101,11 @@ bool set_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars)
  * might be a delay between when this function returns, and when the values are
  * observable in the address space.
  */
-bool update_server_status_runtime_variables(uint32_t endpoint_config_idx, RuntimeVariables* vars);
+bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
+                                              SOPC_Server_RuntimeVariables* vars,
+                                              uintptr_t asyncRespContext);
 
+// TODO: move into helper server ?
 /**
  * \brief Register the current endpoint server using the RegisterServer2 service locally.
  *        In case of success the server will be visible using FindServersOnNetwork service.

@@ -17,22 +17,16 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <check.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h> /* getenv, exit */
+#include <stdlib.h>
 #include <string.h>
 
-#include "opcua_identifiers.h"
-#include "opcua_statuscodes.h"
+// Server wrapper
+#include "libs2opc_server.h"
+#include "libs2opc_server_config.h"
+#include "libs2opc_server_config_custom.h"
+
 #include "sopc_atomic.h"
-#include "sopc_common.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_crypto_provider.h"
-#include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
@@ -40,7 +34,6 @@
 #include "sopc_toolkit_config.h"
 
 #include "embedded/sopc_addspace_loader.h"
-#include "runtime_variables.h"
 
 #include "test_results.h"
 #include "testlib_read_response.h"
@@ -48,22 +41,12 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
-
-/* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
-static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
-static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
                                                NULL};
-static char* default_trusted_intermediate_issuers[] = {NULL};
-static char* default_issued_certs[] = {NULL};
-static char* default_untrusted_root_issuers[] = {NULL};
-static char* default_untrusted_intermediate_issuers[] = {NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
 
-static int32_t endpointClosed = 0;
-static bool secuActive = true;
+static int32_t endpointClosed = false;
 
 static uint32_t session = 0;
 
@@ -84,12 +67,18 @@ static const uint32_t sleepTimeout = 500;
  *---------------------------------------------------------------------------*/
 
 /*
- * Server and client callback
+ * Server stop callback
  */
-static void Test_ComEvent_FctServerClient(SOPC_App_Com_Event event,
-                                          uint32_t idOrStatus,
-                                          void* param,
-                                          uintptr_t appContext)
+static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
+{
+    (void) status;
+    SOPC_Atomic_Int_Set(&endpointClosed, true);
+}
+
+/*
+ * Client events callback
+ */
+static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
     /* avoid unused parameter compiler warning */
     (void) idOrStatus;
@@ -157,65 +146,18 @@ static void Test_ComEvent_FctServerClient(SOPC_App_Com_Event event,
     {
         printf(">>Client: Activation failure or session closed\n");
     }
-    else if (SE_SND_REQUEST_FAILED == event)
-    {
-        printf(">>Client: Send request failure\n");
-    }
-    else if (SE_CLOSED_ENDPOINT == event)
-    {
-        printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
-        SOPC_Atomic_Int_Set(&endpointClosed, 1);
-    }
-    else if (SE_LOCAL_SERVICE_RESPONSE == event)
-    {
-        SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
-
-        if (message_type != &OpcUa_WriteResponse_EncodeableType)
-        {
-            return;
-        }
-
-        OpcUa_WriteResponse* write_response = param;
-
-        bool ok = (write_response->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
-
-        for (int32_t i = 0; i < write_response->NoOfResults; ++i)
-        {
-            ok &= (write_response->Results[i] == SOPC_GoodGenericStatus);
-        }
-
-        if (!ok)
-        {
-            printf("<Test_Server_Toolkit: Error while updating address space\n");
-        }
-
-        return;
-    }
-
     else
     {
-        printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
-    }
-}
-
-/*
- * Server callback definition used for address space modification notification
- */
-static void Test_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
-{
-    /* avoid unused parameter compiler warning */
-    (void) opParam;
-    (void) opStatus;
-
-    if (event != AS_WRITE_EVENT)
-    {
-        printf("<Test_Server_Toolkit: unexpected address space event %d : NOK\n", event);
+        printf("<Test_Server_Client: unexpected endpoint event %d : NOK\n", event);
     }
 }
 
 /*---------------------------------------------------------------------------
  *                          Client initialization
  *---------------------------------------------------------------------------*/
+
+// Avoid const qualifier in SOPC_SecureChannel_Config
+SOPC_PKIProvider* clientPki = NULL;
 
 static SOPC_SecureChannel_Config client_sc_config = {.isClientSc = true,
                                                      .url = DEFAULT_ENDPOINT_URL,
@@ -287,17 +229,17 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
 
     if (SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
         char* lPathsTrustedLinks[] = {NULL};
         char* lPathsUntrustedRoots[] = {NULL};
         char* lPathsUntrustedLinks[] = {NULL};
         char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
+        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, lPathsTrustedLinks,
+                                                       lPathsUntrustedRoots, lPathsUntrustedLinks, lPathsIssuedCerts,
+                                                       default_revoked_certs, &pki);
         if (SOPC_STATUS_OK == status)
         {
             client_sc_config.pki = pki;
+            clientPki = pki;
             printf(">>Client: PKI created\n");
         }
         else
@@ -500,33 +442,6 @@ static SOPC_ReturnStatus client_send_read_req_test(uint32_t session_id)
 }
 
 /*---------------------------------------------------------------------------
- *                          Server initialization
- *---------------------------------------------------------------------------*/
-
-static SOPC_ReturnStatus Server_Initialize(void)
-{
-    // Initialize the toolkit library and define the communication events callback
-
-    SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
-    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs";
-
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(log_config);
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(Test_ComEvent_FctServerClient);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("<Test_Server_Toolkit: Failed initializing\n");
-    }
-    else
-    {
-        printf("<Test_Server_Toolkit: initialized\n");
-    }
-    return status;
-}
-
-/*---------------------------------------------------------------------------
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
@@ -534,321 +449,107 @@ static SOPC_ReturnStatus Server_Initialize(void)
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
 
-/*
- * Default server configuration loader
- */
-static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
-{
-    assert(NULL != output_s2opcConfig);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    // Set namespaces
-    output_s2opcConfig->serverConfig.namespaces = default_app_namespace_uris;
-    // Set locale ids
-    output_s2opcConfig->serverConfig.localeIds = default_locale_ids;
-
-    // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
-    OpcUa_ApplicationDescription* serverDescription = &output_s2opcConfig->serverConfig.serverDescription;
-    OpcUa_ApplicationDescription_Initialize(serverDescription);
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, DEFAULT_APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&serverDescription->ProductUri, DEFAULT_PRODUCT_URI);
-    serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, "S2OPC toolkit server example");
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultLocale, "en-US");
-    SOPC_LocalizedText appNameFr;
-    SOPC_LocalizedText_Initialize(&appNameFr);
-    SOPC_String_AttachFromCstring(&appNameFr.defaultText, "S2OPC toolkit: exemple de serveur");
-    SOPC_String_AttachFromCstring(&appNameFr.defaultLocale, "fr-FR");
-
-    status = SOPC_LocalizedText_AddOrSetLocale(&serverDescription->ApplicationName,
-                                               output_s2opcConfig->serverConfig.localeIds, &appNameFr);
-    SOPC_LocalizedText_Clear(&appNameFr);
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("<Test_Server_Toolkit: Error setting second locale application name\n");
-    }
-
-    output_s2opcConfig->serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
-
-    if (NULL == output_s2opcConfig->serverConfig.endpoints)
-    {
-        return false;
-    }
-
-    output_s2opcConfig->serverConfig.nbEndpoints = 1;
-    SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
-    pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
-    pEpConfig->endpointURL = DEFAULT_ENDPOINT_URL;
-    pEpConfig->hasDiscoveryEndpoint = true;
-
-    /*
-     * Define the certificates, security policies, security modes and user token policies supported by endpoint
-     */
-    if (secuActive)
-    {
-        output_s2opcConfig->serverConfig.serverCertPath = "./server_public/server_2k_cert.der";
-        output_s2opcConfig->serverConfig.serverKeyPath = "./server_private/server_2k_key.pem";
-        output_s2opcConfig->serverConfig.trustedRootIssuersList = default_trusted_root_issuers;
-        output_s2opcConfig->serverConfig.trustedIntermediateIssuersList = default_trusted_intermediate_issuers;
-        output_s2opcConfig->serverConfig.issuedCertificatesList = default_issued_certs;
-        output_s2opcConfig->serverConfig.untrustedRootIssuersList = default_untrusted_root_issuers;
-        output_s2opcConfig->serverConfig.untrustedIntermediateIssuersList = default_untrusted_intermediate_issuers;
-        output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
-
-        /*
-         * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
-         */
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[0].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[0].securityPolicy,
-                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
-        pEpConfig->secuConfigurations[0].securityModes =
-            SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        pEpConfig->secuConfigurations[0].nbOfUserTokenPolicies = 2;
-        pEpConfig->secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
-
-        /*
-         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
-         */
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_String_Initialize(&pEpConfig->secuConfigurations[1].securityPolicy);
-            status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[1].securityPolicy,
-                                                   SOPC_SecurityPolicy_Basic256_URI);
-            pEpConfig->secuConfigurations[1].securityModes =
-                SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-            pEpConfig->secuConfigurations[1].nbOfUserTokenPolicies = 2;
-            pEpConfig->secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-            pEpConfig->secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
-        }
-    }
-
-    /*
-     * 3rd Security policy is None with anonymous and username (non encrypted) authentication allowed
-     * (for tests only, otherwise users on unsecure channel shall be forbidden)
-     */
-    uint8_t NoneSecuConfigIdx = 2;
-    if (!secuActive)
-    {
-        // Keep only None secu and set it as first secu config in this case
-        NoneSecuConfigIdx = 0;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityPolicy,
-                                               SOPC_SecurityPolicy_None_URI);
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].nbOfUserTokenPolicies =
-            2; /* Necessary for tests only: it shall be 0 when
-                  security is None to avoid any possible session without security */
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[0] =
-            c_userTokenPolicy_Anonymous; /* Necessary for tests only */
-        pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[1] =
-            c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
-    }
-
-    if (secuActive)
-    {
-        pEpConfig->nbSecuConfigs = 3;
-    }
-    else
-    {
-        // Only one security config if no secure endpoint defined
-        pEpConfig->nbSecuConfigs = 1;
-    }
-
-    return SOPC_STATUS_OK == status;
-}
-
-static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* output_s2opcConfig)
+static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 {
     /* Load server endpoints configuration
      * use an embedded default demo server configuration.
      */
-    assert(NULL != output_s2opcConfig);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Endpoint_Config ep = SOPC_EndpointConfig_Create(DEFAULT_ENDPOINT_URL, true);
+    SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_Basic256Sha256);
 
-    /* Load the address space using loader */
-    bool res = Server_LoadDefaultConfiguration(output_s2opcConfig);
-
-    /* Check properties on configuration */
-    if (res)
+    if (NULL == sp)
     {
-        status = SOPC_STATUS_OK;
-
-        // Only 1 endpoint supported in demo server
-        if (output_s2opcConfig->serverConfig.nbEndpoints > 1)
-        {
-            printf("<Test_Server_Toolkit: Error only 1 endpoint supported but %" PRIu8 " in configuration\n",
-                   output_s2opcConfig->serverConfig.nbEndpoints);
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_Endpoint_Config* epConfig = &output_s2opcConfig->serverConfig.endpoints[0];
-            for (int i = 0; i < epConfig->nbSecuConfigs; i++)
-            {
-                SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[i];
-                const char* secuPolicyURI = SOPC_String_GetRawCString(&secuPolicy->securityPolicy);
-                // Only None, Basic256 and Basic256Sha256 policies supported
-                if (0 != strcmp(SOPC_SecurityPolicy_None_URI, secuPolicyURI) &&
-                    0 != strcmp(SOPC_SecurityPolicy_Basic256_URI, secuPolicyURI) &&
-                    0 != strcmp(SOPC_SecurityPolicy_Basic256Sha256_URI, secuPolicyURI))
-                {
-                    printf("<Test_Server_Toolkit: Error invalid or unsupported security policy %s in configuration\n",
-                           secuPolicyURI);
-                    status = SOPC_STATUS_INVALID_PARAMETERS;
-                }
-
-                // UserName token type is only supported with security policy None
-                for (int j = 0; j < secuPolicy->nbOfUserTokenPolicies; j++)
-                {
-                    secuPolicyURI = SOPC_String_GetRawCString(&secuPolicy->userTokenPolicies[j].SecurityPolicyUri);
-                    if (secuPolicy->userTokenPolicies[j].TokenType == OpcUa_UserTokenType_UserName &&
-                        0 != strcmp(SOPC_SecurityPolicy_None_URI, secuPolicyURI))
-                    {
-                        printf(
-                            "<Test_Server_Toolkit: Error invalid or unsupported username user security policy %s in "
-                            "configuration\n",
-                            secuPolicyURI);
-                        status = SOPC_STATUS_INVALID_PARAMETERS;
-                    }
-                }
-            }
-        }
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     else
     {
-        printf("<Test_Server_Toolkit: Failed to load the server configuration\n");
-        status = SOPC_STATUS_NOK;
-    }
-
-    return status;
-}
-
-/*
- * Configure the cryptographic parameters of the endpoint:
- * - Server certificate and key
- * - Public Key Infrastructure: using a single certificate as Certificate Authority or Trusted Certificate
- */
-static SOPC_ReturnStatus Server_SetCryptographicConfig(SOPC_Server_Config* serverConfig)
-{
-    assert(NULL != serverConfig);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (secuActive)
-    {
-        /* Load client/server certificates and server key from files */
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
-                                                                      &serverConfig->serverCertificate);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
-                                                                            &serverConfig->serverKey);
-        }
-
-        /* Create the PKI (Public Key Infrastructure) provider */
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_PKIProviderStack_CreateFromPaths(
-                serverConfig->trustedRootIssuersList, serverConfig->trustedIntermediateIssuersList,
-                serverConfig->untrustedRootIssuersList, serverConfig->untrustedIntermediateIssuersList,
-                serverConfig->issuedCertificatesList, serverConfig->certificateRevocationPathList, &serverConfig->pki);
-        }
-
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
-        }
-        else
-        {
-            printf("<Test_Server_Toolkit: Certificates and key loaded\n");
-        }
-    }
-
-    return status;
-}
-
-/*----------------------------------------
- * Users authentication and authorization:
- *----------------------------------------*/
-
-static SOPC_ReturnStatus Server_SetUserManagementConfig(SOPC_Endpoint_Config* pEpConfig,
-                                                        SOPC_UserAuthentication_Manager** output_authenticationManager,
-                                                        SOPC_UserAuthorization_Manager** output_authorizationManager)
-{
-    assert(NULL != pEpConfig);
-    assert(NULL != output_authenticationManager);
-    assert(NULL != output_authorizationManager);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    /* Create an user authorization manager which accepts any user.
-     * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
-    *output_authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    if (NULL == *output_authorizationManager)
-    {
-        status = SOPC_STATUS_NOK;
+        status = SOPC_SecurityPolicy_AddSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
     }
     if (SOPC_STATUS_OK == status)
     {
-        *output_authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-        if (NULL == *output_authenticationManager)
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
     }
-
     if (SOPC_STATUS_OK == status)
     {
-        pEpConfig->authenticationManager = *output_authenticationManager;
-        pEpConfig->authorizationManager = *output_authorizationManager;
+        status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_AddEndpoint(&ep);
+    }
+
+    // Server certificates configuration
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetCertificateFromPath("./server_public/server_2k_cert.der",
+                                                                "./server_private/server_2k_key.pem");
+    }
+
+    // Set PKI configuration
+    if (SOPC_STATUS_OK == status)
+    {
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
+        char* lPathsIssuedCerts[] = {NULL};
+        SOPC_PKIProvider* pkiProvider = NULL;
+        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, lPathsTrustedLinks,
+                                                       lPathsUntrustedRoots, lPathsUntrustedLinks, lPathsIssuedCerts,
+                                                       default_revoked_certs, &pkiProvider);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("<Test_Server_Client: Failed loading certificates and key (check paths are valid)\n");
     }
     else
     {
-        SOPC_UserAuthorization_FreeManager(output_authorizationManager);
-        SOPC_UserAuthentication_FreeManager(output_authenticationManager);
+        printf("<Test_Server_Client: Certificates and key loaded\n");
     }
 
-    return status;
-}
-
-/*------------------------------
- * Address space configuraiton :
- *------------------------------*/
-
-static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output_addressSpace)
-{
-    /* Define server address space loader:
-     * use the embedded address space (already defined as C code) loader.
-     * For this latter case the address space C structure shall have been generated prior to compilation.
-     * This should be done using the script ./scripts/generate-s2opc-address-space.py
-     */
-    assert(NULL != output_addressSpace);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    *output_addressSpace = SOPC_Embedded_AddressSpace_Load();
-    status = NULL != *output_addressSpace ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-
-    /* Set the loaded address space as the current server address space configuration */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitServer_SetAddressSpaceConfig(*output_addressSpace);
+        // Set namespaces
+        char* namespaces[] = {DEFAULT_APPLICATION_URI};
+        status = SOPC_HelperConfigServer_SetNamespaces(1, namespaces);
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_Server_Toolkit: Failed to configure the @ space\n");
-        }
-        else
-        {
-            printf("<Test_Server_Toolkit: @ space configured\n");
+            printf("<Test_Server_Client: Failed setting namespaces\n");
         }
     }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+                                                                   "S2OPC toolkit server example", NULL,
+                                                                   OpcUa_ApplicationType_Server);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Test_Server_Client: Failed setting application description \n");
+        }
+    }
+
+    // Address space configuration
+    SOPC_AddressSpace* address_space = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        address_space = SOPC_Embedded_AddressSpace_Load();
+        status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
+    }
+
+    // Note: user manager are AllowAll by default
 
     return status;
 }
@@ -859,88 +560,54 @@ static SOPC_ReturnStatus Server_ConfigureAddressSpace(SOPC_AddressSpace** output
 
 START_TEST(test_server_client)
 {
-    // Install signal handler to close the server gracefully when server needs to stop
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    SOPC_S2OPC_Config s2opcConfig;
-    SOPC_S2OPC_Config_Initialize(&s2opcConfig);
-    SOPC_Server_Config* serverConfig = &s2opcConfig.serverConfig;
-    SOPC_Endpoint_Config* epConfig = NULL;
-    uint32_t epConfigIdx = 0;
-
     uint32_t client_channel_config_idx = 0;
 
-    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
-    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-
-    SOPC_AddressSpace* address_space = NULL;
-
     /* Get the toolkit build information and print it */
-    RuntimeVariables runtime_vars;
-    SOPC_Toolkit_Build_Info build_info = SOPC_ToolkitConfig_GetBuildInfo();
-    printf("toolkitVersion: %s\n", build_info.toolkitBuildInfo.buildVersion);
-    printf("toolkitSrcCommit: %s\n", build_info.toolkitBuildInfo.buildSrcCommit);
-    printf("toolkitDockerId: %s\n", build_info.toolkitBuildInfo.buildDockerId);
-    printf("toolkitBuildDate: %s\n", build_info.toolkitBuildInfo.buildBuildDate);
+    SOPC_Toolkit_Build_Info build_info = SOPC_Helper_GetBuildInfo();
+    printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+           build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
+           build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
+    printf("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+           build_info.toolkitBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildSrcCommit,
+           build_info.toolkitBuildInfo.buildDockerId, build_info.toolkitBuildInfo.buildBuildDate);
 
-    /* Initialize the server library (start library threads)
-     * and define communication events callback */
-    status = Server_Initialize();
+    /* Initialize the server library (start library threads) */
 
-    /* Configuration of server endpoint:
-       - Enpoint URL,
-       - Security endpoint properties,
-       - Cryptographic parameters,
-       - User authentication and authorization management,
-       - Application description
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
+    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs";
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_Helper_Initialize(&log_config);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("<Test_Server_Client: Failed initializing\n");
+    }
+    else
+    {
+        printf("<Test_Server_Client: initialized\n");
+    }
+
+    /* Configuration of:
+       - Server endpoints configuration:
+         - Enpoint URL,
+         - Security endpoint properties,
+         - Cryptographic parameters,
+         - Application description
+       - Server address space initial content
+       - User authentication and authorization management
     */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_LoadServerConfiguration(&s2opcConfig);
-
-        if (SOPC_STATUS_OK == status)
-        {
-            epConfig = &serverConfig->endpoints[0];
-        }
+        status = Server_SetServerConfiguration();
     }
 
+    /*
+     * Define callback for low-level client events
+     */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SetCryptographicConfig(serverConfig);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = Server_SetUserManagementConfig(epConfig, &authenticationManager, &authorizationManager);
-    }
-
-    /* Set endpoint configuration: keep endpoint configuration identifier for opening it later */
-    if (SOPC_STATUS_OK == status)
-    {
-        epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(epConfig);
-        status = (epConfigIdx != 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
-    }
-
-    /* Configure the address space of the server */
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Address space loaded dynamically from XML file
-           or from pre-generated C structure */
-        status = Server_ConfigureAddressSpace(&address_space);
-    }
-
-    /* Define address space modification notification callback */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(&Test_AddressSpaceNotif_Fct);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Test_Server_Toolkit: Failed to configure the @ space modification notification callback \n");
-        }
-        else
-        {
-            printf("<Test_Server_Toolkit: @ space modification notification callback configured\n");
-        }
+        status = SOPC_HelperConfigClient_SetRawClientComEvent(Test_ComEvent_FctClient);
     }
 
     /* Create client configuration */
@@ -957,37 +624,18 @@ START_TEST(test_server_client)
         }
     }
 
-    /* Finalize configuration */
+    /* Start server / Finalize configuration */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Toolkit_Configured();
+        status = SOPC_ServerHelper_StartServer(SOPC_ServerStoppedCallback);
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_Server_Toolkit: Failed to configure the endpoint\n");
+            printf("<Test_Server_Client: Failed to configure the endpoint\n");
         }
         else
         {
-            printf("<Test_Server_Toolkit: Endpoint configured\n");
-        }
-    }
-
-    /* Asynchronous request to open the configured endpoint using endpoint configuration index */
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("<Test_Server_Toolkit: Opening endpoint... \n");
-        SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
-    }
-
-    /* Update server information runtime variables in address space */
-    if (SOPC_STATUS_OK == status)
-    {
-        runtime_vars = build_runtime_variables(build_info, serverConfig, "Systerel");
-
-        if (!set_runtime_variables(epConfigIdx, &runtime_vars))
-        {
-            printf("<Test_Server_Toolkit: Failed to populate Server object");
-            status = SOPC_STATUS_NOK;
+            printf("<Test_Server_Client: Endpoint configured\n");
         }
     }
 
@@ -1045,34 +693,31 @@ START_TEST(test_server_client)
     }
 
     /* Asynchronous request to close the endpoint */
+    SOPC_ReturnStatus stopStatus = SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx);
+        stopStatus = SOPC_ServerHelper_StopServer();
     }
 
     /* Wait until endpoint is closed or stop server signal */
-    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
+    while (SOPC_STATUS_OK == stopStatus && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
     {
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
 
     /* Clear the server library (stop all library threads) */
-    SOPC_Toolkit_Clear();
+    SOPC_Helper_Clear();
+    SOPC_PKIProvider_Free(&clientPki);
 
     if (SOPC_STATUS_OK == status)
     {
-        printf("<Test_Server_Toolkit final result: OK\n");
+        printf("<Test_Server_Client final result: OK\n");
     }
     else
     {
-        printf("<Test_Server_Toolkit final result: NOK with status = '%d'\n", status);
+        printf("<Test_Server_Client final result: NOK with status = '%d'\n", status);
     }
-
-    /* Deallocate all locally created structures: */
-
-    SOPC_AddressSpace_Delete(address_space);
-    SOPC_S2OPC_Config_Clear(&s2opcConfig);
 }
 END_TEST
 
