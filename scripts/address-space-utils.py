@@ -69,8 +69,8 @@ def _remove_refs_to_nids(tree, nids, namespaces):
         nida = node.get('NodeId')  # The starting node of the references below
         refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
-            if ref.text in nids:  # The destination node of this reference
-                print('RemoveRef: {} -> {}'.format(nida, ref.text), file=sys.stderr)
+            if ref.text.strip() in nids:  # The destination node of this reference
+                print('RemoveRef: {} -> {}'.format(nida, ref.text.strip()), file=sys.stderr)
                 refs.remove(ref)
 
 def _add_ref(node, ref_type, tgt, is_forward=True):
@@ -125,6 +125,8 @@ def merge(tree, new, namespaces):
     new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
     # New nodes are copied
     tree_root = tree.getroot()
+    for nid in set(new_nodes)&set(tree_nodes):
+        print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
     for nid in set(new_nodes)-set(tree_nodes):
         print('Merge: add node {}'.format(nid), file=sys.stderr)
         tree_root.append(new_nodes[nid])
@@ -193,7 +195,7 @@ def sanitize(tree, namespaces):
         refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             type_ref = ref.get('ReferenceType')
-            nidb = ref.text  # The destination node of this reference
+            nidb = ref.text.strip()  # The destination node of this reference
             is_fwd = ref.get('IsForward') != 'false'
             if is_fwd:  # a -> b
                 fwds = refs_fwd[nida]
@@ -245,7 +247,7 @@ def sanitize(tree, namespaces):
         refs, = refs_nodes
         pnid = node.get('ParentNodeId')
         parent_refs = refs.findall('*[@IsForward="false"]')
-        if not any(parent.text == pnid for parent in parent_refs):
+        if not any(parent.text.strip() == pnid for parent in parent_refs):
             print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
                   .format(node.get('NodeId'), pnid), file=sys.stderr)
             # Type is unknown in fact
