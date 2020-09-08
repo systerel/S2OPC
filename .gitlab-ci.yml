@@ -376,10 +376,11 @@ pages:
   stage: doc
   dependencies: []
   rules:
-    - if: "$WITH_DOC != null || $CI_COMMIT_BRANCH == 'master'"
+    - if: "$WITH_DOC != null"
+    - if: "$CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == 'master'"
   variables:
     <<: *build_linux_variables
-  script:
+  script:       
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
