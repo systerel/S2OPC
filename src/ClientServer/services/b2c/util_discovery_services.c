@@ -175,10 +175,14 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
             OpcUa_UserTokenPolicy* srcUserTokenPolicy = &currentSecurityPolicy->userTokenPolicies[userIdTokenIdx];
             OpcUa_UserTokenPolicy* destUserTokenPolicy = &newEndPointDescription->UserIdentityTokens[userIdTokenIdx];
             OpcUa_UserTokenPolicy_Initialize(destUserTokenPolicy);
-            SOPC_String_AttachFrom(&destUserTokenPolicy->IssuedTokenType, &srcUserTokenPolicy->IssuedTokenType);
-            SOPC_String_AttachFrom(&destUserTokenPolicy->IssuerEndpointUrl, &srcUserTokenPolicy->IssuerEndpointUrl);
-            SOPC_String_AttachFrom(&destUserTokenPolicy->PolicyId, &srcUserTokenPolicy->PolicyId);
-            SOPC_String_AttachFrom(&destUserTokenPolicy->SecurityPolicyUri, &srcUserTokenPolicy->SecurityPolicyUri);
+            // Note: ignoring return status since only cases of failure are empty string as source of data
+            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->IssuedTokenType, &srcUserTokenPolicy->IssuedTokenType);
+            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->IssuerEndpointUrl,
+                                          &srcUserTokenPolicy->IssuerEndpointUrl);
+            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->PolicyId, &srcUserTokenPolicy->PolicyId);
+            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->SecurityPolicyUri,
+                                          &srcUserTokenPolicy->SecurityPolicyUri);
+
             destUserTokenPolicy->TokenType = srcUserTokenPolicy->TokenType;
         }
     }
@@ -228,7 +232,12 @@ static void SOPC_SetCommonFields(OpcUa_EndpointDescription* endointDescription,
     endointDescription->TransportProfileUri = tcpUaTransportProfileURI;
 
     // Set securityPolicyUri
-    SOPC_String_AttachFrom(&endointDescription->SecurityPolicyUri, securityPolicy);
+    SOPC_ReturnStatus status = SOPC_String_AttachFrom(&endointDescription->SecurityPolicyUri, securityPolicy);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to set security policy in application description of response");
+    }
 }
 
 constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions(
@@ -257,7 +266,11 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     if (NULL != sopcEndpointConfig)
     {
         status = SOPC_String_AttachFromCstring(&configEndPointURL, sopcEndpointConfig->endpointURL);
-        assert(SOPC_STATUS_OK == status);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Failed to set endpoint URL value in application description of response");
+        }
 
         /* Note: comparison with requested URL is not necessary since we have to return a default URL in any case */
         (void) requestEndpointUrl;
@@ -335,8 +348,16 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     else
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                        SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+                        status = SOPC_String_AttachFrom(
+                            &newEndPointDescription->Server.ApplicationUri,
+                            &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            SOPC_Logger_TraceWarning(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "Failed to set application URI value in application description of response");
+                        }
                     }
 
                     nbEndpointDescription++;
@@ -374,8 +395,15 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     else
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                        SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+                        status = SOPC_String_AttachFrom(
+                            &newEndPointDescription->Server.ApplicationUri,
+                            &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            SOPC_Logger_TraceWarning(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "Failed to set application URI value in application description of response");
+                        }
                     }
 
                     nbEndpointDescription++;
@@ -412,8 +440,15 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     else
                     {
                         // Set Server.ApplicationUri only (see mantis #3578 + part 4 v1.04 RC)
-                        SOPC_String_AttachFrom(&newEndPointDescription->Server.ApplicationUri,
-                                               &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+                        status = SOPC_String_AttachFrom(
+                            &newEndPointDescription->Server.ApplicationUri,
+                            &sopcEndpointConfig->serverConfigPtr->serverDescription.ApplicationUri);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            SOPC_Logger_TraceWarning(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "Failed to set application URI value in application description of response");
+                        }
                     }
 
                     nbEndpointDescription++;
