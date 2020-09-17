@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libs2opc_request_builder.h"
 #include "opcua_statuscodes.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_write.h"
@@ -47,14 +48,15 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     assert(N_VARS % N_GROUPS == 0);
     assert(N_VARS <= INT32_MAX);
 
-    OpcUa_WriteValue* lwv = SOPC_Malloc(N_VARS * sizeof(OpcUa_WriteValue));
+    OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(N_VARS);
+    if (NULL == pReq)
+        exit(1);
+
     size_t i;
     SOPC_ByteString buf;
     SOPC_ByteString_Initialize(&buf);
     uint32_t j;
-
-    if (NULL == lwv)
-        exit(1);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* First batch: variables are divided in n groups,
      * where n is the current number of supported types in the Address Space */
@@ -63,48 +65,50 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
         /* with N_VARS = N_GROUPS, the only i value is 0 */
-        lwv[i] = (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                                    .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                               .Data.Numeric = (uint32_t) i + 1000 + 1,
-                                               .Namespace = 1},
-                                    .AttributeId = 13, // Value attribute
-                                    .IndexRange = {.Length = 0},
-                                    .Value = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
-                                                        .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                        .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) 1)},
-                                              .Status = SOPC_GoodGenericStatus}};
+        SOPC_NodeId nodeId = {
+            .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1, .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) 1)},
+                                    .Status = SOPC_GoodGenericStatus};
+
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i, &nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
 
     /* uint32 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        lwv[i + (N_VARS / N_GROUPS)] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = 13, // Value attribute
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Uint32 = 1000 + (uint32_t) i},
-                                         .Status = SOPC_GoodGenericStatus}};
+        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                              .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1,
+                              .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Uint32 = 1000 + (uint32_t) i},
+                                    .Status = SOPC_GoodGenericStatus};
+
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i + (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value, NULL,
+                                                 &dataValue);
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
 
     /* double */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        lwv[i + (N_VARS / N_GROUPS) * 2] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = 13, // Value attribute
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Doublev = pow(2, (double) (i + 1))},
-                                         .Status = SOPC_GoodGenericStatus}};
+        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                              .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1,
+                              .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Doublev = pow(2, (double) (i + 1))},
+                                    .Status = SOPC_GoodGenericStatus};
+
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i + (N_VARS / N_GROUPS) * 2, &nodeId, SOPC_AttributeId_Value,
+                                                 NULL, &dataValue);
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
 
     /* String */
@@ -118,17 +122,20 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "FOO ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        lwv[i + 3 * (N_VARS / N_GROUPS)] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = 13, // Value attribute
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_String_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.String = buf},
-                                         .Status = SOPC_GoodGenericStatus}};
+        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                              .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1,
+                              .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_String_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.String = buf},
+                                    .Status = SOPC_GoodGenericStatus};
+
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 3 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
+                                                 NULL, &dataValue);
+        SOPC_ByteString_Clear(&buf);
+
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
 
     /* ByteString */
@@ -142,17 +149,20 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "BySt", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        lwv[i + 4 * (N_VARS / N_GROUPS)] =
-            (OpcUa_WriteValue){.encodeableType = &OpcUa_WriteValue_EncodeableType,
-                               .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                          .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1,
-                                          .Namespace = 1},
-                               .AttributeId = 13, // Value attribute
-                               .IndexRange = {.Length = 0},
-                               .Value = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
-                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                                   .Value.Bstring = buf},
-                                         .Status = SOPC_GoodGenericStatus}};
+        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                              .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1,
+                              .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Bstring = buf},
+                                    .Status = SOPC_GoodGenericStatus};
+
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 4 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
+                                                 NULL, &dataValue);
+        SOPC_ByteString_Clear(&buf);
+
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
 
     /* XmlElt */
@@ -166,24 +176,23 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "XML ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        lwv[i + 5 * (N_VARS / N_GROUPS)] = (OpcUa_WriteValue){
-            .encodeableType = &OpcUa_WriteValue_EncodeableType,
-            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                       .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
-                       .Namespace = 1},
-            .AttributeId = 13, // Value attribute
-            .IndexRange = {.Length = 0},
-            .Value = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
-                                .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                .Value.XmlElt = buf},
-                      .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space) ? SOPC_GoodGenericStatus
-                                                                                  : OpcUa_BadDataUnavailable}};
-    }
+        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                              .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
+                              .Namespace = 1};
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.XmlElt = buf},
+                                    .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                  ? SOPC_GoodGenericStatus
+                                                  : OpcUa_BadDataUnavailable};
 
-    OpcUa_WriteRequest* pReq = DESIGNATE_NEW(OpcUa_WriteRequest, .encodeableType = &OpcUa_WriteRequest_EncodeableType,
-                                             .NoOfNodesToWrite = (int32_t) N_VARS, .NodesToWrite = lwv);
-    if (NULL == pReq)
-        exit(1);
+        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 5 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
+                                                 NULL, &dataValue);
+        SOPC_ByteString_Clear(&buf);
+
+        if (SOPC_STATUS_OK != status)
+            exit(1);
+    }
 
     return pReq;
 }
@@ -254,33 +263,22 @@ bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* p
 
 OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
 {
-    OpcUa_ReadValueId* lrv = SOPC_Calloc(N_VARS, sizeof(OpcUa_ReadValueId));
-    size_t i;
+    OpcUa_ReadRequest* pReadReq = SOPC_ReadRequest_Create(N_VARS, OpcUa_TimestampsToReturn_Neither);
 
-    if (NULL == lrv)
+    if (NULL == pReadReq)
         exit(1);
 
     /* We only check that the values of the variables that were modified.
      * For the duplicate WriteRequest, there is a single request.
      * It should match (in the current implementation) the first of the two WriteValue. */
-    for (i = 0; i < N_VARS; ++i)
+    for (size_t i = 0; i < N_VARS; ++i)
     {
-        lrv[i] = (OpcUa_ReadValueId){.encodeableType = &OpcUa_ReadValueId_EncodeableType,
-                                     .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                .Data.Numeric = (uint32_t) i + 1000 + 1,
-                                                .Namespace = 1},
-                                     .AttributeId = 13, // Value attribute
-                                     .IndexRange = {.Length = 0},
-                                     .DataEncoding = {.Name.Length = 0}};
+        SOPC_NodeId nodeId = {
+            .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1, .Namespace = 1};
+        SOPC_ReturnStatus status = SOPC_ReadRequest_SetReadValue(pReadReq, i, &nodeId, SOPC_AttributeId_Value, NULL);
+        if (SOPC_STATUS_OK != status)
+            exit(1);
     }
-
-    OpcUa_ReadRequest* pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest, .encodeableType = &OpcUa_ReadRequest_EncodeableType,
-                                                .MaxAge = 0., .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
-                                                .NoOfNodesToRead = (int32_t) N_VARS, .NodesToRead = lrv);
-
-    if (NULL == pReadReq)
-        exit(1);
-
     return pReadReq;
 }
 

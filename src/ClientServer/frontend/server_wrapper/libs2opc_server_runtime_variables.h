@@ -105,17 +105,4 @@ bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
                                               SOPC_Server_RuntimeVariables* vars,
                                               uintptr_t asyncRespContext);
 
-// TODO: move into helper server ?
-/**
- * \brief Register the current endpoint server using the RegisterServer2 service locally.
- *        In case of success the server will be visible using FindServersOnNetwork service.
- *
- * \param epConfig             Configuration data used to build the RegisterServer2 request
- * \param endpoint_config_idx  Config index of the endpoint where to send the
- *                             RegisterServer2 request.
- * \return \c TRUE on success, \c FALSE in case of failure.
- *
- */
-bool register_server(SOPC_Endpoint_Config* epConfig, uint32_t endpoint_config_idx);
-
 #endif

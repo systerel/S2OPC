@@ -31,6 +31,7 @@
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
 
+#include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
@@ -108,19 +109,6 @@ static bool checkGetEndpointsResponse(OpcUa_GetEndpointsResponse* getEndpointsRe
     SOPC_Free(getEndpointsResp);
 
     return validEndpoints;
-}
-
-/* Function to build the getEndpoints service request message */
-static void* getGetEndpoints_message(void)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    OpcUa_GetEndpointsRequest* getEndpointReq = NULL;
-    status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, DEFAULT_ENDPOINT_URL);
-    }
-    return getEndpointReq;
 }
 
 /* Function to build the read service request message */
@@ -284,7 +272,8 @@ int main(int argc, char* argv[])
 
         // Use 1 as getEndpoints request context
         OpcUa_GetEndpointsResponse* resp = NULL;
-        status = SOPC_ServerHelper_LocalServiceSync(getGetEndpoints_message(), (void**) &resp);
+        status =
+            SOPC_ServerHelper_LocalServiceSync(SOPC_GetEndpointsRequest_Create(DEFAULT_ENDPOINT_URL), (void**) &resp);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -299,6 +288,42 @@ int main(int argc, char* argv[])
         else
         {
             printf("<Test_Server_Local_Service: Get endpoints local  service synchronous call: NOK\n");
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        OpcUa_RegisterServer2Response* resp = NULL;
+        status = SOPC_ServerHelper_LocalServiceSync(SOPC_RegisterServer2Request_CreateFromServerConfiguration(),
+                                                    (void**) &resp);
+
+        if (SOPC_STATUS_OK == status && 0 == (resp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask))
+        {
+            status = resp->NoOfConfigurationResults > 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            for (int32_t i = 0; SOPC_STATUS_OK == status && i < resp->NoOfConfigurationResults; i++)
+            {
+                if (0 != (resp->ConfigurationResults[i] & SOPC_GoodStatusOppositeMask))
+                {
+                    // Status is not good, configuration failed
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        OpcUa_RegisterServer2Response_Clear(resp);
+        SOPC_Free(resp);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            printf("<Test_Server_Local_Service: RegisterServer2 local service synchronous call: OK\n");
+        }
+        else
+        {
+            printf("<Test_Server_Local_Service: RegisterServer2 local  service synchronous call: NOK\n");
         }
     }
 

@@ -266,7 +266,7 @@ if(ENABLE_TESTING)
                                      "validation_tests/client/testlib_read_response.c"
                                      ${TEST_LIGHT_ADDRESS_SPACE_C})
   add_dependencies(toolkit_test_server_local_service make-light-address-space)
-  target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+  target_link_libraries(toolkit_test_client PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
 

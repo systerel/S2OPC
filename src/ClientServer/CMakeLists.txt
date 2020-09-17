@@ -202,6 +202,7 @@ export(EXPORT s2opc_clientserver-clientwrapper-export
        FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
 
 ## Server wrapper library ##
+set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
 set(SERVERWRAPPER_PATH "frontend/server_wrapper")
 # Set empty implementation and dependency if Expat not available
 set(SERVERWRAPPER_XML_CONFIG "")
@@ -216,14 +217,15 @@ add_library(s2opc_serverwrapper "${SERVERWRAPPER_PATH}/libs2opc_server.c"
                                 "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
                                 "${SERVERWRAPPER_PATH}/libs2opc_server_runtime_variables.c"
                                 ${SERVERWRAPPER_XML_CONFIG}
+                                "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
                                 )
 target_link_libraries(s2opc_serverwrapper PUBLIC s2opc_clientserver ${SERVERWRAPPER_XML_DEP})
 target_compile_options(s2opc_serverwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_serverwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_serverwrapper
   PUBLIC # TODO: separate PUBLIC / PRIVATE
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
-  $<INSTALL_INTERFACE:include}> # when installed
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
+  $<INSTALL_INTERFACE:include> # when installed
   )
 
 install(TARGETS s2opc_serverwrapper
