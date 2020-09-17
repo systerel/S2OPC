@@ -1963,9 +1963,14 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len)
+SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString)
 {
-    if (NULL == pNid)
+    if (NULL == pNid || NULL == cString)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    size_t len = strlen(cString);
+    if (len > INT32_MAX)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1986,7 +1991,7 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
     }
     if (NULL != sz)
     {
-        strncpy(sz, cString, (size_t) len);
+        strncpy(sz, cString, len);
         /* Search for namespace, defaults to 0 */
         p = strchr(sz, ';');
         if (NULL != p)
@@ -2007,7 +2012,7 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
         }
 
         /* Search for identifier, followed by '=' */
-        if (SOPC_STATUS_OK == status && len - (p - sz) < 2)
+        if (SOPC_STATUS_OK == status && len - (size_t)(p - sz) < 2)
         {
             /* There is less than 2 chars left to read */
             status = SOPC_STATUS_NOK;
@@ -2048,6 +2053,10 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
             }
         }
     }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -2062,7 +2071,7 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
             status = SOPC_String_InitializeFromCString(&pNid->Data.String, p);
             break;
         case SOPC_IdentifierType_Guid:
-            status = SOPC_Guid_FromCString(pGuid, p, (size_t)(len - (p - sz)));
+            status = SOPC_Guid_FromCString(pGuid, p, (len - (size_t)(p - sz)));
 
             if (SOPC_STATUS_OK == status)
             {
@@ -2071,7 +2080,8 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
             break;
         case SOPC_IdentifierType_ByteString:
             SOPC_ByteString_Initialize(&pNid->Data.Bstring);
-            status = SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, len - (int32_t)(p - sz));
+            status =
+                SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, (int32_t) len - (int32_t)(p - sz));
             break;
         default:
             break;
@@ -2092,13 +2102,14 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
 SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
 {
     SOPC_NodeId* pNid = SOPC_Malloc(sizeof(SOPC_NodeId));
-    if (NULL == pNid)
+    if (NULL == pNid || len <= 0 || strlen(cString) != (size_t) len)
     {
+        SOPC_Free(pNid);
         return NULL;
     }
 
     SOPC_NodeId_Initialize(pNid);
-    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(pNid, cString, len);
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(pNid, cString);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(pNid);

@@ -43,10 +43,40 @@ typedef uint32_t SOPC_StatusCode;
 #define SOPC_GoodStatusOppositeMask 0xC0000000
 
 /**
- * Masks to check status for Uncertain/Bad/Reserved status code: X status <=> (status & SOPC_<X>StatusMask) != 0
+ * \brief Masks to check status for Uncertain/Bad/Reserved status code: X status <=> (status & SOPC_<X>StatusMask) != 0
  */
 #define SOPC_UncertainStatusMask 0x40000000
 #define SOPC_BadStatusMask 0x80000000
+
+/**
+ * \brief Enumerated for all possible OPC UA attribute ids
+ */
+typedef enum
+{
+    SOPC_AttributeId_Invalid = 0,
+    SOPC_AttributeId_NodeId = 1,
+    SOPC_AttributeId_NodeClass = 2,
+    SOPC_AttributeId_BrowseName = 3,
+    SOPC_AttributeId_DisplayName = 4,
+    SOPC_AttributeId_Description = 5,
+    SOPC_AttributeId_WriteMask = 6,
+    SOPC_AttributeId_UserWriteMask = 7,
+    SOPC_AttributeId_IsAbstract = 8,
+    SOPC_AttributeId_Symmetric = 9,
+    SOPC_AttributeId_InverseName = 10,
+    SOPC_AttributeId_ContainsNoLoops = 11,
+    SOPC_AttributeId_EventNotifier = 12,
+    SOPC_AttributeId_Value = 13,
+    SOPC_AttributeId_DataType = 14,
+    SOPC_AttributeId_ValueRank = 15,
+    SOPC_AttributeId_ArrayDimensions = 16,
+    SOPC_AttributeId_AccessLevel = 17,
+    SOPC_AttributeId_UserAccessLevel = 18,
+    SOPC_AttributeId_MinimumSamplingInterval = 19,
+    SOPC_AttributeId_Historizing = 20,
+    SOPC_AttributeId_Executable = 21,
+    SOPC_AttributeId_UserExecutable = 22,
+} SOPC_AttributeId;
 
 /**
  *  \brief Copy function generic signature
@@ -509,7 +539,7 @@ bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId);
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
 char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId);
-SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len);
+SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString);
 SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
 
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
