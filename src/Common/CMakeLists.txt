@@ -95,7 +95,7 @@ target_link_libraries(s2opc_common PUBLIC ${S2OPC_LINKER_FLAGS} ${S2OPC_LINK_LIB
 target_include_directories(s2opc_common
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_COMMON_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
-  $<INSTALL_INTERFACE:include> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/common> # when installed
   PRIVATE ${S2OPC_COMMON_PRIVATE_INCLUDES})
 
 # Needed if we want to use the objects in a shared library
@@ -114,7 +114,7 @@ install(TARGETS s2opc_common
   EXPORT s2opc_common-export # export our project to be importable after install
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  PUBLIC_HEADER DESTINATION include)
+  PUBLIC_HEADER DESTINATION include/s2opc/common)
 
 # install the export as a cmake file
 install(EXPORT s2opc_common-export

@@ -71,7 +71,7 @@ target_include_directories(s2opc_pubsub PRIVATE "${expat_DIR}/../../../include")
 target_include_directories(s2opc_pubsub
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_PUBSUB_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
-  $<INSTALL_INTERFACE:include}> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/pubsub}> # when installed
   )
 
 ### Installation and export of S2OPC client/server toolkit library ###
@@ -86,7 +86,7 @@ install(TARGETS s2opc_pubsub
         EXPORT s2opc_pubsub-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/s2opc/pubsub)
 
 install(FILES ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py DESTINATION bin)
 

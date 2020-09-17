@@ -59,7 +59,7 @@ target_link_libraries(s2opc_clientserver PUBLIC s2opc_common)
 target_include_directories(s2opc_clientserver
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
-  $<INSTALL_INTERFACE:include> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
   PRIVATE ${S2OPC_CLIENTSERVER_PRIVATE_INCLUDES})
 
 ### Installation and export of S2OPC client/server toolkit library ###
@@ -74,7 +74,7 @@ install(TARGETS s2opc_clientserver
         EXPORT s2opc_clientserver-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/s2opc/clientserver)
 
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-export
@@ -104,14 +104,14 @@ target_link_libraries(s2opc_clientserver-loader-embedded PUBLIC s2opc_clientserv
 target_include_directories(s2opc_clientserver-loader-embedded
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders>
-  $<INSTALL_INTERFACE:include> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
   )
 set_target_properties(s2opc_clientserver-loader-embedded PROPERTIES PUBLIC_HEADER "loaders/address_space_loaders/embedded/sopc_addspace_loader.h")
 install(TARGETS s2opc_clientserver-loader-embedded
         EXPORT s2opc_clientserver-loader-embedded-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/embedded)
 
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-loader-embedded-export
@@ -143,7 +143,7 @@ if (expat_FOUND)
   target_include_directories(s2opc_clientserver-xml-loaders-expat
                              PUBLIC
                              "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
-                             $<INSTALL_INTERFACE:include> # when installed
+                             $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
   set_property(TARGET s2opc_clientserver-xml-loaders-expat PROPERTY
                PUBLIC_HEADER "loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
@@ -153,7 +153,7 @@ if (expat_FOUND)
           EXPORT s2opc_clientserver-xml-loaders-expat-export # export our project to be importable after install
           LIBRARY DESTINATION lib
           ARCHIVE DESTINATION lib
-          PUBLIC_HEADER DESTINATION include)
+          PUBLIC_HEADER DESTINATION include/s2opc/clientserver/xml_expat)
 
   # install the export as a cmake file
   install(EXPORT s2opc_clientserver-xml-loaders-expat-export
@@ -183,7 +183,7 @@ target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_clientwrapper
   PUBLIC # TODO: separate PUBLIC / PRIVATE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LIBSUBSCRIBE_PATH}>"
-  $<INSTALL_INTERFACE:include> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
 
 list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${LIBSUBSCRIBE_PATH}/libs2opc_client.h"
@@ -195,7 +195,7 @@ install(TARGETS s2opc_clientwrapper
         EXPORT s2opc_clientserver-clientwrapper-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/frontend)
 
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-clientwrapper-export
@@ -230,7 +230,7 @@ target_compile_definitions(s2opc_serverwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_serverwrapper
   PUBLIC # TODO: separate PUBLIC / PRIVATE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
-  $<INSTALL_INTERFACE:include> # when installed
+  $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
 list(APPEND SERVER_WRAPPER_INCLUDE_FILES "${SERVERWRAPPER_PATH}/libs2opc_server.h"
                                          "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
@@ -242,7 +242,7 @@ install(TARGETS s2opc_serverwrapper
         EXPORT s2opc_clientserver-serverwrapper-export # export our project to be importable after install
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include)
+        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/frontend)
 
 # install the export as a cmake file
 install(EXPORT s2opc_clientserver-serverwrapper-export
