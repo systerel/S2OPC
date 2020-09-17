@@ -100,6 +100,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
     return SOPC_STATUS_OK;
 }
 
+// Add an application name into server description with given locale or no locale
 static SOPC_ReturnStatus SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(const char* appName,
                                                                               const char* appNameLocale)
 {

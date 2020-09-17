@@ -157,6 +157,7 @@ bool SOPC_HelperConfig_LockState(void);
 // Associate global user manager to endpoint configuration
 // Note: temporarily necessary until moved from endpoint to server configuration
 void SOPC_HelperConfig_SetEndpointUserMgr(SOPC_Endpoint_Config* epConfig);
+
 // Associate global user manager to existing endpoint configurations. It shall be called when user managers are set.
 // Note: temporarily necessary until moved from endpoint to server configuration
 void SOPC_HelperConfig_SetEndpointsUserMgr(void);

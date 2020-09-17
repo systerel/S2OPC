@@ -231,7 +231,7 @@ bool SOPC_HelperConfig_LockState(void)
     return res;
 }
 
-// Manage global user manager vs user manager by endpoint in low-level API
+/* Manage global user manager vs user manager by endpoint in low-level API */
 
 static SOPC_ReturnStatus SOPC_HelperConfigInternal_Authen_ValidateUser(
     SOPC_UserAuthentication_Manager* authenticationManager,

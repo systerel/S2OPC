@@ -32,6 +32,7 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
+// Periodic timeout used to check for catch signal or for updating seconds shutdown counter
 #define UPDATE_TIMEOUT_MS 500
 
 // Flag used on sig stop
@@ -121,6 +122,7 @@ void SOPC_HelperInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
     }
 }
 
+// Creates an helper context containing user context to associate with a sent request
 static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintptr_t userContext,
                                                                           SOPC_App_Com_Event event)
 {
@@ -200,6 +202,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     return status;
 }
 
+// Callback dedicated to runtime variable update treatment: check received response is correct or trace error
 static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encType,
                                                              void* response,
                                                              uintptr_t context)
@@ -222,6 +225,7 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
     }
 }
 
+// Build and update server runtime variables (Server node info) and request to open all endpoints of the server
 static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 {
     if (0 == sopc_helper_config.server.nbEndpoints)
@@ -264,6 +268,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     return status;
 }
 
+// Update the server node shutdown information for shutdown phase (state and shutdown countdown)
+// Returns when shutdown countdown is terminated
 static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
     if (!SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
@@ -322,6 +328,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
     }
 }
 
+// Request to close all endpoints of the server
 static void SOPC_HelperInternal_ActualShutdownServer(void)
 {
     for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
@@ -381,6 +388,7 @@ static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus
     SOPC_ReturnStatus status = Mutex_Lock(&sopc_helper_config.server.serverStoppedMutex);
     assert(SOPC_STATUS_OK == status);
     sopc_helper_config.server.serverAllEndpointsClosed = true;
+    // Wake up SOPC_ServerHelper_Serve waiting for update
     status = Condition_SignalAll(&sopc_helper_config.server.serverStoppedCond);
     assert(SOPC_STATUS_OK == status);
     status = Mutex_Unlock(&sopc_helper_config.server.serverStoppedMutex);
