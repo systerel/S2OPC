@@ -17,12 +17,6 @@
  * under the License.
  */
 
-/*! \mainpage S2OPC Toolkit
- *
- * <a href="pys2opc/index.html">Go to PyS2OPC documentation</a>
- *
- */
-
 #ifndef SOPC_COMMON_H_
 #define SOPC_COMMON_H_
 
