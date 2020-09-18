@@ -75,7 +75,8 @@ static void checkEncodeableType(SOPC_EncodeableType* encType,
     ck_assert_ok(SOPC_Buffer_SetPosition(input, 0));
 
     // Initialization
-    SOPC_Encodeable_Create(encType, &obj);
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &obj);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(obj);
 
     // Decode
