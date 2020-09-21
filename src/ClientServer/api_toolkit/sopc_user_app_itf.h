@@ -35,7 +35,9 @@
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 
-/* Client static configuration of a Secure Channel */
+/**
+ *  \brief Client static configuration of a Secure Channel
+ */
 typedef struct SOPC_SecureChannel_Config
 {
     uint8_t isClientSc;
@@ -48,8 +50,8 @@ typedef struct SOPC_SecureChannel_Config
     uint32_t requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;
 
-    /* Internal use only: may be left uninitialized */
-    uintptr_t internalProtocolData; // used to store internal protocol data (set only during connecting phase)
+    uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
+                                       connecting phase) */
 } SOPC_SecureChannel_Config;
 
 #define SOPC_SECURITY_MODE_NONE_MASK 0x01
@@ -67,6 +69,9 @@ extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPol
 
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
+/**
+ * \brief Endpoint security policy configuration
+ */
 typedef struct SOPC_SecurityPolicy
 {
     SOPC_String securityPolicy; /**< Security policy URI supported */
@@ -82,7 +87,9 @@ typedef struct SOPC_SecurityPolicy
 
 typedef struct SOPC_Server_Config SOPC_Server_Config;
 
-/* Server static configuration of a Endpoint listener */
+/**
+ * \brief Server static configuration of a Endpoint listener
+ */
 typedef struct SOPC_Endpoint_Config
 {
     struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
@@ -104,7 +111,9 @@ typedef struct SOPC_Endpoint_Config
         authorizationManager; /**< The user authorization manager: user access level evaluation */
 } SOPC_Endpoint_Config;
 
-/* OPC UA server configuration structure */
+/**
+ * \brief OPC UA server configuration structure
+ */
 struct SOPC_Server_Config
 {
     bool freeCstringsFlag; /**< A flag to indicate if the C strings contained in the server configuration
@@ -147,106 +156,121 @@ struct SOPC_Server_Config
     SOPC_Endpoint_Config* endpoints;         /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
-    SOPC_SerializedCertificate* serverCertificate;
-    SOPC_SerializedAsymmetricKey* serverKey;
-    SOPC_PKIProvider* pki;
+    SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
+    SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
+    SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
+                              or ::SOPC_PKIProviderStack_Create. */
     SOPC_MethodCallManager* mcm; /**< Method Call service configuration.
                                       Can be instantiated with SOPC_MethodCallManager_Create()
                                       or specific code by applicative code.
                                       Can be NULL if Method Call service is not used. */
 };
 
-/* S2OPC server configuration */
+/**
+ * \brief S2OPC server configuration
+ */
 typedef struct SOPC_S2OPC_Config
 {
-    SOPC_Server_Config serverConfig;
+    SOPC_Server_Config serverConfig; /**< server configuration */
 } SOPC_S2OPC_Config;
 
-/* Client and Server communication events to be managed by applicative code*/
+/**
+ *  \brief Client and Server communication events to be managed by applicative code
+ */
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE = 0x700, /**< (Client)
-                                            *   id = internal session id (or 0 if not yet defined)
-                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason
+    SE_SESSION_ACTIVATION_FAILURE = 0x700, /**< (Client)<br/>
+                                            *   id = internal session id (or 0 if not yet defined)<br/>
+                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
                                             *   auxParam = user application session context
                                             */
-    SE_ACTIVATED_SESSION,                  /**< (Client)
-                                            *   id = internal session id
+    SE_ACTIVATED_SESSION,                  /**< (Client)<br/>
+                                            *   id = internal session id<br/>
                                             *   auxParam = user application session context
                                             */
     SE_SESSION_REACTIVATING,               /**< (Client) automatic new SC or manual new user on same SC */
-                                           /**< (Client)
-                                            *   id = internal session id
+                                           /**< (Client)<br/>
+                                            *   id = internal session id<br/>
                                             *   auxParam = user application session context
                                             */
-    SE_RCV_SESSION_RESPONSE,               /**< (Client)
-                                            *   id = internal session id
-                                            *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                            *   (deallocated by toolkit after callback call ends)
+    SE_RCV_SESSION_RESPONSE,               /**< (Client)<br/>
+                                            *   id = internal session id<br/>
+                                            *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                                            *   (deallocated by toolkit after callback call ends)<br/>
                                             *   auxParam = user application request context
                                             */
-    SE_CLOSED_SESSION,                     /**< (Client)
-                                            *   id = internal session id
-                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason
+    SE_CLOSED_SESSION,                     /**< (Client)<br/>
+                                            *   id = internal session id<br/>
+                                            *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
                                             *   auxParam = user application session context
                                             */
-    SE_RCV_DISCOVERY_RESPONSE,             /**< (Client)
-                                            *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload
-                                            *   structure (deallocated by toolkit after callback call ends) auxParam = user
+    SE_RCV_DISCOVERY_RESPONSE,             /**< (Client)<br/>
+                                            *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
+                                            *   structure (deallocated by toolkit after callback call ends) auxParam = user<br/>
                                             *   application request context
                                             */
 
-    SE_SND_REQUEST_FAILED, /**< (Client)
-                            *   idOrStatus = (SOPC_ReturnStatus) status,
-                            *   params = (SOPC_EncodeableType*) request type (shall not be deallocated)
+    SE_SND_REQUEST_FAILED, /**< (Client)<br/>
+                            *   idOrStatus = (SOPC_ReturnStatus) status,<br/>
+                            *   params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
                             *   auxParam = user application request context
                             */
 
     /* Server application events */
-    SE_CLOSED_ENDPOINT,       /**< (Server)
-                               *   id = endpoint configuration index,
+    SE_CLOSED_ENDPOINT,       /**< (Server)<br/>
+                               *   id = endpoint configuration index,<br/>
                                *   auxParam = SOPC_ReturnStatus
                                */
-    SE_LOCAL_SERVICE_RESPONSE /**< (Server)
-                               *   id = endpoint configuration index,
-                               *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                               *   (deallocated by toolkit after callback call ends)
+    SE_LOCAL_SERVICE_RESPONSE /**< (Server)<br/>
+                               *   id = endpoint configuration index,<br/>
+                               *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                               *   (deallocated by toolkit after callback call ends)<br/>
                                *   auxParam = user application request context
                                */
 } SOPC_App_Com_Event;
 
 /* Server only interfaces */
 
-/* Server address space access/modification notifications to applicative code */
+/**
+ * \brief Server address space access/modification notifications to applicative code
+ */
 typedef enum SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT = 0x800, /* opParam = (OpcUa_WriteValue*) single write value operation
-                       opStatus = status of the write operation
-                     */
+    AS_WRITE_EVENT = 0x800, /**< opParam = (OpcUa_WriteValue*) single write value operation<br/>
+                             *   opStatus = status of the write operation
+                             */
 } SOPC_App_AddSpace_Event;
 
-/* Toolkit communication events application callback type */
+/**
+ * \brief Toolkit communication events application callback type
+ */
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
-/* Toolkit address space notification events callback type */
+/**
+ * \brief Toolkit address space notification events callback type
+ */
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
 
-/* Toolkit build information */
+/**
+ * \brief Toolkit build information
+ */
 typedef struct
 {
     SOPC_Build_Info commonBuildInfo;
     SOPC_Build_Info clientServerBuildInfo;
 } SOPC_Toolkit_Build_Info;
 
-/* \brief Initalize the content of the SOPC_S2OPC_Config
+/**
+ * \brief Initalize the content of the SOPC_S2OPC_Config
  *
  * \param config  The s2opc server configuration to initialize
  */
 void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 
-/* \brief Clear the content of the SOPC_S2OPC_Config
+/**
+ * \brief Clear the content of the SOPC_S2OPC_Config
  *
  * \param config  The s2opc server configuration to clear
  */
