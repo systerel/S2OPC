@@ -110,12 +110,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:2eaeac0015278c1fc04f46210b47d3d83281095c61cc17a967b03d1177f376d6 # digest of build:1.21
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:84d7c65956c79dec39d0f9e966078df3293f03c0d2c1fe2dc4c770aa2ef53224 # digest of build:1.22
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:ca2e32f1aa87c5b2af533397ac2f43140d3a6d7255cf4850ea0fdca0369eb518'
+    DOCKER_IMAGE: 'sha256:fafcfa87e1f678cf615ce8093a848ca2d8bf947a9f8eb30a49a94a74d13be587'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -173,7 +173,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5f172f83a860caa75366e2ab14676be6f1d825441b0c61d363a6f872d1fb95c4 # digest of mingw_build:1.9
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:e68d4295fbea8f68ddab6621da203a489738d5e9c007206bf191e25aeca8d849 # digest of mingw_build:1.10
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -181,7 +181,7 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:dea49d2f60f0b9c2cff484d01f7372935d0e25dee3445909479b99d61530d1a8'
+    DOCKER_IMAGE: 'sha256:34d3694b434e89d12273be3533e2c53eb270f5967092dd2b6f158e7433be667a'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
