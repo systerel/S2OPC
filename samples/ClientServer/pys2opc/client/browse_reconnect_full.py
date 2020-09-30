@@ -38,7 +38,7 @@ from utils import ReconnectingContext
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser('Configurable and resilient browse.')
+    parser = argparse.ArgumentParser(description='Configurable and resilient browse.')
     parser.add_argument('-d', '--depth', default=-1, type=int,
                         help='Max browse depth, in number of references from Root (Objects is 1).')
     parser.add_argument('-a', '--analyze', action='store_true',

@@ -40,7 +40,7 @@ if __name__ == '__main__':
     print(PyS2OPC.get_version())
     print()
 
-    parser = argparse.ArgumentParser('Configurable server')
+    parser = argparse.ArgumentParser(description='Configurable OPC UA server')
     parser.add_argument('--config-path', default='S2OPC_Server_Demo_Config.xml',
                         help='The path to the XML configuration of the server endpoints')
     parser.add_argument('--addspace-path', default='s2opc.xml',
