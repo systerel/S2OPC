@@ -56,17 +56,6 @@ static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC
                                                          .username = NULL,
                                                          .password = NULL};
 
-static SOPC_ClientHelper_Security valid_security_sign_b256 = {.security_policy = SOPC_SecurityPolicy_Basic256_URI,
-                                                              .security_mode = OpcUa_MessageSecurityMode_Sign,
-                                                              .path_cert_auth = "./trusted/cacert.der",
-                                                              .path_crl = "./revoked/cacrl.der",
-                                                              .path_cert_srv = "path_cert_srv",
-                                                              .path_cert_cli = "path_cert_cli",
-                                                              .path_key_cli = "path_key_cli",
-                                                              .policyId = "policyId",
-                                                              .username = "username",
-                                                              .password = "password"};
-
 static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
@@ -235,18 +224,6 @@ START_TEST(test_wrapper_config_invalid_arguments)
         invalid_security.security_mode = 4;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
         ck_assert_int_eq(-12, invalid_conf_id);
-    }
-    {
-        SOPC_ClientHelper_Security invalid_security = valid_security_sign_b256;
-        invalid_security.path_cert_auth = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
-        ck_assert_int_eq(-13, invalid_conf_id);
-    }
-    {
-        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
-        invalid_security.path_crl = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
-        ck_assert_int_eq(-14, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;

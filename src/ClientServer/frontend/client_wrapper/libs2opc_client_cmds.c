@@ -470,17 +470,15 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         return -12;
     }
 
-    if (!disable_verification && NULL == cert_auth)
-    {
-        return -13;
-    }
-    if (!disable_verification && NULL == ca_crl)
-    {
-        return -14;
-    }
     if (!disable_verification && NULL == cert_srv)
     {
         return -15;
+    }
+
+    if (!disable_verification && (NULL == cert_auth || NULL == ca_crl))
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING,
+                    "No CA (or mandatory CRL) provided, server certificate will be accepted only if it is self-signed");
     }
     if (!disable_verification && NULL == cert_cli)
     {

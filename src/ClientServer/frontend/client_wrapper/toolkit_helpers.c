@@ -88,7 +88,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         }
     }
     /* Certificate authority shall only exist when PKI is not disabled */
-    if ((bDisablePKI && NULL != szPathCertifAuth) || ((!bDisablePKI) && NULL == szPathCertifAuth))
+    if (bDisablePKI && NULL != szPathCertifAuth)
     {
         Helpers_Log(
             SOPC_LOG_LEVEL_ERROR,
@@ -103,11 +103,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             char* lPathsTrustedRoots[] = {(char*) szPathCertifAuth, NULL};
             char* lPathsCRL[] = {(char*) szPathCrl, NULL};
-            SOPC_GCC_DIAGNOSTIC_RESTORE
             char* lPathsTrustedLinks[] = {NULL};
             char* lPathsUntrustedRoots[] = {NULL};
             char* lPathsUntrustedLinks[] = {NULL};
-            char* lPathsIssuedCerts[] = {NULL};
+            char* lPathsIssuedCerts[] = {(char*) szPathCertServer, NULL};
+            SOPC_GCC_DIAGNOSTIC_RESTORE
             status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
                                                            lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
             if (SOPC_STATUS_OK != status)
