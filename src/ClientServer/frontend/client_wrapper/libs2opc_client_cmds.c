@@ -656,6 +656,10 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
                     endpoints[i].nbOfUserIdentityTokens = descriptions[i].NoOfUserIdentityTokens;
                     endpoints[i].transportProfileUri = SOPC_String_GetCString(&descriptions[i].TransportProfileUri);
                     endpoints[i].securityLevel = descriptions[i].SecurityLevel;
+                    endpoints[i].serverCertificateNbBytes = descriptions[i].ServerCertificate.Length;
+                    endpoints[i].serverCertificate = descriptions[i].ServerCertificate.Data;
+                    // avoid data cleared after callback call
+                    descriptions[i].ServerCertificate.DoNotClear = true;
 
                     SOPC_ClientHelper_UserIdentityToken* userIds = SOPC_Calloc(
                         (size_t) descriptions[i].NoOfUserIdentityTokens, sizeof(SOPC_ClientHelper_UserIdentityToken));

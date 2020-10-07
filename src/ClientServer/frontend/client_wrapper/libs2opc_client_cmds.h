@@ -345,6 +345,10 @@ typedef struct
  * @var SOPC_ClientHelper_EndpointDescription::securityLevel
  *   the security level of the endpoint relative to other available endpoints
  *   on the server (the higher the better)
+ * @var SOPC_ClientHelper_EndpointDescription::serverCertificateNbBytes
+ *   the number of bytes in the server certificate
+ * @var SOPC_ClientHelper_EndpointDescription::serverCertificate
+ *   the server certificate bytes
  */
 typedef struct
 {
@@ -355,6 +359,8 @@ typedef struct
     SOPC_ClientHelper_UserIdentityToken* userIdentityTokens;
     char* transportProfileUri;
     int32_t securityLevel;
+    int32_t serverCertificateNbBytes;
+    uint8_t* serverCertificate;
 } SOPC_ClientHelper_EndpointDescription;
 
 /**
