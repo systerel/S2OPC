@@ -996,6 +996,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             /* Session states */
             case stActivating:
                 processingAuthorization = StaMac_GiveAuthorization_stActivating(pSM, event, pEncType);
+                if (!processingAuthorization && SE_SESSION_ACTIVATION_FAILURE == event)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Session activation failed with status code 0x%X",
+                                (SOPC_StatusCode)(uintptr_t) pParam);
+                }
                 break;
             case stClosing:
                 processingAuthorization = StaMac_GiveAuthorization_stClosing(pSM, event, pEncType);
@@ -1095,7 +1100,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             }
             else
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unexpected message in state %d, switching to error state",
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                            "Received unexpected message or event (%d) in state %d, switching to error state", event,
                             pSM->state);
                 pSM->state = stError;
             }
