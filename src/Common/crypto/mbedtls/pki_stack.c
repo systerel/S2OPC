@@ -263,17 +263,17 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
 
     SOPC_CertificateList* trust_list = bIssued ? pPKI->pUntrustedIssuerRootsList : pPKI->pTrustedIssuerRootsList;
     SOPC_CRLList* cert_crl = pPKI->pCertRevocList;
-    /* TODO: Is an empty trust_list a valid case? */
-    if (NULL == trust_list || NULL == cert_crl)
+    if ((NULL == trust_list || NULL == cert_crl) && !bIssued)
     {
+        // Empty trust list is not valid if the certificate is not issued (only possibility to be valid if self-signed)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* Assumes that mbedtls does not modify the certificates */
-    mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (&trust_list->crt);
+    mbedtls_x509_crt* mbed_ca = (mbedtls_x509_crt*) (NULL != trust_list ? &trust_list->crt : NULL);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     mbedtls_x509_crt* mbed_chall = (mbedtls_x509_crt*) (&pToValidate->crt);
-    mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (&cert_crl->crl);
+    mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Check certificate usages */
@@ -531,21 +531,49 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     bool bUntrustedLinksCRL = false;
     if (SOPC_STATUS_OK == status)
     {
-        /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
-         * We must fail here, otherwise we can't report misconfigurations to the users */
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsTrusted, lCrls, &bTrustedRootsCRL);
+        if (NULL != lRootsTrusted)
+        {
+            /* mbedtls does not verify that each CA has a CRL, so we must do it ourselves.
+             * We must fail here, otherwise we can't report misconfigurations to the users */
+            status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsTrusted, lCrls, &bTrustedRootsCRL);
+        }
+        else
+        {
+            bTrustedRootsCRL = true;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsUntrusted, lCrls, &bUntrustedRootsCRL);
+        if (NULL != lRootsUntrusted)
+        {
+            status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lRootsUntrusted, lCrls, &bUntrustedRootsCRL);
+        }
+        else
+        {
+            bUntrustedRootsCRL = true;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksTrusted, lCrls, &bTrustedLinksCRL);
+        if (NULL != lLinksTrusted)
+        {
+            status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksTrusted, lCrls, &bTrustedLinksCRL);
+        }
+        else
+        {
+            bTrustedLinksCRL = true;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksUntrusted, lCrls, &bUntrustedLinksCRL);
+        if (NULL != lLinksUntrusted)
+        {
+            status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(lLinksUntrusted, lCrls, &bUntrustedLinksCRL);
+        }
+        else
+        {
+            bUntrustedLinksCRL = true;
+        }
     }
     if (SOPC_STATUS_OK == status &&
         (!bTrustedRootsCRL || !bUntrustedRootsCRL || !bTrustedLinksCRL || !bUntrustedLinksCRL))
@@ -576,6 +604,14 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                 "> PKI creation warning: Not all certificate authorities in given untrusted issuer links have a single "
                 "certificate revocation list! Certificates issued by these CAs will be refused.\n");
         }
+    }
+
+    // Display warning in case no root issuer defined and trusted issued defined
+    if (NULL == lRootsTrusted && NULL == lRootsUntrusted && NULL != lIssued)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "No root issuer (CA) defined in PKI: only trusted self-signed issued "
+                                 "certificates will be accepted without possibility to revoke them (no issuer CRL).");
     }
 
     /* Link the untrusted lists with the trusted lists

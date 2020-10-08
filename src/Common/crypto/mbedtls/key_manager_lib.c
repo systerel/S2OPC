@@ -742,7 +742,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch)
 {
-    if (NULL == pCRL)
+    if (NULL == pCRL || NULL == pCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
