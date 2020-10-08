@@ -2101,6 +2101,10 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
                     SOPC_Variant_Move(&req->InputArguments[j], &creq->inputParams[j]);
                 }
                 req->NoOfInputArguments = creq->nbOfInputParams;
+                // Free input param content
+                SOPC_Free(creq->inputParams);
+                creq->inputParams = NULL;
+                creq->nbOfInputParams = 0;
             }
         }
     }
