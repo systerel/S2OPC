@@ -1049,31 +1049,8 @@ START_TEST(test_wrapper_get_endpoints)
         ck_assert_int_eq(0, SOPC_ClientHelper_GetEndpoints(valid_url, &result));
         /* check result content */
         /* free result */
-        if (NULL != result)
-        {
-            if (NULL != result->endpoints)
-            {
-                for (int32_t i = 0; i < result->nbOfEndpoints; i++)
-                {
-                    SOPC_Free(result->endpoints[i].endpointUrl);
-                    SOPC_Free(result->endpoints[i].security_policyUri);
-                    SOPC_Free(result->endpoints[i].transportProfileUri);
-                    if (NULL != result->endpoints[i].userIdentityTokens)
-                    {
-                        for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
-                        {
-                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].policyId);
-                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuedTokenType);
-                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
-                            SOPC_Free(result->endpoints[i].userIdentityTokens[j].securityPolicyUri);
-                        }
-                        SOPC_Free(result->endpoints[i].userIdentityTokens);
-                    }
-                }
-                SOPC_Free(result->endpoints);
-            }
-            SOPC_Free(result);
-        }
+
+        SOPC_ClientHelper_GetEndpointsResult_Free(&result);
     }
 
     /* invalid arguments */

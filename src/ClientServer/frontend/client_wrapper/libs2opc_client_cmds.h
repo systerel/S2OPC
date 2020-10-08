@@ -436,6 +436,14 @@ void SOPC_ClientHelper_Finalize(void);
 int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result);
 
 /**
+ @brief Free the get endpoints result and its content.
+        Make copy or move data to be kept prior to call this function.
+
+ @param getEpResult  The ::SOPC_ClientHelper_GetEndpointsResult structure to clear
+*/
+void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsResult** getEpResult);
+
+/**
  @brief
     Creates a new configuration to connect to a remote OPC server.
     Return a configuration id or error code.

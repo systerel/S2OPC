@@ -431,6 +431,40 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     return res;
 }
 
+void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsResult** getEpResult)
+{
+    if (NULL == getEpResult || NULL == *getEpResult)
+    {
+        return;
+    }
+    SOPC_ClientHelper_GetEndpointsResult* result = *getEpResult;
+
+    if (NULL != result->endpoints)
+    {
+        for (int32_t i = 0; i < result->nbOfEndpoints; i++)
+        {
+            SOPC_Free(result->endpoints[i].endpointUrl);
+            SOPC_Free(result->endpoints[i].security_policyUri);
+            SOPC_Free(result->endpoints[i].serverCertificate);
+            SOPC_Free(result->endpoints[i].transportProfileUri);
+            if (NULL != result->endpoints[i].userIdentityTokens)
+            {
+                for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+                {
+                    SOPC_Free(result->endpoints[i].userIdentityTokens[j].policyId);
+                    SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuedTokenType);
+                    SOPC_Free(result->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
+                    SOPC_Free(result->endpoints[i].userIdentityTokens[j].securityPolicyUri);
+                }
+                SOPC_Free(result->endpoints[i].userIdentityTokens);
+            }
+        }
+        SOPC_Free(result->endpoints);
+    }
+    SOPC_Free(result);
+    *getEpResult = NULL;
+}
+
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
                                                  SOPC_ClientHelper_Security* security)
