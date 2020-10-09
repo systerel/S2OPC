@@ -242,7 +242,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:ccbf1f60a6633bd64b3d1b89fa049ceee3c9272465a625587d815e08b0fc543d # digest of check:1.9
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:dc2546f51f99190ba7af97c98538aa44f27d774a3876af93191ac3b5ec7ee963 # digest of check:1.10
   script:
     - ./.check-code.sh
   artifacts:
@@ -380,7 +380,7 @@ pages:
     - if: "$CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == 'master'"
   variables:
     <<: *build_linux_variables
-  script:       
+  script:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
