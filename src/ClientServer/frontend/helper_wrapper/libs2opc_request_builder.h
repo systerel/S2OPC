@@ -130,7 +130,9 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* r
  * \brief Create a write request
  *
  * \param nbWriteValues  Number of items (node, attribute, index range) to write with this write request.
- *                       \p nbWriteValue <= INT32_MAX
+ *                       \p nbWriteValue <= INT32_MAX. ::SOPC_WriteRequest_SetWriteValueFromStrings
+ *                       or ::SOPC_WriteRequest_SetWriteValue shall be called for each write value index.
+ *                       Otherwise empty write value is sent for the index not configured.
  *
  * \return allocated write request in case of success, NULL in case of failure (out of memory)
  */
@@ -240,7 +242,9 @@ typedef enum
  * \brief Create a browse request
  *
  * \param nbNodesToBrowse       Number of nodes to browse with this browse request.
- *                              \p nbNodesToBrowse <= INT32_MAX
+ *                              \p nbNodesToBrowse <= INT32_MAX. ::SOPC_BrowseRequest_SetBrowseDescriptionFromStrings
+ *                              or ::SOPC_BrowseRequest_SetBrowseDescription shall be called for each browse description
+ *                              index. Otherwise empty browse description is sent for the index not configured.
  *
  * \param maxReferencesPerNode  Indicates the maximum number of references to return for each starting node
  *                              specified in the request.
