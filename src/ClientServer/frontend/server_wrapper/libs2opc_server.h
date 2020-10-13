@@ -19,7 +19,19 @@
 
 /** \file
  *
- * \brief High level interface to run an OPC UA server
+ * \brief High level interface to run an OPC UA server.
+ *
+ * Once the server is configured using functions of libs2opc_server_config.h,
+ * the server should be started using ::SOPC_ServerHelper_StartServer (or ::SOPC_ServerHelper_Serve).
+ * Until it is stopped by call to ::SOPC_ServerHelper_StopServer or due to an error (listening address busy, etc.),
+ * the server is then accessible for connections by OPC UA client applications
+ * and local access/modification of address space content by server application itself.
+ * This is done using same OPC UA services client are using but in a local way called "local services" in this server
+ * API trough ::SOPC_ServerHelper_LocalServiceAsync (or ::SOPC_ServerHelper_LocalServiceSync)
+ *
+ * \note Local services:
+ *  Local services are restricted to a minimal set of services to access or modify address space content without any
+ * access restriction. This is the way to access or modify data of the server in the server application itself.
  *
  */
 
@@ -73,7 +85,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
 // Synchronous call to run the server, returns on stop signal (Ctrl+C) if catchSigStop set, after call to
 // SOPC_ServerHelper_StopServer() or error (endpoint closed).
 /**
- * \brief Run the server synchronously.
+ * \brief Run the server synchronously (alternative to ::SOPC_ServerHelper_StartServer)
  *        Server information node is updated and endpoints are opened.
  *        Run until requested to stop (call to ::SOPC_ServerHelper_StopServer or signal stop if active) or on endpoint
  *        opening error.
@@ -98,9 +110,12 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  */
 
 /**
- * \brief Executes a local service on server (read, write, browse or discovery service) asynchronously.
+ * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) asynchronously.
  *        On local service response callback configured through ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
  *        will be called.
+ *
+ * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called
+ *       and the server shall still running
  *
  * \param request   An instance of on of the following OPC UA request:
  *                  - OpcUa_ReadRequest
@@ -121,12 +136,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext);
 
 /**
- * \brief Executes a local service on server (read, write, browse or discovery service) synchronously
- */
-/**
- * \brief Executes a local service on server (read, write, browse or discovery service) synchronously.
+ * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) synchronously.
  *        On local service response callback configured through ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
  *        will be called.
+ *
+ * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called
+ *       and the server shall still running
+ *
  *
  * \param request   An instance of on of the following OPC UA request:
  *                  - OpcUa_ReadRequest
