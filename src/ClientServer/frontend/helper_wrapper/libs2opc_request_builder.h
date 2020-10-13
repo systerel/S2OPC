@@ -38,7 +38,9 @@
  * \brief Create a read request
  *
  * \param nbReadValues  Number of items (node, attribute, index range) to read with this read request.
- *                      \p nbReadValue <= INT32_MAX
+ *                      \p nbReadValue <= INT32_MAX. ::SOPC_ReadRequest_SetReadValueFromStrings
+ *                      or ::SOPC_ReadRequest_SetReadValue shall be called for each read value index.
+ *                      Otherwise empty read value is sent for the index not configured.
  * \param tsToReturn    The kind of Timestamps to be returned for each requested Variable Value Attribute
  *
  * \return allocated read request in case of success, NULL in case of failure (invalid timestamp kind or out of memory)
@@ -46,7 +48,9 @@
 OpcUa_ReadRequest* SOPC_ReadRequest_Create(size_t nbReadValues, OpcUa_TimestampsToReturn tsToReturn);
 
 /**
- * \brief Set the maximum age of the values to be read by read request
+ * \brief Indicates to the server of maximum age of the data it should return.
+ *        Default value is 0 to indicate to the server to return a fresh data value if applicable,
+ *        value >= INT32_MAX might be used to request a cached value if applicable to server data.
  *
  * \param readRequest  The read request to configure
  * \param maxAge       Maximum age of the value to be read in milliseconds
@@ -112,8 +116,6 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
 
 /**
  * \brief Set the data encoding of the value to read.
- *
- * \note Unsupported by communication stack
  *
  * \param readRequest   The read request to configure
  * \param index         Index of the read value to configure in the read request.
