@@ -442,7 +442,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     If this operation succeeded, return a configuration id \verbatim>\endverbatim 0.
     If invalid endpointUrl detected, return -1.
     If invalid security detected, return \verbatim-<10+n>\endverbatim with \verbatim<n>\endverbatim field number
- (starting from 1). If configuration failed, return '-100'.
+    (starting from 1). If configuration failed, return '-100'.
  */
 int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security);
 
