@@ -143,7 +143,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_ReadValueId* readVal = &readRequest->NodesToRead[index];
     readVal->AttributeId = attribute;
-    status = SOPC_NodeId_InitializeFromCString(&readVal->NodeId, nodeId);
+    status = SOPC_NodeId_InitializeFromCString(&readVal->NodeId, nodeId, (int32_t) strlen(nodeId));
     if (SOPC_STATUS_OK == status && NULL != indexRange)
     {
         status = SOPC_String_CopyFromCString(&readVal->IndexRange, indexRange);
@@ -243,7 +243,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
     OpcUa_WriteValue* wv = &writeRequest->NodesToWrite[index];
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     wv->AttributeId = attribute;
-    status = SOPC_NodeId_InitializeFromCString(&wv->NodeId, nodeId);
+    status = SOPC_NodeId_InitializeFromCString(&wv->NodeId, nodeId, (int32_t) strlen(nodeId));
     if (SOPC_STATUS_OK == status && NULL != indexRange)
     {
         status = SOPC_String_InitializeFromCString(&wv->IndexRange, indexRange);
@@ -356,10 +356,11 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
     bd->IncludeSubtypes = includeSubtypes;
     bd->NodeClassMask = nodeClassMask;
     bd->ResultMask = resultMask;
-    status = SOPC_NodeId_InitializeFromCString(&bd->NodeId, nodeId);
+    status = SOPC_NodeId_InitializeFromCString(&bd->NodeId, nodeId, (int32_t) strlen(nodeId));
     if (SOPC_STATUS_OK == status && NULL != referenceTypeId)
     {
-        status = SOPC_NodeId_InitializeFromCString(&bd->ReferenceTypeId, referenceTypeId);
+        status =
+            SOPC_NodeId_InitializeFromCString(&bd->ReferenceTypeId, referenceTypeId, (int32_t) strlen(referenceTypeId));
     }
     if (SOPC_STATUS_OK != status)
     {

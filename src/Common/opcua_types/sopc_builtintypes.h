@@ -539,7 +539,7 @@ bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId);
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
 char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId);
-SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString);
+SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len);
 SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
 
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);

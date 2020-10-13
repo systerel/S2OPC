@@ -2042,11 +2042,13 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_NodeId_InitializeFromCString(&req->ObjectId, creq->objectNodeId);
+            status = SOPC_NodeId_InitializeFromCString(&req->ObjectId, creq->objectNodeId,
+                                                       (int32_t) strlen(creq->objectNodeId));
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_NodeId_InitializeFromCString(&req->MethodId, creq->methodNodeId);
+            status = SOPC_NodeId_InitializeFromCString(&req->MethodId, creq->methodNodeId,
+                                                       (int32_t) strlen(creq->methodNodeId));
         }
 
         if (SOPC_STATUS_OK == status)
