@@ -48,9 +48,8 @@ static void Demo_WriteNotificationCallback(OpcUa_WriteValue* writeValue, SOPC_St
  *-----------------------*/
 
 /* Set the log path and set directory path built on executable name prefix */
-static char* Server_ConfigLogPath(char* argv[])
+static char* Server_ConfigLogPath(const char* logDirName)
 {
-    const char* logDirName = argv[0];
     char* logDirPath = NULL;
 
     size_t logDirPathSize = strlen(logDirName) + 7; // <logDirName> + "_logs/" + '\0'
@@ -61,7 +60,7 @@ static char* Server_ConfigLogPath(char* argv[])
         (int) (logDirPathSize - 1) != snprintf(logDirPath, logDirPathSize, "%s_logs/", logDirName))
     {
         SOPC_Free(logDirPath);
-        logDirPath = "";
+        logDirPath = NULL;
     }
 
     return logDirPath;
@@ -71,7 +70,7 @@ static char* Server_ConfigLogPath(char* argv[])
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(void)
+static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
      * TEST_SERVER_XML_ADDRESS_SPACE and TEST_USERS_XML_CONFIG.
@@ -92,10 +91,11 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(void)
 
         printf(
             "Error: an XML server configuration file path shall be provided, e.g.: "
-            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml TEST_SERVER_XML_ADDRESS_SPACE=./s2opc[_nano].xml "
+            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml TEST_SERVER_XML_ADDRESS_SPACE=./s2opc%s.xml "
             "TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml "
-            "./toolkit_demo[_nano]_server\nThe following environment variables are missing: %s%s%s\n",
-            server_config_missing, addspace_config_missing, users_config_missing);
+            "./%s\nThe following environment variables are missing: %s%s%s\n",
+            NULL == strstr(argv0, "nano") ? "" : "_nano", argv0, server_config_missing, addspace_config_missing,
+            users_config_missing);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
      * DEBUG traces generated in ./<argv[0]_logs/ */
     SOPC_Log_Configuration logConfig = SOPC_Common_GetDefaultLogConfiguration();
     logConfig.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    char* logDirPath = Server_ConfigLogPath(argv);
+    char* logDirPath = Server_ConfigLogPath(argv[0]);
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
     /* Initialize the server library (start library threads) */
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
     */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_LoadServerConfigurationFromFiles();
+        status = Server_LoadServerConfigurationFromFiles(argv[0]);
     }
 
     /* Define demo implementation of functions called for method call service */
@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
          * It is then possible to use local services to access / write data:
          * - Synchronously with SOPC_ServerHelper_LocalServiceSync(...)
          * - Asynchronously with SOPC_ServerHelper_LocalServiceAsync(...): need
-         * SOPC_HelperConfig_SetLocalServiceAsyncResponse(...) to be configured prir to start server
+         * SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(...) to be configured prir to start server
          */
 
         if (SOPC_STATUS_OK != status)
