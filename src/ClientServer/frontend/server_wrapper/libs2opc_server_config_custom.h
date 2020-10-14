@@ -97,7 +97,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
  *
  * \param additionalAppName        The name of the application using the additional locale language.
  * \param additionalAppNameLocale  Locale used for the application name, it shall exists in supported locales of the
- * server.
+ *                                 server.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p additionalApplicationName or \p additionalApplicationNameLocale are invalid
@@ -105,6 +105,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
  *         (toolkit not initialized, server already started).
  *
  * \note Supported locales shall be defined using ::SOPC_HelperConfigServer_SetLocaleIds prior to this function call.
+ * \note This function shall not be called before defining default name and locale with
+ * ::SOPC_HelperConfigServer_SetApplicationDescription
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
                                                                    const char* additionalAppNameLocale);

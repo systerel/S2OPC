@@ -142,7 +142,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == applicationUri || NULL == productUri || NULL == defaultAppName)
+    if (NULL == applicationUri || NULL == productUri || NULL == defaultAppName || 0 == strlen(defaultAppName))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -169,7 +169,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == additionalAppName || NULL == additionalAppNameLocale)
+    if (NULL == additionalAppName || 0 == strlen(additionalAppName) || NULL == additionalAppNameLocale ||
+        0 == strlen(additionalAppNameLocale))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
