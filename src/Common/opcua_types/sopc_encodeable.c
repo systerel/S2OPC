@@ -87,7 +87,8 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
 
 SOPC_ReturnStatus SOPC_Encodeable_Move(void* destObj, void* srcObj)
 {
-    if (NULL == destObj || NULL == srcObj || *(SOPC_EncodeableType**) destObj != *(SOPC_EncodeableType**) srcObj)
+    if (NULL == destObj || NULL == srcObj || destObj == srcObj ||
+        *(SOPC_EncodeableType**) destObj != *(SOPC_EncodeableType**) srcObj)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
