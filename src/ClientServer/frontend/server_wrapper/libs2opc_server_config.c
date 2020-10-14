@@ -164,6 +164,12 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
             res = false;
         }
     }
+    // Associate global user authentication/authorization managers with each low-level endpoint configuration
+    // Note: in the future, low level configuration should be changed to define those at server level and not endpoint
+    if (res)
+    {
+        SOPC_HelperConfig_SetEndpointsUserMgr();
+    }
 
     if (NULL == sopc_helper_config.config.serverConfig.namespaces)
     {
@@ -232,7 +238,8 @@ bool SOPC_HelperConfig_LockState(void)
 }
 
 /* Manage global user manager vs user manager by endpoint in low-level API */
-
+// Note: in the future, low level configuration should be changed to define those at server level and not endpoint.
+//       And those global variables might be avoided since deallocation of a unique manager is easier than a shared one
 static SOPC_ReturnStatus SOPC_HelperConfigInternal_Authen_ValidateUser(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
@@ -289,12 +296,6 @@ static SOPC_UserAuthorization_Manager authorization_manager = {
     .pData = NULL,
 };
 
-void SOPC_HelperConfig_SetEndpointUserMgr(SOPC_Endpoint_Config* epConfig)
-{
-    epConfig->authenticationManager = &authentication_manager;
-    epConfig->authorizationManager = &authorization_manager;
-}
-
 void SOPC_HelperConfig_SetEndpointsUserMgr(void)
 {
     // Ensure custom user manager data is correctly set
@@ -309,7 +310,8 @@ void SOPC_HelperConfig_SetEndpointsUserMgr(void)
 
     for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
     {
-        SOPC_HelperConfig_SetEndpointUserMgr(&sopc_helper_config.config.serverConfig.endpoints[i]);
+        sopc_helper_config.config.serverConfig.endpoints[i].authenticationManager = &authentication_manager;
+        sopc_helper_config.config.serverConfig.endpoints[i].authorizationManager = &authorization_manager;
     }
 }
 

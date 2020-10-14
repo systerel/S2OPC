@@ -154,12 +154,9 @@ bool SOPC_HelperConfig_IsInitAndLock(void);
 // Atomically set the configuration as locked and check for configuration issues
 bool SOPC_HelperConfig_LockState(void);
 
-// Associate global user manager to endpoint configuration
-// Note: temporarily necessary until moved from endpoint to server configuration
-void SOPC_HelperConfig_SetEndpointUserMgr(SOPC_Endpoint_Config* epConfig);
-
 // Associate global user manager to existing endpoint configurations. It shall be called when user managers are set.
-// Note: temporarily necessary until moved from endpoint to server configuration
+// Note: temporarily necessary until low-level configuration also define managers at server configuration instead of
+//       endpoint configuration level.
 void SOPC_HelperConfig_SetEndpointsUserMgr(void);
 
 // Local service synchronous internal callback

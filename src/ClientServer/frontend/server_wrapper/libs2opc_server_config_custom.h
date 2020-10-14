@@ -136,7 +136,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p serverCertPath or \p serverKeyPath are invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, key/cert pair already set, server already started).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath);
 
@@ -152,7 +152,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* ser
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p certificateNbBytes, \p serverCertificate, \p keyNbBytes or \p serverKeyPath are invalid (0 or NULL)
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, key/cert pair already set, server already started).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* serverCertificate,

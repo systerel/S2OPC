@@ -194,7 +194,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+        NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -239,7 +240,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+        NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -324,8 +326,6 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddEndpoint(SOPC_Endpoint_Config* endp
 
     sopc_helper_config.config.serverConfig.endpoints = newEpArray;
     sopc_helper_config.config.serverConfig.nbEndpoints = (uint8_t)(nbElts + 1);
-
-    SOPC_HelperConfig_SetEndpointUserMgr(&newEpArray[nbElts]);
 
     return SOPC_STATUS_OK;
 }
@@ -454,7 +454,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserManagers(SOPC_UserAuthentication_Manager* authenticationMgr,
                                                           SOPC_UserAuthorization_Manager* authorizationMgr)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.server.authenticationManager ||
+        NULL != sopc_helper_config.server.authorizationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -465,8 +466,6 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserManagers(SOPC_UserAuthenticatio
 
     sopc_helper_config.server.authenticationManager = authenticationMgr;
     sopc_helper_config.server.authorizationManager = authorizationMgr;
-
-    SOPC_HelperConfig_SetEndpointsUserMgr();
 
     return SOPC_STATUS_OK;
 }

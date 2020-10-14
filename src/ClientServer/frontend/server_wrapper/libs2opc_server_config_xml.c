@@ -163,10 +163,6 @@ static bool SOPC_HelperInternal_LoadUsersConfigFromFile(const char* filename)
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "Error parsing configuration file %s. Please check logged errors.\n", filename);
     }
-    else
-    {
-        SOPC_HelperConfig_SetEndpointsUserMgr();
-    }
 
     return res;
 }
