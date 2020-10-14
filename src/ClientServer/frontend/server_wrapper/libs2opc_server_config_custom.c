@@ -344,8 +344,7 @@ SOPC_Endpoint_Config SOPC_EndpointConfig_Create(const char* url, bool hasDiscove
 SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config* destEndpoint,
                                                            SOPC_SecurityPolicy_URI uri)
 {
-    assert(NULL != destEndpoint);
-    if (destEndpoint->nbSecuConfigs == SOPC_MAX_SECU_POLICIES_CFG)
+    if (NULL == destEndpoint || destEndpoint->nbSecuConfigs == SOPC_MAX_SECU_POLICIES_CFG)
     {
         return NULL;
     }
@@ -363,7 +362,7 @@ SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config*
         sUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
         break;
     default:
-        assert(false);
+        return NULL;
     }
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&sp->securityPolicy, sUri);
     assert(SOPC_STATUS_OK == status);
