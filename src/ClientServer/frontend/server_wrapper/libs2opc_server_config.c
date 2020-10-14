@@ -80,7 +80,7 @@ bool SOPC_HelperConfig_IsInitAndLock(void)
 // Check configuration is correct
 static bool SOPC_HelperConfigServer_CheckConfig(void)
 {
-    bool res = sopc_helper_config.config.serverConfig.nbEndpoints > 0;
+    bool res = sopc_helper_config.server.nbEndpoints > 0;
     if (!res)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "At least 1 endpoint shall be defined to start a server");
@@ -88,9 +88,9 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     bool hasUserName = false;
     bool hasSecurity = false;
     uint8_t nbDiscovery = 0;
-    for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
+    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
-        SOPC_Endpoint_Config* ep = &sopc_helper_config.config.serverConfig.endpoints[i];
+        SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
         for (uint8_t j = 0; j < ep->nbSecuConfigs; j++)
         {
             // Is it using security ?
@@ -200,9 +200,9 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                 SOPC_String_Initialize(&appDesc->DiscoveryUrls[i]);
             }
             uint8_t j = 0;
-            for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints && j < nbDiscovery; i++)
+            for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints && j < nbDiscovery; i++)
             {
-                SOPC_Endpoint_Config* ep = &sopc_helper_config.config.serverConfig.endpoints[i];
+                SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
                 // Is this a discovery endpoint ? Add it to application description.
                 if (ep->hasDiscoveryEndpoint)
                 {
@@ -308,10 +308,10 @@ void SOPC_HelperConfig_SetEndpointsUserMgr(void)
         authentication_manager.pData = sopc_helper_config.server.authenticationManager->pData;
     }
 
-    for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
+    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
-        sopc_helper_config.config.serverConfig.endpoints[i].authenticationManager = &authentication_manager;
-        sopc_helper_config.config.serverConfig.endpoints[i].authorizationManager = &authorization_manager;
+        sopc_helper_config.server.endpoints[i]->authenticationManager = &authentication_manager;
+        sopc_helper_config.server.endpoints[i]->authorizationManager = &authorization_manager;
     }
 }
 
@@ -382,6 +382,13 @@ static void SOPC_HelperConfigInternal_Initialize(void)
 static void SOPC_HelperConfigInternal_Clear(void)
 {
     SOPC_S2OPC_Config_Clear(&sopc_helper_config.config);
+    // Clear endpoints since not stored in S2OPC config anymore in wrapper:
+    for (int i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
+    {
+        SOPC_HelperInternal_ClearEndpoint(sopc_helper_config.server.endpoints[i]);
+        SOPC_Free(sopc_helper_config.server.endpoints[i]);
+        sopc_helper_config.server.endpoints[i] = NULL;
+    }
     SOPC_AddressSpace_Delete(sopc_helper_config.server.addressSpace);
     sopc_helper_config.server.addressSpace = NULL;
     Condition_Clear(&sopc_helper_config.server.syncLocalServiceCond);
@@ -487,4 +494,19 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct
     }
     sopc_helper_config.client.clientComEventCb = clientComEvtCb;
     return SOPC_STATUS_OK;
+}
+
+void SOPC_HelperInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
+{
+    SOPC_Free(epConfig->endpointURL);
+    for (int i = 0; i < epConfig->nbSecuConfigs && i < SOPC_MAX_SECU_POLICIES_CFG; i++)
+    {
+        SOPC_String_Clear(&epConfig->secuConfigurations[i].securityPolicy);
+        for (int j = 0; j < epConfig->secuConfigurations[i].nbOfUserTokenPolicies && j < SOPC_MAX_SECU_POLICIES_CFG;
+             j++)
+        {
+            OpcUa_UserTokenPolicy_Clear(&epConfig->secuConfigurations[i].userTokenPolicies[j]);
+        }
+    }
+    // Do not clear user managers since it is managed in a global way in high level API
 }

@@ -156,11 +156,12 @@ int main(int argc, char* argv[])
     // Secu policy configuration
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Endpoint_Config ep = SOPC_EndpointConfig_Create(DEFAULT_ENDPOINT_URL, true);
-        SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_Basic256Sha256);
+        SOPC_Endpoint_Config* ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+        SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
-        if (NULL == sp)
+        if (NULL == ep || NULL == sp)
         {
+            SOPC_Free(ep);
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
@@ -171,10 +172,6 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_HelperConfigServer_AddEndpoint(&ep);
         }
     }
 

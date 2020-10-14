@@ -27,6 +27,10 @@
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 
+// Macro used to check if msgPtr is valid and element index is valid in this message
+#define CHECK_ELEMENT_EXISTS(msgPtr, fieldNoOf, index) \
+    (NULL != (msgPtr) && ((msgPtr)->fieldNoOf) > 0 && (index) < (size_t)((msgPtr)->fieldNoOf))
+
 static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_AttributeId attrId)
 {
     switch (attrId)
@@ -73,10 +77,34 @@ static inline bool SOPC_TypeHelperInternal_CheckBrowseDirection(OpcUa_BrowseDire
     }
 }
 
-static inline bool SOPC_TypeHelperInternal_CheckMessageElementExists(void* msg, int32_t msgNbElts, size_t index)
+const SOPC_BrowseRequest_NodeClassMask NodeClassMask_ALL =
+    SOPC_NodeClassMask_Object | SOPC_NodeClassMask_Variable | SOPC_NodeClassMask_Method |
+    SOPC_NodeClassMask_ObjectType | SOPC_NodeClassMask_VariableType | SOPC_NodeClassMask_ReferenceType |
+    SOPC_NodeClassMask_DataType | SOPC_NodeClassMask_View;
+
+static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(SOPC_BrowseRequest_NodeClassMask ncm)
 {
-    if (NULL == msg || msgNbElts < 0 || index > (size_t) msgNbElts)
+    SOPC_BrowseRequest_NodeClassMask filtered_ncm = ncm & NodeClassMask_ALL;
+
+    if (filtered_ncm != ncm)
     {
+        // Contains invalid mask values
+        return false;
+    }
+    return true;
+}
+
+const SOPC_BrowseRequest_ResultMask ResultMask_ALL = SOPC_ResultMask_ReferenceType | SOPC_ResultMask_IsForward |
+                                                     SOPC_ResultMask_NodeClass | SOPC_ResultMask_BrowseName |
+                                                     SOPC_ResultMask_DisplayName | SOPC_ResultMask_TypeDefinition;
+
+static inline bool SOPC_TypeHelperInternal_CheckResultMask(SOPC_BrowseRequest_ResultMask rm)
+{
+    SOPC_BrowseRequest_ResultMask filtered_rm = rm & ResultMask_ALL;
+
+    if (filtered_rm != rm)
+    {
+        // Contains invalid mask values
         return false;
     }
     return true;
@@ -135,7 +163,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
                                                            SOPC_AttributeId attribute,
                                                            const char* indexRange)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(readRequest, readRequest->NoOfNodesToRead, index) ||
+    if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index) ||
         SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -161,7 +189,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 SOPC_AttributeId attribute,
                                                 SOPC_String* indexRange)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(readRequest, readRequest->NoOfNodesToRead, index) ||
+    if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index) ||
         SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -185,7 +213,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* r
                                                             size_t index,
                                                             SOPC_QualifiedName* dataEncoding)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(readRequest, readRequest->NoOfNodesToRead, index))
+    if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -235,7 +263,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
                                                              const char* indexRange,
                                                              SOPC_DataValue* value)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(writeRequest, writeRequest->NoOfNodesToWrite, index) ||
+    if (!CHECK_ELEMENT_EXISTS(writeRequest, NoOfNodesToWrite, index) ||
         SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -266,7 +294,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
                                                   SOPC_String* indexRange,
                                                   SOPC_DataValue* value)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(writeRequest, writeRequest->NoOfNodesToWrite, index) ||
+    if (!CHECK_ELEMENT_EXISTS(writeRequest, NoOfNodesToWrite, index) ||
         SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -345,8 +373,10 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
                                                                      SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                                      SOPC_BrowseRequest_ResultMask resultMask)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(browseRequest, browseRequest->NoOfNodesToBrowse, index) ||
-        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection))
+    if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
+        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
+        !SOPC_TypeHelperInternal_CheckNodeClassMask(nodeClassMask) ||
+        !SOPC_TypeHelperInternal_CheckResultMask(resultMask))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -378,8 +408,10 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
                                                           SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                           SOPC_BrowseRequest_ResultMask resultMask)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(browseRequest, browseRequest->NoOfNodesToBrowse, index) ||
-        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection))
+    if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
+        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
+        !SOPC_TypeHelperInternal_CheckNodeClassMask(nodeClassMask) ||
+        !SOPC_TypeHelperInternal_CheckResultMask(resultMask))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -443,9 +475,7 @@ SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRe
                                                               size_t index,
                                                               SOPC_ByteString* continuationPoint)
 {
-    if (!SOPC_TypeHelperInternal_CheckMessageElementExists(browseNextRequest, browseNextRequest->NoOfContinuationPoints,
-                                                           index) ||
-        NULL == continuationPoint)
+    if (!CHECK_ELEMENT_EXISTS(browseNextRequest, NoOfContinuationPoints, index) || NULL == continuationPoint)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -546,7 +576,7 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
     OpcUa_RegisterServer2Request_Initialize(request);
     if (NULL == request)
     {
-        return false;
+        return NULL;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     request->DiscoveryConfiguration = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
@@ -559,20 +589,21 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
                                                  &OpcUa_MdnsDiscoveryConfiguration_EncodeableType, (void**) &mdnsObj);
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && srcDesc->NoOfDiscoveryUrls > 0)
     {
-        if (srcDesc->NoOfDiscoveryUrls > 0)
-        {
-            request->Server.DiscoveryUrls = SOPC_Calloc((size_t) srcDesc->NoOfDiscoveryUrls, sizeof(SOPC_String));
+        request->Server.DiscoveryUrls = SOPC_Calloc((size_t) srcDesc->NoOfDiscoveryUrls, sizeof(SOPC_String));
 
-            if (request->Server.DiscoveryUrls != NULL)
+        if (request->Server.DiscoveryUrls != NULL)
+        {
+            request->Server.NoOfDiscoveryUrls = srcDesc->NoOfDiscoveryUrls;
+            for (int32_t i = 0; SOPC_STATUS_OK == status && i < srcDesc->NoOfDiscoveryUrls; i++)
             {
-                request->Server.NoOfDiscoveryUrls = srcDesc->NoOfDiscoveryUrls;
-                for (int32_t i = 0; SOPC_STATUS_OK == status && i < srcDesc->NoOfDiscoveryUrls; i++)
-                {
-                    status = SOPC_String_AttachFrom(&request->Server.DiscoveryUrls[i], &srcDesc->DiscoveryUrls[i]);
-                }
+                status = SOPC_String_AttachFrom(&request->Server.DiscoveryUrls[i], &srcDesc->DiscoveryUrls[i]);
             }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
         }
     }
 
@@ -585,11 +616,6 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
     if (SOPC_STATUS_OK == status && srcDesc->GatewayServerUri.Length > 0)
     {
         status = SOPC_String_AttachFrom(&request->Server.GatewayServerUri, &srcDesc->GatewayServerUri);
-    }
-
-    if (SOPC_STATUS_OK == status && srcDesc->ProductUri.Length > 0)
-    {
-        status = SOPC_String_AttachFrom(&request->Server.ProductUri, &srcDesc->ProductUri);
     }
 
     if (SOPC_STATUS_OK == status && srcDesc->ProductUri.Length > 0)
@@ -635,3 +661,5 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
 
     return request;
 }
+
+#undef CHECK_ELEMENT_EXISTS

@@ -160,25 +160,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
                                                                   const unsigned char* serverPrivateKey);
 
 /**
- * \brief Attach a new endpoint configuration to server configuration.
- *        Use functions below to create the endpoint configuration
- *        (see ::SOPC_HelperConfigServer_AddEndpoint, etc.)
- *
- * \param endpointConfig  The endpoint configuration to add to server configuration
- *
- * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p endpointConfig is invalid (NULL)
- *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
- * \note \p endpointConfig shall have been built with below constructor and not forged manually.
- *       Allocation issues and restrictions managed by constructors.
- * \note \p endpointConfig shall not be accessed nor used after call to this function
- *       and structure does not need to be kept in memory scope after this call.
- */
-SOPC_ReturnStatus SOPC_HelperConfigServer_AddEndpoint(SOPC_Endpoint_Config* endpointConfig);
-
-/**
- * \brief Create a new endpoint configuration structure to configure with the functions below
+ * \brief Create a new endpoint configuration in server to be completed by using the functions below
  * (::SOPC_EndpointConfig_AddSecurityPolicy, etc.)
  *
  * \param url           URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
@@ -186,12 +168,16 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddEndpoint(SOPC_Endpoint_Config* endp
  *                      Discovery services are then accessible without any security even
  *                      if endpoint only allow secure connections (Sign or SignAndEncrypt)
  *
- * \return SOPC_Endpoint_Config structure to be filled with ::SOPC_EndpointConfig_AddSecurityPolicy
- *         and added to server configuration once filled using ::SOPC_HelperConfigServer_AddEndpoint
+ * \return SOPC_Endpoint_Config pointer to configuration structure to be filled
+ *         with ::SOPC_EndpointConfig_AddSecurityPolicy.
+ *         Otherwise Returns NULL if no more configuration slots are available
+ *         (see SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS).
  *
  * \note Invalid parameter or out of memory issue will result in assertion failure.
+ * \note The returned pointer points to static memory and should not be freed or reused once configuration completed.
+ *
  */
-SOPC_Endpoint_Config SOPC_EndpointConfig_Create(const char* url, bool hasDiscovery);
+SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery);
 
 /**
  * \brief Enumerated values authorized for use with ::SOPC_EndpointConfig_AddSecurityPolicy.
@@ -207,7 +193,7 @@ typedef enum
 /**
  * \brief Add a security policy to the endpoint configuration
  *
- * \param destEndpoint Pointer to endpoint created with ::SOPC_EndpointConfig_Create
+ * \param destEndpoint Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
  * \param uri          Security policy ::SOPC_SecurityPolicy_URI supported by \p destEndpoint
  *
  * \return A pointer to the new security policy supported or NULL if ::SOPC_MAX_SECU_POLICIES_CFG are already defined.

@@ -455,18 +455,17 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
      * use an embedded default demo server configuration.
      */
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Endpoint_Config ep = SOPC_EndpointConfig_Create(DEFAULT_ENDPOINT_URL, true);
-    SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_Basic256Sha256);
+    SOPC_Endpoint_Config* ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+    SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
-    if (NULL == sp)
+    if (NULL == ep || NULL == sp)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        SOPC_Free(ep);
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
-    {
-        status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
-    }
+
+    SOPC_ReturnStatus status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
+
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
@@ -474,10 +473,6 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperConfigServer_AddEndpoint(&ep);
     }
 
     // Server certificates configuration
@@ -575,6 +570,7 @@ START_TEST(test_server_client)
 
     // Get default log config and set the custom path
     SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
+    log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
     log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs/";
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_Helper_Initialize(&log_config);

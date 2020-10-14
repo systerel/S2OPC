@@ -324,7 +324,15 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         status = SOPC_HelperConfigServer_AddApplicationNameLocale("S2OPC toolkit: exemple de serveur", "fr-FR");
     }
 
-    SOPC_Endpoint_Config ep = SOPC_EndpointConfig_Create(DEFAULT_ENDPOINT_URL, true);
+    /*
+     * Create new endpoint in server
+     */
+    SOPC_Endpoint_Config* ep = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+        status = NULL == ep ? SOPC_STATUS_OUT_OF_MEMORY : status;
+    }
 
     /*
      * Define the certificates, security policies, security modes and user token policies supported by endpoint
@@ -335,7 +343,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         /*
          * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
          */
-        sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_Basic256Sha256);
+        sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256Sha256);
         if (NULL == sp)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -360,7 +368,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
          */
         if (SOPC_STATUS_OK == status)
         {
-            sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_Basic256);
+            sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256);
             if (NULL == sp)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -390,7 +398,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
      */
     if (SOPC_STATUS_OK == status)
     {
-        sp = SOPC_EndpointConfig_AddSecurityPolicy(&ep, SOPC_SecurityPolicy_None);
+        sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_None);
         if (NULL == sp)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -410,12 +418,6 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                     sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy); /* Necessary for UACTT tests only */
             }
         }
-    }
-
-    // Add endpoint to server configuration
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperConfigServer_AddEndpoint(&ep);
     }
 
     /**

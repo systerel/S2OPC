@@ -25,6 +25,7 @@
 #include "libs2opc_server_config_internal.h"
 
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
 
@@ -185,14 +186,38 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
     }
 
     bool res = true;
+    /* Server XML config */
     if (NULL != serverConfigPath)
     {
         res &= SOPC_HelperInternal_LoadServerConfigFromFile(serverConfigPath);
+        // "Transfer" endpoints from low level S2OPC server config to high level one
+        // Note: in the future we should modify low level representation instead
+        for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
+        {
+            SOPC_Endpoint_Config* ep = &sopc_helper_config.config.serverConfig.endpoints[i];
+            sopc_helper_config.server.endpoints[i] = SOPC_Calloc(1, sizeof(SOPC_Endpoint_Config));
+            if (NULL != sopc_helper_config.server.endpoints[i])
+            {
+                *sopc_helper_config.server.endpoints[i] = *ep;
+                sopc_helper_config.server.nbEndpoints++;
+            }
+            else
+            {
+                // Clear in case of failure to clear low level config
+                SOPC_HelperInternal_ClearEndpoint(ep);
+                res = false;
+            }
+        }
+        SOPC_Free(sopc_helper_config.config.serverConfig.endpoints);
+        sopc_helper_config.config.serverConfig.endpoints = NULL;
+        sopc_helper_config.config.serverConfig.nbEndpoints = 0;
     }
+    /* AddressSpace XML config */
     if (NULL != addressSpaceConfigPath)
     {
         res &= SOPC_HelperInternal_LoadAddressSpaceConfigFromFile(addressSpaceConfigPath);
     }
+    /* Users XML config */
     if (NULL != userConfigPath)
     {
         res &= SOPC_HelperInternal_LoadUsersConfigFromFile(userConfigPath);

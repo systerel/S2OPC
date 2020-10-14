@@ -34,6 +34,7 @@
 
 #include "sopc_address_space.h"
 #include "sopc_mutexes.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_user_app_itf.h"
 
 #include "libs2opc_server.h"
@@ -99,6 +100,9 @@ typedef struct SOPC_Helper_Config
 
         // Configured endpoint indexes and opened state arrays
         uint8_t nbEndpoints;
+        SOPC_Endpoint_Config*
+            endpoints[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]; // we do not use config.endpoints to avoid
+                                                                     // pre-allocating structure
         uint32_t* endpointIndexes;
         bool* endpointOpened;
 
@@ -171,5 +175,8 @@ void SOPC_HelperInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
 
 // Endpoint closed asynchronous callback
 void SOPC_HelperInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status);
+
+// Clear low level endpoint config (clear strings, do not clear user managers)
+void SOPC_HelperInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig);
 
 #endif

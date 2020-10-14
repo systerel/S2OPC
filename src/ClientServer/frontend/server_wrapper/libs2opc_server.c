@@ -139,8 +139,7 @@ static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintpt
 // After this step configuration is not modifiable anymore.
 static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 {
-    SOPC_Server_Config* serverCfg = &sopc_helper_config.config.serverConfig;
-    uint8_t nbEndpoints = serverCfg->nbEndpoints;
+    uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
     if (0 == nbEndpoints)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -159,7 +158,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint8_t i = 0; SOPC_STATUS_OK == status && i < nbEndpoints; i++)
     {
-        uint32_t epIdx = SOPC_ToolkitServer_AddEndpointConfig(&serverCfg->endpoints[i]);
+        uint32_t epIdx = SOPC_ToolkitServer_AddEndpointConfig(sopc_helper_config.server.endpoints[i]);
         if (epIdx > 0)
         {
             endpointIndexes[i] = epIdx;
@@ -170,7 +169,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
                                    "Error configuring endpoint %" PRIu8
                                    ": %s."
                                    " Please check associated configuration data is coherent and complete.\n",
-                                   i, serverCfg->endpoints[i].endpointURL);
+                                   i, sopc_helper_config.server.endpoints[i]->endpointURL);
             status = SOPC_STATUS_NOK;
         }
     }
@@ -331,7 +330,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 // Request to close all endpoints of the server
 static void SOPC_HelperInternal_ActualShutdownServer(void)
 {
-    for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
+    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
         SOPC_ToolkitServer_AsyncCloseEndpoint(sopc_helper_config.server.endpointIndexes[i]);
     }
@@ -354,7 +353,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
 
 void SOPC_HelperInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status)
 {
-    uint8_t nbEndpoints = sopc_helper_config.config.serverConfig.nbEndpoints;
+    uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
     bool allEndpointsClosed = true;
     if (SOPC_STATUS_OK != status && SOPC_STATUS_OK == sopc_helper_config.server.serverStoppedStatus)
     {

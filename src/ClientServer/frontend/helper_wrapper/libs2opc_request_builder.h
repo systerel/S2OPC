@@ -49,6 +49,7 @@ OpcUa_ReadRequest* SOPC_ReadRequest_Create(size_t nbReadValues, OpcUa_Timestamps
 
 /**
  * \brief Indicates to the server of maximum age of the data it should return.
+ *
  *        Default value is 0 to indicate to the server to return a fresh data value if applicable,
  *        value >= INT32_MAX might be used to request a cached value if applicable to server data.
  *
@@ -68,7 +69,10 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetMaxAge(OpcUa_ReadRequest* readRequest, dou
  *                     \p index < number of read value configured in ::SOPC_ReadRequest_Create
  *
  * \param nodeId       The id of the node to read as a C string, e.g. 'ns=1;s=MyNode'.
- *                     \p nodeId shall not be NULL
+ *                     \p nodeId shall not be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                     OPC UA specification</a>.
  *
  * \param attribute    The attribute to read in the node.
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid
@@ -77,6 +81,9 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetMaxAge(OpcUa_ReadRequest* readRequest, dou
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
  *                     If not used for the read value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid read request, index, nodeId or attribute.
@@ -104,6 +111,9 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
  *                     If not used for the read value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid read request, index, nodeId or attribute.
@@ -147,7 +157,10 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues);
  *                      \p index < number of write value configured in ::SOPC_WriteRequest_Create
  *
  * \param nodeId       The id of the node to write as a C string, e.g. 'ns=1;s=MyNode'.
- *                     \p nodeId shall not be NULL
+ *                     \p nodeId shall not be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                     OPC UA specification</a>.
  *
  * \param attribute    The attribute to write in the node.
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
@@ -156,6 +169,9 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues);
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
  *                     If not used for the write value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
  *
  * \param value        The value to write for given item (node, attribute, index range).
  *                     \p value shall not be NULL
@@ -190,6 +206,9 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
  *                     If not used for the write value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
  *
  * \param value        The value to write for given item (node, attribute, index range).
  *                     \p value shall not be NULL
@@ -266,7 +285,10 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
  *                         \p index < number of nodes to browse configured in ::SOPC_BrowseRequest_Create
  *
  * \param nodeId           The id of the node to browse as a C string, e.g. 'ns=1;s=MyNode'.
- *                         \p nodeId shall not be NULL
+ *                         \p nodeId shall not be NULL.
+ *                         Format is described in
+ *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                         OPC UA specification</a>.
  *
  * \param browseDirection  The browse direction to use
  *                         \p browseDirection shall be in the range of ::OpcUa_BrowseDirection.
@@ -275,6 +297,9 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
  * \param referenceTypeId  The node id of the reference type to browse as a C string,  e.g. 'ns=0;i=35' or 'i=35'.
  *                         If not specified then all References are returned and \p includeSubtypes is ignored.
  *                         If not used for to browse this node it should be NULL.
+ *                         Format is described in
+ *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                         OPC UA specification</a>.
  *
  * \param includeSubtypes  Indicates whether subtypes of the ReferenceType should be included in the browse.
  *                         If TRUE, then instances of referenceTypeId and all of its subtypes are returned.
@@ -282,11 +307,11 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
  * \param nodeClassMask    Mask specifying the node classes of the target nodes.
  *                         Only TargetNodes with the selected node classes are returned.
  *                         If set to zero, then all NodeClasses are returned.
- *                         Value shall be a bitwise disjunction of ::SOPC_BrowseRequest_NodeClassMask
+ *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_NodeClassMask
  *
  * \param resultMask       Mask specifying the fields in the ::OpcUa_ReferenceDescription structure
  *                         that should be returned.
- *                         Value shall be a bitwise disjunction of ::SOPC_BrowseRequest_ResultMask
+ *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_ResultMask
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid browse request, index, nodeId or browseDirection.
@@ -325,11 +350,11 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
  * \param nodeClassMask    Mask specifying the node classes of the target nodes.
  *                         Only TargetNodes with the selected node classes are returned.
  *                         If set to zero, then all NodeClasses are returned.
- *                         Value shall be a bitwise disjunction of ::SOPC_BrowseRequest_NodeClassMask
+ *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_NodeClassMask
  *
  * \param resultMask       Mask specifying the fields in the ::OpcUa_ReferenceDescription structure
  *                         that should be returned.
- *                         Value shall be a bitwise disjunction of ::SOPC_BrowseRequest_ResultMask
+ *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_ResultMask
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid browse request, index, nodeId or browseDirection.
@@ -346,6 +371,12 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
 /**
  * \brief Create a browse next request
  *
+ *   BrowseNext are used to continue a Browse that had too much browse results (more than \p maxReferencesPerNode).
+ *   The continuation points are found in the browse response.
+ *   A continuation point shall be used to iterate over all the browse results.
+ *   When no more browse results are available, the BrowseNext should be sent once more with the continuation points to
+ *   free (set \p releaseContinuationPoints to true for these continuation points).
+ *
  * \param releaseContinuationPoints  If set to true passed continuationPoints shall be reset to free resources
  *                                   in the Server. Otherwise the passed continuationPoints shall be used to get
  *                                   the next set of browse information.
@@ -354,8 +385,6 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
  *
  * \return allocated browse next request in case of success, NULL in case of failure
  *         (invalid parameters or out of memory)
- *
- * \note Only 1 continuation point (per session) is supported by s2opc server.
  */
 OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationPoints, size_t nbContinuationPoints);
 
@@ -388,7 +417,7 @@ SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRe
 OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointURL);
 
 /**
- * \brief Add a preferred locale to the get endpoints request (Optional)
+ * \brief Request preferred locales for the endpoints to be returned by the get endpoints service (Optional)
  *        Preferred locale order is from first call to last call to this function.
  *
  * \param getEndpointsReq  The get endpoints request to configure
@@ -403,13 +432,19 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_AddPreferredLocale(OpcUa_GetEndpoints
                                                               const char* localeId);
 
 /**
- * \brief Add a profile URI to the get endpoints request (Optional)
- *        All endpoints are returned if ::SOPC_GetEndpointsRequest_AddProfileURI unused.
+ * \brief Request a specific profile URI for the endpoints to be returned by the get endpoints service (Optional)
+ *        Endpoints of all transport profile types available are returned
+ *        if ::SOPC_GetEndpointsRequest_AddProfileURI unused.
  *
  * \param getEndpointsReq  The get endpoints request to configure
  *
  * \param profileURI       Transport profile to be returned by GetEndpoints service.
  *                         It shall not be NULL.
+ *                         E.g. "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",
+ *                         other possible values are described in Transport category of
+ *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part7/6.2/>
+ *                         OPC UA specification</a>.
+
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid get endpoints request or profileURI.

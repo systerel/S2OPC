@@ -283,62 +283,44 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_AddEndpoint(SOPC_Endpoint_Config* endpointConfig)
+SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (NULL == url || !SOPC_HelperConfig_IsInitAndUnlock() ||
+        sopc_helper_config.server.nbEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
-        return SOPC_STATUS_INVALID_STATE;
+        return NULL;
     }
-    if (NULL == endpointConfig)
+    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_Endpoint_Config* epArray = sopc_helper_config.config.serverConfig.endpoints;
-    uint8_t nbElts = sopc_helper_config.config.serverConfig.nbEndpoints;
-
-    for (uint8_t i = 0; i < nbElts; i++)
-    {
-        SOPC_Endpoint_Config* ep = &epArray[i];
-        int res = SOPC_strcmp_ignore_case(ep->endpointURL, endpointConfig->endpointURL);
+        SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
+        int res = SOPC_strcmp_ignore_case(ep->endpointURL, url);
         if (0 == res)
         {
             // Endpoint URL already set
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Error adding an endpoint with an already configured endpoint URL %s",
                                    ep->endpointURL);
-            return SOPC_STATUS_INVALID_PARAMETERS;
+            return NULL;
         }
     }
-
-    if (UINT8_MAX == nbElts)
+    SOPC_Endpoint_Config* newEp = SOPC_Calloc(1, sizeof(SOPC_Endpoint_Config));
+    if (NULL == newEp)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        return NULL;
     }
 
-    // Use of realloc for each AddEndpoint, possible to optimize or limit to a maximum pre-allocated
-    SOPC_Endpoint_Config* newEpArray = SOPC_Realloc(epArray, (size_t) nbElts * sizeof(SOPC_Endpoint_Config),
-                                                    ((size_t) nbElts + 1) * sizeof(SOPC_Endpoint_Config));
-    if (NULL == newEpArray)
+    newEp->endpointURL = SOPC_strdup(url);
+    if (NULL == newEp->endpointURL)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        SOPC_Free(newEp);
+        return NULL;
     }
-    newEpArray[nbElts] = *endpointConfig;
 
-    sopc_helper_config.config.serverConfig.endpoints = newEpArray;
-    sopc_helper_config.config.serverConfig.nbEndpoints = (uint8_t)(nbElts + 1);
+    newEp->hasDiscoveryEndpoint = hasDiscovery;
+    newEp->serverConfigPtr = &sopc_helper_config.config.serverConfig;
+    sopc_helper_config.server.endpoints[sopc_helper_config.server.nbEndpoints] = newEp;
+    sopc_helper_config.server.nbEndpoints++;
 
-    return SOPC_STATUS_OK;
-}
-
-SOPC_Endpoint_Config SOPC_EndpointConfig_Create(const char* url, bool hasDiscovery)
-{
-    assert(NULL != url);
-    SOPC_Endpoint_Config newEp;
-    memset(&newEp, 0, sizeof(newEp));
-    newEp.endpointURL = SOPC_strdup(url);
-    assert(NULL != newEp.endpointURL);
-    newEp.hasDiscoveryEndpoint = hasDiscovery;
-    newEp.serverConfigPtr = &sopc_helper_config.config.serverConfig;
     return newEp;
 }
 
