@@ -47,9 +47,7 @@ typedef struct SOPC_Server_RuntimeVariables
  * \brief Builds the structure containing the values for runtime variables in the address space.
  *
  * \param build_info  Toolkit build information structure
- *
  * \param server_config Server configuration data
- *
  * \param  manufacturer_name Sever manufacturer name.
  *
  * \return structure containing all runtime variables.

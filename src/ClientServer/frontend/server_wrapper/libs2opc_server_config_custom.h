@@ -210,7 +210,9 @@ typedef enum
  *
  * \return A pointer to the new security policy supported or NULL if ::SOPC_MAX_SECU_POLICIES_CFG are already defined.
  *         The new security policy shall be completed using ::SOPC_SecurityPolicy_AddSecurityModes and
- *         ::SOPC_SecurityPolicy_AddUserTokenPolicy
+ *         ::SOPC_SecurityPolicy_AddUserTokenPolicy.
+ *
+ * \note   The returned pointer points to static memory and should not be freed or reused once configuration completed.
  */
 SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config* destEndpoint,
                                                            SOPC_SecurityPolicy_URI uri);
