@@ -59,7 +59,7 @@ static char** copy_char_array_into_new_NULL_terminated_array(size_t nbElts, char
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.namespaces)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -81,7 +81,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.localeIds)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -180,7 +180,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.pki)
     {
         return SOPC_STATUS_INVALID_STATE;
     }

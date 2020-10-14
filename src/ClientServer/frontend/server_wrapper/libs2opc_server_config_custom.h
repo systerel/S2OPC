@@ -47,7 +47,7 @@
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p nbNamespaces == 0 or \p namespaces is invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, namesapces already defined, server already started).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces);
 
@@ -63,7 +63,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p localeIds is invalid when \p nbLocales \> 0
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, localesIds already defined, server already started).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds);
 
@@ -120,7 +120,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p pki is invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, PKI already defined, server already started).
  *
  * \note A default PKI provider compliant with OPC UA standard is provided in sopc_pki_stack.h
  */
