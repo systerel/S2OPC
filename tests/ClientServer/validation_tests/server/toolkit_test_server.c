@@ -509,7 +509,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     {
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
-        SOPC_HelperConfigServer_SetUserManagers(authenticationManager, authorizationManager);
+        SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
+        SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
     }
 
     return status;

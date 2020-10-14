@@ -451,20 +451,34 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserManagers(SOPC_UserAuthentication_Manager* authenticationMgr,
-                                                          SOPC_UserAuthorization_Manager* authorizationMgr)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+    SOPC_UserAuthentication_Manager* authenticationMgr)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.server.authenticationManager ||
-        NULL != sopc_helper_config.server.authorizationManager)
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.server.authenticationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == authenticationMgr || NULL == authorizationMgr)
+    if (NULL == authenticationMgr)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     sopc_helper_config.server.authenticationManager = authenticationMgr;
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
+{
+    if (!SOPC_HelperConfig_IsInitAndUnlock() || NULL != sopc_helper_config.server.authorizationManager)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == authorizationMgr)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     sopc_helper_config.server.authorizationManager = authorizationMgr;
 
     return SOPC_STATUS_OK;

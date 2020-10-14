@@ -304,20 +304,33 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
 /* User authentication and authorization managers configuration without XML */
 
 /**
- * \brief Configure the server user authentication manager and user authorization manager.
+ * \brief Configure the server user authentication manager in charge to check user credentials
  *
  * \param authenticationMgr  Pointer to the user authentication manager in charge to check user credentials
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ *         if \p authenticationMgr is invalid (NULL)
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *         (toolkit not initialized, authentication manager already set, server already started).
+ *
+ *  \note if not called default user managers allowing any user will be instantiated
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+    SOPC_UserAuthentication_Manager* authenticationMgr);
+
+/**
+ * \brief Configure the server user authorization manager to check user access rights
+ *
  * \param authorizationMgr   Pointer to the user authorization manager in charge to check user access rights
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p certificateNbBytes, \p serverCertificate, \p keyNbBytes or \p serverKeyPath are invalid (0 or NULL)
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, authorization manager already set, server already started).
  *
- *  \note if not defined default user managers allowing any user and any access will be instantiated
+ *  \note if not called default user manager allowing any access will be instantiated
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserManagers(SOPC_UserAuthentication_Manager* authenticationMgr,
-                                                          SOPC_UserAuthorization_Manager* authorizationMgr);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
 
 /* Change software manufacturer */
 
