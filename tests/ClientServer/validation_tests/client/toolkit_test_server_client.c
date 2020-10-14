@@ -465,7 +465,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     }
     else
     {
-        status = SOPC_SecurityPolicy_AddSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
+        status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
     }
     if (SOPC_STATUS_OK == status)
     {

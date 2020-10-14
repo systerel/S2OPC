@@ -342,7 +342,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
         else
         {
-            status = SOPC_SecurityPolicy_AddSecurityModes(
+            status = SOPC_SecurityPolicy_SetSecurityModes(
                 sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
 
             if (SOPC_STATUS_OK == status)
@@ -367,7 +367,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
             }
             else
             {
-                status = SOPC_SecurityPolicy_AddSecurityModes(
+                status = SOPC_SecurityPolicy_SetSecurityModes(
                     sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
 
                 if (SOPC_STATUS_OK == status)
@@ -397,7 +397,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
         else
         {
-            status = SOPC_SecurityPolicy_AddSecurityModes(sp, SOPC_SecurityModeMask_None);
+            status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_None);
 
             if (SOPC_STATUS_OK == status)
             {

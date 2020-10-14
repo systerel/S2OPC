@@ -370,7 +370,7 @@ SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config*
     return sp;
 }
 
-SOPC_ReturnStatus SOPC_SecurityPolicy_AddSecurityModes(SOPC_SecurityPolicy* destSecuPolicy, SOPC_SecurityModeMask modes)
+SOPC_ReturnStatus SOPC_SecurityPolicy_SetSecurityModes(SOPC_SecurityPolicy* destSecuPolicy, SOPC_SecurityModeMask modes)
 {
     if (NULL == destSecuPolicy ||
         0 == (modes & (SOPC_SecurityModeMask_None | SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt)))

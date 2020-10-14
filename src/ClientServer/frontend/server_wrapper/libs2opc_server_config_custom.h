@@ -239,7 +239,7 @@ typedef enum
  *
  * \note the None security policy does not support any mode except None
  */
-SOPC_ReturnStatus SOPC_SecurityPolicy_AddSecurityModes(SOPC_SecurityPolicy* destSecuPolicy,
+SOPC_ReturnStatus SOPC_SecurityPolicy_SetSecurityModes(SOPC_SecurityPolicy* destSecuPolicy,
                                                        SOPC_SecurityModeMask modes);
 
 /**
