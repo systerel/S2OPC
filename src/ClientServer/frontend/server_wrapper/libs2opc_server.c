@@ -139,13 +139,16 @@ static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintpt
 // After this step configuration is not modifiable anymore.
 static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 {
-    uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
-    if (0 == nbEndpoints)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
+
+    // Lock the helper state (verification and finalization of configuration)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Error no endpoint defined, at least one shall be defined");
-        return SOPC_STATUS_INVALID_STATE;
+        bool res = SOPC_ServerInternal_LockConfigState();
+        status = (res ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE);
     }
+
     uint32_t* endpointIndexes = SOPC_Calloc((size_t) nbEndpoints, sizeof(uint32_t));
     bool* endpointOpened = SOPC_Calloc((size_t) nbEndpoints, sizeof(bool));
     if (NULL == endpointIndexes || NULL == endpointOpened)
@@ -155,7 +158,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint8_t i = 0; SOPC_STATUS_OK == status && i < nbEndpoints; i++)
     {
         uint32_t epIdx = SOPC_ToolkitServer_AddEndpointConfig(sopc_helper_config.server.endpoints[i]);
@@ -172,13 +174,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
                                    i, sopc_helper_config.server.endpoints[i]->endpointURL);
             status = SOPC_STATUS_NOK;
         }
-    }
-
-    // Lock the helper state (verification and finalization of configuration)
-    if (SOPC_STATUS_OK == status)
-    {
-        bool res = SOPC_ServerInternal_LockConfigState();
-        status = (res ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE);
     }
 
     if (SOPC_STATUS_OK == status)

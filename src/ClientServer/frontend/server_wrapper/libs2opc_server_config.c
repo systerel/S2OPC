@@ -83,11 +83,11 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     bool res = sopc_helper_config.server.nbEndpoints > 0;
     if (!res)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "At least 1 endpoint shall be defined to start a server");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Error no endpoint defined, at least one shall be defined");
     }
     bool hasUserName = false;
     bool hasSecurity = false;
-    uint8_t nbDiscovery = 0;
     for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
         SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
@@ -106,16 +106,12 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                 OpcUa_UserTokenPolicy* utp = &sp->userTokenPolicies[k];
                 if (OpcUa_UserTokenType_UserName == utp->TokenType)
                 {
+                    // Note that SOPC_SecurityPolicy_AddUserTokenPolicy already warns when used with None security SC
                     hasUserName = true;
                 }
             }
         }
 
-        // Is this a discovery endpoint ? Add it to application description.
-        if (ep->hasDiscoveryEndpoint)
-        {
-            nbDiscovery++;
-        }
         // Other verifications to be done by SOPC_ToolkitServer_AddEndpointConfig
     }
     // Check that the server defines certificates and PKI provider if endpoint uses security
@@ -145,6 +141,32 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                                  "No authentication and/or authorization user manager defined."
                                  " Default will be permissive whereas UserName policy is used in endpoint(s).");
     }
+
+    if (NULL == sopc_helper_config.config.serverConfig.namespaces)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "No namespace defined for the server, 1 server namespace shall be defined");
+        res = false;
+    }
+
+    if (NULL == sopc_helper_config.config.serverConfig.localeIds)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
+        // Create empty locale array
+        sopc_helper_config.config.serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
+        assert(NULL != sopc_helper_config.config.serverConfig.localeIds);
+        sopc_helper_config.config.serverConfig.localeIds[0] = NULL;
+    }
+
+    // TODO: checks on application description content ?
+
+    return res;
+}
+
+// Finalize checked configuration
+static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
+{
+    bool res = true;
 
     if (NULL == sopc_helper_config.server.authenticationManager)
     {
@@ -187,33 +209,48 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
         sopc_helper_config.config.serverConfig.localeIds[0] = NULL;
     }
 
-    // If some discovery endpoints are present and none is described in application description, add them into it
-    if (res && nbDiscovery > 0 && 0 == sopc_helper_config.config.serverConfig.serverDescription.NoOfDiscoveryUrls)
+    // If none discovery is described in application description
+    if (res && 0 == sopc_helper_config.config.serverConfig.serverDescription.NoOfDiscoveryUrls)
     {
-        OpcUa_ApplicationDescription* appDesc = &sopc_helper_config.config.serverConfig.serverDescription;
-        appDesc->DiscoveryUrls = SOPC_Calloc((size_t) nbDiscovery, sizeof(SOPC_String));
-        if (NULL != appDesc->DiscoveryUrls)
+        // And some discovery endpoints are present, add them into it
+        uint8_t nbDiscovery = 0;
+        for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
         {
-            appDesc->NoOfDiscoveryUrls = nbDiscovery;
-            for (uint8_t i = 0; i < nbDiscovery; i++)
+            SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
+            // Is this a discovery endpoint ? Add it to application description.
+            if (ep->hasDiscoveryEndpoint)
             {
-                SOPC_String_Initialize(&appDesc->DiscoveryUrls[i]);
+                nbDiscovery++;
             }
-            uint8_t j = 0;
-            for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints && j < nbDiscovery; i++)
+        }
+
+        if (nbDiscovery > 0)
+        {
+            OpcUa_ApplicationDescription* appDesc = &sopc_helper_config.config.serverConfig.serverDescription;
+            appDesc->DiscoveryUrls = SOPC_Calloc((size_t) nbDiscovery, sizeof(SOPC_String));
+            if (NULL != appDesc->DiscoveryUrls)
             {
-                SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
-                // Is this a discovery endpoint ? Add it to application description.
-                if (ep->hasDiscoveryEndpoint)
+                appDesc->NoOfDiscoveryUrls = nbDiscovery;
+                for (uint8_t i = 0; i < nbDiscovery; i++)
                 {
-                    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&appDesc->DiscoveryUrls[j], ep->endpointURL);
-                    assert(SOPC_STATUS_OK == status);
-                    j++;
+                    SOPC_String_Initialize(&appDesc->DiscoveryUrls[i]);
+                }
+                uint8_t j = 0;
+                for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints && j < nbDiscovery; i++)
+                {
+                    SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
+                    // Is this a discovery endpoint ? Add it to application description.
+                    if (ep->hasDiscoveryEndpoint)
+                    {
+                        SOPC_ReturnStatus status =
+                            SOPC_String_CopyFromCString(&appDesc->DiscoveryUrls[j], ep->endpointURL);
+                        assert(SOPC_STATUS_OK == status);
+                        j++;
+                    }
                 }
             }
         }
     }
-    // TODO: checks on application description content ?
 
     return res;
 }
@@ -232,6 +269,11 @@ bool SOPC_ServerInternal_LockConfigState(void)
     }
 
     bool res = SOPC_HelperConfigServer_CheckConfig();
+    if (res)
+    {
+        res = SOPC_HelperConfigServer_FinaliseCheckedConfig();
+    }
+
     // Only locks if succeeded
     SOPC_Atomic_Int_Set(&sopc_helper_config.locked, (int32_t) res);
     return res;
