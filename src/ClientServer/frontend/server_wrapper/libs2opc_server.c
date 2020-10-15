@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "libs2opc_server.h"
-#include "libs2opc_server_config_internal.h"
+#include "libs2opc_server_internal.h"
 
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"

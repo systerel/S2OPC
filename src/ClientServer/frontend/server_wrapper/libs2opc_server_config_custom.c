@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "libs2opc_server_config_custom.h"
-#include "libs2opc_server_config_internal.h"
+#include "libs2opc_server_internal.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_helper_string.h"

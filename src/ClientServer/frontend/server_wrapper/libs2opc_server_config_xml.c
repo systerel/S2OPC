@@ -22,7 +22,7 @@
 #include <stdio.h>
 
 #include "libs2opc_server_config.h"
-#include "libs2opc_server_config_internal.h"
+#include "libs2opc_server_internal.h"
 
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"

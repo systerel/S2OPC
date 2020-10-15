@@ -21,8 +21,7 @@
 #include <string.h>
 
 #include "libs2opc_request_builder.h"
-
-#include "libs2opc_server_config_internal.h"
+#include "libs2opc_server_internal.h"
 
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
