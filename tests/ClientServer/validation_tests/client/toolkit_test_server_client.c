@@ -575,7 +575,7 @@ START_TEST(test_server_client)
 
     // Get default log config and set the custom path
     SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
-    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs";
+    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs/";
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_Helper_Initialize(&log_config);
 
