@@ -35,7 +35,9 @@
 
 /**
  * \brief Initialize the S2OPC library (start threads, initialize configuration, etc.) and define a custom log
- * configuration. Call to ::SOPC_Helper_Initialize is required before any other operation.
+ * configuration.
+ *
+ * Call to ::SOPC_Helper_Initialize is required before any other operation.
  *
  * \param optLogConfig the custom log configuration or NULL to keep default configuration
  *
@@ -67,6 +69,7 @@ typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
 /**
  * \brief Configure server from XML configuration files for: server endpoints, address space
  *        and users credential and rights.
+ *
  *        If not used or used partially, see libs2opc_config_custom.h to manually configure through API.
  *
  * \param serverConfigPath        path to server configuration XML file (s2opc_clientserver_config.xsd schema)
@@ -91,7 +94,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
 
 /**
  * \brief Method Call service configuration.
+ *
  *        It can be instantiated with ::SOPC_MethodCallManager_Create() or specific code by applicative code.
+ *
  * \param mcm  A manager to implement method behavior for method nodes that can be used by CallMethod.
  *             It shall be compliant with struct ::SOPC_MethodCallManager of sopc_call_method_manager.h,
  *             ::SOPC_MethodCallManager_Create() provides a default implementation.
@@ -114,11 +119,16 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
  * \note Value resulting from write operation might be different from the write value requested
  *       since it is possible to request partial write in arrays and strings.
  *       Thus it indicates the complete final value here in case of success.
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of write notificatoin, local service of response, etc.).
  */
 typedef void SOPC_WriteNotif_Fct(OpcUa_WriteValue* writeValue, SOPC_StatusCode writeStatus);
 
 /**
- * \brief Define the write notification callback to be used. This is optional.
+ * \brief Define the write notification callback to be used.
+ *
+ *        This is optional but if used it shall be defined before starting server.
  *
  * \param writeNotifCb  The write notification callback to be used
  *
@@ -132,19 +142,23 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
  * \brief Type of callback to provide to receive asynchronous local service response
  *
  * \param response     An asynchronous response to a local service request sent using
- *                     ::SOPC_ServerHelper_LocalServiceAsync. It shall a pointer to one of the following types:
+ *                     ::SOPC_ServerHelper_LocalServiceAsync. It shall be a pointer to one of the following types:
  *                     - OpcUa_ReadRequest
  *                     - OpcUa_WriteRequest
  *                     - OpcUa_BrowseRequest
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ServerHelper_LocalServiceAsync call
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of response, write notification, etc.).
  */
 typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext);
 
 /**
- * \brief Define the local service response callback to be used,
- *        this is optional if not used or only synchronous version used.
+ * \brief Define the local service response callback to be used.
+ *
+ *        This is optional if not used or only synchronous version used.
  *        This shall be defined before starting the server and using ::SOPC_ServerHelper_LocalServiceAsync.
  *
  * \param asyncRespCb  The local service asynchronous response callback to be used
@@ -157,6 +171,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
 
 /**
  * \brief Define duration of the shutdown phase when stopping the server.
+ *
  *        According to OPC UA standard the server shall indicate state change and
  *        seconds remaining until shutdown during shutdown phase and before actually stopping.
  *
@@ -172,16 +187,18 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
 
 /**
  * \brief Define a function to be called on client side communication events.
- *        It allows to manage a low-level client in addition to the frontend server use,
- *        the client wrapper and server wrapper are not compatible at same time yet.
- *        Note that low-level client should only define it secure channel configuration
- *        between call to ::SOPC_Helper_Initialize and call to start the server.
+ *
+ *        It allows to manage a low-level client in addition to the frontend server use.
+ *        It is only possible to have a low-level client with a server,
+ *        as the client wrapper and server wrappers cannot be used at same time in this current version.
  *
  * \param clientComEvtCb  The function callback to re-route all client related events
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, server already started).
  *
+ * \warning low-level client should only define its secure channel configuration
+ *          between call to ::SOPC_Helper_Initialize and call to start the server.
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb);
 

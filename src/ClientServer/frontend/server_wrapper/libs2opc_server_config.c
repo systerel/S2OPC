@@ -118,7 +118,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
         }
         // Other verifications to be done by SOPC_ToolkitServer_AddEndpointConfig
     }
-    // Check that the server define certificates and PKI provide if endpoint use security
+    // Check that the server defines certificates and PKI provider if endpoint uses security
     if (hasSecurity)
     {
         if (NULL == sopc_helper_config.config.serverConfig.serverCertificate ||
