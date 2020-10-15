@@ -80,7 +80,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p applicationUri, \p productUri or \p defaultAppName are invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, application description already set, server already started).
  *
  * \note Supported locales shall be defined using ::SOPC_HelperConfigServer_SetLocaleIds prior to this function call.
  * \note If several locales are supported by server, application name shall be defined for each supported locale.

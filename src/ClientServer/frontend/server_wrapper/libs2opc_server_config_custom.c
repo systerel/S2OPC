@@ -138,7 +138,10 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
                                                                     const char* defaultAppNameLocale,
                                                                     OpcUa_ApplicationType applicationType)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() ||
+        sopc_helper_config.config.serverConfig.serverDescription.ApplicationUri.Length > 0 ||
+        sopc_helper_config.config.serverConfig.serverDescription.ProductUri.Length > 0 ||
+        sopc_helper_config.config.serverConfig.serverDescription.ApplicationName.defaultText.Length > 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
