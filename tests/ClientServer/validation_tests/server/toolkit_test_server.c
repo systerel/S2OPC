@@ -343,23 +343,23 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         /*
          * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
          */
-        sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256Sha256);
+        sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
         if (NULL == sp)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            status = SOPC_SecurityPolicy_SetSecurityModes(
+            status = SOPC_SecurityConfig_SetSecurityModes(
                 sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
             }
         }
 
@@ -368,24 +368,24 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
          */
         if (SOPC_STATUS_OK == status)
         {
-            sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256);
+            sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256);
             if (NULL == sp)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
             else
             {
-                status = SOPC_SecurityPolicy_SetSecurityModes(
+                status = SOPC_SecurityConfig_SetSecurityModes(
                     sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
 
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
+                    status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
                 }
                 if (SOPC_STATUS_OK == status)
                 {
                     status =
-                        SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+                        SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
                 }
             }
         }
@@ -398,23 +398,23 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
      */
     if (SOPC_STATUS_OK == status)
     {
-        sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_None);
+        sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_None);
         if (NULL == sp)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_None);
+            status = SOPC_SecurityConfig_SetSecurityModes(sp, SOPC_SecurityModeMask_None);
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_SecurityPolicy_AddUserTokenPolicy(
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(
                     sp, &SOPC_UserTokenPolicy_Anonymous); /* Necessary for tests only */
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_SecurityPolicy_AddUserTokenPolicy(
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(
                     sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy); /* Necessary for UACTT tests only */
             }
         }

@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         SOPC_Endpoint_Config* ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
-        SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityPolicy(ep, SOPC_SecurityPolicy_Basic256Sha256);
+        SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
         if (NULL == ep || NULL == sp)
         {
@@ -166,12 +166,12 @@ int main(int argc, char* argv[])
         }
         else
         {
-            status = SOPC_SecurityPolicy_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
+            status = SOPC_SecurityConfig_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_SecurityPolicy_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
+            status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
         }
     }
 

@@ -161,7 +161,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
 
 /**
  * \brief Create a new endpoint configuration in server to be completed by using the functions below
- * (::SOPC_EndpointConfig_AddSecurityPolicy, etc.)
+ * (::SOPC_EndpointConfig_AddSecurityConfig, etc.)
  *
  * \param url           URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
  * \param hasDiscovery  If set activate discovery endpoint facility on same endpoint URL.
@@ -169,7 +169,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
  *                      if endpoint only allow secure connections (Sign or SignAndEncrypt)
  *
  * \return SOPC_Endpoint_Config pointer to configuration structure to be filled
- *         with ::SOPC_EndpointConfig_AddSecurityPolicy.
+ *         with ::SOPC_EndpointConfig_AddSecurityConfig.
  *         Otherwise Returns NULL if no more configuration slots are available
  *         (see SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS).
  *
@@ -180,7 +180,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
 SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery);
 
 /**
- * \brief Enumerated values authorized for use with ::SOPC_EndpointConfig_AddSecurityPolicy.
+ * \brief Enumerated values authorized for use with ::SOPC_EndpointConfig_AddSecurityConfig.
  *        Values are limited to the security policies supported by server.
  */
 typedef enum
@@ -191,22 +191,28 @@ typedef enum
 } SOPC_SecurityPolicy_URI;
 
 /**
+ * \brief The structure containing an endpoint security configuration.
+ */
+typedef SOPC_SecurityPolicy SOPC_SecurityConfig;
+
+/**
  * \brief Add a security policy to the endpoint configuration
  *
  * \param destEndpoint Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
  * \param uri          Security policy ::SOPC_SecurityPolicy_URI supported by \p destEndpoint
  *
- * \return A pointer to the new security policy supported or NULL if ::SOPC_MAX_SECU_POLICIES_CFG are already defined.
- *         The new security policy shall be completed using ::SOPC_SecurityPolicy_AddSecurityModes and
- *         ::SOPC_SecurityPolicy_AddUserTokenPolicy.
+ * \return A pointer to the new security configuration supported
+ *         or NULL if ::SOPC_MAX_SECU_POLICIES_CFG are already defined.
+ *         The new security policy shall be completed using ::SOPC_SecurityConfig_SetSecurityModes and
+ *         ::SOPC_SecurityConfig_AddUserTokenPolicy.
  *
  * \note   The returned pointer points to static memory and should not be freed or reused once configuration completed.
  */
-SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config* destEndpoint,
+SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config* destEndpoint,
                                                            SOPC_SecurityPolicy_URI uri);
 
 /**
- * \brief Enumerated mask values authorized for use with ::SOPC_SecurityPolicy_AddSecurityModes.
+ * \brief Enumerated mask values authorized for use with ::SOPC_SecurityConfig_SetSecurityModes.
  *        Those values are masks which means they might be used with OR bitwise operation to
  *        activate several security modes.
  */
@@ -221,19 +227,19 @@ typedef enum
 /**
  * \brief Add a security mode mask to the security policy
  *
- * \param destSecuPolicy Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityPolicy
+ * \param destSecuConfig Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityConfig
  * \param modes          Mask of security modes to be supported using a bitwise disjunction of ::SOPC_SecurityModeMask
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p destSecuPolicy or \p modes are invalid (0 or NULL)
+ *         if \p destSecuConfig or \p modes are invalid (0 or NULL)
  *
  * \note the None security policy does not support any mode except None
  */
-SOPC_ReturnStatus SOPC_SecurityPolicy_SetSecurityModes(SOPC_SecurityPolicy* destSecuPolicy,
+SOPC_ReturnStatus SOPC_SecurityConfig_SetSecurityModes(SOPC_SecurityConfig* destSecuConfig,
                                                        SOPC_SecurityModeMask modes);
 
 /**
- * \brief User token policy type to be used with ::SOPC_SecurityPolicy_AddUserTokenPolicy
+ * \brief User token policy type to be used with ::SOPC_SecurityConfig_AddUserTokenPolicy
  */
 typedef OpcUa_UserTokenPolicy SOPC_UserTokenPolicy;
 
@@ -254,20 +260,20 @@ extern const SOPC_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPoli
 /**
  * \brief Add a user token policy to the security policy
  *
- * \param destSecuPolicy   Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityPolicy
+ * \param destSecuConfig   Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityConfig
  * \param userTokenPolicy  User token policy to use for this security policy.
  *                         By default, only ::SOPC_UserTokenPolicy_Anonymous and
  *                         ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy supported
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p destSecuPolicy or \p modes are invalid (NULL),
+ *         if \p destSecuConfig or \p modes are invalid (NULL),
  *         or SOPC_STATUS_OUT_OF_MEMORY if already ::SOPC_MAX_SECU_POLICIES_CFG
  *         user token policies defined in this security policy
  *
  * \note ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy shall never be used
  *       in conjunction with None security mode to avoid possible user credential leaks.
  */
-SOPC_ReturnStatus SOPC_SecurityPolicy_AddUserTokenPolicy(SOPC_SecurityPolicy* destSecuPolicy,
+SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* destSecuConfig,
                                                          const SOPC_UserTokenPolicy* userTokenPolicy);
 
 /* Address space configuration without XML */

@@ -197,7 +197,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() ||
+        NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
         NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -243,7 +244,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() ||
+        NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
         NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -327,14 +329,14 @@ SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bo
     return newEp;
 }
 
-SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config* destEndpoint,
+SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config* destEndpoint,
                                                            SOPC_SecurityPolicy_URI uri)
 {
     if (NULL == destEndpoint || destEndpoint->nbSecuConfigs == SOPC_MAX_SECU_POLICIES_CFG)
     {
         return NULL;
     }
-    SOPC_SecurityPolicy* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
+    SOPC_SecurityConfig* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
     char* sUri = NULL;
     switch (uri)
     {
@@ -356,30 +358,30 @@ SOPC_SecurityPolicy* SOPC_EndpointConfig_AddSecurityPolicy(SOPC_Endpoint_Config*
     return sp;
 }
 
-SOPC_ReturnStatus SOPC_SecurityPolicy_SetSecurityModes(SOPC_SecurityPolicy* destSecuPolicy, SOPC_SecurityModeMask modes)
+SOPC_ReturnStatus SOPC_SecurityConfig_SetSecurityModes(SOPC_SecurityConfig* destSecuConfig, SOPC_SecurityModeMask modes)
 {
-    if (NULL == destSecuPolicy ||
+    if (NULL == destSecuConfig ||
         0 == (modes & (SOPC_SecurityModeMask_None | SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt)))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    destSecuPolicy->securityModes = (uint16_t) modes;
+    destSecuConfig->securityModes = (uint16_t) modes;
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_SecurityPolicy_AddUserTokenPolicy(SOPC_SecurityPolicy* destSecuPolicy,
+SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* destSecuConfig,
                                                          const SOPC_UserTokenPolicy* userTokenPolicy)
 {
-    if (NULL == destSecuPolicy)
+    if (NULL == destSecuConfig)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (destSecuPolicy->nbOfUserTokenPolicies == SOPC_MAX_SECU_POLICIES_CFG)
+    if (destSecuConfig->nbOfUserTokenPolicies == SOPC_MAX_SECU_POLICIES_CFG)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     // Log a warning when used with security mode none + user name without encryption
-    if (0 != (destSecuPolicy->securityModes & SOPC_SecurityModeMask_None) &&
+    if (0 != (destSecuConfig->securityModes & SOPC_SecurityModeMask_None) &&
         OpcUa_UserTokenType_UserName == userTokenPolicy->TokenType &&
         0 == strcmp(SOPC_SecurityPolicy_None_URI, SOPC_String_GetRawCString(&userTokenPolicy->SecurityPolicyUri)))
     {
@@ -389,7 +391,7 @@ SOPC_ReturnStatus SOPC_SecurityPolicy_AddUserTokenPolicy(SOPC_SecurityPolicy* de
             "It is strongly discouraged (password will be transfered without encryption)");
     }
 
-    OpcUa_UserTokenPolicy* utp = &destSecuPolicy->userTokenPolicies[destSecuPolicy->nbOfUserTokenPolicies];
+    OpcUa_UserTokenPolicy* utp = &destSecuConfig->userTokenPolicies[destSecuConfig->nbOfUserTokenPolicies];
     OpcUa_UserTokenPolicy_Initialize(utp);
     SOPC_ReturnStatus status = SOPC_String_Copy(&utp->IssuedTokenType, &userTokenPolicy->IssuedTokenType);
     if (SOPC_STATUS_OK != status)
@@ -413,7 +415,7 @@ SOPC_ReturnStatus SOPC_SecurityPolicy_AddUserTokenPolicy(SOPC_SecurityPolicy* de
     }
     utp->TokenType = userTokenPolicy->TokenType;
 
-    destSecuPolicy->nbOfUserTokenPolicies++;
+    destSecuConfig->nbOfUserTokenPolicies++;
     return SOPC_STATUS_OK;
 }
 
