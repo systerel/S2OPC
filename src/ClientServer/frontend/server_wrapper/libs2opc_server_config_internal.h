@@ -96,7 +96,7 @@ typedef struct SOPC_Helper_Config
         SOPC_UserAuthorization_Manager* authorizationManager;
 
         // Software manufacturer name
-        const char* manufacturerName;
+        char* manufacturerName;
 
         // Configured endpoint indexes and opened state arrays
         uint8_t nbEndpoints;
@@ -146,6 +146,8 @@ typedef struct SOPC_HelperConfigInternal_Ctx
 
 // The singleton configuration structure
 extern SOPC_Helper_Config sopc_helper_config;
+// The default value of the configuration structure
+extern const SOPC_Helper_Config sopc_helper_config_default;
 
 // Returns true if sopc_helper_config.initialized && !sopc_helper_config.locked, false otherwise
 // Note: values are retrieved in an atomic way

@@ -468,7 +468,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetSwManufacturer(const char* manufacturerName)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_HelperConfig_IsInitAndUnlock() &&
+        sopc_helper_config_default.server.manufacturerName == sopc_helper_config.server.manufacturerName)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -476,7 +477,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSwManufacturer(const char* manufact
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    sopc_helper_config.server.manufacturerName = manufacturerName;
+
+    sopc_helper_config.server.manufacturerName = SOPC_strdup(manufacturerName);
 
     return SOPC_STATUS_OK;
 }

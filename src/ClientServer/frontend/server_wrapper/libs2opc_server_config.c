@@ -328,6 +328,10 @@ static void SOPC_HelperConfigInternal_Clear(void)
     Mutex_Clear(&sopc_helper_config.server.serverStoppedMutex);
     SOPC_UserAuthentication_FreeManager(&sopc_helper_config.server.authenticationManager);
     SOPC_UserAuthorization_FreeManager(&sopc_helper_config.server.authorizationManager);
+    if (sopc_helper_config_default.server.manufacturerName != sopc_helper_config.server.manufacturerName)
+    {
+        SOPC_Free(sopc_helper_config.server.manufacturerName);
+    }
     SOPC_Free(sopc_helper_config.server.endpointIndexes);
     SOPC_Free(sopc_helper_config.server.endpointOpened);
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) false);
