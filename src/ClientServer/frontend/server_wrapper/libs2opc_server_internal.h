@@ -151,34 +151,34 @@ extern const SOPC_Helper_Config sopc_helper_config_default;
 
 // Returns true if sopc_helper_config.initialized && !sopc_helper_config.locked, false otherwise
 // Note: values are retrieved in an atomic way
-bool SOPC_HelperConfig_IsInitAndUnlock(void);
+bool SOPC_ServerInternal_IsConfigInitAndUnlock(void);
 
 // Returns true if sopc_helper_config.initialized && sopc_helper_config.locked, false otherwise
 // Note: values are retrieved in an atomic way
-bool SOPC_HelperConfig_IsInitAndLock(void);
+bool SOPC_ServerInternal_IsConfigInitAndLock(void);
 
 // Atomically set the configuration as locked and check for configuration issues
-bool SOPC_HelperConfig_LockState(void);
+bool SOPC_ServerInternal_LockConfigState(void);
 
 // Associate global user manager to existing endpoint configurations. It shall be called when user managers are set.
 // Note: temporarily necessary until low-level configuration also define managers at server configuration instead of
 //       endpoint configuration level.
-void SOPC_HelperConfig_SetEndpointsUserMgr(void);
+void SOPC_ServerInternal_SetEndpointsUserMgr(void);
 
 // Local service synchronous internal callback
-void SOPC_HelperInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
+void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
                                             void* response,
                                             SOPC_HelperConfigInternal_Ctx* helperCtx);
 
 // Local service asynchronous internal callback
-void SOPC_HelperInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
+void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
                                              void* response,
                                              SOPC_HelperConfigInternal_Ctx* helperCtx);
 
 // Endpoint closed asynchronous callback
-void SOPC_HelperInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status);
+void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status);
 
 // Clear low level endpoint config (clear strings, do not clear user managers)
-void SOPC_HelperInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig);
+void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig);
 
 #endif

@@ -61,7 +61,7 @@ static void SOPC_HelperInternal_StopSignal(int sig)
     }
 }
 
-void SOPC_HelperInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
+void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
                                             void* response,
                                             SOPC_HelperConfigInternal_Ctx* helperCtx)
 {
@@ -98,7 +98,7 @@ void SOPC_HelperInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     Mutex_Unlock(&sopc_helper_config.server.syncLocalServiceMutex);
 }
 
-void SOPC_HelperInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
+void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
                                              void* response,
                                              SOPC_HelperConfigInternal_Ctx* helperCtx)
 {
@@ -177,7 +177,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     // Lock the helper state (verification and finalization of configuration)
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_HelperConfig_LockState();
+        bool res = SOPC_ServerInternal_LockConfigState();
         status = (res ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE);
     }
 
@@ -338,7 +338,7 @@ static void SOPC_HelperInternal_ActualShutdownServer(void)
 
 SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedCb)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -351,7 +351,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
     return status;
 }
 
-void SOPC_HelperInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status)
+void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status)
 {
     uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
     bool allEndpointsClosed = true;
@@ -396,7 +396,7 @@ static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus
 
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 {
-    if (!SOPC_HelperConfig_IsInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -487,7 +487,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_HelperConfig_IsInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -536,7 +536,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
 
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)
 {
-    if (!SOPC_HelperConfig_IsInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
     {
         return SOPC_STATUS_INVALID_STATE;
     }

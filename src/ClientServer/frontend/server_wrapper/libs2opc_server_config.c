@@ -67,12 +67,12 @@ static void SOPC_HelperConfigInternal_Initialize(void);
 static void SOPC_HelperConfigInternal_Clear(void);
 
 // Manage configuration state
-bool SOPC_HelperConfig_IsInitAndUnlock(void)
+bool SOPC_ServerInternal_IsConfigInitAndUnlock(void)
 {
     return SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) && !SOPC_Atomic_Int_Get(&sopc_helper_config.locked);
 }
 
-bool SOPC_HelperConfig_IsInitAndLock(void)
+bool SOPC_ServerInternal_IsConfigInitAndLock(void)
 {
     return SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) && SOPC_Atomic_Int_Get(&sopc_helper_config.locked);
 }
@@ -168,7 +168,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     // Note: in the future, low level configuration should be changed to define those at server level and not endpoint
     if (res)
     {
-        SOPC_HelperConfig_SetEndpointsUserMgr();
+        SOPC_ServerInternal_SetEndpointsUserMgr();
     }
 
     if (NULL == sopc_helper_config.config.serverConfig.namespaces)
@@ -219,7 +219,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
 }
 
 // Lock the configuration and check for configuration issues
-bool SOPC_HelperConfig_LockState(void)
+bool SOPC_ServerInternal_LockConfigState(void)
 {
     if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
     {
@@ -237,7 +237,7 @@ bool SOPC_HelperConfig_LockState(void)
     return res;
 }
 
-void SOPC_HelperConfig_SetEndpointsUserMgr(void)
+void SOPC_ServerInternal_SetEndpointsUserMgr(void)
 {
     for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
@@ -277,18 +277,18 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         // Cases to manage:
         // - Unexpected closed endpoint: close others, do we need to do shutdown phase here ?
         // - Expected closed endpoint: determine when all endpoints are closed
-        SOPC_HelperInternal_ClosedEndpoint(IdOrStatus, (SOPC_ReturnStatus) helperContext);
+        SOPC_ServerInternal_ClosedEndpoint(IdOrStatus, (SOPC_ReturnStatus) helperContext);
         break;
     case SE_LOCAL_SERVICE_RESPONSE:
         ctx = (SOPC_HelperConfigInternal_Ctx*) helperContext;
         assert(event == ctx->event);
         if (ctx->eventCtx.localService.isSyncCall)
         {
-            SOPC_HelperInternal_SyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
+            SOPC_ServerInternal_SyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
         }
         else
         {
-            SOPC_HelperInternal_AsyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
+            SOPC_ServerInternal_AsyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
         }
         SOPC_Free(ctx);
         break;
@@ -316,7 +316,7 @@ static void SOPC_HelperConfigInternal_Clear(void)
     // Clear endpoints since not stored in S2OPC config anymore in wrapper:
     for (int i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
-        SOPC_HelperInternal_ClearEndpoint(sopc_helper_config.server.endpoints[i]);
+        SOPC_ServerInternal_ClearEndpoint(sopc_helper_config.server.endpoints[i]);
         SOPC_Free(sopc_helper_config.server.endpoints[i]);
         sopc_helper_config.server.endpoints[i] = NULL;
     }
@@ -371,7 +371,7 @@ SOPC_Toolkit_Build_Info SOPC_Helper_GetBuildInfo(void)
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -385,7 +385,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -399,7 +399,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -413,7 +413,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -423,7 +423,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb)
 {
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -431,7 +431,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct
     return SOPC_STATUS_OK;
 }
 
-void SOPC_HelperInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
+void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
 {
     SOPC_Free(epConfig->endpointURL);
     for (int i = 0; i < epConfig->nbSecuConfigs && i < SOPC_MAX_SECU_POLICIES_CFG; i++)

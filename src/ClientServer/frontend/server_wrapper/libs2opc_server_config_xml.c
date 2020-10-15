@@ -176,7 +176,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
     // Avoid compiler warning on unused parameter, reserved for future use
     (void) customConfig;
 
-    if (!SOPC_HelperConfig_IsInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -204,7 +204,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
             else
             {
                 // Clear in case of failure to clear low level config
-                SOPC_HelperInternal_ClearEndpoint(ep);
+                SOPC_ServerInternal_ClearEndpoint(ep);
                 res = false;
             }
         }
