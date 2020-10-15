@@ -237,81 +237,12 @@ bool SOPC_HelperConfig_LockState(void)
     return res;
 }
 
-/* Manage global user manager vs user manager by endpoint in low-level API */
-// Note: in the future, low level configuration should be changed to define those at server level and not endpoint.
-//       And those global variables might be avoided since deallocation of a unique manager is easier than a shared one
-static SOPC_ReturnStatus SOPC_HelperConfigInternal_Authen_ValidateUser(
-    SOPC_UserAuthentication_Manager* authenticationManager,
-    const SOPC_ExtensionObject* pUser,
-    SOPC_UserAuthentication_Status* pUserAuthenticated)
-{
-    // HelperConfig shall have defined a default user manager if none defined
-    assert(NULL != sopc_helper_config.server.authenticationManager);
-
-    return sopc_helper_config.server.authenticationManager->pFunctions->pFuncValidateUserIdentity(
-        authenticationManager, pUser, pUserAuthenticated);
-}
-
-static void SOPC_HelperConfigInternal_Authen_Free(SOPC_UserAuthentication_Manager* authenticationManager)
-{
-    // Note: global authentication manager freed by SOPC_HelperConfigInternal_Clear
-    (void) authenticationManager;
-}
-
-static SOPC_ReturnStatus SOPC_HelperConfigInternal_AuthorizeOperation(
-    SOPC_UserAuthorization_Manager* authorizationManager,
-    SOPC_UserAuthorization_OperationType operationType,
-    const SOPC_NodeId* nodeId,
-    uint32_t attributeId,
-    const SOPC_User* pUser,
-    bool* pbOperationAuthorized)
-{
-    // HelperConfig shall have defined a default user manager if none defined
-    assert(NULL != sopc_helper_config.server.authorizationManager);
-    return sopc_helper_config.server.authorizationManager->pFunctions->pFuncAuthorizeOperation(
-        authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized);
-}
-
-static void SOPC_HelperConfigInternal_Autho_Free(SOPC_UserAuthorization_Manager* authorizationManager)
-{
-    // Note: global authorization manager freed by SOPC_HelperConfigInternal_Clear
-    (void) authorizationManager;
-}
-
-static const SOPC_UserAuthentication_Functions authentication_functions = {
-    .pFuncFree = SOPC_HelperConfigInternal_Authen_Free,
-    .pFuncValidateUserIdentity = SOPC_HelperConfigInternal_Authen_ValidateUser};
-
-static SOPC_UserAuthentication_Manager authentication_manager = {
-    .pFunctions = &authentication_functions,
-    .pData = NULL,
-};
-
-static const SOPC_UserAuthorization_Functions authorization_functions = {
-    .pFuncFree = SOPC_HelperConfigInternal_Autho_Free,
-    .pFuncAuthorizeOperation = SOPC_HelperConfigInternal_AuthorizeOperation};
-
-static SOPC_UserAuthorization_Manager authorization_manager = {
-    .pFunctions = &authorization_functions,
-    .pData = NULL,
-};
-
 void SOPC_HelperConfig_SetEndpointsUserMgr(void)
 {
-    // Ensure custom user manager data is correctly set
-    if (NULL != sopc_helper_config.server.authorizationManager)
-    {
-        authorization_manager.pData = sopc_helper_config.server.authorizationManager->pData;
-    }
-    if (NULL != sopc_helper_config.server.authenticationManager)
-    {
-        authentication_manager.pData = sopc_helper_config.server.authenticationManager->pData;
-    }
-
     for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
     {
-        sopc_helper_config.server.endpoints[i]->authenticationManager = &authentication_manager;
-        sopc_helper_config.server.endpoints[i]->authorizationManager = &authorization_manager;
+        sopc_helper_config.server.endpoints[i]->authenticationManager = sopc_helper_config.server.authenticationManager;
+        sopc_helper_config.server.endpoints[i]->authorizationManager = sopc_helper_config.server.authorizationManager;
     }
 }
 
