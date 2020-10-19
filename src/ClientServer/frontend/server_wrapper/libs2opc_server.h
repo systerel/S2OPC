@@ -33,6 +33,8 @@
  *  Local services are restricted to a minimal set of services to access or modify address space content without any
  * access restriction. This is the way to access or modify data of the server in the server application itself.
  *
+ * \note When server is started, the configuration is freezed and the Server node content is initialized
+ *
  */
 
 #ifndef LIBS2OPC_SERVER_H_
@@ -42,13 +44,6 @@
 #include <stdint.h>
 
 #include "libs2opc_server_config.h"
-
-/*
- * Server lifecycle.
- * When server is started:
- * - toolkit configuration is freezed
- * - the Server node content is initialized
- */
 
 /**
  * \brief Type of callback called when server stopped
@@ -82,8 +77,6 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
  */
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
 
-// Synchronous call to run the server, returns on stop signal (Ctrl+C) if catchSigStop set, after call to
-// SOPC_ServerHelper_StopServer() or error (endpoint closed).
 /**
  * \brief Run the server synchronously (alternative to ::SOPC_ServerHelper_StartServer)
  *        Server information node is updated and endpoints are opened.
@@ -91,8 +84,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
  *        opening error.
  *
  * \param catchSigStop  If set to true, the stop signal (Ctrl+C) is caught and server shutdown initiated.
- *                      When flag is set the server actively check for signal on a periodic basis,
- *                      otherwise the server uses only passive waiting until call to ::SOPC_ServerHelper_StopServer
+ *                      When flag is set the server will stop on first event occurring between
+ *                      stop signal and call to ::SOPC_ServerHelper_StopServer.
  *
  * \return SOPC_STATUS_OK in case server stopped on purpose, SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, server already started),
@@ -101,7 +94,6 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
  * \note Server stops after configured seconds for shutdown phase (see ::SOPC_HelperConfigServer_SetShutdownCountdown )
  *       to indicate shutdown in ServerState node
  *
- * \note If
  */
 SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
 
