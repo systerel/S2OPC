@@ -32,32 +32,32 @@
 /* Internal configuration structure and functions */
 static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t helperContext);
 
-#define INITIAL_HELPER_CONFIG                                                                            \
-    {                                                                                                    \
-        .initialized = (int32_t) false, .locked = (int32_t) false, .comEventCb = SOPC_Helper_ComEventCb, \
-                                                                                                         \
-        .server = {                                                                                      \
-            .addressSpace = NULL,                                                                        \
-            .writeNotifCb = NULL,                                                                        \
-            .asyncRespCb = NULL,                                                                         \
-            .syncLocalServiceId = 0,                                                                     \
-            .syncResp = NULL,                                                                            \
-            .syncServeStopData =                                                                         \
-                {                                                                                        \
-                    .serverRequestedToStop = false,                                                      \
-                    .serverAllEndpointsClosed = false,                                                   \
-                },                                                                                       \
-            .serverStoppedStatus = SOPC_STATUS_OK,                                                       \
-            .stoppedCb = NULL,                                                                           \
-            .secondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,                                    \
-            .authenticationManager = NULL,                                                               \
-            .authorizationManager = NULL,                                                                \
-            .manufacturerName = "Systerel",                                                              \
-            .nbEndpoints = 0,                                                                            \
-            .endpointIndexes = NULL,                                                                     \
-            .endpointOpened = NULL,                                                                      \
-            .started = false,                                                                            \
-        }                                                                                                \
+#define INITIAL_HELPER_CONFIG                                                 \
+    {                                                                         \
+        .initialized = (int32_t) false, .comEventCb = SOPC_Helper_ComEventCb, \
+                                                                              \
+        .server = {                                                           \
+            .state = SOPC_SERVER_STATE_INITIALIZING,                          \
+            .addressSpace = NULL,                                             \
+            .writeNotifCb = NULL,                                             \
+            .asyncRespCb = NULL,                                              \
+            .syncLocalServiceId = 0,                                          \
+            .syncResp = NULL,                                                 \
+            .syncServeStopData =                                              \
+                {                                                             \
+                    .serverRequestedToStop = false,                           \
+                    .serverAllEndpointsClosed = false,                        \
+                },                                                            \
+            .serverStoppedStatus = SOPC_STATUS_OK,                            \
+            .stoppedCb = NULL,                                                \
+            .secondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,         \
+            .authenticationManager = NULL,                                    \
+            .authorizationManager = NULL,                                     \
+            .manufacturerName = "Systerel",                                   \
+            .nbEndpoints = 0,                                                 \
+            .endpointIndexes = NULL,                                          \
+            .endpointOpened = NULL,                                           \
+        }                                                                     \
     }
 
 const SOPC_Helper_Config sopc_helper_config_default = INITIAL_HELPER_CONFIG;
@@ -70,14 +70,28 @@ static void SOPC_HelperConfigInternal_Initialize(void);
 static void SOPC_HelperConfigInternal_Clear(void);
 
 // Manage configuration state
-bool SOPC_ServerInternal_IsConfigInitAndUnlock(void)
+bool SOPC_ServerInternal_IsConfiguring(void)
 {
-    return SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) && !SOPC_Atomic_Int_Get(&sopc_helper_config.locked);
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_CONFIGURING == sopc_helper_config.server.state;
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
+    return res;
 }
 
-bool SOPC_ServerInternal_IsConfigInitAndLock(void)
+bool SOPC_ServerInternal_IsStarted(void)
 {
-    return SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) && SOPC_Atomic_Int_Get(&sopc_helper_config.locked);
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_STARTED == sopc_helper_config.server.state;
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
+    return res;
 }
 
 // Check configuration is correct
@@ -258,28 +272,74 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
     return res;
 }
 
-// Lock the configuration and check for configuration issues
-bool SOPC_ServerInternal_LockConfigState(void)
+// Check for configuration issues and set server state as configured
+bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void)
 {
-    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
     {
-        return false;
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_CONFIGURING == sopc_helper_config.server.state;
+        if (res)
+        {
+            res = SOPC_HelperConfigServer_CheckConfig();
+        }
+        if (res)
+        {
+            res = SOPC_HelperConfigServer_FinaliseCheckedConfig();
+        }
+        if (res)
+        {
+            // Set state as configured in case of success
+            sopc_helper_config.server.state = SOPC_SERVER_STATE_CONFIGURED;
+        }
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
     }
-    if (SOPC_Atomic_Int_Get(&sopc_helper_config.locked))
-    {
-        // Already locked
-        return true;
-    }
-
-    bool res = SOPC_HelperConfigServer_CheckConfig();
-    if (res)
-    {
-        res = SOPC_HelperConfigServer_FinaliseCheckedConfig();
-    }
-
-    // Only locks if succeeded
-    SOPC_Atomic_Int_Set(&sopc_helper_config.locked, (int32_t) res);
     return res;
+}
+
+bool SOPC_ServerInternal_SetStartedState(void)
+{
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_CONFIGURED == sopc_helper_config.server.state;
+        if (res)
+        {
+            sopc_helper_config.server.state = SOPC_SERVER_STATE_STARTED;
+        }
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
+    return res;
+}
+
+// Check current state and set server state as stopping in case of success
+bool SOPC_ServerInternal_SetStoppingState(void)
+{
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_STARTED == sopc_helper_config.server.state;
+        if (res)
+        {
+            sopc_helper_config.server.state = SOPC_SERVER_STATE_STOPPING;
+        }
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
+    return res;
+}
+
+// Set server state as stopped
+void SOPC_ServerInternal_SetStoppedState(void)
+{
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        sopc_helper_config.server.state = SOPC_SERVER_STATE_STOPPED;
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
 }
 
 void SOPC_ServerInternal_SetEndpointsUserMgr(void)
@@ -349,6 +409,12 @@ static void SOPC_HelperConfigInternal_Initialize(void)
     // We only do copies in helper config
     sopc_helper_config.config.serverConfig.freeCstringsFlag = true;
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) true);
+
+    // Server state initialization
+    Mutex_Initialization(&sopc_helper_config.server.stateMutex);
+    sopc_helper_config.server.state = SOPC_SERVER_STATE_CONFIGURING;
+
+    // Data for synchronous local service call
     Condition_Init(&sopc_helper_config.server.syncLocalServiceCond);
     Mutex_Initialization(&sopc_helper_config.server.syncLocalServiceMutex);
 
@@ -384,8 +450,10 @@ static void SOPC_HelperConfigInternal_Clear(void)
     }
     SOPC_Free(sopc_helper_config.server.endpointIndexes);
     SOPC_Free(sopc_helper_config.server.endpointOpened);
+
+    Mutex_Clear(&sopc_helper_config.server.stateMutex);
+    sopc_helper_config.server.state = SOPC_SERVER_STATE_INITIALIZING;
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) false);
-    SOPC_Atomic_Int_Set(&sopc_helper_config.locked, (int32_t) false);
 }
 
 SOPC_ReturnStatus SOPC_Helper_Initialize(SOPC_Log_Configuration* optLogConfig)
@@ -421,7 +489,7 @@ SOPC_Toolkit_Build_Info SOPC_Helper_GetBuildInfo(void)
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -435,7 +503,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -449,7 +517,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -463,7 +531,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -473,7 +541,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }

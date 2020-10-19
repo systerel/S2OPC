@@ -59,7 +59,7 @@ static char** copy_char_array_into_new_NULL_terminated_array(size_t nbElts, char
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.namespaces)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.namespaces)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -81,7 +81,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.localeIds)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.localeIds)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -138,7 +138,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
                                                                     const char* defaultAppNameLocale,
                                                                     OpcUa_ApplicationType applicationType)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() ||
+    if (!SOPC_ServerInternal_IsConfiguring() ||
         sopc_helper_config.config.serverConfig.serverDescription.ApplicationUri.Length > 0 ||
         sopc_helper_config.config.serverConfig.serverDescription.ProductUri.Length > 0 ||
         sopc_helper_config.config.serverConfig.serverDescription.ApplicationName.defaultText.Length > 0)
@@ -168,7 +168,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
 SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
                                                                    const char* additionalAppNameLocale)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -183,7 +183,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.config.serverConfig.pki)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.pki)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -197,8 +197,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() ||
-        NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
         NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -244,8 +243,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() ||
-        NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
         NULL != sopc_helper_config.config.serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -290,7 +288,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certifi
 
 SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery)
 {
-    if (NULL == url || !SOPC_ServerInternal_IsConfigInitAndUnlock() ||
+    if (NULL == url || !SOPC_ServerInternal_IsConfiguring() ||
         sopc_helper_config.server.nbEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         return NULL;
@@ -421,7 +419,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -441,7 +439,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.server.authenticationManager)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.server.authenticationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -457,7 +455,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() || NULL != sopc_helper_config.server.authorizationManager)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.server.authorizationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -473,7 +471,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetSwManufacturer(const char* manufacturerName)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock() &&
+    if (!SOPC_ServerInternal_IsConfiguring() &&
         sopc_helper_config_default.server.manufacturerName == sopc_helper_config.server.manufacturerName)
     {
         return SOPC_STATUS_INVALID_STATE;

@@ -176,7 +176,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
     // Avoid compiler warning on unused parameter, reserved for future use
     (void) customConfig;
 
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }

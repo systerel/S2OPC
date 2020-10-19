@@ -145,7 +145,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     // Lock the helper state (verification and finalization of configuration)
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ServerInternal_LockConfigState();
+        bool res = SOPC_ServerInternal_CheckConfigAndSetConfiguredState();
         status = (res ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE);
     }
 
@@ -256,7 +256,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             sopc_helper_config.server.endpointOpened[i] = true;
             SOPC_ToolkitServer_AsyncOpenEndpoint(sopc_helper_config.server.endpointIndexes[i]);
         }
-        SOPC_Atomic_Int_Set(&sopc_helper_config.server.started, true);
     }
 
     return status;
@@ -266,11 +265,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 // Returns when shutdown countdown is terminated
 static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
-    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
-    {
-        return;
-    }
-
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
     SOPC_TimeReference targetTime =
         SOPC_TimeReference_GetCurrent() + (SOPC_TimeReference) sopc_helper_config.server.secondsTillShutdown * 1000;
@@ -333,7 +327,7 @@ static void SOPC_HelperInternal_ActualShutdownServer(void)
 
 SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedCb)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndUnlock())
+    if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -342,6 +336,10 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperInternal_OpenEndpoints();
+    }
+    if (SOPC_STATUS_OK == status && !SOPC_ServerInternal_SetStartedState())
+    {
+        status = SOPC_STATUS_INVALID_STATE;
     }
     return status;
 }
@@ -371,6 +369,8 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     }
     if (allEndpointsClosed)
     {
+        // Server is actually stopped
+        (void) SOPC_ServerInternal_SetStoppedState();
         sopc_helper_config.server.stoppedCb(sopc_helper_config.server.serverStoppedStatus);
     }
 }
@@ -403,7 +403,7 @@ static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus
 
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_SetStoppingState())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -426,17 +426,18 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 
 SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
 {
-    if (catchSigStop)
-    {
-        // Install signal handler to close the server gracefully when server needs to stop
-        signal(SIGINT, SOPC_HelperInternal_StopSignal);
-        signal(SIGTERM, SOPC_HelperInternal_StopSignal);
-    }
     SOPC_ReturnStatus status = SOPC_ServerHelper_StartServer(SOPC_HelperInternal_SyncServerStoppedCb);
     // If failed to start return immediately
     if (SOPC_STATUS_OK != status)
     {
         return status;
+    }
+
+    if (catchSigStop)
+    {
+        // Install signal handler to close the server gracefully when server needs to stop
+        signal(SIGINT, SOPC_HelperInternal_StopSignal);
+        signal(SIGTERM, SOPC_HelperInternal_StopSignal);
     }
 
     // Waiting the server requested to stop
@@ -469,6 +470,12 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
         return status;
     }
 
+    if (stopServer)
+    {
+        // Note: if stopping was not requested using StopServer API, force stopping state
+        (void) SOPC_ServerInternal_SetStoppingState();
+    }
+
     // Shutdown phase
     SOPC_HelperInternal_ShutdownPhaseServer();
     // Closing endpoints
@@ -492,7 +499,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_IsStarted())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -541,7 +548,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
 
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)
 {
-    if (!SOPC_ServerInternal_IsConfigInitAndLock() || !SOPC_Atomic_Int_Get(&sopc_helper_config.server.started))
+    if (!SOPC_ServerInternal_IsStarted())
     {
         return SOPC_STATUS_INVALID_STATE;
     }

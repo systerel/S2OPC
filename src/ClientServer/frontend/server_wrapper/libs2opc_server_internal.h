@@ -49,21 +49,33 @@
 #define DEFAULT_SHUTDOWN_PHASE_IN_SECONDS 5
 #endif
 
+typedef enum
+{
+    SOPC_SERVER_STATE_INITIALIZING = 0,
+    SOPC_SERVER_STATE_CONFIGURING = 1,
+    SOPC_SERVER_STATE_CONFIGURED = 2,
+    SOPC_SERVER_STATE_STARTED = 3,
+    SOPC_SERVER_STATE_SHUTDOWN_PHASE = 4,
+    SOPC_SERVER_STATE_STOPPING = 5,
+    SOPC_SERVER_STATE_STOPPED = 6,
+} SOPC_HelperServer_State;
+
 // The global helper config variable (singleton), it shall not be accessed outside of wrapper code
 typedef struct SOPC_Helper_Config
 {
     // Flag atomically set when the structure is initialized during call to SOPC_Helper_Initialize
     // and singleton config is initialized
     int32_t initialized;
-    // Flag atomically set when the structure is locked because server started
-    // (SOPC_ServerHelper_Server or SOPC_ServerHelper_StartServer aleady called)
-    int32_t locked;
     // Communication events callback
     SOPC_ComEvent_Fct* comEventCb;
     // Toolkit configuration structure
     SOPC_S2OPC_Config config;
     struct
     {
+        // Server state
+        Mutex stateMutex;
+        SOPC_HelperServer_State state;
+
         // Address space instance
         SOPC_AddressSpace* addressSpace;
 
@@ -117,8 +129,6 @@ typedef struct SOPC_Helper_Config
         // Runtime variables
         SOPC_Server_RuntimeVariables runtimeVariables;
 
-        // Server started flag (atomic accesses only)
-        int32_t started;
     } server; // additional configuration to config.serverConfig
     struct
     {
@@ -159,14 +169,23 @@ extern const SOPC_Helper_Config sopc_helper_config_default;
 
 // Returns true if sopc_helper_config.initialized && !sopc_helper_config.locked, false otherwise
 // Note: values are retrieved in an atomic way
-bool SOPC_ServerInternal_IsConfigInitAndUnlock(void);
+bool SOPC_ServerInternal_IsConfiguring(void);
 
 // Returns true if sopc_helper_config.initialized && sopc_helper_config.locked, false otherwise
 // Note: values are retrieved in an atomic way
-bool SOPC_ServerInternal_IsConfigInitAndLock(void);
+bool SOPC_ServerInternal_IsStarted(void);
 
-// Atomically set the configuration as locked and check for configuration issues
-bool SOPC_ServerInternal_LockConfigState(void);
+// Check for configuration issues and set server state as configured in case of success
+bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void);
+
+// Check current state and set server state as started in case of success
+bool SOPC_ServerInternal_SetStartedState(void);
+
+// Check current state and set server state as stopping in case of success
+bool SOPC_ServerInternal_SetStoppingState(void);
+
+// Set server state as stopped
+void SOPC_ServerInternal_SetStoppedState(void);
 
 // Associate global user manager to existing endpoint configurations. It shall be called when user managers are set.
 // Note: temporarily necessary until low-level configuration also define managers at server configuration instead of
