@@ -150,11 +150,11 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     }
 
     uint32_t* endpointIndexes = SOPC_Calloc((size_t) nbEndpoints, sizeof(uint32_t));
-    bool* endpointOpened = SOPC_Calloc((size_t) nbEndpoints, sizeof(bool));
-    if (NULL == endpointIndexes || NULL == endpointOpened)
+    bool* endpointClosed = SOPC_Calloc((size_t) nbEndpoints, sizeof(bool));
+    if (NULL == endpointIndexes || NULL == endpointClosed)
     {
         SOPC_Free(endpointIndexes);
-        SOPC_Free(endpointOpened);
+        SOPC_Free(endpointClosed);
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
@@ -185,12 +185,12 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     {
         sopc_helper_config.server.nbEndpoints = nbEndpoints;
         sopc_helper_config.server.endpointIndexes = endpointIndexes;
-        sopc_helper_config.server.endpointOpened = endpointOpened;
+        sopc_helper_config.server.endpointClosed = endpointClosed;
     }
     else
     {
         SOPC_Free(endpointIndexes);
-        SOPC_Free(endpointOpened);
+        SOPC_Free(endpointClosed);
     }
 
     return status;
@@ -253,7 +253,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     {
         for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
         {
-            sopc_helper_config.server.endpointOpened[i] = true;
             SOPC_ToolkitServer_AsyncOpenEndpoint(sopc_helper_config.server.endpointIndexes[i]);
         }
     }
@@ -357,19 +356,20 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     {
         if (epConfigIdx == sopc_helper_config.server.endpointIndexes[i])
         {
-            sopc_helper_config.server.endpointOpened[i] = false;
-        }
-        allEndpointsClosed &= !sopc_helper_config.server.endpointOpened[i];
+            if (SOPC_STATUS_OK != status && !sopc_helper_config.server.endpointClosed[i])
+            {
+                // Log an error on first endpoint close event if it is an error status
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Endpoint number %" PRIu8 " closed with error status: %d", i, status);
+            }
 
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Endpoint number %" PRIu8 " closed with error status: %d", i, status);
+            sopc_helper_config.server.endpointClosed[i] = true;
         }
+        allEndpointsClosed &= sopc_helper_config.server.endpointClosed[i];
     }
     if (allEndpointsClosed)
     {
-        // Server is actually stopped
+        // Server is considered stopped when no client connection possible anymore
         (void) SOPC_ServerInternal_SetStoppedState();
         sopc_helper_config.server.stoppedCb(sopc_helper_config.server.serverStoppedStatus);
     }
@@ -396,8 +396,10 @@ static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClos
 // server stopped callback used by ::SOPC_ServerHelper_Serve
 static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus)
 {
-    // Avoid warning on unused parameter
-    (void) stopStatus;
+    if (SOPC_STATUS_OK != stopStatus)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Endpoint closed with error status: %d", stopStatus);
+    }
     SOPC_HelperInternal_SyncServerAsyncStop(true);
 }
 
@@ -470,25 +472,29 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
         return status;
     }
 
-    if (stopServer)
+    // Check if server is not already stopped before
+    if (!SOPC_ServerInternal_IsStopped())
     {
-        // Note: if stopping was not requested using StopServer API, force stopping state
-        (void) SOPC_ServerInternal_SetStoppingState();
-    }
+        if (stopServer)
+        {
+            // Note: if stopping was not requested using StopServer API, set stopping state when force by sig stop
+            (void) SOPC_ServerInternal_SetStoppingState();
+        }
 
-    // Shutdown phase
-    SOPC_HelperInternal_ShutdownPhaseServer();
-    // Closing endpoints
-    SOPC_HelperInternal_ActualShutdownServer();
+        // Shutdown phase
+        SOPC_HelperInternal_ShutdownPhaseServer();
+        // Closing endpoints
+        SOPC_HelperInternal_ActualShutdownServer();
 
-    // Wait for all endpoints to close
-    status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
-    while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed)
-    {
-        status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
-                                         &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        // Wait for all endpoints to close
+        status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed)
+        {
+            status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
+                                             &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        }
+        status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
     }
-    status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
 
     return status;
 }

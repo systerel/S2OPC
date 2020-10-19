@@ -56,7 +56,7 @@ static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus
             .manufacturerName = "Systerel",                                   \
             .nbEndpoints = 0,                                                 \
             .endpointIndexes = NULL,                                          \
-            .endpointOpened = NULL,                                           \
+            .endpointClosed = NULL,                                           \
         }                                                                     \
     }
 
@@ -89,6 +89,18 @@ bool SOPC_ServerInternal_IsStarted(void)
     {
         Mutex_Lock(&sopc_helper_config.server.stateMutex);
         res = SOPC_SERVER_STATE_STARTED == sopc_helper_config.server.state;
+        Mutex_Unlock(&sopc_helper_config.server.stateMutex);
+    }
+    return res;
+}
+
+bool SOPC_ServerInternal_IsStopped(void)
+{
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        Mutex_Lock(&sopc_helper_config.server.stateMutex);
+        res = SOPC_SERVER_STATE_STOPPED == sopc_helper_config.server.state;
         Mutex_Unlock(&sopc_helper_config.server.stateMutex);
     }
     return res;
@@ -379,9 +391,6 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         break;
     /* Server events all managed */
     case SE_CLOSED_ENDPOINT:
-        // Cases to manage:
-        // - Unexpected closed endpoint: close others, do we need to do shutdown phase here ?
-        // - Expected closed endpoint: determine when all endpoints are closed
         SOPC_ServerInternal_ClosedEndpoint(IdOrStatus, (SOPC_ReturnStatus) helperContext);
         break;
     case SE_LOCAL_SERVICE_RESPONSE:
@@ -449,7 +458,7 @@ static void SOPC_HelperConfigInternal_Clear(void)
         SOPC_Free(sopc_helper_config.server.manufacturerName);
     }
     SOPC_Free(sopc_helper_config.server.endpointIndexes);
-    SOPC_Free(sopc_helper_config.server.endpointOpened);
+    SOPC_Free(sopc_helper_config.server.endpointClosed);
 
     Mutex_Clear(&sopc_helper_config.server.stateMutex);
     sopc_helper_config.server.state = SOPC_SERVER_STATE_INITIALIZING;

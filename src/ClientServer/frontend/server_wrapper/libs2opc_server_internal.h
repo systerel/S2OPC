@@ -123,8 +123,8 @@ typedef struct SOPC_Helper_Config
         SOPC_Endpoint_Config*
             endpoints[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]; // we do not use config.endpoints to avoid
                                                                      // pre-allocating structure
-        uint32_t* endpointIndexes;
-        bool* endpointOpened;
+        uint32_t* endpointIndexes;                                   // array of endpoint indexes provided by toolkit
+        bool* endpointClosed; // array of closed endpoint to keep track of endpoints notified closed by toolkit
 
         // Runtime variables
         SOPC_Server_RuntimeVariables runtimeVariables;
@@ -167,13 +167,14 @@ extern SOPC_Helper_Config sopc_helper_config;
 // The default value of the configuration structure
 extern const SOPC_Helper_Config sopc_helper_config_default;
 
-// Returns true if sopc_helper_config.initialized && !sopc_helper_config.locked, false otherwise
-// Note: values are retrieved in an atomic way
+// Returns true if the server is in configuring state, false otherwise
 bool SOPC_ServerInternal_IsConfiguring(void);
 
-// Returns true if sopc_helper_config.initialized && sopc_helper_config.locked, false otherwise
-// Note: values are retrieved in an atomic way
+// Returns true if the server is in started state, false otherwise
 bool SOPC_ServerInternal_IsStarted(void);
+
+// Returns true if the server is in stopped state, false otherwise
+bool SOPC_ServerInternal_IsStopped(void);
 
 // Check for configuration issues and set server state as configured in case of success
 bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void);
