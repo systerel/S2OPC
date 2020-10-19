@@ -265,8 +265,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
-    SOPC_TimeReference targetTime =
-        SOPC_TimeReference_GetCurrent() + (SOPC_TimeReference) sopc_helper_config.server.secondsTillShutdown * 1000;
+    SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() +
+                                    (SOPC_TimeReference) sopc_helper_config.server.configuredSecondsTillShutdown * 1000;
     bool targetTimeReached = false;
     SOPC_Server_RuntimeVariables* runtime_vars = &sopc_helper_config.server.runtimeVariables;
     // From part 5: "The server has shut down or is in the process of shutting down."
@@ -276,11 +276,11 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
     {
         status = SOPC_String_AttachFromCstring(&runtime_vars->shutdownReason.defaultText, "Requested shutdown");
     }
-    uint32_t secondsTillShutdown = sopc_helper_config.server.secondsTillShutdown;
+    uint32_t remainingSecondsTillShutdown = sopc_helper_config.server.configuredSecondsTillShutdown;
     while (SOPC_STATUS_OK == status && !targetTimeReached)
     {
         // Update the seconds till shutdown value
-        runtime_vars->secondsTillShutdown = secondsTillShutdown;
+        runtime_vars->secondsTillShutdown = remainingSecondsTillShutdown;
         SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
         if (NULL == ctx)
         {
@@ -297,15 +297,16 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
             {
                 status = SOPC_STATUS_NOK;
             }
-            else if (sopc_helper_config.server.secondsTillShutdown > 0)
+            else if (sopc_helper_config.server.configuredSecondsTillShutdown > 0)
             {
                 SOPC_Sleep(UPDATE_TIMEOUT_MS);
-            }
+            } // else: if configured secondsTillShutdown is 0, do not wait since we have to stop immediately
+
             // Evaluation of seconds till shutdown
             SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
             if (currentTime < targetTime)
             {
-                secondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
+                remainingSecondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
             }
             else
             {

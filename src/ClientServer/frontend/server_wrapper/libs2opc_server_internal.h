@@ -107,7 +107,7 @@ typedef struct SOPC_Helper_Config
         SOPC_ReturnStatus serverStoppedStatus;
 
         // Server shutdown phase duration configuration
-        uint16_t secondsTillShutdown;
+        uint16_t configuredSecondsTillShutdown;
 
         // User authentication and authorization managers
         // Note: temporarily duplicated with SOPC_S2OPC_Config endpoints

@@ -32,32 +32,32 @@
 /* Internal configuration structure and functions */
 static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t helperContext);
 
-#define INITIAL_HELPER_CONFIG                                                 \
-    {                                                                         \
-        .initialized = (int32_t) false, .comEventCb = SOPC_Helper_ComEventCb, \
-                                                                              \
-        .server = {                                                           \
-            .state = SOPC_SERVER_STATE_INITIALIZING,                          \
-            .addressSpace = NULL,                                             \
-            .writeNotifCb = NULL,                                             \
-            .asyncRespCb = NULL,                                              \
-            .syncLocalServiceId = 0,                                          \
-            .syncResp = NULL,                                                 \
-            .syncServeStopData =                                              \
-                {                                                             \
-                    .serverRequestedToStop = false,                           \
-                    .serverAllEndpointsClosed = false,                        \
-                },                                                            \
-            .serverStoppedStatus = SOPC_STATUS_OK,                            \
-            .stoppedCb = NULL,                                                \
-            .secondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,         \
-            .authenticationManager = NULL,                                    \
-            .authorizationManager = NULL,                                     \
-            .manufacturerName = "Systerel",                                   \
-            .nbEndpoints = 0,                                                 \
-            .endpointIndexes = NULL,                                          \
-            .endpointClosed = NULL,                                           \
-        }                                                                     \
+#define INITIAL_HELPER_CONFIG                                                   \
+    {                                                                           \
+        .initialized = (int32_t) false, .comEventCb = SOPC_Helper_ComEventCb,   \
+                                                                                \
+        .server = {                                                             \
+            .state = SOPC_SERVER_STATE_INITIALIZING,                            \
+            .addressSpace = NULL,                                               \
+            .writeNotifCb = NULL,                                               \
+            .asyncRespCb = NULL,                                                \
+            .syncLocalServiceId = 0,                                            \
+            .syncResp = NULL,                                                   \
+            .syncServeStopData =                                                \
+                {                                                               \
+                    .serverRequestedToStop = false,                             \
+                    .serverAllEndpointsClosed = false,                          \
+                },                                                              \
+            .serverStoppedStatus = SOPC_STATUS_OK,                              \
+            .stoppedCb = NULL,                                                  \
+            .configuredSecondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS, \
+            .authenticationManager = NULL,                                      \
+            .authorizationManager = NULL,                                       \
+            .manufacturerName = "Systerel",                                     \
+            .nbEndpoints = 0,                                                   \
+            .endpointIndexes = NULL,                                            \
+            .endpointClosed = NULL,                                             \
+        }                                                                       \
     }
 
 const SOPC_Helper_Config sopc_helper_config_default = INITIAL_HELPER_CONFIG;
@@ -544,7 +544,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    sopc_helper_config.server.secondsTillShutdown = secondsTillShutdown;
+    sopc_helper_config.server.configuredSecondsTillShutdown = secondsTillShutdown;
     return SOPC_STATUS_OK;
 }
 
