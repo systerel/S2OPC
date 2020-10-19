@@ -78,15 +78,23 @@ typedef struct SOPC_Helper_Config
         uint32_t syncLocalServiceId;
         void* syncResp;
 
-        // Stop server management
-        Condition serverStoppedCond;
-        Mutex serverStoppedMutex;
-        bool serverRequestedToStop;
-        bool serverAllEndpointsClosed;
-        SOPC_ReturnStatus serverStoppedStatus;
+        // Stop server management:
+
+        // Manage server stopping when server is running synchronously using SOPC_ServerHelper_Serve.
+        struct
+        {
+            Condition serverStoppedCond;
+            Mutex serverStoppedMutex;
+            int32_t serverRequestedToStop;
+            bool serverAllEndpointsClosed;
+        } syncServeStopData;
+
         // Server stopped notification callback record
         SOPC_ServerStopped_Fct* stoppedCb;
-        // Server shutdown phase duration
+        // Server stopped notification callback data
+        SOPC_ReturnStatus serverStoppedStatus;
+
+        // Server shutdown phase duration configuration
         uint16_t secondsTillShutdown;
 
         // User authentication and authorization managers

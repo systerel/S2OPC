@@ -42,8 +42,11 @@ static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus
             .asyncRespCb = NULL,                                                                         \
             .syncLocalServiceId = 0,                                                                     \
             .syncResp = NULL,                                                                            \
-            .serverRequestedToStop = false,                                                              \
-            .serverAllEndpointsClosed = false,                                                           \
+            .syncServeStopData =                                                                         \
+                {                                                                                        \
+                    .serverRequestedToStop = false,                                                      \
+                    .serverAllEndpointsClosed = false,                                                   \
+                },                                                                                       \
             .serverStoppedStatus = SOPC_STATUS_OK,                                                       \
             .stoppedCb = NULL,                                                                           \
             .secondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,                                    \
@@ -348,8 +351,10 @@ static void SOPC_HelperConfigInternal_Initialize(void)
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) true);
     Condition_Init(&sopc_helper_config.server.syncLocalServiceCond);
     Mutex_Initialization(&sopc_helper_config.server.syncLocalServiceMutex);
-    Condition_Init(&sopc_helper_config.server.serverStoppedCond);
-    Mutex_Initialization(&sopc_helper_config.server.serverStoppedMutex);
+
+    // Data used only when server is running with synchronous Serve function
+    Condition_Init(&sopc_helper_config.server.syncServeStopData.serverStoppedCond);
+    Mutex_Initialization(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
 }
 
 static void SOPC_HelperConfigInternal_Clear(void)
@@ -366,8 +371,11 @@ static void SOPC_HelperConfigInternal_Clear(void)
     sopc_helper_config.server.addressSpace = NULL;
     Condition_Clear(&sopc_helper_config.server.syncLocalServiceCond);
     Mutex_Clear(&sopc_helper_config.server.syncLocalServiceMutex);
-    Condition_Clear(&sopc_helper_config.server.serverStoppedCond);
-    Mutex_Clear(&sopc_helper_config.server.serverStoppedMutex);
+
+    // Data used only when server is running with synchronous Serve function
+    Condition_Clear(&sopc_helper_config.server.syncServeStopData.serverStoppedCond);
+    Mutex_Clear(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+
     SOPC_UserAuthentication_FreeManager(&sopc_helper_config.server.authenticationManager);
     SOPC_UserAuthorization_FreeManager(&sopc_helper_config.server.authorizationManager);
     if (sopc_helper_config_default.server.manufacturerName != sopc_helper_config.server.manufacturerName)

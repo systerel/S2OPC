@@ -375,18 +375,30 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     }
 }
 
+// server stop function used when server running with ::SOPC_ServerHelper_Serve
+static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClosed)
+{
+    // use condition variable and let ::SOPC_ServerHelper_Serve manage shutdown
+    SOPC_ReturnStatus status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+    assert(SOPC_STATUS_OK == status);
+    if (allEndpointsAlreadyClosed)
+    {
+        // Case in which server is stopping because all endpoints were closed before server requested to stop
+        sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed = true;
+    }
+    SOPC_Atomic_Int_Set(&sopc_helper_config.server.syncServeStopData.serverRequestedToStop, true);
+    status = Condition_SignalAll(&sopc_helper_config.server.syncServeStopData.serverStoppedCond);
+    assert(SOPC_STATUS_OK == status);
+    status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+    assert(SOPC_STATUS_OK == status);
+}
+
 // server stopped callback used by ::SOPC_ServerHelper_Serve
 static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus)
 {
+    // Avoid warning on unused parameter
     (void) stopStatus;
-    SOPC_ReturnStatus status = Mutex_Lock(&sopc_helper_config.server.serverStoppedMutex);
-    assert(SOPC_STATUS_OK == status);
-    sopc_helper_config.server.serverAllEndpointsClosed = true;
-    // Wake up SOPC_ServerHelper_Serve waiting for update
-    status = Condition_SignalAll(&sopc_helper_config.server.serverStoppedCond);
-    assert(SOPC_STATUS_OK == status);
-    status = Mutex_Unlock(&sopc_helper_config.server.serverStoppedMutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_HelperInternal_SyncServerAsyncStop(true);
 }
 
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
@@ -398,14 +410,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (SOPC_HelperInternal_SyncServerStoppedCb == sopc_helper_config.server.stoppedCb)
     {
-        // use condition variable and let ::SOPC_ServerHelper_Serve manage shutdown
-        status = Mutex_Lock(&sopc_helper_config.server.serverStoppedMutex);
-        assert(SOPC_STATUS_OK == status);
-        sopc_helper_config.server.serverRequestedToStop = true;
-        status = Condition_SignalAll(&sopc_helper_config.server.serverStoppedCond);
-        assert(SOPC_STATUS_OK == status);
-        status = Mutex_Unlock(&sopc_helper_config.server.serverStoppedMutex);
-        assert(SOPC_STATUS_OK == status);
+        // Since server is running synchronously with ::SOPC_ServerHelper_Serve, stop request is asynchronous
+        SOPC_HelperInternal_SyncServerAsyncStop(false);
     }
     else
     {
@@ -432,27 +438,31 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
     {
         return status;
     }
-    status = Mutex_Lock(&sopc_helper_config.server.serverStoppedMutex);
+
+    // Waiting the server requested to stop
     if (catchSigStop)
     {
-        // If we catch sig stop we have to check if the signal occured regularly (timeout cond)
-        while ((SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status) &&
-               !sopc_helper_config.server.serverRequestedToStop && !stopServer)
+        // If we catch sig stop we have to check if the signal occurred regularly or if server is requested to stop
+        // Note: we avoid recurrent use of mutex by accessing serverRequestedToStop in an atomic way
+        while (!SOPC_Atomic_Int_Get(&sopc_helper_config.server.syncServeStopData.serverRequestedToStop) && !stopServer)
         {
-            status = Mutex_UnlockAndTimedWaitCond(&sopc_helper_config.server.serverStoppedCond,
-                                                  &sopc_helper_config.server.serverStoppedMutex, UPDATE_TIMEOUT_MS);
+            SOPC_Sleep(UPDATE_TIMEOUT_MS);
         }
     }
     else
     {
+        status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+
         // If we don't catch sig stop we only have to wait for signal on condition variable (no timeout)
-        while (SOPC_STATUS_OK == status && !sopc_helper_config.server.serverRequestedToStop)
+        // Note: we do not need to access serverRequestedToStop in an atomic way since assignment is protected by mutex
+        while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverRequestedToStop)
         {
-            status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.serverStoppedCond,
-                                             &sopc_helper_config.server.serverStoppedMutex);
+            status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
+                                             &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
         }
+
+        status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
     }
-    status = Mutex_Unlock(&sopc_helper_config.server.serverStoppedMutex);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -465,13 +475,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
     SOPC_HelperInternal_ActualShutdownServer();
 
     // Wait for all endpoints to close
-    status = Mutex_Lock(&sopc_helper_config.server.serverStoppedMutex);
-    while (SOPC_STATUS_OK == status && !sopc_helper_config.server.serverAllEndpointsClosed)
+    status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+    while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed)
     {
-        status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.serverStoppedCond,
-                                         &sopc_helper_config.server.serverStoppedMutex);
+        status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
+                                         &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
     }
-    status = Mutex_Unlock(&sopc_helper_config.server.serverStoppedMutex);
+    status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
 
     return status;
 }
