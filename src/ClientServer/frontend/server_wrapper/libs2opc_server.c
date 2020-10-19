@@ -511,7 +511,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
         return SOPC_STATUS_INVALID_STATE;
     }
     // Allocate local service helper context
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_HelperConfigInternal_Ctx));
+    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
+
     if (NULL == ctx)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
@@ -521,7 +522,6 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     Mutex_Lock(&sopc_helper_config.server.syncLocalServiceMutex);
     assert(NULL == sopc_helper_config.server.syncResp);
     // Set helper local service context
-    ctx->event = SE_LOCAL_SERVICE_RESPONSE;
     ctx->eventCtx.localService.isSyncCall = true;
     ctx->eventCtx.localService.syncId = sopc_helper_config.server.syncLocalServiceId;
 
