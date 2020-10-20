@@ -159,6 +159,11 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *
  * \note request memory is managed by the server after a successful return or in case of timeout
  * \note caller is responsible of output response memory after successful call
+ *
+ * \warning local service synchronous call shall only be called from the application thread and shall not be called from
+ * server callbacks used for notification, asynchronous response, client event, etc. (::SOPC_LocalServiceAsyncResp_Fct,
+ * ::SOPC_WriteNotif_Fct,  ::SOPC_ComEvent_Fct, etc.). Otherwise this will lead to a temporary deadlock situation which
+ * will lead to fail with SOPC_STATUS_TIMEOUT.
  */
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** response);
 

@@ -121,7 +121,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
  *       Thus it indicates the complete final value here in case of success.
  *
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
- *          callback call (other instance of write notificatoin, local service of response, etc.).
+ *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
 typedef void SOPC_WriteNotif_Fct(OpcUa_WriteValue* writeValue, SOPC_StatusCode writeStatus);
 
@@ -135,6 +135,9 @@ typedef void SOPC_WriteNotif_Fct(OpcUa_WriteValue* writeValue, SOPC_StatusCode w
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p writeNotifCb is invalid
  *             or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
 
@@ -166,6 +169,9 @@ typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* res
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p asyncRespCb is invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, server already started).
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb);
 
@@ -199,6 +205,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
  *
  * \warning low-level client should only define its secure channel configuration
  *          between call to ::SOPC_Helper_Initialize and call to start the server.
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb);
 
