@@ -289,7 +289,8 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
         if (SOPC_STATUS_OK == status)
         {
             ctx->eventCtx.localService.isHelperInternal = true;
-            ctx->eventCtx.localService.internalErrorMsg = "Updating runtime variables of server build information nodes failed";
+            ctx->eventCtx.localService.internalErrorMsg =
+                "Updating runtime variables of server build information nodes failed";
             if (!SOPC_RuntimeVariables_UpdateServerStatus(sopc_helper_config.server.endpointIndexes[0], runtime_vars,
                                                           (uintptr_t) ctx))
             {
@@ -526,7 +527,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     // Send request
     SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_helper_config.server.endpointIndexes[0], request, (uintptr_t) ctx);
 
-    // Wait until response received or timeout
+    // Wait until response received or error status (timeout)
     while (SOPC_STATUS_OK == status && NULL == sopc_helper_config.server.syncResp)
     {
         status = Mutex_UnlockAndTimedWaitCond(&sopc_helper_config.server.syncLocalServiceCond,
@@ -541,9 +542,19 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     else if (NULL != sopc_helper_config.server.syncResp)
     {
-        // Clear response since result incorrect
-        SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_helper_config.server.syncResp,
-                                    sopc_helper_config.server.syncResp);
+        // This is possible timeout occurred during response reception, in this case we might ignore timeout
+        if (SOPC_STATUS_TIMEOUT == status)
+        {
+            // Set response output
+            *response = sopc_helper_config.server.syncResp;
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            // Clear response since result incorrect
+            SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_helper_config.server.syncResp,
+                                        sopc_helper_config.server.syncResp);
+        }
     }
     sopc_helper_config.server.syncResp = NULL;
     sopc_helper_config.server.syncLocalServiceId++;
