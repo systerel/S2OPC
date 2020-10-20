@@ -98,6 +98,29 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     Mutex_Unlock(&sopc_helper_config.server.syncLocalServiceMutex);
 }
 
+// Callback dedicated to runtime variable update treatment: check received response is correct or trace error
+static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encType,
+                                                             void* response,
+                                                             uintptr_t context)
+{
+    SOPC_HelperConfigInternal_Ctx* helperCtx = (SOPC_HelperConfigInternal_Ctx*) context;
+
+    assert(&OpcUa_WriteResponse_EncodeableType == encType);
+    OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
+    bool ok = (writeResp->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
+
+    for (int32_t i = 0; i < writeResp->NoOfResults; ++i)
+    {
+        ok &= (writeResp->Results[i] == SOPC_GoodGenericStatus);
+    }
+
+    if (!ok)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s\n",
+                               helperCtx->eventCtx.localService.internalErrorMsg);
+    }
+}
+
 void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
                                              void* response,
                                              SOPC_HelperConfigInternal_Ctx* helperCtx)
@@ -106,7 +129,7 @@ void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
     // Helper internal call to internal services are always using asynchronous way
     if (ls->isHelperInternal)
     {
-        ls->helperInternalCb(encType, response, (uintptr_t) helperCtx);
+        SOPC_HelperInternal_RuntimeVariableSetResponseCb(encType, response, (uintptr_t) helperCtx);
     }
     else if (NULL != sopc_helper_config.server.asyncRespCb)
     {
@@ -196,29 +219,6 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     return status;
 }
 
-// Callback dedicated to runtime variable update treatment: check received response is correct or trace error
-static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encType,
-                                                             void* response,
-                                                             uintptr_t context)
-{
-    SOPC_HelperConfigInternal_Ctx* helperCtx = (SOPC_HelperConfigInternal_Ctx*) context;
-
-    assert(&OpcUa_WriteResponse_EncodeableType == encType);
-    OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
-    bool ok = (writeResp->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
-
-    for (int32_t i = 0; i < writeResp->NoOfResults; ++i)
-    {
-        ok &= (writeResp->Results[i] == SOPC_GoodGenericStatus);
-    }
-
-    if (!ok)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s\n",
-                               helperCtx->eventCtx.localService.errorMsg);
-    }
-}
-
 // Build and update server runtime variables (Server node info) and request to open all endpoints of the server
 static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 {
@@ -235,8 +235,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     if (NULL != ctx)
     {
         ctx->eventCtx.localService.isHelperInternal = true;
-        ctx->eventCtx.localService.helperInternalCb = SOPC_HelperInternal_RuntimeVariableSetResponseCb;
-        ctx->eventCtx.localService.errorMsg =
+        ctx->eventCtx.localService.internalErrorMsg =
             "Setting runtime variables of server build information nodes failed."
             " Please check address space content includes necessary base information nodes.";
         bool res = SOPC_RuntimeVariables_Set(sopc_helper_config.server.endpointIndexes[0],
@@ -290,8 +289,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
         if (SOPC_STATUS_OK == status)
         {
             ctx->eventCtx.localService.isHelperInternal = true;
-            ctx->eventCtx.localService.helperInternalCb = SOPC_HelperInternal_RuntimeVariableSetResponseCb;
-            ctx->eventCtx.localService.errorMsg = "Updating runtime variables of server build information nodes failed";
+            ctx->eventCtx.localService.internalErrorMsg = "Updating runtime variables of server build information nodes failed";
             if (!SOPC_RuntimeVariables_UpdateServerStatus(sopc_helper_config.server.endpointIndexes[0], runtime_vars,
                                                           (uintptr_t) ctx))
             {

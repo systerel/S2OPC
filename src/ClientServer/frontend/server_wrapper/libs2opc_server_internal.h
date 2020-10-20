@@ -154,10 +154,8 @@ typedef struct SOPC_HelperConfigInternal_Ctx
             uint32_t syncId;
             // internal use of local services (runtime variables)
             bool isHelperInternal;
-            // internal management of local service response
-            SOPC_LocalServiceAsyncResp_Fct* helperInternalCb;
             // message to display in case of internal local service failure (response NOK)
-            const char* errorMsg;
+            const char* internalErrorMsg;
         } localService;
     } eventCtx;
 } SOPC_HelperConfigInternal_Ctx;
