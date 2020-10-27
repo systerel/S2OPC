@@ -117,6 +117,7 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_NodeId* objectId
     (void) objectId;
     (void) nbInputArgs;
     (void) inputArgs;
+    // Note: pointers given by the toolkit are always valid
     *nbOutputArgs = 0;
     *outputArgs = NULL;
     (void) param;
@@ -133,6 +134,7 @@ static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_Nod
     (void) objectId;
     (void) nbInputArgs;
     (void) inputArgs;
+    // Note: pointers given by the toolkit are always valid
     *nbOutputArgs = 1;
     *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
     assert(NULL != *outputArgs);
@@ -298,7 +300,7 @@ int main(int argc, char* argv[])
          * It is then possible to use local services to access / write data:
          * - Synchronously with SOPC_ServerHelper_LocalServiceSync(...)
          * - Asynchronously with SOPC_ServerHelper_LocalServiceAsync(...): need
-         * SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(...) to be configured prir to start server
+         * SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(...) to be configured prior to start server
          */
 
         if (SOPC_STATUS_OK != status)
