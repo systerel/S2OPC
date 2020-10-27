@@ -265,7 +265,7 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
                     SOPC_String_Initialize(&appDesc->DiscoveryUrls[i]);
                 }
                 uint8_t j = 0;
-                for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints && j < nbDiscovery; i++)
+                for (uint8_t i = 0; res && i < sopc_helper_config.server.nbEndpoints && j < nbDiscovery; i++)
                 {
                     SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
                     // Is this a discovery endpoint ? Add it to application description.
@@ -273,10 +273,14 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
                     {
                         SOPC_ReturnStatus status =
                             SOPC_String_CopyFromCString(&appDesc->DiscoveryUrls[j], ep->endpointURL);
-                        assert(SOPC_STATUS_OK == status);
+                        res = (SOPC_STATUS_OK == status);
                         j++;
                     }
                 }
+            }
+            else
+            {
+                res = false;
             }
         }
     }
