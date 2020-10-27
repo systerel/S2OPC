@@ -225,15 +225,15 @@ typedef enum
 } SOPC_SecurityModeMask;
 
 /**
- * \brief Add a security mode mask to the security policy
+ * \brief Set a security mode mask to the security configuration
  *
- * \param destSecuConfig Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityConfig
- * \param modes          Mask of security modes to be supported using a bitwise disjunction of ::SOPC_SecurityModeMask
+ * \param destSecuConfig Pointer to security configuration added with ::SOPC_EndpointConfig_AddSecurityConfig
+ * \param modes          Mask of security modes to be supported using a bitwise OR of ::SOPC_SecurityModeMask
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p destSecuConfig or \p modes are invalid (0 or NULL)
  *
- * \note the None security policy does not support any mode except None
+ * \note Security configuration with the None security policy does not support any mode except None
  */
 SOPC_ReturnStatus SOPC_SecurityConfig_SetSecurityModes(SOPC_SecurityConfig* destSecuConfig,
                                                        SOPC_SecurityModeMask modes);
