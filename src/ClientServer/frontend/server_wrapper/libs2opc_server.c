@@ -264,9 +264,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
-    SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() +
-                                    (SOPC_TimeReference) sopc_helper_config.server.configuredSecondsTillShutdown * 1000;
-    bool targetTimeReached = false;
+
     SOPC_Server_RuntimeVariables* runtime_vars = &sopc_helper_config.server.runtimeVariables;
     // From part 5: "The server has shut down or is in the process of shutting down."
     runtime_vars->server_state = OpcUa_ServerState_Shutdown;
@@ -275,8 +273,17 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
     {
         status = SOPC_String_AttachFromCstring(&runtime_vars->shutdownReason.defaultText, "Requested shutdown");
     }
+    if (SOPC_STATUS_OK != status)
+    {
+        return;
+    }
+
+    SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() +
+                                    (SOPC_TimeReference) sopc_helper_config.server.configuredSecondsTillShutdown * 1000;
+    bool targetTimeReached = false;
     uint32_t remainingSecondsTillShutdown = sopc_helper_config.server.configuredSecondsTillShutdown;
-    while (SOPC_STATUS_OK == status && !targetTimeReached)
+
+    do
     {
         // Update the seconds till shutdown value
         runtime_vars->secondsTillShutdown = remainingSecondsTillShutdown;
@@ -296,15 +303,12 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
             {
                 status = SOPC_STATUS_NOK;
             }
-            else if (sopc_helper_config.server.configuredSecondsTillShutdown > 0)
-            {
-                SOPC_Sleep(UPDATE_TIMEOUT_MS);
-            } // else: if configured secondsTillShutdown is 0, do not wait since we have to stop immediately
 
             // Evaluation of seconds till shutdown
             SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
             if (currentTime < targetTime)
             {
+                SOPC_Sleep(UPDATE_TIMEOUT_MS);
                 remainingSecondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
             }
             else
@@ -312,7 +316,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
                 targetTimeReached = true;
             }
         }
-    }
+    } while (SOPC_STATUS_OK == status && !targetTimeReached);
 }
 
 // Request to close all endpoints of the server
