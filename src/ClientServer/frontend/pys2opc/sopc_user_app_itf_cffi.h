@@ -52,8 +52,8 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
-extern const OpcUa_UserTokenPolicy c_userTokenPolicy_Anonymous;
-extern const OpcUa_UserTokenPolicy c_userTokenPolicy_UserName_NoneSecurityPolicy;
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
 
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 

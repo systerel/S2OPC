@@ -58,12 +58,12 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
 /** Default anonymous user security policy supported configuration */
-extern const OpcUa_UserTokenPolicy c_userTokenPolicy_Anonymous;
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
 
 /** Default username security policy supported and configured with security policy None.
  * With this security policy, the password will never be encrypted and this policy
  * shall not be used on unsecured or unencrypted secure channels. */
-extern const OpcUa_UserTokenPolicy c_userTokenPolicy_UserName_NoneSecurityPolicy;
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
 
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
