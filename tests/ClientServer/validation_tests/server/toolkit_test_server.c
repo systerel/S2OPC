@@ -249,7 +249,7 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
         SOPC_CRLList* serializedCAcrl = NULL;
 
         /* Load client/server certificates and server key from C source files (no filesystem needed) */
-        status = SOPC_HelperConfigServer_SetCertificateFromBytes(sizeof(server_2k_cert), server_2k_cert,
+        status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                                  sizeof(server_2k_key), server_2k_key);
         if (SOPC_STATUS_OK == status)
         {
@@ -269,7 +269,7 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
         SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
-        status = SOPC_HelperConfigServer_SetCertificateFromPath(default_server_cert, default_key_cert);
+        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert);
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)

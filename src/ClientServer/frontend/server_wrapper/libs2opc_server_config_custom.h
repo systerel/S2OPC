@@ -138,7 +138,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, key/cert pair already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath, const char* serverKeyPath);
 
 /**
  * \brief Set asymmetrical certificate and key of server from byte arrays.
@@ -154,7 +154,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* ser
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, key/cert pair already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* serverCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey);

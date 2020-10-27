@@ -195,7 +195,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* serverCertPath, const char* serverKeyPath)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath, const char* serverKeyPath)
 {
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
         NULL != sopc_helper_config.config.serverConfig.serverKey)
@@ -238,7 +238,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromPath(const char* ser
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetCertificateFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* serverCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
