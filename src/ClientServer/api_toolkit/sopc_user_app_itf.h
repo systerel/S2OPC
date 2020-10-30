@@ -237,7 +237,7 @@ typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event, void* opP
 typedef struct
 {
     SOPC_Build_Info commonBuildInfo;
-    SOPC_Build_Info toolkitBuildInfo;
+    SOPC_Build_Info clientServerBuildInfo;
 } SOPC_Toolkit_Build_Info;
 
 /* \brief Initalize the content of the SOPC_S2OPC_Config
