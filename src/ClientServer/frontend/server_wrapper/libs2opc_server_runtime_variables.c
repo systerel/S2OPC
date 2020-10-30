@@ -74,9 +74,8 @@ static time_t parse_build_date(const char* build_date)
     return mktime(&time);
 }
 
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info build_info,
-                                                         SOPC_Server_Config* server_config,
-                                                         const char* manufacturer_name)
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
+                                                                SOPC_Server_Config* server_config)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -90,16 +89,12 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info
 
     OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
 
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-
     status =
         SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &server_config->serverDescription.ProductUri);
     assert(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, (char*) manufacturer_name);
+    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, "Systerel");
     assert(SOPC_STATUS_OK == status);
-
-    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName,
                                     &server_config->serverDescription.ApplicationName.defaultText);
@@ -121,6 +116,45 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info
     assert(SOPC_STATUS_OK == status);
 
     runtimeVariables.build_info.BuildDate = buildDate;
+
+    runtimeVariables.service_level = 255;
+    runtimeVariables.auditing = false;
+
+    runtimeVariables.maximum_operation_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
+
+    return runtimeVariables;
+}
+
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info, SOPC_Server_Config* server_config)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    SOPC_Server_RuntimeVariables runtimeVariables;
+
+    runtimeVariables.serverConfig = server_config;
+
+    runtimeVariables.secondsTillShutdown = 0;
+    runtimeVariables.server_state = OpcUa_ServerState_Running;
+    SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
+
+    OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
+
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &build_info->ProductUri);
+    assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ManufacturerName, &build_info->ManufacturerName);
+    assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName, &build_info->ProductName);
+    assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.SoftwareVersion, &build_info->SoftwareVersion);
+    assert(SOPC_STATUS_OK == status);
+
+    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.BuildNumber, &build_info->BuildNumber);
+    assert(SOPC_STATUS_OK == status);
+
+    runtimeVariables.build_info.BuildDate = build_info->BuildDate;
 
     runtimeVariables.service_level = 255;
     runtimeVariables.auditing = false;

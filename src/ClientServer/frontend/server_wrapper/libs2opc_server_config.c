@@ -53,7 +53,7 @@ static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus
             .configuredSecondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS, \
             .authenticationManager = NULL,                                      \
             .authorizationManager = NULL,                                       \
-            .manufacturerName = "Systerel",                                     \
+            .buildInfo = NULL,                                                  \
             .nbEndpoints = 0,                                                   \
             .endpointIndexes = NULL,                                            \
             .endpointClosed = NULL,                                             \
@@ -419,6 +419,7 @@ static void SOPC_HelperConfigInternal_Initialize(void)
 {
     sopc_helper_config = sopc_helper_config_default;
     SOPC_S2OPC_Config_Initialize(&sopc_helper_config.config);
+
     // We only do copies in helper config
     sopc_helper_config.config.serverConfig.freeCstringsFlag = true;
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) true);
@@ -457,10 +458,14 @@ static void SOPC_HelperConfigInternal_Clear(void)
 
     SOPC_UserAuthentication_FreeManager(&sopc_helper_config.server.authenticationManager);
     SOPC_UserAuthorization_FreeManager(&sopc_helper_config.server.authorizationManager);
-    if (sopc_helper_config_default.server.manufacturerName != sopc_helper_config.server.manufacturerName)
+
+    if (NULL != sopc_helper_config.server.buildInfo)
     {
-        SOPC_Free(sopc_helper_config.server.manufacturerName);
+        OpcUa_BuildInfo_Clear(sopc_helper_config.server.buildInfo);
+        SOPC_Free(sopc_helper_config.server.buildInfo);
+        sopc_helper_config.server.buildInfo = NULL;
     }
+
     SOPC_Free(sopc_helper_config.server.endpointIndexes);
     SOPC_Free(sopc_helper_config.server.endpointClosed);
 

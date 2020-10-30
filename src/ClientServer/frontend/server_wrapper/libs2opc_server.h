@@ -98,10 +98,6 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
 SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
 
 /**
- *  Local service
- */
-
-/**
  * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) asynchronously.
  *        On local service response callback configured through ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
  *        will be called.

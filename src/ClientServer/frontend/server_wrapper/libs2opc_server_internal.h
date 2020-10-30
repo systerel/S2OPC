@@ -115,8 +115,8 @@ typedef struct SOPC_Helper_Config
         SOPC_UserAuthentication_Manager* authenticationManager;
         SOPC_UserAuthorization_Manager* authorizationManager;
 
-        // Software manufacturer name
-        char* manufacturerName;
+        // Server build info
+        OpcUa_BuildInfo* buildInfo;
 
         // Configured endpoint indexes and opened state arrays
         uint8_t nbEndpoints;

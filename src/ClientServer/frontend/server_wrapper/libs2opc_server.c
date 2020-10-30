@@ -228,9 +228,15 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     }
     // Set runtime variable
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    sopc_helper_config.server.runtimeVariables =
-        SOPC_RuntimeVariables_Build(SOPC_ToolkitConfig_GetBuildInfo(), &sopc_helper_config.config.serverConfig,
-                                    sopc_helper_config.server.manufacturerName);
+    if (NULL == sopc_helper_config.server.buildInfo)
+    {
+        sopc_helper_config.server.runtimeVariables = SOPC_RuntimeVariables_BuildDefault(
+            SOPC_ToolkitConfig_GetBuildInfo(), &sopc_helper_config.config.serverConfig);
+    }
+    else
+    {
+        SOPC_RuntimeVariables_Build(sopc_helper_config.server.buildInfo, &sopc_helper_config.config.serverConfig);
+    }
     SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
     if (NULL != ctx)
     {

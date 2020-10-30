@@ -24,6 +24,7 @@
 #include "libs2opc_server_internal.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -469,19 +470,53 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetSwManufacturer(const char* manufacturerName)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() &&
-        sopc_helper_config_default.server.manufacturerName == sopc_helper_config.server.manufacturerName)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config_default.server.buildInfo)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == manufacturerName)
+    if (NULL == buildInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    sopc_helper_config.server.manufacturerName = SOPC_strdup(manufacturerName);
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_Create(&OpcUa_BuildInfo_EncodeableType, (void**) &sopc_helper_config.server.buildInfo);
 
-    return SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ProductUri, &buildInfo->ProductUri);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ManufacturerName, &buildInfo->ManufacturerName);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ProductName, &buildInfo->ProductName);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->SoftwareVersion, &buildInfo->SoftwareVersion);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->BuildNumber, &buildInfo->BuildNumber);
+    }
+
+    sopc_helper_config.server.buildInfo->BuildDate = buildInfo->BuildDate;
+
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_BuildInfo_Clear(sopc_helper_config.server.buildInfo);
+        SOPC_Free(sopc_helper_config.server.buildInfo);
+        sopc_helper_config.server.buildInfo = NULL;
+    }
+
+    return status;
 }

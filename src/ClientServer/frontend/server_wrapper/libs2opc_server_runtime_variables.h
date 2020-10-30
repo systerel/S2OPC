@@ -44,18 +44,35 @@ typedef struct SOPC_Server_RuntimeVariables
 } SOPC_Server_RuntimeVariables;
 
 /**
- * \brief Builds the structure containing the values for runtime variables in the address space.
+ * \brief Builds (without custom ::OpcUa_BuildInfo) the structure containing the values for runtime variables in the
+ *        address space
+ *
+ * Information on software are extracted from server configuration. Manufacturer and build date and version are those of
+ * S2OPC by default. Otherwise ::SOPC_RuntimeVariables_Build should be used with custom ::OpcUa_BuildInfo.
  *
  * \param build_info  Toolkit build information structure
  * \param server_config Server configuration data
- * \param  manufacturer_name Sever manufacturer name.
+ *
+ * \return structure containing all runtime variables.
+ */
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
+                                                                SOPC_Server_Config* server_config);
+
+/**
+ * \brief Builds the structure containing the values for runtime variables in the address space.
+ *
+ * Use the custom ::OpcUa_BuildInfo structure content provided, content is copied.
+ *
+ * \param build_info  Server custom build information
+ * \param server_config Server configuration data
  *
  * \return structure containing all runtime variables.
  *
+ * \warning Coherence between build information and server configuration (application description, etc.) is not enforced
+ *
  */
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(SOPC_Toolkit_Build_Info build_info,
-                                                         SOPC_Server_Config* server_config,
-                                                         const char* manufacturer_name);
+SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
+                                                         SOPC_Server_Config* server_config);
 
 /**
  * \brief Sets the values for runtime variables in the address space.

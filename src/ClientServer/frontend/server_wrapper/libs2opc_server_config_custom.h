@@ -324,18 +324,17 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
 
-/* Change software manufacturer */
-
 /**
- * \brief Change the software manufacturer name in the server build info node
+ * \brief Change the software build information to be displayed in the server build info node
  *
- * \param manufacturerName  the manufacturer name to display in server build info node
+ * \param buildInfo  the build information name to display in server build info node.
+ *                   Content is copied and can be cleared after call.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p manufacturerName is invalid (0 or NULL)
+ *         if \p buildInfo is invalid (NULL)
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, server already started).
+ *         (toolkit not initialized, build info already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetSwManufacturer(const char* manufacturerName);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
 
 #endif
