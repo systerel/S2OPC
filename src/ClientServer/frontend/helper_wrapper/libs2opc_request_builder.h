@@ -418,39 +418,43 @@ OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointU
 
 /**
  * \brief Request preferred locales for the endpoints to be returned by the get endpoints service (Optional)
- *        Preferred locale order is from first call to last call to this function.
+ *        Preferred locale order is the order of \p localesIds array
  *
  * \param getEndpointsReq  The get endpoints request to configure
- *
- * \param localeId         The locale to add as preferred for application description.
- *                         It shall not be NULL.
+ * \param nbLocales        Number of locales in array. It shall be > 0.
+ * \param localeIds        Array of preferred locale ids by order of preference.
+ *                         Values are copied. They shall not be NULL.
  *
  * \return SOPC_STATUS_OK in case of success,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid get endpoints request or localId.
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid get endpoints request or locale ids,
+ *         SOPC_STATUS_INVALID_STATE in case preferred locales already set.
  */
-SOPC_ReturnStatus SOPC_GetEndpointsRequest_AddPreferredLocale(OpcUa_GetEndpointsRequest* getEndpointsReq,
-                                                              const char* localeId);
+SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpointsRequest* getEndpointsReq,
+                                                               size_t nbLocales,
+                                                               char** localeIds);
 
 /**
- * \brief Request a specific profile URI for the endpoints to be returned by the get endpoints service (Optional)
+ * \brief Request profile URIs for the endpoints to be returned by the get endpoints service (Optional)
  *        Endpoints of all transport profile types available are returned
- *        if ::SOPC_GetEndpointsRequest_AddProfileURI unused.
+ *        if ::SOPC_GetEndpointsRequest_SetProfileURIs unused.
  *
  * \param getEndpointsReq  The get endpoints request to configure
- *
- * \param profileURI       Transport profile to be returned by GetEndpoints service.
- *                         It shall not be NULL.
- *                         E.g. "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",
- *                         other possible values are described in Transport category of
- *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part7/6.2/>
- *                         OPC UA specification</a>.
+ * \param nbProfiles        Number of profile URIs in array. It shall be > 0.
+ * \param profileURIs       Array of transport profile URIs to be returned by GetEndpoints service.
+ *                          Values shall not be NULL.
+ *                          E.g. "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",
+ *                          other possible values are described in Transport category of
+ *                          <a href=https://reference.opcfoundation.org/v104/Core/docs/Part7/6.2/>
+ *                          OPC UA specification</a>.
 
  *
  * \return SOPC_STATUS_OK in case of success,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid get endpoints request or profileURI.
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid get endpoints request or profiles URI
+ *         (invalid number or NULL value), SOPC_STATUS_INVALID_STATE in case profile URIs already set.
  */
-SOPC_ReturnStatus SOPC_GetEndpointsRequest_AddProfileURI(OpcUa_GetEndpointsRequest* getEndpointsReq,
-                                                         const char* profileURI);
+SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequest* getEndpointsReq,
+                                                          size_t nbProfiles,
+                                                          char** profileURIs);
 
 /**
  * \brief Create a complete RegisterServer2 request from the current server configuration.

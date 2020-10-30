@@ -504,67 +504,84 @@ OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointU
     return getEndpointReq;
 }
 
-static SOPC_String* SOPC_HelperInternal_ReallocAndAddNewStringInArray(SOPC_String* stringArray,
-                                                                      size_t stringArrayLength,
-                                                                      const char* newStringToAdd)
+static SOPC_String* SOPC_HelperInternal_AllocAndCopyCstringInArray(size_t stringArrayLength, char** cStringsToCopy)
 {
-    SOPC_String* newStringArray = SOPC_Realloc(stringArray, stringArrayLength, stringArrayLength + 1);
+    SOPC_String* newStringArray = SOPC_Calloc(sizeof(SOPC_String), stringArrayLength);
 
     if (NULL == newStringArray)
     {
         return NULL;
     }
 
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&newStringArray[stringArrayLength], newStringToAdd);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (size_t i = 0; i < stringArrayLength; i++)
+    {
+        SOPC_String_Initialize(&newStringArray[i]);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_CopyFromCString(&newStringArray[i], cStringsToCopy[i]);
+        }
+    }
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Free(newStringArray);
-        newStringArray = NULL;
+        int32_t length = (int32_t) stringArrayLength;
+        SOPC_Clear_Array(&length, (void**) &newStringArray, sizeof(SOPC_String), SOPC_String_ClearAux);
     }
 
     return newStringArray;
 }
 
-SOPC_ReturnStatus SOPC_GetEndpointsRequest_AddPreferredLocale(OpcUa_GetEndpointsRequest* getEndpointsReq,
-                                                              const char* localeId)
+SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpointsRequest* getEndpointsReq,
+                                                               size_t nbLocales,
+                                                               char** localeIds)
 {
-    if (NULL == getEndpointsReq || NULL == localeId || INT32_MAX == getEndpointsReq->NoOfLocaleIds)
+    if (NULL == getEndpointsReq || 0 == nbLocales || NULL == localeIds)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_String* newLocaleIds = SOPC_HelperInternal_ReallocAndAddNewStringInArray(
-        getEndpointsReq->LocaleIds, (size_t) getEndpointsReq->NoOfLocaleIds, localeId);
-    if (NULL != newLocaleIds)
+    if (getEndpointsReq->NoOfLocaleIds != 0)
     {
-        getEndpointsReq->LocaleIds = newLocaleIds;
-        getEndpointsReq->NoOfLocaleIds++;
-
-        return SOPC_STATUS_OK;
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    return SOPC_STATUS_OUT_OF_MEMORY;
+    getEndpointsReq->LocaleIds = SOPC_HelperInternal_AllocAndCopyCstringInArray(nbLocales, localeIds);
+
+    if (NULL == getEndpointsReq->LocaleIds)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    getEndpointsReq->NoOfLocaleIds = (int32_t) nbLocales;
+
+    return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_GetEndpointsRequest_AddProfileURI(OpcUa_GetEndpointsRequest* getEndpointsReq,
-                                                         const char* profileURI)
+SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequest* getEndpointsReq,
+                                                          size_t nbProfiles,
+                                                          char** profileURIs)
 {
-    if (NULL == getEndpointsReq || NULL == profileURI || INT32_MAX == getEndpointsReq->NoOfProfileUris)
+    if (NULL == getEndpointsReq || NULL == profileURIs)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_String* newProfileURIs = SOPC_HelperInternal_ReallocAndAddNewStringInArray(
-        getEndpointsReq->ProfileUris, (size_t) getEndpointsReq->NoOfProfileUris, profileURI);
-    if (NULL != newProfileURIs)
-    {
-        getEndpointsReq->ProfileUris = newProfileURIs;
-        getEndpointsReq->NoOfProfileUris++;
 
-        return SOPC_STATUS_OK;
+    if (getEndpointsReq->NoOfProfileUris > 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    return SOPC_STATUS_OUT_OF_MEMORY;
+    getEndpointsReq->ProfileUris = SOPC_HelperInternal_AllocAndCopyCstringInArray(nbProfiles, profileURIs);
+
+    if (NULL == getEndpointsReq->ProfileUris)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    getEndpointsReq->NoOfProfileUris = (int32_t) nbProfiles;
+
+    return SOPC_STATUS_OK;
 }
 
 OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfiguration(void)
