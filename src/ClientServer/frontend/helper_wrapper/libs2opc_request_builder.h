@@ -77,7 +77,6 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetMaxAge(OpcUa_ReadRequest* readRequest, dou
  * \param attribute    The attribute to read in the node.
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid
  *
- *
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
  *                     If not used for the read value requested it should be NULL.
