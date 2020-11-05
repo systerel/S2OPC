@@ -155,8 +155,8 @@ static struct
 
     SOPC_RT_Publisher* pRTPublisher; // RT Publisher
 
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
-    Thread handleThreadBeatHeart; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
+    Thread handleThreadHeartBeat; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
     bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
 #endif
 
@@ -171,9 +171,9 @@ static struct
                      .messages.array = NULL,
                      .sequenceNumber = 1,
                      .pRTPublisher = NULL,
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
                      .bQuitBeatHeart = true,
-                     .handleThreadBeatHeart = (Thread) NULL,
+                     .handleThreadHeartBeat = (Thread) NULL,
 #endif
                      .bQuitVarMonitoring = true,
                      .handleThreadVarMonitoring = (Thread) NULL};
@@ -183,8 +183,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg);
 
 // This callback increment call RT publisher beat heart with a monotonic counter post incremented
 // then sleep during SOPC_TIMER_RESOLUTION_MS ms.
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
-static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg);
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
+static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg);
 #endif
 
 // RT Publisher callback functions (start and stop used only for debug, send function is really useful)
@@ -212,17 +212,17 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
 static void SOPC_PubScheduler_Context_Clear(void)
 {
     /* Stop beat heart and variable monitoring threads */
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
     printf("# Info: Stop beat heart thread\r\n");
 
     bool newQuitBeatHeart = true;
 
     __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitBeatHeart, __ATOMIC_SEQ_CST);
 
-    if (pubSchedulerCtx.handleThreadBeatHeart != (Thread) NULL)
+    if (pubSchedulerCtx.handleThreadHeartBeat != (Thread) NULL)
     {
-        SOPC_Thread_Join(pubSchedulerCtx.handleThreadBeatHeart);
-        pubSchedulerCtx.handleThreadBeatHeart = (Thread) NULL;
+        SOPC_Thread_Join(pubSchedulerCtx.handleThreadHeartBeat);
+        pubSchedulerCtx.handleThreadHeartBeat = (Thread) NULL;
     }
 #endif
 
@@ -497,15 +497,17 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
     return;
 }
 
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
 // This callback increment call RT publisher beat heart with a monotonic counter post incremented
 // then sleep during SOPC_TIMER_RESOLUTION_MS ms.
-static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
+static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
 {
-    (void) arg;
+    uintptr_t resMilliSecs = (uintptr_t) arg;
 
-    volatile uint32_t beatHeart = 0;
+    volatile uint32_t heartBeat = 0;
     SOPC_ReturnStatus resultUpdateThread = SOPC_STATUS_OK;
+    SOPC_TimeReference currentRef = SOPC_TimeReference_GetCurrent();
+    SOPC_TimeReference targetRef = SOPC_TimeReference_AddMilliseconds(currentRef, resMilliSecs);
 
     printf("# RT Publisher tick thread: Beat heart thread launched !!!\r\n");
 
@@ -513,13 +515,20 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
     __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
     while (!readQuitHeartBeat)
     {
-        resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, beatHeart++);
+        currentRef = SOPC_TimeReference_GetCurrent();
+        while (targetRef <= currentRef)
+        {
+            // Call heart beat function 1 time per resolution time elapsed since last evaluation
+            resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, heartBeat++);
+            // next target is previous target + resolution time (it might already be elapsed)
+            targetRef = SOPC_TimeReference_AddMilliseconds(targetRef, resMilliSecs);
+        }
         if (resultUpdateThread != SOPC_STATUS_OK)
         {
             printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\r\n", (int) resultUpdateThread);
         }
 
-        SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+        SOPC_Sleep((unsigned int) resMilliSecs);
         __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
     }
 
@@ -531,172 +540,205 @@ static void* SOPC_RT_Publisher_ThreadBeatHeartCallback(void* arg)
 // This callback of thread var monitoring is porting from code of old event_timer callback
 static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
 {
-    (void) arg;
+    uintptr_t resMilliSecs = (uintptr_t) arg;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // Choose a reasonable minimum resolution to get variables
+    // retrieve minimum publishing interval to manage
+    uint64_t minPubInterval = UINT64_MAX;
+    for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
+    {
+        SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
+        uint64_t pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
+        if (minPubInterval > pubInterval)
+        {
+            minPubInterval = pubInterval;
+        }
+    }
+    // minimum resolution = minimum publish interval / 2
+    if (minPubInterval / 2 > resMilliSecs)
+    {
+        assert(minPubInterval <= UINT32_MAX);
+        resMilliSecs = (uint32_t)(minPubInterval / 2);
+    }
 
     printf("# Publisher variables monitoring: thread launched !!!\r\n");
 
     bool readVarMonitoringStatus = false;
     __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
 
+    SOPC_TimeReference startTimeRef = SOPC_TimeReference_GetCurrent();
+    SOPC_TimeReference prevTimeRef = startTimeRef;
+
     while (!readVarMonitoringStatus)
     {
+        SOPC_TimeReference currentTimeRef = SOPC_TimeReference_GetCurrent();
+
         for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
         {
+            bool allocSuccess = true;
+            bool typeCheckingSuccess = true;
+            SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
+
+            uint64_t pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
+
+            // Check if we should retrieve a new value:
+            // - First iteration OR
+            // - Number of publications expected is greater than the one on previous evaluation
+            if (prevTimeRef != startTimeRef &&
+                (currentTimeRef - startTimeRef) / pubInterval == (prevTimeRef - startTimeRef) / pubInterval)
             {
-                bool allocSuccess = true;
-                bool typeCheckingSuccess = true;
-                SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
-                SOPC_Dataset_NetworkMessage* message = ctx->message;
-                assert(NULL != ctx->message);
-                // only one datasetmessage is managed
-                assert(1 == SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message));
-                SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
-                uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+                continue;
+            }
 
-                // get datavalue for the unique datasetwriter
-                const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(ctx->group);
-                const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
-                assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
+            SOPC_Dataset_NetworkMessage* message = ctx->message;
+            assert(NULL != ctx->message);
+            // only one datasetmessage is managed
+            assert(1 == SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message));
+            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
+            uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
 
-                // Fill datasetmessage
-                SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, //
-                                                                             dataset);                     //
+            // get datavalue for the unique datasetwriter
+            const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(ctx->group);
+            const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
+            assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
-                if (NULL == values)
+            // Fill datasetmessage
+            SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, //
+                                                                         dataset);                     //
+
+            if (NULL == values)
+            {
+                printf("# Publisher variable monitoring : Warning, request response unexpected values !!!\r\n");
+            }
+            else
+            {
+                // Check compatibility regarding PubSub configuration
+                for (uint16_t i = 0; i < nbFields; i++)
                 {
-                    printf("# Publisher variable monitoring : Warning, request response unexpected values !!!\r\n");
+                    SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, i);
+                    assert(NULL != fieldData);
+                    SOPC_DataValue* dv = &values[i];
+
+                    bool isBad = false;
+                    bool isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+
+                    // We also want to consider case the value was valid but provided with Bad status, therefore we
+                    // do not consider isNullOrBad in the first condition
+                    if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
+                    {
+                        // If status is bad and value has not status type, set value as a Bad status code
+                        // (see spec part 14: Table 16: DataSetMessage field representation options)
+                        if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
+                        {
+                            SOPC_Variant_Clear(&dv->Value);
+                            dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
+                            dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+                            dv->Value.Value.Status = dv->Status;
+                        }
+                    }
+                    else if (!isCompatible || isBad)
+                    {
+                        // If value is Bad whereas the data value status code is not bad, it is considered as an
+                        // error since this is not the type expected for this value from an OpcUa server.
+
+                        if (!isCompatible)
+                        {
+                            printf(
+                                "# Publisher variables monitoring: Error: incompatible variants between Address "
+                                "Space and Pub config.\r\n");
+                        }
+                        typeCheckingSuccess = false;
+                    }
                 }
-                else
+
+                for (uint16_t dsf_index = 0; dsf_index < nbFields && allocSuccess && typeCheckingSuccess; dsf_index++)
                 {
-                    // Check compatibility regarding PubSub configuration
-                    for (uint16_t i = 0; i < nbFields; i++)
+                    SOPC_FieldMetaData* metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, dsf_index);
+                    SOPC_Variant* variant = SOPC_Variant_Create();
+                    // TODO: log an error if null
+                    allocSuccess = (NULL != variant);
+                    if (allocSuccess)
                     {
-                        SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, i);
-                        assert(NULL != fieldData);
-                        SOPC_DataValue* dv = &values[i];
+                        SOPC_Variant_Move(variant, &(values[dsf_index].Value));
+                        SOPC_NetworkMessage_Set_Variant_At(message,
+                                                           0, // unique datasetmessage
+                                                           dsf_index, variant, metadata);
+                    }
+                }
 
-                        bool isBad = false;
-                        bool isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+                for (uint16_t dsf_index = 0; dsf_index < nbFields; dsf_index++)
+                {
+                    SOPC_DataValue_Clear(&(values[dsf_index]));
+                }
+                SOPC_Free(values);
 
-                        // We also want to consider case the value was valid but provided with Bad status, therefore we
-                        // do not consider isNullOrBad in the first condition
-                        if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
+                // send message
+                if (allocSuccess && typeCheckingSuccess)
+                {
+                    SOPC_PubSub_SecurityType* security = ctx->security;
+
+                    if (allocSuccess)
+                    {
+                        SOPC_Buffer buffer;
+
+                        memset(&buffer, 0, sizeof(SOPC_Buffer));
+
+                        // Get buffer where message is pre-encoded.
+                        status = SOPC_RT_Publisher_GetBuffer(pubSchedulerCtx.pRTPublisher, //
+                                                             ctx->rt_publisher_msg_id,     //
+                                                             &buffer);                     //
+
+                        // If successful, pre-encode message into double buffer
+                        if (SOPC_STATUS_OK == status)
                         {
-                            // If status is bad and value has not status type, set value as a Bad status code
-                            // (see spec part 14: Table 16: DataSetMessage field representation options)
-                            if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
+                            if (NULL != security)
                             {
-                                SOPC_Variant_Clear(&dv->Value);
-                                dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
-                                dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-                                dv->Value.Value.Status = dv->Status;
+                                security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+                                allocSuccess = (NULL != security->msgNonceRandom);
+                                if (allocSuccess)
+                                {
+                                    security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
+                                    pubSchedulerCtx.sequenceNumber++;
+                                }
+                                else
+                                {
+                                    status = SOPC_STATUS_NOK;
+                                }
                             }
-                        }
-                        else if (!isCompatible || isBad)
-                        {
-                            // If value is Bad whereas the data value status code is not bad, it is considered as an
-                            // error since this is not the type expected for this value from an OpcUa server.
 
-                            if (!isCompatible)
-                            {
-                                printf(
-                                    "# Publisher variables monitoring: Error: incompatible variants between Address "
-                                    "Space and Pub config.\r\n");
-                            }
-                            typeCheckingSuccess = false;
-                        }
-                    }
-
-                    for (uint16_t dsf_index = 0; dsf_index < nbFields && allocSuccess && typeCheckingSuccess;
-                         dsf_index++)
-                    {
-                        SOPC_FieldMetaData* metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, dsf_index);
-                        SOPC_Variant* variant = SOPC_Variant_Create();
-                        // TODO: log an error if null
-                        allocSuccess = (NULL != variant);
-                        if (allocSuccess)
-                        {
-                            SOPC_Variant_Move(variant, &(values[dsf_index].Value));
-                            SOPC_NetworkMessage_Set_Variant_At(message,
-                                                               0, // unique datasetmessage
-                                                               dsf_index, variant, metadata);
-                        }
-                    }
-
-                    for (uint16_t dsf_index = 0; dsf_index < nbFields; dsf_index++)
-                    {
-                        SOPC_DataValue_Clear(&(values[dsf_index]));
-                    }
-                    SOPC_Free(values);
-
-                    // send message
-                    if (allocSuccess && typeCheckingSuccess)
-                    {
-                        SOPC_PubSub_SecurityType* security = ctx->security;
-
-                        if (allocSuccess)
-                        {
-                            SOPC_Buffer buffer;
-
-                            memset(&buffer, 0, sizeof(SOPC_Buffer));
-
-                            // Get buffer where message is pre-encoded.
-                            status = SOPC_RT_Publisher_GetBuffer(pubSchedulerCtx.pRTPublisher, //
-                                                                 ctx->rt_publisher_msg_id,     //
-                                                                 &buffer);                     //
-
-                            // If successful, pre-encode message into double buffer
                             if (SOPC_STATUS_OK == status)
                             {
+                                SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message, security);
                                 if (NULL != security)
                                 {
-                                    security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-                                    allocSuccess = (NULL != security->msgNonceRandom);
-                                    if (allocSuccess)
-                                    {
-                                        security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
-                                        pubSchedulerCtx.sequenceNumber++;
-                                    }
-                                    else
-                                    {
-                                        status = SOPC_STATUS_NOK;
-                                    }
+                                    SOPC_Free(security->msgNonceRandom);
+                                    security->msgNonceRandom = NULL;
                                 }
-
-                                if (SOPC_STATUS_OK == status)
+                                if (pBuffer != NULL)
                                 {
-                                    SOPC_Buffer* pBuffer = SOPC_UADP_NetworkMessage_Encode(message, security);
-                                    if (NULL != security)
-                                    {
-                                        SOPC_Free(security->msgNonceRandom);
-                                        security->msgNonceRandom = NULL;
-                                    }
-                                    if (pBuffer != NULL)
-                                    {
-                                        status = SOPC_Buffer_Copy(&buffer, pBuffer);
-                                        SOPC_Buffer_Delete(pBuffer);
-                                    }
+                                    status = SOPC_Buffer_Copy(&buffer, pBuffer);
+                                    SOPC_Buffer_Delete(pBuffer);
                                 }
-                                // Commit buffer with significant bytes
-                                bool bCancel = false;
-                                if (SOPC_STATUS_OK != status)
-                                {
-                                    bCancel = true;
-                                }
-
-                                SOPC_RT_Publisher_ReleaseBuffer(pubSchedulerCtx.pRTPublisher, //
-                                                                ctx->rt_publisher_msg_id,     //
-                                                                &buffer,                      //
-                                                                bCancel);                     //
                             }
+                            // Commit buffer with significant bytes
+                            bool bCancel = false;
+                            if (SOPC_STATUS_OK != status)
+                            {
+                                bCancel = true;
+                            }
+
+                            SOPC_RT_Publisher_ReleaseBuffer(pubSchedulerCtx.pRTPublisher, //
+                                                            ctx->rt_publisher_msg_id,     //
+                                                            &buffer,                      //
+                                                            bCancel);                     //
                         }
                     }
                 }
             }
         }
 
-        SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
+        SOPC_Sleep((unsigned int) resMilliSecs);
 
         __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
     }
@@ -706,8 +748,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
     return NULL;
 }
 
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
-SOPC_ReturnStatus SOPC_PubScheduler_BeatHeartFromIRQ(uint32_t tickValue)
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
+SOPC_ReturnStatus SOPC_PubScheduler_HeartBeatFromIRQ(uint32_t tickValue)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     // Verify that scheduler is not already running
@@ -724,7 +766,9 @@ SOPC_ReturnStatus SOPC_PubScheduler_BeatHeartFromIRQ(uint32_t tickValue)
     return result;
 }
 #endif
-bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig)
+bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
+                             SOPC_PubSourceVariableConfig* sourceConfig,
+                             uint32_t resolutionMicroSecs)
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
@@ -746,6 +790,22 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
     }
+
+    // Adapt resolution when not provided by IRQ (1ms minimum)
+    uint32_t resWithoutIRQ = 1000;
+    if (resolutionMicroSecs > 1000)
+    {
+        resWithoutIRQ = resolutionMicroSecs;
+    }
+
+    // Note: keep 2 resolution definitions since for source data is never retrieved through IRQ
+    // and for now the scheduler shall request to get data up to date.
+    // i.e. resolutionMicroSecs is used for publishingInterval period evaluation
+    // and resWithoutIRQ for calling SOPC_PubSourceVariable_GetVariables through a dedicated thread
+
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
+    resolutionMicroSecs = resWithoutIRQ;
+#endif
 
     // Security : init the sequence number
     pubSchedulerCtx.sequenceNumber = 1;
@@ -829,6 +889,10 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
                     {
                         SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
                         uint64_t publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
+                        if (publishingInterval > UINT32_MAX)
+                        {
+                            resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
+                        }
                         if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
                         {
                             resultSOPC = SOPC_STATUS_NOK;
@@ -845,12 +909,12 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
                             resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
                                 pRTInitializer, //
-                                (uint32_t) publishingInterval > (uint32_t) SOPC_TIMER_RESOLUTION_MS
-                                    ? (uint32_t) publishingInterval / SOPC_TIMER_RESOLUTION_MS
-                                    : (uint32_t) SOPC_TIMER_RESOLUTION_MS / SOPC_TIMER_RESOLUTION_MS, // period in ticks
-                                0,                                                                    // offset in ticks
-                                msgctx,                                                               // Context
-                                SOPC_RT_Publisher_StartPubMsgCallback,                                // Not used
+                                publishingInterval * 1000 > resolutionMicroSecs
+                                    ? (uint32_t)(publishingInterval * 1000 / resolutionMicroSecs)
+                                    : 1,                                  // period in ticks (minimum is 1 tick)
+                                0,                                        // offset in ticks
+                                msgctx,                                   // Context
+                                SOPC_RT_Publisher_StartPubMsgCallback,    // Not used
                                 SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
                                 SOPC_RT_Publisher_StopPubMsgCallback,     // Not used
                                 SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
@@ -890,21 +954,20 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         // Destroy initializer not further used
         SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
 
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 0
-        // Creation of beat heart thread which call RT Publisher Beat Heart
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
+        // Creation of heart beat thread which call RT Publisher Heart Beat
 
         if (SOPC_STATUS_OK == resultSOPC)
         {
             bool newQuitHeartBeat = false;
             __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitHeartBeat, __ATOMIC_SEQ_CST);
-            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadBeatHeart,    //
-                                            SOPC_RT_Publisher_ThreadBeatHeartCallback, //
-                                            NULL,                                      //
-                                            "PubHeart");                               //
+            resultSOPC =
+                SOPC_Thread_Create(&pubSchedulerCtx.handleThreadHeartBeat, SOPC_RT_Publisher_ThreadHeartBeatCallback,
+                                   (void*) (uintptr_t)(resolutionMicroSecs / 1000), "PubHeart");
 
             if (SOPC_STATUS_OK != resultSOPC)
             {
-                printf("# Error creation of rt publisher beat heart thread\r\n");
+                printf("# Error creation of rt publisher heart beat thread\r\n");
             }
         }
 #endif
@@ -918,7 +981,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
             resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring, //
                                             SOPC_RT_Publisher_VarMonitoringCallback,    //
-                                            NULL,                                       //
+                                            (void*) (uintptr_t)(resWithoutIRQ / 1000),  //
                                             "PubVar");                                  //
 
             if (SOPC_STATUS_OK != resultSOPC)

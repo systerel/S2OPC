@@ -23,14 +23,35 @@
 #include "sopc_pub_source_variable.h"
 #include "sopc_pubsub_conf.h"
 
-#define SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ (0)
+#ifndef SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ
+#define SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ 0
+#endif
 
-bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig);
+/**
+ * \brief Starts the Publisher scheduler using the PubSub configuration data
+ *        and the source of data information
+ *
+ * \param config              The PubSub configuration to be used to start the Publisher
+ * \param sourceConfig        The source configured to retrieve up to date data referenced in \p config
+ * \param resolutionMicroSecs The time resolution in micro seconds to use to evaluate publishing intervals periods.
+ *                            In case hardware interruption is used with SOPC_PubScheduler_HeartBeatFromIRQ,
+ *                            this parameter value shall be the tick resolution that will be used to call it
+ *                            and increment tickValue.
+ *                            Otherwise it will be the minimum time between 2 publishing intervals period evaluation
+ *                            (in this case minimum value is 1 millisecond, replaced by if needed).
+ *
+ * \note \p resolutionMicroSecs shall be less than any PublishingInterval configured,
+ *       otherwise PublishingInterval configuration is replaced by \p resolutionMicroSecs.
+ */
+bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
+                             SOPC_PubSourceVariableConfig* sourceConfig,
+                             uint32_t resolutionMicroSecs);
 
 void SOPC_PubScheduler_Stop(void);
 
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
-SOPC_ReturnStatus SOPC_PubScheduler_BeatHeartFromIRQ(uint32_t tickValue);
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
+// tickValue shall be incremented by 1 exactly each \p resolutionMicroSecs micro seconds
+SOPC_ReturnStatus SOPC_PubScheduler_HeartBeatFromIRQ(uint32_t tickValue);
 #endif
 
 #endif /* SOPC_PUB_SCHEDULER_H_ */

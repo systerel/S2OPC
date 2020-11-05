@@ -30,6 +30,14 @@
 #include "pubsub.h"
 #include "server.h"
 
+// Note: if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ is set to 1,
+//       SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS shall be set to exact tick resolution
+//       the function SOPC_PubScheduler_HeartBeatFromIRQ will be called
+#ifndef SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS
+// Use 50 ms as default resolution
+#define SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS 50000
+#endif
+
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
 {
@@ -50,9 +58,6 @@ int main(int argc, char* const argv[])
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
     signal(SIGTERM, signal_stop_server);
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
-    uint32_t tickValue = 0;
-#endif
 
     /* Parse command line arguments ? */
     if (argc > 1)
@@ -114,15 +119,7 @@ int main(int argc, char* const argv[])
     /* Wait for a signal */
     while (SOPC_STATUS_OK == status && Server_IsRunning() && stopSignal == 0)
     {
-        //  Beat heart. Simple pause during SOPC_TIMER_RESOLUTION_MS if
-        //  SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ #define is set to 0
-        //  in the sopc_pub_scheduler header file.
-        //  Else, SOPC_PubScheduler_BeatHeartFromIRQ is defined and called
-        //  with a monotonic uint32_t counter, followed by a pause of
-        //  SOPC_TIMER_RESOLTION_MS
-
-        Pub_BeatHeart();
-
+        SOPC_Sleep(SLEEP_TIMEOUT);
         if (Server_PubSubStop_Requested())
         {
             PubSub_Stop();
@@ -142,7 +139,7 @@ int main(int argc, char* const argv[])
 
             if (SOPC_STATUS_OK == status)
             {
-                status = PubSub_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                status = PubSub_Start(SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                 if (SOPC_STATUS_NOK == status)
                 {
                     PubSub_Stop(); // Ensure Pub & Sub are stopped in this case

@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     assert(NULL != sourceConfig);
 
     // Start
-    bool status = SOPC_PubScheduler_Start(config, sourceConfig);
+    bool status = SOPC_PubScheduler_Start(config, sourceConfig, 50000);
     assert(status);
 
     // Wait until sending some message

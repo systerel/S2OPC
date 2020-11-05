@@ -176,7 +176,7 @@ bool PubSub_IsRunning(void)
     return SOPC_Atomic_Int_Get(&pubsubOnline);
 }
 
-bool PubSub_Start(void)
+bool PubSub_Start(uint32_t timeResMicroSecs)
 {
     bool subOK = false;
     bool pubOK = false;
@@ -198,7 +198,7 @@ bool PubSub_Start(void)
     }
     if (pub_nb_connections > 0)
     {
-        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig);
+        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig, timeResMicroSecs);
     }
     if (subOK || pubOK)
     {
@@ -226,9 +226,9 @@ void PubSub_Stop(void)
 
 void Pub_BeatHeart(void)
 {
-#if SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ == 1
+#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
     static uint32_t tickValue = 0;
-    SOPC_PubScheduler_BeatHeartFromIRQ(tickValue++);
+    SOPC_PubScheduler_HeartBeatFromIRQ(tickValue++);
 #endif
     SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
 }
