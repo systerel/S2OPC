@@ -18,6 +18,9 @@
  */
 
 /// @file sopc_msgbox.h
+/// @brief Non blocking fifo based on ::SOPC_DoubleBuffer mechanism, used by ::SOPC_RT_Subscriber
+/// to access received messages with several modes (simple FIFO, pop latest message, get latest message)
+///
 /// Implement a shared variable between one writer and several readers.
 /// Access mode can be:
 /// * normal : value stored into an internal fifo
@@ -25,8 +28,8 @@
 /// * last : only the most up to date value is read but not removed from fifo for the concerned reader
 /// See SOPC_MsgBox and SOPC_MsgBox_DataHandle description to see how to use API.
 
-#ifndef SOPC_MAILBOX_H_
-#define SOPC_MAILBOX_H_
+#ifndef SOPC_MSGBOX_H_
+#define SOPC_MSGBOX_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -179,4 +182,4 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
 /// @return SOPC_STATUS_OK if valid handle, well finalized.
 SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppDataHandle);
 
-#endif /* SOPC_MAILBOX_H_ */
+#endif /* SOPC_MSGBOX_H_ */

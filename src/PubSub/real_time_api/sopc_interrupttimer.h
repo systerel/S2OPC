@@ -18,6 +18,8 @@
  */
 
 /// @file sopc_interrupttimer.h
+///
+/// @brief Interrupt timer, called from interrupt, used by ::SOPC_RT_Publisher
 
 #ifndef SOPC_INTERRUPT_TIMER_H_
 #define SOPC_INTERRUPT_TIMER_H_

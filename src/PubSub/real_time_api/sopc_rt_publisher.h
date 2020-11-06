@@ -18,6 +18,8 @@
  */
 
 /// @file sopc_rt_publisher.h
+/// @brief Real time publisher, updated by function called from IRQ, call send callback for each configured message
+///
 /// RT Publisher object is used to declare several messages. It calls callbacks periodically on those messages.
 /// 3 callbacks are added to each message:
 /// * Start callback

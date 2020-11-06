@@ -18,6 +18,8 @@
  */
 
 /// @file sopc_rt_subscriber.h
+/// @brief Real time subscriber, updated by step function called from IRQ, read input messages from ::SOPC_MsgBox and
+/// call message management callback (decode, update data target, etc.)
 ///
 /// RT Subscriber is used to interface one or several input variables to reception performed under interrupt by example,
 /// and interface one or several output variables to the user application.

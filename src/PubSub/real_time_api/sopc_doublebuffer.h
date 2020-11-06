@@ -18,6 +18,10 @@
  */
 
 /// @file sopc_doublebuffer.h
+///
+/// @brief Double buffer: allow multiple read concurrently to one writing operation.
+///
+///        It is used by ::SOPC_InterruptTimer and ::SOPC_MsgBox and implement non blocking algorithm
 
 #ifndef SOPC_DBO_H_
 #define SOPC_DBO_H_
