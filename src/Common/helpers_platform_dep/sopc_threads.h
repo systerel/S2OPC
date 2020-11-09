@@ -39,6 +39,9 @@
  *
  *  \return            SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *      or SOPC_STATUS_NOK otherwise.
+ *
+ *  \warning Depending on platform, the \p taskName length might be limited (e.g.: 16 characters including terminating
+ * null byte for POSIX). In this case the \p taskName will be truncated to comply with limitation.
  */
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName);
 

@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "sopc_mutexes.h"
@@ -242,7 +243,20 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     if (thread != NULL && startFct != NULL)
     {
         int creationRetCode = pthread_create(thread, NULL, startFct, startArgs);
-        int setNameRetCode = pthread_setname_np(*thread, taskName);
+
+        int setNameRetCode = -1;
+
+        if (strlen(taskName) < 16)
+        {
+            setNameRetCode = pthread_setname_np(*thread, taskName);
+        }
+        else
+        {
+            char tmpTaskName[16];
+            strncpy(tmpTaskName, taskName, 15);
+            tmpTaskName[15] = '\0';
+            setNameRetCode = pthread_setname_np(*thread, tmpTaskName);
+        }
 
         if (0 == creationRetCode)
         {
@@ -253,10 +267,10 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
             status = SOPC_STATUS_NOK;
         }
 
-        /* pthread_setname_np calls can fail. It is not a sufficent reason to stop processing. */
+        /* pthread_setname_np calls can fail. It is not a sufficient reason to stop processing. */
         if (0 != setNameRetCode)
         {
-            printf("Error during set name to thread: %s", taskName);
+            printf("Error during set name to thread: %s\n", taskName);
         }
     }
     return status;
