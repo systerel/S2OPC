@@ -426,6 +426,12 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
 {
     (void) msgId;
 
+    if (0 == size)
+    {
+        // No data available on PublishingInterval
+        return;
+    }
+
     SOPC_PubScheduler_MessageCtx* pCtx = pUserContext;
 
     SOPC_Buffer buffer;
