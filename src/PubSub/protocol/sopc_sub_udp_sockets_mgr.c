@@ -139,7 +139,7 @@ static bool SOPC_UDP_SocketsMgr_LoopThreadStart(void** sockContextArray,
 
     receptionThread.stopFlag = 0;
 
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_UDP_SocketsMgr_ThreadLoop, NULL, "SubscriberSocketMgr") !=
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_UDP_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr") !=
         SOPC_STATUS_OK)
     {
         return false;

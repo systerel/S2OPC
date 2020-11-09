@@ -3208,7 +3208,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Initialize(MqttManagerHandle* pWks)
 
     pWks->status = E_MQTT_MANAGER_STATUS_RUNNING;
     pWks->libScheduler = (Thread) NULL;
-    result = SOPC_Thread_Create(&pWks->libScheduler, cbTask_MqttManagerScheduler, pWks, "SOPC_MQTT_MGR");
+    result = SOPC_Thread_Create(&pWks->libScheduler, cbTask_MqttManagerScheduler, pWks, "MQTT_MGR");
 
     if (SOPC_STATUS_OK != result)
     {
