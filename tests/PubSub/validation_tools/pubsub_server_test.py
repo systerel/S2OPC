@@ -277,25 +277,29 @@ XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub publisherId="1">
 </PubSub>"""
 
 # Test connection and status depending of pStart command
-def helpTestStopStart(pPubsubserver, pStart, pLogger):
+def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
     pLogger.add_test('Connected to OPCUA Server', pPubsubserver.isConnected())
     if pStart:
         pLogger.add_test('PubSub Module is started' , pPubsubserver.isStart())
     else:
         pLogger.add_test('PubSub Module is stopped', not pPubsubserver.isStart())
 
-    status = 2 if pStart else 0
-    pLogger.add_test('PubSub Module Status should be %d : %d' % (status, pPubsubserver.getStatus()) , status == pPubsubserver.getStatus())
+    retrievedStatus = pPubsubserver.getStatus()
+    if pStart and possibleFail:
+        pLogger.add_test('PubSub Module Status should not be %d : %d' % (0, retrievedStatus) , 0 != retrievedStatus)
+    else:
+        status = 2 if pStart else 0
+        pLogger.add_test('PubSub Module Status should be %d : %d' % (status, retrievedStatus) , status == retrievedStatus)
 
 # Send stop command following by start command
-def helpRestart(pPubsubserver, pLogger):
+def helpRestart(pPubsubserver, pLogger, possibleFail):
     pLogger.add_test('Stop Server', True)
     pPubsubserver.stop()
-    helpTestStopStart(pPubsubserver, False, pLogger)
+    helpTestStopStart(pPubsubserver, False, pLogger, possibleFail)
 
     pLogger.add_test('Start Server', True)
     pPubsubserver.start()
-    helpTestStopStart(pPubsubserver, True, pLogger)
+    helpTestStopStart(pPubsubserver, True, pLogger, possibleFail)
 
 # Change the configuration
 def helpConfigurationChange(pPubsubserver, pConfig, pLogger):
@@ -307,13 +311,13 @@ def helpConfigurationChange(pPubsubserver, pConfig, pLogger):
 
 # Change the configuration and restart PubSub Server
 # Test connection, status and configuration
-def helpConfigurationChangeAndStart(pPubsubserver, pConfig, pLogger, static=False):
+def helpConfigurationChangeAndStart(pPubsubserver, pConfig, pLogger, static=False, possibleFail=False):
     fd = open(DEFAULT_XML_PATH, "r")
     oldConfig = fd.read()
     fd.close()
 
     helpConfigurationChange(pPubsubserver, pConfig, pLogger)
-    helpRestart(pPubsubserver, pLogger)
+    helpRestart(pPubsubserver, pLogger, possibleFail)
 
     # check configuration saved in default file
     fd = open(DEFAULT_XML_PATH, "r")
@@ -543,7 +547,7 @@ def testPubSubDynamicConf():
         #
         logger.begin_section("TC 10 : Security mode not consistent - message is encrypt and sign but no security for subscriber")
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_1, logger)
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_1, logger, possibleFail=True)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
@@ -559,6 +563,11 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        expStatus = 3 # Error state
+        retrievedStatus = pubsubserver.getStatus()
+        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
+
 
         #
         # TC 11 : Test with message configured with security mode encrypt and sign for publisher
@@ -566,7 +575,7 @@ def testPubSubDynamicConf():
         #
         logger.begin_section("TC 11 : Security mode not consistent - message is encrypt and sign but only sign mode for subscriber")
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_2, logger)
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_2, logger, possibleFail=True)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
@@ -582,6 +591,10 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        expStatus = 3 # Error state
+        retrievedStatus = pubsubserver.getStatus()
+        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
 
         #
         # TC 12 : Test with message configured with security mode sign for publisher
@@ -589,7 +602,7 @@ def testPubSubDynamicConf():
         #
         logger.begin_section("TC 12 : Security mode not consistent - message is sign but sign and encrypt for subscriber")
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_3, logger)
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_3, logger, possibleFail=True)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
@@ -605,6 +618,10 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        expStatus = 3 # Error state
+        retrievedStatus = pubsubserver.getStatus()
+        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
 
         #
         # TC 13 : Test with message configured with security mode sign and encrypt
@@ -658,7 +675,7 @@ def testPubSubDynamicConf():
         #
         logger.begin_section("TC 15 : Security mode sign only publisher")
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4, logger)
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4, logger, possibleFail=True)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
@@ -674,6 +691,10 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber bool is not changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
+
+        expStatus = 3 # Error state
+        retrievedStatus = pubsubserver.getStatus()
+        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
 
     finally:
         # restore default XML file
