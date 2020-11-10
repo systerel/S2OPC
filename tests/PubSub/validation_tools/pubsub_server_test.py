@@ -103,7 +103,7 @@ XML_PUBSUB_LOOP = """<PubSub publisherId="1">
 
 XML_PUBSUB_LOOP_MQTT = """<PubSub publisherId="1">
     <connection address="mqtts://127.0.0.1:1883" mode="publisher">
-        <message id="1" publishingInterval="200" version="1">
+        <message id="1" publishingInterval="1000" version="1">
             <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
@@ -111,7 +111,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub publisherId="1">
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
+        <message id="1" publishingInterval="1000" version="1" publisherId="1">
             <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
             <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -469,7 +469,7 @@ def testPubSubDynamicConf():
         logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT) => subscriber variables change through Pub/Sub")
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
 
         # Init Publisher variables
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
@@ -483,13 +483,13 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
 
         logger.add_test('Subscriber bool is changed ', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed ', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed ', -300 == pubsubserver.getValue(NID_SUB_INT))
         logger.add_test('Subscriber string is changed ', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
