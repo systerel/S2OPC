@@ -1048,8 +1048,8 @@ START_TEST(test_wrapper_get_endpoints)
         SOPC_ClientHelper_GetEndpointsResult* result;
         ck_assert_int_eq(0, SOPC_ClientHelper_GetEndpoints(valid_url, &result));
         /* check result content */
+        ck_assert_int_ge(result->nbOfEndpoints, 1);
         /* free result */
-
         SOPC_ClientHelper_GetEndpointsResult_Free(&result);
     }
 
