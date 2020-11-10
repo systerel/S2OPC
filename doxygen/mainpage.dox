@@ -37,24 +37,24 @@ You will find documentation on the Python binding for S2OPC on following page:
 
 \section server High-level Server API
 
-The high-level server API provides functions for configuration (endpoints and security, address space content, user management, etc.) and functions to manager server execution (start/stop, local service execution, etc.). 
+The high-level server API provides functions for configuration (endpoints and security, address space content, user management, etc.) and functions to manage server execution (start/stop, local service execution, etc.).
 
 The main configuration functions are defined by libs2opc_server_config.h:
-- ::SOPC_Helper_Initialize shall be called before any other function of the module
-- ::SOPC_Helper_Clear shall be called when module not used anymore,
+- ::SOPC_Helper_Initialize shall be called before any other function of the module.
+- ::SOPC_Helper_Clear shall be called when module is not used anymore.
 - ::SOPC_HelperConfigServer_ConfigureFromXML loads configuration from XML configuration files (server endpoints and security, address space, users). See \ref xml_config "XML file examples".
-- ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc compiled with WITH_NANO_EXTENDED=1)
-- ::SOPC_HelperConfigServer_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients
-- ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse sets a callback to use local services on server in an asynchronous way (see ::SOPC_ServerHelper_LocalServiceAsync)
+- ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is compiled with WITH_NANO_EXTENDED=1).
+- ::SOPC_HelperConfigServer_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients.
+- ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse sets a callback to use local services on server in an asynchronous way (see ::SOPC_ServerHelper_LocalServiceAsync).
 
-In case the dedicated XML configuration files are not used to configure server, the additional configuration functions libs2opc_server_config_custom.h shall be used. In this latter case only use those functions and do not modify configuration structures manually.
+In case the dedicated XML configuration files are not used to configure server, use the additional configuration functions located in libs2opc_server_config_custom.h.
 
 The main functions for server execution are defined by libs2opc_server.h:
-- ::SOPC_ServerHelper_StartServer: starts the server asynchronously, it runs until requested to stop
-- ::SOPC_ServerHelper_StopServer: stops the server
+- ::SOPC_ServerHelper_StartServer: starts the server asynchronously, it runs until requested to stop.
+- ::SOPC_ServerHelper_StopServer: stops the server.
 - ::SOPC_ServerHelper_Serve synchronous alternative to ::SOPC_ServerHelper_StartServer, it blocks until server stopped.
-- ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
-- ::SOPC_ServerHelper_LocalServiceSync: execute a local service (read, write, etc.) on server synchrnously
+- ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse.
+- ::SOPC_ServerHelper_LocalServiceSync: execute a local service (read, write, etc.) on server synchronously.
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_server/toolkit_demo_server.c">toolkit_demo_server.c</a> (XML configuration only),
@@ -73,7 +73,7 @@ See XML configuration schemas and examples:
 The simplified client interface consists of functions to configure the connection, to establish the connection, to call GetEndpoint, Write, Read and Browse services, and to create a Subscription and add MonitoredItems to it.
 
 The simplified interface functions and types are defined by libs2opc_client_cmds.h.
-- ::SOPC_ClientHelper_Initialize / ::SOPC_ClientHelper_Finalize shall be called before any other function of the module / shall be called when module not used anymore,
+- ::SOPC_ClientHelper_Initialize / ::SOPC_ClientHelper_Finalize shall be called before any other function of the module / shall be called when module not used anymore.
 - ::SOPC_ClientHelper_GetEndpoints: calls GetEndpoints service of a server and returns when server response received or error occurred (connection failure, response timeout).
 - ::SOPC_ClientHelper_CreateConfiguration: creates a connection configuration (security properties, session user, etc.) to be used for non-discovery services.
 - ::SOPC_ClientHelper_CreateConnection: creates a connection (secure channel + session) to the server given the connection configuration identifier created previously.
@@ -83,7 +83,7 @@ The simplified interface functions and types are defined by libs2opc_client_cmds
 - ::SOPC_ClientHelper_Browse: calls Browse service through given connection and returns when server response received.
 - ::SOPC_ClientHelper_CreateSubscription: calls CreateSubscription service through given connection. The subscription is created and publish requests / responses automatically managed by the client helper.
 - ::SOPC_ClientHelper_AddMonitoredItems: calls CreateMonitoredItem service through given connection with a subscription successfully created previously.
-- ::SOPC_ClientHelper_Unsubscribe: stops the connection identifier associated subscription.
+- ::SOPC_ClientHelper_Unsubscribe: stops the subscription associated to the given connection.
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/client_wrapper/examples">\<service>.c</a>
@@ -91,23 +91,24 @@ or <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer
 
 \section lclient Low-level client API
 
-Main configuration functions and types for client are provided by sopc_toolkit_config.h and sopc_user_app_itf.h, function with `SOPC_ToolkitServer_` prefix shall be ignored.
+Main configuration functions and types for client are provided by sopc_toolkit_config.h and sopc_user_app_itf.h.
+The functions with `SOPC_ToolkitServer_` prefix shall be ignored.
 
 - (Optional) log configuration with ::SOPC_Common_Initialize
-- ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit
+- ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
 - ::SOPC_ToolkitClient_AddSecureChannelConfig adds a new secure channel configuration (::SOPC_SecureChannel_Config).
-  In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certficates shall be loaded (sopc_key_manager.h)
-- ::SOPC_Toolkit_Configured shall be called once the configuration steps are terminated
-- ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore
+  In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certficates shall be loaded (sopc_key_manager.h).
+- ::SOPC_Toolkit_Configured shall be called once the configuration steps are terminated.
+- ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore.
 
 Once configuration is done, the client is able to establish connection:
-- ::SOPC_ToolkitClient_AsyncActivateSession to establish a secure channel and activate a session with given user token
-- ::SOPC_ToolkitClient_AsyncActivateSession_Anonymous simplified version of ::SOPC_ToolkitClient_AsyncActivateSession for anonymous user
-- ::SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword simplified version of ::SOPC_ToolkitClient_AsyncActivateSession for using UserName
+- ::SOPC_ToolkitClient_AsyncActivateSession to establish a secure channel and activate a session with given user token.
+- ::SOPC_ToolkitClient_AsyncActivateSession_Anonymous simplified version of ::SOPC_ToolkitClient_AsyncActivateSession for anonymous user.
+- ::SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword simplified version of ::SOPC_ToolkitClient_AsyncActivateSession for using UserName.
 
 Session activation result is provided by event ::SE_ACTIVATED_SESSION through the configured ::SOPC_ComEvent_Fct callback, resulting session identifier is necessary to send requests through a session.
 
-It is also posisble to send discovery services requests to through a configured connection without session using:
+It is also possible to send discovery services requests to through a configured connection without session using:
 - ::SOPC_ToolkitClient_AsyncSendDiscoveryRequest establishes a secure channel without session and send the given request. Response received with event ::SE_RCV_DISCOVERY_RESPONSE  through ::SOPC_ComEvent_Fct callback.
 
 Once a session has been activated it will be possible to send all kind of requests using the session identifier to call:
@@ -121,17 +122,18 @@ and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServe
 
 \section lserver Low-level server API
 
-Main configuration function and types for server are provided by sopc_toolkit_config.h and sopc_user_app_itf.h, function with `SOPC_ToolkitClient_` prefix shall be ignored.
+Main configuration function and types for server are provided by sopc_toolkit_config.h and sopc_user_app_itf.h.
+The functions with `SOPC_ToolkitClient_` prefix shall be ignored.
 
 Some are shared with \ref lclient configuration:
 - (Optional) log configuration with ::SOPC_Common_Initialize
-- ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit
-- ::SOPC_Toolkit_Configured shall be called once all the configuration steps are terminated
-- ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore
+- ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
+- ::SOPC_Toolkit_Configured shall be called once all the configuration steps are terminated.
+- ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore.
 
 For main server configuration there are 2 possible options. The first is to use the XML configuration parser:
-- Configure with XML file (<a href="https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd">XSD schema</a>, <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/config/S2OPC_Server_Demo_Config.xml">XML example</a>) using ::SOPC_Config_Parse, it produces a pre-filled ::SOPC_S2OPC_Config
-- In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certficates shall be loaded (sopc_key_manager.h) into SOPC_S2OPC_Config (SOPC_Server_Config::pki, SOPC_Server_Config::serverCertificate, SOPC_Server_Config::serverKey) using certificate paths from ::SOPC_Server_Config.
+- Configure with XML file (<a href="https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd">XSD schema</a>, <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/config/S2OPC_Server_Demo_Config.xml">XML example</a>) using ::SOPC_Config_Parse, it produces a pre-filled ::SOPC_S2OPC_Config.
+- In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certificates shall be loaded (sopc_key_manager.h) into SOPC_S2OPC_Config (SOPC_Server_Config::pki, SOPC_Server_Config::serverCertificate, SOPC_Server_Config::serverKey) using certificates paths from ::SOPC_Server_Config.
 
 The second is to allocate a ::SOPC_S2OPC_Config structure and to initialize it using ::SOPC_S2OPC_Config_Initialize function, then initialize all ::SOPC_Server_Config fields manually.
 
@@ -146,8 +148,7 @@ This configuration shall be defined using <a href="http://opcfoundation.org/UA/2
 An example is provided for <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/address_space/s2opc_nano.xml">a nano server</a>
 and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/address_space/s2opc.xml">a nano extended server</a>.
 
-All the reciprocal references between nodes shall be present in it,
-the script <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/scripts/gen-reciprocal-refs-address-space.xslt">gen-reciprocal-refs-address-space.xslt</a> might be used to generate reciprocal references missing (XSLT 2.0 processor required).
+All the reciprocal references between nodes shall be present in it. The script <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/scripts/gen-reciprocal-refs-address-space.xslt">gen-reciprocal-refs-address-space.xslt</a> might be used to generate reciprocal references missing (XSLT 2.0 processor required).
 
 Once the XML address space is defined, the C structure to be used for toolkit configuration shall be generated.
 It could be done using the Python C code generator prior to compilation or using the dynamic XML loader.
@@ -160,11 +161,12 @@ and set the client write notification callback with ::SOPC_ToolkitServer_SetAddr
 
 \subsection address2 Configure address space update
 
-Once the inital address space is configured, you might want to configure behavior on address space update from client or to configure how to update address space locally.
+Once the initial address space is configured, you might want to configure behavior on address space update from client or to configure how to update address space locally.
 
 The server application will be notified of address space changes, it only needs to configure the associated callback using ::SOPC_ToolkitServer_SetAddressSpaceNotifCb with the ::SOPC_AddressSpaceNotif_Fct application callback to manage received ::AS_WRITE_EVENT events from toolkit.
 
-The server application is able to modify the address space on runtime using OPC UA services locally, it is allowed to treat OPC UA service requests (::OpcUa_ReadRequest, ::OpcUa_WriteRequest, ::OpcUa_BrowseRequest and discovery service requests) using ::SOPC_ToolkitServer_AsyncLocalServiceRequest.
+The server application is able to modify the address space on runtime using OPC UA services locally.
+It is allowed to treat OPC UA service requests (::OpcUa_ReadRequest, ::OpcUa_WriteRequest, ::OpcUa_BrowseRequest and discovery service requests) using ::SOPC_ToolkitServer_AsyncLocalServiceRequest.
 Once the function is called, an asynchronous ::SE_LOCAL_SERVICE_RESPONSE event will be received by the ::SOPC_ComEvent_Fct application callback containing the response message (::OpcUa_ReadResponse, etc.).
 
 \subsection users User authentication and user authorization managers
@@ -185,7 +187,7 @@ A basic implementation is provided by ::SOPC_MethodCallManager_Create, this mana
 
 \section pubsub PubSub API
 
-Examples of Pub or Sub test application can be found here <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/tests/PubSub/validation_tests/udp_pub_scheduler_test.c">publisher</a> and <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/tests/PubSub/validation_tests/udp_sub_conf_test.c">subscriber</a>, and a PubSub-Server sample is implemented <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/samples/PubSub_ClientServer/pubsub_server">here</a>.
+Examples of Pub or Sub test applications can be found here <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/tests/PubSub/validation_tests/udp_pub_scheduler_test.c">publisher</a> and <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/tests/PubSub/validation_tests/udp_sub_conf_test.c">subscriber</a>, and a PubSub-Server sample is implemented <a href="https://gitlab.com/systerel/S2OPC/-/tree/master/samples/PubSub_ClientServer/pubsub_server">here</a>.
 
 Main interface is defined by sopc_pub_scheduler.h and sopc_sub_scheduler.h.
 
