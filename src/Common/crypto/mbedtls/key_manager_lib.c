@@ -750,7 +750,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
     /* For each CA, find its CRL. If not found, log and match = false */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool list_match = true;
-    mbedtls_x509_crt* crt = NULL != pCert ? &pCert->crt : NULL;
+    mbedtls_x509_crt* crt = &pCert->crt;
     mbedtls_x509_crt* prev = NULL; /* Parent of current cert */
     while (NULL != crt)
     {
