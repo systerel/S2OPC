@@ -29,6 +29,13 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 
+INDENT_SPACES = '  '
+
+def indent(level):
+    spaces = ''
+    for _ in range(level):
+        spaces += INDENT_SPACES
+    return '\n'+spaces
 
 # Namespaces are very hard to handle in XPath and the ET API does not help much
 # {*} notations for namespace in XPath searches only appear in Py3.8
@@ -70,8 +77,8 @@ def _add_ref(node, ref_type, tgt, is_forward=True):
     if len(refs_nodes) < 1:
         refs = ET.Element('uanodeset:References', namespaces)
         # Manual identation with ET... This might not adjust well, we should also indent the latest brother
-        refs.text = '\n'
-        refs.tail = '\n'
+        refs.text = indent(2)
+        refs.tail = indent(2)
         node.append(refs)
     else:
         refs, = refs_nodes
@@ -80,9 +87,12 @@ def _add_ref(node, ref_type, tgt, is_forward=True):
         attribs['IsForward'] = 'false'
     elem = ET.Element('Reference', attribs)
     elem.text = tgt
-    elem.tail = '\n'
+    if len(refs) > 0:
+        refs[-1].tail = indent(3)
+    else:
+        refs.text = indent(3)
+    elem.tail = indent(2)
     refs.append(elem)
-
 
 def merge(tree, new, namespaces):
     # Merge new tree into tree
@@ -91,9 +101,14 @@ def merge(tree, new, namespaces):
 
     # Merge Aliases
     tree_aliases = tree.find('uanodeset:Aliases', namespaces)
-    new_aliases = new.find('uanodeset:Aliases', namespaces)
+    if tree_aliases is None:
+        print('Merge: Aliases expected to be present in first address space')
+        return false
     tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}  # Assumes that the model does not have the same alias defined multiple times
-    new_alias_dict = {alias.get('Alias'):alias.text for alias in new_aliases}
+    new_aliases = new.find('uanodeset:Aliases', namespaces)
+    new_alias_dict = {}
+    if new_aliases is not None:
+        new_alias_dict = {alias.get('Alias'):alias.text for alias in new_aliases}
     # Assert existing aliases are the same
     res = True
     for alias in set(tree_alias_dict)&set(new_alias_dict):
@@ -108,9 +123,17 @@ def merge(tree, new, namespaces):
     for alias in set(new_alias_dict)-set(tree_alias_dict):
         elem = ET.Element('Alias', {'Alias': alias})
         elem.text = new_alias_dict[alias]
-        elem.tail = '\n'
+        # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
+        if len(tree_aliases) > 0:
+            tree_aliases[-1].tail = indent(2)
+        else:
+            tree_aliases.text = indent(2)
         tree_aliases.append(elem)
 
+    if len(tree_aliases) > 0:
+        # Restore correct level for next tag which is </Aliases>
+        tree_aliases[-1].tail = indent(1)
+        
     # Merge Nodes
     tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
     new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
