@@ -114,13 +114,17 @@ def merge(tree, new, namespaces):
     # Merge Nodes
     tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
     new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
+    new_nodes_ids_list = [node.get('NodeId') for node in new.iterfind('*[@NodeId]')]
     # New nodes are copied
     tree_root = tree.getroot()
     for nid in set(new_nodes)&set(tree_nodes):
         print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
-    for nid in set(new_nodes)-set(tree_nodes):
-        print('Merge: add node {}'.format(nid), file=sys.stderr)
-        tree_root.append(new_nodes[nid])
+    # new unique nids
+    new_nids = set(new_nodes)-set(tree_nodes)
+    for nid in new_nodes_ids_list:
+        if nid in new_nids:
+            print('Merge: add node {}'.format(nid), file=sys.stderr)
+            tree_root.append(new_nodes[nid])
     # References of common nodes are merged
     for nid in set(tree_nodes)&set(new_nodes):
         nodeb = new_nodes[nid]
