@@ -121,6 +121,9 @@ def merge(tree, new, namespaces):
         print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
     # new unique nids
     new_nids = set(new_nodes)-set(tree_nodes)
+    if len(new_nids) > 0 and len(tree_root) > 0:
+        # indent for first node added
+        tree_root[-1].tail = indent(1)
     for nid in new_nodes_ids_list:
         if nid in new_nids:
             print('Merge: add node {}'.format(nid), file=sys.stderr)
