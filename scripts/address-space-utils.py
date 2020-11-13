@@ -44,15 +44,6 @@ def parse_xmlns(source):
                 ns_map[prefix] = uri
     return ns_map
 
-# We should test another parser, such as lxml parser...
-#NAMESPACEs = {
-#    'xsd': 'http://www.w3.org/2001/XMLSchema',
-#    'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
-#    'uanodeset': 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd',
-#    'uax': 'http://opcfoundation.org/UA/2008/02/Types.xsd',
-#    }
-
-
 def _remove_nids(tree, nids):
     # Remove nodes that matches all NodeIds in nids
     root = tree.getroot()
@@ -155,9 +146,19 @@ def remove_methods(tree, namespaces):
     # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
     # See Part 3 §6 for more information.
     # (also delete MaxNodesPerMethodCall and its references)
-    methods = [node.get('NodeId') for node in tree.findall('*[@MethodDeclarationId]')]
-    _remove_nids(tree, methods+['i=11709'])
-    _remove_refs_to_nids(tree, methods+['i=11709'], namespaces)
+    # (also delete properties of the methods)
+    methods = []
+    methods_properties = []
+    for method_node in tree.findall('*[@MethodDeclarationId]'):
+        methods.append(method_node.get('NodeId'))
+        refs, = method_node.iterfind('uanodeset:References', namespaces)
+        for ref in refs:
+            ref_type = ref.get('ReferenceType')
+            if ref.get('IsForward') != 'false' and (ref_type == 'HasProperty' or ref_type == 'i=46'):
+                methods_properties.append(ref.text.strip())
+
+    _remove_nids(tree, methods+methods_properties+['i=11709'])
+    _remove_refs_to_nids(tree, methods+methods_properties+['i=11709'], namespaces)
 
 def sanitize(tree, namespaces):
     """
@@ -191,28 +192,33 @@ def sanitize(tree, namespaces):
     refs_fwd = {node: set() for node in nodes}  # {a: {(type, b), ...}}
     refs_inv = {node: set() for node in nodes}  # {a: {(type, b), ...}}, already existing inverse references b <- a are stored in refs_inv[a]
     for node in tree.iterfind('./*[uanodeset:References]', namespaces):
-        nida = node.get('NodeId')  # The starting node of the references below
+        nids = node.get('NodeId')  # The starting node of the references below
         refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             type_ref = ref.get('ReferenceType')
-            nidb = ref.text.strip()  # The destination node of this reference
+            nidt = ref.text.strip()  # The destination node of this reference
             is_fwd = ref.get('IsForward') != 'false'
-            if is_fwd:  # a -> b
-                fwds = refs_fwd[nida]
-                if (type_ref, nidb) in fwds:
-                    print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nida, nidb, type_ref), file=sys.stderr)
+            if is_fwd:
+                # We are in the case a -> b,
+                #  so a = nids, and b = nidt
+                fwds = refs_fwd[nids]
+                if (type_ref, nidt) in fwds:
+                    print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nids, nidt, type_ref), file=sys.stderr)
                     refs.remove(ref)
-                fwds.add((type_ref, nidb))
-            else:  # b <- a is stored in refs_inv[a]
-                if nidb not in nodes:
+                fwds.add((type_ref, nidt))
+            else:
+                # We are in the case b <- a,
+                #  so b = nids, and a = nidt
+                #  and nids <- nidt will be stored in refs_inv[nidt]
+                if nidt not in nodes:
                     print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
-                          .format(nida, nidb, type_ref), file=sys.stderr)
+                          .format(nids, nidt, type_ref), file=sys.stderr)
                     continue
-                invs = refs_inv[nidb]
-                if (type_ref, nida) in invs:
-                    print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidb, nida, type_ref), file=sys.stderr)
+                invs = refs_inv[nidt]
+                if (type_ref, nids) in invs:
+                    print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidt, nids, type_ref), file=sys.stderr)
                     refs.remove(ref)
-                invs.add((type_ref, nida))
+                invs.add((type_ref, nids))
 
     # Now add inverse refs b <- a for which a -> b exists
     trs_fwd = set((a,t,b) for a,ltr in refs_fwd.items() for t,b in ltr)
@@ -233,8 +239,9 @@ def sanitize(tree, namespaces):
             node = nodes[a]
             _add_ref(node, t, b, is_forward=True)
 
-    # Note: ParentNodeId are optional. We add the inverse reference if it is mentioned.
-    #  A ParentNodeId is an inverse reference typed "HasComponent"
+    # Note: ParentNodeId is an optional attribute. It refers to the parent node.
+    #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
+    # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
     for node in tree.iterfind('./*[@ParentNodeId]'):
         # There may be no reference at all
         refs_nodes = node.findall('uanodeset:References', namespaces)
@@ -264,17 +271,15 @@ def sanitize(tree, namespaces):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='A tool to merge (and more) XMLs of OPC UA Address Spaces.')
-    #parser.add_argument('--address-space', '-a', metavar='XML', dest='fns_adds', action='append', required=True,
-    #                    help='Path the address spaces to merge. In case of conflicting elements, '+
-    #                         'the element from the first address space in the argument order is kept.')
     parser.add_argument('fns_adds', nargs='+', metavar='XML',
                         help='''
-            Path (or - for stind) the address spaces to merge. In case of conflicting elements,
+            Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
             the element from the first address space in the argument order is kept.
             The models must be for the same OPC UA version (e.g. 1.03).
                              ''')
     parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
                         help='Path to the output file')# (default to stdout)')
+    # TODO: if this feature is needed...
     #parser.add_argument('--no-gen-reciprocal', action='store_false', dest='reciprocal',
     #                    help='Suppress the normal behavior which is to generate reciprocal references between nodes that only have one to the other.')
     parser.add_argument('--remove-max-monitored-items', action='store_true', dest='remove_max_monit',
@@ -289,6 +294,8 @@ if __name__ == '__main__':
             and remove attribute ParentNodeId when erroneous.
                              ''')
     args = parser.parse_args()
+    # Check that '-' is provided only once in input address spaces
+    assert args.fns_adds.count('-') < 2, 'You can only take a single XML from the standard input'
 
     # Load and merge all address spaces
     tree = None
