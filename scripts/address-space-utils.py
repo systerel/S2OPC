@@ -196,8 +196,14 @@ def sanitize(tree, namespaces):
     # First, compute the a -> b and b <- a sets of references
     # If no reference is missing, refs_fwd == refs_inv
     # In the Address Space, b <- a References are stored in b, hence the difficulty
-    refs_fwd = {node: set() for node in nodes}  # {a: {(type, b), ...}}
-    refs_inv = {node: set() for node in nodes}  # {a: {(type, b), ...}}, already existing inverse references b <- a are stored in refs_inv[a]
+    # Set of forward reference (check existence)
+    refs_fwd = set() # {(a,type, b), ...}
+    # List of forward reference (keep refs order)
+    refs_fwd_list = [] # (a, type, b)[]
+    # Set of backward reference (check existence)
+    refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
+    # List of backward reference (keep refs order)
+    refs_inv_list = [] # (a, type, b)[], already existing inverse references b <- a
     for node in tree.iterfind('./*[uanodeset:References]', namespaces):
         nids = node.get('NodeId')  # The starting node of the references below
         refs, = node.iterfind('uanodeset:References', namespaces)
@@ -208,43 +214,48 @@ def sanitize(tree, namespaces):
             if is_fwd:
                 # We are in the case a -> b,
                 #  so a = nids, and b = nidt
-                fwds = refs_fwd[nids]
-                if (type_ref, nidt) in fwds:
+                if (nids, type_ref, nidt) in refs_fwd:
                     print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nids, nidt, type_ref), file=sys.stderr)
-                    refs.remove(ref)
-                fwds.add((type_ref, nidt))
+                else:
+                    refs_fwd.add((nids, type_ref, nidt))
+                    refs_fwd_list.append((nids, type_ref, nidt))
             else:
                 # We are in the case b <- a,
                 #  so b = nids, and a = nidt
-                #  and nids <- nidt will be stored in refs_inv[nidt]
+                #  and nids <- nidt will be stored in forward order (nidt, type, nids)
                 if nidt not in nodes:
                     print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
                           .format(nids, nidt, type_ref), file=sys.stderr)
                     continue
-                invs = refs_inv[nidt]
-                if (type_ref, nids) in invs:
+                if (nidt, type_ref, nids) in refs_inv:
                     print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidt, nids, type_ref), file=sys.stderr)
-                    refs.remove(ref)
-                invs.add((type_ref, nids))
+                else:
+                    refs_inv.add((nidt, type_ref, nids))
+                    refs_inv_list.append((nidt, type_ref, nids))
 
-    # Now add inverse refs b <- a for which a -> b exists
-    trs_fwd = set((a,t,b) for a,ltr in refs_fwd.items() for t,b in ltr)
-    trs_inv = set((a,t,b) for a,ltr in refs_inv.items() for t,b in ltr)
-    for a, t, b in trs_fwd - trs_inv:
-        if b not in nodes:
-            print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
-        else:
-            print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
-            node = nodes[b]
-            _add_ref(node, t, a, is_forward=False)
-    # Add forward refs (there should be less)
-    for a, t, b in trs_inv - trs_fwd:
+    # Add forward refs a -> b for which b <- a exists
+    for a, t, b in refs_inv_list:
+        if (a, t, b) in refs_fwd:
+            # Already defined
+            continue
         if a not in nodes:
             print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
             print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
             node = nodes[a]
             _add_ref(node, t, b, is_forward=True)
+
+    # Now add inverse refs b <- a for which a -> b exists
+    for a, t, b in refs_fwd_list:
+        if (a, t, b) in refs_inv:
+            # Already defined
+            continue
+        if b not in nodes:
+            print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+        else:
+            print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
+            node = nodes[b]
+            _add_ref(node, t, a, is_forward=False)
 
     # Note: ParentNodeId is an optional attribute. It refers to the parent node.
     #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
