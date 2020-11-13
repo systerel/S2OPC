@@ -338,7 +338,7 @@ if __name__ == '__main__':
         res = True
 
     if res:
-        tree.write(args.fn_out or sys.stdout)
+        tree.write(args.fn_out or sys.stdout, encoding="utf-8", xml_declaration=True)
     else:
         print('There was some unrecoverable error{}'
               .format(', did not save to {}'.format(args.fn_out) if args.fn_out else ''),
