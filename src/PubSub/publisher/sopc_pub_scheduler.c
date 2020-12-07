@@ -460,7 +460,7 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
 {
     uintptr_t resMilliSecs = (uintptr_t) arg;
 
-    volatile uint32_t heartBeat = 0;
+    uint32_t heartBeat = 0;
     SOPC_ReturnStatus resultUpdateThread = SOPC_STATUS_OK;
     SOPC_TimeReference currentRef = SOPC_TimeReference_GetCurrent();
     SOPC_TimeReference targetRef = SOPC_TimeReference_AddMilliseconds(currentRef, resMilliSecs);
@@ -475,7 +475,8 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
         while (targetRef <= currentRef)
         {
             // Call heart beat function 1 time per resolution time elapsed since last evaluation
-            resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, heartBeat++);
+            heartBeat++;
+            resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, heartBeat);
             // next target is previous target + resolution time (it might already be elapsed)
             targetRef = SOPC_TimeReference_AddMilliseconds(targetRef, resMilliSecs);
         }
@@ -500,22 +501,25 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Choose a reasonable minimum resolution to get variables
-    // retrieve minimum publishing interval to manage
-    uint64_t minPubInterval = UINT64_MAX;
-    for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
+    // retrieve minimum publishing interval to manage (if some messages defined)
+    if (pubSchedulerCtx.messages.current > 0)
     {
-        SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
-        uint64_t pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
-        if (minPubInterval > pubInterval)
+        uint64_t minPubInterval = UINT64_MAX;
+        for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
         {
-            minPubInterval = pubInterval;
+            SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
+            uint64_t pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
+            if (minPubInterval > pubInterval)
+            {
+                minPubInterval = pubInterval;
+            }
         }
-    }
-    // minimum resolution = minimum publish interval / 2
-    if (minPubInterval / 2 > resMilliSecs)
-    {
-        assert(minPubInterval <= UINT32_MAX);
-        resMilliSecs = (uint32_t)(minPubInterval / 2);
+        // minimum resolution = minimum publish interval / 2
+        if (minPubInterval / 2 > resMilliSecs)
+        {
+            assert(minPubInterval <= UINT32_MAX);
+            resMilliSecs = (uint32_t)(minPubInterval / 2);
+        }
     }
 
     printf("# Publisher variables monitoring: thread launched !!!\r\n");
@@ -850,7 +854,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                         {
                             resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
                         }
-                        if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
+                        else if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
                         {
                             resultSOPC = SOPC_STATUS_NOK;
                         }

@@ -224,15 +224,6 @@ void PubSub_Stop(void)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }
 
-void Pub_BeatHeart(void)
-{
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
-    static uint32_t tickValue = 0;
-    SOPC_PubScheduler_HeartBeatFromIRQ(tickValue++);
-#endif
-    SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
-}
-
 void PubSub_StopAndClear(void)
 {
     PubSub_Stop();
