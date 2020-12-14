@@ -16,6 +16,7 @@ the legal rights to contribute.
 * Minh-Thang KHUU <khuu@systerel.fr>
 
 # Contributor list
+* Aeicor-IIoT-Dev-Team <dev.iiot@aeicor.com>
 * Anthony Reyre <anthony.reyre-stg@systerel.fr>
 * Adrien Bustany <adrien.bustany@systerel.fr>
 * matclab <mathieu@clabaut.net>
