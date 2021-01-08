@@ -27,8 +27,8 @@ test_script:
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
-    - set EXPAT_DIR_NAME=expat-2.2.9
-    - set EXPAT_DIR=%ROOT_DIR%\libexpat-R_2_2_9\expat
+    - set EXPAT_DIR_NAME=expat-2.2.10
+    - set EXPAT_DIR=%ROOT_DIR%\libexpat-R_2_2_10\expat
     - set EXPAT_BUILD_DIR=%EXPAT_DIR%\build
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
     - set S2OPC_CLIENTSERVER_ONLY=1
@@ -59,7 +59,7 @@ test_script:
         cmake --build . --target ALL_BUILD --config %CONFIG%
     # download and build expat
     - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/R_2_2_9.zip -FileName %EXPAT_DIR_NAME%.zip"
+    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/R_2_2_10.zip -FileName %EXPAT_DIR_NAME%.zip"
     - "unzip %EXPAT_DIR_NAME%.zip"
     - |-
         cd %EXPAT_DIR%

@@ -68,16 +68,12 @@ if(WIN32 AND NOT S2OPC_CLIENTSERVER_ONLY)
   message(FATAL_ERROR "PubSub module requires platform dependent code not implemented yet on windows (see issue #747). Please set S2OPC_CLIENTSERVER_ONLY to exclude PubSub module.")
 endif()
 
-# Expat changes name under native windows
-# ${expat_LIB} contains the target name of the library to avoid misspells
+# Expat have specific requirements for static library and MSCV: XML_STATIC shall be defined by application using it
 if(expat_FOUND)
   if(WIN32 AND NOT MINGW)
-    set(expat_LIB expat::libexpat)
     if (USE_STATIC_EXPAT_LIB)
-      target_compile_definitions(${expat_LIB} INTERFACE "XML_STATIC")
+      target_compile_definitions(expat::expat INTERFACE "XML_STATIC")
     endif()
-  else()
-    set(expat_LIB expat::expat)
   endif()
 endif()
 

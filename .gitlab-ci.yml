@@ -110,12 +110,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:84d7c65956c79dec39d0f9e966078df3293f03c0d2c1fe2dc4c770aa2ef53224 # digest of build:1.22
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:6ef1b62ecf2aada2614a6c7f480902c66c6062134b99acb1007507d1b35d0bdf # digest of build:1.23
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:fafcfa87e1f678cf615ce8093a848ca2d8bf947a9f8eb30a49a94a74d13be587'
+    DOCKER_IMAGE: 'sha256:0e46127c33cee6a6ce45fc66dc948a449ddb783f7ed66fd10b00733a756dc525'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -173,7 +173,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:e68d4295fbea8f68ddab6621da203a489738d5e9c007206bf191e25aeca8d849 # digest of mingw_build:1.10
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:c25d3eee22da8cdda2866b1d4f917027d33c5065dc497c87b09fe4e78e8505dd # digest of mingw_build:1.11
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -181,7 +181,7 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:34d3694b434e89d12273be3533e2c53eb270f5967092dd2b6f158e7433be667a'
+    DOCKER_IMAGE: 'sha256:2a9fa163b8d3b8f35717bbd07faaeebf6715704db4d1c8b0ba51d111121ad93e'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
@@ -242,7 +242,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:dc2546f51f99190ba7af97c98538aa44f27d774a3876af93191ac3b5ec7ee963 # digest of check:1.10
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:678c92905ecb853b1cad6ef2948fb6a40309cf17d1dbbda92ac326f79454925a # digest of check:1.11
   script:
     - ./.check-code.sh
   artifacts:

@@ -23,7 +23,7 @@
 #
 set -e
 
-DOCKER_IMAGE=sha256:cbddbbf6e1ce6cdf5c85c70723d712a8d781b5f48977f66bc92b523cd0f0078b # check 1.9
+DOCKER_IMAGE=sha256:12731bc47e5d69bcb4d7a2489e598dfce628b124cb373a1a4d8372aadb755b1a # check 1.11
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"

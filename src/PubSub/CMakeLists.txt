@@ -62,11 +62,7 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
 add_library(s2opc_pubsub ${S2OPC_PUBSUB_SRCS} ${S2OPC_PUBSUB_BUILD_INFO_C})
 target_compile_options(s2opc_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_pubsub PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc_pubsub PUBLIC s2opc_common ${expat_LIB} ${PAHO_LIBRARIES})
-# Note: the following line is a hack since it seems expat does not export its include directory.
-#       It might not be necessary if other library includes target the same directory.
-target_include_directories(s2opc_pubsub PRIVATE "${expat_DIR}/../../../include")
-
+target_link_libraries(s2opc_pubsub PUBLIC s2opc_common expat::expat ${PAHO_LIBRARIES})
 
 target_include_directories(s2opc_pubsub
   PUBLIC
