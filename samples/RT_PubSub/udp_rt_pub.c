@@ -164,6 +164,7 @@ int main(void)
     }
 
     SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    int returnCode = 0;
     /* Get current time and start 1 second in future and add wake tx delay */
     clock_gettime(CLOCKID, &sleepTime);
     sleepTime.tv_sec += 1;
@@ -175,7 +176,7 @@ int main(void)
     sockErrPoll.fd = sock;
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {
-        while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
+        while (0 == returnCode && SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
         {
             clockErr = clock_nanosleep(CLOCKID, TIMER_ABSTIME, &sleepTime, NULL);
             switch (clockErr)
@@ -194,7 +195,7 @@ int main(void)
                     if (SOPC_TX_UDP_Socket_Error_Queue(sock))
                     {
                         // Operation error identifier
-                        return -ECANCELED;
+                        returnCode = -ECANCELED;
                     }
                 }
                 break;
@@ -202,17 +203,19 @@ int main(void)
                 continue;
             default:
                 fprintf(stderr, "Clock_nanosleep returned %d: %s", clockErr, strerror(clockErr));
-                return clockErr;
+                returnCode = clockErr;
             }
         }
     }
     else
     {
-        return 1;
+        returnCode = 1;
     }
 
     SOPC_Dataset_LL_NetworkMessage_Delete(nm);
     SOPC_Buffer_Delete(buffer);
     SOPC_UDP_Socket_Close(&sock);
     SOPC_UDP_SocketAddress_Delete(&multicastAddr);
+
+    return returnCode;
 }
