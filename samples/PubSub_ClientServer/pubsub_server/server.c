@@ -591,22 +591,22 @@ static void Server_Event_AddressSpace(SOPC_App_AddSpace_Event event, void* opPar
 }
 
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
- {
-     (void) idOrStatus;
-     SOPC_EncodeableType* message_type = NULL;
-     OpcUa_WriteResponse* writeResponse = NULL;
-     OpcUa_ReadResponse* response = NULL;
-     SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
-     SOPC_PubSheduler_GetVariableRequestContext* ctx = NULL;
+{
+    (void) idOrStatus;
+    SOPC_EncodeableType* message_type = NULL;
+    OpcUa_WriteResponse* writeResponse = NULL;
+    OpcUa_ReadResponse* response = NULL;
+    SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
+    SOPC_PubSheduler_GetVariableRequestContext* ctx = NULL;
 
-     switch (event)
-     {
-     case SE_CLOSED_ENDPOINT:
-         printf("# Info: Closed endpoint event.\n");
-         SOPC_Atomic_Int_Set(&serverOnline, 0);
-         return;
-     case SE_LOCAL_SERVICE_RESPONSE:
-         message_type = *((SOPC_EncodeableType**) param);
+    switch (event)
+    {
+    case SE_CLOSED_ENDPOINT:
+        printf("# Info: Closed endpoint event.\n");
+        SOPC_Atomic_Int_Set(&serverOnline, 0);
+        return;
+    case SE_LOCAL_SERVICE_RESPONSE:
+        message_type = *((SOPC_EncodeableType**) param);
 
         /* Listen for ReadResponses, used in GetSourceVariables */
         ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;

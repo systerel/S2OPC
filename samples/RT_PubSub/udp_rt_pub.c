@@ -19,26 +19,26 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <poll.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <poll.h>
 #include <time.h>
 #include <unistd.h>
 
+#include "p_udp_sockets_custom.h"
 #include "sopc_atomic.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_network_layer.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
-#include "p_udp_sockets_custom.h"
 
 /* Publisher cycle time in nano seconds */
-#define CYCLE_TIME    1000000
+#define CYCLE_TIME 1000000
 /* Transmit wake delay */
-#define WAKE_DELAY    500000
-#define MCAST_PORT    "4840"
-#define MCAST_ADDR    "232.1.2.100"
+#define WAKE_DELAY 500000
+#define MCAST_PORT "4840"
+#define MCAST_ADDR "232.1.2.100"
 /* Ethernet interface selection */
 #define ETH_INTERFACE "enp1s0"
 
@@ -59,18 +59,18 @@ static void Test_StopSignal(int sig)
     }
 }
 
-static void Timestamp_Normalize(struct timespec *timestamp)
+static void Timestamp_Normalize(struct timespec* timestamp)
 {
     while (timestamp->tv_nsec > 999999999)
     {
-		timestamp->tv_sec += 1;
-		timestamp->tv_nsec -= 1000000000;
+        timestamp->tv_sec += 1;
+        timestamp->tv_nsec -= 1000000000;
     }
 
     while (timestamp->tv_nsec < 0)
     {
-		timestamp->tv_sec -= 1;
-		timestamp->tv_nsec += 1000000000;
+        timestamp->tv_sec -= 1;
+        timestamp->tv_nsec += 1000000000;
     }
 }
 
