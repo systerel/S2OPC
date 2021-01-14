@@ -275,7 +275,8 @@ static void SOPC_PubScheduler_Context_Clear(void)
     pubSchedulerCtx.config = NULL;
     pubSchedulerCtx.sourceConfig = NULL;
     // TODO SOPC_LocalSKS_Keys_Delete(pubSchedulerCtx.keys);
-    pubSchedulerCtx.sequenceNumber = 1;
+    /* Don't reset the sequenceNumber on Stop(). But for now, there is no other place to reset it */
+    // pubSchedulerCtx.sequenceNumber = 1;
 }
 
 static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
@@ -769,7 +770,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 #endif
 
     // Security : init the sequence number
-    pubSchedulerCtx.sequenceNumber = 1;
+    /* TODO: Don't reset the sequenceNumber here: we might want to publish later and we must keep its value */
+    // pubSchedulerCtx.sequenceNumber = 1;
     pubSchedulerCtx.nbConnection = 0;
 
     // Create Context Array to keep Addresses and Sockets
