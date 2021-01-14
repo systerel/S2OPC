@@ -13,9 +13,6 @@ endif()
 
 # EXPAT dependency managed in CommonDefs
 
-# Paho library is required
-find_package(eclipse-paho-mqtt-c CONFIG)
-
 if (eclipse-paho-mqtt-c_FOUND)
 message ( "-- MQTT PUBSUB: Paho library found, it will be used by MQTT Pubsub Protocol extension")
 add_definitions(-DUSE_MQTT_PAHO=1)

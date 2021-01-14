@@ -24,3 +24,8 @@ if(@expat_FOUND@)
   include(CMakeFindDependencyMacro)
   find_dependency(expat)
 endif()
+
+if(@eclipse-paho-mqtt-c_FOUND@)
+  include(CMakeFindDependencyMacro)
+  find_dependency(eclipse-paho-mqtt-c)
+endif()
