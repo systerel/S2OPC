@@ -27,10 +27,10 @@
 
 struct _SOPC_SubTargetVariableConfig
 {
-    SOPC_SetTargetVariables_Func callback;
+    SOPC_SetTargetVariables_Func* callback;
 };
 
-SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func callback)
+SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func* callback)
 {
     SOPC_SubTargetVariableConfig* targetConfig = SOPC_Calloc(1, sizeof(*targetConfig));
     if (NULL != targetConfig)

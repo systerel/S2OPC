@@ -104,7 +104,7 @@ int main(void)
     int closed = fclose(fd);
     assert(0 == closed);
 
-    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Test);
+    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&SOPC_SetTargetVariables_Test);
 
     bool started = SOPC_SubScheduler_Start(config, targetConfig, stateChangedCb);
 

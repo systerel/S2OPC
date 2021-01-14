@@ -131,7 +131,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     SOPC_SubTargetVariableConfig* pTargetConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pTargetConfig = SOPC_SubTargetVariableConfig_Create(Server_SetTargetVariables);
+        pTargetConfig = SOPC_SubTargetVariableConfig_Create(&Server_SetTargetVariables);
         if (NULL == pTargetConfig)
         {
             printf("# Error: Cannot create Sub configuration.\n");
@@ -143,7 +143,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pSourceConfig = SOPC_PubSourceVariableConfig_Create(Server_GetSourceVariables);
+        pSourceConfig = SOPC_PubSourceVariableConfig_Create(&Server_GetSourceVariables);
         if (NULL == pSourceConfig)
         {
             printf("# Error: Cannot create Pub configuration.\n");

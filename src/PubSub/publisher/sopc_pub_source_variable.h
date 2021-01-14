@@ -25,6 +25,9 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_types.h"
 
+// TODO: this structure is taken from the sample/pubsub_server,
+//  where it is used to handle asynchronous OPC UA local read request.
+//  Either put it back there or document it properly.
 // Pubscheduler get var request
 typedef struct SOPC_PubSheduler_GetVariableRequestContext
 {
@@ -38,19 +41,23 @@ typedef struct SOPC_PubSheduler_GetVariableRequestContext
 
 /**
  * Configuration to provide as source variable config when starting publisher
- * */
-typedef struct _SOPC_PubSourceVariableConfig SOPC_PubSourceVariableConfig;
+ */
+typedef struct SOPC_PubSourceVariableConfig SOPC_PubSourceVariableConfig;
 
 /**
- *  Callback function called by publisher on publishingInterval to send a request on date variable values.
+ * \brief The publisher calls this callback cyclically to get the values to publish.
  *
- * Note: ownership of the ReadValue array is transfered to the callback code
+ * Given the \p nodesToRead, it should produce an array of DataValues of length \p nbValues.
  *
- * \return  status code indicating the success or failure of request sending
+ * \note Ownership of the ReadValue array and its elements is transferred to the callback code which must free them.
+ *
+ * \note Ownership of the returned DataValue array and its elements is transferred to the publisher library.
+ *
+ * \return  An array of DataValue of length \p nbValues or NULL in case of error
  */
-typedef SOPC_DataValue* (*SOPC_GetSourceVariables_Func)(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+typedef SOPC_DataValue* SOPC_GetSourceVariables_Func(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
 
-SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_Func callback);
+SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_Func* callback);
 
 void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceConfig);
 
@@ -60,7 +67,7 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
  * \return an array of DataValue of the size of the PublishedDataSet (number of fields) or NULL in case of error
  */
 
-SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig, //
-                                                    const SOPC_PublishedDataSet* pubDataset);         //
+SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig,
+                                                    const SOPC_PublishedDataSet* pubDataset);
 
 #endif /* SOPC_PUB_SOURCE_VARIABLE_H_ */

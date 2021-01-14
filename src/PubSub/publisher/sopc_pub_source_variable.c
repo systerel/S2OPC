@@ -24,12 +24,12 @@
 #include "sopc_pub_source_variable.h"
 #include "sopc_pubsub_helpers.h"
 
-struct _SOPC_PubSourceVariableConfig
+struct SOPC_PubSourceVariableConfig
 {
-    SOPC_GetSourceVariables_Func callback;
+    SOPC_GetSourceVariables_Func* callback;
 };
 
-SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_Func callback)
+SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_Func* callback)
 {
     SOPC_PubSourceVariableConfig* sourceConfig = NULL;
     if (NULL != callback)

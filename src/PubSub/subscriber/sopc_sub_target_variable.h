@@ -28,16 +28,18 @@
 /* Configuration to provide as target variable config when starting subscriber */
 typedef struct _SOPC_SubTargetVariableConfig SOPC_SubTargetVariableConfig;
 
-/* Callback function called by subscriber scheduler when new values are received for variables with a target variable
- * definition.
+/**
+ * \brief The subscriber scheduler calls this callback cyclically to pass the values received by the subscriber.
  *
- * Note: ownership of the WriteValue array is transfered to the callback code
+ * \note Ownership of the WriteValue array and its elements is transferred to the callback code which must free them.
  *
- * \return   true if processed, false otherwise */
-typedef bool (*SOPC_SetTargetVariables_Func)(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
+ * \note This function is called once per configured DataSet, with all the values of the DataSet in a single call.
+ *
+ * \return   true if processed, false otherwise (array must still be freed) */
+typedef bool SOPC_SetTargetVariables_Func(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
 /* If callback NULL, creation succeeds and SetVariables will only check input parameters on call */
-SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func callback);
+SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func* callback);
 
 void SOPC_SubTargetVariableConfig_Delete(SOPC_SubTargetVariableConfig* targetConfig);
 

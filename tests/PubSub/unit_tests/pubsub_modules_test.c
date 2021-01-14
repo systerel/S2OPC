@@ -413,7 +413,7 @@ START_TEST(test_target_variable_layer)
     SOPC_PubSubConfiguration* config = build_Sub_Config(&dsr);
     ck_assert_ptr_nonnull(config);
 
-    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(setTargetVariablesCb_TargetTest);
+    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&setTargetVariablesCb_TargetTest);
     ck_assert_ptr_nonnull(targetConfig);
 
     bool setVariables =
@@ -448,7 +448,7 @@ START_TEST(test_subscriber_reader_layer)
 
     SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
 
-    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(setTargetVariablesCb_ReaderTest);
+    SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&setTargetVariablesCb_ReaderTest);
 
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
@@ -628,7 +628,7 @@ START_TEST(test_source_variable_layer)
     SOPC_PublishedDataSet* pds = NULL;
     SOPC_PubSubConfiguration* config = build_Pub_Config(&pds);
 
-    SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(getSourceVariablesCb);
+    SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(&getSourceVariablesCb);
     SOPC_DataValue* dataValues = SOPC_PubSourceVariable_GetVariables(sourceConfig, pds);
     check_returned_DataValues(dataValues);
 
