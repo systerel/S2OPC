@@ -66,7 +66,9 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
     SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, securityCBck);
     if (NULL == uadp_nm)
     {
-        return SOPC_STATUS_NOK;
+        /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
+         * random bytes found on the network */
+        return SOPC_STATUS_ENCODING_ERROR;
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

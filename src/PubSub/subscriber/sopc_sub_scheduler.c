@@ -313,12 +313,18 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
 
     if (SOPC_PubSubState_Operational == schedulerCtx.state)
     {
-        result = SOPC_Reader_Read_UADP(pDecoderContext,                       //
-                                       &buffer,                               //
-                                       schedulerCtx.targetConfig,             //
-                                       SOPC_SubScheduler_Get_Security_Infos); //
+        /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
+         * random bytes found on the network */
+        result = SOPC_Reader_Read_UADP(pDecoderContext, &buffer, schedulerCtx.targetConfig,
+                                       SOPC_SubScheduler_Get_Security_Infos);
 
-        if (SOPC_STATUS_OK != result)
+        if (SOPC_STATUS_ENCODING_ERROR == result)
+        {
+            /* TODO: we can't log systematic decoding errors,
+             *  because the volume of these errors is not known */
+            result = SOPC_STATUS_OK;
+        }
+        else if (SOPC_STATUS_OK != result)
         {
             set_new_state(SOPC_PubSubState_Error);
         }

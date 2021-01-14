@@ -929,6 +929,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             return NULL;
         }
 
+        /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
         security = getSecurity_Func(
             securityTokenId, Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)),
             group_id);
