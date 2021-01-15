@@ -38,6 +38,7 @@ class PubSubState(Enum):
 
 
 class PubSubServer:
+    """Wraps a client that connects to the sample pubsub_server"""
 
     def __init__(self, uri, nid_configuration, nid_start_stop, nid_status):
         self.uri = uri
@@ -51,7 +52,7 @@ class PubSubServer:
     def connect(self):
         self.client.connect()
         print('Connected')
-        self.nodeConfiguration =self.client.get_node(self.nid_configuration)
+        self.nodeConfiguration = self.client.get_node(self.nid_configuration)
         self.nodeStartStop = self.client.get_node(self.nid_start_stop)
         self.nodeStatus = self.client.get_node(self.nid_status)
 
@@ -60,7 +61,7 @@ class PubSubServer:
         try:
             self.nodeStatus.get_value()
             return True
-        except:
+        except:  # TODO: exception too broad
             return False
 
     # Disconnect to the Pub/Sub server
@@ -78,15 +79,15 @@ class PubSubServer:
                 sleep(PUBSUBSERVER_TIMEOUT_STEP)
                 timeout = timeout - PUBSUBSERVER_TIMEOUT_STEP
             # TODO: what if we reached the timeout?
-        except e:
-            print('Client not connected to PubSubServer')
+        except e:  # TODO: exception too broad
+            print('Client probably not connected to PubSubServer', e)
 
     # Is Pub/Sub module started
-    def isStart(self):
+    def isStart(self):  # TODO: not connected does not mean that the module is not started
         try:
             return bool(self.nodeStartStop.get_value())
-        except:
-            print('Client not connected to PubSubServer')
+        except:  # TODO: exception too broad
+            print('Client probably not connected to PubSubServer')
             return False
 
     # Start the Pub/Sub module
@@ -103,7 +104,7 @@ class PubSubServer:
     def getPubSubState(self):
         try:
             return PubSubState(self.nodeStatus.get_value())
-        except:  # TODO: exception too large
+        except:  # TODO: exception too broad
             print('Client probably not connected to PubSubServer')
             return PubSubState.EXCEPTION
 
@@ -112,15 +113,15 @@ class PubSubServer:
     def setConfiguration(self, value):
         try:
             self.nodeConfiguration.set_value(ua.Variant(value, ua.VariantType.String))
-        except:
-            print('Client not connected to PubSubServer')
+        except:  # TODO: exception too broad
+            print('Client probably not connected to PubSubServer')
 
     # Get the Pub/Sub module configuration as XML string
     def getConfiguration(self):
         try:
             return self.nodeConfiguration.get_value()
-        except:
-            print('Client not connected to PubSubServer')
+        except:  # TODO: exception too broad
+            print('Client probably not connected to PubSubServer')
             return None
 
     # Get value. Nid is a string

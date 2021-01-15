@@ -76,7 +76,7 @@ if(ENABLE_TESTING)
       "--publisher-cmd" $<TARGET_FILE:pubsub_server>
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" ${test_server_static})
   endfunction()
-  
+
 ## S2OPC PubSub unit tests ##
 
   add_executable(xml_parser_test "unit_tests/xml_parser_test.c")
@@ -112,7 +112,7 @@ if(ENABLE_TESTING)
 
 
 ## S2OPC PubSub validation tests ##
-  
+
   add_executable(udp_pub_test "validation_tests/udp_pub_test.c")
   target_compile_options(udp_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(udp_pub_test PRIVATE ${S2OPC_DEFINITIONS})
@@ -139,7 +139,7 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     )
-  
+
   add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
   target_compile_options(udp_sub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(udp_sub_test PRIVATE ${S2OPC_DEFINITIONS})
