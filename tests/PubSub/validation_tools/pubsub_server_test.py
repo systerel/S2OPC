@@ -567,7 +567,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 should not change', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int should not change', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
+        helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
         #
         # TC 11 : Test with message configured with security mode encrypt and sign for publisher
@@ -592,7 +592,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
+        helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
         #
         # TC 12 : Test with message configured with security mode sign for publisher
@@ -617,7 +617,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
+        helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
         #
         # TC 13 : Test with message configured with security mode sign and encrypt
@@ -669,7 +669,7 @@ def testPubSubDynamicConf():
         # TC 15 : Test with message configured with security mode sign only
         #         for publisher => subscriber variables do not change
         #
-        logger.begin_section("TC 15 : Security mode sign only publisher")
+        logger.begin_section('TC 15 : Inconsistent security mode - publisher is sign, subscriber is None;')
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4, logger, possibleFail=True)
 
@@ -688,7 +688,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
+        helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
     finally:
         # restore default XML file
