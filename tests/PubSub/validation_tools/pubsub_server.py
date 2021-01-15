@@ -19,10 +19,23 @@
 # under the License.
 
 from time import sleep
+from enum import Enum
+
 from opcua import ua, Client
 
 PUBSUBSERVER_TIMEOUT_STEP = 0.1
 PUBSUBSERVER_TIMEOUT_MAX = 3
+
+
+class PubSubState(Enum):
+    # Values taken from SOPC_PubSubState
+    DISABLED = 0
+    PAUSED = 1
+    OPERATIONAL = 2
+    ERROR = 3
+    # This value is not part of the C structure
+    EXCEPTION = 4
+
 
 class PubSubServer:
 
@@ -59,11 +72,12 @@ class PubSubServer:
         try:
             # Set value and wait until value changes or timeout expires
             self.nodeStartStop.set_value(ua.Variant(value, ua.VariantType.Byte))
-            status = 2 if value else 0
+            state = PubSubState.OPERATIONAL if value else PubSubState.DISABLED
             timeout = PUBSUBSERVER_TIMEOUT_MAX
-            while self.getStatus() != status and timeout > 0:
+            while self.getPubSubState() != state and timeout > 0:
                 sleep(PUBSUBSERVER_TIMEOUT_STEP)
                 timeout = timeout - PUBSUBSERVER_TIMEOUT_STEP
+            # TODO: what if we reached the timeout?
         except e:
             print('Client not connected to PubSubServer')
 
@@ -85,15 +99,13 @@ class PubSubServer:
     def stop(self):
         self.__setStartStop(0)
 
-    # Get the Pub/Sub module status:
-    #  - 0 : not running
-    #  - 2 : is running
-    def getStatus(self):
+    # Get the Pub/Sub module state (a PubSubState instance)
+    def getPubSubState(self):
         try:
-            return self.nodeStatus.get_value()
-        except:
-            print('Client not connected to PubSubServer')
-            return 0
+            return PubSubState(self.nodeStatus.get_value())
+        except:  # TODO: exception too large
+            print('Client probably not connected to PubSubServer')
+            return PubSubState.EXCEPTION
 
     # Set the Pub/Sub module configuration
     # Value is a XML in a string

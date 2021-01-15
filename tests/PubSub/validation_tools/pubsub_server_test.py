@@ -24,7 +24,7 @@ import argparse
 
 from opcua import ua
 from tap_logger import TapLogger
-from pubsub_server import PubSubServer
+from pubsub_server import PubSubServer, PubSubState
 
 DEFAULT_URI = 'opc.tcp://localhost:4841'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
@@ -284,12 +284,16 @@ def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
     else:
         pLogger.add_test('PubSub Module is stopped', not pPubsubserver.isStart())
 
-    retrievedStatus = pPubsubserver.getStatus()
-    if pStart and possibleFail:
-        pLogger.add_test('PubSub Module Status should not be %d : %d' % (0, retrievedStatus) , 0 != retrievedStatus)
+    # TODO: for now "possibleFail" is in fact "expectedFail"
+    if pStart:
+        if possibleFail:
+            expected = PubSubState.DISABLED
+            state = pPubsubserver.getPubSubState()
+            pLogger.add_test(f'PubSub Module status is {state}, should not be {expected}', state != expected)
+        else:
+            helpAssertState(pPubsubserver, PubSubState.OPERATIONAL, pLogger)
     else:
-        status = 2 if pStart else 0
-        pLogger.add_test('PubSub Module Status should be %d : %d' % (status, retrievedStatus) , status == retrievedStatus)
+        helpAssertState(pPubsubserver, PubSubState.DISABLED, pLogger)
 
 # Send stop command following by start command
 def helpRestart(pPubsubserver, pLogger, possibleFail):
@@ -333,7 +337,9 @@ def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
     expected = pPubsubserver.getValue(nodeId)
     pLogger.add_test('%s is changed' % nodeId , expected == value)
 
-
+def helpAssertState(psserver, expected, pLogger):
+    state = psserver.getStatus()
+    pLogger.add_test(f'PubSub Module state is {state}, should be {expected}', state == expected)
 
 
 def testPubSubDynamicConf():
@@ -529,17 +535,14 @@ def testPubSubDynamicConf():
 
         logger.add_test('Start Server', True)
         pubsubserver.start()
-        status = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be 0 : %d' % status , 0 == status)
+        helpAssertState(pubsubserver, PubSubState.DISABLED, logger)
 
         #
         # TC 9 : Start and Stop empty configuration
         #
         logger.begin_section("TC 9 : Empty configuration")
         helpConfigurationChange(pubsubserver, XML_EMPTY, logger)
-        status = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be 0 : %d' % status , 0 == status)
-
+        helpAssertState(pubsubserver, PubSubState.DISABLED, logger)
 
         #
         # TC 10 : Test with message configured with security mode encrypt and sign for publisher
@@ -564,10 +567,8 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        expStatus = 3 # Error state
-        retrievedStatus = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
 
+        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
 
         #
         # TC 11 : Test with message configured with security mode encrypt and sign for publisher
@@ -592,9 +593,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        expStatus = 3 # Error state
-        retrievedStatus = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
+        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
 
         #
         # TC 12 : Test with message configured with security mode sign for publisher
@@ -619,9 +618,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        expStatus = 3 # Error state
-        retrievedStatus = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
+        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
 
         #
         # TC 13 : Test with message configured with security mode sign and encrypt
@@ -692,9 +689,7 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber uint16 is not changed ', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed ', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
-        expStatus = 3 # Error state
-        retrievedStatus = pubsubserver.getStatus()
-        logger.add_test('PubSub Module Status should be %d : %d' % (expStatus, retrievedStatus) , expStatus == retrievedStatus)
+        helpAssertState(pubsubserver, PubSubState.ERROR, logger)
 
     finally:
         # restore default XML file
