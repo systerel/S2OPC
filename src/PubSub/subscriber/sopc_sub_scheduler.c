@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 
 #include "sopc_array.h"
@@ -293,10 +294,9 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
     SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
 
 #if DEBUG_PUBSUB_SCHEDULER_INFO
-    printf("# RT Subscriber callback - receive data on input number = %u - size = %u - context = %08lx\r\n", //
-           input_number,                                                                                     //
-           size,                                                                                             //
-           (uint64_t) pInputContext);                                                                        //
+    printf("# RT Subscriber callback - receive data on input number = %" PRIu32 " - size = %" PRIu32
+           " - context = %08" PRIx64 "\n",
+           input_number, size, (uint64_t) pInputContext);
 #endif
 
     if (NULL == pDecoderContext)
@@ -339,7 +339,7 @@ static void* cbBeatHeartThreadCallback(void* arg)
     (void) arg;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    printf("# RT Subscriber beat heart thread launched !!!\r\n");
+    printf("# RT Subscriber beat heart thread launched\n");
 
     bool readValue = false;
     __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
@@ -349,14 +349,14 @@ static void* cbBeatHeartThreadCallback(void* arg)
         result = SOPC_RT_Subscriber_HeartBeat(schedulerCtx.pRTSubscriber);
         if (SOPC_STATUS_OK != result)
         {
-            printf("# RT Subscriber beat heart thread error : %u\r\n", result);
+            printf("# RT Subscriber beat heart thread error : %d\n", result);
         }
 
         SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
         __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
     }
 
-    printf("# RT Subscriber beat heart thread exit !!!\r\n");
+    printf("# RT Subscriber beat heart thread exit\n");
 
     return NULL;
 }
@@ -367,7 +367,7 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.targetConfig = NULL;
     schedulerCtx.stateCallback = NULL;
 
-    printf("# Info: Stop RT Subscriber thread. \r\n");
+    printf("# Info: Stop RT Subscriber thread.\n");
     bool newValue = true;
     __atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
     if (schedulerCtx.handleRTSubscriberBeatHeart != (Thread) NULL)
@@ -379,15 +379,15 @@ static void uninit_sub_scheduler_ctx(void)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     while (SOPC_STATUS_INVALID_STATE == status)
     {
-        printf("# Info: DeInitialize RT Subscriber. \r\n");
+        printf("# Info: DeInitialize RT Subscriber.\n");
         status = SOPC_RT_Subscriber_DeInitialize(schedulerCtx.pRTSubscriber);
     }
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
         schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
-        printf("# Info: transport context destroyed for connection #%u (subscriber). \n", i);
+        printf("# Info: transport context destroyed for connection #%" PRIu32 " (subscriber).\n", i);
     }
-    printf("# Info: Destroy RT Subscriber. \r\n");
+    printf("# Info: Destroy RT Subscriber.\n");
     SOPC_RT_Subscriber_Destroy(&schedulerCtx.pRTSubscriber);
     schedulerCtx.nbConnections = 0;
     schedulerCtx.nbSockets = 0;
@@ -512,7 +512,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             {
                 schedulerCtx.transport[iIter].connection = connection;
 
-                printf("# Add input with context %08lx\r\n", (uint64_t) connection);
+                printf("# Add input with context %p\n", (void*) connection);
 
                 status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,                        //
                                                                  SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER, //
@@ -523,12 +523,13 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                 if (SOPC_STATUS_OK != status)
                 {
-                    printf("# RT Subscriber initializer add input failed !!!\n");
+                    printf("# RT Subscriber initializer add input failed\n");
                     result = false;
                 }
                 else
                 {
-                    printf("# RT Subscriber initializer add input %u\r\n", schedulerCtx.transport[iIter].inputNumber);
+                    printf("# RT Subscriber initializer add input %" PRIu32 "\n",
+                           schedulerCtx.transport[iIter].inputNumber);
                 }
 
                 if (result)
@@ -658,12 +659,12 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
         status = SOPC_RT_Subscriber_Initialize(schedulerCtx.pRTSubscriber, pRTInitializer);
         if (status != SOPC_STATUS_OK)
         {
-            printf("# Rt subscriber initialization failed !!!\r\n");
+            printf("# Rt subscriber initialization failed\n");
             result = false;
         }
         else
         {
-            printf("# Rt subscriber initialized\r\n");
+            printf("# Rt subscriber initialized\n");
         }
     }
 
@@ -685,11 +686,11 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
         if (SOPC_STATUS_OK != status)
         {
             result = false;
-            printf("# Error creation of rt subscriber beat heart thread\r\n");
+            printf("# Error creation of rt subscriber beat heart thread\n");
         }
         else
         {
-            printf("# Rt subscriber beat heart thread created\r\n");
+            printf("# Rt subscriber beat heart thread created\n");
         }
     }
 

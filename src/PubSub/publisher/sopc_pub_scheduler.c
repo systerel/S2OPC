@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <inttypes.h>
 
 #include "sopc_atomic.h"
@@ -1084,7 +1085,7 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     if (SOPC_STATUS_OK != result)
     {
         // TODO: Some verifications should maybe added...
-        printf("# Error on SOPC_UDP_Socket_SendTo  ...\r\n");
+        printf("# Error on SOPC_UDP_Socket_SendTo %s ...\n", strerror(errno));
     }
 }
 
