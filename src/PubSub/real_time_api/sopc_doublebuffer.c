@@ -17,79 +17,101 @@
  * under the License.
  */
 
-/// @file sopc_doublebuffer.c
+/** \file sopc_doublebuffer.c */
 
+#include <assert.h>
+#include <string.h>
+
+#include "sopc_atomic.h"
 #include "sopc_doublebuffer.h"
+#include "sopc_logger.h"
 
-/// @brief SOPC_DoubleBuffer
+typedef struct SOPC_DbleBufElem
+{
+    /* TODO: these values are int32_t because of our current Atomic interface */
+    /** Number of concurrent readers reading this element (more than 0 prevents writes) */
+    int32_t readersCount;
+    /** Whether the first memory bank (\verbatim bankB = false\endverbatim) currently stores data or the other */
+    int32_t bankB;
+    /* To reduce the number of calls to malloc, banks are stored in an array inside the double buffer array */
+} SOPC_DbleBufElem;
+
+/** \brief An array of double buffers of configurable size with a single writer but multiple readers
+ *
+ * Elements are each a double buffer with two banks of the given size.
+ * The array works as follows.
+ *
+ * On the writer side, the `SOPC_DoubleBuffer_GetWriteBuffer` is called to find in which cell it is possible to write.
+ * With the return index,
+ * it is possible to write with `SOPC_DoubleBuffer_WriteBuffer` or `SOPC_DoubleBuffer_WriteBufferGetPtr`.
+ * The index must be released with `SOPC_DoubleBuffer_ReleaseWriteBuffer` (which commits the write).
+ * `SOPC_DoubleBuffer_GetWriteBuffer` should not be called a second time before the first index has been released.
+ *
+ * On the reader side, any thread can call `SOPC_DoubleBuffer_GetReadBuffer`
+ * to obtain an index towards the most recently written element of the array.
+ * `SOPC_DoubleBuffer_ReadBuffer` and `SOPC_DoubleBuffer_ReadBufferPtr` are used obtain data stored in the element.
+ * The index must be released with `SOPC_DoubleBuffer_ReleaseReadBuffer` as soon as possible,
+ * as writes cannot be made in this element while it is read.
+ * Hence, keeping the index may lead to a deprivation of writable elements.
+ *
+ * \note Upon Write, the functions are capable of retrieving the current "last value",
+ *       meaning that it is possible to update the lastly written value
+ *       (this is possible because the writers are not concurrent)
+ *
+ * \warning Writer functions are not thread safe and should not be called concurrently
+ * \warning The structure should not be destroyed while in use
+ */
 struct SOPC_DoubleBuffer
 {
-    uint32_t eltSizeInBytes; //!< Elt size in bytes. Header of 4 bytes (size of record), atomic elt size. Always aligned
-                             //!< on 4 bytes.
-    uint32_t bufferSizeInBytes; //!< Equal to eltsize * number of concurrent readers
-    uint32_t nbBuffers;         //!< Number of readers
-    uint32_t lastRecord; //!< Last written row, between 0 and nbBuffers - 1. pBufferStatus indicate if row 0 or row 1
-                         //!< has been written.
-    uint32_t* pReadersCounter; //!< Indicate for each row how readers are reading it
-    uint32_t* pBufferStatus;   //!< Indicate for each row if row 0 or row 1 is the most up to date
-    uint8_t* doubleBuffer;     //!< Double buffer
-    /* Memory organization
-    DBO             [NB_READERS] [NB_STATUS] (2 status)
-    READERS_COUNTER [NB_READERS]
-    BUFFER_STATUS   [NB_READERS]
-    */
+    size_t nbElems;
+    /** Index of the element that was written lastly */
+    size_t iLastWritten;
+    /** Allocated memory in bytes for each element for each bank */
+    size_t elemSize;
+    /** Array of \p nbElems elements */
+    SOPC_DbleBufElem* arrayElems;
+    /** Array of all the buffers (two buffers per element) */
+    uint8_t* arrayBuffers;
 };
 
-SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders, uint32_t atomic_elt_size)
+/** Buffer elements are arranged in two banks in the array buffer */
+static inline uint8_t* get_buffer_ptr(SOPC_DoubleBuffer* p, size_t idBuffer, bool write);
+static inline uint8_t* get_buffer_ptr(SOPC_DoubleBuffer* p, size_t idBuffer, bool write)
 {
-    int result = 0;
-    SOPC_DoubleBuffer* pBuffer = (SOPC_DoubleBuffer*) SOPC_Malloc(sizeof(SOPC_DoubleBuffer));
-    memset((void*) pBuffer, 0, sizeof(SOPC_DoubleBuffer));
-    if (NULL == pBuffer)
+    size_t index = 2 * idBuffer;
+    /* Write to the other bank (bankB indicates in which bank are currently stored data) */
+    if (p->arrayElems[idBuffer].bankB ^ write)
+    {
+        index += 1;
+    }
+    return &p->arrayBuffers[index * p->elemSize];
+}
+
+SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(size_t nbElements, size_t elementSize)
+{
+    if (0 == nbElements || 0 == elementSize || nbElements > SIZE_MAX / 2 / elementSize)
     {
         return NULL;
     }
 
-    uint64_t nbBuffers = nbReaders + 1;
+    /* Allocate all buffers, then allocate and fill the superstructure */
+    SOPC_DbleBufElem* arrElems = (SOPC_DbleBufElem*) SOPC_Calloc(nbElements, sizeof(SOPC_DbleBufElem));
+    uint8_t* arrBuffs = (uint8_t*) SOPC_Calloc(1, 2 * nbElements * elementSize);
+    SOPC_DoubleBuffer* pBuffer = (SOPC_DoubleBuffer*) SOPC_Calloc(1, sizeof(SOPC_DoubleBuffer));
 
-    // Calculates real elt size (aligned on 4 bytes)
-    size_t eltSizeInBytes = ((atomic_elt_size + sizeof(uint32_t)) + sizeof(uint32_t) -
-                             (atomic_elt_size + sizeof(uint32_t)) % (sizeof(uint32_t)));
-
-    // Calculates for one status buffer size
-    uint64_t bufferSizeInBytes = nbBuffers * eltSizeInBytes;
-
-    // For 2 status, double the size of the buffer and add CURRENT STATUS and NB READERS READING for each row
-    uint64_t totalSize = (bufferSizeInBytes * 2 + 2 * nbBuffers * sizeof(uint32_t));
-
-    // Check for overflow
-    if (totalSize > (uint64_t) UINT32_MAX)
+    if (NULL != pBuffer && NULL != arrElems && NULL != pBuffer)
     {
-        result = -1;
-    }
-
-    if (0 == result)
-    {
-        // Allocation of 1 contiguous memory zone and initialize pointers pBufferStatus and pReadersCounter
-        pBuffer->doubleBuffer = (uint8_t*) SOPC_Malloc(totalSize);
-    }
-
-    if (NULL == pBuffer->doubleBuffer)
-    {
-        result = -1;
-    }
-    if (0 == result)
-    {
-        memset((void*) pBuffer->doubleBuffer, 0, totalSize);
-
-        pBuffer->pReadersCounter = (uint32_t*) (pBuffer->doubleBuffer + bufferSizeInBytes * 2);
-        pBuffer->pBufferStatus = pBuffer->pReadersCounter + nbBuffers;
-        pBuffer->eltSizeInBytes = (uint32_t) eltSizeInBytes;
-        pBuffer->bufferSizeInBytes = (uint32_t) bufferSizeInBytes;
-        pBuffer->nbBuffers = (uint32_t) nbBuffers;
+        pBuffer->nbElems = nbElements;
+        pBuffer->elemSize = elementSize;
+        pBuffer->arrayElems = arrElems;
+        pBuffer->arrayBuffers = arrBuffs;
     }
     else
     {
+        SOPC_Free(arrElems);
+        arrElems = NULL;
+        SOPC_Free(arrBuffs);
+        arrBuffs = NULL;
         SOPC_Free(pBuffer);
         pBuffer = NULL;
     }
@@ -97,385 +119,242 @@ SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders, uint32_t atomic_
     return pBuffer;
 }
 
-void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** p)
+void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** pp)
 {
-    if ((NULL != p) && (NULL != (*p)))
+    if (NULL == pp || NULL == *pp)
     {
-        if ((*p)->doubleBuffer != NULL)
-        {
-            (*p)->pBufferStatus = NULL;
-            (*p)->pReadersCounter = NULL;
-            SOPC_Free((void*) ((*p)->doubleBuffer));
-            (*p)->doubleBuffer = NULL;
-        }
-        SOPC_Free(*p);
-        *p = NULL;
+        return;
     }
+    SOPC_DoubleBuffer* p = *pp;
+    SOPC_Free(p->arrayElems);
+    p->arrayElems = NULL;
+    SOPC_Free(p->arrayBuffers);
+    p->arrayBuffers = NULL;
+    SOPC_Free(p);
+    p = NULL;
+    *pp = NULL;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer, uint32_t* pMaxSize)
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, size_t* pIdBuffer, size_t* pMaxSize)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
     if (NULL == p || NULL == pIdBuffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t idBufferToWrite = UINT32_MAX;
-    uint32_t readCounter = 0;
-    for (uint32_t i = 0; i < p->nbBuffers && UINT32_MAX == idBufferToWrite; i++) /* TODO: don't write to i=0 */
+    int32_t readCounter = 1;
+    /* Find a buffer that is not being read.
+     * Starts at the index after lastWritten to avoid returning lastWritten, which would be the next one to be read. */
+    for (size_t i = 1; i < p->nbElems && readCounter > 0; ++i)
     {
-        __atomic_load(&p->pReadersCounter[(i + p->lastRecord) % p->nbBuffers], &readCounter, __ATOMIC_SEQ_CST);
+        size_t index = (p->iLastWritten + i) % p->nbElems;
+        readCounter = SOPC_Atomic_Int_Get(&p->arrayElems[index].readersCount);
         if (0 == readCounter)
         {
-            idBufferToWrite = (i + p->lastRecord) % p->nbBuffers;
+            *pIdBuffer = index;
         }
     }
 
-    if (idBufferToWrite == UINT32_MAX)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (readCounter > 0)
     {
-        result = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                               "All elements of the double buffer array are being read, cannot write");
+        status = SOPC_STATUS_NOK;
     }
 
-    if (NULL != pMaxSize)
+    if (SOPC_STATUS_OK == status && NULL != pMaxSize)
     {
-        *pMaxSize = (uint32_t)(p->eltSizeInBytes - sizeof(uint32_t)); /* TODO: does not change */
+        *pMaxSize = p->elemSize;
     }
-    *pIdBuffer = idBufferToWrite;
-    return result;
+
+    return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, //
-                                                       uint32_t* pIdBuffer)  //
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, size_t idBuffer)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if (NULL == p || NULL == pIdBuffer)
+    if (NULL == p)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    assert(idBuffer < p->nbElems);
 
-    if (*pIdBuffer >= p->nbBuffers)
+    /* Commit the changes: switch the currently readable bank */
+    /* TODO: Lock before all the following reads and updates */
+    if (0 < p->arrayElems[idBuffer].readersCount)
     {
-        result = SOPC_STATUS_NOK;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                               "Double buffer element became read while being written, cannot commit");
+        return SOPC_STATUS_INVALID_STATE;
     }
 
-    if (SOPC_STATUS_OK == result)
-    {
-        uint32_t idBuffer = *pIdBuffer;
-        // Update status W1 to W2 or W2 to W1
-        uint32_t newValue = (p->pBufferStatus[idBuffer] + 1) % 2;
-        __atomic_store(&p->pBufferStatus[idBuffer], &newValue, __ATOMIC_SEQ_CST);
-        // Id of last record updated
-        __atomic_store(&p->lastRecord, &idBuffer, __ATOMIC_SEQ_CST);
-    }
-    *pIdBuffer = UINT32_MAX;
-    return result;
+    p->arrayElems[idBuffer].bankB = !p->arrayElems[idBuffer].bankB;
+    p->iLastWritten = idBuffer;
+
+    /* TODO: count Get-Release */
+    return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, uint32_t idBuffer)
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, size_t idBuffer)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if (NULL == p || idBuffer >= p->nbBuffers)
+    if (NULL == p)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint8_t* pStartElt =
-        p->doubleBuffer + ((p->pBufferStatus[idBuffer] + 1) % 2) * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes;
+    assert(idBuffer < p->nbElems);
 
-    memset(pStartElt, 0, p->eltSizeInBytes);
-    return result;
+    memset(get_buffer_ptr(p, idBuffer, true), 0, p->elemSize);
+
+    return SOPC_STATUS_OK;
 }
 
-/**
- * \param p               DBO object
- * \param idBuffer        Buffer identifier
- * \param ppDataField     Pointer on data field
- * \param ppSizeField     Pointer on size field
- * \param ignorePrevious  Copy last updated value of DBO on output ptr
- */
 SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(SOPC_DoubleBuffer* p,
-                                                      uint32_t idBuffer,
+                                                      size_t idBuffer,
                                                       uint8_t** ppDataField,
-                                                      uint32_t** ppSizeField,
                                                       bool ignorePrevious)
 {
-    if (NULL == p || idBuffer >= p->nbBuffers || NULL == ppDataField || NULL == ppSizeField)
+    if (NULL == p || NULL == ppDataField)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    assert(idBuffer < p->nbElems);
 
-    *ppDataField = NULL;
-    *ppSizeField = NULL;
+    *ppDataField = get_buffer_ptr(p, idBuffer, true);
 
-    uint8_t* pData = NULL;
-    uint32_t* pSizeField = NULL;
-    uint8_t* pPreviousData = NULL;
-    uint32_t previousDataSize = 0;
-
-    pData =                                                             // Data pointer to update externally
-        p->doubleBuffer +                                               // Double buffer data zone
-        ((p->pBufferStatus[idBuffer] + 1) % 2) * p->bufferSizeInBytes + // Status
-        idBuffer * p->eltSizeInBytes +                                  // Buffer (size + data)
-        sizeof(uint32_t);                                               // Offset added to point on data
-
-    // Get pointer on data size
-    pSizeField = (uint32_t*) (pData - sizeof(uint32_t));
-
-    // Duplicate previous data or not
+    /* Copy the last committed buffer, for update */
     if (!ignorePrevious)
     {
-        pPreviousData = p->doubleBuffer + p->pBufferStatus[p->lastRecord] * p->bufferSizeInBytes +
-                        p->lastRecord * p->eltSizeInBytes + sizeof(uint32_t);
-
-        previousDataSize = *((uint32_t*) ((pPreviousData - sizeof(uint32_t))));
-
-        for (uint32_t i = 0; i < previousDataSize && i < p->eltSizeInBytes; i++)
-        {
-            pData[i] = pPreviousData[i];
-        }
+        memcpy(*ppDataField, get_buffer_ptr(p, p->iLastWritten, false), p->elemSize);
     }
-
-    // Update field size with previous if necessary, else 0
-    *pSizeField = previousDataSize;
-
-    // Out pData and pSize fields pointers
-    *ppDataField = pData;
-    *ppSizeField = pSizeField;
 
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(SOPC_DoubleBuffer* p,
-                                                uint32_t idBuffer,
-                                                uint32_t offset,
+                                                size_t idBuffer,
+                                                size_t offset,
                                                 uint8_t* data,
-                                                uint32_t size,
-                                                uint32_t* pWrittenSize,
+                                                size_t size,
+                                                size_t* pWrittenSize,
                                                 bool ignorePrevious,
                                                 bool ignoreAfter)
 {
-    if (NULL == p || NULL == pWrittenSize || idBuffer >= p->nbBuffers || (NULL == data && size > 0))
+    if (NULL == p || (NULL == data && size > 0))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint32_t newSize = size + offset;
-    if (newSize > p->eltSizeInBytes - sizeof(uint32_t))
+    assert(idBuffer < p->nbElems);
+
+    if (offset + size > p->elemSize)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    uint8_t* pPreviousData = NULL;
-    uint8_t* pStartPreviousElt = NULL;
-    uint32_t previousSize = 0;
+    size_t writtenSize = size;
 
-    uint32_t bufferStatus = (p->pBufferStatus[idBuffer] + 1) % 2;
-    uint8_t* pStartElt = p->doubleBuffer + bufferStatus * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes;
-    uint8_t* pData = pStartElt + sizeof(uint32_t);
-
-    // If previous record not ignored, data of previous record between 0 and offset are copied into new record
-    if (!ignorePrevious)
+    /* Copy the start of the last committed buffer */
+    if (!ignorePrevious && offset > 0)
     {
-        pStartPreviousElt = p->doubleBuffer + p->pBufferStatus[p->lastRecord] * p->bufferSizeInBytes +
-                            p->lastRecord * p->eltSizeInBytes;
-        previousSize = *((uint32_t*) pStartPreviousElt);
-        pPreviousData = pStartPreviousElt + sizeof(uint32_t);
-    }
-    else
-    {
-        pStartPreviousElt = pStartElt;
-        pPreviousData = pData;
-        previousSize = *((uint32_t*) pStartElt);
+        memcpy(get_buffer_ptr(p, idBuffer, true), get_buffer_ptr(p, p->iLastWritten, false), offset);
+        writtenSize += offset;
     }
 
-    // From 0 to offset, copy old to new
-    for (uint32_t i = 0; i < offset; i++)
+    memcpy(get_buffer_ptr(p, idBuffer, true) + offset, data, size);
+
+    /* Also copy the end of the last committed buffer */
+    size_t remaining = p->elemSize - size - offset;
+    if (!ignoreAfter && remaining > 0)
     {
-        *pData = *pPreviousData;
-        pData++;
-        pPreviousData++;
+        memcpy(get_buffer_ptr(p, idBuffer, true) + offset + size,
+               get_buffer_ptr(p, p->iLastWritten, false) + offset + size, remaining);
+        writtenSize += remaining;
     }
 
-    // From offset to offset + size, copy new data
-    for (uint32_t i = offset; i < newSize; i++)
+    /* Return total written size */
+    if (NULL != pWrittenSize)
     {
-        *pData = *data;
-        pData++;
-        pPreviousData++;
-        data++;
+        *pWrittenSize = writtenSize;
     }
-
-    // If ignore after is not set, data after offset + size are copied from previous record if exist.
-    if (ignoreAfter == false)
-    {
-        // From newSize to previousSize
-        for (uint32_t i = newSize; i < previousSize; i++)
-        {
-            *pData = *pPreviousData;
-            pData++;
-            pPreviousData++;
-        }
-
-        // If not enough data, new size is used.
-        *((uint32_t*) pStartElt) = previousSize > newSize ? previousSize : newSize;
-    }
-    else
-    {
-        *((uint32_t*) pStartElt) = newSize;
-    }
-
-    // Return total size of record
-
-    *pWrittenSize = *((uint32_t*) pStartElt);
 
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer)
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, size_t* pIdBuffer)
 {
     if (NULL == p || NULL == pIdBuffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    // Get last record
-    uint32_t idBuffer = 0;
-    bool result = false;
-    uint32_t currentValue = 0;
-    uint32_t newValue = 0;
+    /* TODO: the following operations should be finished before the next GetWriter call,
+     * as it will modify the readersCount of an element of the double buffer */
+    size_t idBuffer = p->iLastWritten;
 
-    __atomic_load(&p->lastRecord, &idBuffer, __ATOMIC_SEQ_CST);
-
-    do
-    {
-        // Load current counter and atomic increment it if possible
-        __atomic_load(&p->pReadersCounter[idBuffer], &currentValue, __ATOMIC_SEQ_CST);
-        newValue = currentValue;
-        if (currentValue < p->nbBuffers)
-        {
-            newValue = currentValue + 1;
-        }
-        else
-        {
-            newValue = currentValue;
-        }
-
-        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], &currentValue, &newValue, false,
-                                           __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-    } while (!result);
+    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayElems[idBuffer].readersCount, 1);
+    /* TODO: The limit of p->nbElems seems rather unjustified, but this was the previous behavior */
+    /* TODO: Have an atomic Get/Set/Add on size_t to avoid tedious casts */
+    assert(prevCount + 1 >= 0 && (size_t)(prevCount + 1) <= p->nbElems - 1 &&
+           "Double buffer array in inconsistent state because of too much readers, cannot proceed");
 
     // Return buffer
     *pIdBuffer = idBuffer;
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,
-                                                  uint32_t idBuffer,
-                                                  uint8_t** pData,
-                                                  uint32_t* pDataToRead)
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p, size_t idBuffer, uint8_t** ppData)
 {
-    if (NULL == p || NULL == pDataToRead || idBuffer >= p->nbBuffers || NULL == pData)
+    if (NULL == p || NULL == ppData)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    assert(idBuffer < p->nbElems);
 
-    // Get buffer status R1 or R2
-    uint32_t bufferStatus = 0;
-
-    __atomic_load(&p->pBufferStatus[idBuffer], &bufferStatus, __ATOMIC_SEQ_CST);
-
-    bufferStatus = bufferStatus % 2;
-
-    uint8_t* pStartElt =
-        p->doubleBuffer + bufferStatus * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes + sizeof(uint32_t);
-
-    uint32_t sizeOfRecord = *((uint32_t*) (pStartElt - sizeof(uint32_t)));
-
-    *pData = pStartElt;
-    *pDataToRead = sizeOfRecord;
+    /* TODO: Write should not be possible on this element while Ptr is potentially in use */
+    *ppData = get_buffer_ptr(p, idBuffer, false);
 
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p,
-                                               uint32_t idBuffer,
-                                               uint32_t offset,
+                                               size_t idBuffer,
+                                               size_t offset,
                                                uint8_t* data,
-                                               uint32_t sizeRequest,
-                                               uint32_t* pReadData)
+                                               size_t size,
+                                               size_t* pReadSize)
 {
-    if (NULL == p || NULL == pReadData || idBuffer >= p->nbBuffers || NULL == data)
+    if (NULL == p || NULL == data)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint32_t bufferStatus = 0;
+    assert(idBuffer < p->nbElems);
 
-    __atomic_load(&p->pBufferStatus[idBuffer], &bufferStatus, __ATOMIC_SEQ_CST);
-
-    bufferStatus = bufferStatus % 2;
-
-    uint8_t* pStartElt = p->doubleBuffer + bufferStatus * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes;
-    uint32_t sizeOfRecord = *((uint32_t*) (pStartElt));
-
-    if (offset >= sizeOfRecord)
-    {
-        *pReadData = 0;
-        return SOPC_STATUS_OK;
-    }
-
-    // Size to return
-    uint32_t sizeToReturn = sizeOfRecord - offset;
-    sizeToReturn = sizeToReturn < sizeRequest ? sizeToReturn : sizeRequest;
-
-    // Data to read
-    uint8_t* pData = pStartElt + sizeof(uint32_t) + offset;
-
-    for (uint32_t i = 0; i < sizeToReturn && i < sizeRequest; i++)
-    {
-        *data = *pData;
-        pData++;
-        data++;
-    }
-
-    // Return nb bytes read
-    *pReadData = sizeToReturn;
-
-    return SOPC_STATUS_OK;
-}
-
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer)
-{
-    if (NULL == p || NULL == pIdBuffer)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    uint32_t idBuffer = *pIdBuffer;
-    if (idBuffer >= p->nbBuffers)
+    if (offset + size > p->elemSize)
     {
         return SOPC_STATUS_NOK;
     }
 
-    // Atomically decrement reader counter for current row
-    bool result = false;
-    uint32_t currentValue = 0;
-    uint32_t newValue = 0;
-    do
+    size_t remaining = p->elemSize - offset;
+    memcpy(data, get_buffer_ptr(p, idBuffer, false) + offset, remaining);
+
+    // Return nb bytes read
+    if (NULL != pReadSize)
     {
-        __atomic_load(&p->pReadersCounter[idBuffer], &currentValue, __ATOMIC_SEQ_CST);
+        *pReadSize = remaining;
+    }
 
-        newValue = currentValue;
-        if (currentValue > 0)
-        {
-            newValue = currentValue - 1;
-        }
-        else
-        {
-            newValue = currentValue;
-        }
-        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], &currentValue, &newValue, false,
-                                           __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    return SOPC_STATUS_OK;
+}
 
-    } while (!result);
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, size_t idBuffer)
+{
+    if (NULL == p)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    assert(idBuffer < p->nbElems);
 
-    *pIdBuffer = UINT32_MAX;
+    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayElems[idBuffer].readersCount, -1);
+    assert(prevCount - 1 >= 0 &&
+           "Double buffer array in inconsistent state because more readers were released than got, cannot proceed");
+
     return SOPC_STATUS_OK;
 }
