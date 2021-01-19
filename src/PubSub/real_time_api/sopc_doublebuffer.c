@@ -28,8 +28,8 @@ struct SOPC_DoubleBuffer
                              //!< on 4 bytes.
     uint32_t bufferSizeInBytes; //!< Equal to eltsize * number of concurrent readers
     uint32_t nbBuffers;         //!< Number of readers
-    uint32_t lastRecord; //!< Last row writed, between 0 and nbBuffers - 1. pBufferStatus indicate if row 0 or row 1 has
-                         //!< been writed.
+    uint32_t lastRecord; //!< Last written row, between 0 and nbBuffers - 1. pBufferStatus indicate if row 0 or row 1
+                         //!< has been written.
     uint32_t* pReadersCounter; //!< Indicate for each row how readers are reading it
     uint32_t* pBufferStatus;   //!< Indicate for each row if row 0 or row 1 is the most up to date
     uint8_t* doubleBuffer;     //!< Double buffer
@@ -40,8 +40,7 @@ struct SOPC_DoubleBuffer
     */
 };
 
-SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders,       //
-                                            uint32_t atomic_elt_size) //
+SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders, uint32_t atomic_elt_size)
 {
     int result = 0;
     SOPC_DoubleBuffer* pBuffer = (SOPC_DoubleBuffer*) SOPC_Malloc(sizeof(SOPC_DoubleBuffer));
@@ -54,11 +53,8 @@ SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(uint32_t nbReaders,       //
     uint64_t nbBuffers = nbReaders + 1;
 
     // Calculates real elt size (aligned on 4 bytes)
-    uint64_t eltSizeInBytes = (                                   //
-        (atomic_elt_size + sizeof(uint32_t)) +                    // Elt size + field size
-        sizeof(uint32_t) -                                        // Increment of nb bytes to align on size of uint32_t
-        (atomic_elt_size + sizeof(uint32_t)) % (sizeof(uint32_t)) //
-    );                                                            //
+    size_t eltSizeInBytes = ((atomic_elt_size + sizeof(uint32_t)) + sizeof(uint32_t) -
+                             (atomic_elt_size + sizeof(uint32_t)) % (sizeof(uint32_t)));
 
     // Calculates for one status buffer size
     uint64_t bufferSizeInBytes = nbBuffers * eltSizeInBytes;
@@ -117,20 +113,18 @@ void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** p)
     }
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, //
-                                                   uint32_t* pIdBuffer,  //
-                                                   uint32_t* pMaxSize)   //
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer, uint32_t* pMaxSize)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    if (NULL == p || pIdBuffer == NULL)
+    if (NULL == p || NULL == pIdBuffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     uint32_t idBufferToWrite = UINT32_MAX;
     uint32_t readCounter = 0;
-    for (uint32_t i = 0; i < p->nbBuffers && UINT32_MAX == idBufferToWrite; i++)
+    for (uint32_t i = 0; i < p->nbBuffers && UINT32_MAX == idBufferToWrite; i++) /* TODO: don't write to i=0 */
     {
         __atomic_load(&p->pReadersCounter[(i + p->lastRecord) % p->nbBuffers], &readCounter, __ATOMIC_SEQ_CST);
         if (0 == readCounter)
@@ -144,9 +138,9 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, //
         result = SOPC_STATUS_NOK;
     }
 
-    if (pMaxSize != NULL)
+    if (NULL != pMaxSize)
     {
-        *pMaxSize = (uint32_t)(p->eltSizeInBytes - sizeof(uint32_t));
+        *pMaxSize = (uint32_t)(p->eltSizeInBytes - sizeof(uint32_t)); /* TODO: does not change */
     }
     *pIdBuffer = idBufferToWrite;
     return result;
@@ -179,28 +173,32 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, //
-                                                     uint32_t idBuffer)    //
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferErase(SOPC_DoubleBuffer* p, uint32_t idBuffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == p || idBuffer >= p->nbBuffers)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint8_t* pStartElt = p->doubleBuffer +                                               //
-                         ((p->pBufferStatus[idBuffer] + 1) % 2) * p->bufferSizeInBytes + //
-                         idBuffer * p->eltSizeInBytes;                                   //
+    uint8_t* pStartElt =
+        p->doubleBuffer + ((p->pBufferStatus[idBuffer] + 1) % 2) * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes;
 
     memset(pStartElt, 0, p->eltSizeInBytes);
     return result;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(
-    SOPC_DoubleBuffer* p,   // DBO object
-    uint32_t idBuffer,      // Buffer identifier
-    uint8_t** ppDataField,  // Pointer on data field
-    uint32_t** ppSizeField, // Pointer on size field
-    bool ignorePrevious)    // Copy last updated value of DBO on output ptr
+/**
+ * \param p               DBO object
+ * \param idBuffer        Buffer identifier
+ * \param ppDataField     Pointer on data field
+ * \param ppSizeField     Pointer on size field
+ * \param ignorePrevious  Copy last updated value of DBO on output ptr
+ */
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(SOPC_DoubleBuffer* p,
+                                                      uint32_t idBuffer,
+                                                      uint8_t** ppDataField,
+                                                      uint32_t** ppSizeField,
+                                                      bool ignorePrevious)
 {
     if (NULL == p || idBuffer >= p->nbBuffers || NULL == ppDataField || NULL == ppSizeField)
     {
@@ -227,10 +225,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(
     // Duplicate previous data or not
     if (!ignorePrevious)
     {
-        pPreviousData = p->doubleBuffer +                                        //
-                        p->pBufferStatus[p->lastRecord] * p->bufferSizeInBytes + //
-                        p->lastRecord * p->eltSizeInBytes +                      //
-                        sizeof(uint32_t);                                        //
+        pPreviousData = p->doubleBuffer + p->pBufferStatus[p->lastRecord] * p->bufferSizeInBytes +
+                        p->lastRecord * p->eltSizeInBytes + sizeof(uint32_t);
 
         previousDataSize = *((uint32_t*) ((pPreviousData - sizeof(uint32_t))));
 
@@ -250,16 +246,16 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBufferGetPtr(
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(SOPC_DoubleBuffer* p,   //
-                                                uint32_t idBuffer,      //
-                                                uint32_t offset,        //
-                                                uint8_t* data,          //
-                                                uint32_t size,          //
-                                                uint32_t* pWrittenSize, //
-                                                bool ignorePrevious,    //
-                                                bool ignoreAfter)       //
+SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(SOPC_DoubleBuffer* p,
+                                                uint32_t idBuffer,
+                                                uint32_t offset,
+                                                uint8_t* data,
+                                                uint32_t size,
+                                                uint32_t* pWrittenSize,
+                                                bool ignorePrevious,
+                                                bool ignoreAfter)
 {
-    if (NULL == p || NULL == pWrittenSize || idBuffer >= p->nbBuffers || ((NULL == data) && (size > 0)))
+    if (NULL == p || NULL == pWrittenSize || idBuffer >= p->nbBuffers || (NULL == data && size > 0))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -335,8 +331,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_WriteBuffer(SOPC_DoubleBuffer* p,   //
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, //
-                                                  uint32_t* pIdBuffer)  //
+SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer)
 {
     if (NULL == p || NULL == pIdBuffer)
     {
@@ -364,11 +359,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, //
             newValue = currentValue;
         }
 
-        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], //
-                                           &currentValue,                 //
-                                           &newValue,                     //
-                                           false, __ATOMIC_SEQ_CST,
-                                           __ATOMIC_SEQ_CST); //
+        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], &currentValue, &newValue, false,
+                                           __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     } while (!result);
 
     // Return buffer
@@ -376,10 +368,10 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, //
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  //
-                                                  uint32_t idBuffer,     //
-                                                  uint8_t** pData,       //
-                                                  uint32_t* pDataToRead) //
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,
+                                                  uint32_t idBuffer,
+                                                  uint8_t** pData,
+                                                  uint32_t* pDataToRead)
 {
     if (NULL == p || NULL == pDataToRead || idBuffer >= p->nbBuffers || NULL == pData)
     {
@@ -389,15 +381,12 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  //
     // Get buffer status R1 or R2
     uint32_t bufferStatus = 0;
 
-    __atomic_load(&p->pBufferStatus[idBuffer], //
-                  &bufferStatus,               //
-                  __ATOMIC_SEQ_CST);           //
+    __atomic_load(&p->pBufferStatus[idBuffer], &bufferStatus, __ATOMIC_SEQ_CST);
 
     bufferStatus = bufferStatus % 2;
 
-    uint8_t* pStartElt = p->doubleBuffer +                                //
-                         bufferStatus * p->bufferSizeInBytes +            //
-                         idBuffer * p->eltSizeInBytes + sizeof(uint32_t); //
+    uint8_t* pStartElt =
+        p->doubleBuffer + bufferStatus * p->bufferSizeInBytes + idBuffer * p->eltSizeInBytes + sizeof(uint32_t);
 
     uint32_t sizeOfRecord = *((uint32_t*) (pStartElt - sizeof(uint32_t)));
 
@@ -407,12 +396,12 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBufferPtr(SOPC_DoubleBuffer* p,  //
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p, //
-                                               uint32_t idBuffer,    //
-                                               uint32_t offset,      //
-                                               uint8_t* data,        //
-                                               uint32_t sizeRequest, //
-                                               uint32_t* pReadData)  //
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p,
+                                               uint32_t idBuffer,
+                                               uint32_t offset,
+                                               uint8_t* data,
+                                               uint32_t sizeRequest,
+                                               uint32_t* pReadData)
 {
     if (NULL == p || NULL == pReadData || idBuffer >= p->nbBuffers || NULL == data)
     {
@@ -453,8 +442,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReadBuffer(SOPC_DoubleBuffer* p, //
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, //
-                                                      uint32_t* pIdBuffer)  //
+SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, uint32_t* pIdBuffer)
 {
     if (NULL == p || NULL == pIdBuffer)
     {
@@ -472,9 +460,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, //
     uint32_t newValue = 0;
     do
     {
-        __atomic_load(&p->pReadersCounter[idBuffer], //
-                      &currentValue,                 //
-                      __ATOMIC_SEQ_CST);             //
+        __atomic_load(&p->pReadersCounter[idBuffer], &currentValue, __ATOMIC_SEQ_CST);
 
         newValue = currentValue;
         if (currentValue > 0)
@@ -485,12 +471,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, //
         {
             newValue = currentValue;
         }
-        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], //
-                                           &currentValue,                 //
-                                           &newValue,                     //
-                                           false,                         //
-                                           __ATOMIC_SEQ_CST,              //
-                                           __ATOMIC_SEQ_CST);             //
+        result = __atomic_compare_exchange(&p->pReadersCounter[idBuffer], &currentValue, &newValue, false,
+                                           __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     } while (!result);
 
