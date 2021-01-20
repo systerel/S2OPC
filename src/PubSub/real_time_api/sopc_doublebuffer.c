@@ -36,31 +36,6 @@ typedef struct SOPC_DbleBufElem
     /* To reduce the number of calls to malloc, banks are stored in an array inside the double buffer array */
 } SOPC_DbleBufElem;
 
-/** \brief An array of double buffers of configurable size with a single writer but multiple readers
- *
- * Elements are each a double buffer with two banks of the given size.
- * The array works as follows.
- *
- * On the writer side, the `SOPC_DoubleBuffer_GetWriteBuffer` is called to find in which cell it is possible to write.
- * With the return index,
- * it is possible to write with `SOPC_DoubleBuffer_WriteBuffer` or `SOPC_DoubleBuffer_WriteBufferGetPtr`.
- * The index must be released with `SOPC_DoubleBuffer_ReleaseWriteBuffer` (which commits the write).
- * `SOPC_DoubleBuffer_GetWriteBuffer` should not be called a second time before the first index has been released.
- *
- * On the reader side, any thread can call `SOPC_DoubleBuffer_GetReadBuffer`
- * to obtain an index towards the most recently written element of the array.
- * `SOPC_DoubleBuffer_ReadBuffer` and `SOPC_DoubleBuffer_ReadBufferPtr` are used obtain data stored in the element.
- * The index must be released with `SOPC_DoubleBuffer_ReleaseReadBuffer` as soon as possible,
- * as writes cannot be made in this element while it is read.
- * Hence, keeping the index may lead to a deprivation of writable elements.
- *
- * \note Upon Write, the functions are capable of retrieving the current "last value",
- *       meaning that it is possible to update the lastly written value
- *       (this is possible because the writers are not concurrent)
- *
- * \warning Writer functions are not thread safe and should not be called concurrently
- * \warning The structure should not be destroyed while in use
- */
 struct SOPC_DoubleBuffer
 {
     size_t nbElems;
@@ -181,6 +156,8 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, siz
 
     /* Commit the changes: switch the currently readable bank */
     /* TODO: Lock before all the following reads and updates */
+    /* TODO: The previous documentation stated that this function may not be called when one cancels the write,
+     *  which must be taken into account before modifying this function */
     if (0 < p->arrayElems[idBuffer].readersCount)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
@@ -191,7 +168,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, siz
     p->arrayElems[idBuffer].bankB = !p->arrayElems[idBuffer].bankB;
     p->iLastWritten = idBuffer;
 
-    /* TODO: count Get-Release */
+    /* TODO: count Get-Release and identify if cancels are really used */
     return SOPC_STATUS_OK;
 }
 
