@@ -100,8 +100,8 @@ static inline eSubscriberSyncStatus _SOPC_RT_Subscriber_DecrementInUseStatus(SOP
 /// @param [inout] in_out_sub RT Subscriber object
 /// @param [in] in_init RT Subscriber initializer object
 /// @return SOPC_STATUS_OK if successful.
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,           //
-                                                               SOPC_RT_Subscriber_Initializer* in_init); //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,
+                                                               SOPC_RT_Subscriber_Initializer* in_init);
 
 /// @brief DeInitialize RT Subscriber object without API concurrent accesses protection.
 /// @param [inout] in_out_sub RT Subscriber object to deinitialize
@@ -243,8 +243,7 @@ void SOPC_RT_Subscriber_Destroy(SOPC_RT_Subscriber** in_out_sub)
     }
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,          //
-                                                SOPC_RT_Subscriber_Initializer* in_init) //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, SOPC_RT_Subscriber_Initializer* in_init)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -255,12 +254,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, 
 
     eSubscriberSyncStatus expectedStatus = E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED;
     eSubscriberSyncStatus desiredStatus = E_SUBSCRIBER_SYNC_STATUS_INITIALIZING;
-    bool bTransition = __atomic_compare_exchange(&in_out_sub->status, //
-                                                 &expectedStatus,     //
-                                                 &desiredStatus,      //
-                                                 false,               //
-                                                 __ATOMIC_SEQ_CST,    //
-                                                 __ATOMIC_SEQ_CST);   //
+    bool bTransition = __atomic_compare_exchange(&in_out_sub->status, &expectedStatus, &desiredStatus, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
@@ -277,9 +272,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub, 
             __atomic_store(&in_out_sub->status, &desiredStatus, __ATOMIC_SEQ_CST);
         }
     }
-    else if (E_SUBSCRIBER_SYNC_STATUS_INITIALIZING == expectedStatus ||   //
-             E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING == expectedStatus || //
-             E_SUBSCRIBER_SYNC_STATUS_LOCKED <= expectedStatus)           //
+    else if (E_SUBSCRIBER_SYNC_STATUS_INITIALIZING == expectedStatus ||
+             E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
+             E_SUBSCRIBER_SYNC_STATUS_LOCKED <= expectedStatus)
     {
         result = SOPC_STATUS_INVALID_STATE;
     }
@@ -302,12 +297,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
 
     eSubscriberSyncStatus expectedStatus = E_SUBSCRIBER_SYNC_STATUS_INITIALIZED;
     eSubscriberSyncStatus desiredStatus = E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING;
-    bool bTransition = __atomic_compare_exchange(&in_out_sub->status, //
-                                                 &expectedStatus,     //
-                                                 &desiredStatus,      //
-                                                 false,               //
-                                                 __ATOMIC_SEQ_CST,    //
-                                                 __ATOMIC_SEQ_CST);   //
+    bool bTransition = __atomic_compare_exchange(&in_out_sub->status, &expectedStatus, &desiredStatus, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
@@ -316,9 +307,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
         desiredStatus = E_SUBSCRIBER_SYNC_STATUS_NOT_INITIALIZED;
         __atomic_store(&in_out_sub->status, &desiredStatus, __ATOMIC_SEQ_CST);
     }
-    else if (E_SUBSCRIBER_SYNC_STATUS_INITIALIZING == expectedStatus ||   //
-             E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING == expectedStatus || //
-             E_SUBSCRIBER_SYNC_STATUS_LOCKED <= expectedStatus)           //
+    else if (E_SUBSCRIBER_SYNC_STATUS_INITIALIZING == expectedStatus ||
+             E_SUBSCRIBER_SYNC_STATUS_DEINITIALIZING == expectedStatus ||
+             E_SUBSCRIBER_SYNC_STATUS_LOCKED <= expectedStatus)
     {
         result = SOPC_STATUS_INVALID_STATE;
     }
@@ -330,8 +321,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
     return result;
 }
 
-SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep, //
-                                                                      void* pGlobalContext)        //
+SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep, void* pGlobalContext)
 {
     if (NULL == cbStep)
     {
@@ -374,24 +364,18 @@ void SOPC_RT_Subscriber_Initializer_Destroy(SOPC_RT_Subscriber_Initializer** in_
     }
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(SOPC_RT_Subscriber_Initializer* in_out_init, //
-                                                          uint32_t in_max_evts,                        //
-                                                          uint32_t in_max_data,                        //
-                                                          SOPC_Pin_Access in_scanmode,                 //
-                                                          void* in_input_context,                      //
-                                                          uint32_t* out_pin)                           //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(SOPC_RT_Subscriber_Initializer* in_out_init,
+                                                          uint32_t in_max_evts,
+                                                          uint32_t in_max_data,
+                                                          SOPC_Pin_Access in_scanmode,
+                                                          void* in_input_context,
+                                                          uint32_t* out_pin)
 
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init,           //
-                                                    1,                     //
-                                                    in_max_evts,           //
-                                                    in_max_data,           //
-                                                    SOPC_PIN_DIRECTION_IN, //
-                                                    in_scanmode,           //
-                                                    in_input_context,      //
-                                                    out_pin);              //
+    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init, 1, in_max_evts, in_max_data, SOPC_PIN_DIRECTION_IN,
+                                                    in_scanmode, in_input_context, out_pin);
 
     return result;
 }
@@ -406,21 +390,15 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init,              //
-                                                    in_max_clients,           //
-                                                    in_max_evts,              //
-                                                    in_max_data,              //
-                                                    SOPC_PIN_DIRECTION_OUT,   //
-                                                    SOPC_PIN_MODE_GET_NORMAL, // Not used
-                                                    NULL,                     // Not used
-                                                    out_pin);                 //
+    result = _SOPC_RT_Subscriber_Initializer_AddPin(in_out_init, in_max_clients, in_max_evts, in_max_data,
+                                                    SOPC_PIN_DIRECTION_OUT, SOPC_PIN_MODE_GET_NORMAL, NULL, out_pin);
 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* in_sub, //
-                                                            uint32_t in_pin,            //
-                                                            uint32_t* out_token)        //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* in_sub,
+                                                            uint32_t in_pin,
+                                                            size_t* out_token)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == out_token)
@@ -432,10 +410,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub,                 //
-                                                         SOPC_PIN_DIRECTION_OUT, //
-                                                         in_pin,                 //
-                                                         out_token);             //
+        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin, out_token);
 
         // Do not restore previous state. Mark as "in use" until that finalize call.
         if (SOPC_STATUS_OK == result)
@@ -456,13 +431,13 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
-                                                 uint32_t in_pin,             //
-                                                 uint32_t in_clt,             //
-                                                 uint32_t in_token,           //
-                                                 SOPC_Pin_Access in_scanmode, //
-                                                 uint8_t** out_pData,         //
-                                                 uint32_t* out_size)          //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,
+                                                 uint32_t in_pin,
+                                                 uint32_t in_clt,
+                                                 size_t in_token,
+                                                 SOPC_Pin_Access in_scanmode,
+                                                 uint8_t** out_pData,
+                                                 uint32_t* out_size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == out_pData || NULL == out_size)
@@ -474,14 +449,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_Read(in_sub,                 //
-                                              SOPC_PIN_DIRECTION_OUT, //
-                                              in_pin,                 //
-                                              in_clt,                 //
-                                              in_token,               //
-                                              in_scanmode,            //
-                                              out_pData,              //
-                                              out_size);              //
+        result = _SOPC_RT_Subscriber_Pin_Read(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin, in_clt, in_token, in_scanmode,
+                                              out_pData, out_size);
 
         _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
@@ -507,10 +476,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_Read_Finalize(in_sub,                 //
-                                                       SOPC_PIN_DIRECTION_OUT, //
-                                                       in_pin,                 //
-                                                       in_out_token);          //
+        result = _SOPC_RT_Subscriber_Pin_Read_Finalize(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin, in_out_token);
 
         if (SOPC_STATUS_OK == result)
         {
@@ -530,10 +496,10 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, //
-                                                 uint32_t in_pin,            //
-                                                 uint8_t* in_data,           //
-                                                 uint32_t in_size)           //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub,
+                                                 uint32_t in_pin,
+                                                 uint8_t* in_data,
+                                                 uint32_t in_size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || in_data == NULL || in_size < 1)
@@ -545,11 +511,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, //
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_Write(in_sub,                //
-                                               SOPC_PIN_DIRECTION_IN, //
-                                               in_pin,                //
-                                               in_data,               //
-                                               in_size);              //
+        result = _SOPC_RT_Subscriber_Pin_Write(in_sub, SOPC_PIN_DIRECTION_IN, in_pin, in_data, in_size);
 
         _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
@@ -561,10 +523,10 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
-                                                  uint32_t in_pin,            //
-                                                  uint8_t* in_data,           //
-                                                  uint32_t in_size)           //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub,
+                                                  uint32_t in_pin,
+                                                  uint8_t* in_data,
+                                                  uint32_t in_size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || in_data == NULL || in_size < 1)
@@ -576,11 +538,7 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_Write(in_sub,                 //
-                                               SOPC_PIN_DIRECTION_OUT, //
-                                               in_pin,                 //
-                                               in_data,                //
-                                               in_size);               //
+        result = _SOPC_RT_Subscriber_Pin_Write(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin, in_data, in_size);
 
         _SOPC_RT_Subscriber_DecrementInUseStatus(in_sub);
     }
@@ -592,9 +550,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,      //
-                                                                      uint32_t in_pin,                 //
-                                                                      SOPC_Buffer* in_out_sopc_buffer) //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                      uint32_t in_pin,
+                                                                      SOPC_Buffer* in_out_sopc_buffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL != in_out_sopc_buffer->data)
@@ -606,10 +564,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Su
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub,                 //
-                                                                   SOPC_PIN_DIRECTION_OUT, //
-                                                                   in_pin,                 //
-                                                                   in_out_sopc_buffer);    //
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin,
+                                                                   in_out_sopc_buffer);
 
         // Do not restore previous state. Mark as "in use" until that finalize call.
         if (SOPC_STATUS_OK == result)
@@ -630,9 +586,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Su
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,      //
-                                                                     uint32_t in_pin,                 //
-                                                                     SOPC_Buffer* in_out_sopc_buffer) //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                     uint32_t in_pin,
+                                                                     SOPC_Buffer* in_out_sopc_buffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL != in_out_sopc_buffer->data)
@@ -644,10 +600,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Sub
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub,                //
-                                                                   SOPC_PIN_DIRECTION_IN, //
-                                                                   in_pin,                //
-                                                                   in_out_sopc_buffer);   //
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffer(in_sub, SOPC_PIN_DIRECTION_IN, in_pin,
+                                                                   in_out_sopc_buffer);
 
         // Do not restore previous state. Mark as "in use" until that finalize call.
         if (SOPC_STATUS_OK == result)
@@ -668,9 +622,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Sub
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,      //
-                                                                          uint32_t in_pin,                 //
-                                                                          SOPC_Buffer* in_out_sopc_buffer) //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                          uint32_t in_pin,
+                                                                          SOPC_Buffer* in_out_sopc_buffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL == in_out_sopc_buffer->data)
@@ -682,10 +636,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_R
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub,                 //
-                                                                       SOPC_PIN_DIRECTION_OUT, //
-                                                                       in_pin,                 //
-                                                                       in_out_sopc_buffer);    //
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub, SOPC_PIN_DIRECTION_OUT, in_pin,
+                                                                       in_out_sopc_buffer);
 
         if (SOPC_STATUS_OK == result)
         {
@@ -705,9 +657,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_R
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,      //
-                                                                         uint32_t in_pin,                 //
-                                                                         SOPC_Buffer* in_out_sopc_buffer) //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                         uint32_t in_pin,
+                                                                         SOPC_Buffer* in_out_sopc_buffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == in_out_sopc_buffer || NULL == in_out_sopc_buffer->data)
@@ -719,10 +671,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT
 
     if (status > E_SUBSCRIBER_SYNC_STATUS_INITIALIZED)
     {
-        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub,                //
-                                                                       SOPC_PIN_DIRECTION_IN, //
-                                                                       in_pin,                //
-                                                                       in_out_sopc_buffer);   //
+        result = _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(in_sub, SOPC_PIN_DIRECTION_IN, in_pin,
+                                                                       in_out_sopc_buffer);
 
         if (SOPC_STATUS_OK == result)
         {
@@ -775,7 +725,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t token = 0;
+    size_t token = 0;
     uint32_t size = 0;
     uint8_t* pData = NULL;
 
@@ -785,38 +735,23 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber
         size = 0;
         pData = NULL;
 
-        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub,                //
-                                                         SOPC_PIN_DIRECTION_IN, //
-                                                         pin,                   //
-                                                         &token);               //
+        result = _SOPC_RT_Subscriber_Pin_Read_Initialize(in_sub, SOPC_PIN_DIRECTION_IN, pin, &token);
 
         if (SOPC_STATUS_OK == result)
         {
             do
             {
-                result = _SOPC_RT_Subscriber_Pin_Read(in_sub,                        //
-                                                      SOPC_PIN_DIRECTION_IN,         //
-                                                      pin,                           //
-                                                      0,                             //
-                                                      token,                         //
-                                                      in_sub->inputs.pReadMode[pin], //
-                                                      &pData,                        //
-                                                      &size);                        //
+                result = _SOPC_RT_Subscriber_Pin_Read(in_sub, SOPC_PIN_DIRECTION_IN, pin, 0, token,
+                                                      in_sub->inputs.pReadMode[pin], &pData, &size);
 
                 if (pData != NULL && size > 0 && SOPC_STATUS_OK == result)
                 {
-                    result = in_sub->cbStep(in_sub,               //
-                                            in_sub->pUserContext, //
-                                            in_sub->inputs.ppContext[pin],
-                                            pin,   //
-                                            pData, //
-                                            size); //
+                    result =
+                        in_sub->cbStep(in_sub, in_sub->pUserContext, in_sub->inputs.ppContext[pin], pin, pData, size);
                 }
 
-            } while ((pData != NULL)                                                //
-                     && (size > 0)                                                  //
-                     && (SOPC_STATUS_OK == result)                                  //
-                     && (in_sub->inputs.pReadMode[pin] != SOPC_PIN_MODE_GET_LAST)); //
+            } while ((pData != NULL) && (size > 0) && (SOPC_STATUS_OK == result) &&
+                     (in_sub->inputs.pReadMode[pin] != SOPC_PIN_MODE_GET_LAST));
 
             _SOPC_RT_Subscriber_Pin_Read_Finalize(in_sub, SOPC_PIN_DIRECTION_IN, pin, &token);
         }
@@ -830,8 +765,8 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_HeartBeat(SOPC_RT_Subscriber
     return globalResult;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,          //
-                                                               SOPC_RT_Subscriber_Initializer* in_init) //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,
+                                                               SOPC_RT_Subscriber_Initializer* in_init)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (in_init->nbInputs < 1 || in_init->nbOutputs < 1 || in_init->cbStep == NULL)
@@ -904,9 +839,8 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscribe
         {
             in_out_sub->inputs.pReadMode[in_out_sub->inputs.nbInputs] = p->scanMode;
             in_out_sub->inputs.ppContext[in_out_sub->inputs.nbInputs] = p->inputContext;
-            in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs] = SOPC_MsgBox_Create(p->nbClients, //
-                                                                                         p->max_evts,  //
-                                                                                         p->max_data); //
+            in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs] =
+                SOPC_MsgBox_Create(p->nbClients, p->max_evts, p->max_data);
 
             in_out_sub->inputs.pDataHandle[in_out_sub->inputs.nbInputs] =
                 SOPC_MsgBox_DataHandle_Create(in_out_sub->inputs.pMsgBox[in_out_sub->inputs.nbInputs]);
@@ -927,9 +861,8 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscribe
         p = in_init->pOutputsList;
         while ((NULL != p) && (in_out_sub->outputs.nbOutputs < in_init->nbOutputs) && (SOPC_STATUS_OK == result))
         {
-            in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs] = SOPC_MsgBox_Create(p->nbClients, //
-                                                                                            p->max_evts,  //
-                                                                                            p->max_data); //
+            in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs] =
+                SOPC_MsgBox_Create(p->nbClients, p->max_evts, p->max_data);
 
             in_out_sub->outputs.pDataHandle[in_out_sub->outputs.nbOutputs] =
                 SOPC_MsgBox_DataHandle_Create(in_out_sub->outputs.pMsgBox[in_out_sub->outputs.nbOutputs]);
@@ -1066,9 +999,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffe
 
             if (SOPC_STATUS_OK == result)
             {
-                result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle,          //
-                                                           &buffer,              //
-                                                           &maximumAllowedSize); //
+                result = SOPC_MsgBox_DataHandle_GetDataEvt(pDataHandle, &buffer, &maximumAllowedSize);
             }
         }
 
@@ -1094,11 +1025,10 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_GetBuffe
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(
-    SOPC_RT_Subscriber* in_sub,      //
-    SOPC_Pin_Direction in_itf,       //
-    uint32_t in_pin,                 //
-    SOPC_Buffer* in_out_sopc_buffer) //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                                      SOPC_Pin_Direction in_itf,
+                                                                                      uint32_t in_pin,
+                                                                                      SOPC_Buffer* in_out_sopc_buffer)
 {
     if (NULL == in_sub || NULL == in_out_sopc_buffer || in_out_sopc_buffer->data == NULL)
     {
@@ -1148,8 +1078,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseB
         // Try to update data size
         bool bCancel = false;
 
-        result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle,                 //
-                                                          in_out_sopc_buffer->length); //
+        result = SOPC_MsgBox_DataHandle_UpdateDataEvtSize(pDataHandle, in_out_sopc_buffer->length);
 
         // Cancel commit in case of error
         if (SOPC_STATUS_OK == result)
@@ -1162,8 +1091,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseB
         }
 
         // Only result of finalize is returned. If pDataHandle is NULL, return INVALID_PARAM
-        result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, //
-                                                 bCancel);    //
+        result = SOPC_MsgBox_DataHandle_Finalize(pDataHandle, bCancel);
     }
 
     in_out_sopc_buffer->maximum_size = 0;
@@ -1176,11 +1104,11 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_WriteDataHandle_ReleaseB
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber* in_sub, //
-                                                              SOPC_Pin_Direction in_itf,  //
-                                                              uint32_t in_pin,            //
-                                                              uint8_t* in_data,           //
-                                                              uint32_t in_size)           //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber* in_sub,
+                                                              SOPC_Pin_Direction in_itf,
+                                                              uint32_t in_pin,
+                                                              uint8_t* in_data,
+                                                              uint32_t in_size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -1227,9 +1155,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber
 
     if (SOPC_STATUS_OK == result)
     {
-        result = SOPC_MsgBox_Push(pMsgBox,  //
-                                  in_data,  //
-                                  in_size); //
+        result = SOPC_MsgBox_Push(pMsgBox, in_data, in_size);
     }
 
     return result;
@@ -1286,21 +1212,20 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(SOPC_RT_
 
     if (SOPC_STATUS_OK == result)
     {
-        result = SOPC_MsgBox_Pop_Initialize(pMsgBox,    //
-                                            out_token); //
+        result = SOPC_MsgBox_Pop_Initialize(pMsgBox, out_token);
     }
 
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber* in_pSub, //
-                                                             SOPC_Pin_Direction in_itf,   //
-                                                             uint32_t in_pin,             //
-                                                             uint32_t in_clt,             //
-                                                             uint32_t in_token,           //
-                                                             SOPC_Pin_Access in_mode,     //
-                                                             uint8_t** out_pData,         //
-                                                             uint32_t* out_size)          //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber* in_pSub,
+                                                             SOPC_Pin_Direction in_itf,
+                                                             uint32_t in_pin,
+                                                             uint32_t in_clt,
+                                                             size_t in_token,
+                                                             SOPC_Pin_Access in_mode,
+                                                             uint8_t** out_pData,
+                                                             uint32_t* out_size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -1349,13 +1274,8 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber*
     if (SOPC_STATUS_OK == result)
     {
         uint32_t nbPendingsEvents = 0;
-        result = SOPC_MsgBox_Pop_GetEvtPtr(pMsgBox,                     //
-                                           in_token,                    //
-                                           in_clt,                      //
-                                           out_pData,                   //
-                                           out_size,                    //
-                                           &nbPendingsEvents,           //
-                                           (SOPC_MsgBox_Mode) in_mode); //
+        result = SOPC_MsgBox_Pop_GetEvtPtr(pMsgBox, in_token, in_clt, out_pData, out_size, &nbPendingsEvents,
+                                           (SOPC_MsgBox_Mode) in_mode);
     }
     return result;
 }
@@ -1410,21 +1330,20 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(SOPC_RT_Su
     }
     if (SOPC_STATUS_OK == result)
     {
-        result = SOPC_MsgBox_Pop_Finalize(pMsgBox,       //
-                                          in_out_token); //
+        result = SOPC_MsgBox_Pop_Finalize(pMsgBox, in_out_token);
     }
 
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initializer_AddPin(SOPC_RT_Subscriber_Initializer* in_out_init, //
-                                                                       uint32_t in_max_clients,                     //
-                                                                       uint32_t in_max_evts,                        //
-                                                                       uint32_t in_max_data,                        //
-                                                                       SOPC_Pin_Direction in_mode,                  //
-                                                                       SOPC_Pin_Access in_scanmode,                 //
-                                                                       void* in_input_context,                      //
-                                                                       uint32_t* out_pinNumber)                     //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Initializer_AddPin(SOPC_RT_Subscriber_Initializer* in_out_init,
+                                                                       uint32_t in_max_clients,
+                                                                       uint32_t in_max_evts,
+                                                                       uint32_t in_max_data,
+                                                                       SOPC_Pin_Direction in_mode,
+                                                                       SOPC_Pin_Access in_scanmode,
+                                                                       void* in_input_context,
+                                                                       uint32_t* out_pinNumber)
 
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;

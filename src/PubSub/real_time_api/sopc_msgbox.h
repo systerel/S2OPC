@@ -69,9 +69,7 @@ typedef struct SOPC_MsgBox_DataHandle SOPC_MsgBox_DataHandle;
 /// @param [in] max_evts Max events to manage writer burst.
 /// @param [in] max_data_evt max cumulative data in bytes
 /// @return NULL if invalid parameters or not enough memory. Else SOPC_MsgBox object.
-SOPC_MsgBox* SOPC_MsgBox_Create(uint32_t max_clients,   //
-                                uint32_t max_evts,      //
-                                uint32_t max_data_evt); //
+SOPC_MsgBox* SOPC_MsgBox_Create(uint32_t max_clients, uint32_t max_evts, uint32_t max_data_evt);
 
 /// @brief Message Box Destruction
 /// @param [inout] ppMsgBox Message box handle to destroy. Set to NULL after free.
@@ -85,9 +83,7 @@ void SOPC_MsgBox_Destroy(SOPC_MsgBox** ppMsgBox);
 /// @return SOPC_STATUS_OK if data well pushed.
 /// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
 /// SOPC_STATUS_NOK in case of invalid parameters : size is 0 or data is null pointer
-SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, //
-                                   uint8_t* data,        //
-                                   uint32_t size);       //
+SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, uint8_t* data, uint32_t size);
 
 /// @brief Reset message box
 /// @param [in] pMsgBox Message box handle
@@ -118,13 +114,13 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, size_t* pIdBu
 /// * If mode GET_LAST, reader pop the last event even if not new (read several time the same last event)
 /// @return SOPC_STATUS_OK if data is returned via ppData.
 /// SOPC_INVALID_STATE if API is in use concurrently by for same client id.
-SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
-                                            uint32_t idBuffer,               //
-                                            uint32_t idclient,               //
-                                            uint8_t** ppData,                //
-                                            uint32_t* pSize,                 //
-                                            uint32_t* pNbPendOrIgnoreEvents, //
-                                            SOPC_MsgBox_Mode mode);          //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,
+                                            size_t idBuffer,
+                                            uint32_t idclient,
+                                            uint8_t** ppData,
+                                            uint32_t* pSize,
+                                            uint32_t* pNbPendOrIgnoreEvents,
+                                            SOPC_MsgBox_Mode mode);
 
 /// @brief Message box pop finalization.
 /// @brief Shall be called after a sequence Pop_Initialize - Pop_GetEvtPtr ... Pop_GetEvtPtr
@@ -155,25 +151,23 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
 /// @param [out] pMaxAllowedSize Max allowed data size
 /// @return SOPC_STATUS_OK if event retrieved.
 /// SOPC_INVALID_STATE if API is in use concurrently.
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                    uint8_t** ppData,                    //
-                                                    uint32_t* pMaxAllowedSize);          //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle,
+                                                    uint8_t** ppData,
+                                                    uint32_t* pMaxAllowedSize);
 
 /// @brief Update event data size (number of effective significant bytes)
 /// @param [in] pDataHandle Message box data handle
 /// @param [in] size Number of significant bytes
 /// @return SOPC_STATUS_OK if event retrieved.
 /// SOPC_INVALID_STATE if API is in use concurrently.
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                           uint32_t size);                      //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size);
 
 /// @brief Message box data handle - Finalize write operation (commit modification)
 /// @param [in] pDataHandle Message box data Handle
 /// @param [in] bCancel Write operation canceled if true.
 /// @return SOPC_STATUS_OK if event retrieved.
 /// SOPC_INVALID_STATE if API is in use concurrently.
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                  bool bCancel);                       //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel);
 
 /// @brief Message box data handle destruction.
 /// @param [inout] ppDataHandle Message box data handle. Set to NULL.

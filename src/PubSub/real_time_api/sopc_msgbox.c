@@ -83,6 +83,18 @@ struct SOPC_MsgBox
                                        ///< tMsgBoxFifoEvents[] + uint8_t[]
 };
 
+/// @brief Message box data handle, which allow a write operation directly to event buffer.
+struct SOPC_MsgBox_DataHandle
+{
+    SOPC_MsgBox* pMsgBox; ///< Message box handle, linked to this data handle
+    size_t idBuffer;      ///< Buffer retrieved by SOPC_DoubleBuffer_GetWriteBuffer
+
+    tMsgBoxFifoHeader* pHeader;     ///< Pointer on buffer where fifo header start
+    tMsgBoxFifoEvents* pEvtsBuffer; ///< Pointer on buffer where event buffer start
+    uint8_t* pDataToUpdate;         ///< Pointer on buffer where event data buffer start
+    uint8_t* pData;                 ///< Pointer on buffer position 0, used to deal with wrap around use case.
+};
+
 // Private functions declaration
 
 /// @brief Message box reset
@@ -121,21 +133,17 @@ static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHea
                                                      tMsgBoxFifoEvents* pFifoEvts,   // Buffer of events
                                                      uint8_t* pFifoData);            // Buffer of data
 
-static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader, //
-                                                      tMsgBoxFifoEvents* pFifoEvts,   //
-                                                      uint8_t* pFifoData,             //
-                                                      uint8_t* pData,                 //
-                                                      uint32_t size)                  //
+static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHeader,
+                                                      tMsgBoxFifoEvents* pFifoEvts,
+                                                      uint8_t* pFifoData,
+                                                      uint8_t* pData,
+                                                      uint32_t size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     // Check invalid parameters
-    if (pFifoHeader == NULL ||         //
-        size > pFifoHeader->maxData || //
-        size < 1 ||                    //
-        pFifoEvts == NULL ||           //
-        pFifoData == NULL ||           //
-        pData == NULL)                 //
+    if (pFifoHeader == NULL || size > pFifoHeader->maxData || size < 1 || pFifoEvts == NULL || pFifoData == NULL ||
+        pData == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -199,9 +207,9 @@ static SOPC_ReturnStatus SOPC_MsgBox_UpdateFifoHeader(tMsgBoxFifoHeader* pFifoHe
     return result;
 }
 
-static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader, //
-                                                     tMsgBoxFifoEvents* pFifoEvts,   //
-                                                     uint8_t* pFifoData)             //
+static SOPC_ReturnStatus SOPC_MsgBox_ResetFifoHeader(tMsgBoxFifoHeader* pFifoHeader,
+                                                     tMsgBoxFifoEvents* pFifoEvts,
+                                                     uint8_t* pFifoData)
 
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
@@ -487,18 +495,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
     return result;
 }
 
-/// @brief Message box data handle, which allow a write operation directly to event buffer.
-struct SOPC_MsgBox_DataHandle
-{
-    SOPC_MsgBox* pMsgBox; ///< Message box handle, linked to this data handle
-    uint32_t idBuffer;    ///< Buffer retrieved by SOPC_DoubleBuffer_GetWriteBuffer
-
-    tMsgBoxFifoHeader* pHeader;     ///< Pointer on buffer where fifo header start
-    tMsgBoxFifoEvents* pEvtsBuffer; ///< Pointer on buffer where event buffer start
-    uint8_t* pDataToUpdate;         ///< Pointer on buffer where event data buffer start
-    uint8_t* pData;                 ///< Pointer on buffer position 0, used to deal with wrap around use case.
-};
-
 SOPC_MsgBox_DataHandle* SOPC_MsgBox_DataHandle_Create(SOPC_MsgBox* pMsgBox)
 {
     SOPC_MsgBox_DataHandle* p = SOPC_Calloc(1, sizeof(SOPC_MsgBox_DataHandle));
@@ -578,9 +574,9 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                    uint8_t** ppData,                    //
-                                                    uint32_t* pMaxAllowedSize)           //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDataHandle,
+                                                    uint8_t** ppData,
+                                                    uint32_t* pMaxAllowedSize)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -593,12 +589,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
 
     eMsgBoxInfoSync expectedValue = E_MSG_BOX_INFO_SYNC_RESERVED;
     eMsgBoxInfoSync desiredValue = E_MSG_BOX_INFO_SYNC_RESERVED_USED;
-    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                                                 &expectedValue,                             //
-                                                 &desiredValue,                              //
-                                                 false,                                      //
-                                                 __ATOMIC_SEQ_CST,                           //
-                                                 __ATOMIC_SEQ_CST);                          //
+    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &expectedValue,
+                                                 &desiredValue, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
@@ -606,9 +598,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
         *pMaxAllowedSize = pDataHandle->pHeader->maxData;
 
         desiredValue = E_MSG_BOX_INFO_SYNC_RESERVED;
-        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                       &desiredValue,                              //
-                       __ATOMIC_SEQ_CST);                          //
+        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &desiredValue, __ATOMIC_SEQ_CST);
     }
     else
     {
@@ -618,8 +608,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_GetDataEvt(SOPC_MsgBox_DataHandle* pDat
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                           uint32_t size)                       //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandle* pDataHandle, uint32_t size)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
         NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
@@ -631,12 +620,8 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
 
     eMsgBoxInfoSync expectedStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
     eMsgBoxInfoSync desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVED_USED;
-    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                                                 &expectedStatus,                            //
-                                                 &desiredStatus,                             //
-                                                 false,                                      //
-                                                 __ATOMIC_SEQ_CST,                           //
-                                                 __ATOMIC_SEQ_CST);                          //
+    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &expectedStatus,
+                                                 &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
@@ -697,15 +682,12 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_UpdateDataEvtSize(SOPC_MsgBox_DataHandl
         }
 
         desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
-        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                       &desiredStatus,                             //
-                       __ATOMIC_SEQ_CST);                          //
+        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &desiredStatus, __ATOMIC_SEQ_CST);
     }
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, //
-                                                  bool bCancel)                        //
+SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataHandle, bool bCancel)
 {
     if (NULL == pDataHandle || NULL == pDataHandle->pDataToUpdate || NULL == pDataHandle->pData ||
         NULL == pDataHandle->pEvtsBuffer || NULL == pDataHandle->pHeader || UINT32_MAX == pDataHandle->idBuffer ||
@@ -717,18 +699,14 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
 
     eMsgBoxInfoSync expectedStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
     eMsgBoxInfoSync desiredStatus = E_MSG_BOX_INFO_SYNC_RELEASING;
-    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                                                 &expectedStatus,                            //
-                                                 &desiredStatus,                             //
-                                                 false,                                      //
-                                                 __ATOMIC_SEQ_CST,                           //
-                                                 __ATOMIC_SEQ_CST);                          //
+    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &expectedStatus,
+                                                 &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
         if (SOPC_STATUS_OK == result && !bCancel)
         {
-            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDataHandle->pMsgBox->pFifoPublisher, &pDataHandle->idBuffer);
+            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDataHandle->pMsgBox->pFifoPublisher, pDataHandle->idBuffer);
         }
 
         pDataHandle->idBuffer = UINT32_MAX;
@@ -738,9 +716,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Finalize(SOPC_MsgBox_DataHandle* pDataH
         pDataHandle->pEvtsBuffer = NULL;
 
         desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
-        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                       &desiredStatus,                             //
-                       __ATOMIC_SEQ_CST);                          //
+        __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &desiredStatus, __ATOMIC_SEQ_CST);
     }
     return result;
 }
@@ -933,6 +909,6 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, size_t* pIdBuff
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    result = SOPC_DoubleBuffer_ReleaseReadBuffer(pMsgBox->pFifoPublisher, pIdBuffer);
+    result = SOPC_DoubleBuffer_ReleaseReadBuffer(pMsgBox->pFifoPublisher, *pIdBuffer);
     return result;
 }

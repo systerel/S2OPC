@@ -119,12 +119,12 @@ typedef struct SOPC_RT_Subscriber_Initializer SOPC_RT_Subscriber_Initializer;
 /// @param [in] input_number Input identifier, returned by SOPC_RT_Subscriber_Initializer_AddInput
 /// @param [in] pData Data received
 /// @param [in] size Size of data received
-typedef SOPC_ReturnStatus (*ptrBeatHeartCallback)(SOPC_RT_Subscriber* pSub, //
-                                                  void* pGlobalContext,     //
-                                                  void* pInputContext,      //
-                                                  uint32_t input_number,    //
-                                                  uint8_t* pData,           //
-                                                  uint32_t size);           //
+typedef SOPC_ReturnStatus (*ptrBeatHeartCallback)(SOPC_RT_Subscriber* pSub,
+                                                  void* pGlobalContext,
+                                                  void* pInputContext,
+                                                  uint32_t input_number,
+                                                  uint8_t* pData,
+                                                  uint32_t size);
 
 /// @brief RT Subscriber object creation
 /// @return SOPC_RT_Subscriber object
@@ -139,8 +139,8 @@ void SOPC_RT_Subscriber_Destroy(SOPC_RT_Subscriber** in_out_sub);
 /// @param [in] in_init RT Subscriber Initializer object initialized with a minimum of minimum 1 input / 1 output
 /// @return SOPC_STATUS_OK if initialized.
 /// SOPC_INVALID_STATE in the case of unexpected current status (initializing, in use...)
-SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,           //
-                                                SOPC_RT_Subscriber_Initializer* in_init); //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Initialize(SOPC_RT_Subscriber* in_out_sub,
+                                                SOPC_RT_Subscriber_Initializer* in_init);
 
 /// @brief RT Subscriber de-initialization
 /// @param [inout] in_out_sub RT Subscriber object to de initialize.
@@ -153,8 +153,8 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_DeInitialize(SOPC_RT_Subscriber* in_out_sub
 /// @param [in] cbStep User callback will be called for each input by SOPC_RT_Subscriber_HeartBeat
 /// @param [in] pGlobalContext A global context which will be passed to callback for all input
 /// @return SOPC_RT_Subscriber_Initializer object
-SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep, //
-                                                                      void* pGlobalContext);       //
+SOPC_RT_Subscriber_Initializer* SOPC_RT_Subscriber_Initializer_Create(ptrBeatHeartCallback cbStep,
+                                                                      void* pGlobalContext);
 
 /// @brief RT Subscriber Initializer Destruction
 /// @param [in] in_out_p_init RT Subscriber Initializer object to destroy
@@ -168,12 +168,12 @@ void SOPC_RT_Subscriber_Initializer_Destroy(SOPC_RT_Subscriber_Initializer** in_
 /// @param [in] in_input_context User context
 /// @param [out] out_pin Pin number associated to this input.
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(SOPC_RT_Subscriber_Initializer* in_out_init, //
-                                                          uint32_t in_max_evts,                        //
-                                                          uint32_t in_max_data,                        //
-                                                          SOPC_Pin_Access in_scanmode,                 //
-                                                          void* in_input_context,                      //
-                                                          uint32_t* out_pin);                          //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(SOPC_RT_Subscriber_Initializer* in_out_init,
+                                                          uint32_t in_max_evts,
+                                                          uint32_t in_max_data,
+                                                          SOPC_Pin_Access in_scanmode,
+                                                          void* in_input_context,
+                                                          uint32_t* out_pin);
 
 /// @brief Add output definition to initialize object
 /// @param [in] in_out_init Initializer object
@@ -182,11 +182,11 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddInput(SOPC_RT_Subscriber_Ini
 /// @param [in] in_max_data Max data supported by this output before overflow
 /// @param [in] out_pin Pin number associated to this output
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(SOPC_RT_Subscriber_Initializer* in_out_init, //
-                                                           uint32_t in_max_clients,                     //
-                                                           uint32_t in_max_evts,                        //
-                                                           uint32_t in_max_data,                        //
-                                                           uint32_t* out_pin);                          //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(SOPC_RT_Subscriber_Initializer* in_out_init,
+                                                           uint32_t in_max_clients,
+                                                           uint32_t in_max_evts,
+                                                           uint32_t in_max_data,
+                                                           uint32_t* out_pin);
 
 /// @brief Read output sequence initialization. Used outside RT Subscriber.
 /// @param [in] in_sub RT Subscriber object
@@ -234,20 +234,20 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in
 /// @param [in] in_size Size to write
 /// @return SOPC_STATUS_OK if successful.
 /// SOPC_STATUS_INVALID_STATE if used by another process.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub, //
-                                                 uint32_t in_pin,            //
-                                                 uint8_t* in_data,           //
-                                                 uint32_t in_size);          //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_Write(SOPC_RT_Subscriber* in_sub,
+                                                 uint32_t in_pin,
+                                                 uint8_t* in_data,
+                                                 uint32_t in_size);
 
 /// @brief Write output. Used inside RT Subscriber, in the user callback to update an output.
 /// @param [in] in_sub RT Subscriber object
 /// @param [in] in_pin Pin number
 /// @param [in] in_data Data to write
 /// @param [in] in_size Size to write
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
-                                                  uint32_t in_pin,            //
-                                                  uint8_t* in_data,           //
-                                                  uint32_t in_size);          //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub,
+                                                  uint32_t in_pin,
+                                                  uint8_t* in_data,
+                                                  uint32_t in_size);
 
 /// @brief Get direct data pointer for output selected pin
 /// @param [in] in_sub RT Subscriber object
@@ -256,9 +256,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Write(SOPC_RT_Subscriber* in_sub, //
 /// with data pointer set to internal buffer on return.
 /// On entry, data pointer of SOPC_Buffer shall be set to NULL.
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,       //
-                                                                      uint32_t in_pin,                  //
-                                                                      SOPC_Buffer* in_out_sopc_buffer); //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                      uint32_t in_pin,
+                                                                      SOPC_Buffer* in_out_sopc_buffer);
 
 /// @brief Get direct data pointer for input selected pin
 /// @param [in] in_sub RT Subscriber object
@@ -267,9 +267,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_GetBuffer(SOPC_RT_Su
 /// with data pointer set to internal buffer on return.
 /// On entry, data pointer of SOPC_Buffer shall be set to NULL.
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,       //
-                                                                     uint32_t in_pin,                  //
-                                                                     SOPC_Buffer* in_out_sopc_buffer); //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                     uint32_t in_pin,
+                                                                     SOPC_Buffer* in_out_sopc_buffer);
 
 /// @brief Release direct data pointer for output selected pin, without API concurrent accesses protection.
 /// @param [in] in_sub RT Subscriber object
@@ -278,9 +278,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_GetBuffer(SOPC_RT_Sub
 /// SOPC Buffer structure, with data pointer set to NULL on return.
 /// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,       //
-                                                                          uint32_t in_pin,                  //
-                                                                          SOPC_Buffer* in_out_sopc_buffer); //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                          uint32_t in_pin,
+                                                                          SOPC_Buffer* in_out_sopc_buffer);
 
 /// @brief Release direct data pointer for input selected pin, without API concurrent accesses protection.
 /// @param [in] in_sub RT Subscriber object
@@ -289,9 +289,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_WriteDataHandle_ReleaseBuffer(SOPC_R
 /// SOPC Buffer structure, with data pointer set to NULL on return.
 /// On entry, SOPC_Buffer data pointer is normally not NULL if GetBuffer was successful.
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,       //
-                                                                         uint32_t in_pin,                  //
-                                                                         SOPC_Buffer* in_out_sopc_buffer); //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Input_WriteDataHandle_ReleaseBuffer(SOPC_RT_Subscriber* in_sub,
+                                                                         uint32_t in_pin,
+                                                                         SOPC_Buffer* in_out_sopc_buffer);
 
 /// @brief Heart beat. Use to read each input.
 /// For each read input, user callback is invoked.

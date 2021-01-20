@@ -169,9 +169,9 @@ void SOPC_InterruptTimer_Destroy(SOPC_InterruptTimer** ppTimer)
     }
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(SOPC_InterruptTimer* pTimer,  //
-                                                 uint32_t nbInstances,         //
-                                                 uint32_t maxInstanceDataSize) //
+SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(SOPC_InterruptTimer* pTimer,
+                                                 uint32_t nbInstances,
+                                                 uint32_t maxInstanceDataSize)
 {
     if (NULL == pTimer || nbInstances < 1)
     {
@@ -183,12 +183,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Initialize(SOPC_InterruptTimer* pTimer,  /
     // Try to go to INITILIZING from NOT INITIALIZED state
     eInterruptTimerSyncStatus expectedStatus = E_INTERRUPT_TIMER_SYNC_STATUS_NOT_INITIALIZED;
     eInterruptTimerSyncStatus desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZING;
-    bool bTransition = __atomic_compare_exchange(&pTimer->status,
-                                                 &expectedStatus,   //
-                                                 &desiredStatus,    //
-                                                 false,             //
-                                                 __ATOMIC_SEQ_CST,  //
-                                                 __ATOMIC_SEQ_CST); //
+    bool bTransition = __atomic_compare_exchange(&pTimer->status, &expectedStatus, &desiredStatus, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     // If status from NOT INITIALIZED, so create interrupt timer workspace.
     if (bTransition)
@@ -243,12 +239,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     // Try to go to DEINITIALIZED from INITIALIZED state
     eInterruptTimerSyncStatus expectedStatus = E_INTERRUPT_TIMER_SYNC_STATUS_INITIALIZED;
     eInterruptTimerSyncStatus desiredStatus = E_INTERRUPT_TIMER_SYNC_STATUS_DEINITIALIZING;
-    bool bTransition = __atomic_compare_exchange(&pTimer->status,   //
-                                                 &expectedStatus,   //
-                                                 &desiredStatus,    //
-                                                 false,             //
-                                                 __ATOMIC_SEQ_CST,  //
-                                                 __ATOMIC_SEQ_CST); //
+    bool bTransition = __atomic_compare_exchange(&pTimer->status, &expectedStatus, &desiredStatus, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     // If status from INITIALIZED, so destroy interrupt timer workspace.
     if (bTransition)
@@ -273,15 +265,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_DeInitialize(SOPC_InterruptTimer* pTimer)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,                //
-                                                    uint32_t idInstanceTimer,                   //
-                                                    uint32_t period,                            //
-                                                    uint32_t offset,                            //
-                                                    void* pUserContext,                         //
-                                                    sopc_irq_timer_cb_start cbStart,            //
-                                                    sopc_irq_timer_cb_period_elapsed cbElapsed, //
-                                                    sopc_irq_timer_cb_stop cbStop,              //
-                                                    SOPC_IrqTimer_InstanceStatus initStatus)    //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,
+                                                    uint32_t idInstanceTimer,
+                                                    uint32_t period,
+                                                    uint32_t offset,
+                                                    void* pUserContext,
+                                                    sopc_irq_timer_cb_start cbStart,
+                                                    sopc_irq_timer_cb_period_elapsed cbElapsed,
+                                                    sopc_irq_timer_cb_stop cbStop,
+                                                    SOPC_IrqTimer_InstanceStatus initStatus)
 {
     // Check for incorrect parameters
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances) ||
@@ -303,12 +295,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,
         // Try to go from not in use to in use status for the specified instance
         eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedValue,                                             //
-                                                     &desiredValue,                                              //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedValue,
+                                      &desiredValue, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If transition OK, get timer instance information in the associated double buffer
         // and set new configuration taken into account by next update call.
@@ -364,8 +353,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, //
-                                                      uint32_t idInstanceTimer)    //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTimer, uint32_t idInstanceTimer)
 {
     // Check for incorrect parameters
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
@@ -385,12 +373,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
 
         eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedValue,                                             //
-                                                     &desiredValue,                                              //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedValue,
+                                      &desiredValue, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, erase timer instance configuration to take into account by next
         // update call.
@@ -431,9 +416,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
     return result;
 }
 
-static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTimer* pTimer,         //
-                                                              uint32_t idInstanceTimer,            //
-                                                              SOPC_IrqTimer_InstanceStatus status) //
+static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTimer* pTimer,
+                                                              uint32_t idInstanceTimer,
+                                                              SOPC_IrqTimer_InstanceStatus status)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -453,12 +438,9 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTime
         eInterruptTimerInstanceSyncStatus expectedValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
 
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedValue,                                             //
-                                                     &desiredValue,                                              //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedValue,
+                                      &desiredValue, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -514,9 +496,9 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTime
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* pTimer,          //
-                                                          uint32_t idInstanceTimer,             //
-                                                          SOPC_IrqTimer_InstanceStatus* status) //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* pTimer,
+                                                          uint32_t idInstanceTimer,
+                                                          SOPC_IrqTimer_InstanceStatus* status)
 {
     if ((NULL == pTimer) || (NULL == status) || (NULL == pTimer->pData) ||
         (idInstanceTimer >= pTimer->pData->nbInstances))
@@ -537,12 +519,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
 
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedStatus,                                            //
-                                                     &desiredStatus,                                             //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -568,9 +547,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
 
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                             //
-                           __ATOMIC_SEQ_CST);                                          //
+            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
+
+            /* TODO: call SOPC_DoubleBuffer_ReleaseWriteBuffer */
         }
         else
         {
@@ -588,21 +568,19 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, //
-                                                     uint32_t idInstanceTimer)    //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Start(SOPC_InterruptTimer* pTimer, uint32_t idInstanceTimer)
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_ENABLED);
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, //
-                                                    uint32_t idInstanceTimer)    //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Stop(SOPC_InterruptTimer* pTimer, uint32_t idInstanceTimer)
 {
     return SOPC_InterruptTimer_SetStatus(pTimer, idInstanceTimer, SOPC_INTERRUPT_TIMER_STATUS_DISABLED);
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer, //
-                                                         uint32_t idInstanceTimer,    //
-                                                         uint32_t period)             //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pTimer,
+                                                         uint32_t idInstanceTimer,
+                                                         uint32_t period)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances) || (period < 1))
     {
@@ -621,12 +599,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
 
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedStatus,                                            //
-                                                     &desiredStatus,                                             //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -663,9 +638,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
 
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                             //
-                           __ATOMIC_SEQ_CST);                                          //
+            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
         }
         else
         {
@@ -683,9 +657,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer, //
-                                                         uint32_t idInstanceTimer,    //
-                                                         uint32_t offset)             //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pTimer,
+                                                         uint32_t idInstanceTimer,
+                                                         uint32_t offset)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -704,12 +678,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
 
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedStatus,                                            //
-                                                     &desiredStatus,                                             //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -746,9 +717,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
 
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                             //
-                           __ATOMIC_SEQ_CST);                                          //
+            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
         }
         else
         {
@@ -766,12 +736,12 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* pTimer,                //
-                                                           uint32_t idInstanceTimer,                   //
-                                                           void* pUserContext,                         //
-                                                           sopc_irq_timer_cb_start cbStart,            //
-                                                           sopc_irq_timer_cb_period_elapsed cbElapsed, //
-                                                           sopc_irq_timer_cb_stop cbStop)              //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* pTimer,
+                                                           uint32_t idInstanceTimer,
+                                                           void* pUserContext,
+                                                           sopc_irq_timer_cb_start cbStart,
+                                                           sopc_irq_timer_cb_period_elapsed cbElapsed,
+                                                           sopc_irq_timer_cb_stop cbStop)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -790,12 +760,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* 
 
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedStatus,                                            //
-                                                     &desiredStatus,                                             //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -838,9 +805,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* 
 
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                             //
-                           __ATOMIC_SEQ_CST);                                          //
+            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
         }
         else
         {
@@ -858,10 +824,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* 
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer, //
-                                                       uint32_t idInstanceTimer,    //
-                                                       uint8_t* pData,              //
-                                                       uint32_t sizeToWrite)        //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTimer,
+                                                       uint32_t idInstanceTimer,
+                                                       uint8_t* pData,
+                                                       uint32_t sizeToWrite)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData) || (idInstanceTimer >= pTimer->pData->nbInstances))
     {
@@ -880,12 +846,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
 
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-        bool bTransition = __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                                     &expectedStatus,                                            //
-                                                     &desiredStatus,                                             //
-                                                     false,                                                      //
-                                                     __ATOMIC_SEQ_CST,                                           //
-                                                     __ATOMIC_SEQ_CST);                                          //
+        bool bTransition =
+            __atomic_compare_exchange(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -916,9 +879,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
             }
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                             //
-                           __ATOMIC_SEQ_CST);                                          //
+            __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
         }
         else
         {
@@ -936,8 +898,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
     return result;
 }
 
-SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(SOPC_InterruptTimer* pTimer, //
-                                                                               uint32_t idInstanceTimer)    //
+SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(SOPC_InterruptTimer* pTimer,
+                                                                               uint32_t idInstanceTimer)
 {
     SOPC_InterruptTimer_DataHandle* pContainer = NULL;
 
@@ -986,8 +948,7 @@ void SOPC_InterruptTimer_DestroyDataContainer(SOPC_InterruptTimer_DataHandle** p
     }
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_InterruptTimer_DataHandle* pDataContainer //
-)
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_InterruptTimer_DataHandle* pDataContainer)
 {
     if ((NULL == pDataContainer) || (NULL == (pDataContainer)->pTimer) || (NULL == (pDataContainer)->pTimer->pData) ||
         ((pDataContainer)->idInstanceTimer >= (pDataContainer)->pTimer->pData->nbInstances))
@@ -1011,12 +972,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVING;
         bool bTransition =
-            __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                      &expectedStatus,                                                  //
-                                      &desiredStatus,                                                   //
-                                      false,                                                            //
-                                      __ATOMIC_SEQ_CST,                                                 //
-                                      __ATOMIC_SEQ_CST);                                                //
+            __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -1046,17 +1003,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
                 result = SOPC_STATUS_NOK;
 
                 desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
-                __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                               &desiredStatus,                                                   //
-                               __ATOMIC_SEQ_CST);                                                //
+                __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                               __ATOMIC_SEQ_CST);
             }
             else
             {
                 SOPC_InterruptTimer_IncrementInUseStatus(pTimer);
                 desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-                __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                               &desiredStatus,                                                   //
-                               __ATOMIC_SEQ_CST);                                                //
+                __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                               __ATOMIC_SEQ_CST);
             }
         }
         else
@@ -1074,8 +1029,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_InterruptTimer_DataHandle* pDataContainer, //
-                                                                   bool bCancel)                                   //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_InterruptTimer_DataHandle* pDataContainer,
+                                                                   bool bCancel)
 {
     if ((NULL == pDataContainer) || (NULL == pDataContainer->pTimer) || (NULL == pDataContainer->pTimer->pData) ||
         (pDataContainer->idInstanceTimer >= pDataContainer->pTimer->pData->nbInstances))
@@ -1099,12 +1054,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RELEASING;
         bool bTransition =
-            __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                                      &expectedStatus,                                                  //
-                                      &desiredStatus,                                                   //
-                                      false,                                                            //
-                                      __ATOMIC_SEQ_CST,                                                 //
-                                      __ATOMIC_SEQ_CST);                                                //
+            __atomic_compare_exchange(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &expectedStatus,
+                                      &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API is not in use for this instance, set timer status
         if (bTransition)
@@ -1123,9 +1074,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
 
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
 
-            __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, //
-                           &desiredStatus,                                                   //
-                           __ATOMIC_SEQ_CST);                                                //
+            __atomic_store(&pTimerData->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredStatus,
+                           __ATOMIC_SEQ_CST);
 
             SOPC_InterruptTimer_DecrementInUseStatus(pTimer);
         }
@@ -1163,8 +1113,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer, //
-                                                                     uint32_t newSize)                           //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer,
+                                                                     uint32_t newSize)
 
 {
     if (NULL == pContainer || newSize > pContainer->maxAllowedSize)
@@ -1177,8 +1127,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
     return result;
 }
 
-SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
-                                             uint32_t externalTickValue)  //
+SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, uint32_t externalTickValue)
 {
     if ((NULL == pTimer) || (NULL == pTimer->pData))
     {
@@ -1197,12 +1146,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
         // Check if UDPATE API is not in use.
         eInterruptTimerInstanceSyncStatus expectedStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
         eInterruptTimerInstanceSyncStatus desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_RESERVED;
-        bool bTransition = __atomic_compare_exchange(&pWks->bTickIsUpdating.instanceStatus, //
-                                                     &expectedStatus,                       //
-                                                     &desiredStatus,                        //
-                                                     false,                                 //
-                                                     __ATOMIC_SEQ_CST,
-                                                     __ATOMIC_SEQ_CST); //
+        bool bTransition = __atomic_compare_exchange(&pWks->bTickIsUpdating.instanceStatus, &expectedStatus,
+                                                     &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
         // If API not in use, parse all timers instances and check callback invoke condition
         if (bTransition)
@@ -1313,8 +1258,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
     return result;
 }
 
-static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(uint32_t nbInstances, //
-                                                                        uint32_t maxDataSize) //
+static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(uint32_t nbInstances, uint32_t maxDataSize)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     tInterruptTimerData* pWks = SOPC_Calloc(1, sizeof(tInterruptTimerData));
@@ -1431,12 +1375,8 @@ static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_IncrementInUseStatus
             {
                 newValue = currentValue;
             }
-            result = __atomic_compare_exchange(&pTimer->status,   //
-                                               &currentValue,     //
-                                               &newValue,         //
-                                               false,             //
-                                               __ATOMIC_SEQ_CST,  //
-                                               __ATOMIC_SEQ_CST); //
+            result = __atomic_compare_exchange(&pTimer->status, &currentValue, &newValue, false, __ATOMIC_SEQ_CST,
+                                               __ATOMIC_SEQ_CST);
         } while (!result);
 
         return newValue;
@@ -1462,12 +1402,8 @@ static inline eInterruptTimerSyncStatus SOPC_InterruptTimer_DecrementInUseStatus
             {
                 newValue = currentValue;
             }
-            result = __atomic_compare_exchange(&pTimer->status,   //
-                                               &currentValue,     //
-                                               &newValue,         //
-                                               false,             //
-                                               __ATOMIC_SEQ_CST,  //
-                                               __ATOMIC_SEQ_CST); //
+            result = __atomic_compare_exchange(&pTimer->status, &currentValue, &newValue, false, __ATOMIC_SEQ_CST,
+                                               __ATOMIC_SEQ_CST);
         } while (!result);
 
         return newValue;
