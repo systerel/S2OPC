@@ -100,8 +100,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox);
 /// @param [out] pIdBuffer Buffer identifier to use with SOPC_MsgBox_Pop_GetEvtPtr and SOPC_MsgBox_Pop_Finalize.
 /// @return SOPC_STATUS_OK if a valid idBuffer is returned. This id shall be used by SOPC_MsgBox_Pop_GetEvtPtr function.
 /// It reset idBuffer to UINT32_MAX in case of error.
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, //
-                                             uint32_t* pIdBuffer); //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, size_t* pIdBuffer);
 
 /// @brief Message box pop operation. Used to get an event.
 /// @brief This function shall be used AFTER a Pop_Initialize.
@@ -133,8 +132,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
 /// @param [in] pMsgBox Message box handle
 /// @param [inout] pIdBuffer Buffer identifier returned by SOPC_MsgBox_Pop_Initialize
 /// @return SOPC_STATUS_OK if buffer identifier is valid.
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, //
-                                           uint32_t* pIdBuffer); //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, size_t* pIdBuffer);
 
 /// @brief Message box data handle creation. Used to directly write into event buffer.
 /// @warning Not tested API!

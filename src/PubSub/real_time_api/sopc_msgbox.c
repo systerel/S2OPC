@@ -270,10 +270,10 @@ static void SOPC_MsgBox_DeInitialize(SOPC_MsgBox* pMsgBox)
     }
 }
 
-static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
-                                                uint32_t max_clients,  //
-                                                uint32_t max_evts,     //
-                                                uint32_t max_data_evt) //
+static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,
+                                                uint32_t max_clients,
+                                                uint32_t max_evts,
+                                                uint32_t max_data_evt)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -320,9 +320,7 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
     // Allocation of double buffer used to publish FIFO image (header + events table + data buffer)
     if (result == SOPC_STATUS_OK)
     {
-        pMsgBox->pFifoPublisher = SOPC_DoubleBuffer_Create(
-            pMsgBox->nbMaxClts,              // Max concurrently clients
-            pMsgBox->doubleBufferFieldSize); // Fifo header size + events buffer + data buffer * 2
+        pMsgBox->pFifoPublisher = SOPC_DoubleBuffer_Create(pMsgBox->nbMaxClts + 1, pMsgBox->doubleBufferFieldSize);
 
         if (pMsgBox->pFifoPublisher == NULL)
         {
@@ -332,12 +330,10 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
 
     if (SOPC_STATUS_OK == result)
     {
-        uint32_t idBuffer = UINT32_MAX;
+        size_t idBuffer = 0;
+        tMsgBoxFifoHeader* pHeader = NULL;
 
         result = SOPC_DoubleBuffer_GetWriteBuffer(pMsgBox->pFifoPublisher, &idBuffer, NULL);
-
-        uint32_t* pSizeField = NULL;
-        uint8_t* pData = NULL;
 
         if (SOPC_STATUS_OK == result)
         {
@@ -346,16 +342,11 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
 
         if (SOPC_STATUS_OK == result)
         {
-            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, //
-                                                         idBuffer,                //
-                                                         &pData,                  //
-                                                         &pSizeField,             //
-                                                         true);                   //
+            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, idBuffer, (uint8_t**) &pHeader, true);
         }
 
         if (result == SOPC_STATUS_OK)
         {
-            tMsgBoxFifoHeader* pHeader = (void*) pData;
             pHeader->maxEvts = max_evts;
             pHeader->maxData = max_data_evt; // Real data size is multiplied by 2. maxData = real Size / 2
             pHeader->nbData = 0;
@@ -363,9 +354,7 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
             pHeader->idxWrData = 0;
             pHeader->idxWrEvt = 0;
 
-            *pSizeField = pMsgBox->doubleBufferFieldSize;
-
-            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, &idBuffer);
+            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, idBuffer);
         }
     }
 
@@ -378,9 +367,7 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,  //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, //
-                                   uint8_t* data,        //
-                                   uint32_t size)        //
+SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, uint8_t* data, uint32_t size)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -393,63 +380,45 @@ SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, //
     // Try to switch flag from not use to in use
     bool expectedValue = false;
     bool desiredValue = true;
-    bool bTransition = __atomic_compare_exchange(&pMsgBox->lockWriter.bIsInUse, //
-                                                 &expectedValue,                //
-                                                 &desiredValue,                 //
-                                                 false,                         //
-                                                 __ATOMIC_SEQ_CST,
-                                                 __ATOMIC_SEQ_CST); //
+    bool bTransition = __atomic_compare_exchange(&pMsgBox->lockWriter.bIsInUse, &expectedValue, &desiredValue, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     // If transition successful update header of the FIFO writer side, event buffer, data buffer and publish it.
     if (bTransition)
     {
         // Reserve DBO for write
-        uint32_t idBuffer = UINT32_MAX;
+        size_t idBuffer = 0;
 
         result = SOPC_DoubleBuffer_GetWriteBuffer(pMsgBox->pFifoPublisher, &idBuffer, NULL);
 
-        uint8_t* pData = NULL;
-        uint32_t* pDataSize = NULL;
-
         // Get pointer on buffer to write
+        tMsgBoxFifoHeader* pHeader = NULL;
         if (SOPC_STATUS_OK == result)
         {
-            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, // DBO object
-                                                         idBuffer,                // Id of reserved buffer
-                                                         &pData,                  // Data out pointer
-                                                         &pDataSize, // Significant bytes from previous write
-                                                         false);     // Don't ignore previous data
+            result =
+                SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, idBuffer, (uint8_t**) &pHeader, false);
         }
 
         if (result == SOPC_STATUS_OK)
         {
-            tMsgBoxFifoHeader* pHeader = (void*) pData;
-            tMsgBoxFifoEvents* pEvtBuffer = (void*) (pData + sizeof(tMsgBoxFifoHeader));
-            uint8_t* pDataBuffer = (void*) (pData +                                        //
-                                            sizeof(tMsgBoxFifoHeader) +                    //
-                                            sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts); //
+            /* TODO: Restructure fields in tMsgBoxFifoHeader instead of pointing somewhere after it */
+            tMsgBoxFifoEvents* pEvtBuffer = (tMsgBoxFifoEvents*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
+            uint8_t* pDataBuffer =
+                (uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts;
 
             // FIFO header and event / data buffer update with data and size
-            result = SOPC_MsgBox_UpdateFifoHeader(pHeader,     // FIFO header
-                                                  pEvtBuffer,  // Event buffer
-                                                  pDataBuffer, // Data buffer
-                                                  data,        // Data
-                                                  size);       // Data size
+            result = SOPC_MsgBox_UpdateFifoHeader(pHeader, pEvtBuffer, pDataBuffer, data, size);
         }
 
         // Commit if no error
         if (result == SOPC_STATUS_OK)
         {
-            *pDataSize = pMsgBox->doubleBufferFieldSize;
-
-            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, //
-                                                          &idBuffer);              //
+            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, idBuffer);
         }
+        /* TODO: else cancel but call ReleaseWriteBuffer */
 
         desiredValue = false;
-        __atomic_store(&pMsgBox->lockWriter.bIsInUse, //
-                       &desiredValue,                 //
-                       __ATOMIC_SEQ_CST);             //
+        __atomic_store(&pMsgBox->lockWriter.bIsInUse, &desiredValue, __ATOMIC_SEQ_CST);
     }
     else
     {
@@ -472,61 +441,43 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
     // Try to switch flag from not use to in use
     bool expectedValue = false;
     bool desiredValue = true;
-    bool bTransition = __atomic_compare_exchange(&pMsgBox->lockWriter.bIsInUse, //
-                                                 &expectedValue,                //
-                                                 &desiredValue,                 //
-                                                 false,                         //
-                                                 __ATOMIC_SEQ_CST,
-                                                 __ATOMIC_SEQ_CST); //
+    bool bTransition = __atomic_compare_exchange(&pMsgBox->lockWriter.bIsInUse, &expectedValue, &desiredValue, false,
+                                                 __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     // If transition successful update header of the FIFO writer side, event buffer, data buffer and publish it.
     if (bTransition)
     {
         // Reserve DBO for write
-        uint32_t idBuffer = UINT32_MAX;
-
+        size_t idBuffer = UINT32_MAX;
         result = SOPC_DoubleBuffer_GetWriteBuffer(pMsgBox->pFifoPublisher, &idBuffer, NULL);
 
-        uint8_t* pData = NULL;
-        uint32_t* pDataSize = NULL;
-
         // Verify reservation result and get pointer on buffer
+        tMsgBoxFifoHeader* pHeader = NULL;
         if (SOPC_STATUS_OK == result)
         {
-            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, //
-                                                         idBuffer,                //
-                                                         &pData,                  //
-                                                         &pDataSize,              //
-                                                         false);                  //
+            result =
+                SOPC_DoubleBuffer_WriteBufferGetPtr(pMsgBox->pFifoPublisher, idBuffer, (uint8_t**) &pHeader, false);
         }
 
         if (SOPC_STATUS_OK == result)
         {
-            tMsgBoxFifoHeader* pHeader = (void*) pData;
-            tMsgBoxFifoEvents* pEvtBuffer = (void*) (pData + sizeof(tMsgBoxFifoHeader));
-            uint8_t* pDataBuffer = (void*) (pData +                                        //
-                                            sizeof(tMsgBoxFifoHeader) +                    //
-                                            sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts); //
+            tMsgBoxFifoEvents* pEvtBuffer = (tMsgBoxFifoEvents*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
+            uint8_t* pDataBuffer =
+                (uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts;
 
             // FIFO header and event / data buffer update with data and size
-            result = SOPC_MsgBox_ResetFifoHeader(pHeader,      // FIFO header
-                                                 pEvtBuffer,   // Event buffer
-                                                 pDataBuffer); // Data buffer
+            result = SOPC_MsgBox_ResetFifoHeader(pHeader, pEvtBuffer, pDataBuffer);
         }
 
         // Commit if no error
         if (result == SOPC_STATUS_OK)
         {
-            *pDataSize = pMsgBox->doubleBufferFieldSize;
-
-            SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, //
-                                                 &idBuffer);              //
+            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pMsgBox->pFifoPublisher, idBuffer);
         }
+        /* TODO: else cancel but call ReleaseWriteBuffer */
 
         desiredValue = false;
-        __atomic_store(&pMsgBox->lockWriter.bIsInUse, //
-                       &desiredValue,                 //
-                       __ATOMIC_SEQ_CST);             //
+        __atomic_store(&pMsgBox->lockWriter.bIsInUse, &desiredValue, __ATOMIC_SEQ_CST);
     }
     else
     {
@@ -565,6 +516,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
+    /* TODO: idBuffer should not have forbidden value */
     if (NULL == pDataHandle || NULL == pDataHandle->pMsgBox || pDataHandle->idBuffer != UINT32_MAX)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -572,40 +524,28 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
 
     eMsgBoxInfoSync expectedStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
     eMsgBoxInfoSync desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVING;
-    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                                                 &expectedStatus,                            //
-                                                 &desiredStatus,                             //
-                                                 false,                                      //
-                                                 __ATOMIC_SEQ_CST,                           //
-                                                 __ATOMIC_SEQ_CST);                          //
+    bool bTransition = __atomic_compare_exchange(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &expectedStatus,
+                                                 &desiredStatus, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
-        uint8_t* pDataField = NULL;
+        tMsgBoxFifoHeader* pHead = NULL;
 
         // Reserve buffer to write
-        result = SOPC_DoubleBuffer_GetWriteBuffer(pDataHandle->pMsgBox->pFifoPublisher, //
-                                                  &pDataHandle->idBuffer,               //
-                                                  NULL);                                //
+        result = SOPC_DoubleBuffer_GetWriteBuffer(pDataHandle->pMsgBox->pFifoPublisher, &pDataHandle->idBuffer, NULL);
 
         // Retrieve buffer informations
         if (SOPC_STATUS_OK == result)
         {
-            uint32_t* pCurrentSizeField = NULL;
-            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDataHandle->pMsgBox->pFifoPublisher, //
-                                                         pDataHandle->idBuffer,                //
-                                                         &pDataField,                          //
-                                                         &pCurrentSizeField,                   //
-                                                         false);                               //
+            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDataHandle->pMsgBox->pFifoPublisher, pDataHandle->idBuffer,
+                                                         (uint8_t**) &pHead, false);
         }
 
         // Set shortcut pointer on header, events buffer and current free data buffer
         if (SOPC_STATUS_OK == result)
         {
-            tMsgBoxFifoHeader* pHead = (void*) pDataField;
-            tMsgBoxFifoEvents* pEvts = (void*) (pDataField + sizeof(tMsgBoxFifoHeader));
-            uint8_t* pData =
-                (void*) (pDataField + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHead->maxEvts);
+            tMsgBoxFifoEvents* pEvts = (tMsgBoxFifoEvents*) ((uint8_t*) pHead + sizeof(tMsgBoxFifoHeader));
+            uint8_t* pData = (uint8_t*) pHead + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHead->maxEvts;
 
             pDataHandle->pHeader = pHead;
             pDataHandle->pEvtsBuffer = pEvts;
@@ -622,16 +562,12 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
             pDataHandle->pData = NULL;
             pDataHandle->pEvtsBuffer = NULL;
             desiredStatus = E_MSG_BOX_INFO_SYNC_NOT_USED;
-            __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                           &desiredStatus,                             //
-                           __ATOMIC_SEQ_CST);                          //
+            __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &desiredStatus, __ATOMIC_SEQ_CST);
         }
         else
         {
             desiredStatus = E_MSG_BOX_INFO_SYNC_RESERVED;
-            __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, //
-                           &desiredStatus,                             //
-                           __ATOMIC_SEQ_CST);                          //
+            __atomic_store(&pDataHandle->pMsgBox->lockWriter.eIsInUse, &desiredStatus, __ATOMIC_SEQ_CST);
         }
     }
     else
@@ -834,26 +770,22 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Destroy(SOPC_MsgBox_DataHandle** ppData
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, //
-                                             uint32_t* pIdBuffer)  //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Initialize(SOPC_MsgBox* pMsgBox, size_t* pIdBuffer)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
     if (NULL == pMsgBox || NULL == pIdBuffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    result = SOPC_DoubleBuffer_GetReadBuffer(pMsgBox->pFifoPublisher, pIdBuffer);
-    return result;
+    return SOPC_DoubleBuffer_GetReadBuffer(pMsgBox->pFifoPublisher, pIdBuffer);
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
-                                            uint32_t idBuffer,               //
-                                            uint32_t idclient,               //
-                                            uint8_t** ppData,                //
-                                            uint32_t* pSize,                 //
-                                            uint32_t* pNbPendOrIgnoreEvents, //
-                                            SOPC_MsgBox_Mode mode)           //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,
+                                            size_t idBuffer,
+                                            uint32_t idclient,
+                                            uint8_t** ppData,
+                                            uint32_t* pSize,
+                                            uint32_t* pNbPendOrIgnoreEvents,
+                                            SOPC_MsgBox_Mode mode)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -869,12 +801,8 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
 
     bool expectedValue = false;
     bool desiredValue = true;
-    bool bTransition = __atomic_compare_exchange(&pMsgBox->pLockReader[idclient].bIsInUse, //
-                                                 &expectedValue,                           //
-                                                 &desiredValue,                            //
-                                                 false,                                    //
-                                                 __ATOMIC_SEQ_CST,                         //
-                                                 __ATOMIC_SEQ_CST);                        //
+    bool bTransition = __atomic_compare_exchange(&pMsgBox->pLockReader[idclient].bIsInUse, &expectedValue,
+                                                 &desiredValue, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
@@ -882,16 +810,11 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
         uint32_t nbEventsFromCltView = 0;
 
         // Get FIFO data pointer
-        uint32_t size = 0;
-
-        result = SOPC_DoubleBuffer_ReadBufferPtr(pMsgBox->pFifoPublisher, // DBO object
-                                                 idBuffer,                // Id returned by Pop_Initalized
-                                                 (uint8_t**) &pHeader,    // FIFO header image pointer
-                                                 &size);                  // size can be read
+        result = SOPC_DoubleBuffer_ReadBufferPtr(pMsgBox->pFifoPublisher, idBuffer, (uint8_t**) &pHeader);
 
         // Check valid minimum size
         // Check if at least 1 event exist. If it exist, at least one event with a dataSize > 0 exist.
-        if (result != SOPC_STATUS_OK || pHeader->nbEvts <= 0 || size < pMsgBox->doubleBufferFieldSize)
+        if (result != SOPC_STATUS_OK || pHeader->nbEvts <= 0)
         {
             // No event in the DBO or DBO reset. Reset reader index.
             pMsgBox->idxEvtReader[idclient] = 0;
@@ -936,9 +859,8 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
                     }
 
                     // Get event pointed by index
-                    tMsgBoxFifoEvents* pEvts = (void*) ((uint8_t*) pHeader +                    //
-                                                        sizeof(tMsgBoxFifoHeader) +             //
-                                                        cltEvtIdx * sizeof(tMsgBoxFifoEvents)); //
+                    tMsgBoxFifoEvents* pEvts = (void*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) +
+                                                        cltEvtIdx * sizeof(tMsgBoxFifoEvents));
 
                     // Get data offset
                     uint32_t dataOffset = pEvts->offset;
@@ -950,10 +872,8 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
                     if (dataSize > 0)
                     {
                         // Get pointer on data
-                        pData = ((uint8_t*) pHeader +                           //
-                                 sizeof(tMsgBoxFifoHeader) +                    //
-                                 pHeader->maxEvts * sizeof(tMsgBoxFifoEvents) + //
-                                 dataOffset);                                   //
+                        pData = ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) +
+                                 pHeader->maxEvts * sizeof(tMsgBoxFifoEvents) + dataOffset);
                     }
 
                     // Update index for this client
@@ -991,9 +911,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
 
         // Mark API as not in use.
         desiredValue = false;
-        __atomic_store(&pMsgBox->pLockReader[idclient].bIsInUse, //
-                       &desiredValue,                            //
-                       __ATOMIC_SEQ_CST);                        //
+        __atomic_store(&pMsgBox->pLockReader[idclient].bIsInUse, &desiredValue, __ATOMIC_SEQ_CST);
     }
     else
     {
@@ -1007,8 +925,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Pop_GetEvtPtr(SOPC_MsgBox* pMsgBox,            //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, //
-                                           uint32_t* pIdBuffer)  //
+SOPC_ReturnStatus SOPC_MsgBox_Pop_Finalize(SOPC_MsgBox* pMsgBox, size_t* pIdBuffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 

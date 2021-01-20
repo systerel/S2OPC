@@ -140,7 +140,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(
     SOPC_RT_Subscriber* in_sub, // RT subscriber object
     SOPC_Pin_Direction in_dir,  // Pin direction
     uint32_t in_pin,            // pin number
-    uint32_t* out_token);       // token of read sequence
+    size_t* out_token);         // token of read sequence
 
 /// @brief Read pin sequence, without API concurrent accesses protection
 /// @param [in] in_itf Pin direction
@@ -157,7 +157,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber*
                                                              SOPC_Pin_Direction in_itf,   // pin direction
                                                              uint32_t in_pin,             // Pin number
                                                              uint32_t in_clt,             // Client number
-                                                             uint32_t in_token,           // Token of read sequence
+                                                             size_t in_token,             // Token of read sequence
                                                              SOPC_Pin_Access in_mode,     // Access mode
                                                              uint8_t** out_pData,         // Pointer on data
                                                              uint32_t* out_size);         // Size of data
@@ -173,7 +173,7 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(
     SOPC_RT_Subscriber* in_sub, // RT Subscriber object
     SOPC_Pin_Direction in_itf,  // Pin direction
     uint32_t in_pin,            // Pin number
-    uint32_t* in_out_token);    // token
+    size_t* in_out_token);      // token
 
 /// @brief Get direct data pointer for selected pin, without API concurrent accesses protection.
 /// @param [in] in_sub RT Subscriber object
@@ -493,9 +493,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in_sub, //
-                                                          uint32_t in_pin,            //
-                                                          uint32_t* in_out_token)     //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in_sub,
+                                                          uint32_t in_pin,
+                                                          size_t* in_out_token)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     if (NULL == in_sub || NULL == in_out_token)
@@ -1235,10 +1235,10 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Write(SOPC_RT_Subscriber
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(SOPC_RT_Subscriber* in_sub, //
-                                                                        SOPC_Pin_Direction in_dir,  //
-                                                                        uint32_t in_pin,            //
-                                                                        uint32_t* out_token)        //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Initialize(SOPC_RT_Subscriber* in_sub,
+                                                                        SOPC_Pin_Direction in_dir,
+                                                                        uint32_t in_pin,
+                                                                        size_t* out_token)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -1360,10 +1360,10 @@ static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read(SOPC_RT_Subscriber*
     return result;
 }
 
-static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(SOPC_RT_Subscriber* in_sub, //
-                                                                      SOPC_Pin_Direction in_itf,  //
-                                                                      uint32_t in_pin,            //
-                                                                      uint32_t* in_out_token)     //
+static inline SOPC_ReturnStatus _SOPC_RT_Subscriber_Pin_Read_Finalize(SOPC_RT_Subscriber* in_sub,
+                                                                      SOPC_Pin_Direction in_itf,
+                                                                      uint32_t in_pin,
+                                                                      size_t* in_out_token)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 

@@ -19,6 +19,8 @@
 
 /// @file sopc_interrupttimer.c
 
+#include <assert.h>
+
 #include "sopc_interrupttimer.h"
 
 /// @brief Sync status of an interrupt timer workspace
@@ -101,11 +103,9 @@ struct SOPC_InterruptTimer_DataHandle
     uint8_t* pPublishedData; ///< Pointer on timer data buffer
 
     uint32_t idInstanceTimer; ///< Timer instance identifier, set by SOPC_InterruptTimer_DataHandle_Create
-    uint32_t idContainer;     ///< Double buffer reserved buffer used by timer instance identifier, returned by
+    size_t idContainer;       ///< Double buffer reserved buffer used by timer instance identifier, returned by
                               ///< SOPC_DoubleBuffer_GetWriteBuffer
     uint8_t* pDboData;        ///< Double buffer data buffer field, returned by SOPC_DoubleBuffer_WriteBufferGetPtr
-    uint32_t* pDboSize;       ///< Double buffer size field linked to reserved data buffer, returned by
-                              ///< SOPC_DoubleBuffer_WriteBufferPtr
 };
 
 // Declaration of private function
@@ -315,12 +315,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,
         if (bTransition)
         {
             // Try to get a not reading buffer
-            uint32_t idBuffer = UINT32_MAX;
+            size_t idBuffer = 0;
 
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Erase buffer
-            SOPC_DoubleBuffer_WriteBufferErase(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+            result = SOPC_DoubleBuffer_WriteBufferErase(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+            assert(SOPC_STATUS_OK == result);
 
             // Set timer instance configuration
             tTimerInstanceInfo timerInfo;
@@ -333,29 +336,16 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_Init(SOPC_InterruptTimer* pTimer,
             timerInfo.cbStop = cbStop;
 
             // Try to write timer configuration
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // Double buffer object
-                                          idBuffer,                                          // Id of buffer
-                                          0,                                                 // No offset
-                                          (uint8_t*) &timerInfo,                             // Data
-                                          sizeof(tTimerInstanceInfo),                        // Data size
-                                          &size,                                             // Written size
-                                          true,  // Ignore the least old data before offset
-                                          true); // Ignore the least old data after written data
+            result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer, 0,
+                                                   (uint8_t*) &timerInfo, sizeof(tTimerInstanceInfo), NULL, true, true);
+            assert(SOPC_STATUS_OK == result);
 
             // Release buffer
-            SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
+            SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
 
             // Go from in use to not in use status for this timer instance
             desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
             __atomic_store(&pWks->pTimerInstanceInUse[idInstanceTimer].instanceStatus, &desiredValue, __ATOMIC_SEQ_CST);
-
-            // Check if result is OK
-            if (size < sizeof(tTimerInstanceInfo))
-            {
-                result = SOPC_STATUS_NOK;
-            }
         }
         else
         {
@@ -407,14 +397,18 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DeInit(SOPC_InterruptTimer* pTime
         if (bTransition)
         {
             // Reserve DBO for write
-            uint32_t idBuffer = UINT32_MAX;
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Write DBO
-            SOPC_DoubleBuffer_WriteBufferErase(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+            result = SOPC_DoubleBuffer_WriteBufferErase(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+            assert(SOPC_STATUS_OK == result);
 
             // Release DBO
-            SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
+            result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+            assert(SOPC_STATUS_OK == result);
 
             // Mark API as not in use.
             desiredValue = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
@@ -474,32 +468,30 @@ static inline SOPC_ReturnStatus SOPC_InterruptTimer_SetStatus(SOPC_InterruptTime
             timerInfo.wStatus = status;
 
             // Reserve DBO for write
-            uint32_t idBuffer = UINT32_MAX;
-
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Try to write DBO
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
-                                          idBuffer,                                          // Reserved buffer
-                                          offsetof(tTimerInstanceInfo, wStatus),             // Offset of status
-                                          (uint8_t*) &timerInfo.wStatus,                     // value of status
-                                          member_size(tTimerInstanceInfo, wStatus),          // size of status
-                                          &size,                                             // written size
-                                          false,  // Don't ignore the least old data previous offset
-                                          false); // Don't ignore the least old data after written data
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
+                                                   offsetof(tTimerInstanceInfo, wStatus), (uint8_t*) &timerInfo.wStatus,
+                                                   member_size(tTimerInstanceInfo, wStatus), &size, false, false);
+            assert(SOPC_STATUS_OK == result);
 
             // Check written size. Until wStatus field included minimum.
             if (size < offsetof(tTimerInstanceInfo, wStatus) + member_size(tTimerInstanceInfo, wStatus))
             {
+                /* TODO: Call ReleaseWriteBuffer anyway and cancel the write */
                 result = SOPC_STATUS_NOK;
             }
             else
             {
                 // Release DBO
-                SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], //
-                                                     &idBuffer);                                        //
+                result =
+                    SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
+                assert(SOPC_STATUS_OK == result);
             }
 
             // Mark API as not in use.
@@ -557,33 +549,21 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
         {
             // New status to take into account by next update call
             tTimerInstanceInfo* pTimerInfo;
-            uint32_t* pSize = 0;
 
             // Reserve DBO for write
-            uint32_t idBuffer = UINT32_MAX;
-
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Try to write DBO
-
-            result =
-                SOPC_DoubleBuffer_WriteBufferGetPtr(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
-                                                    idBuffer,                // Reserved buffer
-                                                    (uint8_t**) &pTimerInfo, // Pointer on data field
-                                                    &pSize,                  // Pointer on size field
-                                                    false); // Don't ignore the least old data after written data
+            /* TODO: Is that a read call disguised as a write ? */
+            result = SOPC_DoubleBuffer_WriteBufferGetPtr(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
+                                                         (uint8_t**) &pTimerInfo, false);
 
             if (SOPC_STATUS_OK == result)
             {
-                // Check written size. Until wStatus field included minimum.
-                if (*pSize < offsetof(tTimerInstanceInfo, wStatus) + member_size(tTimerInstanceInfo, wStatus))
-                {
-                    result = SOPC_STATUS_NOK;
-                }
-                else
-                {
-                    *status = pTimerInfo->wStatus;
-                }
+                *status = pTimerInfo->wStatus;
             }
 
             // Mark API as not in use.
@@ -656,32 +636,29 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetPeriod(SOPC_InterruptTimer* pT
             timerInfo.wPeriod = period;
 
             // Reserve buffer
-            uint32_t idBuffer = UINT32_MAX;
-
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Write buffer
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
-                                          idBuffer,                                          // Reserved buffer
-                                          offsetof(tTimerInstanceInfo, wPeriod),    // Period offset in the buffer
-                                          (uint8_t*) &timerInfo.wPeriod,            // Period value
-                                          member_size(tTimerInstanceInfo, wPeriod), // Size of period value
-                                          &size,                                    // Written size
-                                          false,  // Don't ignore the least old data previous offset
-                                          false); // Don't ignore the least old data after written data
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
+                                                   offsetof(tTimerInstanceInfo, wPeriod), (uint8_t*) &timerInfo.wPeriod,
+                                                   member_size(tTimerInstanceInfo, wPeriod), &size, false, false);
+            assert(SOPC_STATUS_OK == result);
 
             // Check written size. Until wPeriod field included minimum.
             if (size < offsetof(tTimerInstanceInfo, wPeriod) + member_size(tTimerInstanceInfo, wPeriod))
             {
+                /* TODO: Call ReleaseWriteBuffer anyway and cancel the write */
                 result = SOPC_STATUS_NOK;
             }
             else
             {
                 // Release buffer
-                SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], //
-                                                     &idBuffer);                                        //
+                result =
+                    SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
             }
 
             // Mark API as not in use.
@@ -742,32 +719,29 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetOffset(SOPC_InterruptTimer* pT
             timerInfo.wOffset = offset;
 
             // Reserve buffer
-            uint32_t idBuffer = UINT32_MAX;
-
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Write buffer
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO object
-                                          idBuffer,                                          // Reserved buffer
-                                          offsetof(tTimerInstanceInfo, wOffset),    // Period offset in the buffer
-                                          (uint8_t*) &timerInfo.wOffset,            // Period value
-                                          member_size(tTimerInstanceInfo, wOffset), // Size of period value
-                                          &size,                                    // Written size
-                                          false,  // Don't ignore the least old data previous offset
-                                          false); // Don't ignore the least old data after written data
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
+                                                   offsetof(tTimerInstanceInfo, wOffset), (uint8_t*) &timerInfo.wOffset,
+                                                   member_size(tTimerInstanceInfo, wOffset), &size, false, false);
+            assert(SOPC_STATUS_OK == result);
 
             // Check written size. Until wPeriod field included minimum.
             if (size < offsetof(tTimerInstanceInfo, wOffset) + member_size(tTimerInstanceInfo, wOffset))
             {
+                /* TODO: Call ReleaseWriteBuffer anyway and cancel the write */
                 result = SOPC_STATUS_NOK;
             }
             else
             {
                 // Release buffer
-                SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], //
-                                                     &idBuffer);                                        //
+                result =
+                    SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
             }
 
             // Mark API as not in use.
@@ -834,35 +808,32 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetCallback(SOPC_InterruptTimer* 
             timerInfo.cbStop = cbStop;
 
             // Reserve DBO to write
-            uint32_t idBuffer = UINT32_MAX;
-
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Write DBO
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO buffer
-                                          idBuffer,                                          // Buffer reserved to write
-                                          offsetof(tTimerInstanceInfo, pUserContext),        // Offset of write
-                                          (uint8_t*) &timerInfo.pUserContext,                // Data to write
-                                          member_size(tTimerInstanceInfo, pUserContext) +    //
-                                              member_size(tTimerInstanceInfo, cbElapsed) +   //
-                                              member_size(tTimerInstanceInfo, cbStart) +     //
-                                              member_size(tTimerInstanceInfo, cbStop),       // Size to write
-                                          &size,                                             // written size
-                                          false,  // Don't ignore previous last updated data before offset
-                                          false); // Don't ignore after last field
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_WriteBuffer(
+                pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer, offsetof(tTimerInstanceInfo, pUserContext),
+                (uint8_t*) &timerInfo.pUserContext,
+                member_size(tTimerInstanceInfo, pUserContext) + member_size(tTimerInstanceInfo, cbElapsed) +
+                    member_size(tTimerInstanceInfo, cbStart) + member_size(tTimerInstanceInfo, cbStop),
+                &size, false, false);
+            assert(SOPC_STATUS_OK == result);
 
             // Check written size. Until cbStop field included minimum.
             if (size < offsetof(tTimerInstanceInfo, cbStop) + member_size(tTimerInstanceInfo, cbStop))
             {
+                /* TODO: Call ReleaseWriteBuffer anyway and cancel the write */
                 result = SOPC_STATUS_NOK;
             }
             else
             {
                 // Release DBO
-                SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], //
-                                                     &idBuffer);                                        //
+                result =
+                    SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
             }
 
             // Mark API as not in use.
@@ -920,30 +891,28 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
         if (bTransition)
         {
             // Reserve DBO to write
-            uint32_t idBuffer = UINT32_MAX;
-            SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            size_t idBuffer = 0;
+            result =
+                SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
+            assert(SOPC_STATUS_OK == result);
 
             // Write DBO
-            uint32_t size = 0;
-
-            SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], // DBO buffer
-                                          idBuffer,                                          // Buffer reserved to write
-                                          sizeof(tTimerInstanceInfo), // Offset of write, after timer info
-                                          pData,                      // Data to write
-                                          sizeToWrite,                // Data size
-                                          &size,                      // written size
-                                          false,                      // Don't ignore before offset
-                                          true);                      // Ignore after data written
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
+                                                   sizeof(tTimerInstanceInfo), pData, sizeToWrite, &size, false, true);
+            assert(SOPC_STATUS_OK == result);
 
             // Data shall not be less than header + size published, duplicated from last update.
             if (size < (sizeToWrite + sizeof(tTimerInstanceInfo)))
             {
+                /* TODO: Call ReleaseWriteBuffer anyway and cancel the write */
                 result = SOPC_STATUS_NOK;
             }
             else
             {
                 // Release DBO
-                SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer);
+                result =
+                    SOPC_DoubleBuffer_ReleaseWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer);
             }
             // Mark API as not in use.
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
@@ -996,7 +965,7 @@ SOPC_InterruptTimer_DataHandle* SOPC_InterruptTimer_Instance_DataHandle_Create(S
             pContainer->pTimer = pTimer;
             pContainer->idInstanceTimer = idInstanceTimer;
             pContainer->maxAllowedSize = pTimer->pData->maxTimerDataSize;
-            pContainer->idContainer = UINT32_MAX;
+            pContainer->idContainer = 0;
         }
 
         SOPC_InterruptTimer_DecrementInUseStatus(pTimer);
@@ -1052,32 +1021,25 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
         // If API is not in use for this instance, set timer status
         if (bTransition)
         {
-            pDataContainer->idContainer = UINT32_MAX;
-
-            result = SOPC_DoubleBuffer_GetWriteBuffer(pDbo,                         //
-                                                      &pDataContainer->idContainer, //
-                                                      NULL);                        //
+            size_t size = 0;
+            result = SOPC_DoubleBuffer_GetWriteBuffer(pDbo, &pDataContainer->idContainer, &size);
 
             if (SOPC_STATUS_OK == result)
             {
-                result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDbo,                        //
-                                                             pDataContainer->idContainer, //
-                                                             &pDataContainer->pDboData,   //
-                                                             &pDataContainer->pDboSize,   //
-                                                             false);                      //
+                result = SOPC_DoubleBuffer_WriteBufferGetPtr(pDbo, pDataContainer->idContainer,
+                                                             &pDataContainer->pDboData, false);
             }
 
             if (SOPC_STATUS_OK == result)
             {
-                pDataContainer->currentSize = (uint32_t)((*pDataContainer->pDboSize) - sizeof(tTimerInstanceInfo));
+                pDataContainer->currentSize = (uint32_t) size; /* TODO: check for overflow */
                 pDataContainer->pPublishedData = (pDataContainer->pDboData + sizeof(tTimerInstanceInfo));
             }
 
             if (SOPC_STATUS_OK != result)
             {
-                pDataContainer->idContainer = UINT32_MAX;
+                pDataContainer->idContainer = 0;
                 pDataContainer->pDboData = NULL;
-                pDataContainer->pDboSize = 0;
                 pDataContainer->pPublishedData = NULL;
                 pDataContainer->currentSize = 0;
 
@@ -1154,13 +1116,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
 
             if (SOPC_STATUS_OK == result && !bCancel)
             {
-                *(pDataContainer->pDboSize) = (uint32_t)(pDataContainer->currentSize + sizeof(tTimerInstanceInfo));
-
-                result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDbo,                            //
-                                                              &(pDataContainer->idContainer)); //
+                result = SOPC_DoubleBuffer_ReleaseWriteBuffer(pDbo, pDataContainer->idContainer);
             }
 
-            pDataContainer->idContainer = UINT32_MAX;
+            pDataContainer->idContainer = 0;
 
             desiredStatus = E_INTERRUPT_TIMER_INSTANCE_SYNC_STATUS_NOT_USED;
 
@@ -1269,20 +1228,20 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
             {
                 {
                     // Indicate timer instance will be read
-                    uint32_t idBuffer = UINT32_MAX;
-
-                    SOPC_DoubleBuffer_GetReadBuffer(pWks->pTimerInstanceDoubleBuffer[i], &idBuffer);
+                    size_t idBuffer = UINT32_MAX;
+                    result = SOPC_DoubleBuffer_GetReadBuffer(pWks->pTimerInstanceDoubleBuffer[i], &idBuffer);
+                    assert(SOPC_STATUS_OK == result);
 
                     // Get pointer on data
                     tTimerInstanceInfo* ptrInfo = NULL;
-                    uint32_t size = 0;
-
-                    SOPC_DoubleBuffer_ReadBufferPtr(pWks->pTimerInstanceDoubleBuffer[i], //
-                                                    idBuffer,                            //
-                                                    (uint8_t**) &ptrInfo,
-                                                    &size); //
+                    result = SOPC_DoubleBuffer_ReadBufferPtr(pWks->pTimerInstanceDoubleBuffer[i], idBuffer,
+                                                             (uint8_t**) &ptrInfo);
+                    assert(SOPC_STATUS_OK == result);
 
                     // Verify minimum size
+                    /* TODO: Read reads it all, this size is specified at creation time, it should success or fail
+                     * systematically */
+                    size_t size = sizeof(tTimerInstanceInfo) + pWks->maxTimerDataSize;
                     if (size >= sizeof(tTimerInstanceInfo))
                     {
                         // Check status change (start)
@@ -1304,11 +1263,9 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
                                 // Invoke elapsed callback
                                 if (NULL != ptrInfo->cbElapsed)
                                 {
-                                    ptrInfo->cbElapsed(
-                                        i,                                                 // Timer id
-                                        ptrInfo->pUserContext,                             // User context
-                                        ((uint8_t*) ptrInfo) + sizeof(tTimerInstanceInfo), // Data published
-                                        (uint32_t)(size - sizeof(tTimerInstanceInfo)));    // Data size
+                                    ptrInfo->cbElapsed(i, ptrInfo->pUserContext,
+                                                       ((uint8_t*) ptrInfo) + sizeof(tTimerInstanceInfo),
+                                                       (uint32_t)(size - sizeof(tTimerInstanceInfo)));
                                 }
                             }
                         }
@@ -1333,8 +1290,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, //
                     }
 
                     // Release double buffer for this timer instance
-                    SOPC_DoubleBuffer_ReleaseReadBuffer(pWks->pTimerInstanceDoubleBuffer[i], //
-                                                        &idBuffer);                          //
+                    SOPC_DoubleBuffer_ReleaseReadBuffer(pWks->pTimerInstanceDoubleBuffer[i], idBuffer);
                 }
 
             } // End of parsing all instances
@@ -1401,7 +1357,7 @@ static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(uint32_t
     for (uint32_t i = 0; i < nbInstances && SOPC_STATUS_OK == result; i++)
     {
         pWks->pTimerInstanceDoubleBuffer[i] =
-            SOPC_DoubleBuffer_Create(1, (uint32_t)(sizeof(tTimerInstanceInfo) + maxDataSize));
+            SOPC_DoubleBuffer_Create(2, (uint32_t)(sizeof(tTimerInstanceInfo) + maxDataSize));
         if (NULL == pWks->pTimerInstanceDoubleBuffer[i])
         {
             result = SOPC_STATUS_NOK;

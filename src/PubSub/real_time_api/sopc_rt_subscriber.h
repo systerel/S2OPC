@@ -194,9 +194,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Initializer_AddOutput(SOPC_RT_Subscriber_In
 /// @param [out] out_token Token which identify read output sequence. Will be used by SOPC_RT_Subscriber_Output_Read and
 /// SOPC_RT_Subscriber_Output_Read_Finalize
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* in_sub, //
-                                                            uint32_t in_pin,            //
-                                                            uint32_t* out_token);       //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* in_sub,
+                                                            uint32_t in_pin,
+                                                            size_t* out_token);
 
 /// @brief Read output sequence. Used outside RT Subscriber.
 /// @param [in] in_sub RT Subscriber object
@@ -209,13 +209,13 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Initialize(SOPC_RT_Subscriber* 
 /// @param [out] out_size Data size (significant bytes) pointed by *out_pData.
 /// @return SOPC_STATUS_OK if successful.
 /// SOPC_STATUS_INVALID_STATE if read sequence is performing for the same client identifier in other context.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
-                                                 uint32_t in_pin,             //
-                                                 uint32_t in_clt,             //
-                                                 uint32_t in_token,           //
-                                                 SOPC_Pin_Access in_scanmode, //
-                                                 uint8_t** out_pData,         //
-                                                 uint32_t* out_size);         //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,
+                                                 uint32_t in_pin,
+                                                 uint32_t in_clt,
+                                                 size_t in_token,
+                                                 SOPC_Pin_Access in_scanmode,
+                                                 uint8_t** out_pData,
+                                                 uint32_t* out_size);
 
 /// @brief Read output sequence finalization. Used outside RT Subscriber.
 /// @param [in] in_sub RT Subscriber object
@@ -223,9 +223,9 @@ SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read(SOPC_RT_Subscriber* in_sub,  //
 /// @param [inout] in_out_token Token which identify read output sequence. Returned by
 /// SOPC_RT_Subscriber_Output_Read_Initialize. Set to UINT32_MAX on return (invalid sequence)
 /// @return SOPC_STATUS_OK if successful.
-SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in_sub, //
-                                                          uint32_t in_pin,            //
-                                                          uint32_t* in_out_token);    //
+SOPC_ReturnStatus SOPC_RT_Subscriber_Output_Read_Finalize(SOPC_RT_Subscriber* in_sub,
+                                                          uint32_t in_pin,
+                                                          size_t* in_out_token);
 
 /// @brief Write input. Used outside RT Subscriber.
 /// @param [in] in_sub RT Subscriber object

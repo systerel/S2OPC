@@ -169,7 +169,7 @@ static void* cbmsgBoxRead2(void* arg);
 static void* cbmsgBoxRead1(void* arg)
 {
     (void) arg;
-    uint32_t id = UINT32_MAX;
+    size_t id = 0;
     uint8_t* pData = NULL;
     uint32_t size = 0;
 
@@ -181,8 +181,9 @@ static void* cbmsgBoxRead1(void* arg)
         if (!bFreeze)
         {
             SOPC_MsgBox_Pop_Initialize(myMsgBox, &id);
-        repeat:
-            if (mode == SOPC_MSGBOX_MODE_GET_NORMAL)
+        repeat: /* TODO: remove goto */
+            if (mode ==
+                SOPC_MSGBOX_MODE_GET_NORMAL) /* TODO: switch case + use mode if it contains the correct value... */
             {
                 result = SOPC_MsgBox_Pop_GetEvtPtr(myMsgBox, id, 0, &pData, &size, &nbPendingsEvent,
                                                    SOPC_MSGBOX_MODE_GET_NORMAL);
@@ -245,7 +246,7 @@ static void* cbmsgBoxRead1(void* arg)
             SOPC_Sleep(PERIOD_MS_READER_200MS);
             break;
         default:
-            assert(false && "Unexpected periopd.");
+            assert(false && "Unexpected period.");
             break;
         }
     }
@@ -254,8 +255,9 @@ static void* cbmsgBoxRead1(void* arg)
 
 static void* cbmsgBoxRead2(void* arg)
 {
+    /* TODO: remove copy paste and factorize these functions */
     (void) arg;
-    uint32_t id = UINT32_MAX;
+    size_t id = 0;
     uint8_t* pData = NULL;
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     uint32_t size = 0;
@@ -330,7 +332,7 @@ static void* cbmsgBoxRead2(void* arg)
             SOPC_Sleep(PERIOD_MS_READER_200MS);
             break;
         default:
-            assert(false && "Unexpected periopd.");
+            assert(false && "Unexpected period.");
             break;
         }
     }
@@ -528,7 +530,7 @@ static void* cbSubscriberReaderCallback(void* arg)
     uint8_t* pData = NULL;
 
     uint32_t clientId = *((uint32_t*) arg);
-    uint32_t token[2] = {0};
+    size_t token[2] = {0};
     uint32_t cpt[2] = {0};
 
     while (!bQuit)
@@ -1689,10 +1691,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
 
         printf("\r\n T0 NB STOP = %u , T1 NB STOP = %u  \r\n", bTest03_TestStop[0], bTest03_TestStop[1]);
 
-        if (!((1 == bTest03_TestStop[1])     //
-              && (1 == bTest03_TestStop[0])) //
-
-        )
+        if (!(1 == bTest03_TestStop[1] && 1 == bTest03_TestStop[0]))
         {
             res = -1;
         }
@@ -1732,6 +1731,7 @@ static int SOPC_TEST_IRQ_TIMER(void)
 
 int main(void)
 {
+    /* TODO: use libcheck */
     int res = 0;
 
     res = SOPC_TEST_IRQ_TIMER();
