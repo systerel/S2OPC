@@ -911,7 +911,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
             }
             else
             {
-                printf("# RT Publisher well initialized :)");
+                printf("# RT Publisher well initialized\n");
             }
         }
 

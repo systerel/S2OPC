@@ -238,10 +238,10 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
 /// @param [out] pCurrentSize Function returns current significant bytes present in the returned exposed buffer
 /// @param [out] ppData Address where is returned pointer on exposed buffer. Do not free this value.
 /// @return SOPC_STATUS_OK in case of success.
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_InterruptTimer_DataHandle* pContainer, //
-                                                                        uint32_t* pMaxAllowedSize,                  //
-                                                                        uint32_t* pCurrentSize,                     //
-                                                                        uint8_t** ppData);                          //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_InterruptTimer_DataHandle* pContainer,
+                                                                        uint32_t* pMaxAllowedSize,
+                                                                        size_t* pCurrentSize,
+                                                                        uint8_t** ppData);
 
 /// @brief Update data handle size with newSize parameter.
 /// @warning This function shall be used between SOPC_InterruptTimer_Instance_DataHandle_Initialize  and
@@ -251,8 +251,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
 /// @return SOPC_STATUS_OK in case of success.
 /// @return SOPC_INVALID_PARAMETERS if newSize > max allowed size returned by
 /// SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo
-SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer, //
-                                                                     uint32_t newSize);                          //
+SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer,
+                                                                     size_t newSize);
 
 /// @brief Commit data container with new data and its new size
 /// @param [in] pDataContainer Interrupt timer instance data handle

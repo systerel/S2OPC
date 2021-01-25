@@ -438,9 +438,7 @@ SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPu
     return result;
 }
 
-SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, //
-                                              uint32_t msgIdentifier,  //
-                                              SOPC_Buffer* pBuffer)    //
+SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, uint32_t msgIdentifier, SOPC_Buffer* pBuffer)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -457,10 +455,17 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetBuffer(SOPC_RT_Publisher* pPub, //
 
         if (SOPC_STATUS_OK == result)
         {
-            result = SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(pPub->ppTmrDataHandle[msgIdentifier], //
-                                                                           &pBuffer->maximum_size,               //
-                                                                           &pBuffer->length,                     //
-                                                                           &pBuffer->data);                      //
+            size_t size = 0;
+            result = SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(
+                pPub->ppTmrDataHandle[msgIdentifier], &pBuffer->maximum_size, &size, &pBuffer->data);
+            if (size < UINT32_MAX)
+            {
+                pBuffer->length = (uint32_t) size;
+            }
+            else
+            {
+                result = SOPC_STATUS_OUT_OF_MEMORY;
+            }
 
             if (SOPC_STATUS_OK == result)
             {

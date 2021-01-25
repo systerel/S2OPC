@@ -100,13 +100,12 @@ struct SOPC_InterruptTimer_DataHandle
 {
     struct SOPC_InterruptTimer* pTimer; ///< Linked workspace, set by SOPC_InterruptTimer_DataHandle_Create
     uint32_t maxAllowedSize;            ///< Max allowed size retrieved by SOPC_InterruptTimer_DataHandle_Initialize
-    uint32_t currentSize;    ///< Current significant bytes retrieved by SOPC_InterruptTimer_DataHandle_Initialize
-    uint8_t* pPublishedData; ///< Pointer on timer data buffer
+    uint8_t* pPublishedData;            ///< Pointer on timer data buffer
 
     uint32_t idInstanceTimer; ///< Timer instance identifier, set by SOPC_InterruptTimer_DataHandle_Create
     size_t idContainer;       ///< Double buffer reserved buffer used by timer instance identifier, returned by
                               ///< SOPC_DoubleBuffer_GetWriteBuffer
-    uint8_t* pDboData;        ///< Double buffer data buffer field, returned by SOPC_DoubleBuffer_WriteBufferGetPtr
+    uint8_t* pDboData;        //< Double buffer data buffer field: timer info followed by timer data
 };
 
 // Declaration of private function
@@ -992,7 +991,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
 
             if (SOPC_STATUS_OK == result)
             {
-                pDataContainer->currentSize = (uint32_t) size; /* TODO: check for overflow */
                 pDataContainer->pPublishedData = (pDataContainer->pDboData + sizeof(tTimerInstanceInfo));
             }
 
@@ -1001,7 +999,6 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Initialize(SOPC_Interr
                 pDataContainer->idContainer = 0;
                 pDataContainer->pDboData = NULL;
                 pDataContainer->pPublishedData = NULL;
-                pDataContainer->currentSize = 0;
 
                 result = SOPC_STATUS_NOK;
 
@@ -1044,7 +1041,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
     uint32_t idInstanceTimer = pDataContainer->idInstanceTimer;
     SOPC_InterruptTimer* pTimer = pDataContainer->pTimer;
     tInterruptTimerData* pTimerData = pDataContainer->pTimer->pData;
-    SOPC_DoubleBuffer* pDbo = pTimer->pData->pTimerInstanceDoubleBuffer[idInstanceTimer];
+    SOPC_DoubleBuffer* pDbo = pTimerData->pTimerInstanceDoubleBuffer[idInstanceTimer];
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -1063,7 +1060,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
         // If API is not in use for this instance, set timer status
         if (bTransition)
         {
-            if (pDataContainer->currentSize > pTimerData->maxTimerDataSize && !bCancel)
+            if (((tTimerInstanceInfo*) (pDataContainer->pDboData))->dataSize > pTimerData->maxTimerDataSize && !bCancel)
             {
                 result = SOPC_STATUS_OUT_OF_MEMORY;
             }
@@ -1099,7 +1096,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
 
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_InterruptTimer_DataHandle* pContainer,
                                                                         uint32_t* pMaxAllowedSize,
-                                                                        uint32_t* pCurrentSize,
+                                                                        size_t* pCurrentSize,
                                                                         uint8_t** ppData)
 {
     if (NULL == pContainer || NULL == pMaxAllowedSize || NULL == pCurrentSize || NULL == ppData)
@@ -1110,14 +1107,14 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     *pMaxAllowedSize = pContainer->maxAllowedSize;
-    *pCurrentSize = pContainer->currentSize;
+    *pCurrentSize = ((tTimerInstanceInfo*) (pContainer->pDboData))->dataSize;
     *ppData = pContainer->pPublishedData;
 
     return result;
 }
 
 SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_InterruptTimer_DataHandle* pContainer,
-                                                                     uint32_t newSize)
+                                                                     size_t newSize)
 
 {
     if (NULL == pContainer || newSize > pContainer->maxAllowedSize)
@@ -1126,7 +1123,7 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
     }
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    pContainer->currentSize = newSize;
+    ((tTimerInstanceInfo*) (pContainer->pDboData))->dataSize = newSize;
     return result;
 }
 
