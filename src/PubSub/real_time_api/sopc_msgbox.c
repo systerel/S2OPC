@@ -410,7 +410,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Push(SOPC_MsgBox* pMsgBox, uint8_t* data, uint32_t
         if (result == SOPC_STATUS_OK)
         {
             /* TODO: Restructure fields in tMsgBoxFifoHeader instead of pointing somewhere after it */
-            tMsgBoxFifoEvents* pEvtBuffer = (tMsgBoxFifoEvents*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
+            tMsgBoxFifoEvents* pEvtBuffer = (void*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
             uint8_t* pDataBuffer =
                 (uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts;
 
@@ -469,7 +469,7 @@ SOPC_ReturnStatus SOPC_MsgBox_Reset(SOPC_MsgBox* pMsgBox)
 
         if (SOPC_STATUS_OK == result)
         {
-            tMsgBoxFifoEvents* pEvtBuffer = (tMsgBoxFifoEvents*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
+            tMsgBoxFifoEvents* pEvtBuffer = (void*) ((uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader));
             uint8_t* pDataBuffer =
                 (uint8_t*) pHeader + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHeader->maxEvts;
 
@@ -540,7 +540,7 @@ SOPC_ReturnStatus SOPC_MsgBox_DataHandle_Initialize(SOPC_MsgBox_DataHandle* pDat
         // Set shortcut pointer on header, events buffer and current free data buffer
         if (SOPC_STATUS_OK == result)
         {
-            tMsgBoxFifoEvents* pEvts = (tMsgBoxFifoEvents*) ((uint8_t*) pHead + sizeof(tMsgBoxFifoHeader));
+            tMsgBoxFifoEvents* pEvts = (void*) ((uint8_t*) pHead + sizeof(tMsgBoxFifoHeader));
             uint8_t* pData = (uint8_t*) pHead + sizeof(tMsgBoxFifoHeader) + sizeof(tMsgBoxFifoEvents) * pHead->maxEvts;
 
             pDataHandle->pHeader = pHead;

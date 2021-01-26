@@ -1060,7 +1060,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_Finalize(SOPC_Interrup
         // If API is not in use for this instance, set timer status
         if (bTransition)
         {
-            if (((tTimerInstanceInfo*) (pDataContainer->pDboData))->dataSize > pTimerData->maxTimerDataSize && !bCancel)
+            tTimerInstanceInfo* ptrInfo = (void*) (pDataContainer->pDboData);
+            if (ptrInfo->dataSize > pTimerData->maxTimerDataSize && !bCancel)
             {
                 result = SOPC_STATUS_OUT_OF_MEMORY;
             }
@@ -1107,7 +1108,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_GetBufferInfo(SOPC_Int
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     *pMaxAllowedSize = pContainer->maxAllowedSize;
-    *pCurrentSize = ((tTimerInstanceInfo*) (pContainer->pDboData))->dataSize;
+    tTimerInstanceInfo* ptrInfo = (void*) (pContainer->pDboData);
+    *pCurrentSize = ptrInfo->dataSize;
     *ppData = pContainer->pPublishedData;
 
     return result;
@@ -1123,7 +1125,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_DataHandle_SetNewSize(SOPC_Interr
     }
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    ((tTimerInstanceInfo*) (pContainer->pDboData))->dataSize = newSize;
+    tTimerInstanceInfo* ptrInfo = (void*) (pContainer->pDboData);
+    ptrInfo->dataSize = newSize;
     return result;
 }
 
