@@ -25,6 +25,7 @@
 #include "sopc_helper_uri.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
+#include "udp_json_gtw.h"
 
 #include "config.h"
 #include "pubsub.h"
@@ -94,6 +95,16 @@ int main(int argc, char* const argv[])
         status = Server_LoadAddressSpace();
     }
 
+    /* Configure the UDP JSON Gateway module */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = UDP_Configure();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not configure UDP JSON Gateway module.\n");
+        }
+    }
+
     /* Configuration of the PubSub module is done upon PubSub start through the local service */
 
     /* Start the Server */
@@ -106,6 +117,16 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = Server_WritePubSubNodes();
+    }
+
+    /* Start the UDP JSON Gateway module */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = UDP_Start(0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not start UDP JSON Gateway module.\n");
+        }
     }
 
     /* Wait for a signal */
@@ -156,5 +177,6 @@ int main(int argc, char* const argv[])
     /* Clean and quit */
     PubSub_StopAndClear();
     Server_StopAndClear(&s2opcConfig);
+    UDP_Stop();
     printf("# Info: Server closed.\n");
 }

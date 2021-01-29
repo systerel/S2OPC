@@ -65,6 +65,7 @@ if(ENABLE_SAMPLES)
                                "pubsub_server/server.c"
                                "pubsub_server/pubsub.c"
                                "pubsub_server/helpers.c"
+                               "pubsub_server/udp_json_gtw.c"
                                "${STATIC_PUBSUB_CONFIG_C}"
                                "${STATIC_ADDRESS_SPACE_C}"
                                )
