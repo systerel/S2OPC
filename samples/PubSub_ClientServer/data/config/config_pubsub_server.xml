@@ -13,6 +13,13 @@
             <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>
         </message>
+		<message id="16" version="1" publishingInterval="1000">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0" displayName="Counter" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1" displayName="Data1" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2" displayName="Data2" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3" displayName="Data3" dataType="String"/>
+        </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->

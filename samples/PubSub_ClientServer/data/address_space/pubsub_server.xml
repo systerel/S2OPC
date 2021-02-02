@@ -788,7 +788,12 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt16</Reference>
-      <Reference ReferenceType="HasComponent">ns=1;s=PubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubUInt32</Reference>	  
+      <!-- Schneider Variables -->
+      <Reference ReferenceType="HasComponent">ns=1;s=data0</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data1</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data2</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data3</Reference>
     </References>
   </UAObject>
   <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
@@ -855,6 +860,50 @@
     </References>
     <Value>
       <uax:UInt32>4294967295</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Counter" DataType="UInt32" NodeId="ns=1;s=data0" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Counter</DisplayName>
+    <Description>Schneider frame reception counter</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>0</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data1" DataType="Int16" NodeId="ns=1;s=data1" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data1</DisplayName>
+    <Description>Schneider Data 1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int16>0</uax:Int16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data2" DataType="Int32" NodeId="ns=1;s=data2" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data2</DisplayName>
+    <Description>Schneider Data 2</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data3" DataType="String" NodeId="ns=1;s=data3" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data3</DisplayName>
+    <Description>Schneider Data 3</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>Default Text</uax:String>
     </Value>
   </UAVariable>
 

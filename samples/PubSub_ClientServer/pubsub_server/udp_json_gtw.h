@@ -32,7 +32,7 @@
 SOPC_ReturnStatus UDP_Configure(void);
 
 /* Start */
-bool UDP_Start(uint32_t timeResMicroSecs);
+bool UDP_Start(void);
 
 /* Stop and Clean */
 void UDP_Stop(void);

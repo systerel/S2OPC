@@ -122,7 +122,7 @@ int main(int argc, char* const argv[])
     /* Start the UDP JSON Gateway module */
     if (SOPC_STATUS_OK == status)
     {
-        status = UDP_Start(0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        status = UDP_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Could not start UDP JSON Gateway module.\n");
