@@ -165,6 +165,13 @@ static SOPC_ReturnStatus UDP_SendingConfigure (void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    /* Create socket file descriptor for sending */
+    if ((sendSockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        printf("# Error: sending socket creation failed.\n");
+        status = SOPC_STATUS_NOK;
+    }
+
     /* Configure sending information */
     sendSock.sin_family = AF_INET;
     sendSock.sin_addr.s_addr = inet_addr(localhost_ip);
@@ -248,7 +255,7 @@ static bool UDP_UpdateServer(void)
 {
     OpcUa_WriteValue* writeValues = SOPC_Calloc(NBDATA, sizeof(OpcUa_WriteValue));
     bool status = false;
-    char nodeId_Str[2*MAXNBCHAR];
+    char nodeId_Str[2*MAXNBCHAR] = {0};
     SOPC_NodeId* nodeId = NULL;
 
     /* For each data, create OPC UA Node Id and Write Value */
@@ -280,7 +287,7 @@ static bool UDP_UpdateServer(void)
 static void UDP_DecodeData(char* buffer)
 {
     uint8_t dataIdx = 0;
-    char* dataArr[NBDATA];
+    char* dataArr[NBDATA] = {NULL};
     char comma[] = ",";
     char *data = strtok(buffer, comma);
 
@@ -332,7 +339,7 @@ static void UDP_DecodeData(char* buffer)
 
 static void UDP_DecodeDataAndUpdateServer(char* buffer)
 {
-    char dataBuffer[MAXSIZE];
+    char dataBuffer[MAXSIZE] = {0};
     char c = buffer[NBDATA];
     uint8_t nbCurlyBracket = 0;
     uint8_t buffIdx = 0;
@@ -384,8 +391,8 @@ static void* UDP_ManageReception (void* arg)
     /*unused parameter */
     (void) arg;
 
-    char buffer[MAXSIZE];
-    ssize_t data_len;
+    char buffer[MAXSIZE]  = {0};
+    ssize_t data_len = 0;
 
     printf("# Info: UDP Reception thread running.\n");
 
@@ -417,10 +424,10 @@ static void* UDP_ManageReception (void* arg)
 
 static bool UDP_ReadServer(SOPC_DataValue** readValues)
 {
-    OpcUa_ReadValueId* readValuesId;
-    char nodeId_Str[2*MAXNBCHAR];
-    SOPC_NodeId* nodeId;
-    SOPC_StatusCode status;
+    OpcUa_ReadValueId* readValuesId = NULL;
+    char nodeId_Str[2*MAXNBCHAR] = {0};
+    SOPC_NodeId* nodeId = NULL;
+    SOPC_StatusCode status = SOPC_STATUS_OK;
     bool readStatus = true;
 
     /* Allocate memory */
@@ -457,7 +464,7 @@ static bool UDP_ReadServer(SOPC_DataValue** readValues)
 
 static void UDP_CreateRequest(char* request, SOPC_DataValue* readValues)
 {
-    char buffer[MAXNBCHAR];
+    char buffer[MAXNBCHAR] = {0};
 
     /* Reset Request content */
     memset(request, '\0', REQUEST_LENGTH);
@@ -465,7 +472,7 @@ static void UDP_CreateRequest(char* request, SOPC_DataValue* readValues)
     /* Build request header */
     strcpy(request, REQUEST_HEADER_1);
     sprintf(buffer, "%d;", UDP_PORT_IN);
-    strncat(request, buffer, REQUEST_LENGTH-strlen(request));
+    strncat(request, buffer, REQUEST_LENGTH-strlen(request)-1);
     strncat(request, localhost_ip, REQUEST_LENGTH-strlen(request));
     sprintf(buffer, ";%d", UDP_PORT_OUT);
     strncat(request, buffer, REQUEST_LENGTH-strlen(request));
@@ -526,7 +533,7 @@ static void* UDP_ManageSending (void* arg)
     (void) arg;
 
     SOPC_DataValue* readValues = NULL;
-    char request[REQUEST_LENGTH];
+    char request[REQUEST_LENGTH] = {0};
 
     printf("# Info: UDP Sending thread running.\n");
 
