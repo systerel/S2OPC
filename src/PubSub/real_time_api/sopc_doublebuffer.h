@@ -66,7 +66,7 @@ typedef struct SOPC_DoubleBuffer SOPC_DoubleBuffer;
  * \param   nbElements      Number of elements in the array.
  * \param   elementSize     Size of an atomic element
  *
- * \note    \p nbElements should be chosen such that
+ * \note    \p nbElements shall be chosen such that
  *          there are at most `nbElements-1` concurrent read access to the array
  *
  * \see     SOPC_DoubleBuffer
@@ -76,7 +76,7 @@ typedef struct SOPC_DoubleBuffer SOPC_DoubleBuffer;
 SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(size_t nbElements, size_t elementSize);
 
 /** \brief   Destroy a double buffer array
- * \param [inout]  p  Object to destroy. Pointer is set to NULL.
+ * \param [inout]  pp  Object to destroy. Pointer is set to NULL.
  * \warning Not thread safe!
  */
 void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** pp);
@@ -174,7 +174,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, siz
 /** \brief Get most up to date buffer to read.
  *
  * This buffer is reserved for read operations
- * and cannot be written before it is released by calling SOPC_DoubleBuffer_ReadBufferPtr()
+ * and cannot be written before it is released by calling SOPC_DoubleBuffer_ReleaseReadBuffer()
  *
  * \param [in] p            The double buffer array
  * \param [out] pIdBuffer   Pointer to the buffer reserved for read operations

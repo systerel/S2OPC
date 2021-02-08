@@ -328,6 +328,7 @@ static SOPC_ReturnStatus SOPC_MsgBox_Initialize(SOPC_MsgBox* pMsgBox,
     // Allocation of double buffer used to publish FIFO image (header + events table + data buffer)
     if (result == SOPC_STATUS_OK)
     {
+        /* Create 1 more element in the buffer array than there are clients, so that a read is always possible */
         pMsgBox->pFifoPublisher = SOPC_DoubleBuffer_Create(pMsgBox->nbMaxClts + 1, pMsgBox->doubleBufferFieldSize);
 
         if (pMsgBox->pFifoPublisher == NULL)

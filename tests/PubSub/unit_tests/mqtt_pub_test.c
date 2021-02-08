@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -125,7 +126,7 @@ static void pFctReceiveMessage(MqttTransportHandle* pCtx, uint8_t* data, uint16_
     (void) data;
     (void) size;
     (void) ctx;
-    printf("***** SYNC GET MSG : handle %08lX - size = %d \r\n", (uint64_t) pCtx, size);
+    printf("***** SYNC GET MSG : handle %p - size = %" PRId16, pCtx, size);
 
     printf("\r\nMessage read = %s\r\n", data);
 

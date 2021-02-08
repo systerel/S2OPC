@@ -537,7 +537,8 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_LastStatus(SOPC_InterruptTimer* p
             assert(SOPC_STATUS_OK == result);
 
             // Try to write DBO
-            /* TODO: Is that a read call disguised as a write ? */
+            /* Note: This write call without release and without "ignorePrevious" looks like a read.
+             * TODO: Add another element to the double buffer creation, and change this write with a read */
             result = SOPC_DoubleBuffer_WriteBufferGetPtr(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
                                                          (uint8_t**) &pTimerInfo, false);
 
@@ -860,13 +861,15 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Instance_SetData(SOPC_InterruptTimer* pTim
                 SOPC_DoubleBuffer_GetWriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], &idBuffer, NULL);
             assert(SOPC_STATUS_OK == result);
 
-            /* Update the timerInfo structure for the size of the payload and keep the current value for the rest */
+            /* Update the timerInfo structure with the size of the payload */
             tTimerInstanceInfo timerInfo;
             timerInfo.dataSize = sizeToWrite;
             result = SOPC_DoubleBuffer_WriteBuffer(
                 pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer, offsetof(tTimerInstanceInfo, dataSize),
                 (uint8_t*) &timerInfo.dataSize, sizeof(timerInfo.dataSize), NULL, false, true);
             assert(SOPC_STATUS_OK == result);
+
+            /* And write the data after the header */
             result = SOPC_DoubleBuffer_WriteBuffer(pWks->pTimerInstanceDoubleBuffer[idInstanceTimer], idBuffer,
                                                    sizeof(tTimerInstanceInfo), pData, sizeToWrite, NULL, true, true);
 
@@ -1186,48 +1189,46 @@ SOPC_ReturnStatus SOPC_InterruptTimer_Update(SOPC_InterruptTimer* pTimer, uint32
                                                              (uint8_t**) &ptrInfo);
                     assert(SOPC_STATUS_OK == result);
 
-                    // Verify minimum size
-                    /* TODO: test removed because always true */
+                    // Check status change (start)
+                    if (pWks->pTimerInstancePreviousStatus[i] != ptrInfo->wStatus)
                     {
-                        // Check status change (start)
-                        if (pWks->pTimerInstancePreviousStatus[i] != ptrInfo->wStatus)
+                        // If started, invoke start callback
+                        if (ptrInfo->cbStart != NULL && SOPC_INTERRUPT_TIMER_STATUS_ENABLED == ptrInfo->wStatus)
                         {
-                            // If started, invoke start callback
-                            if (ptrInfo->cbStart != NULL && SOPC_INTERRUPT_TIMER_STATUS_ENABLED == ptrInfo->wStatus)
-                            {
-                                ptrInfo->cbStart(i, ptrInfo->pUserContext);
-                            }
+                            ptrInfo->cbStart(i, ptrInfo->pUserContext);
                         }
-
-                        // Check status and period
-                        if (SOPC_INTERRUPT_TIMER_STATUS_ENABLED == ptrInfo->wStatus && ptrInfo->wPeriod > 0)
-                        {
-                            // Verify timeout
-                            if (((pWks->irqTicks + ptrInfo->wOffset) % ptrInfo->wPeriod) == 0)
-                            {
-                                // Invoke elapsed callback
-                                if (NULL != ptrInfo->cbElapsed)
-                                {
-                                    ptrInfo->cbElapsed(i, ptrInfo->pUserContext,
-                                                       ((uint8_t*) ptrInfo) + sizeof(tTimerInstanceInfo),
-                                                       (uint32_t) ptrInfo->dataSize); /* TODO: remove cast */
-                                }
-                            }
-                        }
-
-                        // Check status change and stop
-                        if (pWks->pTimerInstancePreviousStatus[i] != ptrInfo->wStatus)
-                        {
-                            // If stopped, invoke stop callback
-                            if (ptrInfo->cbStop != NULL && SOPC_INTERRUPT_TIMER_STATUS_DISABLED == ptrInfo->wStatus)
-                            {
-                                ptrInfo->cbStop(i, ptrInfo->pUserContext);
-                            }
-                        }
-
-                        // Save new status reference
-                        pWks->pTimerInstancePreviousStatus[i] = ptrInfo->wStatus;
                     }
+
+                    // Check status and period
+                    if (SOPC_INTERRUPT_TIMER_STATUS_ENABLED == ptrInfo->wStatus && ptrInfo->wPeriod > 0)
+                    {
+                        // Verify timeout
+                        if (((pWks->irqTicks + ptrInfo->wOffset) % ptrInfo->wPeriod) == 0)
+                        {
+                            // Invoke elapsed callback
+                            if (NULL != ptrInfo->cbElapsed)
+                            {
+                                /* TODO: Change callback type to accept a size_t in the size field
+                                 *  (instead of uint32_t), then remove cast */
+                                ptrInfo->cbElapsed(i, ptrInfo->pUserContext,
+                                                   ((uint8_t*) ptrInfo) + sizeof(tTimerInstanceInfo),
+                                                   (uint32_t) ptrInfo->dataSize);
+                            }
+                        }
+                    }
+
+                    // Check status change and stop
+                    if (pWks->pTimerInstancePreviousStatus[i] != ptrInfo->wStatus)
+                    {
+                        // If stopped, invoke stop callback
+                        if (ptrInfo->cbStop != NULL && SOPC_INTERRUPT_TIMER_STATUS_DISABLED == ptrInfo->wStatus)
+                        {
+                            ptrInfo->cbStop(i, ptrInfo->pUserContext);
+                        }
+                    }
+
+                    // Save new status reference
+                    pWks->pTimerInstancePreviousStatus[i] = ptrInfo->wStatus;
 
                     // Release double buffer for this timer instance
                     SOPC_DoubleBuffer_ReleaseReadBuffer(pWks->pTimerInstanceDoubleBuffer[i], idBuffer);
@@ -1295,6 +1296,7 @@ static inline tInterruptTimerData* SOPC_InterruptTimer_Workspace_Create(uint32_t
 
     for (uint32_t i = 0; i < nbInstances && SOPC_STATUS_OK == result; i++)
     {
+        /* Create a double buffer with 2 elements as we must reserve one more elements than the number of readers */
         pWks->pTimerInstanceDoubleBuffer[i] =
             SOPC_DoubleBuffer_Create(2, (uint32_t)(sizeof(tTimerInstanceInfo) + maxDataSize));
         if (NULL == pWks->pTimerInstanceDoubleBuffer[i])

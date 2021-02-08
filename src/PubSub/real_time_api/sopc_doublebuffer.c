@@ -26,7 +26,7 @@
 #include "sopc_doublebuffer.h"
 #include "sopc_logger.h"
 
-typedef struct SOPC_DbleBufElem
+typedef struct BufferState
 {
     /* TODO: these values are int32_t because of our current Atomic interface */
     /** Number of concurrent readers reading this element (more than 0 prevents writes) */
@@ -34,7 +34,7 @@ typedef struct SOPC_DbleBufElem
     /** Whether the first memory bank (\verbatim bankB = false\endverbatim) currently stores data or the other */
     int32_t bankB;
     /* To reduce the number of calls to malloc, banks are stored in an array inside the double buffer array */
-} SOPC_DbleBufElem;
+} BufferState;
 
 struct SOPC_DoubleBuffer
 {
@@ -43,8 +43,8 @@ struct SOPC_DoubleBuffer
     size_t iLastWritten;
     /** Allocated memory in bytes for each element for each bank */
     size_t elemSize;
-    /** Array of \p nbElems elements */
-    SOPC_DbleBufElem* arrayElems;
+    /** Array of \p nbElems states, which stores the number of current reader of the currently read memory bank */
+    BufferState* arrayStates;
     /** Array of all the buffers (two buffers per element) */
     uint8_t* arrayBuffers;
 };
@@ -55,7 +55,7 @@ static inline uint8_t* get_buffer_ptr(SOPC_DoubleBuffer* p, size_t idBuffer, boo
 {
     size_t index = 2 * idBuffer;
     /* Write to the other bank (bankB indicates in which bank are currently stored data) */
-    if (p->arrayElems[idBuffer].bankB ^ write)
+    if (p->arrayStates[idBuffer].bankB ^ write)
     {
         index += 1;
     }
@@ -70,15 +70,15 @@ SOPC_DoubleBuffer* SOPC_DoubleBuffer_Create(size_t nbElements, size_t elementSiz
     }
 
     /* Allocate all buffers, then allocate and fill the superstructure */
-    SOPC_DbleBufElem* arrElems = (SOPC_DbleBufElem*) SOPC_Calloc(nbElements, sizeof(SOPC_DbleBufElem));
-    uint8_t* arrBuffs = (uint8_t*) SOPC_Calloc(1, 2 * nbElements * elementSize);
+    BufferState* arrElems = (BufferState*) SOPC_Calloc(nbElements, sizeof(BufferState));
+    uint8_t* arrBuffs = (uint8_t*) SOPC_Calloc(2 * nbElements, elementSize);
     SOPC_DoubleBuffer* pBuffer = (SOPC_DoubleBuffer*) SOPC_Calloc(1, sizeof(SOPC_DoubleBuffer));
 
     if (NULL != pBuffer && NULL != arrElems && NULL != pBuffer)
     {
         pBuffer->nbElems = nbElements;
         pBuffer->elemSize = elementSize;
-        pBuffer->arrayElems = arrElems;
+        pBuffer->arrayStates = arrElems;
         pBuffer->arrayBuffers = arrBuffs;
     }
     else
@@ -101,8 +101,8 @@ void SOPC_DoubleBuffer_Destroy(SOPC_DoubleBuffer** pp)
         return;
     }
     SOPC_DoubleBuffer* p = *pp;
-    SOPC_Free(p->arrayElems);
-    p->arrayElems = NULL;
+    SOPC_Free(p->arrayStates);
+    p->arrayStates = NULL;
     SOPC_Free(p->arrayBuffers);
     p->arrayBuffers = NULL;
     SOPC_Free(p);
@@ -123,7 +123,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetWriteBuffer(SOPC_DoubleBuffer* p, size_t*
     for (size_t i = 1; i < p->nbElems && readCounter > 0; ++i)
     {
         size_t index = (p->iLastWritten + i) % p->nbElems;
-        readCounter = SOPC_Atomic_Int_Get(&p->arrayElems[index].readersCount);
+        readCounter = SOPC_Atomic_Int_Get(&p->arrayStates[index].readersCount);
         if (0 == readCounter)
         {
             *pIdBuffer = index;
@@ -158,14 +158,14 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseWriteBuffer(SOPC_DoubleBuffer* p, siz
     /* TODO: Lock before all the following reads and updates */
     /* TODO: The previous documentation stated that this function may not be called when one cancels the write,
      *  which must be taken into account before modifying this function */
-    if (0 < p->arrayElems[idBuffer].readersCount)
+    if (0 < p->arrayStates[idBuffer].readersCount)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                                "Double buffer element became read while being written, cannot commit");
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    p->arrayElems[idBuffer].bankB = !p->arrayElems[idBuffer].bankB;
+    p->arrayStates[idBuffer].bankB = !p->arrayStates[idBuffer].bankB;
     p->iLastWritten = idBuffer;
 
     /* TODO: count Get-Release and identify if cancels are really used */
@@ -266,7 +266,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_GetReadBuffer(SOPC_DoubleBuffer* p, size_t* 
      * as it will modify the readersCount of an element of the double buffer */
     size_t idBuffer = p->iLastWritten;
 
-    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayElems[idBuffer].readersCount, 1);
+    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayStates[idBuffer].readersCount, 1);
     /* TODO: The limit of p->nbElems seems rather unjustified, but this was the previous behavior */
     /* TODO: Have an atomic Get/Set/Add on size_t to avoid tedious casts */
     assert(prevCount + 1 >= 0 && (size_t)(prevCount + 1) <= p->nbElems - 1 &&
@@ -329,7 +329,7 @@ SOPC_ReturnStatus SOPC_DoubleBuffer_ReleaseReadBuffer(SOPC_DoubleBuffer* p, size
     }
     assert(idBuffer < p->nbElems);
 
-    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayElems[idBuffer].readersCount, -1);
+    int32_t prevCount = SOPC_Atomic_Int_Add(&p->arrayStates[idBuffer].readersCount, -1);
     assert(prevCount - 1 >= 0 &&
            "Double buffer array in inconsistent state because more readers were released than got, cannot proceed");
 
