@@ -121,12 +121,8 @@ static const char* expectedResultsBuffer[10] = {"MESSAGE 1", "MESSAGE 2", "MESSA
 
 static void pFctReceiveMessage(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* ctx)
 {
-    (void) data;
-    (void) pCtx;
-    (void) data;
-    (void) size;
     (void) ctx;
-    printf("***** SYNC GET MSG : handle %p - size = %" PRId16, pCtx, size);
+    printf("***** SYNC GET MSG : handle %p - size = %" PRId16, (void*) pCtx, size);
 
     printf("\r\nMessage read = %s\r\n", data);
 

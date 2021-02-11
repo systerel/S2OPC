@@ -107,6 +107,8 @@ if(ENABLE_TESTING)
 
   add_executable(mqtt_pub_test "unit_tests/mqtt_pub_test.c")
   target_link_libraries(mqtt_pub_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
+  target_compile_options(mqtt_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(mqtt_pub_test PRIVATE ${S2OPC_DEFINITIONS})
 
   s2opc_unit_test(mqtt_pub_test)
 
