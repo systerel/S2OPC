@@ -101,6 +101,10 @@ else
 fi
 
 if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
+   adduser --system mosquitto
+   mosquitto &
+   MOSQUITTO_PID=$!
+
    if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
        PUBSUB_TEST_DIR=${BIN_DIR}/PubSub
        PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
@@ -121,6 +125,7 @@ if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
    fi
    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
    CTEST_RET2=$?
+   kill $MOSQUITTO_PID
 else
    CTEST_RET2=0
 fi

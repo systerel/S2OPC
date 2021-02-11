@@ -287,8 +287,6 @@ test-check:
   <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/test@sha256:833082e232ca3a26fd758eda093242bebcc57305713d3eb2de5a95f58ff9bc31  # digest of test:2.8
   script:
-    - 'adduser --system mosquitto'
-    - 'mosquitto -d'
     - './test-all.sh'
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -304,8 +302,6 @@ test-unit-all-tests:
   variables:
     <<: *all-tests_test_variables
   script:
-    - 'adduser --system mosquitto'
-    - 'mosquitto -d'
     - './test-all.sh'
   rules:
     - if: "$ALL_TESTS != null"
