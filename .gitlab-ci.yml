@@ -411,3 +411,24 @@ pages:
     paths:
     - public
     expire_in: 30 days
+
+check_doc:
+  <<: *build_linux
+  stage: doc
+  dependencies: []
+  script:
+    - mkdir $BUILD_DIR
+    - cd $BUILD_DIR
+    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
+    - cmake --build . --target doc &> doc.log
+    - test $(grep -c warning doc.log) -eq 0
+  variables:
+    <<: *build_linux_variables
+  artifacts:
+    paths:
+      - '$BUILD_DIR/doc.log'
+    expire_in: '1 month'
+    when: always
+  rules:
+   - if: "$ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+     when: always # run even if previous job in pipeline failed
