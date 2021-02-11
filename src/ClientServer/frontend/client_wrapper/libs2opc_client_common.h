@@ -140,7 +140,9 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
  * @brief
  *    deletes a subscription
  * @param cliId
- *    connection id
+ *    The connection id.
+ * @return
+ *    The operation status.
  */
 SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_ConnectionId cliId);
 

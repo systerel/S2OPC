@@ -428,7 +428,7 @@ check_doc:
     paths:
       - '$BUILD_DIR/doc.log'
     expire_in: '1 month'
-    when: always
+    when: on_failure
   rules:
    - if: "$ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
      when: always # run even if previous job in pipeline failed

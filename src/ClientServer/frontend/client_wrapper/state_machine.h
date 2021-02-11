@@ -119,6 +119,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  *                                before killing the subscription
  * \param iTokenTarget            Number of subscription tokens the server should always have
  * \param iTimeoutMs              Timeout for the synchroneous calls
+ * \param cbkGenericEvent         Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession()
  * \param userContext             Caller defined user context that could be retrieved or set using accessors
  * \param ppSM                    The returned machine, when successful
  *
@@ -141,7 +142,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_StaMac_Machine** ppSM);
 
 /*
- * TODO
+ * \brief Changes the callback for data change notifications on subscription
  */
 SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
                                                           SOPC_ClientHelper_DataChangeCbk cbkClientHelper);
@@ -177,11 +178,12 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM);
  * \warning Every client request should be sent with this wrapper, so that the machine
  *          can recognize the response from the server.
  *
+ * \param pSM           The state machine used to send request
  * \param requestStruct The structure of the request, see SOPC_ToolkitClient_AsyncSendRequestOnSession()
  * \param appCtx        An ID that will be given back through the call to the event handler.
  *                      The value 0 indicates "no ID".
- * \param requestScope scope of the request (state machine or application)
- * \param requestType  type of the request
+ * \param requestScope  scope of the request (state machine or application)
+ * \param requestType   type of the request
  */
 SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           void* requestStruct,
@@ -190,12 +192,12 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           SOPC_StaMac_RequestType requestType);
 
 /*
- * TODO
+ * \brief Create subscription associated to the given state machine
  */
 SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
- * TODO
+ * \brief Delete subscription associated to the given state machine
  */
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
@@ -205,7 +207,15 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
  * The optional \p pAppCtx may be used to test the effective creation of the MonitoredItem with
  * SOPC_StaMac_HasMonitoredItem().
  *
- * \param lCliHndl  An array of client handles to be filled.
+ * \param pSM        The state machine with a subscription used to create monitored items
+ * \param lszNodeId  An array of describing the NodeIds to add.
+                     It should be at least \p nElems long.
+ * \param liAttrId   An array of attributes id. The subscription is created for the attribute lAttrId[i]
+ *                   for the node id lszNodeId[i]. It should be at least \p nElems long.
+ * \param nElems     The number of elements in previous arrays.
+ * \param pAppCtx    The create monitored item application context is stored in this pointer and
+ *                   could be used to call ::SOPC_StaMac_HasMonItByAppCtx
+ * \param lCliHndl   An array of client handles to be filled.
  *
  * \warning The szNodeId must be \0-terminated.
  */
@@ -270,8 +280,12 @@ void SOPC_StaMac_SetUserContext(SOPC_StaMac_Machine* pSM, uintptr_t userContext)
  * If the event is a response from a request issued with the SOPC_REQUEST_SCOPE_APPLICATION,
  * the generic event callback of the machine is called.
  *
+ * \param pSM       The state machine for which event should be handled
  * \param pAppCtx   A pointer to an uintptr_t which will contain the appCtx given to
  *                  SOPC_StaMac_SendRequest(). NULL is valid. 0 indicates "appID unavailable".
+ * \param event     The event to be handled in the state machine
+ * \param arg       The first parameter (id or status) associated with the event
+ * \param pParam    The second parameter associated with the event
  * \param appCtx    The appCtx given by the Toolkit.
  *
  * \warning This function shall be called upon each event raised by the Toolkit.
