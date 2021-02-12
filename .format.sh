@@ -26,5 +26,7 @@ BSRCS_DIR=./bsrc
 SAMPLE_DIR=./samples
 
 find $SRCS_DIR $TEST_DIR $SAMPLE_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
-find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -exec sed 's/\t/    /g' -i '{}' \;
-find $BSRCS_DIR -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -exec sed 's/\s\+$//g' -i '{}' \;
+find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\t/    /g' -i '{}' \;
+find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\s\+$//g' -i '{}' \;
+find . -name CMakeLists.txt -exec sed 's/\t/    /g' -i '{}' \;
+find . -name CMakeLists.txt -exec sed 's/\s\+$//g' -i '{}' \;
