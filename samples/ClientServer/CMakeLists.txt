@@ -91,28 +91,27 @@ if(ENABLE_SAMPLES)
     s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
     add_custom_target(make-sks-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
 
-    set(TOOLKIT_DEMO_SKS "toolkit_demo_sks")
-    add_executable(${TOOLKIT_DEMO_SKS}
+    add_executable(toolkit_demo_sks
       "demo_server/toolkit_demo_sks.c"
       "${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server/client.c"
       ${TEST_SERVER_ADDRESS_SPACE_C})
     set(S2OPC_PUBSUB_CLIENT_INCLUDES ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server)
-    target_include_directories(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
-    target_link_libraries(${TOOLKIT_DEMO_SKS} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
-    target_compile_options(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_COMPILER_FLAGS})
-    target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE ${S2OPC_DEFINITIONS})
+    target_include_directories(toolkit_demo_sks PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
+    target_link_libraries(toolkit_demo_sks PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+    target_compile_options(toolkit_demo_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(toolkit_demo_sks PRIVATE ${S2OPC_DEFINITIONS})
 
     if (EXPAT_FOUND)
-      target_link_libraries(${TOOLKIT_DEMO_SKS} PRIVATE s2opc_clientserver-xml-loaders-expat)
-      target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE "WITH_EXPAT")
+      target_link_libraries(toolkit_demo_sks PRIVATE s2opc_clientserver-xml-loaders-expat)
+      target_compile_definitions(toolkit_demo_sks PRIVATE "WITH_EXPAT")
     endif()
 
     if (WITH_STATIC_SECURITY_DATA)
-      target_compile_definitions(${TOOLKIT_DEMO_SKS} PRIVATE "WITH_STATIC_SECURITY_DATA")
+      target_compile_definitions(toolkit_demo_sks PRIVATE "WITH_STATIC_SECURITY_DATA")
     endif()
 
     add_custom_command(
-      TARGET ${TOOLKIT_DEMO_SKS} POST_BUILD
+      TARGET toolkit_demo_sks POST_BUILD
 
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
