@@ -394,8 +394,8 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr (asym cert): sender certificate decoding error (epCfgIdx=%" PRIu32
-                                   " scCfgIdx=%" PRIu32 ")",
-                                   epConfigIdx, scConfigIdx);
+                                   " scCfgIdx=%" PRIu32 "): status=%" PRIX32,
+                                   epConfigIdx, scConfigIdx, status);
         }
     }
 
