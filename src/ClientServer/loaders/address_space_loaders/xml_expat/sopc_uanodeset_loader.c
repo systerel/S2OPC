@@ -1570,8 +1570,9 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     return result;
 }
 
-static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const char* val)
+static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, const char* val)
 {
+    SOPC_BuiltinId type_id = ctx->current_value_type;
     switch (type_id)
     {
     case SOPC_Boolean_Id:
@@ -1609,7 +1610,8 @@ static bool set_variant_value(SOPC_Variant* var, SOPC_BuiltinId type_id, const c
     case SOPC_XmlElement_Id: // TODO: should be a not simple type
         SET_STR_ELEMENT_VALUE_CASE(XmlElt)
     default:
-        assert(false && "Cannot parse current value type.");
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Cannot parse current value type (Not supported yet): '%d'", type_id);
+        return false;
     }
 
     return false;
@@ -1665,7 +1667,7 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
     bool ok = false;
     if (PARSE_NODE_VALUE_SCALAR == ctx->state)
     {
-        ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+        ok = set_variant_value(ctx, var, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
         SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
     }
     else if (PARSE_NODE_VALUE_SCALAR_COMPLEX == ctx->state)
@@ -1696,7 +1698,7 @@ static bool append_element_value(struct parse_context_t* ctx)
     bool ok = false;
     if (PARSE_NODE_VALUE_SCALAR == ctx->state)
     {
-        ok = set_variant_value(var, ctx->current_value_type, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
+        ok = set_variant_value(ctx, var, SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
         SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
     }
     else if (PARSE_NODE_VALUE_SCALAR_COMPLEX == ctx->state)
