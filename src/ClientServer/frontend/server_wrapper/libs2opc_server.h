@@ -106,13 +106,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  *       and the server shall still running
  *
  * \param request   An instance of on of the following OPC UA request:
- *                  - OpcUa_ReadRequest
- *                  - OpcUa_WriteRequest
- *                  - OpcUa_BrowseRequest
- *                  - OpcUa_GetEndpointsRequest
- *                  - OpcUa_FindServersRequest
- *                  - OpcUa_FindServersOnNetworkRequest
- *                  - OpcUa_RegisterServer2Request
+ *                  - ::OpcUa_ReadRequest
+ *                  - ::OpcUa_WriteRequest
+ *                  - ::OpcUa_BrowseRequest
+ *                  - ::OpcUa_GetEndpointsRequest
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_RegisterServer2Request
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
@@ -133,21 +133,21 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *
  *
  * \param request   An instance of on of the following OPC UA request:
- *                  - OpcUa_ReadRequest
- *                  - OpcUa_WriteRequest
- *                  - OpcUa_BrowseRequest
- *                  - OpcUa_GetEndpointsRequest
- *                  - OpcUa_FindServersRequest
- *                  - OpcUa_FindServersOnNetworkRequest
- *                  - OpcUa_RegisterServer2Request
+ *                  - ::OpcUa_ReadRequest
+ *                  - ::OpcUa_WriteRequest
+ *                  - ::OpcUa_BrowseRequest
+ *                  - ::OpcUa_GetEndpointsRequest
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_RegisterServer2Request
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
- *                       - OpcUa_ReadResponse
- *                       - OpcUa_WriteResponse
- *                       - OpcUa_BrowseResponse
- *                       - OpcUa_GetEndpointsResponse
- *                       - OpcUa_FindServersResponse
- *                       - OpcUa_FindServersOnNetworkResponse
- *                       - OpcUa_RegisterServer2Response
+ *                       - ::OpcUa_ReadResponse
+ *                       - ::OpcUa_WriteResponse
+ *                       - ::OpcUa_BrowseResponse
+ *                       - ::OpcUa_GetEndpointsResponse
+ *                       - ::OpcUa_FindServersResponse
+ *                       - ::OpcUa_FindServersOnNetworkResponse
+ *                       - ::OpcUa_RegisterServer2Response
  *                       e.g.: OpcUa_ReadResponse* resp = NULL; SOPC_ServerHelper_LocalServiceSync(request, &resp);
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE if the server is not running otherwise

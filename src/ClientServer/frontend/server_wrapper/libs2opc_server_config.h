@@ -145,10 +145,15 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
  * \brief Type of callback to provide to receive asynchronous local service response
  *
  * \param response     An asynchronous response to a local service request sent using
- *                     ::SOPC_ServerHelper_LocalServiceAsync. It shall be a pointer to one of the following types:
- *                     - OpcUa_ReadRequest
- *                     - OpcUa_WriteRequest
- *                     - OpcUa_BrowseRequest
+ *                     ::SOPC_ServerHelper_LocalServiceAsync (see authorized requests).
+ *                     Response will be a pointer to one of the following types:
+ *                     - ::OpcUa_ReadResponse
+ *                     - ::OpcUa_WriteResponse
+ *                     - ::OpcUa_BrowseResponse
+ *                     - ::OpcUa_GetEndpointsResponse
+ *                     - ::OpcUa_FindServersResponse
+ *                     - ::OpcUa_FindServersOnNetworkResponse
+ *                     - ::OpcUa_RegisterServer2Response
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ServerHelper_LocalServiceAsync call
