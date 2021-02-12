@@ -108,7 +108,7 @@ END
 &
 
 THEORY th_simp_overload IS
-    
+
     dom(r<+s) == dom(r)\/dom(s)
 /*    ;
     a<+{b|->c}|>>{d,e} == */
@@ -118,6 +118,6 @@ THEORY th_simp_overload IS
     bnot(btest(c = e))
     =>
     a<+{b|->(c|->E)}|>{e|->E} == a|>{e|->E} <+ {b|->(c|->E)}
-    
+
 END
 

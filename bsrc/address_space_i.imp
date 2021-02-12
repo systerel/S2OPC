@@ -888,5 +888,5 @@ OPERATIONS
     ;
 
     btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
-	btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)
+    btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr)
 END

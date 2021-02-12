@@ -171,7 +171,7 @@ LOCAL_OPERATIONS
     ;
 
     /**
-	* Verify the Arguments against Method description
+    * Verify the Arguments against Method description
     */
     StatusCode <-- check_method_call_arguments (p_req_msg, p_callMethod, p_method_node, p_res_msg)=
     PRE
@@ -357,7 +357,7 @@ OPERATIONS
             l_methodid <-- read_CallMethod_MethodId (p_req_msg, p_callMethod);
             StatusCode, l_method <-- check_nodeId_isValid(l_methodid);
             IF StatusCode = e_sc_ok THEN
-				/* method is executable by user */
+                /* method is executable by user */
                 l_user <-- get_session_user_server(p_session);
                 l_valid_executable <-- get_Executable(l_method);  /* TODO change by e_sc_bad_not_executable when update to Spec 1.04 */
                 l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
@@ -384,7 +384,7 @@ OPERATIONS
     ;
 
     /**
-	* Verify the Arguments against Method description
+    * Verify the Arguments against Method description
     */
     StatusCode <-- check_method_call_arguments (p_req_msg, p_callMethod, p_method_node, p_res_msg)=
     VAR

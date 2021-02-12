@@ -59,7 +59,7 @@ endif()
 
 if(ENABLE_SAMPLES)
 
-  
+
   # Demo PubSub server
   add_executable(pubsub_server "pubsub_server/main.c"
                                "pubsub_server/server.c"
@@ -70,15 +70,15 @@ if(ENABLE_SAMPLES)
                                )
   target_compile_options(pubsub_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(pubsub_server PRIVATE ${S2OPC_DEFINITIONS})
-  
+
   if (WITH_STATIC_SECURITY_DATA)
     target_compile_definitions(pubsub_server PRIVATE "WITH_STATIC_SECURITY_DATA")
     # Reuse code of demo server
-  	set(S2OPC_SERVERTEST_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
-  	target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERTEST_INCLUDES})
+      set(S2OPC_SERVERTEST_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
+      target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERTEST_INCLUDES})
   endif()
-  
-  
+
+
   target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded s2opc_clientserver-xml-loaders-expat)
   target_include_directories(pubsub_server PRIVATE pubsub_server)
 

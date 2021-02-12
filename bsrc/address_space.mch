@@ -54,8 +54,8 @@ DEFINITIONS
         Type_IsTransitiveSubtype,
         Type_IsReferenceTypeIdValid,
 
-       	/* Objects */
-       	Object_HasMethod,
+           /* Objects */
+           Object_HasMethod,
 
         Variant_LocalDataType,
         Variant_ValueRank,
@@ -654,7 +654,7 @@ OPERATIONS
     PRE
         p_method : t_NodeId_i &
         p_method : t_NodeId   &
-		p_object : t_NodeId_i &
+        p_object : t_NodeId_i &
         p_object : t_NodeId
     THEN
         p_bool := bool(p_object |-> p_method : Object_HasMethod)

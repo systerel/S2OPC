@@ -32,7 +32,7 @@ THEORY th_eh_loc IS
     a: c
     =>
     a: dom(b)
-    
+
 END
 &
 
@@ -43,5 +43,5 @@ THEORY th_simp_img IS
     Q\ (a,b,c)
     =>
     (a: b~[c]) == (d: c)
-    
+
 END

@@ -237,7 +237,7 @@ if(ENABLE_TESTING)
       ${TEST_LIGHT_ADDRESS_SPACE_C})
   add_dependencies(toolkit_test_server_client make-light-address-space)
   target_link_libraries(toolkit_test_server_client PRIVATE
-    s2opc_serverwrapper 
+    s2opc_serverwrapper
     s2opc_clientserver-loader-embedded
     Check::check)
   target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})

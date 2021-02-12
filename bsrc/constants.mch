@@ -288,7 +288,7 @@ SETS
     t_operation_type_i = {c_operation_type_indet,
                           e_operation_type_read,
                           e_operation_type_write,
-                      	  e_operation_type_executable};
+                          e_operation_type_executable};
 
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;

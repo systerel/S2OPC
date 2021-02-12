@@ -70,8 +70,8 @@ OPERATIONS
     ;
 
     nb <-- read_nb_exec_result =
-	BEGIN
-	    nb
+    BEGIN
+        nb
         :(
             nb : NAT &
             nb = size(exec_result)
