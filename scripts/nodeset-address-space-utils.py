@@ -32,10 +32,7 @@ import xml.etree.ElementTree as ET
 INDENT_SPACES = '  '
 
 def indent(level):
-    spaces = ''
-    for _ in range(level):
-        spaces += INDENT_SPACES
-    return '\n'+spaces
+    return '\n' + INDENT_SPACES*level
 
 # Namespaces are very hard to handle in XPath and the ET API does not help much
 # {*} notations for namespace in XPath searches only appear in Py3.8
@@ -133,21 +130,21 @@ def merge(tree, new, namespaces):
     if len(tree_aliases) > 0:
         # Restore correct level for next tag which is </Aliases>
         tree_aliases[-1].tail = indent(1)
-        
+
     # Merge Nodes
     tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
     new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
-    new_nodes_ids_list = [node.get('NodeId') for node in new.iterfind('*[@NodeId]')]
     # New nodes are copied
     tree_root = tree.getroot()
     for nid in set(new_nodes)&set(tree_nodes):
         print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
-    # new unique nids
+    # New unique nids
     new_nids = set(new_nodes)-set(tree_nodes)
     if len(new_nids) > 0 and len(tree_root) > 0:
         # indent for first node added
         tree_root[-1].tail = indent(1)
-    for nid in new_nodes_ids_list:
+    for node in new.iterfind('*[@NodeId]'):
+        nid = node.get('NodeId')
         if nid in new_nids:
             print('Merge: add node {}'.format(nid), file=sys.stderr)
             tree_root.append(new_nodes[nid])
@@ -222,11 +219,11 @@ def sanitize(tree, namespaces):
     # Set of forward reference (check existence)
     refs_fwd = set() # {(a,type, b), ...}
     # List of forward reference (keep refs order)
-    refs_fwd_list = [] # (a, type, b)[]
+    refs_fwd_list = [] # [(a, type, b), ...]
     # Set of backward reference (check existence)
     refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
     # List of backward reference (keep refs order)
-    refs_inv_list = [] # (a, type, b)[], already existing inverse references b <- a
+    refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
     for node in tree.iterfind('./*[uanodeset:References]', namespaces):
         nids = node.get('NodeId')  # The starting node of the references below
         refs, = node.iterfind('uanodeset:References', namespaces)
@@ -372,7 +369,7 @@ if __name__ == '__main__':
         res = True
 
     if res:
-        tree.write(args.fn_out or sys.stdout, encoding="utf-8", xml_declaration=True)
+        tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
     else:
         print('There was some unrecoverable error{}'
               .format(', did not save to {}'.format(args.fn_out) if args.fn_out else ''),
