@@ -2,7 +2,7 @@
     <!-- one to many -->
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <!-- one to many -->
-        <message id="14" version="1" publishingInterval="100." securityMode="signAndEncrypt">
+        <message id="14" version="1" publishingInterval="1000." securityMode="signAndEncrypt">
           <!-- one to many -->
             <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
@@ -23,7 +23,7 @@
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
-        <message id="14" version="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
+        <message id="14" version="1" publishingInterval="1000." publisherId="42" securityMode="signAndEncrypt">
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>

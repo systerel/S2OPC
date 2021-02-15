@@ -39,6 +39,11 @@
 /* ---------------------------------------- */
 /* DEFINE */
 /* ---------------------------------------- */
+#define ONE_HUNDRED_MILLISEC 100
+#define TEN_MILLISEC 10
+#define FIVE_MILLISEC 5
+#define ONE_SEC_IN_MILLISEC 1000
+
 #define UDP_PORT_IN 5000
 #define UDP_PORT_OUT 5002
 
@@ -403,7 +408,7 @@ static void* UDP_ManageReception (void* arg)
 
         if (data_len < 0)
         {
-            SOPC_Sleep(SLEEP_TIMEOUT);
+            SOPC_Sleep(FIVE_MILLISEC);
         }
         else
         {
@@ -559,7 +564,7 @@ static void* UDP_ManageSending (void* arg)
         }
 
         /* Wait sending delay => 1 second */
-        SOPC_Sleep(SLEEP_TIMEOUT*10);
+        SOPC_Sleep(ONE_SEC_IN_MILLISEC);
     }
 
     /* Exit current thread */
