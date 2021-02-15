@@ -393,6 +393,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         }
         SOPC_Free(*outputArgs);
         *outputArgs = NULL;
+        *nbOutputArgs = 0;
     }
 
     /* Delete Keys */
