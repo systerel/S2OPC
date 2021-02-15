@@ -279,6 +279,7 @@ def load_pubsubserver_configuration(uri, xml):
     pubsub_server = PubSubServer(uri, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
     pubsub_server.connect()
     helpConfigurationChangeAndStart(pubsub_server, xml, logger)
+    pubsub_server.disconnect()
 
 # Test that there is no exchange of Address Space value
 def test_no_adresse_space_exchange():
@@ -298,6 +299,9 @@ def test_no_adresse_space_exchange():
     time.sleep(1)
     __test_variables('Subscriber', subscriber_server, NID_SUB_BOOL, False, NID_SUB_UINT16, 2002, NID_SUB_INT, 1311)
     __test_variables('Publisher', publisher_server, NID_PUB_BOOL, True, NID_PUB_UINT16, 1422, NID_PUB_INT, 3003)
+
+    publisher_server.disconnect()
+    subscriber_server.disconnect()
 
 def test_adresse_space_exchange():
 
@@ -320,6 +324,8 @@ def test_adresse_space_exchange():
     time.sleep(1)
     __test_variables('Subscriber', subscriber_server, NID_SUB_BOOL, False, NID_SUB_UINT16, 1234, NID_SUB_INT, 654123)
 
+    publisher_server.disconnect()
+    subscriber_server.disconnect()
 
     
 ##################################################
