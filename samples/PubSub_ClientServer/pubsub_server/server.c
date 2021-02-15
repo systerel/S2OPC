@@ -856,6 +856,15 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     return ldv;
 }
 
+static void Internal_FreeDataValueArray(SOPC_DataValue* dvArray, int32_t length)
+{
+    for (size_t i = 0; i < (size_t) length; ++i)
+    {
+        SOPC_DataValue_Clear(&dvArray[i]);
+    }
+    SOPC_Free(dvArray);
+}
+
 void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
 {
     SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
@@ -885,11 +894,7 @@ void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
                 // Error, free allocated data values
                 if (SOPC_STATUS_OK != statusCopy)
                 {
-                    for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead; ++i)
-                    {
-                        SOPC_DataValue_Clear(&ctx->ldv[i]);
-                    }
-                    SOPC_Free(ctx->ldv);
+                    Internal_FreeDataValueArray(ctx->ldv, ctx->NoOfNodesToRead);
                     ctx->ldv = NULL;
                 }
             }
