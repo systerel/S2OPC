@@ -272,6 +272,10 @@ static bool UDP_UpdateServer(void)
         /* Create OPC UA Write value */
         UDP_CreateWriteValue(&writeValues[i], i);
         status = SOPC_NodeId_Copy(&writeValues[i].NodeId, nodeId);
+
+        /* Free memory */
+        SOPC_NodeId_Clear(nodeId);
+        SOPC_Free(nodeId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -281,9 +285,17 @@ static bool UDP_UpdateServer(void)
     }
     else
     {
+        printf("# Warning: Server update has failed.\n");
+
+        /* Free memory */
+        for (int i = 0; i < NBDATA; i++)
+        {
+            OpcUa_WriteValue_Clear(&writeValues[i]);
+        }
         SOPC_Free(writeValues);
         writeValues = NULL;
     }
+
     return status;
 }
 
@@ -541,6 +553,7 @@ static void* UDP_ManageSending (void* arg)
                 SOPC_DataValue_Clear(&readValues[i]);
             }
             SOPC_Free(readValues);
+            readValues = NULL;
 
             /* Send UDP datagram */
             sendto(sendSockfd, request, strlen(request),
