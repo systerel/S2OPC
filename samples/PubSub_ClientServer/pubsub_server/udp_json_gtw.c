@@ -242,7 +242,7 @@ static void UDP_CreateWriteValue(OpcUa_WriteValue* writeValue, uint8_t dataIdx)
             break;
 
         default :
-            printf("# Info: Unexpected type in UDP configuration: %d\n", Cfg[dataIdx].type);
+            printf("# Warning: Unexpected type in UDP configuration: %d\n", Cfg[dataIdx].type);
             break;
     }
 }
@@ -252,7 +252,6 @@ static void UDP_CreateNodeId(char* dataName, char* nodeId_Str)
     memset(nodeId_Str, '\0', 2*MAXNBCHAR);
     strcpy(nodeId_Str, NODEID_PREFIX);
     strcat(nodeId_Str, dataName);
-    printf("# Info: Node Id created: %s\n", nodeId_Str);
 }
 
 
@@ -300,7 +299,6 @@ static void UDP_DecodeData(char* buffer)
     /* Data are separated by commas */
     while ((data != NULL) && (dataIdx < NBDATA))
     {
-        printf("# Info: UDP received data : %s\n", data);
         dataArr[dataIdx] = data;
         data = strtok(NULL, comma);
         dataIdx++;
@@ -313,30 +311,22 @@ static void UDP_DecodeData(char* buffer)
         {
             case SOPC_String_Id :
                 sscanf(dataArr[i], "%s :%s" , rcvdData[i].name,  rcvdData[i].Value.text);
-                printf("# Info: Data name: %s\n", rcvdData[i].name);
-                printf("# Info: Data value: %s\n", rcvdData[i].Value.text);
                 break;
 
             case SOPC_Int32_Id :
                 sscanf(dataArr[i], "%s :%" SCNi32, rcvdData[i].name, &rcvdData[i].Value.int32);
-                printf("# Info: Data name: %s\n", rcvdData[i].name);
-                printf("# Info: Data value: %d\n", rcvdData[i].Value.int32);
                 break;
 
             case SOPC_UInt32_Id :
                 sscanf(dataArr[i], "%s :%" SCNu32, rcvdData[i].name, &rcvdData[i].Value.uint32);
-                printf("# Info: Data name: %s\n", rcvdData[i].name);
-                printf("# Info: Data value: %d\n", rcvdData[i].Value.uint32);
                 break;
 
             case SOPC_Int16_Id :
                 sscanf(dataArr[i], "%s :%" SCNi16, rcvdData[i].name, &rcvdData[i].Value.int16);
-                printf("# Info: Data name: %s\n", rcvdData[i].name);
-                printf("# Info: Data value: %d\n", rcvdData[i].Value.int16);
                 break;
 
             default :
-                printf("# Info: Unexpected type in UDP configuration: %d\n", Cfg[i].type);
+                printf("# Warning: Unexpected type in UDP configuration: %d\n", Cfg[i].type);
                 break;
         }
     }
@@ -378,15 +368,13 @@ static void UDP_DecodeDataAndUpdateServer(char* buffer)
         c = buffer[buffIdx];
     } while (!dataIsolated);
 
-    printf("# Info: UDP data part of the frame has been isolated : %s\n", dataBuffer);
-
     /* Decode Data name and value */
     UDP_DecodeData(dataBuffer);
 
     /* Update OPC UA Server nodes */
     if (!UDP_UpdateServer())
     {
-        printf("# Error: UDP data have not been updated into OPC UA Server.\n");
+        printf("# Warning: UDP data have not been updated into OPC UA Server.\n");
     }
 }
 
@@ -414,7 +402,6 @@ static void* UDP_ManageReception (void* arg)
         {
             /* Set end of line */
             buffer[data_len] = '\0';
-            printf("# Info: Received value is %s.\n", buffer);
 
             /* Decode received data and update OPC UA Server nodes */
             UDP_DecodeDataAndUpdateServer (buffer);
@@ -448,7 +435,7 @@ static bool UDP_ReadServer(SOPC_DataValue** readValues)
         status = SOPC_NodeId_Copy(&readValuesId[i].NodeId, nodeId);
         if (SOPC_STATUS_OK != status)
         {
-            printf("# Info: Node Id creation failure for %s.\n", Cfg[i].name);
+            printf("# Warning: Node Id creation failure for %s.\n", Cfg[i].name);
             readStatus = false;
         }
 
@@ -514,7 +501,7 @@ static void UDP_CreateRequest(char* request, SOPC_DataValue* readValues)
                 break;
 
             default :
-                printf("# Info: Received unexpected type : %d\n", readValues[i].Value.BuiltInTypeId);
+                printf("# Warning: Received unexpected type : %d\n", readValues[i].Value.BuiltInTypeId);
                 break;
         }
 
@@ -527,8 +514,6 @@ static void UDP_CreateRequest(char* request, SOPC_DataValue* readValues)
     /* Finalize request (both open curly bracket to be closed) */
     strncat(request, REQUEST_END, REQUEST_LENGTH-strlen(request));
     strncat(request, REQUEST_END, REQUEST_LENGTH-strlen(request));
-
-    printf("# Info: Request to be sent is:\n%s\n", request);
 }
 
 
@@ -551,6 +536,10 @@ static void* UDP_ManageSending (void* arg)
             UDP_CreateRequest(request, readValues);
 
             /* Free memory */
+            for (int i = 0; i < NBDATA; i++)
+            {
+                SOPC_DataValue_Clear(&readValues[i]);
+            }
             SOPC_Free(readValues);
 
             /* Send UDP datagram */
@@ -560,7 +549,7 @@ static void* UDP_ManageSending (void* arg)
         }
         else
         {
-            printf("# Info: Server read has failed, no request sent.\n");
+            printf("# Warning: Server read has failed, no request sent.\n");
         }
 
         /* Wait sending delay => 1 second */
