@@ -57,6 +57,12 @@ static SOPC_CRLList* static_cacrl = NULL;
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
+/* SKS Constants */
+#define SKS_KEYS_FILES_SIGNING_KEY "./sks_private/signingKey.key"
+#define SKS_KEYS_FILES_ENCRYPT_KEY "./sks_private/encryptKey.key"
+#define SKS_KEYS_FILES_KEY_NONCE "./sks_private/keyNonce.key"
+#define SKS_SECURITY_GROUPID "sgid_1"
+
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2, NULL};
 static char* default_locale_ids[] = {"en-US", "fr-FR", NULL};
@@ -156,6 +162,45 @@ static SOPC_StatusCode Server_InitDefaultCallMethodService(SOPC_Server_Config* s
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
 
+static SOPC_StatusCode SOPC_SKS_CopyKeyFromFile(const char* path, const uint32_t size, SOPC_Byte* keys)
+{
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+    SOPC_SecretBuffer* secret_buffer = SOPC_SecretBuffer_NewFromFile(path);
+    if (NULL == secret_buffer)
+    {
+        status = OpcUa_BadInternalError;
+    }
+
+    if (SOPC_GoodGenericStatus == status)
+    {
+        if (size != SOPC_SecretBuffer_GetLength(secret_buffer))
+        {
+            printf("<Security Key Service: Bad key size\n");
+            status = OpcUa_BadInternalError;
+        }
+    }
+
+    if (SOPC_GoodGenericStatus == status)
+    {
+        const SOPC_ExposedBuffer* buffer = SOPC_SecretBuffer_Expose(secret_buffer);
+
+        if (NULL == buffer)
+        {
+            status = OpcUa_BadInternalError;
+        }
+        else
+        {
+            memcpy(keys, buffer, size);
+            SOPC_SecretBuffer_Unexpose(buffer, secret_buffer);
+        }
+    }
+    if (NULL != secret_buffer)
+    {
+        SOPC_SecretBuffer_DeleteClear(secret_buffer);
+    }
+    return status;
+}
+
 static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const SOPC_CallContext* callContextPtr,
                                                                          const SOPC_NodeId* objectId,
                                                                          uint32_t nbInputArgs,
@@ -164,17 +209,51 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
                                                                          SOPC_Variant** outputArgs,
                                                                          void* param)
 {
-    (void) callContextPtr;
-    (void) objectId;    /* Should be "i=15000"*/
-    (void) nbInputArgs; /* Should be 3*/
-    (void) inputArgs;
-    (void) param; /* Should be NULL */
+    (void) objectId; /* Should be "i=15000"*/
+    (void) param;    /* Should be NULL */
+
+    /* Check Input Object */
+
+    if (3 != nbInputArgs || NULL == inputArgs)
+    {
+        /* Should not happen if method is well defined in address space */
+        return OpcUa_BadInternalError;
+    }
+
+    /* Check Security Group */
+    if (SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
+    {
+        /* Should not happen if method is well defined in address space */
+        return OpcUa_BadInternalError;
+    }
+
+    if (0 != strcmp(SKS_SECURITY_GROUPID, SOPC_String_GetRawCString(&inputArgs[0].Value.String)))
+    {
+        return OpcUa_BadNotFound;
+    }
+
+    const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
+    /* Check if the user is authorized to call the method for this Security Group */
+    if (SOPC_User_IsUsername(user))
+    { /* Type of user should be username */
+        const SOPC_String* username = SOPC_User_GetUsername(user);
+        if (0 != strcmp("user1", SOPC_String_GetRawCString(username)))
+        {
+            /* Only user1 is allowed to call getSecurityKeys() */
+            return OpcUa_BadUserAccessDenied;
+        }
+    }
+    else
+    {
+        return OpcUa_BadUserAccessDenied;
+    }
+
     *nbOutputArgs = 5;
     *outputArgs = SOPC_Calloc(5, sizeof(SOPC_Variant));
-    SOPC_StatusCode status = SOPC_STATUS_OK;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     if (NULL == *outputArgs)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        return OpcUa_BadOutOfMemory;
     }
 
     SOPC_Variant* variant;
@@ -184,7 +263,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         SOPC_Variant_Initialize(variant);
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_GoodGenericStatus == status)
     {
         /* SecurityPolicyUri */
         variant = &((*outputArgs)[0]);
@@ -193,7 +272,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         SOPC_String_CopyFromCString(&variant->Value.String, SOPC_SecurityPolicy_PubSub_Aes256_URI);
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_GoodGenericStatus == status)
     {
         /* FirstTokenId */
         variant = &((*outputArgs)[1]);
@@ -202,7 +281,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Uint32 = 1;
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_GoodGenericStatus == status)
     {
         /* Keys */
         variant = &((*outputArgs)[2]);
@@ -213,24 +292,47 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Array.Content.BstringArr = SOPC_Calloc(1, sizeof(SOPC_ByteString));
         if (NULL == *outputArgs)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            status = OpcUa_BadOutOfMemory;
         }
         else
         {
             uint32_t size = 32 + 32 + 4;
             SOPC_Byte* keys = SOPC_Calloc(size, sizeof(SOPC_Byte));
-            SOPC_Byte j = 0x21;
-            for (uint32_t i = 0; i < size; i++)
+
+            if (NULL != keys)
             {
-                keys[i] = j;
-                j++;
+                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_SIGNING_KEY, 32, keys);
             }
-            SOPC_ByteString_CopyFromBytes(&variant->Value.Array.Content.BstringArr[0], keys, 32 + 32 + 4);
+            if (SOPC_GoodGenericStatus == status)
+            {
+                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_ENCRYPT_KEY, 32, &keys[32]);
+            }
+            else
+            {
+                printf("<Security Key Service: cannont load signing key\n");
+            }
+
+            if (SOPC_GoodGenericStatus == status)
+            {
+                status = SOPC_SKS_CopyKeyFromFile(SKS_KEYS_FILES_KEY_NONCE, 4, &keys[64]);
+            }
+            else
+            {
+                printf("<Security Key Service: cannont load encrypt key\n");
+            }
+            if (SOPC_GoodGenericStatus == status)
+            {
+                SOPC_ByteString_CopyFromBytes(&variant->Value.Array.Content.BstringArr[0], keys, 32 + 32 + 4);
+            }
+            else
+            {
+                printf("<Security Key Service: cannont load key nonce\n");
+            }
             SOPC_Free(keys);
         }
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_GoodGenericStatus == status)
     {
         /* TimeToNextKey */
         variant = &((*outputArgs)[3]);
@@ -239,7 +341,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Doublev = 0;
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_GoodGenericStatus == status)
     {
         /* KeyLifetime */
         variant = &((*outputArgs)[4]);
@@ -248,7 +350,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         variant->Value.Doublev = 0;
     }
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_GoodGenericStatus != status)
     {
         for (uint32_t i = 0; i < 5; i++)
         {
@@ -259,7 +361,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
         *outputArgs = NULL;
     }
 
-    return SOPC_STATUS_OK;
+    return SOPC_GoodGenericStatus;
 }
 
 /*
