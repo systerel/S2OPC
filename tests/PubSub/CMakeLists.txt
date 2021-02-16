@@ -202,7 +202,7 @@ if(ENABLE_TESTING)
 
   if(S2OPC_PUBSUB_ONLY)
     # it is not possible to use both PubSub and ClientServer libraries
-  else()
+  elseif(WITH_NANO_EXTENDED)
     s2opc_server_validation_test("pubsub_server_test.py")
   endif()
 
