@@ -27,6 +27,11 @@ from abc import ABC, abstractmethod
 import atexit
 import subprocess
 import time
+
+import socket
+from urllib.parse import urlparse
+
+
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer
 from pubsub_server_test import helpConfigurationChangeAndStart, helpTestSetValue
@@ -34,6 +39,11 @@ from pubsub_server_test import helpConfigurationChangeAndStart, helpTestSetValue
 
 # Timeout for SKS Client to activate session
 CLIENT_TIMEOUT_ACTIVATE_SESSION = 10 # 10s
+# Time for SKS to get Keys from other SKS
+TIME_SLAVE_GET_KEYS = 5
+
+
+TIMEOUT_WAIT_SERVER = 20.
 SERVER_TIMEOUT_SHUTDOWN = 10 # 10s
 
 
@@ -48,8 +58,30 @@ def Test_Sleep(s):
     log_test('.......... finish waiting')
 
 
+def test_wait_server(name, url):
+    Test_Sleep(5)
+    started = wait_server(url, TIMEOUT_WAIT_SERVER)
+    logger.add_test('%s is started' % name, started)
+        
+    
+def wait_server(url, timeout):
+    # Parse url to find the endpoint IP, connects while not TIMEOUT
+    pr = urlparse(url)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    t0 = time.time()
+    while 'Waiting for succesful connection':
+        try:
+            sock.connect((pr.hostname, pr.port))
+            sock.close()
+            return True
+        except ConnectionError:
+            time.sleep(0.1)
+        if time.time()-t0 >= timeout:
+            return False
 
 
+        
 class AbstractBenchmarkManager(ABC):
 
 
@@ -146,6 +178,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
     def __stop_proc__(self, proc):
         proc.kill()
+        proc.wait()
         self.all_processes.remove(proc)
 
     def stop_all(self):
@@ -154,17 +187,10 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         for p in self.all_processes:
             i = i + 1
             p_sec = 0
-            #for second in range(timeout_sec):
-            #    if p.poll() == None:
-            #        time.sleep(1)
-            #        p_sec += 1
-            #if p_sec >= timeout_sec:
-            if True:
-                log_test("Kill proc %d" % i)
-                p.kill()
-                #log_test("Wait until proc is killed %d" % i)
-                p.wait()
-                #log_test("Proc %d killed" % i)
+            log_test("Kill proc %d" % i)
+            p.kill()
+            p.wait()
+            log_test("Proc %d killed" % i)
         self.all_processes = []
         self.sks_master = None
         self.sks_slave = dict()
@@ -176,12 +202,15 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         self.output = []
 
     def start_sks_master(self, restart=False):
+        global SKS_MASTER_URI
         log_test("Start SKS Master")
         if self.sks_master is None:
             master = self.command_sks_master.copy()
             if restart:
                 master.append('--restart')
             self.sks_master = self.__start_proc__(master, 'master', True)
+            test_wait_server('SKS Master', SKS_MASTER_URI)
+
         else:
             log_test("Warning : SKS Master is already running")
 
@@ -193,6 +222,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
 
     def start_sks_slave(self, num):
+        global SKS_MASTER_URI
         log_test("Start SKS Slave %i" % num)
 
         if num < 1 or num > self.max_slave:
@@ -203,6 +233,8 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
             slave = self.command_sks_slave.copy()
             slave.append(str(num))
             self.sks_slave[num] = self.__start_proc__(slave, 'slave_%s' % num)
+            test_wait_server('SKS Slave %i' % num, SKS_SLAVE_URI[num-1])
+
         else:
             log_test("Warning : SKS slave %d is already running" % num )
 
@@ -220,6 +252,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         log_test("Start Publisher")
         if self.publisher is None:
             self.publisher = self.__start_proc__(self.command_publisher, 'publisher')
+            test_wait_server('Publisher', PUBLISHER_URI)
         else:
             log_test("Warning : Publisher is already running")
 
@@ -236,6 +269,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         log_test("Start Subscriber")
         if self.subscriber is None:
             self.subscriber = self.__start_proc__(self.command_subscriber, 'subscriber', True)
+            test_wait_server('Subscriber', SUBSCRIBER_URI)
         else:
             log_test("Warning : Subscriber is already running")
 
@@ -359,6 +393,9 @@ XML_SUBSCRIBER_ONLY = """<PubSub>
     </connection>
 </PubSub>"""
 
+SKS_MASTER_URI = "opc.tcp://localhost:4841"
+SKS_SLAVE_URI = ["opc.tcp://localhost:4842", "opc.tcp://localhost:4843"]
+
 PUBLISHER_URI = 'opc.tcp://localhost:4851'
 SUBSCRIBER_URI = 'opc.tcp://localhost:4852'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
@@ -380,7 +417,7 @@ NID_PUB_INT = u"ns=1;s=PubInt"
 #BINARY_DIRECTORY = PurePosixPath('/users/aurelien/git/S2OPC_new/build/bin/')
 #localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
 
-logger = TapLogger("sks_redundancy_test.tap")
+logger = TapLogger("pubsub_sks_test.tap")
 
 ####################################################################################################
 # TC 1 :
@@ -394,20 +431,14 @@ def integration_TC1(benchmark):
 
     # Start Master, Slave 1 and Slave2
     benchmark.start_sks_master()
-    Test_Sleep(5)
     benchmark.start_sks_slave(1)
-    Test_Sleep(5)
     benchmark.start_sks_slave(2)
-    Test_Sleep(5)
     
     # Start Publisher and Subscriber
     benchmark.start_publisher()
-    Test_Sleep(3)
     benchmark.start_subscriber()
-    Test_Sleep(3)
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
-    Test_Sleep(3)
     
     # Test data exchange
     test_adresse_space_exchange()
@@ -427,23 +458,18 @@ def integration_TC2(benchmark):
     
     # Start Master, Slave 1 and Slave2
     benchmark.start_sks_master()
-    Test_Sleep(5)
     benchmark.start_sks_slave(1)
-    Test_Sleep(5)
     benchmark.start_sks_slave(2)
-    Test_Sleep(5)
-    
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
+
     # Stop Master
     benchmark.stop_sks_master()
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
 
     # Start Publisher and Subscriber
     benchmark.start_publisher()
     benchmark.start_subscriber()
-    Test_Sleep(3)
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
-    Test_Sleep(3)
 
     # Test no data exchange
     test_no_adresse_space_exchange()
@@ -472,28 +498,21 @@ def integration_TC3(benchmark):
     # Start Master, Slave 1 and Slave2
     
     benchmark.start_sks_master()
-    Test_Sleep(5)
-    
     benchmark.start_sks_slave(1)
-    Test_Sleep(5)
-
     benchmark.start_sks_slave(2)
-    Test_Sleep(5)
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
     
     # Stop Master and Slave 1
     
     benchmark.stop_sks_master()
     benchmark.stop_sks_slave(1)
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
 
     # Start Publisher and Subscriber
     
     benchmark.start_publisher()
     benchmark.start_subscriber()
-    Test_Sleep(3)
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
-    Test_Sleep(3)
 
     # Test no data exchange
     test_no_adresse_space_exchange()
@@ -528,37 +547,29 @@ def integration_TC4(benchmark):
 
     # Start Master, Slave 1 and Slave2
     benchmark.start_sks_master()
-    Test_Sleep(5)
     benchmark.start_sks_slave(1)
-    Test_Sleep(5)
     benchmark.start_sks_slave(2)
-    Test_Sleep(5)
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
     
     # Start Publisher
     #   => Publisher get keys from master
     benchmark.start_publisher()
-    Test_Sleep(3)
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
-    Test_Sleep(3)
 
     # Stop Master
     benchmark.stop_sks_master()
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
     
     # Restart Master and stop Slaves
     #   => Master get keys from slave 1
     benchmark.start_sks_master(restart=True)
-    Test_Sleep(5)
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
     benchmark.stop_sks_slave(1)
     benchmark.stop_sks_slave(2)
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
     
     # Start Subscriber
     #   => Subscriber get keys from master
     benchmark.start_subscriber()
-    Test_Sleep(3)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
-    Test_Sleep(3)
 
     # Test data exchange
     test_adresse_space_exchange()
@@ -577,23 +588,18 @@ def integration_TC5(benchmark):
 
     # Start Master, Slave 1 and Slave2
     benchmark.start_sks_master()
-    Test_Sleep(5)
     benchmark.start_sks_slave(1)
-    Test_Sleep(5)
     benchmark.start_sks_slave(2)
-    Test_Sleep(5)
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
     
     # Stop Master and Slave 1
     benchmark.stop_sks_master()
     benchmark.stop_sks_slave(1)
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
     
     # Start Publisher
     #   => Publisher get keys from slave 2
     benchmark.start_publisher()
-    Test_Sleep(3)
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
-    Test_Sleep(3)
     # Get Keys from Master timeout
     Test_Sleep(CLIENT_TIMEOUT_ACTIVATE_SESSION)
     # Get Keys from Slave 1 timeout
@@ -602,22 +608,20 @@ def integration_TC5(benchmark):
     # Restart Master
     #   => Master get keys from slave 2
     benchmark.start_sks_master(restart=True)
-    Test_Sleep(5)
     
     # Master try to get Keys from Slave 1.
     # Waits until timeout
     Test_Sleep(CLIENT_TIMEOUT_ACTIVATE_SESSION)
+    # Master get keys from slave 2
+    Test_Sleep(TIME_SLAVE_GET_KEYS)
 
     # Stop Slave 2
     benchmark.stop_sks_slave(2)
-    Test_Sleep(SERVER_TIMEOUT_SHUTDOWN)
     
     # Start Subscriber
     #   => Subscriber get keys from master
     benchmark.start_subscriber()
-    Test_Sleep(3)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
-    Test_Sleep(3)
 
     # Test data exchange
     test_adresse_space_exchange()
@@ -625,23 +629,23 @@ def integration_TC5(benchmark):
     # Stop all process
     benchmark.stop_all()
 
-
+  
 def execute_tests(lbenchmark):
 
     # Start Local Benchmark Test
     try:
         log_test(" ---> TEST INTEGRATION TC1 <---")
         integration_TC1(lbenchmark)
-    
+            
         log_test(" ---> TEST INTEGRATION TC2 <---")
         integration_TC2(lbenchmark)
-    
+            
         log_test(" ---> TEST INTEGRATION TC3 <---")
         integration_TC3(lbenchmark)
-    
+            
         log_test(" ---> TEST INTEGRATION TC4 <---")
         integration_TC4(lbenchmark)
-    
+        
         log_test(" ---> TEST INTEGRATION TC5 <---")
         integration_TC5(lbenchmark)
     
@@ -650,9 +654,7 @@ def execute_tests(lbenchmark):
         
     logger.finalize_report()
     
-    log_test(" ---> EXIT <---")
     killchild()
-    sys.exit(0)
     log_test(" ---> END OF SCRIPT <---")
 
 
@@ -664,9 +666,6 @@ if __name__=='__main__':
     
     BINARY_DIRECTORY=pathlib.PurePosixPath(args.binary_dir)
     localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
-    
-    # Register in call on exist
-    atexit.register(killchild)
     
     execute_tests(localbenchmark);
 
