@@ -38,7 +38,6 @@ ATTRIBUTE_MESSAGE_SECURITY_MODE = "securityMode"
 VALUE_MESSAGE_SECURITY_MODE_NONE = "none"
 VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
 VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
-ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR = "sksAddress"
 
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 
@@ -46,6 +45,10 @@ TAG_VARIABLE = "variable"
 ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
 ATTRIBUTE_VARIABLE_TYPE="dataType"
+
+TAG_SKSERVER = "skserver"
+ATTRIBUTE_SKSERVER_URL = "endpointUrl"
+ATTRIBUTE_SKSERVER_CERT = "serverCertPath"
 
 TYPE_IDS = {"Null": "SOPC_Null_Id",
             "Boolean": "SOPC_Boolean_Id",
@@ -231,7 +234,7 @@ def handlePubConnection(publisherId, connection, index, result):
 
 
 
-def handlePubMessage(message, index, result):
+def handlePubMessage(message, indexMessage, result):
     global IS_DEFINED_C_WRITER
     global IS_DEFINED_C_DATASET
 
@@ -239,9 +242,6 @@ def handlePubMessage(message, index, result):
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
     interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
-
-    sksAddress = message.get(ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR, None)
-    sksAddress = 'NULL' if sksAddress is None else '"%s"' % sksAddress
 
     variables = message.findall(TAG_VARIABLE)
 
@@ -258,10 +258,10 @@ def handlePubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s, %s);
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s);
         alloc = NULL != writer;
     }
-    """ % (index, id, version, interval, getCSecurityMode(securityMode), sksAddress))
+    """ % (indexMessage, id, version, interval, getCSecurityMode(securityMode)))
 
     if len(variables) > 0:
 
@@ -279,7 +279,7 @@ def handlePubMessage(message, index, result):
     }
     if (alloc)
     {
-        """ % (index, len(variables)))
+        """ % (indexMessage, len(variables)))
         index = 0
         for variable in variables:
             handleVariable("Pub", variable, index, result)
@@ -288,6 +288,26 @@ def handlePubMessage(message, index, result):
         result.add("""
     }
     """)
+
+    skservers = message.findall(TAG_SKSERVER)
+
+    if len(skservers) > 0:
+
+        result.add("""
+    SOPC_WriterGroup* group = NULL;
+        """)
+
+        result.add("""
+    if (alloc)
+    {
+        group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, %d);
+        alloc = SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(group, %d);
+    }
+    """ % (indexMessage, len(skservers)))
+        index = 0
+        for sks in skservers:
+            handleSkserver("Pub", sks, index, result)
+            index += 1
 
 # type is Pub or Sub
 def handleVariable(mode, variable, index, result):
@@ -306,6 +326,32 @@ def handleVariable(mode, variable, index, result):
         result.add("""
         SOPC_PubSubConfig_SetSubVariableAt(reader, %d, "%s", %s);""" % (index, nodeId, dataid))
         DEFINE_C_SETSUBVARIABLEAT = True
+
+
+# type is Pub or Sub
+def handleSkserver(mode, skserver, index, result):
+    url = skserver.get(ATTRIBUTE_SKSERVER_URL)
+    cert = skserver.get(ATTRIBUTE_SKSERVER_CERT)
+    result.add("""
+    if (alloc)
+    {
+    """)
+    if mode == "Pub":
+        result.add("""
+        SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(group, %d);""" % (index))
+    else:
+        result.add("""
+        SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(group, %d);""" % (index))
+
+    result.add("""
+        SOPC_SerializedCertificate* cert = NULL;
+        alloc = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, "%s");
+        SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("%s", &cert);
+        if(SOPC_STATUS_OK == status) {
+            SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
+        }
+        alloc = (alloc && SOPC_STATUS_OK == status);
+    }""" % (url, cert))
 
 
 def handleSubConnection(publisherId, connection, index, result):
@@ -340,7 +386,7 @@ def handleSubConnection(publisherId, connection, index, result):
                 index += 1
 
 
-def handleSubMessage(message, index, result):
+def handleSubMessage(message, indexMessage, result):
     global IS_DEFINED_C_READER
     global DEFINE_C_SETSUBNBVARIABLES
 
@@ -353,8 +399,6 @@ def handleSubMessage(message, index, result):
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
     interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
-    sksAddress = message.get(ATTRIBUTE_MESSAGE_SECURITY_SKS_ADDR, None)
-    sksAddress = 'NULL' if sksAddress is None else '"%s"' % sksAddress
     publisherId = int(message.get(ATTRIBUTE_MESSAGE_PUBLISHERID), 10)
     variables = message.findall(TAG_VARIABLE)
 
@@ -371,10 +415,10 @@ def handleSubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %f, %s, %s);
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %f, %s);
         alloc = NULL != reader;
     }
-    """ % (index, publisherId, id, version, interval, getCSecurityMode(securityMode), sksAddress))
+    """ % (indexMessage, publisherId, id, version, interval, getCSecurityMode(securityMode)))
 
     if len(variables) > 0:
 
@@ -397,6 +441,25 @@ def handleSubMessage(message, index, result):
     }
     """)
 
+    skservers = message.findall(TAG_SKSERVER)
+
+    if len(skservers) > 0:
+
+        result.add("""
+    SOPC_ReaderGroup* group = NULL;
+        """)
+
+        result.add("""
+    if (alloc)
+    {
+        group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, %d);
+        alloc = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(group, %d);
+    }
+    """ % (indexMessage, len(skservers)))
+        index = 0
+        for sks in skservers:
+            handleSkserver("Sub", sks, index, result)
+            index += 1
 
 
 def generate_pubsub_config(xml_file_in, c_file_out):
@@ -427,11 +490,9 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t messageId,
                                                              uint32_t version,
                                                              double interval,
-                                                             SOPC_SecurityMode_Type securityMode,
-                                                             char* sksAddress)
+                                                             SOPC_SecurityMode_Type securityMode)
 {
     bool alloc;
-    OpcUa_EndpointDescription* endpoint = NULL;
     SOPC_DataSetWriter* writer = NULL;
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, messageId);
@@ -439,17 +500,8 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
 
-    alloc = SOPC_EndpointDescription_Create_From_URL(sksAddress, &endpoint);
-    if(alloc && NULL != endpoint) {
-        // only one endpoint is created
-        SOPC_WriterGroup_Set_EndPointDescription(group, endpoint, 1);
-    }
+    alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(group, 1);
 
-    // Create one DataSet Writer
-    if (alloc)
-    {
-        alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(group, 1);
-    }
     if (alloc)
     {
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
@@ -509,19 +561,12 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t messageId,
                                                              uint32_t version,
                                                              double interval,
-                                                             SOPC_SecurityMode_Type securityMode,
-                                                             char* sksAddress)
+                                                             SOPC_SecurityMode_Type securityMode)
 {
     bool alloc;
-    OpcUa_EndpointDescription* endpoint = NULL;
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     assert(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
-    alloc = SOPC_EndpointDescription_Create_From_URL(sksAddress, &endpoint);
-    if(alloc && NULL != endpoint) {
-        // only one endpoint is created
-        SOPC_ReaderGroup_Set_EndPointDescription(readerGroup, endpoint, 1);
-    }
 
     alloc = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
     if (alloc)
