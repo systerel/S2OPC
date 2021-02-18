@@ -59,7 +59,6 @@ def Test_Sleep(s):
 
 
 def test_wait_server(name, url):
-    Test_Sleep(5)
     started = wait_server(url, TIMEOUT_WAIT_SERVER)
     logger.add_test('%s is started' % name, started)
         
