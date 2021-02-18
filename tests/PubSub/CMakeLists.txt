@@ -60,7 +60,7 @@ if(ENABLE_TESTING)
   endfunction()
 
   # Function to add a validatoin test using the pubsub server code
-  function(s2opc_server_validation_test name)
+  function(s2opc_pubsub_server_validation_test name)
     set(test_name "validation::${name}")
     if(PUBSUB_STATIC_CONFIG)
       set(test_server_static "--static")
@@ -76,6 +76,22 @@ if(ENABLE_TESTING)
       "--sks-cmd" $<TARGET_FILE:toolkit_demo_sks>
       "--publisher-cmd" $<TARGET_FILE:pubsub_server>
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" ${test_server_static})
+  endfunction()
+
+  # Function to add a validatoin test using the pubsub server code
+  function(s2opc_sks_server_validation_test name)
+    set(test_name "validation::${name}")
+    if(PUBSUB_STATIC_CONFIG)
+      # Le script de test a besoin de changer la configuration
+    else()
+      #Note: use absolute path for scripts to allow ctest to be run from another another path
+      add_test(NAME "${test_name}"
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND
+        "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}"
+        "--binary_dir" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif()
+
   endfunction()
 
 ## S2OPC PubSub unit tests ##
@@ -203,7 +219,8 @@ if(ENABLE_TESTING)
   if(S2OPC_PUBSUB_ONLY)
     # it is not possible to use both PubSub and ClientServer libraries
   elseif(WITH_NANO_EXTENDED)
-    s2opc_server_validation_test("pubsub_server_test.py")
+    s2opc_pubsub_server_validation_test("pubsub_server_test.py")
+    s2opc_sks_server_validation_test("pubsub_sks_test.py")
   endif()
 
 ## S2OPC PubSub interoperability tests ##
