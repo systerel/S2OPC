@@ -1768,6 +1768,223 @@ START_TEST(test_string_nodeid)
 }
 END_TEST
 
+// Note: use macros to keep line number of caller
+
+#define check_string_datetime(datetime, success, expYear, expMonth, expDay, expHour, expMinute, expSecond,          \
+                              expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off)        \
+    {                                                                                                               \
+        int16_t year = 0;                                                                                           \
+        uint8_t month = 0;                                                                                          \
+        uint8_t day = 0;                                                                                            \
+        uint8_t hour = 0;                                                                                           \
+        uint8_t minute = 0;                                                                                         \
+        uint8_t second = 0;                                                                                         \
+        float secondAndFraction = 0.0;                                                                              \
+        bool utc = true;                                                                                            \
+        bool utc_neg_off = false;                                                                                   \
+        uint8_t utc_hour_off = 0;                                                                                   \
+        uint8_t utc_min_off = 0;                                                                                    \
+                                                                                                                    \
+        size_t len = strlen(datetime);                                                                              \
+        bool parseRes = SOPC_stringToDateTime(datetime, len, &year, &month, &day, &hour, &minute, &second,          \
+                                              &secondAndFraction, &utc, &utc_neg_off, &utc_hour_off, &utc_min_off); \
+        ck_assert(parseRes == success);                                                                             \
+        ck_assert_int_eq(expYear, year);                                                                            \
+        ck_assert_uint_eq(expMonth, month);                                                                         \
+        ck_assert_uint_eq(expDay, day);                                                                             \
+        ck_assert_uint_eq(expHour, hour);                                                                           \
+        ck_assert_uint_eq(expMinute, minute);                                                                       \
+        ck_assert_uint_eq(expSecond, second);                                                                       \
+        ck_assert_float_eq_tol(expSecondAndFraction, secondAndFraction, (float) 0.000000001);                       \
+        ck_assert(utc == expUtc);                                                                                   \
+        ck_assert_uint_eq(expUtc_neg_off, utc_neg_off);                                                             \
+        ck_assert_uint_eq(expUtc_hour_off, utc_hour_off);                                                           \
+        ck_assert_uint_eq(expUtc_min_off, utc_min_off);                                                             \
+    }
+
+#define check_ok_string_datetime_no_timezeone(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond, \
+                                              expSecondAndFraction)                                               \
+    check_string_datetime(datetime, true, expYear, expMonth, expDay, expHour, expMinute, expSecond,               \
+                          expSecondAndFraction, true, false, 0, 0)
+
+#define check_nok_string_datetime_no_timezeone(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond, \
+                                               expSecondAndFraction)                                               \
+    check_string_datetime(datetime, false, expYear, expMonth, expDay, expHour, expMinute, expSecond,               \
+                          expSecondAndFraction, true, false, 0, 0)
+
+START_TEST(test_string_datetime_no_timezone)
+{
+    // Nominal
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:01.168764999", 2021, 02, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+
+    // Invalid separators / format
+    check_nok_string_datetime_no_timezeone("2021+02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021", 0, 0, 0, 0, 0, 0, (float) 0);
+
+    check_nok_string_datetime_no_timezeone("2021-02.16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-0216T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02", 0, 0, 0, 0, 0, 0, (float) 0);
+
+    check_nok_string_datetime_no_timezeone("2021-02-16X18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16", 0, 0, 0, 0, 0, 0, (float) 0);
+
+    check_nok_string_datetime_no_timezeone("2021-02-16T18-13:01.168764999", 2021, 02, 16, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:1301.168764999", 2021, 02, 16, 18, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18", 0, 0, 0, 0, 0, 0, (float) 0);
+
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13.01.168764999", 2021, 02, 16, 18, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:01-168764999", 2021, 02, 16, 18, 13, 01, (float) 1);
+    // Complete date without second fraction
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:01", 2021, 02, 16, 18, 13, 01, (float) 0);
+
+    // Negative year ok
+    check_ok_string_datetime_no_timezeone("-2021-02-16T18:13:01.168764999", -2021, 02, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+
+    // Valid min and max years
+    check_ok_string_datetime_no_timezeone("-32768-02-16T18:13:01.168764999", INT16_MIN, 02, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+    check_ok_string_datetime_no_timezeone("32767-02-16T18:13:01.168764999", INT16_MAX, 02, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+
+    // Invalid out of [min, max] years range
+    check_nok_string_datetime_no_timezeone("-32769-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("32768-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
+
+    // First month
+    check_ok_string_datetime_no_timezeone("2021-01-16T18:13:01.168764999", 2021, 01, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+    // Last month
+    check_ok_string_datetime_no_timezeone("2021-12-16T18:13:01.168764999", 2021, 12, 16, 18, 13, 01,
+                                          (float) 1.168764999);
+
+    // Invalid out of [min, max] months range
+    check_nok_string_datetime_no_timezeone("2021-00-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+
+    check_nok_string_datetime_no_timezeone("2021-13-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+
+    // Note: parser do not check day/month/year coherency
+
+    // First day
+    check_ok_string_datetime_no_timezeone("2021-02-01T18:13:01.168764999", 2021, 02, 01, 18, 13, 01,
+                                          (float) 1.168764999);
+    // Last last day
+    check_ok_string_datetime_no_timezeone("2021-02-31T18:13:01.168764999", 2021, 02, 31, 18, 13, 01,
+                                          (float) 1.168764999);
+    // Invalid out of [min, max] days range
+    check_nok_string_datetime_no_timezeone("2021-02-00T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-32T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
+
+    // First hour
+    check_ok_string_datetime_no_timezeone("2021-02-16T00:13:01.168764999", 2021, 02, 16, 00, 13, 01,
+                                          (float) 1.168764999);
+    // Last hour
+    check_ok_string_datetime_no_timezeone("2021-02-16T23:13:01.168764999", 2021, 02, 16, 23, 13, 01,
+                                          (float) 1.168764999);
+    // Hour == 24 only allowed if everything else is 0
+    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000", 2021, 02, 16, 24, 00, 00, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00", 2021, 02, 16, 24, 00, 00, (float) 0);
+
+    // Hour == 24 not allowed if anything else != 0
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:13:00", 2021, 02, 16, 24, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:02", 2021, 02, 16, 24, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000000001", 2021, 02, 16, 24, 0, 0, (float) 0);
+    // First minute
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:00:01.168764999", 2021, 02, 16, 18, 00, 01,
+                                          (float) 1.168764999);
+    // Last minute
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:59:01.168764999", 2021, 02, 16, 18, 59, 01,
+                                          (float) 1.168764999);
+
+    // Invalid minute (> max)
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:60:01.168764999", 2021, 02, 16, 18, 00, 0, (float) 0);
+
+    // First second
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00.000000000", 2021, 02, 16, 18, 13, 00, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00", 2021, 02, 16, 18, 13, 00, (float) 0);
+
+    // Last second
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59", 2021, 02, 16, 18, 13, 59, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59.9999999", 2021, 02, 16, 18, 13, 59, (float) 59.9999999);
+
+    // Invalid second (> max)
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:60.168764999", 2021, 02, 16, 18, 13, 0, (float) 0);
+}
+END_TEST
+
+#define check_ok_string_datetime(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond,            \
+                                 expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off) \
+    check_string_datetime(datetime, true, expYear, expMonth, expDay, expHour, expMinute, expSecond,             \
+                          expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off)
+
+#define check_nok_string_datetime(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond,            \
+                                  expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off) \
+    check_string_datetime(datetime, false, expYear, expMonth, expDay, expHour, expMinute, expSecond,             \
+                          expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off)
+
+START_TEST(test_string_datetime_with_timezone)
+{
+    // Nominal UTC+/-0
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999Z", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                             false, 0, 0);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+00:00", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                             false, 0, 0);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-00:00", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                             true, 0, 0);
+    // Nominal UTC+/-01:30
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+01:30", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                             false, false, 01, 30);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-01:30", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                             false, true, 01, 30);
+
+    // Invalid separators / format
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999X", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                              false, 0, 0);
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999:03:45", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                              true, false, 0, 0);
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999-", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                              false, 0, 0);
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999+", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+                              false, 0, 0);
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999+01:30+", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                              false, false, 01, 30);
+
+    // First hour offset
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999-14:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                             false, true, 14, 00);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-13:59", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                             false, true, 13, 59);
+
+    // Last hour offset
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+14:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                             false, false, 14, 00);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+13:59", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+                             false, false, 13, 59);
+
+    // Hour == 14 not allowed if minute != 0
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999-14:01", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                              true, false, 00, 00);
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+14:01", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                              true, false, 00, 00);
+    // Hour > 14 not allowed
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999-15:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                              true, false, 00, 00);
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+15:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                              true, false, 00, 00);
+
+    // First minute
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                             false, false, 12, 00);
+    // Last minute
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:59", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                             false, false, 12, 59);
+    // Invalid minute (> max)
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+12:60", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+                              true, false, 00, 00);
+}
+
 // Async queue
 
 START_TEST(test_async_queue)
@@ -1810,7 +2027,8 @@ static void* test_async_queue_blocking_dequeue_fct(void* args)
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
     bool success = true;
-    // Dequeue expected number of messages with increased value sequence as action parameter
+    // Dequeue expected number of messages with increased value sequence as
+    // action parameter
     while (nbDequeued < param->nbMsgs && success != false)
     {
         SOPC_Atomic_Int_Add(&param->dequeue_pending, 1);
@@ -1840,7 +2058,8 @@ static void* test_async_queue_nonblocking_dequeue_fct(void* args)
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
     bool success = true;
-    // Dequeue expected number of messages with increased value sequence as action parameter
+    // Dequeue expected number of messages with increased value sequence as
+    // action parameter
     while (nbDequeued < param->nbMsgs && success != false)
     {
         status = SOPC_AsyncQueue_NonBlockingDequeue(param->queue, &arg);
@@ -2111,7 +2330,8 @@ END_TEST
 
 START_TEST(test_ua_encoder_basic_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
+                                            // endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -2526,7 +2746,8 @@ END_TEST
 
 START_TEST(test_ua_encoder_other_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
+                                            // endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -2995,7 +3216,8 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(buffer->data[4] == 0x00);
     ck_assert(buffer->data[5] == 0x01);
 
-    // Four bytes node id (limit of two bytes representation on namespace value)
+    // Four bytes node id (limit of two bytes representation on namespace
+    // value)
     nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Namespace = 1;
     nodeId.Data.Numeric = 255;
@@ -3128,7 +3350,8 @@ END_TEST
 
 START_TEST(test_ua_decoder_allocation_limit)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
+                                            // endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_String s;
     SOPC_String_Initialize(&s);
@@ -3346,7 +3569,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_Variant_Clear(&v);
 
-    // Set position to write to buffer: position = position - 4 * 4 bytes to write array dimensions length
+    // Set position to write to buffer: position = position - 4 * 4 bytes to
+    // write array dimensions length
     status = SOPC_Buffer_SetPosition(buffer, buffer->position - 4 * 4);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Overwrite with limit+1 length value
@@ -3367,7 +3591,8 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS (TEST NESTED VERSION OF CODE) */
+    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS (TEST NESTED VERSION OF
+     * CODE) */
     v.BuiltInTypeId = SOPC_Variant_Id;
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 1;
@@ -3400,8 +3625,9 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT OF NESTED VARIANT ELEMENTS */
 
-    // ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL nested levels
-    // Variant/Array nested so limit has to be divided by 2, minus 1 for fields
+    // ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL nested
+    // levels Variant/Array nested so limit has to be divided by 2, minus 1
+    // for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 2; idx++)
     {
@@ -3456,8 +3682,9 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // ENCODING A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL Variant nested levels
-    // Variant/DataValue nested so limit has to be divided by 2, minus one for fields
+    // ENCODING A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL Variant
+    // nested levels Variant/DataValue nested so limit has to be divided by 2,
+    // minus one for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 2; idx++)
     {
@@ -3491,8 +3718,9 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT + 1 OF NESTED VARIANT ELEMENTS */
 
-    // TEST ENCODER FAILURE OF A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL /2 nested levels
-    // Nested Variant/Datavalue, so limit has to be divided by 2 minus 1 for fields
+    // TEST ENCODER FAILURE OF A VARIANT WITH
+    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL /2 nested levels Nested
+    // Variant/Datavalue, so limit has to be divided by 2 minus 1 for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
     {
@@ -3516,8 +3744,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // MANUAL ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL/2 nested levels
-    // Nested Variant/Array so limit has to be divided by 2
+    // MANUAL ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL/2
+    // nested levels Nested Variant/Array so limit has to be divided by 2
     encodingByte = 152; // Variant Id + 2^7 bit to indicate an array
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
@@ -3551,7 +3779,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // TEST ENCODER FAILURE OF A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
+    // TEST ENCODER FAILURE OF A DATAVALUE WITH
+    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1; idx++)
     {
@@ -3575,7 +3804,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // MANUAL ENCODING OF A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
+    // MANUAL ENCODING OF A DATAVALUE WITH
+    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1; idx++)
     {
@@ -3584,7 +3814,8 @@ START_TEST(test_ua_decoder_allocation_limit)
         status = SOPC_Byte_Write(&encodingByte, buffer, 0);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
         // DataValue
-        encodingByte = SOPC_DataValue_NotNullValue; // It indicates there is a value and nothing else in DataValue
+        encodingByte = SOPC_DataValue_NotNullValue; // It indicates there is a value
+                                                    // and nothing else in DataValue
         // EncodingMask byte
         status = SOPC_Byte_Write(&encodingByte, buffer, 0);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -3614,7 +3845,8 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT OF NESTED DIAG INFO */
 
-    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL nested levels
+    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL
+    // nested levels
     pDiag = &diag;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL; idx++)
     {
@@ -3665,7 +3897,8 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT+1 OF NESTED DIAG INFO */
 
-    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL+1 nested levels
+    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL+1
+    // nested levels
     encodingByte = SOPC_DiagInfoEncoding_InnerDianosticInfo;
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL + 1; idx++)
@@ -3921,7 +4154,8 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt,
+                                        &comp_res); // same with an LT array
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
@@ -3944,7 +4178,8 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt,
+                                        &comp_res); // same with an LT array
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
@@ -3960,7 +4195,8 @@ START_TEST(test_ua_localized_text_type)
     status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // Keep only en-UK as english preferred locale and do not keep another exactly valid neither
+    // Keep only en-UK as english preferred locale and do not keep another
+    // exactly valid neither
     char* preferredLocales3[] = {"de-DE", "en-UK", "fr-BE", NULL};
 
     // en-US shall be preferred
@@ -3977,7 +4213,8 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    // Keep only 'en' as english preferred locale and do not keep another exactly valid neither
+    // Keep only 'en' as english preferred locale and do not keep another
+    // exactly valid neither
     char* preferredLocales4[] = {"de-DE", "en", "fr-BE", NULL};
     // en-US shall be preferred
     SOPC_LocalizedText_Clear(&single2Lt);
@@ -3988,7 +4225,8 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    // Keep only en-UK as english preferred locale but also keep fr-FR exact and valid locale
+    // Keep only en-UK as english preferred locale but also keep fr-FR exact
+    // and valid locale
     char* preferredLocales5[] = {"de-DE", "en-UK", "fr-FR", NULL};
 
     // fr-FR shall be preferred
@@ -4030,7 +4268,8 @@ START_TEST(test_ua_localized_text_type)
     result = SOPC_String_Equal(&setOfLt.defaultText, &single2Lt.defaultText);
     ck_assert_int_eq(true, result);
 
-    // Set the default locale to specialized locale: test specific case of deletion of the default one
+    // Set the default locale to specialized locale: test specific case of
+    // deletion of the default one
     status = SOPC_String_AttachFromCstring(&setOfLt.defaultLocale, "en-UK");
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -4192,7 +4431,8 @@ START_TEST(test_ua_variant_get_range_scalar)
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
 
-    // Except String and ByteString, we shouldn't be able to dereference scalar types
+    // Except String and ByteString, we shouldn't be able to dereference
+    // scalar types
     for (SOPC_BuiltinId type_id = SOPC_Null_Id; type_id < SOPC_DiagnosticInfo_Id; ++type_id)
     {
         if (type_id == SOPC_String_Id || type_id == SOPC_ByteString_Id)
@@ -4419,7 +4659,8 @@ START_TEST(test_ua_variant_set_range_scalar)
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
 
-    // Except String and ByteString, we shouldn't be able to dereference scalar types
+    // Except String and ByteString, we shouldn't be able to dereference
+    // scalar types
     for (SOPC_BuiltinId type_id = SOPC_Null_Id; type_id < SOPC_DiagnosticInfo_Id; ++type_id)
     {
         if (type_id == SOPC_String_Id || type_id == SOPC_ByteString_Id)
@@ -4559,6 +4800,8 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_basetools, test_strtouint2);
     tcase_add_test(tc_basetools, test_strtoint);
     tcase_add_test(tc_basetools, test_string_nodeid);
+    tcase_add_test(tc_basetools, test_string_datetime_no_timezone);
+    tcase_add_test(tc_basetools, test_string_datetime_with_timezone);
     suite_add_tcase(s, tc_basetools);
     tc_buffer = tcase_create("Buffer");
     tcase_add_test(tc_buffer, test_buffer_create);
