@@ -9112,7 +9112,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=15182</Reference>
     </References>
     <Value>
-      <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2016-04-15</String>
+      <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2016-04-15T00:00:00Z</DateTime>
     </Value>
   </UAVariable>
   <UAVariable NodeId="i=15186" BrowseName="IsNamespaceSubset" ParentNodeId="i=15182" DataType="Boolean">
