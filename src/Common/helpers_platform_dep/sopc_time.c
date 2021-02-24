@@ -190,24 +190,24 @@ static int64_t daysSince1601(int16_t year, uint8_t month, uint8_t day)
     assert(year >= 1601);
     assert(year <= 9999);
 
-    // Number of days until 01/01/1601: 1600 * 365 + 1600 / 4 - 1600 / 100 + 1600 /400
-    const int64_t daysUntil1601 = 584388;
+    // Change base year from 1 to 1601 (safe since 1601 <= year <= 9999)
+    int16_t yearBased1601 = (int16_t)(year - 1600);
 
     // Month-to-day offset for non-leap-years.
     const int64_t monthDaysElapsed[12] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
     // Number of February months (no year 0)
-    int64_t nbFebs = year - (month <= 2 ? 1 : 0);
+    int64_t nbFebs = yearBased1601 - (month <= 2 ? 1 : 0);
 
     // Total number of leap days
     int64_t leapDays = (nbFebs / 4) - (nbFebs / 100) + (nbFebs / 400);
 
     // Total number of days =
-    // 365 * elapsed years + elapsed leap days + elapsed days in year before current month (without leap day)
-    // + elapsed days in current month - 1 (current day not elapsed yet)
-    int64_t days = 365 * (year - 1) + leapDays + monthDaysElapsed[month - 1] + day - 1;
+    // 365 * elapsed years + elapsed leap days + elapsed days in current year before current month (without leap day)
+    // + elapsed days in current month (- 1 since current day not elapsed yet)
+    int64_t days = 365 * (yearBased1601 - 1) + leapDays + monthDaysElapsed[month - 1] + day - 1;
 
-    return days - daysUntil1601;
+    return days;
 }
 
 static int64_t secondsSince1601(int16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)

@@ -38,6 +38,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_time.h"
 
 typedef enum
 {
@@ -1150,7 +1151,7 @@ static uint8_t type_width(SOPC_BuiltinId ty)
         }                                                                                 \
         else                                                                              \
         {                                                                                 \
-            LOGF("Invalid integer value: '%s'", val);                                     \
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid integer value: '%s'", val);   \
             return false;                                                                 \
         }
 
@@ -1572,6 +1573,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
 
 static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, const char* val)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_BuiltinId type_id = ctx->current_value_type;
     switch (type_id)
     {
@@ -1579,6 +1581,9 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
         var->BuiltInTypeId = SOPC_Boolean_Id;
         var->Value.Boolean = (strcmp(val, "true") == 0);
         return true;
+        /*
+    case: all signed/unsigned integer cases managed here:
+        */
         FOREACH_SIGNED_VALUE_TYPE(SET_SIGNED_INT_ELEMENT_VALUE_CASE)
         FOREACH_UNSIGNED_VALUE_TYPE(SET_UNSIGNED_INT_ELEMENT_VALUE_CASE)
     case SOPC_Float_Id:
@@ -1589,7 +1594,7 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
         }
         else
         {
-            LOGF("Invalid float value: '%s'", val);
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid float value: '%s'", val);
             return false;
         }
     case SOPC_Double_Id:
@@ -1600,9 +1605,23 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
         }
         else
         {
-            LOGF("Invalid double value: '%s'", val);
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid double value: '%s'", val);
             return false;
         }
+    case SOPC_DateTime_Id:
+        status = SOPC_Time_FromXsdDateTime(val, strlen(val), &var->Value.Date);
+        if (SOPC_STATUS_OK == status)
+        {
+            var->BuiltInTypeId = SOPC_DateTime_Id;
+            return true;
+        }
+        else
+        {
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid or unsupported DateTime value: '%s', status = '%d'", val,
+                           status);
+            return false;
+        }
+        return true;
     case SOPC_String_Id:
         SET_STR_ELEMENT_VALUE_CASE(String)
     case SOPC_ByteString_Id:
