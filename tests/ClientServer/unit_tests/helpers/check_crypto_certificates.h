@@ -25,16 +25,16 @@
 #include "sopc_key_manager.h"
 
 // server_2k_cert.der
-const char* SRV_CRT;
-const char* SRV_CRT_THUMB;
+extern const char* SRV_CRT;
+extern const char* SRV_CRT_THUMB;
 
 // cacert.der
-const char* CA_CRT;
-const size_t CA_CRT_LEN;
+extern const char* CA_CRT;
+extern const size_t CA_CRT_LEN;
 
 // cacrl.der
-const char* CA_CRL;
-const size_t CA_CRL_LEN;
+extern const char* CA_CRL;
+extern const size_t CA_CRL_LEN;
 
 SOPC_CertificateList* SOPC_UnhexlifyCertificate(const char* hex_data);
 SOPC_CRLList* SOPC_UnhexlifyCRL(const char* hex_data);
