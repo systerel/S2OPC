@@ -261,7 +261,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:b8fc17972b668928fa1053abe7aa970fa6d887580f02fc32bb9aa9f8b5366eb3  # digest of test:2.7
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:833082e232ca3a26fd758eda093242bebcc57305713d3eb2de5a95f58ff9bc31  # digest of test:2.8
   script:
     - 'adduser --system mosquitto'
     - 'mosquitto -d'
