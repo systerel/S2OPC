@@ -1,0 +1,29 @@
+<PubSub publisherId="44">    
+	<!-- PUBLISHER -->
+    <connection address="opc.udp://232.1.4.100:4840" mode="publisher">
+        <message id="15" version="1" publishingInterval="2">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0PubSub" displayName="CounterPubSub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1PubSub" displayName="Data1PubSub" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2PubSub" displayName="Data2PubSub" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3PubSub" displayName="Data3PubSub" dataType="String"/>
+        </message>
+		<message id="16" version="1" publishingInterval="2">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0" displayName="CounterUDP_Board2" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1" displayName="Data1UDP" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2" displayName="Data2UDP" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3" displayName="Data3UDP" dataType="String"/>
+        </message>
+    </connection>
+    <!-- SUSCRIBER -->
+    <connection address="opc.udp://232.1.3.100:4840" mode="subscriber">
+		<message id="16" version="1" publishingInterval="2" publisherId="43">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0PubSub" displayName="CounterPubSub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1PubSub" displayName="Data1PubSub" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2PubSub" displayName="Data2PubSub" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3PubSub" displayName="Data3PubSub" dataType="String"/>
+        </message>
+    </connection>
+</PubSub>

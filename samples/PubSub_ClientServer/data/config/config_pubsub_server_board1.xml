@@ -1,0 +1,12 @@
+<PubSub publisherId="43">    
+	<!-- PUBLISHER -->
+    <connection address="opc.udp://232.1.3.100:4840" mode="publisher">
+		<message id="16" version="1" publishingInterval="2">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0" displayName="CounterUDP_Board1" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1" displayName="Data1" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2" displayName="Data2" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3" displayName="Data3" dataType="String"/>
+        </message>
+    </connection>
+</PubSub>

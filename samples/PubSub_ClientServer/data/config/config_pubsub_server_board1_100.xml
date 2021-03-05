@@ -1,0 +1,1636 @@
+<PubSub publisherId="43">    
+	<!-- PUBLISHER -->
+    <connection address="opc.udp://232.1.3.100:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="14" version="1" publishingInterval="5" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+        <message id="15" version="1" publishingInterval="5">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>
+        </message>
+		<message id="16" version="1" publishingInterval="5">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0" displayName="CounterUDP_Board1" dataType="UInt32"/>
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.101:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1_Pub" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.102:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test2_Pub" displayName="Test2" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.103:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test3_Pub" displayName="Test3" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.104:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test4_Pub" displayName="Test4" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.105:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test5_Pub" displayName="Test5" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.106:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test6_Pub" displayName="Test6" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.107:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test7_Pub" displayName="Test7" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.108:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test8_Pub" displayName="Test8" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.109:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test9_Pub" displayName="Test9" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.110:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test10_Pub" displayName="Test10" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.111:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test11_Pub" displayName="Test11" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.112:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test12_Pub" displayName="Test12" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.113:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test13_Pub" displayName="Test13" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.114:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test14_Pub" displayName="Test14" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.115:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test15_Pub" displayName="Test15" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.116:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test16_Pub" displayName="Test16" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.117:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test17_Pub" displayName="Test17" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.118:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test18_Pub" displayName="Test18" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.119:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test19_Pub" displayName="Test19" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.120:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test20_Pub" displayName="Test20" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>	
+	<connection address="opc.udp://232.1.3.121:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test21_Pub" displayName="Test21" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.122:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test22_Pub" displayName="Test22" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.123:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test23_Pub" displayName="Test23" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.124:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test24_Pub" displayName="Test24" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.125:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test25_Pub" displayName="Test25" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.126:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test26_Pub" displayName="Test26" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.127:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test27_Pub" displayName="Test27" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.128:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test28_Pub" displayName="Test28" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.129:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test29_Pub" displayName="Test29" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.130:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test30_Pub" displayName="Test30" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.131:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test31_Pub" displayName="Test31" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.132:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test32_Pub" displayName="Test32" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.133:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test33_Pub" displayName="Test33" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.134:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test34_Pub" displayName="Test34" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.135:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test35_Pub" displayName="Test35" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.136:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test36_Pub" displayName="Test36" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.137:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test37_Pub" displayName="Test37" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.138:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test38_Pub" displayName="Test38" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.139:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test39_Pub" displayName="Test39" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.140:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test40_Pub" displayName="Test40" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.141:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test41_Pub" displayName="Test41" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.142:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test42_Pub" displayName="Test42" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.143:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test43_Pub" displayName="Test43" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.144:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test44_Pub" displayName="Test44" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.145:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test45_Pub" displayName="Test45" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.146:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test46_Pub" displayName="Test46" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.147:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test47_Pub" displayName="Test47" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.148:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test48_Pub" displayName="Test48" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.149:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test49_Pub" displayName="Test49" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.150:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test50_Pub" displayName="Test50" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.151:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test51_Pub" displayName="Test51" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.152:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test52_Pub" displayName="Test52" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.153:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test53_Pub" displayName="Test53" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.154:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test54_Pub" displayName="Test54" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.155:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test55_Pub" displayName="Test55" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.156:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test56_Pub" displayName="Test56" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.157:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test57_Pub" displayName="Test57" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.158:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test58_Pub" displayName="Test58" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.159:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test59_Pub" displayName="Test59" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.160:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test60_Pub" displayName="Test60" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.161:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test61_Pub" displayName="Test61" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.162:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test62_Pub" displayName="Test62" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.163:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test63_Pub" displayName="Test63" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.164:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test64_Pub" displayName="Test64" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.165:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test65_Pub" displayName="Test65" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.166:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test66_Pub" displayName="Test66" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.167:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test67_Pub" displayName="Test67" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.168:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test68_Pub" displayName="Test68" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.169:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test69_Pub" displayName="Test69" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.170:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test70_Pub" displayName="Test70" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.171:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test71_Pub" displayName="Test71" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.172:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test72_Pub" displayName="Test72" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.173:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test73_Pub" displayName="Test73" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.174:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test74_Pub" displayName="Test74" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.175:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test75_Pub" displayName="Test75" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.176:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test76_Pub" displayName="Test76" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.177:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test77_Pub" displayName="Test77" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.178:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test78_Pub" displayName="Test78" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.179:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test79_Pub" displayName="Test79" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.180:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test80_Pub" displayName="Test80" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.181:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test81_Pub" displayName="Test81" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.182:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test82_Pub" displayName="Test82" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.183:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test83_Pub" displayName="Test83" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.184:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test84_Pub" displayName="Test84" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.185:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test85_Pub" displayName="Test85" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.186:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test86_Pub" displayName="Test86" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.187:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test87_Pub" displayName="Test87" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.188:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test88_Pub" displayName="Test88" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.189:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test89_Pub" displayName="Test89" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.190:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test90_Pub" displayName="Test90" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.191:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test91_Pub" displayName="Test91" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.192:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test92_Pub" displayName="Test92" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.193:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test93_Pub" displayName="Test93" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.194:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test94_Pub" displayName="Test94" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.195:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test95_Pub" displayName="Test95" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.196:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test96_Pub" displayName="Test96" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.197:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test97_Pub" displayName="Test97" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.198:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test98_Pub" displayName="Test98" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.199:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test99_Pub" displayName="Test99" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.3.200:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test100_Pub" displayName="Test100" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<!-- SUSCRIBER -->
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="14" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+        <message id="15" version="1" publishingInterval="100" publisherId="42">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=SubUInt" displayName="varUInt" dataType="UInt64"/>
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.101:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>	
+	<connection address="opc.udp://232.1.2.102:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.103:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.104:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.105:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.106:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.107:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.108:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.109:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.110:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.111:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.112:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.113:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.114:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.115:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.116:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.117:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.118:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.119:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.120:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test1" displayName="Test1" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>	
+	<connection address="opc.udp://232.1.2.121:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test21" displayName="Test21" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.122:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test22" displayName="Test22" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.123:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test23" displayName="Test23" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.124:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test24" displayName="Test24" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.125:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test25" displayName="Test25" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.126:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test26" displayName="Test26" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.127:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test27" displayName="Test27" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.128:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test28" displayName="Test28" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.129:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test29" displayName="Test29" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.130:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test30" displayName="Test30" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.131:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test31" displayName="Test31" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.132:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test32" displayName="Test32" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.133:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test33" displayName="Test33" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.134:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test34" displayName="Test34" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.135:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test35" displayName="Test35" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.136:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test36" displayName="Test36" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.137:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test37" displayName="Test37" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.138:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test38" displayName="Test38" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.139:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test39" displayName="Test39" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.140:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test40" displayName="Test40" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.141:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test41" displayName="Test41" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.142:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test42" displayName="Test42" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.143:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test43" displayName="Test43" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.144:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test44" displayName="Test44" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.145:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test45" displayName="Test45" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.146:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test46" displayName="Test46" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.147:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test47" displayName="Test47" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.148:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test48" displayName="Test48" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.149:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test49" displayName="Test49" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.150:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test50" displayName="Test50" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.151:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test51" displayName="Test51" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.152:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test52" displayName="Test52" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.153:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test53" displayName="Test53" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.154:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test54" displayName="Test54" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.155:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test55" displayName="Test55" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.156:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test56" displayName="Test56" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.157:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test57" displayName="Test57" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.158:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test58" displayName="Test58" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.159:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test59" displayName="Test59" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.160:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test60" displayName="Test60" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.161:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test61" displayName="Test61" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.162:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test62" displayName="Test62" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.163:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test63" displayName="Test63" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.164:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test64" displayName="Test64" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.165:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test65" displayName="Test65" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.166:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test66" displayName="Test66" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.167:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test67" displayName="Test67" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.168:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test68" displayName="Test68" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.169:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test69" displayName="Test69" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.170:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test70" displayName="Test70" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.171:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test71" displayName="Test71" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.172:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test72" displayName="Test72" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.173:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test73" displayName="Test73" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.174:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test74" displayName="Test74" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.175:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test75" displayName="Test75" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.176:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test76" displayName="Test76" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.177:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test77" displayName="Test77" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.178:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test78" displayName="Test78" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.179:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test79" displayName="Test79" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.180:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test80" displayName="Test80" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.181:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test81" displayName="Test81" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.182:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test82" displayName="Test82" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.183:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test83" displayName="Test83" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.184:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test84" displayName="Test84" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.185:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test85" displayName="Test85" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.186:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test86" displayName="Test86" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.187:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test87" displayName="Test87" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.188:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test88" displayName="Test88" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.189:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test89" displayName="Test89" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.190:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test90" displayName="Test90" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.191:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test91" displayName="Test91" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.192:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test92" displayName="Test92" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.193:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test93" displayName="Test93" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.194:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test94" displayName="Test94" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.195:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test95" displayName="Test95" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.196:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test96" displayName="Test96" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.197:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test97" displayName="Test97" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.198:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test98" displayName="Test98" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.199:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test99" displayName="Test99" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+	<connection address="opc.udp://232.1.2.200:4840" mode="subscriber">
+        <!-- one to many -->
+        <message id="17" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=Test100" displayName="Test100" dataType="UInt32"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+        </message>
+    </connection>
+</PubSub>

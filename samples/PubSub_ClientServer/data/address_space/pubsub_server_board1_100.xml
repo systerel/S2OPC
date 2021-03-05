@@ -1,0 +1,3393 @@
+<?xml version='1.0' encoding='utf-8'?>
+<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamespaceUris>
+    <Uri>FEP_NS_261</Uri>
+  </NamespaceUris>
+
+  <!-- Basic types definition -->
+  <Aliases>
+    <Alias Alias="Boolean">i=1</Alias>
+    <Alias Alias="SByte">i=2</Alias>
+    <Alias Alias="Byte">i=3</Alias>
+    <Alias Alias="Int16">i=4</Alias>
+    <Alias Alias="UInt16">i=5</Alias>
+    <Alias Alias="Int32">i=6</Alias>
+    <Alias Alias="UInt32">i=7</Alias>
+    <Alias Alias="Int64">i=8</Alias>
+    <Alias Alias="UInt64">i=9</Alias>
+    <Alias Alias="Float">i=10</Alias>
+    <Alias Alias="Double">i=11</Alias>
+    <Alias Alias="DateTime">i=13</Alias>
+    <Alias Alias="String">i=12</Alias>
+    <Alias Alias="ByteString">i=15</Alias>
+    <Alias Alias="Guid">i=14</Alias>
+    <Alias Alias="XmlElement">i=16</Alias>
+    <Alias Alias="NodeId">i=17</Alias>
+    <Alias Alias="ExpandedNodeId">i=18</Alias>
+    <Alias Alias="QualifiedName">i=20</Alias>
+    <Alias Alias="LocalizedText">i=21</Alias>
+    <Alias Alias="StatusCode">i=19</Alias>
+    <Alias Alias="Structure">i=22</Alias>
+    <Alias Alias="Number">i=26</Alias>
+    <Alias Alias="Integer">i=27</Alias>
+    <Alias Alias="UInteger">i=28</Alias>
+    <Alias Alias="HasComponent">i=47</Alias>
+    <Alias Alias="HasProperty">i=46</Alias>
+    <Alias Alias="Organizes">i=35</Alias>
+    <Alias Alias="HasEventSource">i=36</Alias>
+    <Alias Alias="HasNotifier">i=48</Alias>
+    <Alias Alias="HasSubtype">i=45</Alias>
+    <Alias Alias="HasTypeDefinition">i=40</Alias>
+    <Alias Alias="HasModellingRule">i=37</Alias>
+    <Alias Alias="HasEncoding">i=38</Alias>
+    <Alias Alias="HasDescription">i=39</Alias>
+  </Aliases>
+  <UADataType NodeId="i=24" BrowseName="BaseDataType" IsAbstract="true">
+    <DisplayName>BaseDataType</DisplayName>
+    <Description>Describes a value that can have any valid DataType.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=26" BrowseName="Number" IsAbstract="true">
+    <DisplayName>Number</DisplayName>
+    <Description>Describes a value that can have any numeric DataType.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=27" BrowseName="Integer" IsAbstract="true">
+    <DisplayName>Integer</DisplayName>
+    <Description>Describes a value that can have any integer DataType.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=28" BrowseName="UInteger" IsAbstract="true">
+    <DisplayName>UInteger</DisplayName>
+    <Description>Describes a value that can have any unsigned integer DataType.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=29" BrowseName="Enumeration" IsAbstract="true">
+    <DisplayName>Enumeration</DisplayName>
+    <Description>Describes a value that is an enumerated DataType.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=1" BrowseName="Boolean">
+    <DisplayName>Boolean</DisplayName>
+    <Description>Describes a value that is either TRUE or FALSE.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=2" BrowseName="SByte">
+    <DisplayName>SByte</DisplayName>
+    <Description>Describes a value that is an integer between -128 and 127.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=27</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=3" BrowseName="Byte">
+    <DisplayName>Byte</DisplayName>
+    <Description>Describes a value that is an integer between 0 and 255.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=28</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=4" BrowseName="Int16">
+    <DisplayName>Int16</DisplayName>
+    <Description>Describes a value that is an integer between −32,768 and 32,767.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=27</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=5" BrowseName="UInt16">
+    <DisplayName>UInt16</DisplayName>
+    <Description>Describes a value that is an integer between 0 and 65535.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=28</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=6" BrowseName="Int32">
+    <DisplayName>Int32</DisplayName>
+    <Description>Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=27</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=7" BrowseName="UInt32">
+    <DisplayName>UInt32</DisplayName>
+    <Description>Describes a value that is an integer between 0 and 4,294,967,295.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=28</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=8" BrowseName="Int64">
+    <DisplayName>Int64</DisplayName>
+    <Description>Describes a value that is an integer between −9,223,372,036,854,775,808 and 9,223,372,036,854,775,807.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=27</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=9" BrowseName="UInt64">
+    <DisplayName>UInt64</DisplayName>
+    <Description>Describes a value that is an integer between 0 and 18,446,744,073,709,551,615.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=28</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=10" BrowseName="Float">
+    <DisplayName>Float</DisplayName>
+    <Description>Describes a value that is an IEEE 754-1985 single precision floating point number.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=11" BrowseName="Double">
+    <DisplayName>Double</DisplayName>
+    <Description>Describes a value that is an IEEE 754-1985 double precision floating point number.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=12" BrowseName="String">
+    <DisplayName>String</DisplayName>
+    <Description>Describes a value that is a sequence of printable Unicode characters.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=13" BrowseName="DateTime">
+    <DisplayName>DateTime</DisplayName>
+    <Description>Describes a value that is a Gregorian calender date and time.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=14" BrowseName="Guid">
+    <DisplayName>Guid</DisplayName>
+    <Description>Describes a value that is a 128-bit globally unique identifier.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=15" BrowseName="ByteString">
+    <DisplayName>ByteString</DisplayName>
+    <Description>Describes a value that is a sequence of bytes.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=16" BrowseName="XmlElement">
+    <DisplayName>XmlElement</DisplayName>
+    <Description>Describes a value that is an XML element.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=17" BrowseName="NodeId">
+    <DisplayName>NodeId</DisplayName>
+    <Description>Describes a value that is an identifier for a node within a Server address space.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=18" BrowseName="ExpandedNodeId">
+    <DisplayName>ExpandedNodeId</DisplayName>
+    <Description>Describes a value that is an absolute identifier for a node.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=19" BrowseName="StatusCode">
+    <DisplayName>StatusCode</DisplayName>
+    <Description>Describes a value that is a code representing the outcome of an operation by a Server.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=20" BrowseName="QualifiedName">
+    <DisplayName>QualifiedName</DisplayName>
+    <Description>Describes a value that is a name qualified by a namespace.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=21" BrowseName="LocalizedText">
+    <DisplayName>LocalizedText</DisplayName>
+    <Description>Describes a value that is human readable Unicode text with a locale identifier.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=22" BrowseName="Structure" IsAbstract="true">
+    <DisplayName>Structure</DisplayName>
+    <Description>Describes a value that is any type of structure that can be described with a data encoding.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=23" BrowseName="DataValue">
+    <DisplayName>DataValue</DisplayName>
+    <Description>Describes a value that is a structure containing a value, a status code and timestamps.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=25" BrowseName="DiagnosticInfo">
+    <DisplayName>DiagnosticInfo</DisplayName>
+    <Description>Describes a value that is a structure containing diagnostics associated with a StatusCode.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=30" BrowseName="Image">
+    <DisplayName>Image</DisplayName>
+    <Description>Describes a value that is an image encoded as a string of bytes.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=15</Reference>
+    </References>
+  </UADataType>
+  <UAReferenceType NodeId="i=31" BrowseName="References" IsAbstract="true" Symmetric="true">
+    <DisplayName>References</DisplayName>
+    <Description>The abstract base type for all references.</Description>
+    <References />
+  </UAReferenceType>
+  <UAReferenceType NodeId="i=32" BrowseName="NonHierarchicalReferences" IsAbstract="true">
+    <DisplayName>NonHierarchicalReferences</DisplayName>
+    <Description>The abstract base type for all non-hierarchical references.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=31</Reference>
+    </References>
+    <InverseName>NonHierarchicalReferences</InverseName>
+  </UAReferenceType>
+  <UAReferenceType NodeId="i=39" BrowseName="HasDescription">
+    <DisplayName>HasDescription</DisplayName>
+    <Description>The type for references from data type encoding nodes to data type description nodes.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=32</Reference>
+    </References>
+    <InverseName>DescriptionOf</InverseName>
+  </UAReferenceType>
+  <UAReferenceType NodeId="i=40" BrowseName="HasTypeDefinition">
+    <DisplayName>HasTypeDefinition</DisplayName>
+    <Description>The type for references from a instance node its type definition node.</Description>
+    <References>
+        <Reference ReferenceType="HasSubtype" IsForward="false">i=32</Reference>
+    </References>
+    <InverseName>TypeDefinitionOf</InverseName>
+  </UAReferenceType>
+
+
+  <UAVariableType NodeId="i=68" BrowseName="PropertyType" ValueRank="-2">
+    <DisplayName>PropertyType</DisplayName>
+    <Description>The type for variable that represents a property of another node.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=62</Reference>
+    </References>
+  </UAVariableType>
+  <UADataType NodeId="i=295" BrowseName="LocaleId">
+    <DisplayName>LocaleId</DisplayName>
+    <Description>An identifier for a user locale.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=12</Reference>
+    </References>
+  </UADataType>
+  <UADataType NodeId="i=121" BrowseName="Decimal128">
+    <DisplayName>Decimal128</DisplayName>
+    <Description>Describes a 128-bit decimal value.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=26</Reference>
+    </References>
+  </UADataType>
+  <!-- End: Basic types definition -->
+  <!-- Root Folders -->
+  <UAObjectType NodeId="i=58" BrowseName="BaseObjectType">
+    <DisplayName>BaseObjectType</DisplayName>
+    <Description>The base type for all object nodes.</Description>
+    <References />
+  </UAObjectType>
+  <UAObjectType NodeId="i=61" BrowseName="FolderType">
+    <DisplayName>FolderType</DisplayName>
+    <Description>The type for objects that organize other nodes.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAVariableType NodeId="i=62" BrowseName="BaseVariableType" IsAbstract="true" ValueRank="-2">
+    <DisplayName>BaseVariableType</DisplayName>
+    <Description>The abstract base type for all variable nodes.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype">i=63</Reference>
+      <Reference ReferenceType="HasSubtype">i=68</Reference>
+    </References>
+  </UAVariableType>
+  <UAVariableType NodeId="i=63" BrowseName="BaseDataVariableType" ValueRank="-2">
+    <DisplayName>BaseDataVariableType</DisplayName>
+    <Description>The type for variable that represents a process value.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=62</Reference>
+      <Reference ReferenceType="HasSubtype">i=3051</Reference>
+    </References>
+  </UAVariableType>
+  <UAObject NodeId="i=84" BrowseName="Root" SymbolicName="RootFolder">
+    <DisplayName>Root</DisplayName>
+    <Description>The root of the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes">i=85</Reference>
+      <Reference ReferenceType="Organizes">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=87</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=85" BrowseName="Objects" SymbolicName="ObjectsFolder">
+    <DisplayName>Objects</DisplayName>
+    <Description>The browse entry point when looking for objects in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="Organizes">i=2253</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubSubStatus</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubSubConfiguration</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubSubStartStop</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=86" BrowseName="Types" SymbolicName="TypesFolder">
+    <DisplayName>Types</DisplayName>
+    <Description>The browse entry point when looking for types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="Organizes">i=88</Reference>
+      <Reference ReferenceType="Organizes">i=89</Reference>
+      <Reference ReferenceType="Organizes">i=90</Reference>
+      <Reference ReferenceType="Organizes">i=91</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=87" BrowseName="Views" SymbolicName="ViewsFolder">
+    <DisplayName>Views</DisplayName>
+    <Description>The browse entry point when looking for views in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+ <UAObject NodeId="i=88" BrowseName="ObjectTypes" SymbolicName="ObjectTypesFolder">
+    <DisplayName>ObjectTypes</DisplayName>
+    <Description>The browse entry point when looking for object types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=58</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=89" BrowseName="VariableTypes" SymbolicName="VariableTypesFolder">
+    <DisplayName>VariableTypes</DisplayName>
+    <Description>The browse entry point when looking for variable types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=62</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=90" BrowseName="DataTypes" SymbolicName="DataTypesFolder">
+    <DisplayName>DataTypes</DisplayName>
+    <Description>The browse entry point when looking for data types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=24</Reference>
+      <Reference ReferenceType="Organizes">i=26</Reference>
+      <Reference ReferenceType="Organizes">i=27</Reference>
+      <Reference ReferenceType="Organizes">i=28</Reference>
+      <Reference ReferenceType="Organizes">i=29</Reference>
+      <Reference ReferenceType="Organizes">i=1</Reference>
+      <Reference ReferenceType="Organizes">i=2</Reference>
+      <Reference ReferenceType="Organizes">i=3</Reference>
+      <Reference ReferenceType="Organizes">i=4</Reference>
+      <Reference ReferenceType="Organizes">i=5</Reference>
+      <Reference ReferenceType="Organizes">i=6</Reference>
+      <Reference ReferenceType="Organizes">i=7</Reference>
+      <Reference ReferenceType="Organizes">i=8</Reference>
+      <Reference ReferenceType="Organizes">i=9</Reference>
+      <Reference ReferenceType="Organizes">i=10</Reference>
+      <Reference ReferenceType="Organizes">i=11</Reference>
+      <Reference ReferenceType="Organizes">i=12</Reference>
+      <Reference ReferenceType="Organizes">i=13</Reference>
+      <Reference ReferenceType="Organizes">i=14</Reference>
+      <Reference ReferenceType="Organizes">i=15</Reference>
+      <Reference ReferenceType="Organizes">i=16</Reference>
+      <Reference ReferenceType="Organizes">i=17</Reference>
+      <Reference ReferenceType="Organizes">i=18</Reference>
+      <Reference ReferenceType="Organizes">i=19</Reference>
+      <Reference ReferenceType="Organizes">i=20</Reference>
+      <Reference ReferenceType="Organizes">i=21</Reference>
+      <Reference ReferenceType="Organizes">i=22</Reference>
+      <Reference ReferenceType="Organizes">i=23</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=91" BrowseName="ReferenceTypes" SymbolicName="ReferenceTypesFolder">
+    <DisplayName>ReferenceTypes</DisplayName>
+    <Description>The browse entry point when looking for reference types in the server address space.</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=86</Reference>
+      <Reference ReferenceType="Organizes">i=31</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObjectType NodeId="i=2013" BrowseName="ServerCapabilitiesType">
+    <DisplayName>ServerCapabilitiesType</DisplayName>
+    <Description>Describes the capabilities supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=2268" BrowseName="ServerCapabilities" ParentNodeId="i=2253">
+    <DisplayName>ServerCapabilities</DisplayName>
+    <Description>Describes capabilities supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">i=2271</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2013</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=2271" BrowseName="LocaleIdArray" ParentNodeId="i=2268" DataType="i=295" ValueRank="1">
+    <DisplayName>LocaleIdArray</DisplayName>
+    <Description>A list of locales supported by the server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
+    </References>
+<!-- TODO: fix parser using en-US in Server display name ? -->
+<!--    <Value>
+      <uax:ListOfString>
+        <uax:String>en-US</uax:String>
+      </uax:ListOfString>
+      </Value>
+-->
+  </UAVariable>
+  <UAObject NodeId="i=2253" BrowseName="Server">
+    <DisplayName>Server</DisplayName>
+    <Description>Describes this OPC-UA Server</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">i=2254</Reference>
+      <Reference ReferenceType="HasProperty">i=2255</Reference>
+      <Reference ReferenceType="HasComponent">i=2256</Reference>
+      <Reference ReferenceType="HasProperty">i=2267</Reference>
+      <Reference ReferenceType="HasComponent">i=2268</Reference>
+      <Reference ReferenceType="HasComponent">i=2274</Reference>
+      <Reference ReferenceType="HasProperty">i=2994</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=2254" BrowseName="ServerArray" DataType="String" ValueRank="1">
+    <DisplayName>ServerArray</DisplayName>
+    <Description>List of servers accessible from this server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=2255" BrowseName="NamespaceArray" DataType="String" ValueRank="1">
+    <DisplayName>NamespaceArray</DisplayName>
+    <Description>List of namespace on this server.</Description>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="i=2256" BrowseName="ServerStatus">
+    <DisplayName>ServerStatus</DisplayName>
+    <Description>Describes the status of this server</Description>
+    <References>
+      <Reference ReferenceType="HasComponent">i=2257</Reference>
+      <Reference ReferenceType="HasComponent">i=2258</Reference>
+      <Reference ReferenceType="HasComponent">i=2259</Reference>
+      <Reference ReferenceType="HasComponent">i=2260</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAVariable BrowseName="StartTime" NodeId="i=2257" DataType="DateTime">
+    <DisplayName>StartTime</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="CurrentTime" NodeId="i=2258" DataType="DateTime">
+    <DisplayName>CurrentTime</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="State" NodeId="i=2259" DataType="Int32">
+    <DisplayName>State</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="BuildInfo" NodeId="i=2260" DataType="i=338">
+    <DisplayName>BuildInfo</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">i=2261</Reference>
+      <Reference ReferenceType="HasComponent">i=2262</Reference>
+      <Reference ReferenceType="HasComponent">i=2263</Reference>
+      <Reference ReferenceType="HasComponent">i=2264</Reference>
+      <Reference ReferenceType="HasComponent">i=2265</Reference>
+      <Reference ReferenceType="HasComponent">i=2266</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2256</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="ProductName" NodeId="i=2261" DataType="String">
+    <DisplayName>ProductName</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="ProductUri" NodeId="i=2262" DataType="String">
+    <DisplayName>ProductUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="ManufacturerName" NodeId="i=2263" DataType="String">
+    <DisplayName>ManufacturerName</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="SoftwareVersion" NodeId="i=2264" DataType="String">
+    <DisplayName>SoftwareVersion</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="BuildNumber" NodeId="i=2265" DataType="String">
+    <DisplayName>BuildNumber</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="BuildDate" NodeId="i=2266" DataType="DateTime">
+    <DisplayName>BuildDate</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2260</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="ServiceLevel" NodeId="i=2267" DataType="Byte">
+    <DisplayName>ServiceLevel</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="i=2274" BrowseName="ServerDiagnostics">
+    <DisplayName>ServerDiagnostics</DisplayName>
+    <Description>Diagnostic summary of this server</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">i=2294</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+    </References>
+  </UAObject>
+  <UAVariable BrowseName="Enabled" NodeId="i=2294" DataType="Boolean">
+    <DisplayName>Enabled</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2274</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable BrowseName="Auditing" NodeId="i=2994" DataType="Boolean">
+    <DisplayName>Auditing</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+  </UAVariable>
+  <UAVariableType NodeId="i=3051" BrowseName="BuildInfoType" DataType="i=338">
+    <DisplayName>BuildInfoType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">i=3052</Reference>
+      <Reference ReferenceType="HasComponent">i=3053</Reference>
+      <Reference ReferenceType="HasComponent">i=3054</Reference>
+      <Reference ReferenceType="HasComponent">i=3055</Reference>
+      <Reference ReferenceType="HasComponent">i=3056</Reference>
+      <Reference ReferenceType="HasComponent">i=3057</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=63</Reference>
+    </References>
+  </UAVariableType>
+  <UAVariable NodeId="i=3052" BrowseName="ProductUri" ParentNodeId="i=3051" DataType="String" MinimumSamplingInterval="1000">
+    <DisplayName>ProductUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=3053" BrowseName="ManufacturerName" ParentNodeId="i=3051" DataType="String" MinimumSamplingInterval="1000">
+    <DisplayName>ManufacturerName</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=3054" BrowseName="ProductName" ParentNodeId="i=3051" DataType="String" MinimumSamplingInterval="1000">
+    <DisplayName>ProductName</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=3055" BrowseName="SoftwareVersion" ParentNodeId="i=3051" DataType="String" MinimumSamplingInterval="1000">
+    <DisplayName>SoftwareVersion</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=3056" BrowseName="BuildNumber" ParentNodeId="i=3051" DataType="String" MinimumSamplingInterval="1000">
+    <DisplayName>BuildNumber</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=3057" BrowseName="BuildDate" ParentNodeId="i=3051" DataType="i=294" MinimumSamplingInterval="1000">
+    <DisplayName>BuildDate</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=3051</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="i=10001" BrowseName="SessionPlaceHolder1" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 1</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10002" BrowseName="SessionPlaceHolder2" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 2</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10003" BrowseName="SessionPlaceHolder3" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 3</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10004" BrowseName="SessionPlaceHolder4" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 4</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10005" BrowseName="SessionPlaceHolder5" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 5</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10006" BrowseName="SessionPlaceHolder6" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 6</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10007" BrowseName="SessionPlaceHolder7" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 7</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10008" BrowseName="SessionPlaceHolder8" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 8</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10009" BrowseName="SessionPlaceHolder9" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 9</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10010" BrowseName="SessionPlaceHolder10" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 10</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10011" BrowseName="SessionPlaceHolder11" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 11</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10012" BrowseName="SessionPlaceHolder12" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 12</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10013" BrowseName="SessionPlaceHolder13" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 13</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10014" BrowseName="SessionPlaceHolder14" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 14</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10015" BrowseName="SessionPlaceHolder15" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 15</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10016" BrowseName="SessionPlaceHolder16" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 16</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10017" BrowseName="SessionPlaceHolder17" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 17</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10018" BrowseName="SessionPlaceHolder18" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 18</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10019" BrowseName="SessionPlaceHolder19" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 19</DisplayName>
+  </UAObject>
+  <UAObject NodeId="i=10020" BrowseName="SessionPlaceHolder20" ParentNodeId="i=2010">
+    <DisplayName>SessionPlaceHolder 20</DisplayName>
+  </UAObject>
+
+  <!-- PubSub commands and status -->
+
+  <UAVariable AccessLevel="3" BrowseName="PubSub Status" DataType="Byte" NodeId="ns=1;s=PubSubStatus" ParentNodeId="i=85">
+    <DisplayName>PubSub Status</DisplayName>
+    <Description>The status of the PubSub module</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Byte>3</uax:Byte>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="PubSub Configuration" DataType="String" NodeId="ns=1;s=PubSubConfiguration" ParentNodeId="i=85">
+    <DisplayName>PubSub Configuration</DisplayName>
+    <Description>Path(s) to the configuration files used when PubSub is started</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>PLACEHOLDER</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="PubSub Start/Stop Command" DataType="Byte" NodeId="ns=1;s=PubSubStartStop" ParentNodeId="i=85">
+    <DisplayName>PubSub Start/Stop Command</DisplayName>
+    <Description>Write 1 to start (or restart) the PubSub Module, write 0 to stop the module</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Byte>2</uax:Byte>
+    </Value>
+  </UAVariable>
+
+  <!-- PubSub exchanged variables -->
+
+  <!-- Publisher -->
+  <UAObject BrowseName="1:PublisherVars" NodeId="ns=1;s=PubVars" ParentNodeId="i=85">
+    <DisplayName>PublisherVars</DisplayName>
+    <Description>PublisherVarsDesc</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubBool</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubString</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubInt</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubUInt</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubUInt16</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubUInt32</Reference>	  
+      <!-- Schneider Variables -->
+      <Reference ReferenceType="HasComponent">ns=1;s=data0</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data1</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data2</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=data3</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test1_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test2_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test3_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test4_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test5_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test6_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test7_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test8_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test9_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test10_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test11_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test12_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test13_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test14_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test15_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test16_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test17_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test18_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test19_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test20_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test21_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test22_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test23_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test24_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test25_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test26_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test27_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test28_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test29_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test30_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test31_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test32_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test33_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test34_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test35_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test36_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test37_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test38_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test39_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test40_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test41_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test42_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test43_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test44_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test45_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test46_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test47_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test48_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test49_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test50_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test51_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test52_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test53_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test54_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test55_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test56_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test57_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test58_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test59_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test60_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test61_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test62_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test63_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test64_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test65_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test66_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test67_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test68_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test69_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test70_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test71_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test72_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test73_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test74_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test75_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test76_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test77_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test78_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test79_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test80_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test81_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test82_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test83_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test84_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test85_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test86_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test87_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test88_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test89_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test90_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test91_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test92_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test93_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test94_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test95_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test96_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test97_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test98_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test99_Pub</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test100_Pub</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarBool</DisplayName>
+    <Description>pubVarBoolDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>true</uax:Boolean>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varString" DataType="String" NodeId="ns=1;s=PubString" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarString</DisplayName>
+    <Description>pubVarStringDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>This is a text !</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varInt" DataType="Int64" NodeId="ns=1;s=PubInt" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarInt</DisplayName>
+    <Description>pubVarIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int64>-32767</uax:Int64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt" DataType="UInt64" NodeId="ns=1;s=PubUInt" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarUInt</DisplayName>
+    <Description>pubVarUIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt64>8589934592</uax:UInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt16" DataType="UInt16" NodeId="ns=1;s=PubUInt16" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarUInt16</DisplayName>
+    <Description>pubVarUIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt16>65535</uax:UInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt32" DataType="UInt32" NodeId="ns=1;s=PubUInt32" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubVarUInt32</DisplayName>
+    <Description>pubVarUIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>4294967295</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:CounterUDP_Board1" DataType="UInt32" NodeId="ns=1;s=data0" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>CounterUDP_Board1</DisplayName>
+    <Description>Schneider UDP frame reception counter</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>0</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data1" DataType="Int16" NodeId="ns=1;s=data1" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data1</DisplayName>
+    <Description>Schneider Data 1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int16>0</uax:Int16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data2" DataType="Int32" NodeId="ns=1;s=data2" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data2</DisplayName>
+    <Description>Schneider Data 2</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Data3" DataType="String" NodeId="ns=1;s=data3" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Data3</DisplayName>
+    <Description>Schneider Data 3</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>Default Text</uax:String>
+    </Value>
+  </UAVariable>  
+  <UAVariable AccessLevel="3" BrowseName="1:Test1" DataType="UInt32" NodeId="ns=1;s=Test1_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test1</DisplayName>
+    <Description>Test 1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test2" DataType="UInt32" NodeId="ns=1;s=Test2_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test2</DisplayName>
+    <Description>Test 2</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>2</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test3" DataType="UInt32" NodeId="ns=1;s=Test3_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test3</DisplayName>
+    <Description>Test 3</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>3</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test4" DataType="UInt32" NodeId="ns=1;s=Test4_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test4</DisplayName>
+    <Description>Test 4</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>4</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test5" DataType="UInt32" NodeId="ns=1;s=Test5_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test5</DisplayName>
+    <Description>Test 5</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>5</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test6" DataType="UInt32" NodeId="ns=1;s=Test6_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test6</DisplayName>
+    <Description>Test 6</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>6</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test7" DataType="UInt32" NodeId="ns=1;s=Test7_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test7</DisplayName>
+    <Description>Test 7</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>7</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test8" DataType="UInt32" NodeId="ns=1;s=Test8_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test8</DisplayName>
+    <Description>Test 8</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>8</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test9" DataType="UInt32" NodeId="ns=1;s=Test9_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test9</DisplayName>
+    <Description>Test 9</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>9</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test10" DataType="UInt32" NodeId="ns=1;s=Test10_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test10</DisplayName>
+    <Description>Test 10</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>10</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test11" DataType="UInt32" NodeId="ns=1;s=Test11_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test11</DisplayName>
+    <Description>Test 11</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>11</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test12" DataType="UInt32" NodeId="ns=1;s=Test12_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test12</DisplayName>
+    <Description>Test 12</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>12</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test13" DataType="UInt32" NodeId="ns=1;s=Test13_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test13</DisplayName>
+    <Description>Test 13</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>13</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test14" DataType="UInt32" NodeId="ns=1;s=Test14_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test14</DisplayName>
+    <Description>Test 14</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>14</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test15" DataType="UInt32" NodeId="ns=1;s=Test15_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test15</DisplayName>
+    <Description>Test 15</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>15</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test16" DataType="UInt32" NodeId="ns=1;s=Test16_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test16</DisplayName>
+    <Description>Test 16</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>16</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test17" DataType="UInt32" NodeId="ns=1;s=Test17_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test17</DisplayName>
+    <Description>Test 17</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>17</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test18" DataType="UInt32" NodeId="ns=1;s=Test18_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test18</DisplayName>
+    <Description>Test 18</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>18</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test19" DataType="UInt32" NodeId="ns=1;s=Test19_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test19</DisplayName>
+    <Description>Test 19</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>19</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test20" DataType="UInt32" NodeId="ns=1;s=Test20_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test20</DisplayName>
+    <Description>Test 20</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>20</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test21" DataType="UInt32" NodeId="ns=1;s=Test21_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test21</DisplayName>
+    <Description>Test 21</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>21</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test22" DataType="UInt32" NodeId="ns=1;s=Test22_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test22</DisplayName>
+    <Description>Test 22</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>22</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test23" DataType="UInt32" NodeId="ns=1;s=Test23_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test23</DisplayName>
+    <Description>Test 23</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>23</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test24" DataType="UInt32" NodeId="ns=1;s=Test24_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test24</DisplayName>
+    <Description>Test 24</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>24</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test25" DataType="UInt32" NodeId="ns=1;s=Test25_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test25</DisplayName>
+    <Description>Test 25</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>25</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test26" DataType="UInt32" NodeId="ns=1;s=Test26_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test26</DisplayName>
+    <Description>Test 26</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>26</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test27" DataType="UInt32" NodeId="ns=1;s=Test27_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test27</DisplayName>
+    <Description>Test 27</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>27</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test28" DataType="UInt32" NodeId="ns=1;s=Test28_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test28</DisplayName>
+    <Description>Test 28</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>28</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test29" DataType="UInt32" NodeId="ns=1;s=Test29_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test29</DisplayName>
+    <Description>Test 29</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>29</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test30" DataType="UInt32" NodeId="ns=1;s=Test30_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test30</DisplayName>
+    <Description>Test 30</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>30</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test31" DataType="UInt32" NodeId="ns=1;s=Test31_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test31</DisplayName>
+    <Description>Test 31</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>31</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test32" DataType="UInt32" NodeId="ns=1;s=Test32_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test32</DisplayName>
+    <Description>Test 32</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>32</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test33" DataType="UInt32" NodeId="ns=1;s=Test33_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test33</DisplayName>
+    <Description>Test 33</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>33</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test34" DataType="UInt32" NodeId="ns=1;s=Test34_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test34</DisplayName>
+    <Description>Test 34</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>34</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test35" DataType="UInt32" NodeId="ns=1;s=Test35_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test35</DisplayName>
+    <Description>Test 35</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>35</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test36" DataType="UInt32" NodeId="ns=1;s=Test36_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test36</DisplayName>
+    <Description>Test 36</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>36</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test37" DataType="UInt32" NodeId="ns=1;s=Test37_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test37</DisplayName>
+    <Description>Test 37</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>37</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test38" DataType="UInt32" NodeId="ns=1;s=Test38_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test38</DisplayName>
+    <Description>Test 38</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>38</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test39" DataType="UInt32" NodeId="ns=1;s=Test39_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test39</DisplayName>
+    <Description>Test 39</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>39</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test40" DataType="UInt32" NodeId="ns=1;s=Test40_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test40</DisplayName>
+    <Description>Test 40</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>40</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test41" DataType="UInt32" NodeId="ns=1;s=Test41_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test41</DisplayName>
+    <Description>Test 41</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>41</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test42" DataType="UInt32" NodeId="ns=1;s=Test42_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test42</DisplayName>
+    <Description>Test 42</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>42</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test43" DataType="UInt32" NodeId="ns=1;s=Test43_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test43</DisplayName>
+    <Description>Test 43</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>43</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test44" DataType="UInt32" NodeId="ns=1;s=Test44_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test44</DisplayName>
+    <Description>Test 44</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>44</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test45" DataType="UInt32" NodeId="ns=1;s=Test45_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test45</DisplayName>
+    <Description>Test 45</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>45</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test46" DataType="UInt32" NodeId="ns=1;s=Test46_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test46</DisplayName>
+    <Description>Test 46</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>46</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test47" DataType="UInt32" NodeId="ns=1;s=Test47_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test47</DisplayName>
+    <Description>Test 47</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>47</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test48" DataType="UInt32" NodeId="ns=1;s=Test48_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test48</DisplayName>
+    <Description>Test 48</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>48</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test49" DataType="UInt32" NodeId="ns=1;s=Test49_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test49</DisplayName>
+    <Description>Test 49</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>49</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test50" DataType="UInt32" NodeId="ns=1;s=Test50_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test50</DisplayName>
+    <Description>Test 50</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>50</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test51" DataType="UInt32" NodeId="ns=1;s=Test51_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test51</DisplayName>
+    <Description>Test 51</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>51</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test52" DataType="UInt32" NodeId="ns=1;s=Test52_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test52</DisplayName>
+    <Description>Test 52</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>52</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test53" DataType="UInt32" NodeId="ns=1;s=Test53_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test53</DisplayName>
+    <Description>Test 53</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>53</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test54" DataType="UInt32" NodeId="ns=1;s=Test54_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test54</DisplayName>
+    <Description>Test 54</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>54</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test55" DataType="UInt32" NodeId="ns=1;s=Test55_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test55</DisplayName>
+    <Description>Test 55</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>55</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test56" DataType="UInt32" NodeId="ns=1;s=Test56_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test56</DisplayName>
+    <Description>Test 56</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>56</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test57" DataType="UInt32" NodeId="ns=1;s=Test57_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test57</DisplayName>
+    <Description>Test 57</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>57</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test58" DataType="UInt32" NodeId="ns=1;s=Test58_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test58</DisplayName>
+    <Description>Test 58</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>58</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test59" DataType="UInt32" NodeId="ns=1;s=Test59_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test59</DisplayName>
+    <Description>Test 59</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>59</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test60" DataType="UInt32" NodeId="ns=1;s=Test60_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test60</DisplayName>
+    <Description>Test 60</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>60</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test61" DataType="UInt32" NodeId="ns=1;s=Test61_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test61</DisplayName>
+    <Description>Test 61</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>61</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test62" DataType="UInt32" NodeId="ns=1;s=Test62_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test62</DisplayName>
+    <Description>Test 62</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>62</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test63" DataType="UInt32" NodeId="ns=1;s=Test63_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test63</DisplayName>
+    <Description>Test 63</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>63</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test64" DataType="UInt32" NodeId="ns=1;s=Test64_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test64</DisplayName>
+    <Description>Test 64</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>64</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test65" DataType="UInt32" NodeId="ns=1;s=Test65_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test65</DisplayName>
+    <Description>Test 65</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>65</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test66" DataType="UInt32" NodeId="ns=1;s=Test66_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test66</DisplayName>
+    <Description>Test 66</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>66</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test67" DataType="UInt32" NodeId="ns=1;s=Test67_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test67</DisplayName>
+    <Description>Test 67</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>67</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test68" DataType="UInt32" NodeId="ns=1;s=Test68_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test68</DisplayName>
+    <Description>Test 68</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>68</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test69" DataType="UInt32" NodeId="ns=1;s=Test69_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test69</DisplayName>
+    <Description>Test 69</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>69</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test70" DataType="UInt32" NodeId="ns=1;s=Test70_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test70</DisplayName>
+    <Description>Test 70</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>70</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test71" DataType="UInt32" NodeId="ns=1;s=Test71_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test71</DisplayName>
+    <Description>Test 71</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>71</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test72" DataType="UInt32" NodeId="ns=1;s=Test72_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test72</DisplayName>
+    <Description>Test 72</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>72</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test73" DataType="UInt32" NodeId="ns=1;s=Test73_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test73</DisplayName>
+    <Description>Test 73</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>73</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test74" DataType="UInt32" NodeId="ns=1;s=Test74_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test74</DisplayName>
+    <Description>Test 74</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>74</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test75" DataType="UInt32" NodeId="ns=1;s=Test75_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test75</DisplayName>
+    <Description>Test 75</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>75</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test76" DataType="UInt32" NodeId="ns=1;s=Test76_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test76</DisplayName>
+    <Description>Test 76</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>76</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test77" DataType="UInt32" NodeId="ns=1;s=Test77_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test77</DisplayName>
+    <Description>Test 77</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>77</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test78" DataType="UInt32" NodeId="ns=1;s=Test78_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test78</DisplayName>
+    <Description>Test 78</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>78</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test79" DataType="UInt32" NodeId="ns=1;s=Test79_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test79</DisplayName>
+    <Description>Test 79</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>79</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test80" DataType="UInt32" NodeId="ns=1;s=Test80_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test80</DisplayName>
+    <Description>Test 80</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>80</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test81" DataType="UInt32" NodeId="ns=1;s=Test81_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test81</DisplayName>
+    <Description>Test 81</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>81</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test82" DataType="UInt32" NodeId="ns=1;s=Test82_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test82</DisplayName>
+    <Description>Test 82</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>82</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test83" DataType="UInt32" NodeId="ns=1;s=Test83_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test83</DisplayName>
+    <Description>Test 83</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>83</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test84" DataType="UInt32" NodeId="ns=1;s=Test84_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test84</DisplayName>
+    <Description>Test 84</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>84</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test85" DataType="UInt32" NodeId="ns=1;s=Test85_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test85</DisplayName>
+    <Description>Test 85</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>85</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test86" DataType="UInt32" NodeId="ns=1;s=Test86_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test86</DisplayName>
+    <Description>Test 86</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>86</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test87" DataType="UInt32" NodeId="ns=1;s=Test87_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test87</DisplayName>
+    <Description>Test 87</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>87</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test88" DataType="UInt32" NodeId="ns=1;s=Test88_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test88</DisplayName>
+    <Description>Test 88</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>88</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test89" DataType="UInt32" NodeId="ns=1;s=Test89_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test89</DisplayName>
+    <Description>Test 89</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>89</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test90" DataType="UInt32" NodeId="ns=1;s=Test90_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test90</DisplayName>
+    <Description>Test 90</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>90</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test91" DataType="UInt32" NodeId="ns=1;s=Test91_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test91</DisplayName>
+    <Description>Test 91</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>91</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test92" DataType="UInt32" NodeId="ns=1;s=Test92_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test92</DisplayName>
+    <Description>Test 92</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>92</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test93" DataType="UInt32" NodeId="ns=1;s=Test93_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test93</DisplayName>
+    <Description>Test 93</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>93</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test94" DataType="UInt32" NodeId="ns=1;s=Test94_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test94</DisplayName>
+    <Description>Test 94</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>94</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test95" DataType="UInt32" NodeId="ns=1;s=Test95_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test95</DisplayName>
+    <Description>Test 95</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>95</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test96" DataType="UInt32" NodeId="ns=1;s=Test96_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test96</DisplayName>
+    <Description>Test 96</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>96</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test97" DataType="UInt32" NodeId="ns=1;s=Test97_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test97</DisplayName>
+    <Description>Test 97</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>97</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test98" DataType="UInt32" NodeId="ns=1;s=Test98_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test98</DisplayName>
+    <Description>Test 98</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>98</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test99" DataType="UInt32" NodeId="ns=1;s=Test99_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test99</DisplayName>
+    <Description>Test 99</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>99</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test100" DataType="UInt32" NodeId="ns=1;s=Test100_Pub" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>Test100</DisplayName>
+    <Description>Test 100</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>100</uax:UInt32>
+    </Value>
+  </UAVariable>
+
+
+  <!-- Subscriber -->
+  <UAObject BrowseName="1:SubscriberVars" NodeId="ns=1;s=SubVars" ParentNodeId="i=85">
+    <DisplayName>SubscriberVars</DisplayName>
+    <Description>SubscriberVarsDesc</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubBool</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubString</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubInt</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubUInt</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubUInt16</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test1</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test2</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test3</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test4</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test5</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test6</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test7</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test8</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test9</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test10</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test11</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test12</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test13</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test14</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test15</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test16</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test17</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test18</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test19</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test20</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test21</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test22</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test23</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test24</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test25</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test26</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test27</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test28</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test29</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test30</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test31</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test33</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test34</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test35</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test36</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test37</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test38</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test39</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test40</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test41</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test42</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test43</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test44</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test45</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test46</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test47</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test48</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test49</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test50</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test51</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test52</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test53</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test54</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test55</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test56</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test57</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test58</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test59</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test60</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test61</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test62</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test63</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test64</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test65</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test66</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test67</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test68</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test69</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test70</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test71</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test72</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test73</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test74</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test75</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test76</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test77</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test78</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test79</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test80</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test81</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test82</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test83</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test84</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test85</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test86</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test87</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test88</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test89</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test90</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test91</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test92</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test93</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test94</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test95</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test96</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test97</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test98</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test99</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=Test100</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=SubBool" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarBool</DisplayName>
+    <Description>subVarBoolDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>true</uax:Boolean>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varString" DataType="String" NodeId="ns=1;s=SubString" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarString</DisplayName>
+    <Description>subVarStringDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>This is a text !</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varInt" DataType="Int64" NodeId="ns=1;s=SubInt" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarInt</DisplayName>
+    <Description>subVarIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int16>-1</uax:Int16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt" DataType="UInt64" NodeId="ns=1;s=SubUInt" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarUInt</DisplayName>
+    <Description>subVarUIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt64>1</uax:UInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt16" DataType="UInt16" NodeId="ns=1;s=SubUInt16" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarUInt16</DisplayName>
+    <Description>subVarUInt16Desc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt16>1</uax:UInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:varUInt32" DataType="UInt32" NodeId="ns=1;s=SubUInt32" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subVarUInt32</DisplayName>
+    <Description>subVarUInt32Desc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test1" DataType="UInt32" NodeId="ns=1;s=Test1" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test1</DisplayName>
+    <Description>Test 1</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test2" DataType="UInt32" NodeId="ns=1;s=Test2" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test2</DisplayName>
+    <Description>Test 2</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>2</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test3" DataType="UInt32" NodeId="ns=1;s=Test3" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test3</DisplayName>
+    <Description>Test 3</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>3</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test4" DataType="UInt32" NodeId="ns=1;s=Test4" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test4</DisplayName>
+    <Description>Test 4</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>4</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test5" DataType="UInt32" NodeId="ns=1;s=Test5" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test5</DisplayName>
+    <Description>Test 5</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>5</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test6" DataType="UInt32" NodeId="ns=1;s=Test6" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test6</DisplayName>
+    <Description>Test 6</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>6</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test7" DataType="UInt32" NodeId="ns=1;s=Test7" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test7</DisplayName>
+    <Description>Test 7</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>7</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test8" DataType="UInt32" NodeId="ns=1;s=Test8" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test8</DisplayName>
+    <Description>Test 8</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>8</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test9" DataType="UInt32" NodeId="ns=1;s=Test9" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test9</DisplayName>
+    <Description>Test 9</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>9</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test10" DataType="UInt32" NodeId="ns=1;s=Test10" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test10</DisplayName>
+    <Description>Test 10</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>10</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test11" DataType="UInt32" NodeId="ns=1;s=Test11" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test11</DisplayName>
+    <Description>Test 11</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>11</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test12" DataType="UInt32" NodeId="ns=1;s=Test12" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test12</DisplayName>
+    <Description>Test 12</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>12</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test13" DataType="UInt32" NodeId="ns=1;s=Test13" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test13</DisplayName>
+    <Description>Test 13</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>13</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test14" DataType="UInt32" NodeId="ns=1;s=Test14" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test14</DisplayName>
+    <Description>Test 14</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>14</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test15" DataType="UInt32" NodeId="ns=1;s=Test15" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test15</DisplayName>
+    <Description>Test 15</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>15</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test16" DataType="UInt32" NodeId="ns=1;s=Test16" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test16</DisplayName>
+    <Description>Test 16</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>16</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test17" DataType="UInt32" NodeId="ns=1;s=Test17" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test17</DisplayName>
+    <Description>Test 17</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>17</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test18" DataType="UInt32" NodeId="ns=1;s=Test18" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test18</DisplayName>
+    <Description>Test 18</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>18</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test19" DataType="UInt32" NodeId="ns=1;s=Test19" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test19</DisplayName>
+    <Description>Test 19</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>19</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test20" DataType="UInt32" NodeId="ns=1;s=Test20" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test20</DisplayName>
+    <Description>Test 20</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>20</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test21" DataType="UInt32" NodeId="ns=1;s=Test21" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test21</DisplayName>
+    <Description>Test 21</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>21</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test22" DataType="UInt32" NodeId="ns=1;s=Test22" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test22</DisplayName>
+    <Description>Test 22</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>22</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test23" DataType="UInt32" NodeId="ns=1;s=Test23" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test23</DisplayName>
+    <Description>Test 23</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>23</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test24" DataType="UInt32" NodeId="ns=1;s=Test24" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test24</DisplayName>
+    <Description>Test 24</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>24</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test25" DataType="UInt32" NodeId="ns=1;s=Test25" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test25</DisplayName>
+    <Description>Test 25</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>25</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test26" DataType="UInt32" NodeId="ns=1;s=Test26" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test26</DisplayName>
+    <Description>Test 26</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>26</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test27" DataType="UInt32" NodeId="ns=1;s=Test27" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test27</DisplayName>
+    <Description>Test 27</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>27</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test28" DataType="UInt32" NodeId="ns=1;s=Test28" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test28</DisplayName>
+    <Description>Test 28</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>28</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test29" DataType="UInt32" NodeId="ns=1;s=Test29" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test29</DisplayName>
+    <Description>Test 29</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>29</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test30" DataType="UInt32" NodeId="ns=1;s=Test30" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test30</DisplayName>
+    <Description>Test 30</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>30</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test31" DataType="UInt32" NodeId="ns=1;s=Test31" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test31</DisplayName>
+    <Description>Test 31</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>31</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test32" DataType="UInt32" NodeId="ns=1;s=Test32" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test32</DisplayName>
+    <Description>Test 32</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>32</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test33" DataType="UInt32" NodeId="ns=1;s=Test33" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test33</DisplayName>
+    <Description>Test 33</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>33</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test34" DataType="UInt32" NodeId="ns=1;s=Test34" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test34</DisplayName>
+    <Description>Test 34</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>34</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test35" DataType="UInt32" NodeId="ns=1;s=Test35" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test35</DisplayName>
+    <Description>Test 35</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>35</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test36" DataType="UInt32" NodeId="ns=1;s=Test36" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test36</DisplayName>
+    <Description>Test 36</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>36</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test37" DataType="UInt32" NodeId="ns=1;s=Test37" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test37</DisplayName>
+    <Description>Test 37</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>37</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test38" DataType="UInt32" NodeId="ns=1;s=Test38" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test38</DisplayName>
+    <Description>Test 38</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>38</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test39" DataType="UInt32" NodeId="ns=1;s=Test39" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test39</DisplayName>
+    <Description>Test 39</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>39</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test40" DataType="UInt32" NodeId="ns=1;s=Test40" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test40</DisplayName>
+    <Description>Test 40</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>40</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test41" DataType="UInt32" NodeId="ns=1;s=Test41" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test41</DisplayName>
+    <Description>Test 41</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>41</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test42" DataType="UInt32" NodeId="ns=1;s=Test42" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test42</DisplayName>
+    <Description>Test 42</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>42</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test43" DataType="UInt32" NodeId="ns=1;s=Test43" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test43</DisplayName>
+    <Description>Test 43</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>43</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test44" DataType="UInt32" NodeId="ns=1;s=Test44" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test44</DisplayName>
+    <Description>Test 44</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>44</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test45" DataType="UInt32" NodeId="ns=1;s=Test45" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test45</DisplayName>
+    <Description>Test 45</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>45</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test46" DataType="UInt32" NodeId="ns=1;s=Test46" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test46</DisplayName>
+    <Description>Test 46</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>46</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test47" DataType="UInt32" NodeId="ns=1;s=Test47" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test47</DisplayName>
+    <Description>Test 47</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>47</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test48" DataType="UInt32" NodeId="ns=1;s=Test48" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test48</DisplayName>
+    <Description>Test 48</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>48</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test49" DataType="UInt32" NodeId="ns=1;s=Test49" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test49</DisplayName>
+    <Description>Test 49</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>49</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test50" DataType="UInt32" NodeId="ns=1;s=Test50" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test50</DisplayName>
+    <Description>Test 50</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>50</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test51" DataType="UInt32" NodeId="ns=1;s=Test51" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test51</DisplayName>
+    <Description>Test 51</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>51</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test52" DataType="UInt32" NodeId="ns=1;s=Test52" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test52</DisplayName>
+    <Description>Test 52</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>52</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test53" DataType="UInt32" NodeId="ns=1;s=Test53" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test53</DisplayName>
+    <Description>Test 53</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>53</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test54" DataType="UInt32" NodeId="ns=1;s=Test54" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test54</DisplayName>
+    <Description>Test 54</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>54</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test55" DataType="UInt32" NodeId="ns=1;s=Test55" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test55</DisplayName>
+    <Description>Test 55</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>55</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test56" DataType="UInt32" NodeId="ns=1;s=Test56" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test56</DisplayName>
+    <Description>Test 56</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>56</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test57" DataType="UInt32" NodeId="ns=1;s=Test57" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test57</DisplayName>
+    <Description>Test 57</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>57</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test58" DataType="UInt32" NodeId="ns=1;s=Test58" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test58</DisplayName>
+    <Description>Test 58</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>58</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test59" DataType="UInt32" NodeId="ns=1;s=Test59" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test59</DisplayName>
+    <Description>Test 59</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>59</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test60" DataType="UInt32" NodeId="ns=1;s=Test60" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test60</DisplayName>
+    <Description>Test 60</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>60</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test61" DataType="UInt32" NodeId="ns=1;s=Test61" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test61</DisplayName>
+    <Description>Test 61</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>61</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test62" DataType="UInt32" NodeId="ns=1;s=Test62" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test62</DisplayName>
+    <Description>Test 62</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>62</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test63" DataType="UInt32" NodeId="ns=1;s=Test63" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test63</DisplayName>
+    <Description>Test 63</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>63</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test64" DataType="UInt32" NodeId="ns=1;s=Test64" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test64</DisplayName>
+    <Description>Test 64</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>64</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test65" DataType="UInt32" NodeId="ns=1;s=Test65" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test65</DisplayName>
+    <Description>Test 65</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>65</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test66" DataType="UInt32" NodeId="ns=1;s=Test66" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test66</DisplayName>
+    <Description>Test 66</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>66</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test67" DataType="UInt32" NodeId="ns=1;s=Test67" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test67</DisplayName>
+    <Description>Test 67</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>67</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test68" DataType="UInt32" NodeId="ns=1;s=Test68" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test68</DisplayName>
+    <Description>Test 68</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>68</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test69" DataType="UInt32" NodeId="ns=1;s=Test69" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test69</DisplayName>
+    <Description>Test 69</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>69</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test70" DataType="UInt32" NodeId="ns=1;s=Test70" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test70</DisplayName>
+    <Description>Test 70</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>70</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test71" DataType="UInt32" NodeId="ns=1;s=Test71" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test71</DisplayName>
+    <Description>Test 71</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>71</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test72" DataType="UInt32" NodeId="ns=1;s=Test72" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test72</DisplayName>
+    <Description>Test 72</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>72</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test73" DataType="UInt32" NodeId="ns=1;s=Test73" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test73</DisplayName>
+    <Description>Test 73</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>73</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test74" DataType="UInt32" NodeId="ns=1;s=Test74" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test74</DisplayName>
+    <Description>Test 74</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>74</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test75" DataType="UInt32" NodeId="ns=1;s=Test75" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test75</DisplayName>
+    <Description>Test 75</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>75</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test76" DataType="UInt32" NodeId="ns=1;s=Test76" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test76</DisplayName>
+    <Description>Test 76</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>76</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test77" DataType="UInt32" NodeId="ns=1;s=Test77" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test77</DisplayName>
+    <Description>Test 77</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>77</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test78" DataType="UInt32" NodeId="ns=1;s=Test78" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test78</DisplayName>
+    <Description>Test 78</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>78</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test79" DataType="UInt32" NodeId="ns=1;s=Test79" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test79</DisplayName>
+    <Description>Test 79</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>79</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test80" DataType="UInt32" NodeId="ns=1;s=Test80" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test80</DisplayName>
+    <Description>Test 80</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>80</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test81" DataType="UInt32" NodeId="ns=1;s=Test81" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test81</DisplayName>
+    <Description>Test 81</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>81</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test82" DataType="UInt32" NodeId="ns=1;s=Test82" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test82</DisplayName>
+    <Description>Test 82</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>82</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test83" DataType="UInt32" NodeId="ns=1;s=Test83" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test83</DisplayName>
+    <Description>Test 83</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>83</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test84" DataType="UInt32" NodeId="ns=1;s=Test84" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test84</DisplayName>
+    <Description>Test 84</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>84</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test85" DataType="UInt32" NodeId="ns=1;s=Test85" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test85</DisplayName>
+    <Description>Test 85</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>85</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test86" DataType="UInt32" NodeId="ns=1;s=Test86" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test86</DisplayName>
+    <Description>Test 86</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>86</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test87" DataType="UInt32" NodeId="ns=1;s=Test87" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test87</DisplayName>
+    <Description>Test 87</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>87</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test88" DataType="UInt32" NodeId="ns=1;s=Test88" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test88</DisplayName>
+    <Description>Test 88</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>88</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test89" DataType="UInt32" NodeId="ns=1;s=Test89" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test89</DisplayName>
+    <Description>Test 89</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>89</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test90" DataType="UInt32" NodeId="ns=1;s=Test90" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test90</DisplayName>
+    <Description>Test 90</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>90</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test91" DataType="UInt32" NodeId="ns=1;s=Test91" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test91</DisplayName>
+    <Description>Test 91</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>91</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test92" DataType="UInt32" NodeId="ns=1;s=Test92" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test92</DisplayName>
+    <Description>Test 92</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>92</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test93" DataType="UInt32" NodeId="ns=1;s=Test93" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test93</DisplayName>
+    <Description>Test 93</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>93</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test94" DataType="UInt32" NodeId="ns=1;s=Test94" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test94</DisplayName>
+    <Description>Test 94</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>94</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test95" DataType="UInt32" NodeId="ns=1;s=Test95" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test95</DisplayName>
+    <Description>Test 95</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>95</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test96" DataType="UInt32" NodeId="ns=1;s=Test96" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test96</DisplayName>
+    <Description>Test 96</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>96</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test97" DataType="UInt32" NodeId="ns=1;s=Test97" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test97</DisplayName>
+    <Description>Test 97</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>97</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test98" DataType="UInt32" NodeId="ns=1;s=Test98" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test98</DisplayName>
+    <Description>Test 98</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>98</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test99" DataType="UInt32" NodeId="ns=1;s=Test99" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test99</DisplayName>
+    <Description>Test 99</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>99</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Test100" DataType="UInt32" NodeId="ns=1;s=Test100" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>Test100</DisplayName>
+    <Description>Test 100</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>100</uax:UInt32>
+    </Value>
+  </UAVariable>
+    
+</UANodeSet>
