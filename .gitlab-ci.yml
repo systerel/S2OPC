@@ -298,7 +298,7 @@ test-unit:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-win@sha256:e8a51f56722873c5752f8e50f33e557db426a14460558bc5931b9d24e7a9b540 # digest of uactt-win:1.7
+  image: com.systerel.fr:5000/c838/uactt-win@sha256:5be484563b6d9ba9bc96ace1e0f4a7c2f44acbf44197db7ef020a24beb140e03 # digest of uactt-win:1.8
   script:
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:

@@ -22,8 +22,8 @@
 #
 set -e
 
-# com2.systerel.fr:5000/c838/uactt-win: 1.7
-DOCKER_IMAGE=sha256:3e3b0e3b03e696333b0fcf0e64e14a876ae326f8e264659e149d1e40fac4bd5e
+# com2.systerel.fr:5000/c838/uactt-win: 1.8
+DOCKER_IMAGE=sha256:6c5d97dd84cf85269c4f89250e6b12601fdd0298eeee14675c8600e0972d953e
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
