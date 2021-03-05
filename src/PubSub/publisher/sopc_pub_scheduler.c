@@ -676,6 +676,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             *ctx = NULL;
             return false;
         }
+        assert(SOPC_STATUS_OK == SOPC_UDP_Socket_Set_MulticastTTL(out_sock, 10));
         pubSchedulerCtx.transport[index].sock = out_sock;
         pubSchedulerCtx.transport[index].fctClear = &SOPC_PubScheduler_CtxUdp_Clear;
         pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxUdp_Send;
