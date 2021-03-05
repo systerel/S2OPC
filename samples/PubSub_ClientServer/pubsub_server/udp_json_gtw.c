@@ -42,10 +42,20 @@
 #define ONE_HUNDRED_MILLISEC 100
 #define TEN_MILLISEC 10
 #define FIVE_MILLISEC 5
+#define ONE_MILLISEC 1
 #define ONE_SEC_IN_MILLISEC 1000
+
+/* BOARD 1 */
 
 #define UDP_PORT_IN 5000
 #define UDP_PORT_OUT 5002
+
+
+/* BOARD 2 */
+/*
+#define UDP_PORT_IN 6000
+#define UDP_PORT_OUT 6002
+*/
 
 #define MAXSIZE 1024
 #define NBDATA 4
@@ -408,7 +418,7 @@ static void* UDP_ManageReception (void* arg)
 
         if (data_len < 0)
         {
-            SOPC_Sleep(FIVE_MILLISEC);
+            SOPC_Sleep(ONE_MILLISEC);
         }
         else
         {
@@ -536,6 +546,7 @@ static void* UDP_ManageSending (void* arg)
 
     SOPC_DataValue* readValues = NULL;
     char request[REQUEST_LENGTH] = {0};
+    /* timespec tim; */
 
     printf("# Info: UDP Sending thread running.\n");
 
@@ -565,8 +576,16 @@ static void* UDP_ManageSending (void* arg)
             printf("# Warning: Server read has failed, no request sent.\n");
         }
 
-        /* Wait sending delay => 1 second */
-        SOPC_Sleep(ONE_SEC_IN_MILLISEC);
+        /* Wait sending delay => 1 ms */
+        SOPC_Sleep(ONE_MILLISEC);
+
+        // TODO
+        /*tim.tv_sec = 0;
+        tim.tv_nsec = 5000000;
+        if(nanosleep(&tim , NULL) < 0 )
+        {
+            printf("# Warning: Nanosleep system call failed \n");
+        }*/
     }
 
     /* Exit current thread */
