@@ -689,6 +689,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     // pubSchedulerCtx.sequenceNumber = 1;
     pubSchedulerCtx.nbConnection = 0;
 
+    /* --- Create configurations from configurations --- */
+
     // Create Context Array to keep Addresses and Sockets
     const uint32_t nbConnection = SOPC_PubSubConfiguration_Nb_PubConnection(config);
     resultSOPC = nbConnection > 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
@@ -735,7 +737,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     // Creation of RT_Pubslisher Initializer. This will be destroyed after initialization.
     if (SOPC_STATUS_OK == resultSOPC)
     {
-        pRTInitializer = SOPC_RT_Publisher_Initializer_Create(2048);
+        pRTInitializer = SOPC_RT_Publisher_Initializer_Create(2048); /* TODO: */
         if (NULL == pRTInitializer)
         {
             printf("# Error, can't create rt pub initializer\n");
@@ -747,64 +749,56 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         }
     }
 
-    if (SOPC_STATUS_OK == resultSOPC)
+    for (uint32_t i = 0; SOPC_STATUS_OK == resultSOPC && i < nbConnection; i++)
     {
-        // Create the Timer for each Writer Group
-        for (uint32_t i = 0; (i < nbConnection) && (SOPC_STATUS_OK == resultSOPC); i++)
-        {
-            SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
 
-            if (!SOPC_PubScheduler_Connection_Get_Transport(i, connection, &transportCtx))
+        const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
+        if (!SOPC_PubScheduler_Connection_Get_Transport(i, connection, &transportCtx))
+        {
+            resultSOPC = SOPC_STATUS_NOK;
+        }
+        for (uint16_t j = 0; SOPC_STATUS_OK == resultSOPC && j < nbWriterGroup; j++)
+        {
+            SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
+            uint64_t publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
+            if (publishingInterval > UINT32_MAX)
+            {
+                resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
+            }
+            else if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }
             else
             {
-                const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
-                for (uint16_t j = 0; (j < nbWriterGroup) && (SOPC_STATUS_OK == resultSOPC); j++)
-                {
-                    SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
-                    uint64_t publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
-                    if (publishingInterval > UINT32_MAX)
-                    {
-                        resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
-                    }
-                    else if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
-                    {
-                        resultSOPC = SOPC_STATUS_NOK;
-                    }
-                    else
-                    {
-                        SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
+                SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
 
-                        // Add a message to rt publisher initializer
+                // Add a message to rt publisher initializer
 
-                        printf("# RT Publisher initializer : Creation of message with publishing value = %" PRIu64
-                               "\n",
-                               publishingInterval);
+                printf("# RT Publisher initializer : Creation of message with publishing value = %" PRIu64
+                       "\n",
+                       publishingInterval);
 
-                        resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
-                            pRTInitializer,
-                            1,                                  // period in ticks (minimum is 1 tick)
-                            0,                                        // offset in ticks
-                            msgctx,                                   // Context
-                            NULL,    // Not used
-                            SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
-                            NULL,     // Not used
-                            SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
-                            &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
-
-                        if (SOPC_STATUS_OK != resultSOPC)
-                        {
-                            printf("# RT Publisher initializer : Error creation of rt publisher message\n");
-                        }
-                        else
-                        {
-                            printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\n",
-                                   msgctx->rt_publisher_msg_id);
-                        }
-                    }
-                }
+                resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
+                    pRTInitializer,
+                    1,                                  // period in ticks (minimum is 1 tick)
+                    0,                                        // offset in ticks
+                    msgctx,                                   // Context
+                    NULL,    // Not used
+                    SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
+                    NULL,     // Not used
+                    SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
+                    &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
+            }
+            if (SOPC_STATUS_OK != resultSOPC)
+            {
+                printf("# RT Publisher initializer : Error creation of rt publisher message\n");
+            }
+            else
+            {
+                printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\n",
+                       msgctx->rt_publisher_msg_id);
             }
         }
     }
