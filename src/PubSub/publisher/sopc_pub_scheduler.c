@@ -517,8 +517,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
             assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
             // Fill datasetmessage
-            SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, //
-                                                                         dataset);                     //
+            SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig,
+                                                                         dataset);
 
             if (NULL == values)
             {
@@ -598,9 +598,9 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                         memset(&buffer, 0, sizeof(SOPC_Buffer));
 
                         // Get buffer where message is pre-encoded.
-                        status = SOPC_RT_Publisher_GetBuffer(pubSchedulerCtx.pRTPublisher, //
-                                                             ctx->rt_publisher_msg_id,     //
-                                                             &buffer);                     //
+                        status = SOPC_RT_Publisher_GetBuffer(pubSchedulerCtx.pRTPublisher,
+                                                             ctx->rt_publisher_msg_id,
+                                                             &buffer);
 
                         // If successful, pre-encode message into double buffer
                         if (SOPC_STATUS_OK == status)
@@ -641,10 +641,10 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                                 bCancel = true;
                             }
 
-                            SOPC_RT_Publisher_ReleaseBuffer(pubSchedulerCtx.pRTPublisher, //
-                                                            ctx->rt_publisher_msg_id,     //
-                                                            &buffer,                      //
-                                                            bCancel);                     //
+                            SOPC_RT_Publisher_ReleaseBuffer(pubSchedulerCtx.pRTPublisher,
+                                                            ctx->rt_publisher_msg_id,
+                                                            &buffer,
+                                                            bCancel);
                         }
                     }
                 }
@@ -787,7 +787,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                                    publishingInterval);
 
                             resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
-                                pRTInitializer, //
+                                pRTInitializer,
                                 1,                                  // period in ticks (minimum is 1 tick)
                                 0,                                        // offset in ticks
                                 msgctx,                                   // Context
@@ -852,10 +852,10 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
             bool newVarMonitoringStatus = false;
             __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
 
-            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring, //
-                                            SOPC_RT_Publisher_VarMonitoringCallback,    //
-                                            1,  //
-                                            "PubVar");                                  //
+            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring,
+                                            SOPC_RT_Publisher_VarMonitoringCallback,
+                                            1,
+                                            "PubVar");
 
             if (SOPC_STATUS_OK != resultSOPC)
             {
@@ -920,8 +920,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
     {
         Socket out_sock;
         SOPC_Socket_AddressInfo* out_multicastAddr;
-        bool allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(address,             //
-                                                                               &out_multicastAddr); //
+        bool allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(address,
+                                                                               &out_multicastAddr);
         if (!allocSuccess)
         {
             return false;
@@ -954,11 +954,11 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         }
         MqttManagerHandle* handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
         pubSchedulerCtx.transport[index].mqttHandle =
-            SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(handleMqttManager,             //
-                                                &address[strlen(MQTT_PREFIX)], //
-                                                MQTT_LIB_TOPIC_NAME,           //
-                                                on_mqtt_message_received,      //
-                                                NULL);                         //
+            SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(handleMqttManager,
+                                                &address[strlen(MQTT_PREFIX)],
+                                                MQTT_LIB_TOPIC_NAME,
+                                                on_mqtt_message_received,
+                                                NULL);
 
         if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
         {
