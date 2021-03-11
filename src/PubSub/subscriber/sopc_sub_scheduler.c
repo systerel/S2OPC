@@ -293,11 +293,9 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
 
     SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
 
-#if DEBUG_PUBSUB_SCHEDULER_INFO
-    printf("# RT Subscriber callback - receive data on input number = %" PRIu32 " - size = %" PRIu32
-           " - context = %08" PRIx64 "\n",
-           input_number, size, (uint64_t) pInputContext);
-#endif
+    //printf("# RT Subscriber callback - receive data on input number = %" PRIu32 " - size = %" PRIu32
+    //       " - context = %08" PRIx64 "\n",
+    //       input_number, size, (uint64_t) pInputContext);
 
     if (NULL == pDecoderContext)
     {

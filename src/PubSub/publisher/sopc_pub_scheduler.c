@@ -397,12 +397,10 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
     buffer.maximum_size = size;
     buffer.initial_size = size;
 
-#if DEBUG_PUBSUB_SCHEDULER_INFO
-    printf("# RT Publisher send callback: Msg id = %u - User context %08lx - To encode size = %d!!!\r\n", //
-           msgId,                                                                                         //
-           (uint64_t) pUserContext,                                                                       //
-           size);                                                                                         //
-#endif
+    //printf("# RT Publisher send callback: Msg id = %u - User context %08lx - To encode size = %d!!!\r\n",
+    //       msgId,
+    //       (uint64_t) pUserContext,
+    //       size);
 
     pCtx->transport->fctSend(pCtx->transport, &buffer);
 
