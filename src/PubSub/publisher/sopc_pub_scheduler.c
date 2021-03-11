@@ -661,9 +661,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
     return NULL;
 }
 
-bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
-                             SOPC_PubSourceVariableConfig* sourceConfig,
-                             uint32_t resolutionMicroSecs)
+bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig)
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
@@ -685,20 +683,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
     }
-
-    // Adapt resolution when not provided by IRQ (1ms minimum)
-    uint32_t resWithoutIRQ = 1000;
-    if (resolutionMicroSecs > 1000)
-    {
-        resWithoutIRQ = resolutionMicroSecs;
-    }
-
-    // Note: keep 2 resolution definitions since for source data is never retrieved through IRQ
-    // and for now the scheduler shall request to get data up to date.
-    // i.e. resolutionMicroSecs is used for publishingInterval period evaluation
-    // and resWithoutIRQ for calling SOPC_PubSourceVariable_GetVariables through a dedicated thread
-
-    resolutionMicroSecs = resWithoutIRQ;
 
     // Security : init the sequence number
     /* TODO: Don't reset the sequenceNumber here: we might want to publish later and we must keep its value */
@@ -803,9 +787,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
                             resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
                                 pRTInitializer, //
-                                publishingInterval * 1000 > resolutionMicroSecs
-                                    ? (uint32_t)(publishingInterval * 1000 / resolutionMicroSecs)
-                                    : 1,                                  // period in ticks (minimum is 1 tick)
+                                1,                                  // period in ticks (minimum is 1 tick)
                                 0,                                        // offset in ticks
                                 msgctx,                                   // Context
                                 NULL,    // Not used
@@ -848,15 +830,14 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         // Destroy initializer not further used
         SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
 
-        // Creation of heart beat thread which call RT Publisher Heart Beat
-
+        /* Creation of the time-sensitive thread */
         if (SOPC_STATUS_OK == resultSOPC)
         {
             bool newQuitHeartBeat = false;
             __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitHeartBeat, __ATOMIC_SEQ_CST);
             resultSOPC =
                 SOPC_Thread_Create(&pubSchedulerCtx.handleThreadHeartBeat, SOPC_RT_Publisher_ThreadHeartBeatCallback,
-                                   (void*) (uintptr_t)(resolutionMicroSecs / 1000), "PubHeart");
+                                   1, "PubHeart");
 
             if (SOPC_STATUS_OK != resultSOPC)
             {
@@ -865,7 +846,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         }
 
         // Creation of variables monitoring thread
-
         if (SOPC_STATUS_OK == resultSOPC)
         {
             bool newVarMonitoringStatus = false;
@@ -873,7 +853,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
             resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring, //
                                             SOPC_RT_Publisher_VarMonitoringCallback,    //
-                                            (void*) (uintptr_t)(resWithoutIRQ / 1000),  //
+                                            1,  //
                                             "PubVar");                                  //
 
             if (SOPC_STATUS_OK != resultSOPC)

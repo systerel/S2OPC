@@ -176,7 +176,7 @@ bool PubSub_IsRunning(void)
     return SOPC_Atomic_Int_Get(&pubsubOnline);
 }
 
-bool PubSub_Start(uint32_t timeResMicroSecs)
+bool PubSub_Start(void)
 {
     bool subOK = false;
     bool pubOK = false;
@@ -198,7 +198,7 @@ bool PubSub_Start(uint32_t timeResMicroSecs)
     }
     if (pub_nb_connections > 0)
     {
-        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig, timeResMicroSecs);
+        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig);
     }
     if (subOK || pubOK)
     {
