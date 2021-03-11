@@ -145,7 +145,7 @@ SOPC_ReturnStatus SOPC_RT_Publisher_Initializer_AddMessage(SOPC_RT_Publisher_Ini
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
-    if (pConfig == NULL || period < 1 || cbSend == NULL || cbStop == NULL || cbStart == NULL || NULL == pOutMsgId)
+    if (pConfig == NULL || period < 1 || cbSend == NULL || NULL == pOutMsgId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -334,99 +334,6 @@ SOPC_ReturnStatus SOPC_RT_Publisher_GetMessagePubStatus(SOPC_RT_Publisher* pPub,
                 break;
             }
         }
-
-        SOPC_RT_Publisher_DecrementInUseStatus(pPub);
-    }
-    else
-    {
-        result = SOPC_STATUS_INVALID_STATE;
-    }
-
-    return result;
-}
-
-SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,                       //
-                                                     uint32_t messageIdentifier,                    //
-                                                     uint32_t period,                               //
-                                                     uint32_t offset,                               //
-                                                     void* pContext,                                //
-                                                     ptrCallbackStart cbStart,                      //
-                                                     ptrCallbackSend cbSend,                        //
-                                                     ptrCallbackStart cbStop,                       //
-                                                     SOPC_RT_Publisher_MessageStatus initialStatus) //
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    if (NULL == pPub)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    ePublisherSyncStatus currentStatus = SOPC_RT_Publisher_IncrementInUseStatus(pPub);
-
-    if (currentStatus > E_PUBLISHER_SYNC_STATUS_INITIALIZED)
-    {
-        result = SOPC_InterruptTimer_Instance_Init(pPub->pInterruptTimer,                         //
-                                                   messageIdentifier,                             //
-                                                   period,                                        //
-                                                   offset,                                        //
-                                                   pContext,                                      //
-                                                   cbStart,                                       //
-                                                   cbSend,                                        //
-                                                   cbStop,                                        //
-                                                   (SOPC_IrqTimer_InstanceStatus) initialStatus); //
-
-        SOPC_RT_Publisher_DecrementInUseStatus(pPub);
-    }
-    else
-    {
-        result = SOPC_STATUS_INVALID_STATE;
-    }
-
-    return result;
-}
-
-SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pPub, //
-                                                           uint32_t msgIdentifier)  //
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
-    if (NULL == pPub)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    ePublisherSyncStatus currentStatus = SOPC_RT_Publisher_IncrementInUseStatus(pPub);
-
-    if (currentStatus > E_PUBLISHER_SYNC_STATUS_INITIALIZED)
-    {
-        result = SOPC_InterruptTimer_Instance_Start(pPub->pInterruptTimer, msgIdentifier);
-
-        SOPC_RT_Publisher_DecrementInUseStatus(pPub);
-    }
-    else
-    {
-        result = SOPC_STATUS_INVALID_STATE;
-    }
-
-    return result;
-}
-
-SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPub, // RT Publisher object
-                                                          uint32_t msgIdentifier)  // Message identifier
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
-    if (NULL == pPub)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    ePublisherSyncStatus currentStatus = SOPC_RT_Publisher_IncrementInUseStatus(pPub);
-
-    if (currentStatus > E_PUBLISHER_SYNC_STATUS_INITIALIZED)
-    {
-        result = SOPC_InterruptTimer_Instance_Stop(pPub->pInterruptTimer, //
-                                                   msgIdentifier);        //
 
         SOPC_RT_Publisher_DecrementInUseStatus(pPub);
     }
