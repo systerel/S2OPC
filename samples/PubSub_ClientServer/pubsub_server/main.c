@@ -30,14 +30,6 @@
 #include "pubsub.h"
 #include "server.h"
 
-// Note: if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ is set to 1,
-//       SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS shall be set to exact tick resolution
-//       the function SOPC_PubScheduler_HeartBeatFromIRQ will be called
-#ifndef SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS
-// Use 50 ms as default resolution
-#define SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS 50000
-#endif
-
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
 {
@@ -139,7 +131,7 @@ int main(int argc, char* const argv[])
 
             if (SOPC_STATUS_OK == status)
             {
-                status = PubSub_Start(SOPC_PUBSCHEDULER_TIME_RESOLUTION_MICROSECS) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                status = PubSub_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                 if (SOPC_STATUS_NOK == status)
                 {
                     PubSub_Stop(); // Ensure Pub & Sub are stopped in this case
