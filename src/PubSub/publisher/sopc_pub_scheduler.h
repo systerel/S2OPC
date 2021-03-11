@@ -29,19 +29,9 @@
  *
  * \param config              The PubSub configuration to be used to start the Publisher
  * \param sourceConfig        The source configured to retrieve up to date data referenced in \p config
- * \param resolutionMicroSecs The time resolution in micro seconds to use to evaluate publishing intervals periods.
- *                            In case hardware interruption is used with SOPC_PubScheduler_HeartBeatFromIRQ,
- *                            this parameter value shall be the tick resolution that will be used to call it
- *                            and increment tickValue.
- *                            Otherwise it will be the minimum time between 2 publishing intervals period evaluation
- *                            (in this case minimum value is 1 millisecond, replaced by if needed).
- *
- * \note \p resolutionMicroSecs shall be less than any PublishingInterval configured,
- *       otherwise PublishingInterval configuration is replaced by \p resolutionMicroSecs.
  */
 bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
-                             SOPC_PubSourceVariableConfig* sourceConfig,
-                             uint32_t resolutionMicroSecs);
+                             SOPC_PubSourceVariableConfig* sourceConfig);
 
 void SOPC_PubScheduler_Stop(void);
 

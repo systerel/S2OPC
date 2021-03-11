@@ -30,7 +30,7 @@
 /* Running the PubSub modules */
 
 SOPC_ReturnStatus PubSub_Configure(void);
-bool PubSub_Start(uint32_t timeResMicroSecs);
+bool PubSub_Start(void);
 bool PubSub_IsRunning(void);
 void PubSub_Stop(void);
 void PubSub_StopAndClear(void);
