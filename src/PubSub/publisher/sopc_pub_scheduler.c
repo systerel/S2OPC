@@ -195,7 +195,7 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
 static void SOPC_PubScheduler_Context_Clear(void)
 {
     /* Stop beat heart and variable monitoring threads */
-    printf("# Info: Stop beat heart thread\r\n");
+    printf("# Info: Stop beat heart thread\n");
 
     bool newQuitBeatHeart = true;
 
@@ -207,7 +207,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
         pubSchedulerCtx.handleThreadHeartBeat = (Thread) NULL;
     }
 
-    printf("# Info: Stop var monitoring thread\r\n");
+    printf("# Info: Stop var monitoring thread\n");
 
     bool newVarMonitoringStatus = true;
     __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
@@ -219,7 +219,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
     }
 
     /* Clear RT publisher */
-    printf("# Info: Deinit and destroy rt publisher \r\n");
+    printf("# Info: Deinit and destroy rt publisher\n");
     SOPC_ReturnStatus result = SOPC_RT_Publisher_DeInitialize(pubSchedulerCtx.pRTPublisher);
 
     /* Destroy RT Publisher.*/
@@ -397,7 +397,7 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
     buffer.maximum_size = size;
     buffer.initial_size = size;
 
-    //printf("# RT Publisher send callback: Msg id = %u - User context %08lx - To encode size = %d!!!\r\n",
+    //printf("# RT Publisher send callback: Msg id = %u - User context %08lx - To encode size = %d\n",
     //       msgId,
     //       (uint64_t) pUserContext,
     //       size);
@@ -418,7 +418,7 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
     SOPC_TimeReference currentRef = SOPC_TimeReference_GetCurrent();
     SOPC_TimeReference targetRef = SOPC_TimeReference_AddMilliseconds(currentRef, resMilliSecs);
 
-    printf("# RT Publisher tick thread: Beat heart thread launched !!!\r\n");
+    printf("# RT Publisher tick thread: Beat heart thread launched\n");
 
     bool readQuitHeartBeat = false;
     __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
@@ -435,14 +435,14 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
         }
         if (resultUpdateThread != SOPC_STATUS_OK)
         {
-            printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\r\n", (int) resultUpdateThread);
+            printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\n", (int) resultUpdateThread);
         }
 
         SOPC_Sleep((unsigned int) resMilliSecs);
         __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
     }
 
-    printf("# RT Publisher tick thread: Quit Beat heart thread !!!\r\n");
+    printf("# RT Publisher tick thread: Quit Heart beat thread\n");
     return NULL;
 }
 
@@ -474,7 +474,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
         }
     }
 
-    printf("# Publisher variables monitoring: thread launched !!!\r\n");
+    printf("# Publisher variables monitoring: thread launched\n");
 
     bool readVarMonitoringStatus = false;
     __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
@@ -522,7 +522,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
 
             if (NULL == values)
             {
-                printf("# Publisher variable monitoring : Warning, request response unexpected values !!!\r\n");
+                printf("# Publisher variable monitoring : Warning, request response unexpected values\n");
             }
             else
             {
@@ -559,7 +559,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
                         {
                             printf(
                                 "# Publisher variables monitoring: Error: incompatible variants between Address "
-                                "Space and Pub config.\r\n");
+                                "Space and Pub config.\n");
                         }
                         typeCheckingSuccess = false;
                     }
@@ -656,7 +656,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
         __atomic_load(&pubSchedulerCtx.bQuitVarMonitoring, &readVarMonitoringStatus, __ATOMIC_SEQ_CST);
     }
 
-    printf("# Publisher variables monitoring: quit variable monitoring thread !!!\r\n");
+    printf("# Publisher variables monitoring: quit variable monitoring thread\n");
 
     return NULL;
 }
@@ -720,16 +720,15 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     if (SOPC_STATUS_OK == resultSOPC)
     {
         // Creation of RT Publisher
-
         pubSchedulerCtx.pRTPublisher = SOPC_RT_Publisher_Create();
         if (NULL == pubSchedulerCtx.pRTPublisher)
         {
-            printf("# Error, can't create rt publisher :(\r\n");
+            printf("# Error, can't create rt publisher\n");
             resultSOPC = SOPC_STATUS_NOK;
         }
         else
         {
-            printf("# RT publisher created :)\r\n");
+            printf("# RT publisher created\n");
         }
     }
 
@@ -740,12 +739,12 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         pRTInitializer = SOPC_RT_Publisher_Initializer_Create(2048);
         if (NULL == pRTInitializer)
         {
-            printf("# Error, can't create rt pub initializer :(\r\n");
+            printf("# Error, can't create rt pub initializer\n");
             resultSOPC = SOPC_STATUS_NOK;
         }
         else
         {
-            printf("# RT publisher initializer created :)\r\n");
+            printf("# RT publisher initializer created\n");
         }
     }
 
@@ -782,7 +781,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                         // Add a message to rt publisher initializer
 
                         printf("# RT Publisher initializer : Creation of message with publishing value = %" PRIu64
-                               "\r\n",
+                               "\n",
                                publishingInterval);
 
                         resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
@@ -798,11 +797,11 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
                         if (SOPC_STATUS_OK != resultSOPC)
                         {
-                            printf("# RT Publisher initializer : Error creation of rt publisher message :(\r\n");
+                            printf("# RT Publisher initializer : Error creation of rt publisher message\n");
                         }
                         else
                         {
-                            printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\r\n",
+                            printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\n",
                                    msgctx->rt_publisher_msg_id);
                         }
                     }
@@ -837,11 +836,11 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitHeartBeat, __ATOMIC_SEQ_CST);
         resultSOPC =
             SOPC_Thread_Create(&pubSchedulerCtx.handleThreadHeartBeat, SOPC_RT_Publisher_ThreadHeartBeatCallback,
-                               1, "PubHeart");
+                               NULL, "PubHeart");
 
         if (SOPC_STATUS_OK != resultSOPC)
         {
-            printf("# Error creation of rt publisher heart beat thread\r\n");
+            printf("# Error creation of rt publisher heart beat thread\n");
         }
     }
 
@@ -878,11 +877,11 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
 void SOPC_PubScheduler_Stop(void)
 {
-    printf("# Try to enter scheduler stop ...\r\n");
+    printf("# Try to enter scheduler stop ...\n");
     if (false == SOPC_Atomic_Int_Get(&pubSchedulerCtx.isStarted) ||
         true == SOPC_Atomic_Int_Get(&pubSchedulerCtx.processingStartStop))
     {
-        printf("# Scheduler already stopping or stopped\r\n");
+        printf("# Scheduler already stopping or stopped\n");
         return;
     }
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
@@ -890,7 +889,7 @@ void SOPC_PubScheduler_Stop(void)
 
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, false);
-    printf("# Scheduler stopped ...\r\n");
+    printf("# Scheduler stopped\n");
 }
 
 static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group)
