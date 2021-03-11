@@ -188,14 +188,6 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg);
 
 // RT Publisher callback functions (start and stop used only for debug, send function is really useful)
 
-// Start callback, called when timer switch from DISABLED to ENABLED
-static void SOPC_RT_Publisher_StartPubMsgCallback(uint32_t msgId,      // Message instance identifier
-                                                  void* pUserContext); // User context
-
-// Stop callback, called when timer switch from ENABLED to DISABLED
-static void SOPC_RT_Publisher_StopPubMsgCallback(uint32_t msgId,      // Message instance identifier
-                                                 void* pUserContext); // User context
-
 // Elapsed callback, called when timer reach its configured period
 static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message instance identifier
                                                  void* pUserContext, // User context
@@ -398,26 +390,6 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
         result = result + SOPC_PubSubConnection_Nb_WriterGroup(connection);
     }
     return result;
-}
-
-// RT Publisher callback functions (start and stop used only for debug, send function is really usefull
-
-// Start callback, called when timer switch from DISABLED to ENABLED
-static void SOPC_RT_Publisher_StartPubMsgCallback(uint32_t msgId,     // Message instance identifier
-                                                  void* pUserContext) // User context
-{
-    (void) pUserContext; // avoid unused warning
-    printf("# RT Publisher start callback: Msg id = %" PRIu32 " - Started\r\n", msgId);
-    return;
-}
-
-// Stop callback, called when timer switch from ENABLED to DISABLED
-static void SOPC_RT_Publisher_StopPubMsgCallback(uint32_t msgId,     // Message instance identifier
-                                                 void* pUserContext) // User context
-{
-    (void) pUserContext; // avoid unused warning
-    printf("# RT Publisher stop callback:  Msg id = %" PRIu32 " - Stopped\r\n", msgId);
-    return;
 }
 
 // Elapsed callback, called when timer reach its configured period
@@ -878,9 +850,9 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                                     : 1,                                  // period in ticks (minimum is 1 tick)
                                 0,                                        // offset in ticks
                                 msgctx,                                   // Context
-                                SOPC_RT_Publisher_StartPubMsgCallback,    // Not used
+                                NULL,    // Not used
                                 SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
-                                SOPC_RT_Publisher_StopPubMsgCallback,     // Not used
+                                NULL,     // Not used
                                 SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
                                 &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
 
