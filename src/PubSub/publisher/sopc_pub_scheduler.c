@@ -154,10 +154,8 @@ static struct
 
     SOPC_RT_Publisher* pRTPublisher; // RT Publisher
 
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
     Thread handleThreadHeartBeat; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
     bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
-#endif
 
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
@@ -170,10 +168,8 @@ static struct
                      .messages.array = NULL,
                      .sequenceNumber = 1,
                      .pRTPublisher = NULL,
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
                      .bQuitBeatHeart = true,
                      .handleThreadHeartBeat = (Thread) NULL,
-#endif
                      .bQuitVarMonitoring = true,
                      .handleThreadVarMonitoring = (Thread) NULL};
 
@@ -182,11 +178,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg);
 
 // This callback increment call RT publisher beat heart with a monotonic counter post incremented
 // then sleep during SOPC_TIMER_RESOLUTION_MS ms.
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
 static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg);
-#endif
-
-// RT Publisher callback functions (start and stop used only for debug, send function is really useful)
 
 // Elapsed callback, called when timer reach its configured period
 static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message instance identifier
@@ -203,7 +195,6 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
 static void SOPC_PubScheduler_Context_Clear(void)
 {
     /* Stop beat heart and variable monitoring threads */
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
     printf("# Info: Stop beat heart thread\r\n");
 
     bool newQuitBeatHeart = true;
@@ -215,7 +206,6 @@ static void SOPC_PubScheduler_Context_Clear(void)
         SOPC_Thread_Join(pubSchedulerCtx.handleThreadHeartBeat);
         pubSchedulerCtx.handleThreadHeartBeat = (Thread) NULL;
     }
-#endif
 
     printf("# Info: Stop var monitoring thread\r\n");
 
@@ -231,14 +221,6 @@ static void SOPC_PubScheduler_Context_Clear(void)
     /* Clear RT publisher */
     printf("# Info: Deinit and destroy rt publisher \r\n");
     SOPC_ReturnStatus result = SOPC_RT_Publisher_DeInitialize(pubSchedulerCtx.pRTPublisher);
-
-    /* This loop is useless in this case, but can be used if beat heart is called from IRQ*/
-    while (SOPC_STATUS_INVALID_STATE == result)
-    {
-        printf("# Info: Error... \r\n");
-        result = SOPC_RT_Publisher_DeInitialize(pubSchedulerCtx.pRTPublisher);
-        SOPC_Sleep(100);
-    }
 
     /* Destroy RT Publisher.*/
 
@@ -427,7 +409,6 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
     return;
 }
 
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
 // This callback increment call RT publisher beat heart with a monotonic counter post incremented
 // then sleep during SOPC_TIMER_RESOLUTION_MS ms.
 static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
@@ -466,7 +447,6 @@ static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
     printf("# RT Publisher tick thread: Quit Beat heart thread !!!\r\n");
     return NULL;
 }
-#endif
 
 // This callback of thread var monitoring is porting from code of old event_timer callback
 static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
@@ -683,24 +663,6 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
     return NULL;
 }
 
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
-SOPC_ReturnStatus SOPC_PubScheduler_HeartBeatFromIRQ(uint32_t tickValue)
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    // Verify that scheduler is not already running
-    if (true == SOPC_Atomic_Int_Get(&pubSchedulerCtx.isStarted) &&
-        false == SOPC_Atomic_Int_Get(&pubSchedulerCtx.processingStartStop))
-    {
-        result = SOPC_RT_Publisher_BeatHeart(pubSchedulerCtx.pRTPublisher, tickValue);
-    }
-    else
-    {
-        result = SOPC_STATUS_INVALID_STATE;
-    }
-
-    return result;
-}
-#endif
 bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_PubSourceVariableConfig* sourceConfig,
                              uint32_t resolutionMicroSecs)
@@ -738,9 +700,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     // i.e. resolutionMicroSecs is used for publishingInterval period evaluation
     // and resWithoutIRQ for calling SOPC_PubSourceVariable_GetVariables through a dedicated thread
 
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
     resolutionMicroSecs = resWithoutIRQ;
-#endif
 
     // Security : init the sequence number
     /* TODO: Don't reset the sequenceNumber here: we might want to publish later and we must keep its value */
@@ -890,7 +850,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         // Destroy initializer not further used
         SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
 
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 0
         // Creation of heart beat thread which call RT Publisher Heart Beat
 
         if (SOPC_STATUS_OK == resultSOPC)
@@ -906,7 +865,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                 printf("# Error creation of rt publisher heart beat thread\r\n");
             }
         }
-#endif
 
         // Creation of variables monitoring thread
 
