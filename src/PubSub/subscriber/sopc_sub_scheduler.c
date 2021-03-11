@@ -250,10 +250,10 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport con
         memcpy(schedulerCtx.receptionBufferMQTT->data, data, size);
         schedulerCtx.receptionBufferMQTT->length = size;
 
-        SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,                //
-                                       inputIdentifier,                           //
-                                       schedulerCtx.receptionBufferMQTT->data,    //
-                                       schedulerCtx.receptionBufferMQTT->length); //
+        SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,
+                                       inputIdentifier,
+                                       schedulerCtx.receptionBufferMQTT->data,
+                                       schedulerCtx.receptionBufferMQTT->length);
     }
 }
 
@@ -271,10 +271,10 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
     // Write input
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,               //
-                                       inputIdentifier,                          //
-                                       schedulerCtx.receptionBufferUDP->data,    //
-                                       schedulerCtx.receptionBufferUDP->length); //
+        SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,
+                                       inputIdentifier,
+                                       schedulerCtx.receptionBufferUDP->data,
+                                       schedulerCtx.receptionBufferUDP->length);
     }
 }
 
@@ -461,9 +461,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
     if (result)
     {
-        schedulerCtx.securityCtx = SOPC_Array_Create(sizeof(SOPC_SubScheduler_Security_Pub_Ctx*), //
-                                                     SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER,     //
-                                                     NULL);                                       //
+        schedulerCtx.securityCtx = SOPC_Array_Create(sizeof(SOPC_SubScheduler_Security_Pub_Ctx*),
+                                                     SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER,
+                                                     NULL);
 
         result = (NULL != schedulerCtx.securityCtx);
         if (!result)
@@ -512,12 +512,12 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                 printf("# Add input with context %p\n", (void*) connection);
 
-                status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,                        //
-                                                                 SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER, //
-                                                                 SOPC_PUBSUB_BUFFER_SIZE,               //
-                                                                 SOPC_PIN_MODE_GET_NORMAL,              //
+                status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,
+                                                                 SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER,
+                                                                 SOPC_PUBSUB_BUFFER_SIZE,
+                                                                 SOPC_PIN_MODE_GET_NORMAL,
                                                                  (void*) connection,
-                                                                 &schedulerCtx.transport[iIter].inputNumber); //
+                                                                 &schedulerCtx.transport[iIter].inputNumber);
 
                 if (SOPC_STATUS_OK != status)
                 {
@@ -600,11 +600,11 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             else
                             {
                                 schedulerCtx.transport[iIter].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-                                    handleMqttMgr,                                       //
-                                    &address[strlen(MQTT_PREFIX)],                       //
-                                    MQTT_LIB_TOPIC_NAME,                                 //
-                                    on_mqtt_message_received,                            //
-                                    (void*) &schedulerCtx.transport[iIter].inputNumber); //
+                                    handleMqttMgr,
+                                    &address[strlen(MQTT_PREFIX)],
+                                    MQTT_LIB_TOPIC_NAME,
+                                    on_mqtt_message_received,
+                                    (void*) &schedulerCtx.transport[iIter].inputNumber);
 
                                 if (schedulerCtx.transport[iIter].mqttHandle == NULL)
                                 {
@@ -676,10 +676,10 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     {
         bool newValue = false;
         __atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
-        status = SOPC_Thread_Create(&schedulerCtx.handleRTSubscriberBeatHeart, //
-                                    cbBeatHeartThreadCallback,                 //
-                                    NULL,                                      //
-                                    "SubHeart");                               //
+        status = SOPC_Thread_Create(&schedulerCtx.handleRTSubscriberBeatHeart,
+                                    cbBeatHeartThreadCallback,
+                                    NULL,
+                                    "SubHeart");
 
         if (SOPC_STATUS_OK != status)
         {
