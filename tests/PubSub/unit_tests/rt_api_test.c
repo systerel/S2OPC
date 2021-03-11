@@ -1069,9 +1069,9 @@ static int SOPC_TEST_RT_PUBLISHER(void)
 
     printf("\r\n==>RT_PUBLISHER : Stop timers value\r\n");
 
-    SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg1);
-    SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg2);
-    SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg3);
+    //SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg1);
+    //SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg2);
+    //SOPC_RT_Publisher_StopMessagePublishing(myRTPub, idMsg3);
 
     SOPC_Sleep(200);
 

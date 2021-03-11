@@ -171,41 +171,6 @@ SOPC_ReturnStatus SOPC_RT_Publisher_HeartBeat(SOPC_RT_Publisher* pPub, //
 /// In that case, you should retry to call it.
 SOPC_ReturnStatus SOPC_RT_Publisher_DeInitialize(SOPC_RT_Publisher* pPub);
 
-/// @brief Start message publishing for a given message identifier.
-/// @param [in] pPub RT Publisher object well initialized.
-/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
-/// @return SOPC_STATUS_OK if well started.
-SOPC_ReturnStatus SOPC_RT_Publisher_StartMessagePublishing(SOPC_RT_Publisher* pPub, //
-                                                           uint32_t msgIdentifier); //
-
-/// @brief Stop message publishing for a given message identifier.
-/// @param [in] pPub RT Publisher object well initialized.
-/// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
-/// @return SOPC_STATUS_OK if well stopped.
-SOPC_ReturnStatus SOPC_RT_Publisher_StopMessagePublishing(SOPC_RT_Publisher* pPub, //
-                                                          uint32_t msgIdentifier); //
-
-/// @brief Configure a message in the case of already initialized publisher.
-/// @param [in] pPub RT Publisher object
-/// @param [in] messageIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
-/// @param [in] period Period in heart beats taken into account on the next call of Heart Beat function
-/// @param [in] offset Offset in heart beats taken into account on the next call of Heart Beat function
-/// @param [in] pContext User context taken into account on the next call of Heart Beat function
-/// @param [in] cbStart Start callback taken into account on the next call of Heart Beat function
-/// @param [in] cbSend Elapsed period callback taken into account on the next call of Heart Beat function
-/// @param [in] cbStop Stop callback taken into account on the next call of Heart Beat function
-/// @param [in] initialStatus Initial status taken into account on the next call of Heart Beat function
-/// @return SOPC_STATUS_OK if well configured.
-SOPC_ReturnStatus SOPC_RT_Publisher_ConfigureMessage(SOPC_RT_Publisher* pPub,                        //
-                                                     uint32_t messageIdentifier,                     //
-                                                     uint32_t period,                                //
-                                                     uint32_t offset,                                //
-                                                     void* pContext,                                 //
-                                                     ptrCallbackStart cbStart,                       //
-                                                     ptrCallbackSend cbSend,                         //
-                                                     ptrCallbackStart cbStop,                        //
-                                                     SOPC_RT_Publisher_MessageStatus initialStatus); //
-
 /// @brief Get the next message publishing status, which will be taken into account by the next heart beat.
 /// @param [in] pPub RT Publisher object
 /// @param [in] msgIdentifier Message identifier returned by SOPC_RT_Publisher_Initializer_AddMessage
