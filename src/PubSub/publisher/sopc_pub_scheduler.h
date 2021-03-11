@@ -23,10 +23,6 @@
 #include "sopc_pub_source_variable.h"
 #include "sopc_pubsub_conf.h"
 
-#ifndef SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ
-#define SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ 0
-#endif
-
 /**
  * \brief Starts the Publisher scheduler using the PubSub configuration data
  *        and the source of data information
@@ -48,10 +44,5 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                              uint32_t resolutionMicroSecs);
 
 void SOPC_PubScheduler_Stop(void);
-
-#if SOPC_PUBSCHEDULER_HEARTBEAT_FROM_IRQ == 1
-// tickValue shall be incremented by 1 exactly each \p resolutionMicroSecs micro seconds
-SOPC_ReturnStatus SOPC_PubScheduler_HeartBeatFromIRQ(uint32_t tickValue);
-#endif
 
 #endif /* SOPC_PUB_SCHEDULER_H_ */
