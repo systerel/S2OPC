@@ -114,7 +114,7 @@ struct SOPC_WriterGroup
 {
     SOPC_PubSubConnection* parent;
     uint16_t id;
-    uint64_t publishingInterval;
+    double publishingInterval;
     SOPC_UadpWriterGroup messageSettings;
 
     uint8_t dataSetWriters_length;
@@ -164,7 +164,7 @@ struct SOPC_DataSetReader
     uint16_t dataSetWriterId;
     SOPC_DataSetMetaData metaData;
     SOPC_SubscribedDataSetType targetType;
-    uint64_t messageReceiveTimeout;
+    double messageReceiveTimeout; /* ms */
 
     // These fields below are defined in Spec but not used
     // DataSetFieldContentMask
@@ -671,16 +671,16 @@ SOPC_SubscribedDataSetType SOPC_DataSetReader_Get_DataSet_TargetType(const SOPC_
     return reader->targetType;
 }
 
-uint64_t SOPC_DataSetReader_Get_ReceiveTimeout(const SOPC_DataSetReader* reader)
+double SOPC_DataSetReader_Get_ReceiveTimeout(const SOPC_DataSetReader* reader)
 {
     assert(NULL != reader);
     return reader->messageReceiveTimeout;
 }
 
-void SOPC_DataSetReader_Set_ReceiveTimeout(SOPC_DataSetReader* reader, uint64_t timeout)
+void SOPC_DataSetReader_Set_ReceiveTimeout(SOPC_DataSetReader* reader, double timeout_ms)
 {
     assert(NULL != reader);
-    reader->messageReceiveTimeout = timeout;
+    reader->messageReceiveTimeout = timeout_ms;
 }
 
 /** SOPC_FieldTarget **/
@@ -767,16 +767,16 @@ void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version)
     group->messageSettings.version = version;
 }
 
-uint64_t SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group)
+double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group)
 {
     assert(NULL != group);
     return group->publishingInterval;
 }
 
-void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, uint64_t interval)
+void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms)
 {
     assert(NULL != group);
-    group->publishingInterval = interval;
+    group->publishingInterval = interval_ms;
 }
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group)

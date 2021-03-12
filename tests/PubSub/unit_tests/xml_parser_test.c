@@ -59,7 +59,7 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_ptr_eq(conn, SOPC_WriterGroup_Get_Connection(writerGroup));
     ck_assert_uint_eq(14, SOPC_WriterGroup_Get_Id(writerGroup));
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
-    ck_assert_uint_eq(50, SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
+    ck_assert_double_eq(50., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
@@ -75,7 +75,7 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_ptr_eq(conn, SOPC_WriterGroup_Get_Connection(writerGroup));
     ck_assert_uint_eq(15, SOPC_WriterGroup_Get_Id(writerGroup));
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
-    ck_assert_uint_eq(30, SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
+    ck_assert_double_eq(30., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
@@ -170,8 +170,8 @@ START_TEST(test_sub_xml_parsing)
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(14, writerId); // same as writeGroupId
 
-    uint64_t timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
-    ck_assert_uint_eq(2 * 50, timeoutMs); // 2*publishingInternval
+    double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
+    ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
 
     ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
 
@@ -209,7 +209,7 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_uint_eq(15, writerId); // same as writeGroupId
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
-    ck_assert_uint_eq(2 * 100, timeoutMs); // 2*publishingInternval
+    ck_assert_double_eq(2 * 100., timeoutMs); // 2*publishingInternval
 
     ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
 
