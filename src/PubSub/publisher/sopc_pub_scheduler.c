@@ -85,7 +85,7 @@ typedef struct SOPC_PubScheduler_MessageCtx
     SOPC_Dataset_NetworkMessage* message;
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
-    uint32_t rt_publisher_msg_id;
+    //uint32_t rt_publisher_msg_id;
 } SOPC_PubScheduler_MessageCtx;
 
 typedef struct SOPC_PubScheduler_MessageCtx_Array
@@ -733,21 +733,21 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         }
     }
 
-    SOPC_RT_Publisher_Initializer* pRTInitializer = NULL;
-    // Creation of RT_Pubslisher Initializer. This will be destroyed after initialization.
-    if (SOPC_STATUS_OK == resultSOPC)
-    {
-        pRTInitializer = SOPC_RT_Publisher_Initializer_Create(2048); /* TODO: */
-        if (NULL == pRTInitializer)
-        {
-            printf("# Error, can't create rt pub initializer\n");
-            resultSOPC = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            printf("# RT publisher initializer created\n");
-        }
-    }
+    //SOPC_RT_Publisher_Initializer* pRTInitializer = NULL;
+    //// Creation of RT_Pubslisher Initializer. This will be destroyed after initialization.
+    //if (SOPC_STATUS_OK == resultSOPC)
+    //{
+    //    pRTInitializer = SOPC_RT_Publisher_Initializer_Create(2048); /* TODO: */
+    //    if (NULL == pRTInitializer)
+    //    {
+    //        printf("# Error, can't create rt pub initializer\n");
+    //        resultSOPC = SOPC_STATUS_NOK;
+    //    }
+    //    else
+    //    {
+    //        printf("# RT publisher initializer created\n");
+    //    }
+    //}
 
     for (uint32_t i = 0; SOPC_STATUS_OK == resultSOPC && i < nbConnection; i++)
     {
@@ -775,52 +775,50 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
                 SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
 
                 // Add a message to rt publisher initializer
+                /* TODO: log */
+                log_info("# Message context with publishing interval = %" PRIu64 "\n", publishingInterval);
 
-                printf("# RT Publisher initializer : Creation of message with publishing value = %" PRIu64
-                       "\n",
-                       publishingInterval);
+                //resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
+                //    pRTInitializer,
+                //    1,                                  // period in ticks (minimum is 1 tick)
+                //    0,                                        // offset in ticks
+                //    msgctx,                                   // Context
+                //    NULL,    // Not used
+                //    SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
+                //    NULL,     // Not used
+                //    SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
+                //    &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
 
-                resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
-                    pRTInitializer,
-                    1,                                  // period in ticks (minimum is 1 tick)
-                    0,                                        // offset in ticks
-                    msgctx,                                   // Context
-                    NULL,    // Not used
-                    SOPC_RT_Publisher_SendPubMsgCallback,     // Wrap send callback of transport context
-                    NULL,     // Not used
-                    SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
-                    &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
             }
             if (SOPC_STATUS_OK != resultSOPC)
             {
-                printf("# RT Publisher initializer : Error creation of rt publisher message\n");
+                log_error("# RT Publisher initializer : Error creation of rt publisher message\n");
             }
             else
             {
-                printf("# RT Publisher initializer : Creation of rt publisher message handle = %u\n",
-                       msgctx->rt_publisher_msg_id);
+                log_info("# RT Publisher initializer : Creation of rt publisher message handle = %u\n", msgctx->rt_publisher_msg_id);
             }
         }
     }
 
-    if (SOPC_STATUS_OK == resultSOPC)
-    {
-        // Initalize RT Publisher with initializer
+    //if (SOPC_STATUS_OK == resultSOPC)
+    //{
+    //    // Initalize RT Publisher with initializer
 
-        resultSOPC = SOPC_RT_Publisher_Initialize(pubSchedulerCtx.pRTPublisher, pRTInitializer);
+    //    resultSOPC = SOPC_RT_Publisher_Initialize(pubSchedulerCtx.pRTPublisher, pRTInitializer);
 
-        if (SOPC_STATUS_OK != resultSOPC)
-        {
-            printf("# Error, can't initialize RT Publisher : %d", (int) resultSOPC);
-        }
-        else
-        {
-            printf("# RT Publisher well initialized\n");
-        }
-    }
+    //    if (SOPC_STATUS_OK != resultSOPC)
+    //    {
+    //        printf("# Error, can't initialize RT Publisher : %d", (int) resultSOPC);
+    //    }
+    //    else
+    //    {
+    //        printf("# RT Publisher well initialized\n");
+    //    }
+    //}
 
     // Destroy initializer not further used
-    SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
+    //SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
 
     /* Creation of the time-sensitive thread */
     if (SOPC_STATUS_OK == resultSOPC)
@@ -838,21 +836,21 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     }
 
     // Creation of variables monitoring thread
-    if (SOPC_STATUS_OK == resultSOPC)
-    {
-        bool newVarMonitoringStatus = false;
-        __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
+    //if (SOPC_STATUS_OK == resultSOPC)
+    //{
+    //    bool newVarMonitoringStatus = false;
+    //    __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
 
-        resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring,
-                                        SOPC_RT_Publisher_VarMonitoringCallback,
-                                        1,
-                                        "PubVar");
+    //    resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.handleThreadVarMonitoring,
+    //                                    SOPC_RT_Publisher_VarMonitoringCallback,
+    //                                    1,
+    //                                    "PubVar");
 
-        if (SOPC_STATUS_OK != resultSOPC)
-        {
-            printf("# Error creation of var monitoring thread\r\n");
-        }
-    }
+    //    if (SOPC_STATUS_OK != resultSOPC)
+    //    {
+    //        printf("# Error creation of var monitoring thread\n");
+    //    }
+    //}
 
     if (SOPC_STATUS_OK != resultSOPC)
     {
