@@ -2,11 +2,11 @@
     <!-- one to many -->
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
         <!-- one to many -->
-        <message id="14" publishingInterval="50" version="1" >
+        <message id="14" publishingInterval="50." version="1" >
             <!-- one to many -->
             <variable nodeId="ns=1;i=5" displayName="Toto" dataType="Boolean"/>
         </message>
-        <message id="15" publishingInterval="30" version="1">
+        <message id="15" publishingInterval="30." version="1">
             <!-- one to many -->
             <variable nodeId="ns=1;i=2" displayName="Tata" dataType="Int16"/>
         </message>

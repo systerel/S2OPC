@@ -68,7 +68,7 @@ static SOPC_PubSubConfiguration* UDP_Pub_Test_Get_Conf(void)
 
     SOPC_WriterGroup_Set_Id(group, 45612);
     SOPC_WriterGroup_Set_Version(group, 123456);
-    SOPC_WriterGroup_Set_PublishingInterval(group, 2000);
+    SOPC_WriterGroup_Set_PublishingInterval(group, 2000.);
 
     SOPC_UadpNetworkMessageContentMask contentMask;
     contentMask.PublisherIdFlag = true;
