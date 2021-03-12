@@ -172,8 +172,8 @@ void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t
 SOPC_SubscribedDataSetType SOPC_DataSetReader_Get_DataSet_TargetType(const SOPC_DataSetReader* reader);
 // void SOPC_DataSetReader_Set_DataSet_TargetType(SOPC_DataSetReader* reader, SOPC_SubscribedDataSetType type);
 
-uint64_t SOPC_DataSetReader_Get_ReceiveTimeout(const SOPC_DataSetReader* reader);
-void SOPC_DataSetReader_Set_ReceiveTimeout(SOPC_DataSetReader* reader, uint64_t timeout);
+double SOPC_DataSetReader_Get_ReceiveTimeout(const SOPC_DataSetReader* reader);
+void SOPC_DataSetReader_Set_ReceiveTimeout(SOPC_DataSetReader* reader, double timeout_ms);
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
                                                      SOPC_SubscribedDataSetType type,
@@ -212,8 +212,8 @@ void SOPC_WriterGroup_Set_Id(SOPC_WriterGroup* group, uint16_t id);
 uint32_t SOPC_WriterGroup_Get_Version(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version);
 
-uint64_t SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group);
-void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, uint64_t interval);
+double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms);
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,

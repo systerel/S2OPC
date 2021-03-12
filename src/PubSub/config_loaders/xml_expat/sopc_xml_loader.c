@@ -30,6 +30,7 @@
 #include "expat.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
 #ifdef XML_CONFIG_LOADER_LOG
@@ -95,7 +96,7 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_message_t
 {
     uint16_t id; // WriteGroupId
-    uint64_t publishing_interval;
+    double publishing_interval;
     uint64_t publisher_id;
     uint32_t version;
     SOPC_SecurityMode_Type security_mode;
@@ -345,8 +346,8 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
         {
             const char* attr_val = attrs[++i];
 
-            if (NULL == attr_val || !parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publishing_interval) ||
-                0 == msg->publishing_interval)
+            if (NULL == attr_val || !SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval) ||
+                msg->publishing_interval <= 0.)
             {
                 LOG_XML_ERRORF("Invalid message publishingInterval value: '%s", attr_val);
                 return false;
