@@ -59,6 +59,7 @@ typedef struct timespec SOPC_RealTime; /* Or SensitiveTime or SpecialTime or Pre
 
  /* ret = now if copy is NULL */
 SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy);
+bool SOPC_RealTime_GetTime(SOPC_RealTime *t);
 void SOPC_RealTime_Delete(SOPC_RealTime **t);
 /* t += double in ms */
 void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms);
@@ -68,22 +69,35 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now);
 SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy)
 {
     SOPC_RealTime *ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
-    if (NULL == copy && NULL != ret)
-    {
-        int res = clock_gettime(CLOCK_MONOTONIC, ret);
-        if (-1 == res)
-        {
-            /* TODO: use log, use thread safe function */
-            log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
-            SOPC_Free(ret);
-            ret = NULL;
-        }
-    }
-    else if (NULL != ret)
+    if (NULL != copy && NULL != ret)
     {
         *ret = *copy;
     }
+    else if (NULL != ret)
+    {
+        bool ok = SOPC_RealTime_GetTime(ret);
+        if(! ok)
+        {
+            SOPC_RealTime_Delete(&ret);
+        }
+    }
+
     return ret;
+}
+
+bool SOPC_RealTime_GetTime(SOPC_RealTime *t)
+{
+    assert(NULL != t);
+
+    int res = clock_gettime(CLOCK_MONOTONIC, t);
+    if (-1 == res)
+    {
+        /* TODO: use log, use thread safe function */
+        log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
+        return false;
+    }
+
+    return true;
 }
 
 void SOPC_RealTime_Delete(SOPC_RealTime **t)
