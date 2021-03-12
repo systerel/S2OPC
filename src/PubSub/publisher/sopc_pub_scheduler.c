@@ -65,6 +65,9 @@ void SOPC_RealTime_Delete(SOPC_RealTime **t);
 void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms);
 /* t <= now */
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now);
+/* Precise sleep until there, does not check that date is in the future
+ * The calling thread must have appropriate scheduling policy and priority for precise timing */
+bool SOPC_RealTime_SleepUntil(const SOPC_RealTime *date);
 
 SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy)
 {
@@ -142,7 +145,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now)
         if (-1 == res)
         {
             /* TODO: use log, use thread safe function */
-            log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
+            log_error("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
             ok = false;
         }
     }
@@ -153,6 +156,23 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now)
 
     /* t <= t1 */
     return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
+}
+
+bool SOPC_RealTime_SleepUntil(const SOPC_RealTime *date)
+{
+    assert(NULL != date);
+    static bool warned = false;
+    int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
+
+    /* TODO: handle the EINTR case more accurately */
+    if(-1 == res && !warned)
+    {
+        /* TODO: use log, use thread safe function */
+        log_error("ERROR: clock_nanosleep failed (warn once): %d (%s)\n", errno, strerror(errno));
+        warned = true;
+    }
+
+    return -1 == res;
 }
 /* ----------------- */
 
