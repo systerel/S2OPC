@@ -18,7 +18,7 @@
                                                            </xs:element>
                                                      </xs:sequence>
                                                      <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
-                                                     <xs:attribute name="publishingInterval" type="xs:unsignedLong" use="required"/>
+                                                     <xs:attribute name="publishingInterval" type="xs:double" use="required"/>
                                                      <xs:attribute name="version" type="xs:unsignedInt" use="required"/>
                                                      <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
                                                </xs:complexType>

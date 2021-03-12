@@ -2,12 +2,12 @@
     <!-- one to many -->
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
-        <message id="14" version="1" publishingInterval="50" publisherId="123" >
+        <message id="14" version="1" publishingInterval="50." publisherId="123" >
             <!-- one to many -->
             <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
                 <!-- the nodeId is used to retrieve the variable in the adresse space -->
         </message>
-        <message id="15" version="1" publishingInterval="100" publisherId="456" securityMode="sign">
+        <message id="15" version="1" publishingInterval="100." publisherId="456" securityMode="sign">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
         </message>

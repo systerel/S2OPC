@@ -568,7 +568,7 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
         for (uint32_t iIterMsg = 0; iIterMsg < pubSchedulerCtx.messages.current; iIterMsg++)
         {
             SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
-            uint64_t pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
+            double pubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group);
             if (minPubInterval > pubInterval)
             {
                 minPubInterval = pubInterval;
@@ -601,7 +601,8 @@ static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg)
             SOPC_PubScheduler_MessageCtx* ctx = &pubSchedulerCtx.messages.array[iIterMsg];
 
             // Note: use half interval data update to ensure data up to date for sending on PublishingInterval
-            uint64_t halfPubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group) / 2;
+            /* TODO: this calls the data twice, it should be offset instead */
+            double halfPubInterval = SOPC_WriterGroup_Get_PublishingInterval(ctx->group) / 2;
 
             // Check if we should retrieve a new value:
             // - First iteration OR
@@ -870,8 +871,9 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         for (uint16_t j = 0; SOPC_STATUS_OK == resultSOPC && j < nbWriterGroup; j++)
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
-            uint64_t publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
-            if (publishingInterval > UINT32_MAX)
+            double publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
+
+            if (publishingInterval/1000 > SIZE_MAX || publishingInterval < 0.)
             {
                 resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
             }
@@ -884,7 +886,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
                 SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
 
                 // Add a message to rt publisher initializer
-                log_info("# Message context with publishing interval = %" PRIu64 "\n", publishingInterval);
+                log_info("# Message context with publishing interval = %f\n", publishingInterval);
 
                 //resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
                 //    pRTInitializer,
@@ -899,13 +901,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
                 /* Compute next timeout */
                 SOPC_RealTime_AddDuration(msgctx->next_timeout, publishingInterval);
-            }
-            if (SOPC_STATUS_OK != resultSOPC)
-            {
-                log_error("# RT Publisher initializer : Error creation of rt publisher message\n");
-            }
-            else
-            {
+
                 log_info("# RT Publisher initializer : Creation of rt publisher message handle = %u\n", msgctx->rt_publisher_msg_id);
             }
         }
