@@ -216,6 +216,7 @@ struct SOPC_PubScheduler_TransportCtx
     MqttTransportHandle* mqttHandle;
 };
 
+/* TODO: this type is local to this file and its name may be shortened */
 typedef struct SOPC_PubScheduler_MessageCtx
 {
     SOPC_WriterGroup* group;
@@ -224,8 +225,10 @@ typedef struct SOPC_PubScheduler_MessageCtx
     SOPC_PubSub_SecurityType* security;
     //uint32_t rt_publisher_msg_id;
     SOPC_RealTime *next_timeout; /**< Next expiration absolute date */
+    double publishingInterval;
 } SOPC_PubScheduler_MessageCtx;
 
+/* TODO: use SOPC_Array, which already does that, and uses size_t */
 typedef struct SOPC_PubScheduler_MessageCtx_Array
 {
     uint64_t length;                     // Size of this array is SOPC_PubScheduler_Nb_Message
@@ -246,9 +249,8 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
 static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
 
 // Get last well initialized message context.
-static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void);
+//static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void);
 
-// Clear pub scheduler context
 static void SOPC_PubScheduler_Context_Clear(void);
 
 // Return data set writer use to build opcua frame to send from a writer group of a message context.
@@ -435,44 +437,43 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
 {
     assert(ctx != NULL);
     assert(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
-    bool result = true;
 
     SOPC_PubScheduler_MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
 
     context->transport = ctx;
     context->group = group;
+    context->publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
+    SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
+
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
     context->next_timeout = SOPC_RealTime_Create(NULL);
-
-    if (NULL == context->message || NULL == context->next_timeout)
+    bool result = true;
+    if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
+        context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
+        result = (NULL != context->security);
+    }
+
+    if (NULL == context->message || NULL == context->next_timeout || !result)
+    {
+        log_error("# Error Publisher: cannot allocate message context\n");
         return false;
     }
 
-    if (result)
-    {
-        SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
-        if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
-        {
-            context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
-            if (NULL == context->security)
-            {
-                printf("# Error Publisher : can't alloc security context !\n");
-                result = false;
-            }
+    /* Compute next timeout */
+    SOPC_RealTime_AddDuration(context->next_timeout, context->publishingInterval);
 
-            if (result)
-            {
-                context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
-                context->security->groupKeys =
-                    SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
-                context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-                if (NULL == context->security->groupKeys || NULL == context->security->provider)
-                {
-                    printf("# Error Publisher : can't create provider !\n");
-                    result = false;
-                }
-            }
+    /* Fill in security context */
+    if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+    {
+        context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
+        context->security->groupKeys =
+            SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+        context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
+        if (NULL == context->security->groupKeys || NULL == context->security->provider)
+        {
+            log_error("# Error Publisher: cannot create security provider\n");
+            result = false; /* TODO: it should be possible to avoid this variable and the partial frees when false */
         }
     }
 
@@ -480,29 +481,24 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     {
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
         context->message = NULL;
-        if (context->security != NULL)
-        {
-            SOPC_PubSub_Security_Clear(context->security);
-            SOPC_Free(context->security);
-            context->security = NULL;
-        }
-
-        printf("# Error : message can't be created #%d\n", (int32_t) pubSchedulerCtx.messages.current);
+        SOPC_RealTime_Delete(&context->next_timeout);
+        SOPC_PubSub_Security_Clear(context->security);
+        SOPC_Free(context->security);
+        context->security = NULL;
     }
     else
     {
-        printf("# Info Publisher : message created #%d\n", (int32_t) pubSchedulerCtx.messages.current);
-        // Successfull, free necessary if not further used
+        log_debug("# Info Publisher: message created #%d\n", (int32_t) pubSchedulerCtx.messages.current);
         pubSchedulerCtx.messages.current++;
     }
     return result;
 }
 
-static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void)
-{
-    assert(0 < pubSchedulerCtx.messages.current && pubSchedulerCtx.messages.current <= pubSchedulerCtx.messages.length);
-    return &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current - 1]);
-}
+//static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void)
+//{
+//    assert(0 < pubSchedulerCtx.messages.current && pubSchedulerCtx.messages.current <= pubSchedulerCtx.messages.length);
+//    return &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current - 1]);
+//}
 
 static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 {
@@ -906,22 +902,15 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         for (uint16_t j = 0; SOPC_STATUS_OK == resultSOPC && j < nbWriterGroup; j++)
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
-            double publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
 
-            if (publishingInterval/1000 > SIZE_MAX || publishingInterval < 0.)
-            {
-                resultSOPC = SOPC_STATUS_NOT_SUPPORTED;
-            }
-            else if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
+            /* TODO: call with side effect in if statement */
+            if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }
-            else
-            {
-                SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
-
-                // Add a message to rt publisher initializer
-                log_info("# Message context with publishing interval = %f\n", publishingInterval);
+            //else
+            //{
+                //SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
 
                 //resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
                 //    pRTInitializer,
@@ -934,11 +923,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                 //    SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
                 //    &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
 
-                /* Compute next timeout */
-                SOPC_RealTime_AddDuration(msgctx->next_timeout, publishingInterval);
-
-                log_info("# RT Publisher initializer : Creation of rt publisher message handle = %u\n", msgctx->rt_publisher_msg_id);
-            }
+                //log_info("# RT Publisher initializer : Creation of rt publisher message handle = %u\n", msgctx->rt_publisher_msg_id);
+            //}
         }
     }
 
