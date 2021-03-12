@@ -319,12 +319,6 @@ static struct
  * It computes when it should wake up and sleeps until then (if not past) */
 static void* thread_start_publish(void* arg);
 
-// Elapsed callback, called when timer reach its configured period
-static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message instance identifier
-                                                 void* pUserContext, // User context
-                                                 void* pData,        // Data published by set data API
-                                                 uint32_t size);     // Data size in bytes
-
 // Clear pub scheduler context
 // 1) Join thread
 // 5) Destory all message context
@@ -513,39 +507,6 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
         result = result + SOPC_PubSubConnection_Nb_WriterGroup(connection);
     }
     return result;
-}
-
-// Elapsed callback, called when timer reach its configured period
-static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message instance identifier
-                                                 void* pUserContext, // User context
-                                                 void* pData,        // Data published by set data API
-                                                 uint32_t size)      // Data size in bytes
-{
-    (void) msgId;
-
-    if (0 == size)
-    {
-        // No data available on PublishingInterval
-        return;
-    }
-
-    SOPC_PubScheduler_MessageCtx* pCtx = pUserContext;
-
-    SOPC_Buffer buffer;
-    buffer.data = pData;
-    buffer.length = size;
-    buffer.position = 0;
-    buffer.maximum_size = size;
-    buffer.initial_size = size;
-
-    //printf("# RT Publisher send callback: Msg id = %u - User context %08lx - To encode size = %d\n",
-    //       msgId,
-    //       (uint64_t) pUserContext,
-    //       size);
-
-    pCtx->transport->fctSend(pCtx->transport, &buffer);
-
-    return;
 }
 
 static void* thread_start_publish(void* arg)
