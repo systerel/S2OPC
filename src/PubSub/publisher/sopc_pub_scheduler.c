@@ -17,6 +17,9 @@
  * under the License.
  */
 
+/* TODO: move to interop' module */
+#define _POSIX_C_SOURCE 199309L
+
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -38,6 +41,106 @@
 #include "sopc_rt_publisher.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
+
+/* TODO: use the correct log system */
+#define log_error(...) printf(__VA_ARGS__)
+#define log_warning(...) printf(__VA_ARGS__)
+#define log_info(...) printf(__VA_ARGS__)
+#define log_debug(...) printf(__VA_ARGS__)
+
+/* ----------------- TODO: abstract me and move me to the interop' module */
+#include <time.h>
+#include <error.h>
+#include <errno.h>
+#include <math.h>
+
+/* CLOCK_MONOTONIC under linux, as we want to send regular notifications, even if the time gets back or forth */
+typedef struct timespec SOPC_RealTime; /* Or SensitiveTime or SpecialTime or PreciseTime */
+
+ /* ret = now if copy is NULL */
+SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy);
+void SOPC_RealTime_Delete(SOPC_RealTime **t);
+/* t += double in ms */
+void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms);
+/* t <= now */
+bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now);
+
+SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy)
+{
+    SOPC_RealTime *ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
+    if (NULL == copy && NULL != ret)
+    {
+        int res = clock_gettime(CLOCK_MONOTONIC, ret);
+        if (-1 == res)
+        {
+            /* TODO: use log, use thread safe function */
+            log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
+            SOPC_Free(ret);
+            ret = NULL;
+        }
+    }
+    else if (NULL != ret)
+    {
+        *ret = *copy;
+    }
+    return ret;
+}
+
+void SOPC_RealTime_Delete(SOPC_RealTime **t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
+}
+
+void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms)
+{
+    assert(NULL != t);
+
+    /* TODO: tv_sec is a time_t, how do we assert the cast?? */
+    t->tv_sec += (time_t)(duration_ms/1000);
+    t->tv_nsec += (long)(fmod(duration_ms, 1000.)*1000000); /* This may add a negative or positive number */
+
+    /* Normalize */
+    if (t->tv_nsec < 0)
+    {
+        t->tv_sec -= 1;
+        t->tv_nsec += 1000000000;
+    }
+    else if (t->tv_nsec > 1000000000)
+    {
+        t->tv_sec += 1;
+        t->tv_nsec -= 1000000000;
+    }
+}
+
+bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now)
+{
+    struct timespec t1 = {0};
+    bool ok = true;
+
+    if (NULL == now)
+    {
+        int res = clock_gettime(CLOCK_MONOTONIC, &t1);
+        if (-1 == res)
+        {
+            /* TODO: use log, use thread safe function */
+            log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
+            ok = false;
+        }
+    }
+    else
+    {
+        t1 = *now;
+    }
+
+    /* t <= t1 */
+    return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
+}
+/* ----------------- */
 
 /* Transport context. One per connection */
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
@@ -82,10 +185,11 @@ struct SOPC_PubScheduler_TransportCtx
 typedef struct SOPC_PubScheduler_MessageCtx
 {
     SOPC_WriterGroup* group;
-    SOPC_Dataset_NetworkMessage* message;
+    SOPC_Dataset_NetworkMessage* message; /* TODO: */
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     //uint32_t rt_publisher_msg_id;
+    SOPC_RealTime *next_timeout; /**< Next expiration absolute date */
 } SOPC_PubScheduler_MessageCtx;
 
 typedef struct SOPC_PubScheduler_MessageCtx_Array
@@ -269,17 +373,20 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfigurati
 
 static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
 {
+    /* TODO: have a local variable to store pubSchedulerCtx.messages.array */
     if (pubSchedulerCtx.messages.array != NULL)
     {
         /* Destroy message */
         for (uint32_t i = 0; i < pubSchedulerCtx.messages.current; i++)
         {
+            /* TODO: have a local variable to store array[i] */
             printf("# Info: Network message #%u. destroyed \n", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(pubSchedulerCtx.messages.array[i].message);
             pubSchedulerCtx.messages.array[i].message = NULL;
             SOPC_PubSub_Security_Clear(pubSchedulerCtx.messages.array[i].security);
             SOPC_Free(pubSchedulerCtx.messages.array[i].security);
             pubSchedulerCtx.messages.array[i].security = NULL;
+            SOPC_RealTime_Delete(&pubSchedulerCtx.messages.array[i].next_timeout);
         }
 
         /* Destroy messages array */
@@ -301,8 +408,9 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     context->transport = ctx;
     context->group = group;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
+    context->next_timeout = SOPC_RealTime_Create(NULL);
 
-    if (NULL == context->message)
+    if (NULL == context->message || NULL == context->next_timeout)
     {
         return false;
     }
@@ -719,6 +827,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         }
     }
 
+    /* TODO: Is necessary? */
     if (SOPC_STATUS_OK == resultSOPC)
     {
         // Creation of RT Publisher
@@ -776,7 +885,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                 SOPC_PubScheduler_MessageCtx* msgctx = SOPC_PubScheduler_MessageCtx_Get_Last();
 
                 // Add a message to rt publisher initializer
-                /* TODO: log */
                 log_info("# Message context with publishing interval = %" PRIu64 "\n", publishingInterval);
 
                 //resultSOPC = SOPC_RT_Publisher_Initializer_AddMessage(
@@ -790,6 +898,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                 //    SOPC_RT_PUBLISHER_MSG_PUB_STATUS_ENABLED, // Publication started
                 //    &msgctx->rt_publisher_msg_id);            // Message identifier used to update data
 
+                /* Compute next timeout */
+                SOPC_RealTime_AddDuration(msgctx->next_timeout, publishingInterval);
             }
             if (SOPC_STATUS_OK != resultSOPC)
             {
