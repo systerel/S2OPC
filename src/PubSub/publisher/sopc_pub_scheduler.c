@@ -263,8 +263,10 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 static struct
 {
     /* Managing start / stop phase */
+    /* TODO: use an enum, command, sub state, pub state */
     int32_t isStarted;
     int32_t processingStartStop;
+    int32_t quit;
 
     /* Input parameters */
     SOPC_PubSubConfiguration* config;
@@ -287,15 +289,13 @@ static struct
 
     // Thread variable monitoring
 
-    Thread handleThreadVarMonitoring;
-    bool bQuitVarMonitoring;
+    //Thread handleThreadVarMonitoring;
+    //bool bQuitVarMonitoring;
 
     // Thread which call beat heart function of RT Publisher
 
-    SOPC_RT_Publisher* pRTPublisher; // RT Publisher
-
-    Thread handleThreadHeartBeat; // Handle thread simulates IRQ. This thread call HeartBeat publisher function.
-    bool bQuitBeatHeart;          // Quit control of thread which simulates IRQ
+    //SOPC_RT_Publisher* pRTPublisher; // RT Publisher
+    Thread thPublisher;
 
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
@@ -306,19 +306,14 @@ static struct
                      .messages.length = 0,
                      .messages.current = 0,
                      .messages.array = NULL,
-                     .sequenceNumber = 1,
-                     .pRTPublisher = NULL,
-                     .bQuitBeatHeart = true,
-                     .handleThreadHeartBeat = (Thread) NULL,
-                     .bQuitVarMonitoring = true,
-                     .handleThreadVarMonitoring = (Thread) NULL};
+                     .sequenceNumber = 1};
 
 // This callback of thread var monitoring is porting from code of old event_timer callback
 static void* SOPC_RT_Publisher_VarMonitoringCallback(void* arg);
 
-// This callback increment call RT publisher beat heart with a monotonic counter post incremented
-// then sleep during SOPC_TIMER_RESOLUTION_MS ms.
-static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg);
+/* This callback implements the main loop of the publisher which fetches data to publish, encode them and send them.
+ * It computes when it should wake up and sleeps until then (if not past) */
+static void* thread_start_publish(void* arg);
 
 // Elapsed callback, called when timer reach its configured period
 static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message instance identifier
@@ -327,44 +322,30 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
                                                  uint32_t size);     // Data size in bytes
 
 // Clear pub scheduler context
-// 1) Stop beat heart thread
-// 2) Stop variable monitoring thread
-// 3) Clear (De initialize) RT Publisher
-// 4) Destroy RT Publisher
+// 1) Join thread
 // 5) Destory all message context
 static void SOPC_PubScheduler_Context_Clear(void)
 {
-    /* Stop beat heart and variable monitoring threads */
-    printf("# Info: Stop beat heart thread\n");
+    SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, 1);
+    SOPC_Thread_Join(pubSchedulerCtx.thPublisher);
 
-    bool newQuitBeatHeart = true;
+    //printf("# Info: Stop var monitoring thread\n");
 
-    __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitBeatHeart, __ATOMIC_SEQ_CST);
+    //bool newVarMonitoringStatus = true;
+    //__atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
 
-    if (pubSchedulerCtx.handleThreadHeartBeat != (Thread) NULL)
-    {
-        SOPC_Thread_Join(pubSchedulerCtx.handleThreadHeartBeat);
-        pubSchedulerCtx.handleThreadHeartBeat = (Thread) NULL;
-    }
-
-    printf("# Info: Stop var monitoring thread\n");
-
-    bool newVarMonitoringStatus = true;
-    __atomic_store(&pubSchedulerCtx.bQuitVarMonitoring, &newVarMonitoringStatus, __ATOMIC_SEQ_CST);
-
-    if (pubSchedulerCtx.handleThreadVarMonitoring != (Thread) NULL)
-    {
-        SOPC_Thread_Join(pubSchedulerCtx.handleThreadVarMonitoring);
-        pubSchedulerCtx.handleThreadVarMonitoring = (Thread) NULL;
-    }
+    //if (pubSchedulerCtx.handleThreadVarMonitoring != (Thread) NULL)
+    //{
+    //    SOPC_Thread_Join(pubSchedulerCtx.handleThreadVarMonitoring);
+    //    pubSchedulerCtx.handleThreadVarMonitoring = (Thread) NULL;
+    //}
 
     /* Clear RT publisher */
-    printf("# Info: Deinit and destroy rt publisher\n");
-    SOPC_ReturnStatus result = SOPC_RT_Publisher_DeInitialize(pubSchedulerCtx.pRTPublisher);
+    //printf("# Info: Deinit and destroy rt publisher\n");
+    //SOPC_ReturnStatus result = SOPC_RT_Publisher_DeInitialize(pubSchedulerCtx.pRTPublisher);
 
     /* Destroy RT Publisher.*/
-
-    SOPC_RT_Publisher_Destroy(&pubSchedulerCtx.pRTPublisher);
+    //SOPC_RT_Publisher_Destroy(&pubSchedulerCtx.pRTPublisher);
 
     /* Destroy messages and messages array */
     SOPC_PubScheduler_MessageCtx_Array_Clear();
@@ -545,42 +526,48 @@ static void SOPC_RT_Publisher_SendPubMsgCallback(uint32_t msgId,     // Message 
     return;
 }
 
-// This callback increment call RT publisher beat heart with a monotonic counter post incremented
-// then sleep during SOPC_TIMER_RESOLUTION_MS ms.
-static void* SOPC_RT_Publisher_ThreadHeartBeatCallback(void* arg)
+static void* thread_start_publish(void* arg)
 {
-    uintptr_t resMilliSecs = (uintptr_t) arg;
+    (void) arg;
 
-    uint32_t heartBeat = 0;
-    SOPC_ReturnStatus resultUpdateThread = SOPC_STATUS_OK;
-    SOPC_TimeReference currentRef = SOPC_TimeReference_GetCurrent();
-    SOPC_TimeReference targetRef = SOPC_TimeReference_AddMilliseconds(currentRef, resMilliSecs);
+    log_info("# Time-sensitive publisher thread started\n");
 
-    printf("# RT Publisher tick thread: Beat heart thread launched\n");
-
-    bool readQuitHeartBeat = false;
-    __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
-    while (!readQuitHeartBeat)
-    {
-        currentRef = SOPC_TimeReference_GetCurrent();
-        while (targetRef <= currentRef)
-        {
-            // Call heart beat function 1 time per resolution time elapsed since last evaluation
-            heartBeat++;
-            resultUpdateThread = SOPC_RT_Publisher_HeartBeat(pubSchedulerCtx.pRTPublisher, heartBeat);
-            // next target is previous target + resolution time (it might already be elapsed)
-            targetRef = SOPC_TimeReference_AddMilliseconds(targetRef, resMilliSecs);
-        }
-        if (resultUpdateThread != SOPC_STATUS_OK)
-        {
-            printf("# RT Publisher tick thread: SOPC_RT_Publisher_BeatHeart error = %d\n", (int) resultUpdateThread);
-        }
-
-        SOPC_Sleep((unsigned int) resMilliSecs);
-        __atomic_load(&pubSchedulerCtx.bQuitBeatHeart, &readQuitHeartBeat, __ATOMIC_SEQ_CST);
+    { /* TODO: remove me/refactor me */
+        int policy = -1;
+        pthread_t tid = pthread_self();
+        struct sched_param sp;
+        assert(pthread_getschedparam(tid, &policy, &sp) == 0);
+        display_sched_attr(policy, &sp);
     }
 
-    printf("# RT Publisher tick thread: Quit Heart beat thread\n");
+    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+    assert(NULL != now);
+    bool ok = true;
+
+    while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
+    {
+        /* Wake-up: find which message(s) needs to be sent */
+        ok = SOPC_RealTime_GetTime(&now);
+        assert(ok && "Failed GetTime");
+
+        /* If a message needs to be sent, send it */
+        SOPC_PubScheduler_MessageCtx *message = MessageCtxArray_FindMostExpired();
+        if (SOPC_RealTime_IsExpired(message->next_timeout, now))
+        {
+            /* TODO: send */
+            /* Re-schedule this message */
+            SOPC_RealTime_Add(message->next_timeout, message->publishingInterval);
+        }
+
+        /* Otherwise sleep until there is a message to send */
+        else
+        {
+            ok = SOPC_RealTime_SleepUntil(message->next_timeout);
+            assert(ok || "Failed NanoSleep");
+        }
+    }
+
+    log_info("# Time-sensitive publisher thread stopped\n");
     return NULL;
 }
 
@@ -857,21 +844,20 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         }
     }
 
-    /* TODO: Is necessary? */
-    if (SOPC_STATUS_OK == resultSOPC)
-    {
-        // Creation of RT Publisher
-        pubSchedulerCtx.pRTPublisher = SOPC_RT_Publisher_Create();
-        if (NULL == pubSchedulerCtx.pRTPublisher)
-        {
-            printf("# Error, can't create rt publisher\n");
-            resultSOPC = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            printf("# RT publisher created\n");
-        }
-    }
+    //if (SOPC_STATUS_OK == resultSOPC)
+    //{
+    //    // Creation of RT Publisher
+    //    pubSchedulerCtx.pRTPublisher = SOPC_RT_Publisher_Create();
+    //    if (NULL == pubSchedulerCtx.pRTPublisher)
+    //    {
+    //        printf("# Error, can't create rt publisher\n");
+    //        resultSOPC = SOPC_STATUS_NOK;
+    //    }
+    //    else
+    //    {
+    //        printf("# RT publisher created\n");
+    //    }
+    //}
 
     //SOPC_RT_Publisher_Initializer* pRTInitializer = NULL;
     //// Creation of RT_Pubslisher Initializer. This will be destroyed after initialization.
@@ -949,11 +935,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     /* Creation of the time-sensitive thread */
     if (SOPC_STATUS_OK == resultSOPC)
     {
-        bool newQuitHeartBeat = false;
-        __atomic_store(&pubSchedulerCtx.bQuitBeatHeart, &newQuitHeartBeat, __ATOMIC_SEQ_CST);
-        resultSOPC =
-            SOPC_Thread_Create(&pubSchedulerCtx.handleThreadHeartBeat, SOPC_RT_Publisher_ThreadHeartBeatCallback,
-                               NULL, "PubHeart");
+        SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
+        resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, thread_start_publish, NULL, "Publisher");
 
         if (SOPC_STATUS_OK != resultSOPC)
         {
@@ -994,19 +977,20 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
 
 void SOPC_PubScheduler_Stop(void)
 {
-    printf("# Try to enter scheduler stop ...\n");
     if (false == SOPC_Atomic_Int_Get(&pubSchedulerCtx.isStarted) ||
         true == SOPC_Atomic_Int_Get(&pubSchedulerCtx.processingStartStop))
     {
-        printf("# Scheduler already stopping or stopped\n");
+        log_info("# Scheduler already stopping or stopped\n");
         return;
     }
-    SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true);
+
+    log_info("# Stop Scheduler...\n");
+    SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true); /* TODO: ? -> remove when using an enum */
     SOPC_PubScheduler_Context_Clear();
 
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, false);
-    printf("# Scheduler stopped\n");
+    log_info("# Scheduler stopped\n");
 }
 
 static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group)
@@ -1018,6 +1002,7 @@ static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const
 }
 
 // Get Socket and Multicast Address then save it in context
+/* TODO: rename, it does more than a Get */
 static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
                                                        SOPC_PubSubConnection* connection,
                                                        SOPC_PubScheduler_TransportCtx** ctx)
