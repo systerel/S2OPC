@@ -248,6 +248,9 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
 // Traverse allocated message array to initialize transport context associated to message. Increment "current" field.
 static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
 
+/* Finds the message with the smallest next_timeout */
+static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void);
+
 // Get last well initialized message context.
 //static SOPC_PubScheduler_MessageCtx* SOPC_PubScheduler_MessageCtx_Get_Last(void);
 
@@ -481,6 +484,24 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
 //    assert(0 < pubSchedulerCtx.messages.current && pubSchedulerCtx.messages.current <= pubSchedulerCtx.messages.length);
 //    return &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current - 1]);
 //}
+
+static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void)
+{
+    SOPC_PubScheduler_MessageCtx_Array *messages = &pubSchedulerCtx.messages;
+    SOPC_PubScheduler_MessageCtx *worse = NULL;
+
+    assert(messages->length > 0 && messages->current == messages->length-1);
+    for (size_t i=0; i<messages->length; ++i)
+    {
+        SOPC_PubScheduler_MessageCtx *cursor = &messages->array[i];
+        if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
+        {
+            worse = cursor;
+        }
+    }
+
+    return worse;
+}
 
 static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 {
