@@ -17,9 +17,6 @@
  * under the License.
  */
 
-/* TODO: move to interop' module */
-#define _POSIX_C_SOURCE 199309L
-
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -800,14 +797,51 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     //SOPC_RT_Publisher_Initializer_Destroy(&pRTInitializer);
 
     /* Creation of the time-sensitive thread */
+    /* TODO: have a ThreadSensitive_Create, simplify Tread_Create */
     if (SOPC_STATUS_OK == resultSOPC)
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
-        resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, thread_start_publish, NULL, "Publisher");
+
+        Thread *thread = &pubSchedulerCtx.thPublisher;
+        pthread_attr_t attr;
+
+        /* Initialize scheduling policy and priority */
+        int ret = pthread_attr_init(&attr);
+        assert(0 == ret && "Could not initialize pthread attributes");
+        ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+        assert(0 == ret && "Could not set thread scheduling policy");
+        struct sched_param scp;
+        scp.sched_priority = 99;
+        ret = pthread_attr_setschedparam(&attr, &scp);
+        assert(0 == ret && "Could not set thread priority");
+
+        ret = pthread_create(thread, &attr, thread_start_publish, NULL);
+        if (0 != ret)
+        {
+            resultSOPC = SOPC_STATUS_NOK;
+        }
+
+        char *taskNameParam = "Publisher";
+        char tmpTaskName[16];
+        char *taskName = taskNameParam;
+        if (strlen(taskName) >= 16)
+        {
+            strncpy(tmpTaskName, taskName, 15);
+            tmpTaskName[15] = '\0';
+            taskName = tmpTaskName;
+        }
+        ret = pthread_setname_np(*thread, taskName);
+
+        /* pthread_setname_np calls can fail. It is not a sufficient reason to stop processing. */
+        if (0 != ret)
+        {
+            /* TODO: thread-safety of errno and strerror */
+            log_warning("Warning, thread name set failed \"%s\" with error %s\n", taskNameParam, strerror(errno));
+        }
 
         if (SOPC_STATUS_OK != resultSOPC)
         {
-            printf("# Error creation of rt publisher heart beat thread\n");
+            log_error("# Error: could not create the publisher thread\n");
         }
     }
 
