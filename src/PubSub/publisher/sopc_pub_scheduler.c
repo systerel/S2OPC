@@ -228,6 +228,7 @@ typedef struct SOPC_PubScheduler_MessageCtx
     //uint32_t rt_publisher_msg_id;
     SOPC_RealTime *next_timeout; /**< Next expiration absolute date */
     double publishingInterval;
+    bool warned; /**< Have we warned about expired messages yet? */
 } SOPC_PubScheduler_MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
@@ -425,6 +426,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     context->group = group;
     context->publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
+    context->warned = false;
 
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
     context->next_timeout = SOPC_RealTime_Create(NULL);
@@ -635,6 +637,13 @@ static void* thread_start_publish(void* arg)
 
             /* Re-schedule this message */
             SOPC_RealTime_AddDuration(context->next_timeout, context->publishingInterval);
+            if (SOPC_RealTime_IsExpired(context->next_timeout, now) && !context->warned)
+            {
+                /* This message next publish cycle was already expired before we encoded the previous one */
+                /* TODO: find other message ID, such as the PublisherId */
+                log_warning("# Warning: message with writerGroupId %" PRIu16 " could not be sent in time\n", SOPC_WriterGroup_Get_Id(context->group));
+                context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
+            }
         }
 
         /* Otherwise sleep until there is a message to send */
