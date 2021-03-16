@@ -216,8 +216,6 @@ build-rpi:
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:dd90af3131fec7e2dc298bcbe34a912b6bba38b435ae3e92f811e0602e6693fa # digest of rpi-build:1.3
   script:
-    # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
-    - 'export WITH_PYS2OPC=OFF'
     - *build_command_line
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
