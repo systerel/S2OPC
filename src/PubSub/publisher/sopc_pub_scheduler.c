@@ -482,7 +482,7 @@ static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void)
     SOPC_PubScheduler_MessageCtx_Array *messages = &pubSchedulerCtx.messages;
     SOPC_PubScheduler_MessageCtx *worse = NULL;
 
-    assert(messages->length > 0 && messages->current == messages->length-1);
+    assert(messages->length > 0 && messages->current == messages->length);
     for (size_t i=0; i<messages->length; ++i)
     {
         SOPC_PubScheduler_MessageCtx *cursor = &messages->array[i];
@@ -631,10 +631,15 @@ static void* thread_start_publish(void* arg)
                     pubSchedulerCtx.sequenceNumber++;
                 }
                 SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
-                SOPC_Free(security->msgNonceRandom);
-                security->msgNonceRandom = NULL;
+                if (NULL != security)
+                {
+                    SOPC_Free(security->msgNonceRandom);
+                    security->msgNonceRandom = NULL;
+                }
 
                 context->transport->fctSend(context->transport, buffer);
+                SOPC_Buffer_Delete(buffer);
+                buffer = NULL;
             }
 
             /* Re-schedule this message */
@@ -652,12 +657,13 @@ static void* thread_start_publish(void* arg)
         /* Otherwise sleep until there is a message to send */
         else
         {
-            ok = SOPC_RealTime_SleepUntil(context->next_timeout);
+            ok = SOPC_RealTime_SleepUntil(context->next_timeout) == 0;
             assert(ok && "Failed NanoSleep");
         }
     }
 
     log_info("# Time-sensitive publisher thread stopped\n");
+    SOPC_RealTime_Delete(&now);
     return NULL;
 }
 
