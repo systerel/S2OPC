@@ -413,11 +413,8 @@ pages:
 check_doc:
   <<: *build_linux
   stage: doc
-  dependencies: []
   script:
-    - mkdir $BUILD_DIR
     - cd $BUILD_DIR
-    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
     - cmake --build . --target doc &> doc.log
     - test $(grep -c warning doc.log) -eq 0
   variables:
