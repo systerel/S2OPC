@@ -19,11 +19,11 @@
 
 #include "network_init.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <kernel.h>
 #include <limits.h>
-#include <assert.h>
 
 #include <stdbool.h>
 #include <stdint.h>

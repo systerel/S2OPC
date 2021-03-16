@@ -22,17 +22,15 @@
 #include <kernel.h>
 #include <limits.h>
 
-
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <signal.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef __INT32_MAX__
 #include <toolchain/xcc_missing_defs.h>
@@ -49,30 +47,28 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
+#include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pki_stack.h"
-#include "sopc_time.h"
-#include "sopc_toolkit_async_api.h"
-#include "sopc_toolkit_config.h"
-#include "sopc_user_app_itf.h"
-#include "sopc_user_manager.h"
-#include "sopc_common.h"
 #include "sopc_mutexes.h"
+#include "sopc_pki_stack.h"
+#include "sopc_pub_scheduler.h"
+#include "sopc_pubsub_helpers.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_async_api.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_udp_sockets.h"
-#include "sopc_helper_uri.h"
-#include "sopc_pub_scheduler.h"
-#include "sopc_pubsub_helpers.h"
-#include "sopc_time.h"
+#include "sopc_user_app_itf.h"
+#include "sopc_user_manager.h"
 
 #include "embedded/sopc_addspace_loader.h"
-#include "runtime_variables.h"
 #include "network_init.h"
+#include "runtime_variables.h"
 #include "threading_alt.h"
 
 #include "static_security_data.h"
@@ -96,13 +92,13 @@ char gBuffer[256];
 
 static void _zephyr_callback_log_buffer_hook(const char* buffer, int size)
 {
-    //SOPC_LogServer_Print(0, buffer, size, false);
-    k_mutex_lock(&my_mutex,K_FOREVER);
+    // SOPC_LogServer_Print(0, buffer, size, false);
+    k_mutex_lock(&my_mutex, K_FOREVER);
     size = size > 256 ? 256 : size;
-    memset(gBuffer,0,256);
-    memcpy(gBuffer,buffer,size);
-    gBuffer[size-1]=0;
-    (void)printk("%s\r\n",(char*)gBuffer);
+    memset(gBuffer, 0, 256);
+    memcpy(gBuffer, buffer, size);
+    gBuffer[size - 1] = 0;
+    (void) printk("%s\r\n", (char*) gBuffer);
     k_mutex_unlock(&my_mutex);
     return;
 }
@@ -125,8 +121,6 @@ static int _zephyr_add_log_hook(struct device* d)
 }
 
 #endif
-
-
 
 #ifndef SOPC_PUBSCHEDULER_BEATHEART_FROM_IRQ
 void Pub_BeatHeart(void)

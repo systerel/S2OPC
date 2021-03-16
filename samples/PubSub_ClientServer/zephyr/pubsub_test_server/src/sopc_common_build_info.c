@@ -20,12 +20,10 @@
 #include "sopc_common_build_info.h"
 #include "sopc_version.h"
 
-const SOPC_Build_Info sopc_common_build_info = {
-    .buildVersion = SOPC_TOOLKIT_VERSION,
-    .buildSrcCommit = "Unknown_Revision",
-    .buildDockerId = "",
-    .buildBuildDate = ""
-};
+const SOPC_Build_Info sopc_common_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
+                                                .buildSrcCommit = "Unknown_Revision",
+                                                .buildDockerId = "",
+                                                .buildBuildDate = ""};
 
 SOPC_Build_Info SOPC_Common_GetBuildInfo()
 {

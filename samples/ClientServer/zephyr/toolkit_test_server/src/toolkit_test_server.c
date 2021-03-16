@@ -70,13 +70,13 @@ char gBuffer[256];
 
 static void _zephyr_callback_log_buffer_hook(const char* buffer, int size)
 {
-    //SOPC_LogServer_Print(0, buffer, size, false);
-    k_mutex_lock(&my_mutex,K_FOREVER);
+    // SOPC_LogServer_Print(0, buffer, size, false);
+    k_mutex_lock(&my_mutex, K_FOREVER);
     size = size > 256 ? 256 : size;
-    memset(gBuffer,0,256);
-    memcpy(gBuffer,buffer,size);
-    gBuffer[size-1]=0;
-    (void)printk("%s\r\n",(char*)gBuffer);
+    memset(gBuffer, 0, 256);
+    memcpy(gBuffer, buffer, size);
+    gBuffer[size - 1] = 0;
+    (void) printk("%s\r\n", (char*) gBuffer);
     k_mutex_unlock(&my_mutex);
     return;
 }
@@ -102,7 +102,6 @@ static int _zephyr_add_log_hook(struct device* d)
 
 /****************************************/
 
-
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
@@ -118,8 +117,8 @@ static int _zephyr_add_log_hook(struct device* d)
 #include "sopc_user_manager.h"
 
 #include "embedded/sopc_addspace_loader.h"
-#include "runtime_variables.h"
 #include "network_init.h"
+#include "runtime_variables.h"
 #include "threading_alt.h"
 
 #include "static_security_data.h"
@@ -911,7 +910,7 @@ static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
     SOPC_SocketSet_Add(sockR, &wrset);
     SOPC_SocketSet_Add(sockR, &exset);
 
-//    bool bDropMemberShip = true;
+    //    bool bDropMemberShip = true;
     uint32_t cpt = 0;
 
     while (cpt < 60)
@@ -951,21 +950,21 @@ static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
             }
 
             cpt++;
-//            if ((cpt % 10) == 0)
-//            {
-//                if (bDropMemberShip)
-//                {
-//                    printk("\r\nThread 1 Drop MCAST !!!\r\n");
-//                    assert(SOPC_UDP_Socket_DropMembership(sockR, adresseM, NULL) == SOPC_STATUS_OK);
-//                }
-//                else
-//                {
-//                    printk("\r\nThread 1 Join MCAST !!!\r\n");
-//                    assert(SOPC_UDP_Socket_AddMembership(sockR, adresseM, NULL) == SOPC_STATUS_OK);
-//                }
-//
-//                bDropMemberShip = !bDropMemberShip;
-//            }
+            //            if ((cpt % 10) == 0)
+            //            {
+            //                if (bDropMemberShip)
+            //                {
+            //                    printk("\r\nThread 1 Drop MCAST !!!\r\n");
+            //                    assert(SOPC_UDP_Socket_DropMembership(sockR, adresseM, NULL) == SOPC_STATUS_OK);
+            //                }
+            //                else
+            //                {
+            //                    printk("\r\nThread 1 Join MCAST !!!\r\n");
+            //                    assert(SOPC_UDP_Socket_AddMembership(sockR, adresseM, NULL) == SOPC_STATUS_OK);
+            //                }
+            //
+            //                bDropMemberShip = !bDropMemberShip;
+            //            }
         }
     }
 
@@ -980,13 +979,10 @@ static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
 
 void TEST_S2OPC_UDP_SOCKET_API_LB(void)
 {
-
-
     SOPC_ReturnStatus result;
 
     bool netInit = Network_Initialize();
     assert(netInit == true);
-
 
     Thread sopcThreadHandle1 = NULL;
 
@@ -1005,19 +1001,17 @@ void TEST_S2OPC_UDP_SOCKET_API_LB(void)
     return;
 }
 
-
-
 void main(void)
 {
 #if LIBC_STDOUT_BUFFER_HOOK == 1
     _zephyr_add_log_hook(NULL);
 #endif
 
-    //Decommenter pour tester les socket udp mutlicast
-    //TEST_S2OPC_UDP_SOCKET_API_LB();
+    // Decommenter pour tester les socket udp mutlicast
+    // TEST_S2OPC_UDP_SOCKET_API_LB();
 
     Launch_Server();
-    while(true)
+    while (true)
     {
         printf("\r\nThread quit, error and go to idle...\r\n");
         SOPC_Sleep(1000);

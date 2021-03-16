@@ -17,10 +17,10 @@
  * under the License.
  */
 
+#include <random/rand32.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <random/rand32.h>
 
 #include <inttypes.h>
 
@@ -75,21 +75,23 @@ int32_t mbedtls_hardware_poll(void* data, uint8_t* output, int32_t len, int32_t*
 #endif
     if (err != 0)
     {
-
 #if P_ENTROPY_DEBUG == 1
         printk("\r\nFailed to obtain entropy, err %d, software mode engaged !!!\r\n", err);
 #endif
         uint32_t lenIter = 0;
         uint32_t blocksize = 4;
         uint32_t random_num = 0;
-        while (lenIter < len) {
+        while (lenIter < len)
+        {
             random_num = k_cycle_get_32();
-            if ((len-lenIter) < sizeof(random_num)) {
+            if ((len - lenIter) < sizeof(random_num))
+            {
                 blocksize = lenIter;
-                (void)memcpy(&(output[lenIter]),
-                        &random_num, len-lenIter);
-            } else {
-                *((uint32_t *)&output[lenIter]) = random_num;
+                (void) memcpy(&(output[lenIter]), &random_num, len - lenIter);
+            }
+            else
+            {
+                *((uint32_t*) &output[lenIter]) = random_num;
             }
             lenIter += blocksize;
         }
