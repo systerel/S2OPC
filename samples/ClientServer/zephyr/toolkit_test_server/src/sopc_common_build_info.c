@@ -22,12 +22,12 @@
 
 const SOPC_Build_Info sopc_common_build_info = {
     .buildVersion = SOPC_TOOLKIT_VERSION,
-    .buildSrcCommit = "Unknown_Revision",
-    .buildDockerId = "",
-    .buildBuildDate = ""
+    .buildSrcCommit = "f417af8e40c2c7c82102fe92a26cb88df9afc131",
+    .buildDockerId = "sha256:a2ff15f9670d471d04872ea86f8d01502f7741c24669b024a9e16f92966a8c18",
+    .buildBuildDate = "2021-03-01",
 };
 
-SOPC_Build_Info SOPC_Common_GetBuildInfo()
+SOPC_Build_Info SOPC_Common_GetBuildInfo(void)
 {
     return sopc_common_build_info;
 }

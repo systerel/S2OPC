@@ -352,8 +352,8 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
         pEpConfig->secuConfigurations[0].securityModes =
             SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         pEpConfig->secuConfigurations[0].nbOfUserTokenPolicies = 2;
-        pEpConfig->secuConfigurations[0].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[0].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+        pEpConfig->secuConfigurations[0].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
+        pEpConfig->secuConfigurations[0].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
 
         /*
          * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
@@ -366,8 +366,8 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
             pEpConfig->secuConfigurations[1].securityModes =
                 SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
             pEpConfig->secuConfigurations[1].nbOfUserTokenPolicies = 2;
-            pEpConfig->secuConfigurations[1].userTokenPolicies[0] = c_userTokenPolicy_Anonymous;
-            pEpConfig->secuConfigurations[1].userTokenPolicies[1] = c_userTokenPolicy_UserName_NoneSecurityPolicy;
+            pEpConfig->secuConfigurations[1].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
+            pEpConfig->secuConfigurations[1].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
         }
     }
 
@@ -391,9 +391,9 @@ static bool Server_LoadDefaultConfiguration(SOPC_S2OPC_Config* output_s2opcConfi
             2; /* Necessary for tests only: it shall be 0 when
                   security is None to avoid any possible session without security */
         pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[0] =
-            c_userTokenPolicy_Anonymous; /* Necessary for tests only */
+            SOPC_UserTokenPolicy_Anonymous; /* Necessary for tests only */
         pEpConfig->secuConfigurations[NoneSecuConfigIdx].userTokenPolicies[1] =
-            c_userTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
+            SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy; /* Necessary for UACTT tests only */
     }
 
     if (secuActive)

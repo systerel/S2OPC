@@ -85,17 +85,17 @@ RuntimeVariables build_runtime_variables(SOPC_Toolkit_Build_Info build_info,
                                     &server_config->serverDescription.ApplicationName.defaultText);
     assert(SOPC_STATUS_OK == status);
 
-    int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.toolkitBuildInfo.buildVersion);
+    int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildVersion);
     assert(0 == cmp_res);
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion,
-                                           (char*) build_info.toolkitBuildInfo.buildVersion);
+                                           (char*) build_info.commonBuildInfo.buildVersion);
     assert(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber,
-                                           (char*) build_info.toolkitBuildInfo.buildSrcCommit);
+                                           (char*) build_info.commonBuildInfo.buildSrcCommit);
     assert(SOPC_STATUS_OK == status);
 
-    time_t buildDateAsTimet = parse_build_date(build_info.toolkitBuildInfo.buildBuildDate);
+    time_t buildDateAsTimet = parse_build_date(build_info.commonBuildInfo.buildBuildDate);
     SOPC_DateTime buildDate;
     status = SOPC_Time_FromTimeT(buildDateAsTimet, &buildDate);
     assert(SOPC_STATUS_OK == status);
