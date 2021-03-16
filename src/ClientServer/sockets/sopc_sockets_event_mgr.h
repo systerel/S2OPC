@@ -22,7 +22,6 @@
 
 #include <stdint.h>
 
-#include "sopc_event_handler.h"
 #include "sopc_sockets_api.h"
 #include "sopc_sockets_internal_ctx.h"
 
