@@ -821,8 +821,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
     {
         Socket out_sock;
         SOPC_Socket_AddressInfo* out_multicastAddr;
-        bool allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(address,
-                                                                               &out_multicastAddr);
+        bool allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(address, &out_multicastAddr);
         if (!allocSuccess)
         {
             return false;
@@ -854,12 +853,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             }
         }
         MqttManagerHandle* handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
-        pubSchedulerCtx.transport[index].mqttHandle =
-            SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(handleMqttManager,
-                                                &address[strlen(MQTT_PREFIX)],
-                                                MQTT_LIB_TOPIC_NAME,
-                                                on_mqtt_message_received,
-                                                NULL);
+        pubSchedulerCtx.transport[index].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
+            handleMqttManager, &address[strlen(MQTT_PREFIX)], MQTT_LIB_TOPIC_NAME, on_mqtt_message_received, NULL);
 
         if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
         {
