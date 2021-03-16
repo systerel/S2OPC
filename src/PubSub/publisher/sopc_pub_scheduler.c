@@ -513,11 +513,35 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
+
+static void display_sched_attr(int policy, struct sched_param *param);
+static void display_sched_attr(int policy, struct sched_param *param)
+{
+   printf("# Thread current sched policy=%s with priority=%d\n",
+           (policy == SCHED_FIFO)  ? "SCHED_FIFO" :
+           (policy == SCHED_RR)    ? "SCHED_RR" :
+           (policy == SCHED_OTHER) ? "SCHED_OTHER" :
+           "???",
+           param->sched_priority);
+}
+
 static void* thread_start_publish(void* arg)
 {
     (void) arg;
 
     log_info("# Time-sensitive publisher thread started\n");
+
+    { /* TODO: remove me/refactor me */
+        int policy = -1;
+        pthread_t tid = pthread_self();
+        struct sched_param sp;
+        assert(pthread_getschedparam(tid, &policy, &sp) == 0);
+        display_sched_attr(policy, &sp);
+        //sp.sched_priority = 99;
+        //assert(pthread_setschedparam(tid, SCHED_FIFO, &sp) == 0);  /* SCHED_RR should also work */
+        //assert(pthread_getschedparam(tid, &policy, &sp) == 0);
+        //display_sched_attr(policy, &sp);
+    }
 
     SOPC_RealTime *now = SOPC_RealTime_Create(NULL);
     assert(NULL != now);
@@ -661,6 +685,7 @@ static void* thread_start_publish(void* arg)
 
     log_info("# Time-sensitive publisher thread stopped\n");
     SOPC_RealTime_Delete(&now);
+
     return NULL;
 }
 
@@ -904,6 +929,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         /* Initialize scheduling policy and priority */
         int ret = pthread_attr_init(&attr);
         assert(0 == ret && "Could not initialize pthread attributes");
+        ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+        assert(0 == ret && "Could not unset scheduler inheritance in thread creation attributes");
         ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
         assert(0 == ret && "Could not set thread scheduling policy");
         struct sched_param scp;
