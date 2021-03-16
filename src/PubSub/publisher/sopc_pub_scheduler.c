@@ -479,13 +479,13 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
 
 static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void)
 {
-    SOPC_PubScheduler_MessageCtx_Array *messages = &pubSchedulerCtx.messages;
-    SOPC_PubScheduler_MessageCtx *worse = NULL;
+    SOPC_PubScheduler_MessageCtx_Array* messages = &pubSchedulerCtx.messages;
+    SOPC_PubScheduler_MessageCtx* worse = NULL;
 
     assert(messages->length > 0 && messages->current == messages->length);
-    for (size_t i=0; i<messages->length; ++i)
+    for (size_t i = 0; i < messages->length; ++i)
     {
-        SOPC_PubScheduler_MessageCtx *cursor = &messages->array[i];
+        SOPC_PubScheduler_MessageCtx* cursor = &messages->array[i];
         if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
         {
             worse = cursor;
@@ -505,6 +505,15 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
         result = result + SOPC_PubSubConnection_Nb_WriterGroup(connection);
     }
     return result;
+}
+
+static void display_sched_attr(int policy, struct sched_param* param);
+static void display_sched_attr(int policy, struct sched_param* param)
+{
+    printf("# Thread current sched policy=%s with priority=%d\n",
+           (policy == SCHED_FIFO) ? "SCHED_FIFO"
+                                  : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
+           param->sched_priority);
 }
 
 static void* thread_start_publish(void* arg)
@@ -664,6 +673,7 @@ static void* thread_start_publish(void* arg)
 
     log_info("# Time-sensitive publisher thread stopped\n");
     SOPC_RealTime_Delete(&now);
+
     return NULL;
 }
 
@@ -824,6 +834,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         /* Initialize scheduling policy and priority */
         int ret = pthread_attr_init(&attr);
         assert(0 == ret && "Could not initialize pthread attributes");
+        ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+        assert(0 == ret && "Could not unset scheduler inheritance in thread creation attributes");
         ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
         assert(0 == ret && "Could not set thread scheduling policy");
         struct sched_param scp;
