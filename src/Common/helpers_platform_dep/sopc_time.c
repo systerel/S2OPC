@@ -233,7 +233,7 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
     uint8_t hour = 0;
     uint8_t minute = 0;
     uint8_t second = 0;
-    float secondAndFraction = 0.0;
+    double secondAndFraction = 0.0;
     bool utc = true;
     bool utc_neg_off = false;
     uint8_t utc_hour_off = 0;
@@ -246,13 +246,23 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (year < 1601)
+    if (year < 1601 ||
+        (1601 == year && 1 == month && 1 == day &&
+         // when year is 1601, check if equal to minimum time in UTC case or equal/earlier in UTC+<HH:MM> offset case
+         ((utc && 00 == hour && 00 == minute && 00 == second && secondAndFraction < sec_fraction_100ns) ||
+          (!utc && !utc_neg_off && (utc_hour_off > hour || (utc_hour_off == hour && utc_min_off >= minute))))))
     {
         // A date/time value is encoded as 0 if is equal to or earlier than 1601-01-01 12:00AM UTC
         *res = 0;
         return SOPC_STATUS_OK;
     }
-    else if (year > 9999)
+    else if (year > 9999 ||
+             (9999 == year && 12 == month && 31 == day &&
+              // when year is 9999, check if equal to maximum time in UTC case or equal/greater in
+              // UTC-<HH:MM> offset case
+              ((utc && (24 == hour || (23 == hour && 59 == minute && 59 == second))) ||
+               (!utc && utc_neg_off &&
+                (utc_hour_off + hour > 23 || (utc_hour_off + hour == 23 && utc_min_off + minute >= 59))))))
     {
         // A date/time is encoded as the maximum value for an Int64 if
         // the value is equal to or greater than 9999-12-31 11:59:59PM UTC
@@ -279,7 +289,7 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
     }
 
     // Compute seconds fraction if significant
-    float sec_fraction = secondAndFraction - (float) second;
+    double sec_fraction = secondAndFraction - (double) second;
     int64_t hundredOfNanoseconds = (int64_t)(sec_fraction / sec_fraction_100ns);
 
     // Note: no overflow possible for 1601 <= year <= 9999
