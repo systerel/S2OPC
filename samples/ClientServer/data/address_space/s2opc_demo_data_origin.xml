@@ -125,6 +125,17 @@
       <uax:ByteString>Qnl0ZVN0cmluZzpTMk9QQw==</uax:ByteString>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:DateTime" DataType="DateTime" NodeId="ns=1;s=DateTimeVar" ParentNodeId="ns=1;i=1000">
+    <DisplayName>DateTime_1dn</DisplayName>
+    <Description>DateTime_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:DateTime>2021-03-16T16:57:42.12345678Z</uax:DateTime>
+    </Value>
+  </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:XmlElement" DataType="XmlElement" NodeId="ns=1;i=1006" ParentNodeId="ns=1;i=1000">
     <DisplayName>XmlElement_1dn</DisplayName>
     <Description>XmlElement_1d</Description>
@@ -20024,6 +20035,35 @@
     </References>
     <Value>
       <uax:UInt64>4294967395</uax:UInt64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:Array_DateTime" DataType="DateTime" NodeId="ns=1;s=Array_DateTime" ParentNodeId="ns=1;i=20003" ValueRank="1">
+    <DisplayName>Array_DateTime</DisplayName>
+    <Description>Array_DateTime</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=20003</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfDateTime>
+        <uax:DateTime>2021-03-17T16:57:42</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42Z</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42+00:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42-00:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42-14:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42+14:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42-01:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T16:57:42+01:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T24:00:00</uax:DateTime>
+        <uax:DateTime>2021-03-17T24:00:00Z</uax:DateTime>
+        <uax:DateTime>1601-01-01T00:00:00</uax:DateTime>
+        <uax:DateTime>1601-01-01T00:00:00.0000000</uax:DateTime>
+        <uax:DateTime>1601-01-01T00:00:00.0000001</uax:DateTime>
+        <uax:DateTime>9999-12-31T23:59:59</uax:DateTime>
+        <uax:DateTime>9999-12-31T23:59:59.0000001</uax:DateTime>
+        <uax:DateTime>9999-12-31T24:00:00</uax:DateTime>
+        <uax:DateTime>9999-12-31T23:59:58</uax:DateTime>
+      </uax:ListOfDateTime>
     </Value>
   </UAVariable>
   <UAVariable AccessLevel="3" BrowseName="1:Array_Boolean_001" DataType="Boolean" NodeId="ns=1;s=Array_Boolean_001" ParentNodeId="ns=1;i=20003" ValueRank="1">
