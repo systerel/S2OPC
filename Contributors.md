@@ -23,3 +23,4 @@ the legal rights to contribute.
 * Matthieu Archez <matthieu.archez@systerel.fr>
 * Simon Chollet <simon.chollet-stg@systerel.fr>
 * Kevin P <kevin.phouratsamay-stg@systerel.fr>
+* Adrien COURNAND <adrien@systerel.fr>
