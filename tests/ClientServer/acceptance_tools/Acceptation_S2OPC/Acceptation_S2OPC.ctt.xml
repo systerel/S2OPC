@@ -1430,7 +1430,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=DateTimeVar"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -2761,7 +2761,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=Array_DateTime"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
