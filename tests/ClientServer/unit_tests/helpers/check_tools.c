@@ -1779,7 +1779,7 @@ END_TEST
         uint8_t hour = 0;                                                                                           \
         uint8_t minute = 0;                                                                                         \
         uint8_t second = 0;                                                                                         \
-        float secondAndFraction = 0.0;                                                                              \
+        double secondAndFraction = 0.0;                                                                             \
         bool utc = true;                                                                                            \
         bool utc_neg_off = false;                                                                                   \
         uint8_t utc_hour_off = 0;                                                                                   \
@@ -1795,7 +1795,7 @@ END_TEST
         ck_assert_uint_eq(expHour, hour);                                                                           \
         ck_assert_uint_eq(expMinute, minute);                                                                       \
         ck_assert_uint_eq(expSecond, second);                                                                       \
-        ck_assert_float_eq_tol(expSecondAndFraction, secondAndFraction, (float) 0.000000001);                       \
+        ck_assert_double_eq_tol(expSecondAndFraction, secondAndFraction, (double) 0.000000001);                     \
         ck_assert(utc == expUtc);                                                                                   \
         ck_assert_uint_eq(expUtc_neg_off, utc_neg_off);                                                             \
         ck_assert_uint_eq(expUtc_hour_off, utc_hour_off);                                                           \
@@ -1816,101 +1816,101 @@ START_TEST(test_string_datetime_no_timezone)
 {
     // Nominal
     check_ok_string_datetime_no_timezeone("2021-02-16T18:13:01.168764999", 2021, 02, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
 
     // Invalid separators / format
-    check_nok_string_datetime_no_timezeone("2021+02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021+02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021", 0, 0, 0, 0, 0, 0, (double) 0);
 
-    check_nok_string_datetime_no_timezeone("2021-02.16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-0216T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02.16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-0216T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02", 0, 0, 0, 0, 0, 0, (double) 0);
 
-    check_nok_string_datetime_no_timezeone("2021-02-16X18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16X18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16", 0, 0, 0, 0, 0, 0, (double) 0);
 
-    check_nok_string_datetime_no_timezeone("2021-02-16T18-13:01.168764999", 2021, 02, 16, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:1301.168764999", 2021, 02, 16, 18, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T18", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18-13:01.168764999", 2021, 02, 16, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:1301.168764999", 2021, 02, 16, 18, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18", 0, 0, 0, 0, 0, 0, (double) 0);
 
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:13.01.168764999", 2021, 02, 16, 18, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:13", 0, 0, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:01-168764999", 2021, 02, 16, 18, 13, 01, (float) 1);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13.01.168764999", 2021, 02, 16, 18, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13", 0, 0, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:01-168764999", 2021, 02, 16, 18, 13, 01, (double) 1);
     // Complete date without second fraction
-    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:01", 2021, 02, 16, 18, 13, 01, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:01", 2021, 02, 16, 18, 13, 01, (double) 1);
 
     // Negative year ok
     check_ok_string_datetime_no_timezeone("-2021-02-16T18:13:01.168764999", -2021, 02, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
 
     // Valid min and max years
     check_ok_string_datetime_no_timezeone("-32768-02-16T18:13:01.168764999", INT16_MIN, 02, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     check_ok_string_datetime_no_timezeone("32767-02-16T18:13:01.168764999", INT16_MAX, 02, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
 
     // Invalid out of [min, max] years range
-    check_nok_string_datetime_no_timezeone("-32769-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("32768-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("-32769-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("32768-02-16T18:13:01.168764999", 0, 0, 0, 0, 0, 0, (double) 0);
 
     // First month
     check_ok_string_datetime_no_timezeone("2021-01-16T18:13:01.168764999", 2021, 01, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Last month
     check_ok_string_datetime_no_timezeone("2021-12-16T18:13:01.168764999", 2021, 12, 16, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
 
     // Invalid out of [min, max] months range
-    check_nok_string_datetime_no_timezeone("2021-00-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-00-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (double) 0);
 
-    check_nok_string_datetime_no_timezeone("2021-13-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-13-16T18:13:01.168764999", 2021, 0, 0, 0, 0, 0, (double) 0);
 
     // Note: parser do not check day/month/year coherency
 
     // First day
     check_ok_string_datetime_no_timezeone("2021-02-01T18:13:01.168764999", 2021, 02, 01, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Last last day
     check_ok_string_datetime_no_timezeone("2021-02-31T18:13:01.168764999", 2021, 02, 31, 18, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Invalid out of [min, max] days range
-    check_nok_string_datetime_no_timezeone("2021-02-00T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-32T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-00T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-32T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (double) 0);
 
     // First hour
     check_ok_string_datetime_no_timezeone("2021-02-16T00:13:01.168764999", 2021, 02, 16, 00, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Last hour
     check_ok_string_datetime_no_timezeone("2021-02-16T23:13:01.168764999", 2021, 02, 16, 23, 13, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Hour == 24 only allowed if everything else is 0
-    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000", 2021, 02, 16, 24, 00, 00, (float) 0);
-    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00", 2021, 02, 16, 24, 00, 00, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000", 2021, 02, 16, 24, 00, 00, (double) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T24:00:00", 2021, 02, 16, 24, 00, 00, (double) 0);
 
     // Hour == 24 not allowed if anything else != 0
-    check_nok_string_datetime_no_timezeone("2021-02-16T24:13:00", 2021, 02, 16, 24, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:02", 2021, 02, 16, 24, 0, 0, (float) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000000001", 2021, 02, 16, 24, 0, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:13:00", 2021, 02, 16, 24, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:02", 2021, 02, 16, 24, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T24:00:00.0000000000001", 2021, 02, 16, 24, 0, 0, (double) 0);
     // First minute
     check_ok_string_datetime_no_timezeone("2021-02-16T18:00:01.168764999", 2021, 02, 16, 18, 00, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
     // Last minute
     check_ok_string_datetime_no_timezeone("2021-02-16T18:59:01.168764999", 2021, 02, 16, 18, 59, 01,
-                                          (float) 1.168764999);
+                                          (double) 1.168764999);
 
     // Invalid minute (> max)
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:60:01.168764999", 2021, 02, 16, 18, 00, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:60:01.168764999", 2021, 02, 16, 18, 00, 0, (double) 0);
 
     // First second
-    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00.000000000", 2021, 02, 16, 18, 13, 00, (float) 0);
-    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00", 2021, 02, 16, 18, 13, 00, (float) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00.000000000", 2021, 02, 16, 18, 13, 00, (double) 0);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:00", 2021, 02, 16, 18, 13, 00, (double) 0);
 
     // Last second
-    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59", 2021, 02, 16, 18, 13, 59, (float) 0);
-    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59.9999999", 2021, 02, 16, 18, 13, 59, (float) 59.9999999);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59", 2021, 02, 16, 18, 13, 59, (double) 59);
+    check_ok_string_datetime_no_timezeone("2021-02-16T18:13:59.9999999", 2021, 02, 16, 18, 13, 59, (double) 59.9999999);
 
     // Invalid second (> max)
-    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:60.168764999", 2021, 02, 16, 18, 13, 0, (float) 0);
+    check_nok_string_datetime_no_timezeone("2021-02-16T18:13:60.168764999", 2021, 02, 16, 18, 13, 0, (double) 0);
 }
 END_TEST
 
@@ -1927,61 +1927,61 @@ END_TEST
 START_TEST(test_string_datetime_with_timezone)
 {
     // Nominal UTC+/-0
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999Z", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999Z", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
                              false, 0, 0);
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999+00:00", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
-                             false, 0, 0);
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999-00:00", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
-                             true, 0, 0);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+00:00", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
+                             true, false, 0, 0);
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-00:00", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
+                             true, true, 0, 0);
     // Nominal UTC+/-01:30
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999+01:30", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+01:30", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                              false, false, 01, 30);
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999-01:30", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-01:30", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                              false, true, 01, 30);
 
     // Invalid separators / format
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999X", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999X", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
                               false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999:03:45", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999:03:45", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                               true, false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999-", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999-", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
                               false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999+", 2021, 02, 16, 18, 13, 01, (float) 1.168764999, true,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999+", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
                               false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999+01:30+", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999+01:30+", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                               false, false, 01, 30);
 
     // First hour offset
-    check_ok_string_datetime("2021-02-16T00:13:01.168764999-14:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999-14:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                              false, true, 14, 00);
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999-13:59", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999-13:59", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                              false, true, 13, 59);
 
     // Last hour offset
-    check_ok_string_datetime("2021-02-16T00:13:01.168764999+14:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+14:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                              false, false, 14, 00);
-    check_ok_string_datetime("2021-02-16T18:13:01.168764999+13:59", 2021, 02, 16, 18, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T18:13:01.168764999+13:59", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                              false, false, 13, 59);
 
     // Hour == 14 not allowed if minute != 0
-    check_nok_string_datetime("2021-02-16T00:13:01.168764999-14:01", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999-14:01", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                               true, false, 00, 00);
-    check_nok_string_datetime("2021-02-16T00:13:01.168764999+14:01", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+14:01", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                               true, false, 00, 00);
     // Hour > 14 not allowed
-    check_nok_string_datetime("2021-02-16T00:13:01.168764999-15:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999-15:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                               true, false, 00, 00);
-    check_nok_string_datetime("2021-02-16T00:13:01.168764999+15:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+15:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                               true, false, 00, 00);
 
     // First minute
-    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:00", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                              false, false, 12, 00);
     // Last minute
-    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:59", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:59", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                              false, false, 12, 59);
     // Invalid minute (> max)
-    check_nok_string_datetime("2021-02-16T00:13:01.168764999+12:60", 2021, 02, 16, 00, 13, 01, (float) 1.168764999,
+    check_nok_string_datetime("2021-02-16T00:13:01.168764999+12:60", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
                               true, false, 00, 00);
 }
 

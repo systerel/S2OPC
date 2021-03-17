@@ -433,7 +433,7 @@ bool SOPC_stringToDateTime(const char* datetime,
                            uint8_t* pHour,
                            uint8_t* pMinute,
                            uint8_t* pSecond,
-                           float* pSecondAndFrac,
+                           double* pSecondAndFrac,
                            bool* p_UTC,
                            bool* pUTC_neg_off,
                            uint8_t* pUTC_hour_off,
@@ -445,7 +445,7 @@ bool SOPC_stringToDateTime(const char* datetime,
     uint8_t hour = 0;
     uint8_t minute = 0;
     uint8_t second = 0;
-    float secondAndFraction = 0.0;
+    double secondAndFraction = 0.0;
     bool utc = true;
     bool negativeOffset = false;
     uint8_t utc_hour_off = 0;
@@ -586,6 +586,9 @@ bool SOPC_stringToDateTime(const char* datetime,
         *pSecond = second;
     }
 
+    // Initialize seconds without fraction first (in case of no fraction present)
+    secondAndFraction = (double) second;
+
     // Check 24:00:00 special case
     if (24 == hour && (0 != minute || 0 != second))
     {
@@ -606,6 +609,13 @@ bool SOPC_stringToDateTime(const char* datetime,
     if (2 == remainingLength)
     {
         // Whole datetime string consume without any error
+
+        // Set the seconds with fraction since we will not parse a fraction later
+        if (NULL != pSecondAndFrac)
+        {
+            *pSecondAndFrac = secondAndFraction;
+        }
+
         return true;
     }
 
@@ -632,11 +642,11 @@ bool SOPC_stringToDateTime(const char* datetime,
             localRemLength--;
         }
 
-        // Parse the seconds with fraction as a float value
+        // Parse the seconds with fraction as a double value
         assert(endPointer > currentPointer);
-        res = SOPC_strtodouble(currentPointer, (size_t)(endPointer - currentPointer), 32, &secondAndFraction);
+        res = SOPC_strtodouble(currentPointer, (size_t)(endPointer - currentPointer), 64, &secondAndFraction);
         // Note: we do not need to check for actual value since we already controlled each digit individually
-        // If something went wrong it is either due to SOPC_strtodouble or due to float representation
+        // If something went wrong it is either due to SOPC_strtodouble or due to double representation
         if (!res)
         {
             return false;
@@ -647,9 +657,6 @@ bool SOPC_stringToDateTime(const char* datetime,
     }
     else
     {
-        // End of seconds without fraction
-        secondAndFraction = (float) second;
-
         remainingLength -= 2;
         currentPointer += 2;
     }

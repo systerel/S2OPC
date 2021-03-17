@@ -176,6 +176,8 @@ char* SOPC_strdup(const char* s);
  * \param pSecond          Pointer set to the whole number of seconds provided in datetime string as 2 digit number.
  * \param pSecondAndFrac   Pointer set to seconds provided in datetime string as 2 digit number
  *                         with optionally seconds fraction after a '.'.
+ *                         It always contains the integer part even when no fraction provided.
+ *
  * \param p_UTC             Pointer set to true if the provided time is UTC (or not specified),
  *                         false if UTC with an offset. Flag is still set for +/-00:00 offsets.
  * \param pUTC_neg_off      Pointer set to true if the provided time offset is negative
@@ -192,7 +194,7 @@ bool SOPC_stringToDateTime(const char* datetime,
                            uint8_t* pHour,
                            uint8_t* pMinute,
                            uint8_t* pSecond,
-                           float* pSecondAndFrac,
+                           double* pSecondAndFrac,
                            bool* p_UTC,
                            bool* pUTC_neg_off,
                            uint8_t* pUTC_hour_off,
