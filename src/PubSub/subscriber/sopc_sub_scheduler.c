@@ -194,7 +194,7 @@ static struct
     // specific to SOPC_PubSubProtocol_UDP
     uint16_t nbSockets;
     uint16_t nbMqttTransportContext;
-    //uint32_t** sockInputNumbers;
+    SOPC_PubSubConnection** connectionArray;
     Socket* sockArray;
 
     /* UADP Security */
@@ -410,11 +410,11 @@ static void uninit_sub_scheduler_ctx(void)
         SOPC_Free(schedulerCtx.transport);
         schedulerCtx.transport = NULL;
     }
-    //if (schedulerCtx.sockInputNumbers)
-    //{
-    //    SOPC_Free(schedulerCtx.sockInputNumbers);
-    //    schedulerCtx.sockInputNumbers = NULL;
-    //}
+    if (schedulerCtx.connectionArray)
+    {
+        SOPC_Free(schedulerCtx.connectionArray);
+        schedulerCtx.connectionArray = NULL;
+    }
     if (NULL != schedulerCtx.sockArray)
     {
         SOPC_Free(schedulerCtx.sockArray);
@@ -799,15 +799,15 @@ void SOPC_SubScheduler_Stop(void)
 static bool SOPC_SubScheduler_Start_UDP(void)
 {
     assert(0 < schedulerCtx.nbSockets);
-    assert(NULL == schedulerCtx.sockArray);// && NULL == schedulerCtx.sockInputNumbers);
+    assert(NULL == schedulerCtx.sockArray && NULL == schedulerCtx.connectionArray);
 
     uint16_t nb_socket = schedulerCtx.nbSockets;
     schedulerCtx.sockArray = SOPC_Calloc(nb_socket, sizeof(*schedulerCtx.sockArray));
-    //schedulerCtx.sockInputNumbers = SOPC_Calloc(nb_socket, sizeof(uint32_t*));
-    //if (NULL == schedulerCtx.sockArray || NULL == schedulerCtx.sockInputNumbers)
+    schedulerCtx.connectionArray = SOPC_Calloc(nb_socket, sizeof(SOPC_PubSubConnection*));
+    if (NULL == schedulerCtx.sockArray || NULL == schedulerCtx.connectionArray)
     {
         SOPC_Free(schedulerCtx.sockArray);
-        //SOPC_Free(schedulerCtx.sockInputNumbers);
+        SOPC_Free(schedulerCtx.connectionArray);
         return false;
     }
     uint16_t sockIdx = 0;
@@ -815,21 +815,21 @@ static bool SOPC_SubScheduler_Start_UDP(void)
     /* TODO: this is not the socket creation step,
      *  socket are already stored in the transport context,
      *  array length should be size_t,
-     *  -> remove this code and sockArray */
+     *  -> remove this code, only udp_sockets_mgr use these arrays, and it only borrows them */
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
     for (uint32_t iIter = 0; iIter < schedulerCtx.nbConnections; iIter++)
     {
         if (SOPC_PubSubProtocol_UDP == schedulerCtx.transport[iIter].protocol)
         {
             schedulerCtx.sockArray[sockIdx] = schedulerCtx.transport[iIter].sock;
-            //schedulerCtx.sockInputNumbers[sockIdx] =
+            schedulerCtx.connectionArray[sockIdx] = schedulerCtx.transport[iIter].connection;
             //    &schedulerCtx.transport[iIter].inputNumber; // Connection input number
             sockIdx++;
         }
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_UDP_SocketsMgr_Initialize(NULL/*(void**) schedulerCtx.sockInputNumbers*/, schedulerCtx.sockArray, nb_socket,
+    SOPC_UDP_SocketsMgr_Initialize((void**)schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
                                    on_udp_message_received, NULL, NULL);
 
     return true;
