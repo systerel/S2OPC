@@ -202,12 +202,6 @@ static struct
     // One element by publisher id : actually same key and same group for all module
     // TODO future version, it should contain one element per (publisherid, tokenid)
     SOPC_Array* securityCtx;
-
-    // Test rt scheduler integration
-
-    //SOPC_RT_Subscriber* pRTSubscriber;
-    //Thread handleRTSubscriberBeatHeart;
-    //bool bQuitSubcriberBeatHeart;
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
                   .stateCallback = NULL,
@@ -247,18 +241,10 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport con
     (void) pCtx;
     assert(NULL != pInputIdentifier);
 
-    // Get input
-    //uint32_t inputIdentifier = *((uint32_t*) pInputIdentifier);
-
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
     {
         memcpy(schedulerCtx.receptionBufferMQTT->data, data, size);
         schedulerCtx.receptionBufferMQTT->length = size;
-
-        //SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,
-        //                               inputIdentifier,
-        //                               schedulerCtx.receptionBufferMQTT->data,
-        //                               schedulerCtx.receptionBufferMQTT->length);
         SOPC_ReturnStatus status = SOPC_RT_Subscriber_Callback(NULL, NULL, pInputIdentifier, 0, NULL, 0);
         /* TODO: what do we do in case of NOK? */
         (void) status;
@@ -272,19 +258,12 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
 {
     assert(NULL != pInputIdentifier);
 
-    // Get input
-    //uint32_t inputIdentifier = *((uint32_t*) pInputIdentifier);
-
     SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferUDP, 0);
     SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferUDP);
 
     // Write input
     if (SOPC_STATUS_OK == status)
     {
-    //    SOPC_RT_Subscriber_Input_Write(schedulerCtx.pRTSubscriber,
-    //                                   inputIdentifier,
-    //                                   schedulerCtx.receptionBufferUDP->data,
-    //                                   schedulerCtx.receptionBufferUDP->length);
         status = SOPC_RT_Subscriber_Callback(NULL, NULL, pInputIdentifier, 0, NULL, 0);
     }
     /* TODO: else */
@@ -301,28 +280,16 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
     (void) input_number;
     (void) pContext;
     (void) pSub;
+    (void) pData;
+    (void) size;
 
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
     SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
-
-    //printf("# RT Subscriber callback - receive data on input number = %" PRIu32 " - size = %" PRIu32
-    //       " - context = %08" PRIx64 "\n",
-    //       input_number, size, (uint64_t) pInputContext);
 
     if (NULL == pDecoderContext)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    //SOPC_Buffer buffer;
-    //buffer.position = 0;
-    //buffer.length = size;
-    //buffer.maximum_size = size;
-    //buffer.current_size = size;
-    //buffer.data = pData;
-    (void) pData;
-    (void) size;
 
     if (SOPC_PubSubState_Operational == schedulerCtx.state)
     {
@@ -346,35 +313,6 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
     return result;
 }
 
-// Beat heart thread
-/* TODO: this is Subscriber's main loop in fact */
-//static void* cbBeatHeartThreadCallback(void* arg)
-//{
-//    (void) arg;
-//    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-//
-//    printf("# RT Subscriber beat heart thread launched\n");
-//
-//    bool readValue = false;
-//    __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
-//
-//    while (!readValue)
-//    {
-//        result = SOPC_RT_Subscriber_HeartBeat(schedulerCtx.pRTSubscriber);
-//        if (SOPC_STATUS_OK != result)
-//        {
-//            printf("# RT Subscriber beat heart thread error : %d\n", result);
-//        }
-//
-//        SOPC_Sleep(SOPC_TIMER_RESOLUTION_MS);
-//        __atomic_load(&schedulerCtx.bQuitSubcriberBeatHeart, &readValue, __ATOMIC_SEQ_CST);
-//    }
-//
-//    printf("# RT Subscriber beat heart thread exit\n");
-//
-//    return NULL;
-//}
-
 static void uninit_sub_scheduler_ctx(void)
 {
     schedulerCtx.config = NULL;
@@ -382,27 +320,11 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.stateCallback = NULL;
 
     printf("# Info: Stop Subscriber thread.\n");
-    //bool newValue = true;
-    //__atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
-    //if (schedulerCtx.handleRTSubscriberBeatHeart != (Thread) NULL)
-    //{
-    //    SOPC_Thread_Join(schedulerCtx.handleRTSubscriberBeatHeart);
-    //    schedulerCtx.handleRTSubscriberBeatHeart = (Thread) NULL;
-    //}
-
-    //SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    //while (SOPC_STATUS_INVALID_STATE == status)
-    //{
-    //    printf("# Info: DeInitialize RT Subscriber.\n");
-    //    status = SOPC_RT_Subscriber_DeInitialize(schedulerCtx.pRTSubscriber);
-    //}
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
         schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
         printf("# Info: transport context destroyed for connection #%" PRIu32 " (subscriber).\n", i);
     }
-    //printf("# Info: Destroy RT Subscriber.\n");
-    //SOPC_RT_Subscriber_Destroy(&schedulerCtx.pRTSubscriber);
     schedulerCtx.nbConnections = 0;
     schedulerCtx.nbSockets = 0;
     if (NULL != schedulerCtx.transport)
@@ -485,28 +407,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
         }
     }
 
-    //SOPC_RT_Subscriber_Initializer* pRTInitializer = NULL;
-
-    //if (result)
-    //{
-    //    pRTInitializer = SOPC_RT_Subscriber_Initializer_Create(SOPC_RT_Subscriber_Callback, NULL);
-    //    result = (NULL != pRTInitializer);
-    //    if (!result)
-    //    {
-    //        status = SOPC_STATUS_OUT_OF_MEMORY;
-    //    }
-    //}
-
-    //if (result)
-    //{
-    //    schedulerCtx.pRTSubscriber = SOPC_RT_Subscriber_Create();
-    //    result = (NULL != schedulerCtx.pRTSubscriber);
-    //    if (!result)
-    //    {
-    //        status = SOPC_STATUS_OUT_OF_MEMORY;
-    //    }
-    //}
-
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
     for (uint32_t iIter = 0; iIter < nb_connections && result; iIter++)
     {
@@ -522,26 +422,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             if (nbReaderGroups > 0)
             {
                 schedulerCtx.transport[iIter].connection = connection;
-
-                //printf("# Add input with context %p\n", (void*) connection);
-
-                //status = SOPC_RT_Subscriber_Initializer_AddInput(pRTInitializer,
-                //                                                 SOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER,
-                //                                                 SOPC_PUBSUB_BUFFER_SIZE,
-                //                                                 SOPC_PIN_MODE_GET_NORMAL,
-                //                                                 (void*) connection,
-                //                                                 &schedulerCtx.transport[iIter].inputNumber);
-
-                //if (SOPC_STATUS_OK != status)
-                //{
-                //    printf("# RT Subscriber initializer add input failed\n");
-                //    result = false;
-                //}
-                //else
-                //{
-                //    printf("# RT Subscriber initializer add input %" PRIu32 "\n",
-                //           schedulerCtx.transport[iIter].inputNumber);
-                //}
 
                 if (result)
                 {
@@ -664,48 +544,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             }
         }
     }
-
-    // Create reception buffer
-    //if (result)
-    //{
-    //    uint32_t out = 0;
-    //    SOPC_RT_Subscriber_Initializer_AddOutput(pRTInitializer, 1, 1, 1, &out);
-    //    status = SOPC_RT_Subscriber_Initialize(schedulerCtx.pRTSubscriber, pRTInitializer);
-    //    if (status != SOPC_STATUS_OK)
-    //    {
-    //        printf("# Rt subscriber initialization failed\n");
-    //        result = false;
-    //    }
-    //    else
-    //    {
-    //        printf("# Rt subscriber initialized\n");
-    //    }
-    //}
-
-    //if (pRTInitializer != NULL)
-    //{
-    //    SOPC_RT_Subscriber_Initializer_Destroy(&pRTInitializer);
-    //}
-
-    //if (result)
-    //{
-    //    bool newValue = false;
-    //    __atomic_store(&schedulerCtx.bQuitSubcriberBeatHeart, &newValue, __ATOMIC_SEQ_CST);
-    //    status = SOPC_Thread_Create(&schedulerCtx.handleRTSubscriberBeatHeart,
-    //                                cbBeatHeartThreadCallback,
-    //                                NULL,
-    //                                "SubHeart");
-
-    //    if (SOPC_STATUS_OK != status)
-    //    {
-    //        result = false;
-    //        printf("# Error creation of rt subscriber beat heart thread\n");
-    //    }
-    //    else
-    //    {
-    //        printf("# Rt subscriber beat heart thread created\n");
-    //    }
-    //}
 
     if (false == result)
     {
