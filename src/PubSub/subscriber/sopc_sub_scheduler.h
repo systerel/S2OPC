@@ -23,6 +23,7 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_target_variable.h"
 
+/* TODO: Move me */
 typedef enum SOPC_PubSubState
 {
     SOPC_PubSubState_Disabled = 0,
