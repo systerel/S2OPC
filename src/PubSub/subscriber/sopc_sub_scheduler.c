@@ -221,19 +221,22 @@ static void set_new_state(SOPC_PubSubState new)
     schedulerCtx.state = new;
 }
 
-/* TODO: move this missing decl with the others */
-static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub,
-                                                     void* pContext,
-                                                     void* pInputContext,
-                                                     uint32_t input_number,
-                                                     uint8_t* pData,
-                                                     uint32_t size);
+/* The generic callback that decode message and call the configuration-defined callback SetVariables */
+static SOPC_ReturnStatus on_message_received(void* pInputContext);
 
-// Specific callback for MQTT message
-static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport context handle */
-                                     uint8_t* data,             /* Data received */
-                                     uint16_t size,             /* Size of data received, in bytes. */
-                                     void* pInputIdentifier)    /* User context, used as pub sub connection */
+/* The callback for received messages specific to the UDP transport */
+static void on_udp_message_received(void* pInputIdentifier, Socket sock);
+
+/* The callback for received messages specific to the MQTT transport
+ *
+ * \param pCtx  Transport context handle
+ * \param data  Pointer to received data
+ * \param size  Size of data received, in bytes
+ * \param pInputIdentifier  User context identifying the connection
+ */
+static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier);
+
+static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
     (void) pCtx;
     assert(NULL != pInputIdentifier);
@@ -242,7 +245,7 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport con
     {
         memcpy(schedulerCtx.receptionBufferMQTT->data, data, size);
         schedulerCtx.receptionBufferMQTT->length = size;
-        SOPC_ReturnStatus status = SOPC_RT_Subscriber_Callback(NULL, NULL, pInputIdentifier, 0, NULL, 0);
+        SOPC_ReturnStatus status = on_message_received(pInputIdentifier);
         /* TODO: what do we do in case of NOK? */
         (void) status;
     }
@@ -250,7 +253,6 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport con
     /* TODO: else if status? */
 }
 
-// Specific callback for UDP message
 static void on_udp_message_received(void* pInputIdentifier, Socket sock)
 {
     assert(NULL != pInputIdentifier);
@@ -261,25 +263,14 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
     // Write input
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_RT_Subscriber_Callback(NULL, NULL, pInputIdentifier, 0, NULL, 0);
+        status = on_message_received(pInputIdentifier);
     }
     /* TODO: else */
     /* TODO: what do we do in case of NOK? */
 }
 
-static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, // RT Subscriber object
-                                                     void* pContext,           // User context
-                                                     void* pInputContext,      // Decode context
-                                                     uint32_t input_number,    // Input pin number
-                                                     uint8_t* pData,           // Data received
-                                                     uint32_t size)            // Size of data
+static SOPC_ReturnStatus on_message_received(void* pInputContext)
 {
-    (void) input_number;
-    (void) pContext;
-    (void) pSub;
-    (void) pData;
-    (void) size;
-
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
 
@@ -306,6 +297,7 @@ static SOPC_ReturnStatus SOPC_RT_Subscriber_Callback(SOPC_RT_Subscriber* pSub, /
             set_new_state(SOPC_PubSubState_Error);
         }
     }
+    /* TODO: else */
 
     return result;
 }
