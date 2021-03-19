@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#include "p_time.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
@@ -44,134 +45,6 @@
 #define log_warning(...) printf(__VA_ARGS__)
 #define log_info(...) printf(__VA_ARGS__)
 #define log_debug(...) printf(__VA_ARGS__)
-
-/* ----------------- TODO: abstract me and move me to the interop' module */
-#include <time.h>
-#include <error.h>
-#include <errno.h>
-#include <math.h>
-
-/* CLOCK_MONOTONIC under linux, as we want to send regular notifications, even if the time gets back or forth */
-typedef struct timespec SOPC_RealTime; /* Or SensitiveTime or SpecialTime or PreciseTime */
-
- /* ret = now if copy is NULL */
-SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy);
-bool SOPC_RealTime_GetTime(SOPC_RealTime *t);
-void SOPC_RealTime_Delete(SOPC_RealTime **t);
-/* t += double in ms */
-void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms);
-/* t <= now */
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now);
-/* Precise sleep until there, does not check that date is in the future
- * The calling thread must have appropriate scheduling policy and priority for precise timing */
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime *date);
-
-SOPC_RealTime *SOPC_RealTime_Create(const SOPC_RealTime *copy)
-{
-    SOPC_RealTime *ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
-    if (NULL != copy && NULL != ret)
-    {
-        *ret = *copy;
-    }
-    else if (NULL != ret)
-    {
-        bool ok = SOPC_RealTime_GetTime(ret);
-        if(! ok)
-        {
-            SOPC_RealTime_Delete(&ret);
-        }
-    }
-
-    return ret;
-}
-
-bool SOPC_RealTime_GetTime(SOPC_RealTime *t)
-{
-    assert(NULL != t);
-
-    int res = clock_gettime(CLOCK_MONOTONIC, t);
-    if (-1 == res)
-    {
-        /* TODO: use log, use thread safe function */
-        log_debug("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
-        return false;
-    }
-
-    return true;
-}
-
-void SOPC_RealTime_Delete(SOPC_RealTime **t)
-{
-    if (NULL == t)
-    {
-        return;
-    }
-    SOPC_Free(*t);
-    *t = NULL;
-}
-
-void SOPC_RealTime_AddDuration(SOPC_RealTime *t, double duration_ms)
-{
-    assert(NULL != t);
-
-    /* TODO: tv_sec is a time_t, how do we assert the cast?? */
-    t->tv_sec += (time_t)(duration_ms/1000);
-    t->tv_nsec += (long)(fmod(duration_ms, 1000.)*1000000); /* This may add a negative or positive number */
-
-    /* Normalize */
-    if (t->tv_nsec < 0)
-    {
-        t->tv_sec -= 1;
-        t->tv_nsec += 1000000000;
-    }
-    else if (t->tv_nsec > 1000000000)
-    {
-        t->tv_sec += 1;
-        t->tv_nsec -= 1000000000;
-    }
-}
-
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime *t, const SOPC_RealTime *now)
-{
-    struct timespec t1 = {0};
-    bool ok = true;
-
-    if (NULL == now)
-    {
-        int res = clock_gettime(CLOCK_MONOTONIC, &t1);
-        if (-1 == res)
-        {
-            /* TODO: use log, use thread safe function */
-            log_error("ERROR: clock_gettime: %d (%s)\n", errno, strerror(errno));
-            ok = false;
-        }
-    }
-    else
-    {
-        t1 = *now;
-    }
-
-    /* t <= t1 */
-    return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
-}
-
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime *date)
-{
-    assert(NULL != date);
-    static bool warned = false;
-    int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
-
-    /* TODO: handle the EINTR case more accurately */
-    if(-1 == res && !warned)
-    {
-        /* TODO: use log, use thread safe function */
-        log_error("ERROR: clock_nanosleep failed (warn once): %d (%s)\n", errno, strerror(errno));
-        warned = true;
-    }
-
-    return -1 == res;
-}
-/* ----------------- */
 
 /* Transport context. One per connection */
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
