@@ -18,12 +18,15 @@
  */
 
 #include <assert.h>
-#include <stdint.h>
-#include <time.h>
+#include <errno.h>
+#include <error.h>
+#include <math.h>
+#include <string.h>
 
+#include "p_time.h"
+#include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
-
-#include "sopc_enums.h"
 
 /*
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
@@ -130,4 +133,113 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
 SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 {
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}
+
+/* TODO: generalize the precise time interface */
+
+SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
+{
+    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
+    if (NULL != copy && NULL != ret)
+    {
+        *ret = *copy;
+    }
+    else if (NULL != ret)
+    {
+        bool ok = SOPC_RealTime_GetTime(ret);
+        if (!ok)
+        {
+            SOPC_RealTime_Delete(&ret);
+        }
+    }
+
+    return ret;
+}
+
+bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+{
+    assert(NULL != t);
+
+    int res = clock_gettime(CLOCK_MONOTONIC, t);
+    if (-1 == res)
+    {
+        /* TODO: use thread safe function */
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+void SOPC_RealTime_Delete(SOPC_RealTime** t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
+}
+
+void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
+{
+    assert(NULL != t);
+
+    /* TODO: tv_sec is a time_t, how do we assert the cast?? */
+    t->tv_sec += (time_t)(duration_ms / 1000);
+    t->tv_nsec += (long) (fmod(duration_ms, 1000.) * 1000000); /* This may add a negative or positive number */
+
+    /* Normalize */
+    if (t->tv_nsec < 0)
+    {
+        t->tv_sec -= 1;
+        t->tv_nsec += 1000000000;
+    }
+    else if (t->tv_nsec > 1000000000)
+    {
+        t->tv_sec += 1;
+        t->tv_nsec -= 1000000000;
+    }
+}
+
+bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+{
+    struct timespec t1 = {0};
+    bool ok = true;
+
+    if (NULL == now)
+    {
+        int res = clock_gettime(CLOCK_MONOTONIC, &t1);
+        if (-1 == res)
+        {
+            /* TODO: use thread safe function */
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
+            ok = false;
+        }
+    }
+    else
+    {
+        t1 = *now;
+    }
+
+    /* t <= t1 */
+    return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
+}
+
+bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+{
+    assert(NULL != date);
+    static bool warned = false;
+    int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
+
+    /* TODO: handle the EINTR case more accurately */
+    if (-1 == res && !warned)
+    {
+        /* TODO: use thread safe function */
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_nanosleep failed (warn once): %d (%s)", errno,
+                               strerror(errno));
+        warned = true;
+    }
+
+    return -1 == res;
 }
