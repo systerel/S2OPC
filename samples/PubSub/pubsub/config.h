@@ -30,7 +30,7 @@
 #define SKS_KEY_NONCE "./keyNonce.key"
 
 /* Sleep period of the main loop */
-#define SLEEP_TIMEOUT 100
+#define SLEEP_TIMEOUT (100)
 
 /* NodeIds of the counter, shall match the configuration */
 #define NODEID_COUNTER_SEND                                                              \
@@ -41,3 +41,6 @@
     {                                                                                    \
         .IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 1, .Data.Numeric = 1 \
     }
+
+/* Number of recorded timestamps in the RTT calculations */
+#define RTT_SAMPLES "1024"
