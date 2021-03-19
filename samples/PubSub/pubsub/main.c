@@ -18,11 +18,14 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "p_time.h"
 #include "sopc_common.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_local_sks.h"
@@ -32,6 +35,8 @@
 
 #include "cache.h"
 #include "config.h"
+
+#include <time.h> /* For now, requires struct timespec */
 
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -59,6 +64,12 @@ static const char* getenv_default(const char* name, const char* default_value)
 static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
 static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
+/* RTT calculations */
+SOPC_RealTime* g_ts_emissions = NULL;
+long* g_rtt = NULL;
+size_t g_n_samples = 0;
+static inline long diff_timespec(struct timespec* a, struct timespec* b);
+
 int main(int argc, char* const argv[])
 {
     /* Signal handling: close the server gracefully when interrupted */
@@ -83,21 +94,35 @@ int main(int argc, char* const argv[])
         printf("Error while initializing logs\n");
     }
 
+    sscanf(getenv_default("RTT_SAMPLES", RTT_SAMPLES), "%zu", &g_n_samples);
+    printf("RTT_SAMPLES: %zu\n", g_n_samples);
+    g_ts_emissions = SOPC_Calloc(g_n_samples, sizeof(struct timespec));
+    g_rtt = SOPC_Calloc(g_n_samples, sizeof(long));
+    if (NULL == g_ts_emissions || NULL == g_rtt)
+    {
+        printf("Error while allocating %zd round-trip time measurements\n", g_n_samples);
+        status = SOPC_STATUS_NOK;
+    }
+
     /* Configuration of the PubSub */
     const bool is_loopback = atoi(getenv_default("IS_LOOPBACK", IS_LOOPBACK)) != 0;
     printf("IS_LOOPBACK: %d\n", is_loopback);
-
-    const char* config_path = getenv_default("PUBSUB_XML_CONFIG", is_loopback ? PUBSUB_XML_CONFIG_LOOP : PUBSUB_XML_CONFIG_EMIT);
-    printf("PUBSUB_XML_CONFIG: %s\n", config_path);
-
-    FILE* fd = fopen(config_path, "r");
-    SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);
-    int closed = fclose(fd);
-
-    status = (0 == closed && NULL != config) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
-    if(SOPC_STATUS_OK != status)
+    SOPC_PubSubConfiguration* config = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        printf("Error while loading PubSub configuration from %s\n", config_path);
+        const char* config_path =
+            getenv_default("PUBSUB_XML_CONFIG", is_loopback ? PUBSUB_XML_CONFIG_LOOP : PUBSUB_XML_CONFIG_EMIT);
+        printf("PUBSUB_XML_CONFIG: %s\n", config_path);
+
+        FILE* fd = fopen(config_path, "r");
+        config = SOPC_PubSubConfig_ParseXML(fd);
+        int closed = fclose(fd);
+
+        status = (0 == closed && NULL != config) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("Error while loading PubSub configuration from %s\n", config_path);
+        }
     }
 
     SOPC_PubSourceVariableConfig* sourceConfig = NULL;
@@ -114,7 +139,7 @@ int main(int argc, char* const argv[])
         }
         if (NULL == sourceConfig)
         {
-            printf("Error while loading PubSub configuration from %s\n", config_path);
+            printf("Error while loading PubSub configuration\n");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -130,7 +155,7 @@ int main(int argc, char* const argv[])
         }
         if (NULL == sourceConfig)
         {
-            printf("Error while loading PubSub configuration from %s\n", config_path);
+            printf("Error while loading PubSub configuration\n");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -215,6 +240,17 @@ int main(int argc, char* const argv[])
     SOPC_SubTargetVariableConfig_Delete(targetConfig);
     SOPC_PubSubConfiguration_Delete(config);
     printf("# Info: PubSub stopped\n");
+
+    /* print the non-empty RTT */
+    for (size_t idx=0; idx<g_n_samples; ++idx)
+    {
+        if (0 != g_rtt[idx])
+        {
+            printf("% 9zd: round-trip time: % 12ld ns\n", idx, g_rtt[idx]);
+        }
+    }
+    SOPC_Free(g_ts_emissions);
+    SOPC_Free(g_rtt);
 }
 
 static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
@@ -236,6 +272,14 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
             assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
             assert(SOPC_UInt32_Id == var->BuiltInTypeId);
             ++var->Value.Uint32;
+
+            /* Record the current time */
+            size_t idx = var->Value.Uint32;
+            if (idx < g_n_samples)
+            {
+                bool ok = SOPC_RealTime_GetTime(&g_ts_emissions[idx]);
+                (void) ok;
+            }
         }
     }
 
@@ -254,7 +298,23 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
         SOPC_ReturnStatus status = SOPC_NodeId_Compare(&nid_counter, &nodesToWrite[i].NodeId, &cmp);
         if (SOPC_STATUS_OK == status && 0 == cmp)
         {
-            /* TODO: Record the emitter time in get_source_increment, compute the diff here */
+            /* Compute the round-trip time */
+            static SOPC_RealTime now = {0}; /* Requires a static initializer to be abstracted in p_time interface */
+            bool ok = SOPC_RealTime_GetTime(&now);
+            if (ok)
+            {
+                SOPC_Variant* var = &nodesToWrite[i].Value.Value;
+                size_t idx = var->Value.Uint32;
+                if (idx < g_n_samples)
+                {
+                    ok &= SOPC_VariantArrayType_SingleValue == var->ArrayType;
+                    ok &= SOPC_UInt32_Id == var->BuiltInTypeId;
+                    if (ok)
+                    {
+                        g_rtt[idx] = diff_timespec(&now, &g_ts_emissions[idx]);
+                    }
+                }
+            }
         }
     }
 
@@ -262,3 +322,48 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
     /* TODO: lock before write or double buffer */
     return Cache_SetTargetVariables(nodesToWrite, nbValues);
 }
+
+/* TODO: implement this in a platform independent fashion */
+static inline long diff_timespec(struct timespec* a, struct timespec* b)
+{
+    if (!a || !b)
+    {
+        return LONG_MAX;
+    }
+
+    bool invert = false;
+    if (b->tv_sec > a->tv_sec || (b->tv_sec == a->tv_sec && b->tv_nsec > a->tv_nsec))
+    {
+        invert = true;
+        struct timespec* c = a;
+        a = b;
+        b = c;
+    }
+
+    time_t sec = a->tv_sec - b->tv_sec;
+    long ret = a->tv_nsec - b->tv_nsec;
+    if (ret < 0)
+    {
+        --sec;
+        ret += 1000000000;
+    }
+    if (sec > LONG_MAX / 1000000000 || ret > LONG_MAX - 1000000000 * sec) /* Would overflow */
+    {
+        ret = LONG_MAX;
+    }
+
+    if (invert)
+    {
+        if (ret < LONG_MAX)
+        {
+            ret *= -1;
+        }
+        else
+        {
+            ret = LONG_MIN; /* This leaves -LONG_MAX undistinguishable from LONG_MIN */
+        }
+    }
+
+    return ret;
+}
+
