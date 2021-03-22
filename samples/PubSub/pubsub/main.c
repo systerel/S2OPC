@@ -258,6 +258,7 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
     /* Pre-hook: filter and increment the counter */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_SEND;
 
+    Cache_Lock();
     for (int32_t i=0; i<nbValues; ++i)
     {
         int32_t cmp = 0;
@@ -283,7 +284,9 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
     }
 
     /* Let the cache handle the memory and treatment of this request */
-    return Cache_GetSourceVariables(nodesToRead, nbValues);
+    SOPC_DataValue *dvs = Cache_GetSourceVariables(nodesToRead, nbValues);
+    Cache_Unlock();
+    return dvs;
 }
 
 static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
@@ -291,6 +294,7 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
     /* Pre-hook: filter and use the new counter value to compute the round trip time */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_RECV;
 
+    Cache_Lock();
     for (int32_t i=0; i<nbValues; ++i)
     {
         int32_t cmp = 0;
@@ -318,8 +322,9 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
     }
 
     /* Let the cache handle the memory and treatment of this request */
-    /* TODO: lock before write or double buffer */
-    return Cache_SetTargetVariables(nodesToWrite, nbValues);
+    bool processed = Cache_SetTargetVariables(nodesToWrite, nbValues);
+    Cache_Unlock();
+    return processed;
 }
 
 /* TODO: implement this in a platform independent fashion */

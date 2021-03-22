@@ -20,14 +20,16 @@
 
 #include <assert.h>
 
-#include "sopc_mem_alloc.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_time.h"
 
 #include "cache.h"
 
 
 SOPC_Dict* g_cache = NULL;
+Mutex g_lock;
 
 
 static void free_datavalue(void* value)
@@ -121,6 +123,7 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type)
 
 bool Cache_Initialize(SOPC_PubSubConfiguration* config)
 {
+    /* TODO: lock before write or double buffer */
     if (NULL == config)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cache initialization with NULL configuration");
@@ -133,8 +136,9 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
         return false;
     }
 
+    SOPC_ReturnStatus status = Mutex_Initialization(&g_lock);
     g_cache =  SOPC_NodeId_Dict_Create(true, free_datavalue);
-    bool res = NULL != g_cache;
+    bool res = SOPC_STATUS_OK == status && NULL != g_cache;
 
     /* Parse configuration and fill the cache with default values */
     /* NodeId is in the field metadata (target variable for subscriber and published variable for publisher)
@@ -168,7 +172,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
 
                     if (res)
                     {
-                        SOPC_ReturnStatus status = SOPC_NodeId_Copy(nid, src);
+                        status = SOPC_NodeId_Copy(nid, src);
                         if (SOPC_STATUS_OK != status)
                         {
                             res = false;
@@ -219,7 +223,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
 
                     if (res)
                     {
-                        SOPC_ReturnStatus status = SOPC_NodeId_Copy(nid, src);
+                        status = SOPC_NodeId_Copy(nid, src);
                         if (SOPC_STATUS_OK != status)
                         {
                             res = false;
@@ -272,6 +276,7 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    Cache_Lock();
     for (int32_t i=0; SOPC_STATUS_OK == status && i < nbValues; ++i)
     {
         OpcUa_ReadValueId *rv = &nodesToRead[i];
@@ -285,6 +290,7 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
         /* As we have ownership of the rv, clear it */
         OpcUa_ReadValueId_Clear(rv);
     }
+    Cache_Unlock();
     SOPC_Free(nodesToRead);
 
     if (SOPC_STATUS_OK != status)
@@ -307,6 +313,7 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     assert(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
 
     bool ok = true;
+    Cache_Lock();
     for (int32_t i=0; ok && i < nbValues; ++i)
     {
         /* TODO: IndexRange */
@@ -332,9 +339,22 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
         /* As we have ownership of the wv, clear it */
         OpcUa_WriteValue_Clear(wv);
     }
+    Cache_Unlock();
     SOPC_Free(nodesToWrite);
 
     return ok;
+}
+
+void Cache_Lock(void)
+{
+    SOPC_ReturnStatus status = Mutex_Lock(&g_lock);
+    assert(SOPC_STATUS_OK == status);
+}
+
+void Cache_Unlock(void)
+{
+    SOPC_ReturnStatus status = Mutex_Unlock(&g_lock);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void Cache_Clear(void)
