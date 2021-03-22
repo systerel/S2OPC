@@ -44,3 +44,6 @@
 
 /* Number of recorded timestamps in the RTT calculations */
 #define RTT_SAMPLES "1024"
+
+/* Empty CSV path means no CSV recording, but print some stats on stdout (can be versbose) */
+#define CSV_PREFIX "./rtt"
