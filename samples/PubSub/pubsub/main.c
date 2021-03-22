@@ -18,13 +18,17 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>  /* strerror */
+#include <time.h>  /* Timestamped csv */
 
 #include "p_time.h"
 #include "sopc_common.h"
+#include "sopc_common_build_info.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
@@ -70,6 +74,7 @@ SOPC_RealTime *g_ts_emissions = NULL;
 long *g_rtt = NULL;
 size_t g_n_samples = 0;
 static inline long diff_timespec(struct timespec *a, struct timespec *b);
+static void save_rtt_to_csv(void);
 
 int main(int argc, char* const argv[])
 {
@@ -159,6 +164,8 @@ int main(int argc, char* const argv[])
             status = SOPC_STATUS_NOK;
         }
     }
+    /* Also print the save-file prefix */
+    printf("CSV_PREFIX: %s\n", getenv_default("CSV_PREFIX", CSV_PREFIX));
 
     /* Don't forget the SKS */
     const char* signing_key = getenv_default("SKS_SIGNING_KEY", SKS_SIGNING_KEY);
@@ -241,13 +248,20 @@ int main(int argc, char* const argv[])
     SOPC_PubSubConfiguration_Delete(config);
     printf("# Info: PubSub stopped\n");
 
-    /* print the non-empty RTT */
-    for (size_t idx=0; idx<g_n_samples; ++idx)
+    /* Print or save the non-empty RTT */
+    if (sizeof(CSV_PREFIX) == 0)
     {
-        if (0 != g_rtt[idx])
+        for (size_t idx=0; idx<g_n_samples; ++idx)
         {
-            printf("% 9zd: round-trip time: % 12ld ns\n", idx, g_rtt[idx]);
+            if (0 != g_rtt[idx])
+            {
+                printf("% 9zd: round-trip time: % 12ld ns\n", idx, g_rtt[idx]);
+            }
         }
+    }
+    else if (!is_loopback)
+    {
+        save_rtt_to_csv();
     }
     SOPC_Free(g_ts_emissions);
     SOPC_Free(g_rtt);
@@ -370,3 +384,55 @@ static inline long diff_timespec(struct timespec *a, struct timespec *b)
     return ret;
 }
 
+static void save_rtt_to_csv(void)
+{
+    time_t now = time(NULL);
+    struct tm *tm_now = localtime(&now);
+    char time_fmt[16] = {0};
+    size_t n = strftime(time_fmt, sizeof(time_fmt), "%Y%m%d-%H%M%S", tm_now);
+    if (0 == n)
+    {
+        printf("# Error in strftime\n");
+        return;
+    }
+
+    char csv_path[128] = {0};
+    int n_path = snprintf(csv_path, sizeof(csv_path), "%s-%s.csv", getenv_default("CSV_PREFIX", CSV_PREFIX), time_fmt);
+    if (n_path < 0 || n_path >= (int)(sizeof(csv_path)))
+    {
+        printf("# Error while formatting CSV path name\n");
+        return;
+    }
+
+    FILE *csv = fopen(csv_path, "w");
+    if (NULL == csv)
+    {
+        printf("# Error opening the CSV file \"%s\" for writing: %s\n", csv_path, strerror(errno));
+        return;
+    }
+
+    /* First record version information */
+    SOPC_Build_Info binfo_common = SOPC_Common_GetBuildInfo();
+    int res = fprintf(csv, "S2OPC_Common Version;SrcCommit;DockerId;BuildDate\n");
+    if (res > 0)
+    {
+        res = fprintf(csv, "%s;%s;%s;%s\n",
+                      binfo_common.buildVersion,
+                      binfo_common.buildSrcCommit,
+                      binfo_common.buildDockerId,
+                      binfo_common.buildBuildDate);
+    }
+
+    /* Write records */
+    if (res > 0)
+    {
+        res = fprintf(csv, "\nGetSourceTime (ns since app start);Round-trip time (ns)\n");
+    }
+    for (size_t idx=0; res > 0 && idx<g_n_samples; ++idx)
+    {
+        int64_t ts = g_ts_emissions[idx].tv_sec*1000000000 + g_ts_emissions[idx].tv_nsec;
+        res = fprintf(csv, "%" PRIi64 ";%ld\n", ts, g_rtt[idx]);
+    }
+
+    fclose(csv);
+}
