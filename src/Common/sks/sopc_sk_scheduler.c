@@ -28,7 +28,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_sk_scheduler.h"
 
-typedef struct SOPC_SKOrdonnancer_Task
+typedef struct SOPC_SKscheduler_Task
 {
     SOPC_SKBuilder* builder;
     SOPC_SKProvider* provider;
@@ -38,26 +38,26 @@ typedef struct SOPC_SKOrdonnancer_Task
     uint32_t timerId;
     uint32_t msPeriod;
 
-} SOPC_SKOrdonnancer_Task;
+} SOPC_SKscheduler_Task;
 
-typedef struct SOPC_SKOrdonnancer_DefaultData
+typedef struct SOPC_SKscheduler_DefaultData
 {
     bool isInitialized;
 
     SOPC_Looper* looper;
     SOPC_EventHandler* handler;
 
-    SOPC_SKOrdonnancer_Task task;
+    SOPC_SKscheduler_Task task;
 
-} SOPC_SKOrdonnancer_DefaultData;
+} SOPC_SKscheduler_DefaultData;
 
 /*** DEFAULT IMPLEMENTATION FUNCTIONS ***/
 
-static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* handler,
-                                                             int32_t event,
-                                                             uint32_t eltId,
-                                                             uintptr_t params,
-                                                             uintptr_t auxParam)
+static void SOPC_SKscheduler_EventHandler_Callback_Default(SOPC_EventHandler* handler,
+                                                           int32_t event,
+                                                           uint32_t eltId,
+                                                           uintptr_t params,
+                                                           uintptr_t auxParam)
 {
     // unused variables
     (void) handler;
@@ -66,7 +66,7 @@ static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* 
     (void) auxParam;
 
     (void) params;
-    SOPC_SKOrdonnancer_Task* task = (SOPC_SKOrdonnancer_Task*) params;
+    SOPC_SKscheduler_Task* task = (SOPC_SKscheduler_Task*) params;
     assert(NULL != task);
     assert(NULL != task->builder || NULL != task->provider || NULL != task->manager);
 
@@ -79,13 +79,13 @@ static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* 
 
     /* Get the remaining time to use all available keys */
     uint32_t halfAllKeysLifeTime = SOPC_SKManager_GetAllKeysLifeTime(task->manager) / 2;
-    if (halfAllKeysLifeTime < SOPC_SK_ORDONNACER_UPDATE_TIMER_MIN)
+    if (halfAllKeysLifeTime < SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN)
     {
-        halfAllKeysLifeTime = SOPC_SK_ORDONNACER_UPDATE_TIMER_MIN;
+        halfAllKeysLifeTime = SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN;
     }
-    else if (halfAllKeysLifeTime > SOPC_SK_ORDONNACER_UPDATE_TIMER_MAX)
+    else if (halfAllKeysLifeTime > SOPC_SK_SCHEDULER_UPDATE_TIMER_MAX)
     {
-        halfAllKeysLifeTime = SOPC_SK_ORDONNACER_UPDATE_TIMER_MAX;
+        halfAllKeysLifeTime = SOPC_SK_SCHEDULER_UPDATE_TIMER_MAX;
     }
 
     // Replace the timer by a new one with expiration time updated ( half the Keys Life Time )
@@ -105,14 +105,14 @@ static void SOPC_SKOrdonnancer_EventHandler_Callback_Default(SOPC_EventHandler* 
     }
 }
 
-static SOPC_ReturnStatus SOPC_SKOrdonnancer_Initialize_Default(SOPC_SKOrdonnancer* sko)
+static SOPC_ReturnStatus SOPC_SKscheduler_Initialize_Default(SOPC_SKscheduler* sko)
 {
     if (NULL == sko || NULL == sko->data)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
+    SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
     if (data->isInitialized)
     {
@@ -135,7 +135,7 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_Initialize_Default(SOPC_SKOrdonnance
 
     if (SOPC_STATUS_OK == status)
     {
-        data->handler = SOPC_EventHandler_Create(data->looper, SOPC_SKOrdonnancer_EventHandler_Callback_Default);
+        data->handler = SOPC_EventHandler_Create(data->looper, SOPC_SKscheduler_EventHandler_Callback_Default);
         if (NULL == data->handler)
         {
             status = SOPC_STATUS_NOK;
@@ -158,7 +158,7 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_Initialize_Default(SOPC_SKOrdonnance
     return status;
 }
 
-static SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask_Default(SOPC_SKOrdonnancer* sko,
+static SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask_Default(SOPC_SKscheduler* sko,
                                                             SOPC_SKBuilder* skb,
                                                             SOPC_SKProvider* skp,
                                                             SOPC_SKManager* skm,
@@ -169,7 +169,7 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask_Default(SOPC_SKOrdonnancer* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
+    SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
     if (NULL != data->task.builder || NULL != data->task.provider || NULL != data->task.manager)
     {
@@ -185,14 +185,14 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask_Default(SOPC_SKOrdonnancer* 
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus SOPC_SKOrdonnancer_Start_Default(SOPC_SKOrdonnancer* sko)
+static SOPC_ReturnStatus SOPC_SKOrdonnancer_Start_Default(SOPC_SKscheduler* sko)
 {
     if (NULL == sko || NULL == sko->data)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
+    SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
     if (NULL == data->task.builder || NULL == data->task.provider || NULL == data->task.manager)
     {
@@ -200,7 +200,7 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_Start_Default(SOPC_SKOrdonnancer* sk
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ReturnStatus status = SOPC_SKOrdonnancer_Initialize_Default(sko);
+    SOPC_ReturnStatus status = SOPC_SKscheduler_Initialize_Default(sko);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_Event event = {.event = 0, .eltId = 0, .params = (uintptr_t) &data->task};
@@ -214,14 +214,14 @@ static SOPC_ReturnStatus SOPC_SKOrdonnancer_Start_Default(SOPC_SKOrdonnancer* sk
     return status;
 }
 
-static void SOPC_SKOrdonnancer_StopAndClear_Default(SOPC_SKOrdonnancer* sko)
+static void SOPC_SKOrdonnancer_StopAndClear_Default(SOPC_SKscheduler* sko)
 {
     if (NULL == sko)
     {
         return;
     }
 
-    SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
+    SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
     // Cancel associated timer
     SOPC_EventTimer_Cancel(data->task.timerId);
@@ -246,21 +246,21 @@ static void SOPC_SKOrdonnancer_StopAndClear_Default(SOPC_SKOrdonnancer* sko)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKOrdonnancer* SOPC_SKOrdonnancer_Create()
+SOPC_SKscheduler* SOPC_SKscheduler_Create()
 {
-    SOPC_SKOrdonnancer* sko = SOPC_Calloc(1, sizeof(SOPC_SKOrdonnancer));
+    SOPC_SKscheduler* sko = SOPC_Calloc(1, sizeof(SOPC_SKscheduler));
     if (NULL == sko)
     {
         return NULL;
     }
 
-    sko->data = SOPC_Calloc(1, sizeof(SOPC_SKOrdonnancer_DefaultData));
+    sko->data = SOPC_Calloc(1, sizeof(SOPC_SKscheduler_DefaultData));
     if (NULL == sko->data)
     {
         SOPC_Free(sko);
         return NULL;
     }
-    SOPC_SKOrdonnancer_DefaultData* data = (SOPC_SKOrdonnancer_DefaultData*) sko->data;
+    SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
     data->isInitialized = false;
     data->task.builder = NULL;
     data->task.provider = NULL;
@@ -274,11 +274,11 @@ SOPC_SKOrdonnancer* SOPC_SKOrdonnancer_Create()
     return sko;
 }
 
-SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask(SOPC_SKOrdonnancer* sko,
-                                             SOPC_SKBuilder* skb,
-                                             SOPC_SKProvider* skp,
-                                             SOPC_SKManager* skm,
-                                             uint32_t msPeriod)
+SOPC_ReturnStatus SOPC_SKscheduler_AddTask(SOPC_SKscheduler* sko,
+                                           SOPC_SKBuilder* skb,
+                                           SOPC_SKProvider* skp,
+                                           SOPC_SKManager* skm,
+                                           uint32_t msPeriod)
 {
     if (NULL == sko)
     {
@@ -287,7 +287,7 @@ SOPC_ReturnStatus SOPC_SKOrdonnancer_AddTask(SOPC_SKOrdonnancer* sko,
     return sko->ptrAddTask(sko, skb, skp, skm, msPeriod);
 }
 
-SOPC_ReturnStatus SOPC_SKOrdonnancer_Start(SOPC_SKOrdonnancer* sko)
+SOPC_ReturnStatus SOPC_SKscheduler_Start(SOPC_SKscheduler* sko)
 {
     if (NULL == sko)
     {
@@ -296,7 +296,7 @@ SOPC_ReturnStatus SOPC_SKOrdonnancer_Start(SOPC_SKOrdonnancer* sko)
     return sko->ptrStart(sko);
 }
 
-void SOPC_SKOrdonnancer_StopAndClear(SOPC_SKOrdonnancer* sko)
+void SOPC_SKscheduler_StopAndClear(SOPC_SKscheduler* sko)
 {
     if (NULL == sko || NULL == sko->ptrClear)
     {

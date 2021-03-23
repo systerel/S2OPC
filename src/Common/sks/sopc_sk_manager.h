@@ -18,9 +18,7 @@
  */
 
 /**
- *  \file sopc_sk_manager.h
- *
- *  \brief A buffer of bytes with a maximum size, length and position.
+ *  \brief Security Keys Manager.
  */
 
 #ifndef SOPC_SK_MANAGER_H_
@@ -72,9 +70,6 @@ typedef SOPC_ReturnStatus (*SOPC_SKManager_GetKeys_Func)(SOPC_SKManager* skm,
                                                          uint32_t* KeyLifetime);
 typedef void (*SOPC_SKManager_Clear_Func)(SOPC_SKManager* skm);
 
-/**
- *  \brief Bytes buffer structure
- */
 struct SOPC_SKManager
 {
     SOPC_SKManager_GetSize_Func ptrSize;                   /* number of token */

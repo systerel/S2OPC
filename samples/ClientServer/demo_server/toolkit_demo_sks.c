@@ -192,7 +192,7 @@ uint32_t nbMethodIds = 0;
 
 /* SKS Data  */
 SOPC_SKManager* skManager;
-SOPC_SKOrdonnancer* skOrdonnancer;
+SOPC_SKscheduler* skScheduler;
 SKS_ServerModeType sksServerMode;
 uint64_t sksServerIndex;
 bool sksRestart = false;
@@ -796,11 +796,11 @@ static SOPC_StatusCode Server_SKS_Start()
         }
     }
 
-    /* Init SK Ordonnancer */
+    /* Init SK Scheduler */
     if (SOPC_STATUS_OK == status)
     {
-        skOrdonnancer = SOPC_SKOrdonnancer_Create();
-        if (NULL == skOrdonnancer)
+        skScheduler = SOPC_SKscheduler_Create();
+        if (NULL == skScheduler)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -856,13 +856,12 @@ static SOPC_StatusCode Server_SKS_Start()
     if (SOPC_STATUS_OK == status)
     {
         /* Init the task with 1s */
-        status =
-            SOPC_SKOrdonnancer_AddTask(skOrdonnancer, skBuilder, skProvider, skManager, SKS_ORDONANCER_INIT_MSPERIOD);
+        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager, SKS_ORDONANCER_INIT_MSPERIOD);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SKOrdonnancer_Start(skOrdonnancer);
+        status = SOPC_SKscheduler_Start(skScheduler);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1611,7 +1610,7 @@ int main(int argc, char* argv[])
     }
     */
 
-    /* Master retrieve Keys from Slave and start Ordonnancer */
+    /* Master retrieve Keys from Slave and start Scheduler */
     if (SOPC_STATUS_OK == status)
     {
         status = Server_SKS_Start();
@@ -1669,8 +1668,8 @@ int main(int argc, char* argv[])
     }
 
     Client_Stop();
-    SOPC_SKOrdonnancer_StopAndClear(skOrdonnancer);
-    SOPC_Free(skOrdonnancer);
+    SOPC_SKscheduler_StopAndClear(skScheduler);
+    SOPC_Free(skScheduler);
     SOPC_SKManager_Clear(skManager);
     SOPC_Free(skManager);
     Client_Teardown();

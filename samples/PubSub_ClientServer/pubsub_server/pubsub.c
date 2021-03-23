@@ -69,13 +69,13 @@ static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
-static SOPC_SKOrdonnancer* g_skOrdonnancer = NULL;
+static SOPC_SKscheduler* g_skScheduler = NULL;
 static SOPC_SKManager* g_skManager = NULL;
 static SOPC_SKProvider* g_skProvider = NULL;
 static bool g_isSecurity = false;
 static bool g_isSks = false;
 
-/* Initialise and start SK Ordonnancer and SK Manager if security is needed */
+/* Initialise and start SK Scheduler and SK Manager if security is needed */
 static bool PubSub_local_SKS_Start(void);
 
 static void free_global_configurations(void);
@@ -325,8 +325,8 @@ bool PubSub_local_SKS_Start()
     sksOK = sksOK && (NULL != provider);
     if (sksOK)
     {
-        g_skOrdonnancer = SOPC_SKOrdonnancer_Create();
-        sksOK = (NULL != g_skOrdonnancer);
+        g_skScheduler = SOPC_SKscheduler_Create();
+        sksOK = (NULL != g_skScheduler);
     }
 
     // Create a SK Builder which replace all Keys of a SK Manager
@@ -336,17 +336,17 @@ bool PubSub_local_SKS_Start()
         sksOK = (NULL != builder);
     }
 
-    // Create a SK Ordonnancer with a single task : call GetSecurityKeys and replace all keys
+    // Create a SK Scheduler with a single task : call GetSecurityKeys and replace all keys
     if (sksOK)
     {
-        status = SOPC_SKOrdonnancer_AddTask(g_skOrdonnancer, builder, provider, g_skManager,
-                                            PUBSUB_ORDONNANCER_FIRST_MSPERIOD); // Start with 3s
+        status = SOPC_SKscheduler_AddTask(g_skScheduler, builder, provider, g_skManager,
+                                          PUBSUB_ORDONNANCER_FIRST_MSPERIOD); // Start with 3s
         sksOK = (SOPC_STATUS_OK == status);
     }
 
     if (!sksOK)
     {
-        // Delete Builder and Provider. Manager and Ordonnancer are delete in Global Context Clear
+        // Delete Builder and Provider. Manager and Scheduler are delete in Global Context Clear
         SOPC_SKBuilder_Clear(builder);
         SOPC_Free(builder);
         SOPC_SKProvider_Clear(provider);
@@ -356,9 +356,9 @@ bool PubSub_local_SKS_Start()
 
     if (sksOK)
     {
-        // If it fails, builder and provider are deleted in Ordonnancer Clear function.
+        // If it fails, builder and provider are deleted in Scheduler Clear function.
         Client_Start();
-        status = SOPC_SKOrdonnancer_Start(g_skOrdonnancer);
+        status = SOPC_SKscheduler_Start(g_skScheduler);
         sksOK = (SOPC_STATUS_OK == status);
     }
 
@@ -413,9 +413,9 @@ void PubSub_Stop(void)
 
     Client_Stop();
     SOPC_LocalSKS_setSkManager(NULL);
-    SOPC_SKOrdonnancer_StopAndClear(g_skOrdonnancer);
-    SOPC_Free(g_skOrdonnancer);
-    g_skOrdonnancer = NULL;
+    SOPC_SKscheduler_StopAndClear(g_skScheduler);
+    SOPC_Free(g_skScheduler);
+    g_skScheduler = NULL;
     SOPC_SKManager_Clear(g_skManager);
     SOPC_Free(g_skManager);
     g_skManager = NULL;

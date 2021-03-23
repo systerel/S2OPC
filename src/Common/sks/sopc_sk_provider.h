@@ -18,9 +18,7 @@
  */
 
 /**
- *  \file sopc_sk_provider.h
- *
- *  \brief A buffer of bytes with a maximum size, length and position.
+ *  \brief Security Keys Provider.
  */
 
 #ifndef SOPC_SK_PROVIDER_H_
@@ -46,7 +44,7 @@ typedef SOPC_ReturnStatus (*SOPC_SKProvider_GetKeys_Func)(SOPC_SKProvider* skp,
 typedef void (*SOPC_SKProvider_Clear_Func)(void* data);
 
 /**
- *  \brief Bytes Security Keys Provider structure
+ *  \brief Security Keys Provider structure
  *
  */
 struct SOPC_SKProvider
