@@ -453,7 +453,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
         if (debug)
         {
             printf(">>Client debug : SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
-            printf(">>Client debug : appContext: %lu\n", appContext);
+            printf(">>Client debug : appContext: %" PRIuPTR "\n", appContext);
         }
         if (0 != appContext && appContext == Client_SessionContext)
         {
@@ -1033,7 +1033,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
 {
     /* Load server endpoints configuration
      * If WITH_EXPAT environment variable defined,
-     * retrieve XML file path from environment variable TEST_SERVER_XML_CONFIG.
+     * retrieve XML file path from environment variable TEST_SKS_SERVER_XML_CONFIG.
      * In case of success, use the dynamic server configuration loader from an XML file.
      *
      * Otherwise use an embedded default demo server configuration.
@@ -1044,7 +1044,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(SOPC_S2OPC_Config* outpu
     ServerConfigLoader config_loader = SRV_LOADER_DEFAULT_CONFIG;
 
 #ifdef WITH_EXPAT
-    const char* xml_file_path = getenv("TEST_SERVER_XML_CONFIG");
+    const char* xml_file_path = getenv("TEST_SKS_SERVER_XML_CONFIG");
 
     if (xml_file_path != NULL)
     {
