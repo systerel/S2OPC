@@ -26,6 +26,8 @@
 #ifndef SOPC_SK_ORDONNANCER_H_
 #define SOPC_SK_ORDONNANCER_H_
 
+#include "sopc_sk_scheduler.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -33,7 +35,6 @@
 #include "sopc_enums.h"
 #include "sopc_sk_builder.h"
 #include "sopc_sk_manager.h"
-#include "sopc_sk_ordonnancer.h"
 #include "sopc_sk_provider.h"
 
 // minimal periode for update 2s. Time use when no keys are available

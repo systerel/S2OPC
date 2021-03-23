@@ -26,7 +26,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_sk_ordonnancer.h"
+#include "sopc_sk_scheduler.h"
 
 typedef struct SOPC_SKOrdonnancer_Task
 {

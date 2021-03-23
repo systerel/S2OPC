@@ -31,8 +31,8 @@
 #include "sopc_pubsub_protocol.h"
 #include "sopc_sk_builder.h"
 #include "sopc_sk_manager.h"
-#include "sopc_sk_ordonnancer.h"
 #include "sopc_sk_provider.h"
+#include "sopc_sk_scheduler.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_udp_sockets.h"
 #include "sopc_xml_loader.h"
@@ -40,6 +40,7 @@
 #include "client.h"
 #include "config.h"
 #include "pubsub.h"
+
 #include "server.h"
 
 #ifdef PUBSUB_STATIC_CONFIG
