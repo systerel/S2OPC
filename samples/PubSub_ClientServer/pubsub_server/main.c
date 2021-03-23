@@ -21,10 +21,12 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_helper_uri.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
@@ -38,7 +40,8 @@ static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event,
                                        uint32_t idOrStatus,
                                        void* param,
                                        uintptr_t appContext);
-static SOPC_ReturnStatus ClientServer_Initialize(void);
+static SOPC_ReturnStatus ClientServer_Initialize(char* logPath);
+static char* ClientServer_GetLogPath(const char* binName, const char* port);
 
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -134,10 +137,10 @@ static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrSt
     }
 }
 
-SOPC_ReturnStatus ClientServer_Initialize(void)
+SOPC_ReturnStatus ClientServer_Initialize(char* logPath)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logPath;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
@@ -153,9 +156,52 @@ SOPC_ReturnStatus ClientServer_Initialize(void)
     else
     {
         printf("# Error: Server initialization failed.\n");
+        return status;
+    }
+    return SOPC_STATUS_OK;
+}
+
+char* ClientServer_GetLogPath(const char* binName, const char* port)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // './' + <name> + <port> + '_logs/'
+    char* logPath = SOPC_Calloc(strlen(binName) + strlen(port) + 6 + 1, sizeof(char));
+    if (NULL == logPath)
+    {
+        return NULL;
+    }
+    char* res = strcpy(logPath, binName);
+    if (res == logPath)
+    {
+        res = strcpy(logPath + strlen(binName), port);
+        if (res == logPath + strlen(binName))
+        {
+            res = strcpy(logPath + strlen(binName) + strlen(port), "_logs/");
+            if (res != logPath + strlen(binName) + strlen(port))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
     }
 
-    return status;
+    if (SOPC_STATUS_OK == status)
+    {
+        printf("# Info: Server log path initialized to '%s'.\n", logPath);
+    }
+    else
+    {
+        printf("# Info: Server log initialized with default configuration './logs'.\n");
+        res = strcpy(logPath, "./logs");
+    }
+    return logPath;
 }
 
 int main(int argc, char* const argv[])
@@ -168,13 +214,6 @@ int main(int argc, char* const argv[])
     if (argc > 1)
     {
         assert(argc == 2);
-        size_t tmp, tmp2, tmp3;
-        bool res = SOPC_Helper_URI_ParseUri_WithPrefix("opc.tcp://", argv[1], &tmp, &tmp2, &tmp3);
-        if (!res)
-        {
-            printf("# Error: invalid OPC UA server address\n");
-            exit(1);
-        }
         ENDPOINT_URL = argv[1];
     }
     else
@@ -182,8 +221,17 @@ int main(int argc, char* const argv[])
         ENDPOINT_URL = DEFAULT_ENDPOINT_URL;
     }
 
+    size_t hostNameLength, portIdx, portLength;
+    bool res = SOPC_Helper_URI_ParseUri_WithPrefix("opc.tcp://", ENDPOINT_URL, &hostNameLength, &portIdx, &portLength);
+    if (!res)
+    {
+        printf("# Error: invalid OPC UA server address\n");
+        exit(1);
+    }
+
     /* Initialize S2OPC Server */
-    SOPC_ReturnStatus status = ClientServer_Initialize();
+    char* logDirPath = ClientServer_GetLogPath(argv[0], &ENDPOINT_URL[portIdx]);
+    SOPC_ReturnStatus status = ClientServer_Initialize(logDirPath);
     if (SOPC_STATUS_OK != status)
     {
         printf("# Error: Could not initialize the PubSub client/server.\n");
@@ -270,5 +318,6 @@ int main(int argc, char* const argv[])
     PubSub_StopAndClear();
     Client_Teardown();
     Server_StopAndClear(&s2opcConfig);
+    SOPC_Free(logDirPath);
     printf("# Info: Server closed.\n");
 }
