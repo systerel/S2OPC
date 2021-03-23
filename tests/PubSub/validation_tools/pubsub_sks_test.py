@@ -153,10 +153,6 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
         self.fileCount = 0
 
     def __start_proc__(self, cmd, filename, show=False):
-        #proc = subprocess.Popen(cmd)
-        #proc = subprocess.Popen(cmd, shell = True, stdin = None, stdout = subprocess.PIPE, stderr = subprocess.PIPE, encoding = 'utf8')
-        show = True
-
         if show == True:
             print("Popen with output")
             proc = subprocess.Popen(cmd)
@@ -250,7 +246,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
     def start_publisher(self):
         log_test("Start Publisher")
         if self.publisher is None:
-            self.publisher = self.__start_proc__(self.command_publisher, 'publisher')
+            self.publisher = self.__start_proc__(self.command_publisher, 'publisher', True)
             test_wait_server('Publisher', PUBLISHER_URI)
         else:
             log_test("Warning : Publisher is already running")
@@ -412,10 +408,6 @@ NID_PUB_UINT16 = u"ns=1;s=PubUInt16"
 NID_PUB_INT = u"ns=1;s=PubInt"
 
 
-#PurePosixPath('/users/vla/Private/03_DEV/INGOPCS/build/bin/')
-#BINARY_DIRECTORY = PurePosixPath('/users/aurelien/git/S2OPC_new/build/bin/')
-#localbenchmark = LocalBenchmarkManager(bindir=BINARY_DIRECTORY, max_slave=2, port_pub='4851', port_sub='4852')
-
 logger = TapLogger("pubsub_sks_test.tap")
 
 ####################################################################################################
@@ -436,6 +428,7 @@ def integration_TC1(benchmark):
     # Start Publisher and Subscriber
     benchmark.start_publisher()
     benchmark.start_subscriber()
+
     load_pubsubserver_configuration(PUBLISHER_URI, XML_PUBLISHER_ONLY)
     load_pubsubserver_configuration(SUBSCRIBER_URI, XML_SUBSCRIBER_ONLY)
     
@@ -444,7 +437,7 @@ def integration_TC1(benchmark):
 
     # Stop all process
     benchmark.stop_all()
-    
+
 
 ####################################################################################################
 # TC 2 :
