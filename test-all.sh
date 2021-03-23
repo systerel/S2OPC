@@ -65,8 +65,8 @@ publisher_scheduler_test.tap
 pubsub_modules_test.tap
 xml_parser_test.tap'
 
-PUBSUB_CLIENTSERVER_TAP_FILES='pubsub_server_test.tap'
-PUBSUB_CLIENTSERVER_TAP_FILES=$PUBSUB_CLIENTSERVER_TAP_FILES$'\npubsub_sks_test.tap'
+PUBSUB_CLIENTSERVER_TAP_FILES='pubsub_server_test.tap
+pubsub_sks_test.tap'
 
 
 PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
@@ -124,7 +124,7 @@ if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
    EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_TAP_FILES
    if [ -z $S2OPC_PUBSUB_ONLY ]; then
        if [ -z $WITH_NANO_EXTENDED ] || [ "$WITH_NANO_EXTENDED" == "1" ]; then
-           # si nano extended pas défini ou à 1 on fait le tests
+           # If WITH_NANO_EXTENDED not defined or set to 1, expect all tests passed
            EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_CLIENTSERVER_TAP_FILES
        fi
    fi
