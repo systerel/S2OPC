@@ -38,6 +38,11 @@ if(ENABLE_SAMPLES)
     # Configurations
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_rtt_emitter.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_rtt_loopback.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    # Batch test scripts
+    # TODO: make this optional
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/pubsub/start_campaign.sh ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/pubsub/gen_xmls.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/pubsub/analyze_rtt.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     )
 
 endif(ENABLE_SAMPLES)
