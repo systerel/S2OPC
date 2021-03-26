@@ -39,6 +39,7 @@
 
 #include "cache.h"
 #include "config.h"
+#include "udp_json_gtw.h"
 
 #include <time.h> /* For now, requires struct timespec */
 
@@ -187,6 +188,16 @@ int main(int argc, char* const argv[])
         }
     }
 
+    /* Configure the UDP JSON Gateway module */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = UDP_Configure();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not configure UDP JSON Gateway module.\n");
+        }
+    }
+
     /* Start PubSub */
     if (SOPC_STATUS_OK == status)
     {
@@ -233,6 +244,16 @@ int main(int argc, char* const argv[])
         }
     }
 
+    /* Start the UDP JSON Gateway module */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = UDP_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("# Error: Could not start UDP JSON Gateway module.\n");
+        }
+    }
+
     /* Wait for a signal */
     while (SOPC_STATUS_OK == status && 0 == stopSignal)
     {
@@ -242,6 +263,7 @@ int main(int argc, char* const argv[])
     /* Clean and quit */
     SOPC_PubScheduler_Stop();
     SOPC_SubScheduler_Stop();
+    UDP_StopAndClear();
     Cache_Clear();
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
     SOPC_SubTargetVariableConfig_Delete(targetConfig);

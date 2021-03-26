@@ -50,7 +50,7 @@ SOPC_DataValue* Cache_Get(const SOPC_NodeId *nid);
 /**
  * \brief Set a value in the cache
  *
- * \warning The ownership of given \p dv is taken by the cache, so you should not reuse or free it
+ * \warning The ownership of given \p nid and \p dv is taken by the cache, so you should not reuse or free them
  */
 bool Cache_Set(SOPC_NodeId *nid, SOPC_DataValue *dv);
 

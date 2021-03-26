@@ -20,6 +20,7 @@ if(ENABLE_SAMPLES)
   # Demo PubSub
   add_executable(pubsub "pubsub/main.c"
                         "pubsub/cache.c"
+                        "pubsub/udp_json_gtw.c"
                         )
   target_compile_options(pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(pubsub PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")

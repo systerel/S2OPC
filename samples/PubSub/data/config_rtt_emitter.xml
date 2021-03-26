@@ -1,7 +1,14 @@
 <PubSub publisherId="42">
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="93" version="1" publishingInterval=".1" securityMode="signAndEncrypt">
+        <message id="93" version="1" publishingInterval="2000" securityMode="signAndEncrypt">
             <variable nodeId="ns=1;i=0" dataType="UInt32" displayName="ignored"/>
+        </message>
+        <message id="16" version="1" publishingInterval="1000">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=data0" displayName="Counter" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=data1" displayName="Data1" dataType="Int16"/>
+            <variable nodeId="ns=1;s=data2" displayName="Data2" dataType="Int32"/>
+            <variable nodeId="ns=1;s=data3" displayName="Data3" dataType="String"/>
         </message>
     </connection>
     <!-- The emitter subscribes to the variable that has been looped-back,
