@@ -590,54 +590,11 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
     }
 
     /* Creation of the time-sensitive thread */
-    /* TODO: have a ThreadSensitive_Create, simplify Tread_Create */
     if (SOPC_STATUS_OK == resultSOPC)
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
-
-        Thread *thread = &pubSchedulerCtx.thPublisher;
-        pthread_attr_t attr;
-
-        /* Initialize scheduling policy and priority */
-        int ret = pthread_attr_init(&attr);
-        assert(0 == ret && "Could not initialize pthread attributes");
-        ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-        assert(0 == ret && "Could not unset scheduler inheritance in thread creation attributes");
-        ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-        assert(0 == ret && "Could not set thread scheduling policy");
-        struct sched_param scp;
-        scp.sched_priority = 99;
-        ret = pthread_attr_setschedparam(&attr, &scp);
-        assert(0 == ret && "Could not set thread priority");
-
-        ret = pthread_create(thread, &attr, thread_start_publish, NULL);
-        if (0 != ret)
-        {
-            resultSOPC = SOPC_STATUS_NOK;
-        }
-
-        char *taskNameParam = "Publisher";
-        char tmpTaskName[16];
-        char *taskName = taskNameParam;
-        if (strlen(taskName) >= 16)
-        {
-            strncpy(tmpTaskName, taskName, 15);
-            tmpTaskName[15] = '\0';
-            taskName = tmpTaskName;
-        }
-        ret = pthread_setname_np(*thread, taskName);
-
-        /* pthread_setname_np calls can fail. It is not a sufficient reason to stop processing. */
-        if (0 != ret)
-        {
-            /* TODO: thread-safety of errno and strerror */
-            log_warning("Warning, thread name set failed \"%s\" with error %s\n", taskNameParam, strerror(errno));
-        }
-
-        if (SOPC_STATUS_OK != resultSOPC)
-        {
-            log_error("# Error: could not create the publisher thread\n");
-        }
+        resultSOPC =
+            SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL, 99, "Publisher");
     }
 
     if (SOPC_STATUS_OK != resultSOPC)
