@@ -26,13 +26,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <pthread.h>
 
 #include "udp_json_gtw.h"
 #include "sopc_atomic.h"
 #include "sopc_time.h"
 #include "sopc_builtintypes.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_threads.h"
 #include "server.h"
 #include "config.h"
 
@@ -113,13 +113,13 @@ static char* localhost_ip = "127.0.0.1";
 static int32_t UDP_recepRunning = 0;
 static int recepSockfd = 0;
 static struct sockaddr_in recepSock;
-static pthread_t recepThreadId = 0;
+static Thread recepThreadId = 0;
 
 /* Sending global variables */
 static int32_t UDP_sendRunning = 0;
 static int sendSockfd = 0;
 static struct sockaddr_in sendSock;
-static pthread_t sendThreadId = 0;
+static Thread sendThreadId = 0;
 
 /* Data global variables */
 static DataType rcvdData[NBDATA];
@@ -432,7 +432,7 @@ static void* UDP_ManageReception (void* arg)
 
     /* Exit current thread */
     printf("# Info: Exit UDP reception thread.\n");
-    pthread_exit(NULL);
+    return NULL;
 }
 
 
@@ -590,7 +590,7 @@ static void* UDP_ManageSending (void* arg)
 
     /* Exit current thread */
     printf("# Info: Exit UDP sending thread.\n");
-    pthread_exit(NULL);
+    return NULL;
 }
 
 
@@ -601,7 +601,8 @@ bool UDP_Start(void)
 
     /* Create and start reception thread */
     SOPC_Atomic_Int_Set(&UDP_recepRunning, 1);
-    if (0 == pthread_create(&recepThreadId, NULL, &UDP_ManageReception, NULL))
+    SOPC_ReturnStatus status = SOPC_Thread_Create(&recepThreadId, &UDP_ManageReception, NULL, "ReceiveJSON");
+    if (SOPC_STATUS_OK == status)
     {
         UDP_recepOK = true;
         printf("# Info: UDP Reception thread %ld created.\n", recepThreadId);
@@ -609,7 +610,8 @@ bool UDP_Start(void)
 
     /* Create and start sending thread */
     SOPC_Atomic_Int_Set(&UDP_sendRunning, 1);
-    if (0 == pthread_create(&sendThreadId, NULL, &UDP_ManageSending, NULL))
+    status = SOPC_Thread_CreatePrioritized(&sendThreadId, &UDP_ManageSending, NULL, 98, "SendJSON");
+    if (SOPC_STATUS_OK == status)
     {
         UDP_sendOK = true;
         printf("# Info: UDP Sending thread %ld created.\n", sendThreadId);
@@ -626,8 +628,8 @@ void UDP_Stop(void)
     SOPC_Atomic_Int_Set(&UDP_sendRunning, 0);
 
     /* Wait for threads to be reset*/
-    pthread_join(recepThreadId, NULL);
-    pthread_join(sendThreadId, NULL);
+    SOPC_Thread_Join(recepThreadId);
+    SOPC_Thread_Join(sendThreadId);
 }
 
 
