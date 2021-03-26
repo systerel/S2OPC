@@ -237,42 +237,96 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+static inline SOPC_ReturnStatus create_thread(Thread* thread, pthread_attr_t *attr, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (thread != NULL && startFct != NULL)
+    int ret = pthread_create(thread, attr, startFct, startArgs);
+
+    SOPC_ReturnStatus status = (0 == ret) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    if (SOPC_STATUS_OK != status)
     {
-        int creationRetCode = pthread_create(thread, NULL, startFct, startArgs);
+        fprintf(stderr, "Error cannot create thread: %d\n", ret);
+    }
+    else
+    {
+        const char *name = taskName;
+        char tmpTaskName[16];
 
-        int setNameRetCode = -1;
-
-        if (strlen(taskName) < 16)
+        if (strlen(taskName) >= 16)
         {
-            setNameRetCode = pthread_setname_np(*thread, taskName);
-        }
-        else
-        {
-            char tmpTaskName[16];
             strncpy(tmpTaskName, taskName, 15);
             tmpTaskName[15] = '\0';
-            setNameRetCode = pthread_setname_np(*thread, tmpTaskName);
-        }
-
-        if (0 == creationRetCode)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
+            name = tmpTaskName;
         }
 
         /* pthread_setname_np calls can fail. It is not a sufficient reason to stop processing. */
-        if (0 != setNameRetCode)
+        ret = pthread_setname_np(*thread, name);
+        if (0 != ret)
         {
-            printf("Error during set name to thread: %s\n", taskName);
+            fprintf(stderr, "Error during set name \"%s\" to thread: %d\n", taskName, ret);
         }
     }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+{
+    if (NULL == thread || NULL == startFct)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return create_thread(thread, NULL, startFct, startArgs, taskName);
+}
+
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread, void* (*startFct)(void*), void* startArgs, int priority, const char* taskName)
+{
+    if (NULL == thread || NULL == startFct || priority < 1 || priority > 99)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Initialize scheduling policy and priority */
+    pthread_attr_t attr;
+    int ret = pthread_attr_init(&attr);
+    if (0 != ret)
+    {
+        fprintf(stderr, "Could not initialize pthread attributes: %d\n", ret);
+    }
+    if (0 == ret)
+    {
+        ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+        if (0 != ret)
+        {
+            fprintf(stderr, "Could not unset scheduler inheritance in thread creation attributes: %d\n", ret);
+        }
+    }
+    if (0 == ret)
+    {
+        ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+        if (0 != ret)
+        {
+            fprintf(stderr, "Could not set thread scheduling policy: %d\n", ret);
+        }
+    }
+    if (0 == ret)
+    {
+        struct sched_param scp;
+        scp.sched_priority = priority;
+        ret = pthread_attr_setschedparam(&attr, &scp);
+        if (0 != ret)
+        {
+            fprintf(stderr, "Could not set thread priority: %d\n", ret);
+        }
+    }
+
+    /* Create thread with created attributes */
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (0 == ret)
+    {
+        status = create_thread(thread, &attr, startFct, startArgs, taskName);
+    }
+
     return status;
 }
 
