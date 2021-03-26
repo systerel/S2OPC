@@ -49,10 +49,13 @@ if [[ ! -z "${REMOTE_HOST}" && -z "${REMOTE_PATH}" ]]; then
     exit 1
 fi
 
+sleep_time=30
 work_dir=$(mktemp -d)
-list_pubints_ms=("100" "30"   "10"   "3"    "1"    "0.3"   "0.1"   "0.03")
-list_n_samples=( "256" "1024" "2048" "4096" "8192" "32768" "65536" "65536")
-list_names=(    "100m" "30m"  "10m"  "3m"   "1m"   "300µ"  "100µ"  "30µ")
+list_pubints_ms=("100" "30"   "10"   "3"     "1"    "0.3"   "0.1"   "0.03")
+#list_n_samples=( "256" "1024" "2048" "4096" "8192" "32768" "65536" "65536")
+# Compute the number of samples to cover the sleep_time
+list_n_samples=( "300" "1000" "3000" "10000" "30000" "100000" "300000" "1000000")
+list_names=(    "100m" "30m"  "10m"  "3m"    "1m"   "300µ"  "100µ"  "30µ")
 list_secmodes="none signAndEncrypt"
 
 # Generate configurations
@@ -69,8 +72,8 @@ done
 if [[ ! -z "${REMOTE_HOST}" ]]; then
     remote_work_dir=$(ssh ${REMOTE_HOST} "mktemp -d")
     printf "Working on remote in %s\n" ${remote_work_dir}
-    scp "${work_dir}/config_rtt_loop_*.xml" "${remote_work_dir}"
-    rm "${work_dir}/config_rtt_loop_*.xml"
+    scp "${work_dir}/config_rtt_loop_"*.xml ${REMOTE_HOST}:"${remote_work_dir}"
+    rm "${work_dir}/config_rtt_loop_"*.xml
 fi
 
 # Do the experiments
@@ -86,7 +89,7 @@ for secmode in ${list_secmodes}; do
             config_loop="${remote_work_dir}/config_rtt_loop_${secmode}_${list_names[i]}.xml"
             pubsub_out="${remote_work_dir}/pubsub_${secmode}_${list_names[i]}.out"
             # TODO: pipe this into local grep...
-            pid_loopback=$((ssh ${REMOTE_HOST} | tee -a /dev/tty | grep -Po "Loopback pid is \K\d\+") <<- EOF
+            pid_loopback=$((ssh ${REMOTE_HOST} | tee -a /dev/tty | grep -Po "Loopback pid is \K\d+") <<- EOF
 				cd ${REMOTE_PATH}
 				nohup env IS_LOOPBACK=1 PUBSUB_XML_CONFIG="${config_loop}" ./pubsub < /dev/null > "${pubsub_out}"  &
 				echo "Loopback pid is \$!"
@@ -100,8 +103,12 @@ for secmode in ${list_secmodes}; do
         pid_emitter=$!
         # Stat it
         pubsub_out="${work_dir}/pubsub_${secmode}_${list_names[i]}.stat"
-        sudo perf stat -p ${pid_emitter} -- sleep 20 |& tee ${pubsub_out}
-        # Kill emitter then loopback
+        # perf stat requires sudo on most platform to snoop into other pids
+        # perf stat prints its number according to locale, don't do this (with LANG=)
+        # perf stat -e duration_time is only available on Linux 5.2+ so don't count on it
+        #  (even though it would have been easier to use -x which produces a CSV)
+        LANG= sudo perf stat -p ${pid_emitter} --no-big-num -- sleep ${sleep_time} |& tee ${pubsub_out}
+        # Kill emitter then the loopback
         kill ${pid_emitter}
         if [[ -z "${REMOTE_HOST}" ]]; then
             kill ${pid_loopback}

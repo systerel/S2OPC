@@ -36,13 +36,13 @@ Stats = namedtuple('Stats', ['min', 'max', 'mean', 'deviation', 'missed', 'pct_m
 def do_stats(xs):
     # ys is xs without nulls, which are misses
     ys = [x for x in xs if x != 0]
-    m = min(ys)
-    M = max(ys)
-    mean = sum(ys)/len(ys)
+    m = min(ys) if ys else 0
+    M = max(ys) if ys else 0
+    mean = sum(ys)/len(ys) if ys else 0
     # This way of computing the std dev is not the most accurate but it yields correct-enough results
-    std_dev = (sum((y-mean)**2 for y in ys)/len(ys))**.5
+    std_dev = (sum((y-mean)**2 for y in ys)/len(ys))**.5 if ys else 0
     missed = sum(1 for x in xs if x == 0)  # should also be len(xs)-len(ys)
-    frac_missed = missed/len(ys)
+    frac_missed = missed/len(xs)
     return Stats(m, M, mean, std_dev, missed, 100*frac_missed)
 
 
@@ -65,14 +65,20 @@ if __name__ == '__main__':
 
     # Get the measures from the stat file
     stat_fname = Path(args.rtt_fname).with_name('pubsub_{}_{}.stat'.format(sec_mode, pub_int))
-    m = re.search(r'(\d+[,.]\d+)\s+task-clock \(msec\).*?(\d+[,.]\d+) seconds time elapsed', open(str(stat_fname)).read(), re.DOTALL)
-    if not m:
+    task_clock = None
+    duration = None
+    reNumber = re.compile(r'(\d+\.\d+)')
+    for line in open(str(stat_fname)):
+        if 'task-clock' in line and 'msec' in line:
+            task_clock, *_ = reNumber.findall(line)
+        if 'seconds time elapsed' in line:
+            duration, *_ = reNumber.findall(line)
+    if task_clock is None or duration is None:
         eprint('Did not find numbers in stat file', stat_fname)
         sys.exit(2)
 
-    a,b = m.groups()
-    conso_ms = float(a.replace(',', '.'))
-    tot_s = float(b.replace(',', '.'))
+    conso_ms = float(task_clock)
+    tot_s = float(duration)
 
     print('Experiment consumed on average {:.2f}% CPU\n'.format(conso_ms/10/tot_s))
 
