@@ -234,6 +234,7 @@ static void UDP_CreateWriteValue(OpcUa_WriteValue* writeValue, uint8_t dataIdx)
     switch (Cfg[dataIdx].type)
     {
         case SOPC_String_Id :
+            /* TODO: Copy this value */
             val->Value.String.Length = (int32_t) strlen(rcvdData[dataIdx].Value.text);
             val->Value.String.DoNotClear = true;
             val->Value.String.Data = (SOPC_Byte*) rcvdData[dataIdx].Value.text;
@@ -327,7 +328,7 @@ static void UDP_DecodeData(char* buffer)
     }
 
     /* For each data, split value and name */
-    for (int i = 0; i < NBDATA; i++)
+    for (int i = 0; i < dataIdx; i++)
     {
         switch (Cfg[i].type)
         {
@@ -617,7 +618,7 @@ bool UDP_Start(void)
         printf("# Info: UDP Sending thread %ld created.\n", sendThreadId);
     }
 
-    return UDP_recepOK || UDP_sendOK;
+    return UDP_recepOK && UDP_sendOK;
 }
 
 
