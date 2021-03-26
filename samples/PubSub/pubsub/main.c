@@ -428,7 +428,7 @@ static void save_rtt_to_csv(void)
     }
     for (size_t idx = 0; res > 0 && idx < g_n_samples; ++idx)
     {
-        int64_t ts = g_ts_emissions[idx].tv_sec*1000000000 + g_ts_emissions[idx].tv_nsec;
+        int64_t ts = g_ts_emissions[idx].tv_sec * (int64_t)(1000000000) + g_ts_emissions[idx].tv_nsec;
         res = fprintf(csv, "%" PRIi64 ";%ld\n", ts, g_rtt[idx]);
     }
 
