@@ -231,11 +231,14 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
         data = strtok(NULL, comma);
         dataIdx++;
     }
-    assert(NBDATA-1 == dataIdx);
+    if (dataIdx < NBDATA)
+    {
+        printf("# Warning: received only %" PRIu8 " values\n", dataIdx);
+    }
 
     /* For each data, split value and name */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    for (int i = 0; SOPC_STATUS_OK == status && i < NBDATA; i++)
+    for (int i = 0; SOPC_STATUS_OK == status && i < dataIdx; i++)
     {
         /* The cache keeps the ownership of the NodeId and the DataValue, so we must create new ones */
         SOPC_NodeId* nodeId = NULL;
