@@ -569,6 +569,10 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct
 
 void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
 {
+    if (NULL == epConfig)
+    {
+        return;
+    }
     SOPC_Free(epConfig->endpointURL);
     for (int i = 0; i < epConfig->nbSecuConfigs && i < SOPC_MAX_SECU_POLICIES_CFG; i++)
     {
