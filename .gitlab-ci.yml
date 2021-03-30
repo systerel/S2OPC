@@ -110,12 +110,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:0b462da8ab4c786c28041ee4bb6e99272bf7e3f63c74b039717bbd2aecab6119 # digest of build:1.24
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:ec567d159562f2559273547909da9414105ff38c3a5997d699a997eae486807a # digest of build:1.25
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:a2ff15f9670d471d04872ea86f8d01502f7741c24669b024a9e16f92966a8c18'
+    DOCKER_IMAGE: 'sha256:15a79c5ed94c53698f0c24fcf7bf49a3c37947651f37ce68bc093b56eb1150d5'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -242,7 +242,7 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:678c92905ecb853b1cad6ef2948fb6a40309cf17d1dbbda92ac326f79454925a # digest of check:1.11
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:dbf6a13b489deabbebeafe9b72c633ca0787c47e27e83cb765662f5769ac5726 # digest of check:1.13
   script:
     - ./.check-code.sh
   artifacts:
