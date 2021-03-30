@@ -82,7 +82,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
     char* timestamp = NULL;
     const char* sLevel = NULL;
     int res;
-    if (pLogInst->file->pFile != NULL && false != pLogInst->started)
+    if (pLogInst->file->pFile != NULL && pLogInst->started)
     {
         timestamp = SOPC_Time_GetStringOfCurrentTimeUTC(false);
         switch (level)
@@ -104,10 +104,10 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
             sLevel = SOPC_CSTRING_LEVEL_UNKNOWN;
             break;
         }
-        if (false == withCategory)
+        if (!withCategory)
         {
             res = fprintf(pLogInst->file->pFile, "[%s] %s", timestamp, sLevel);
-            if (inhibitConsole == false && pLogInst->consoleFlag != false)
+            if (!inhibitConsole && pLogInst->consoleFlag)
             {
                 printf("[%s] %s", timestamp, sLevel);
             }
@@ -115,7 +115,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         else
         {
             res = fprintf(pLogInst->file->pFile, "[%s] %s%s", timestamp, pLogInst->category, sLevel);
-            if (inhibitConsole == false && pLogInst->consoleFlag != false)
+            if (!inhibitConsole && pLogInst->consoleFlag)
             {
                 printf("[%s] %s%s", timestamp, pLogInst->category, sLevel);
             }
@@ -146,10 +146,10 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
 {
     int res = 0;
     bool result = false;
-    if (NULL != pLogInst && false == pLogInst->started)
+    if (NULL != pLogInst && !pLogInst->started)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
-        if (pLogInst->file->pFile != NULL)
+        if (NULL != pLogInst->file->pFile)
         {
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
@@ -283,7 +283,12 @@ SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->started = false;
         // Starts the log instance
-        SOPC_Log_Start(result);
+        bool started = SOPC_Log_Start(result);
+
+        if (!started)
+        {
+            SOPC_Log_ClearInstance(&result);
+        }
     }
     return result;
 }
@@ -342,7 +347,12 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
         result->level = SOPC_LOG_LEVEL_ERROR;
 
         // Starts the log instance
-        SOPC_Log_Start(result);
+        bool started = SOPC_Log_Start(result);
+
+        if (!started)
+        {
+            SOPC_Log_ClearInstance(&result);
+        }
     }
     return result;
 }
@@ -352,14 +362,15 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
 {
     bool result = false;
     int res = 0;
-    if (NULL != pLogInst && false != pLogInst->started)
+    if (NULL != pLogInst && pLogInst->started)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
         pLogInst->level = level;
         result = true;
+        SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
+
         if (pLogInst->file->pFile != NULL)
         {
-            SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
             switch (level)
             {
             case SOPC_LOG_LEVEL_ERROR:
@@ -410,14 +421,16 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 {
     int res = 0;
     bool result = false;
-    if (NULL != pLogInst && false != pLogInst->started)
+    if (NULL != pLogInst && pLogInst->started)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
         pLogInst->consoleFlag = activate;
         result = true;
+
+        SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
+
         if (pLogInst->file->pFile != NULL)
         {
-            SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
             res = fprintf(pLogInst->file->pFile, "LOG CONSOLE OUTPUT SET TO '%s'\n", activate ? "TRUE" : "FALSE");
             if (res > 0)
             {
@@ -472,8 +485,12 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             assert(res > 0);
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
-            res = fprintf(pLogInst->file->pFile, "LOG CONTINUE IN NEXT FILE: %s\n", pLogInst->file->filePath);
-            assert(res > 0);
+            if (pLogInst->file->pFile != NULL)
+            {
+                res = fprintf(pLogInst->file->pFile, "LOG CONTINUE IN NEXT FILE: %s\n", pLogInst->file->filePath);
+                assert(res > 0);
+            }
+
             fclose(pLogInst->file->pFile);
             pLogInst->file->pFile = fopen(pLogInst->file->filePath, "w");
             pLogInst->file->nbBytes = 0;
@@ -485,14 +502,14 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
 {
     int res = 0;
     int res2 = 0;
-    if (NULL != pLogInst && false != pLogInst->started && level <= pLogInst->level)
+    if (NULL != pLogInst && pLogInst->started && level <= pLogInst->level)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
         // Check file open
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
         if (NULL != pLogInst->file->pFile)
         {
-            if (pLogInst->consoleFlag != false)
+            if (pLogInst->consoleFlag)
             {
                 va_list args_copy;
                 va_copy(args_copy, args);
@@ -543,11 +560,11 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
     {
         pLogInst = *ppLogInst;
         Mutex_Lock(&pLogInst->file->fileMutex);
-        if (false != pLogInst->started)
+        if (pLogInst->started)
         {
+            SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
             if (pLogInst->file->pFile != NULL)
             {
-                SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
                 fprintf(pLogInst->file->pFile, "LOG STOP\n");
             }
 
@@ -575,7 +592,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
 
 void SOPC_Log_Clear(void)
 {
-    if (uniquePrefixSet != false)
+    if (uniquePrefixSet)
     {
         SOPC_Free(SOPC_CSTRING_UNIQUE_LOG_PREFIX);
         uniquePrefixSet = false;
