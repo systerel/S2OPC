@@ -90,7 +90,7 @@ int main(void)
 
     // pLogSrv = P_LOG_SRV_CreateAndStart(60,2);
 
-    handleCondition = Condition_Create();
+    Condition_Init(handleCondition);
 
     FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
 

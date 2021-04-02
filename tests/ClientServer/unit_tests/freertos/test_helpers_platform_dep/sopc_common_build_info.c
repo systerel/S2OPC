@@ -21,10 +21,10 @@
 #include "sopc_version.h"
 
 const SOPC_Build_Info sopc_common_build_info = {
-    .toolkitVersion = SOPC_TOOLKIT_VERSION,
-    .toolkitSrcCommit = "ECLIPSE BUILD",
-    .toolkitDockerId = "",
-    .toolkitBuildDate = "2019-05-29+",
+    .buildVersion = SOPC_TOOLKIT_VERSION,
+    .buildSrcCommit = "ECLIPSE BUILD",
+    .buildDockerId = "",
+    .buildBuildDate = "2019-05-29+",
 };
 
 SOPC_Build_Info SOPC_Common_GetBuildInfo()

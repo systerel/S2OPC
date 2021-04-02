@@ -17,17 +17,16 @@
  * under the License.
  */
 
-#include "sopc_toolkit_build_info.h"
-#include "sopc_version.h"
+#ifndef FREERTOS_P_MEM_H_
+#define FREERTOS_P_MEM_H_
 
-const SOPC_Build_Info sopc_client_server_build_info = {
-    .buildVersion = SOPC_TOOLKIT_VERSION,
-    .buildSrcCommit = "ECLIPSE BUILD",
-    .buildDockerId = "",
-    .buildBuildDate = "2019-05-29+",
-};
+#include <inttypes.h> /* stdlib includes */
+#include <limits.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
-SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
-{
-    return sopc_client_server_build_info;
-}
+#include "FreeRTOS.h" /* freeRtos includes */
+#include "task.h"
+
+#endif /* FREERTOS_P_MEM_H_ */

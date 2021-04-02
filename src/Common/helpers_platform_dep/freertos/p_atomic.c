@@ -19,6 +19,15 @@
 
 #include "sopc_atomic.h"
 
+#ifndef SOPC_PTR_SIZE
+    //TODO: Compiler check
+    #ifndef __SIZEOF_POINTER__
+        #error "S2OPC cannot be compiled with gcc on this platform"
+    #else
+        #define SOPC_PTR_SIZE __SIZEOF_POINTER__
+    #endif
+#endif
+
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
 #if !defined(__clang__) && (__GNUC__ > 4)

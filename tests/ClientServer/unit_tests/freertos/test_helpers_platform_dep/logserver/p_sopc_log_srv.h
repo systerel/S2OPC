@@ -17,17 +17,22 @@
  * under the License.
  */
 
-#include "sopc_toolkit_build_info.h"
-#include "sopc_version.h"
+#ifndef P_SOPC_LOG_SRV_H
+#define P_SOPC_LOG_SRV_H
 
-const SOPC_Build_Info sopc_client_server_build_info = {
-    .buildVersion = SOPC_TOOLKIT_VERSION,
-    .buildSrcCommit = "ECLIPSE BUILD",
-    .buildDockerId = "",
-    .buildBuildDate = "2019-05-29+",
-};
+// ************Public API**************
 
-SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
-{
-    return sopc_client_server_build_info;
-}
+// Wait a client connexion.
+SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs);
+
+// Stop log server
+SOPC_ReturnStatus SOPC_LogSrv_Stop(void);
+
+// Start log server
+SOPC_ReturnStatus SOPC_LogSrv_Start(
+    uint16_t portSrvTCP,  // Server listen port
+    uint16_t portCltUDP); // Destination UDP port where server announce its @IP and listen port
+
+SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length);
+
+#endif

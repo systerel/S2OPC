@@ -243,7 +243,7 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
         // SOPC_Sleep (1000);
 
-        status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_p2, pv);
+        status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_p2, pv, "THREAD_P2");
 
         Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 2 result = %lu : current time = %lu\r\n",
@@ -253,7 +253,7 @@ static void* cbS2OPC_Thread_p1(void* ptr)
 
         Mutex_Lock(&m); // Test condition variable
         {
-            status = SOPC_Thread_Create(&p4, cbS2OPC_Thread_p4, pv);
+            status = SOPC_Thread_Create(&p4, cbS2OPC_Thread_p4, pv, "THREAD_P4");
 
             sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 4 result = %lu : current time = %lu\r\n",
                     xTaskGetCurrentTaskHandle(), status, xTaskGetTickCount());
