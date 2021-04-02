@@ -31,7 +31,9 @@
 #include "key_manager_lib.h"
 
 #include "mbedtls/pk.h"
-#include "mbedtls/x509.h"
+//#include "mbedtls/x509.h"
+#include "mbedtls/x509_crl.h"
+#include "mbedtls/x509_crt.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API

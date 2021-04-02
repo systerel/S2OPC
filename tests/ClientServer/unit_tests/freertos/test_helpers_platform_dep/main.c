@@ -46,7 +46,7 @@
 
 #include "FreeRTOSTest.h"
 
-//#include "p_ethernet_if.h"
+#include "p_ethernet_if.h"
 //#include "p_logsrv.h"
 
 Condition* handleCondition;
@@ -61,7 +61,7 @@ int main(void)
     BOARD_InitDebugConsole();
     BOARD_InitBootPeripherals();
 
-    // P_ETHERNET_IF_Initialize();
+    P_ETHERNET_IF_Initialize();
 
     // p = P_LOG_SRV_CreateAndStart(80,2);
     // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
@@ -92,7 +92,7 @@ int main(void)
 
     Condition_Init(handleCondition);
 
-    FREE_RTOS_TEST_API_S2OPC_THREAD(handleCondition);
+    FREE_RTOS_TEST_S2OPC_PUBSUB(handleCondition);
 
     vTaskStartScheduler();
 
