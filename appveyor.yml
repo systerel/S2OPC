@@ -23,7 +23,7 @@ test_script:
     - set CHECK_DIR_NAME=check-0.14.0
     - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
     - set CHECK_BUILD_DIR=%CHECK_DIR%\build
-    - set MBEDTLS_VERSION=2.16.8
+    - set MBEDTLS_VERSION=2.16.10
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
