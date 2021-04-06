@@ -233,7 +233,7 @@ static void* callbackTest(void* pCtx)
 
             if (SOPC_STATUS_OK == status)
             {
-                status = PubSub_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                status = PubSub_Start(50000) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                 if (SOPC_STATUS_NOK == status)
                 {
                     PubSub_Stop(); // Ensure Pub & Sub are stopped in this case
