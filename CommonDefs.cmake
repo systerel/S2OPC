@@ -107,15 +107,18 @@ set(IS_WARNINGS_AS_ERRORS $<STREQUAL:${WARNINGS_AS_ERRORS},ON>)
 
 # Set GNU compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-std=c99 -pedantic -Wall -Wextra>)
-list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-fcf-protection -fstack-clash-protection -fstack-protector-strong>)
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>>)
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat=2 -Wconversion -Wshadow -Wmissing-prototypes -Wdate-time -Wfloat-equal -Winit-self -Wjump-misses-init -Wlogical-op -Wnested-externs -Wnormalized -Wold-style-definition -Wpointer-arith -Wswitch-default -Wtrampolines >)
 # Make optional some flags not supported with GCC < 6
 list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},6>>:-Wduplicated-cond -Wnull-dereference >)
 
-# Set GNU definitions
-list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
+# Add security hardening compilation options
+if (SECURITY_HARDENING)
+  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-fcf-protection -fstack-clash-protection -fstack-protector-strong>)
+  # Set GNU definitions for security hardening
+  list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
+endif()
 # Set GNU linker flags
 list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wl,-z,relro,-z,now>)
 
@@ -128,12 +131,15 @@ endif()
 
 # Set Clang compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-std=c99 -pedantic -fstack-protector -Wall -Wextra -Wunreachable-code>)
-list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-mspeculative-load-hardening>)
+# Add security hardening compilation options
+if (SECURITY_HARDENING)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-mspeculative-load-hardening>)
+  # Set Clang definitions
+  list(APPEND S2OPC_DEFINITIONS $<${IS_CLANG}:_FORTIFY_SOURCE=2>)
+endif()
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>>)
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion>)
-# Set Clang definitions
-list(APPEND S2OPC_DEFINITIONS $<${IS_CLANG}:_FORTIFY_SOURCE=2>)
 
 
 # Set MSVC compiler flags

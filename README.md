@@ -190,25 +190,39 @@ At the end of build process, the binary is available here `build/bin/pubsub_serv
 
 ## S2OPC Linux compilation
 
-Tested under Ubuntu 16.04 and Debian 9.
+Tested under Debian 9.
 Prerequisites:
 - Make (tested with GNU Make version 4.2.1)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
-- GCC (tested with GCC version 8.1.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.0)
+- GCC (tested with GCC version 10.2.0)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.10)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(require libexpat version >= 2.2.10 compiled with CMake)
 - Python3 (tested with version 3.6.3)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
-To build the Toolkit library and tests with default configuration on current
-stable release:
+To build S2OPC library, samples and tests with default configuration on current stable release:
 ```
   git clone https://gitlab.com/systerel/S2OPC.git --branch S2OPC_Toolkit_1.0.0
   cd S2OPC
   ./build.sh
 ```
 For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
+
+### Linux compilation with GCC security hardening options
+
+In order to improve binaries security, some compilation options might be activated by setting following variables:
+- `SECURITY_HARDENING=1`: activate several program instrumentation options during compilation
+- `POSITION_INDEPENDENT_EXECUTABLE=1`: produces position-independent executable to support address space layout randomization (ASLR)
+- `USE_STATIC_EXT_LIBS=0`: if active use static version of external libraries, set this variable to 0 avoid embedding external libraries into the binaries.
+
+To build with those options:
+```
+SECURITY_HARDENING=1 POSITION_INDEPENDENT_EXECUTABLE=1 USE_STATIC_EXT_LIBS=0 ./build.sh
+```
+
+Note: some options activated by SECURITY_HARDENING require recent version for GCC (see pre-requisites) and for binutils (tested with 2.36.1).
+Note 2: it is possible to use the `hardening-check` tool on binaries to check option activation worked.
 
 ## S2OPC Windows compilation
 
@@ -219,7 +233,7 @@ Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.11.1)
 - Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.0)
+- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.10)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 
 To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
