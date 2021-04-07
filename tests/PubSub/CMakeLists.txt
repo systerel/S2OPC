@@ -97,14 +97,6 @@ if(ENABLE_TESTING)
 
   s2opc_unit_test(pubsub_modules_test)
 
-
-  add_executable(rt_api_test "unit_tests/rt_api_test.c")
-  target_link_libraries(rt_api_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
-  target_compile_options(rt_api_test PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(rt_api_test PRIVATE ${S2OPC_DEFINITIONS})
-
-  s2opc_unit_test(rt_api_test)
-
   add_executable(mqtt_pub_test "unit_tests/mqtt_pub_test.c")
   target_link_libraries(mqtt_pub_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
   target_compile_options(mqtt_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})

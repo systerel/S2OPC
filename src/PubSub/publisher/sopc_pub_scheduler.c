@@ -36,7 +36,6 @@
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_pubsub_protocol.h"
 #include "sopc_raw_sockets.h"
-#include "sopc_rt_publisher.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
