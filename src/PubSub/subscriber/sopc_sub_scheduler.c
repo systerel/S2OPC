@@ -33,7 +33,6 @@
 #include "sopc_pubsub_helpers.h"
 #include "sopc_pubsub_protocol.h"
 #include "sopc_reader_layer.h"
-#include "sopc_rt_subscriber.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_sub_udp_sockets_mgr.h"
 #include "sopc_threads.h"
