@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <Anonymous>
+    <UserAuthorization write="true" read="true" execute="true" />
+  </Anonymous>
+  <UserPassword user="user1" pwd="password">
+    <UserAuthorization write="true" read="true" execute="true" />
+  </UserPassword>
+  <UserPassword user="user2" pwd="password1">
+    <UserAuthorization write="true" read="true" execute="true" />
+  </UserPassword>
+  <UserPassword user="username" pwd="password">
+    <!-- user with no right: refused with use access denied -->
+    <UserAuthorization/>
+  </UserPassword>
+
+</S2OPC_Users>

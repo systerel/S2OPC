@@ -1,0 +1,14 @@
+<PubSub publisherId="42">
+    <!-- one to many -->
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
+        <!-- one to many -->
+        <message id="14" publishingInterval="30" version="1" >
+            <!-- one to many -->
+            <variable nodeId="ns=1;i=1" displayName="myByte" dataType="Byte"/>
+            <variable nodeId="ns=1;i=0" displayName="myUInt32" dataType="UInt32"/>
+        </message>
+    </connection>
+</PubSub>
+
+
+

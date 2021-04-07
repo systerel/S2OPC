@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:localhost"/>
+    </Namespaces>
+    <Locales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </Locales>
+    <ApplicationCertificates>
+      <ServerCertificate path="server_public/server_4k_cert.der"/>
+      <ServerKey path="server_private/server_4k_key.pem"/>
+      <TrustedIssuers>
+        <!-- List of CAs or trusted certicates -->
+        <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
+      </TrustedIssuers>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="S2OPC toolkit server example" locale="en-US"/>
+      <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
+      <!-- No discovery URL: use of endpoint URL as discovery URL -->
+    </ApplicationDescription>
+    <Endpoints>
+      <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
+      <Endpoint url="opc.tcp://localhost:4841">
+          <!-- Only None/Basic256/Basic256Sha256 available -->
+        <SecurityPolicies>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+              <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+</S2OPC>
