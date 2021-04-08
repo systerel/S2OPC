@@ -341,7 +341,7 @@ static pFsmSchCallback tabFsmScheduler[E_MQTT_MANAGER_STATUS_MAX][E_MQTT_MANAGER
         /*    RUNNING,            */    {cbNewHdl,        cbRelHdl,        cbSnd,       cbQuit,       cbRcv,         cbCltRdy,    cbCltNotRdy,    cbCltRmv,        cbTmo},  //
         /*    STOPPING            */    {NULL,            NULL,            NULL,        NULL,         NULL,          cbCltRdy,    cbCltNotRdy,    cbCltRmv,        cbTmo},   //
         /*    STOPPED             */    {NULL,            NULL,            NULL,        NULL,         NULL,          NULL,        NULL,           NULL,            NULL}    //
-};                                                                                                                                                                                        //
+};
 
 /*=== States machine callbacks declarations used by MQTT TRANSPORT CONTEXT states machine ===*/
 
@@ -572,9 +572,8 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbNewHdl entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                         //
-               get_mgr_event_string(event));                          //
+        printf("\n cbNewHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         tMqttGetHandleRequest* pGetHandleRequest = (tMqttGetHandleRequest*) bufferData;
 
@@ -591,9 +590,8 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
                     /* Mark as reserved, copy callbacks configuration and user context*/
                     pWks->slotsTransportContext[i].status = E_MQTT_TRANSPORT_CONTEXT_STATUS_RESERVED;
 
-                    memcpy(&pWks->slotsTransportContext[i].callbacksConfig, //
-                           &pGetHandleRequest->callbacksConf,               //
-                           sizeof(tMqttTransportContextCallbacksConfig));   //
+                    memcpy(&pWks->slotsTransportContext[i].callbacksConfig, &pGetHandleRequest->callbacksConf,
+                           sizeof(tMqttTransportContextCallbacksConfig));
                     pWks->slotsTransportContext[i].pUserContext = pGetHandleRequest->pUserContext;
 
                     /* Store transport id and flag found set*/
@@ -636,8 +634,8 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
                 //***************CALLBACK GET HANDLE ERROR ***********************
                 if (NULL != pGetHandleRequest->callbacksConf.cbGetHandleFailure)
                 {
-                    pGetHandleRequest->callbacksConf.cbGetHandleFailure(MQTT_INVALID_TRANSPORT_ASYNC_HANDLE, //
-                                                                        pGetHandleRequest->pUserContext);    //
+                    pGetHandleRequest->callbacksConf.cbGetHandleFailure(MQTT_INVALID_TRANSPORT_ASYNC_HANDLE,
+                                                                        pGetHandleRequest->pUserContext);
                 }
             }
         }
@@ -665,9 +663,8 @@ static eMqttManagerStatus cbRelHdl(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbRelHdl entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                         //
-               get_mgr_event_string(event));                          //
+        printf("\n cbRelHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Send disconnection request event to transport async handle specified */
         CLT_EvtDiscReq(pWks, cltId);
@@ -696,15 +693,11 @@ static eMqttManagerStatus cbSnd(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbSnd entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                      //
-               get_mgr_event_string(event));                       //
+        printf("\n cbSnd entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Send message to send to transport context async handle */
-        CLT_EvtSendMsgReq(pWks,       //
-                          cltId,      //
-                          bufferData, //
-                          dataSize);  //
+        CLT_EvtSendMsgReq(pWks, cltId, bufferData, dataSize);
         return pWks->status;
     }
     return E_MQTT_MANAGER_STATUS_NOT_INITIALIZED;
@@ -730,9 +723,8 @@ static eMqttManagerStatus cbRcv(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbRcv entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                      //
-               get_mgr_event_string(event));                       //
+        printf("\n cbRcv entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -768,9 +760,8 @@ static eMqttManagerStatus cbCltRdy(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltRdy entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                         //
-               get_mgr_event_string(event));                          //
+        printf("\n cbCltRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -806,9 +797,8 @@ static eMqttManagerStatus cbCltNotRdy(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltNotRdy entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                            //
-               get_mgr_event_string(event));                             //
+        printf("\n cbCltNotRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -843,9 +833,8 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltRmv entry : status = %s - event = %s\n", //
-               get_mgr_status_string(status),                         //
-               get_mgr_event_string(event));                          //
+        printf("\n cbCltRmv entry : status = %s - event = %s\n", get_mgr_status_string(status),
+               get_mgr_event_string(event));
 #endif
         /* Decrement nb transport context. If this counter is set to 0 and mqtt manager
          * status is STOPPING, scheduler thread going to stop. */
@@ -941,9 +930,8 @@ static eMqttManagerStatus cbTmo(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-        printf("\n cbTmo entry : timeout value = %d - current status = %s\n", //
-               pWks->cptStatusTimeout,                                            //
-               get_mgr_status_string(status));                                    //
+        printf("\n cbTmo entry : timeout value = %d - current status = %s\n", pWks->cptStatusTimeout,
+               get_mgr_status_string(status));
 #endif
         pWks->cptStatusTimeout++;
         switch (status)
@@ -1019,16 +1007,14 @@ static eMqttTransportContextStatus cbConnReq(
         {
             /* Retrieve from event data the connexion configuration (uri, topic name which will be used by messages sent
              * and message received). */
-            memcpy(&pCtx->connexionConfig,                             //
-                   (tMqttTransportContextConnexionConfig*) bufferData, //
-                   sizeof(tMqttTransportContextConnexionConfig));      //
+            memcpy(&pCtx->connexionConfig, (tMqttTransportContextConnexionConfig*) bufferData,
+                   sizeof(tMqttTransportContextConnexionConfig));
 
             MQTTAsyncResult = api_lib_create(pCtx);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-            printf("\n *******************>>>>>>>> %08lX with %s\n", //
-                   (uint64_t) pCtx->clientHandle,                         //
-                   pCtx->connexionConfig.uri);                            //
+            printf("\n *******************>>>>>>>> %08lX with %s\n", (uint64_t) pCtx->clientHandle,
+                   pCtx->connexionConfig.uri);
 #endif
         }
 
@@ -1074,8 +1060,7 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr entry for client %d\n", //
-               pCtx->identification.transportId);          //
+        printf("\n cb_conn_clr entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Set transport context status to not initialized, raz try counter, connection configuration and flush pending
          * messages to send.*/
@@ -1088,16 +1073,14 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
         /* Destroy if necessary PAHO LIB client */
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr destroy mqtt lib for client %d\n", //
-               pCtx->identification.transportId);                     //
+        printf("\n cb_conn_clr destroy mqtt lib for client %d\n", pCtx->identification.transportId);
         printf("\n ********************************** %08lX\n", (uint64_t) pCtx->clientHandle);
 #endif
 
         api_lib_destroy(pCtx);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr destroy mqtt lib well performed for client %d\n", //
-               pCtx->identification.transportId);                                    //
+        printf("\n cb_conn_clr destroy mqtt lib well performed for client %d\n", pCtx->identification.transportId);
 #endif
 
         /* Send an event TRANSPORT_CONTEXT_REMOVED to mqtt manager states machine */
@@ -1105,8 +1088,7 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
         MGR_EvtCltRemoved(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr exit for client %d\n", //
-               pCtx->identification.transportId);         //
+        printf("\n cb_conn_clr exit for client %d\n", pCtx->identification.transportId);
 #endif
 
         return pCtx->status;
@@ -1304,7 +1286,7 @@ static eMqttTransportContextStatus cbSubReq(tMqttTransportContext* pCtx,
 
         /* Initiate subscribe operation */
 
-        if (0 != MQTTAsyncResult) //
+        if (0 != MQTTAsyncResult)
         {
             CLT_EvtSubFailed(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
         }
@@ -1338,10 +1320,8 @@ static eMqttTransportContextStatus cbPubReq(
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_pub_req entry for client %d - event =  %s - status = %s\n", //
-               pCtx->identification.transportId,                                      //
-               get_event_string(event),                                               //
-               get_status_string(status));                                            //
+        printf("\n cb_pub_req entry for client %d - event =  %s - status = %s\n", pCtx->identification.transportId,
+               get_event_string(event), get_status_string(status));
 #endif
         uint8_t* pendingMsg = NULL;
         uint16_t sizePendingMsg = 0;
@@ -1469,9 +1449,7 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
         /* Increment counter. */
         pCtx->cptStatusTimeout++;
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1 && DEBUG_TMO_TICK == 1
-        printf("\n tick = %d - client %d\n ", //
-               pCtx->cptStatusTimeout,            //
-               pCtx->identification.transportId); //
+        printf("\n tick = %d - client %d\n ", pCtx->cptStatusTimeout, pCtx->identification.transportId);
 #endif
         switch (pCtx->status)
         {
@@ -2558,11 +2536,8 @@ static int api_lib_create(tMqttTransportContext* pCtx)
 
 #if USE_MQTT_PAHO == 1
 
-    int MQTTAsyncResult = MQTTAsync_create(&pCtx->clientHandle,         //
-                                           pCtx->connexionConfig.uri,   //
-                                           clientIdStrFromIdx,          //
-                                           MQTTCLIENT_PERSISTENCE_NONE, //
-                                           NULL);                       //
+    int MQTTAsyncResult = MQTTAsync_create(&pCtx->clientHandle, pCtx->connexionConfig.uri, clientIdStrFromIdx,
+                                           MQTTCLIENT_PERSISTENCE_NONE, NULL);
 
     if (MQTTASYNC_SUCCESS != MQTTAsyncResult)
     {
@@ -2609,11 +2584,8 @@ static int api_lib_connect(tMqttTransportContext* pCtx)
 
     int MQTTAsyncResult = 0;
 
-    MQTTAsyncResult = MQTTAsync_setCallbacks(pCtx->clientHandle,    //
-                                             &pCtx->identification, //
-                                             cb_lib_onConnLost,     //
-                                             cb_lib_onMsgRcv,       //
-                                             NULL);                 //
+    MQTTAsyncResult =
+        MQTTAsync_setCallbacks(pCtx->clientHandle, &pCtx->identification, cb_lib_onConnLost, cb_lib_onMsgRcv, NULL);
 
     if (MQTTASYNC_SUCCESS != MQTTAsyncResult)
     {
@@ -2657,14 +2629,12 @@ static int api_lib_subscribe(tMqttTransportContext* pCtx)
     sub_opts.onSuccess = cb_lib_onSubscribe;
     sub_opts.onFailure = cb_lib_onSubscribeFailure;
     sub_opts.context = &pCtx->identification;
-    int MQTTAsyncResult = MQTTAsync_subscribe(pCtx->clientHandle,              //
-                                              pCtx->connexionConfig.topicname, //
-                                              MQTT_LIB_QOS,                    //
-                                              &sub_opts);                      //
+    int MQTTAsyncResult =
+        MQTTAsync_subscribe(pCtx->clientHandle, pCtx->connexionConfig.topicname, MQTT_LIB_QOS, &sub_opts);
 
     /* Initiate subscribe operation */
 
-    if (MQTTASYNC_SUCCESS != MQTTAsyncResult) //
+    if (MQTTASYNC_SUCCESS != MQTTAsyncResult)
     {
         return -1;
     }
@@ -2699,10 +2669,7 @@ static int api_lib_send_msg(tMqttTransportContext* pCtx, uint8_t* data, uint16_t
 
     int MQTTAsyncResult = 0;
 
-    MQTTAsyncResult = MQTTAsync_sendMessage(pCtx->clientHandle,              //
-                                            pCtx->connexionConfig.topicname, //
-                                            &pubmsg,                         //
-                                            &opts);                          //
+    MQTTAsyncResult = MQTTAsync_sendMessage(pCtx->clientHandle, pCtx->connexionConfig.topicname, &pubmsg, &opts);
 
     if (MQTTASYNC_SUCCESS != MQTTAsyncResult)
     {
@@ -2890,9 +2857,8 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
         if (SOPC_STATUS_OK == EVENT_CHANNEL_pop(&pWks->schedulerChannel, &currentEvent, timeToWait))
         {
 #if DEBUG_SCHEDULER == 1
-            printf("\n Event received : id=%d ev=%d idx=%d\n", //
-                   currentEvent.idFsm, currentEvent.event,         //
-                   currentEvent.idTransportContext);               //
+            printf("\n Event received : id=%d ev=%d idx=%d\n", currentEvent.idFsm, currentEvent.event,
+                   currentEvent.idTransportContext);
 #endif
             /* Choose of state machine, MQTT manager or MQTT Transport Async Context*/
 
@@ -2916,13 +2882,9 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 
                     if (NULL != tabFsmScheduler[pWks->status][currentEvent.event])
                     {
-                        pWks->status = tabFsmScheduler[pWks->status][currentEvent.event]( //
-                            pWks,                            // Mqtt manager workspace (or handle)
-                            pWks->status,                    // Current status
-                            currentEvent.event,              // Current event
-                            currentEvent.idTransportContext, // Mqtt transport context async handle
-                            currentEvent.pEventData,         // Data
-                            currentEvent.size);              // Data size
+                        pWks->status = tabFsmScheduler[pWks->status][currentEvent.event](
+                            pWks, pWks->status, currentEvent.event, currentEvent.idTransportContext,
+                            currentEvent.pEventData, currentEvent.size);
                     }
 
                     /* RAZ status timeout if status changes. */
@@ -2949,15 +2911,14 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                 /* Systematically check if status, event and async handle are in max range of the table which represents
                  * the state machine */
 
-                if (currentEvent.idTransportContext < MQTT_MAX_TRANSPORT_CONTEXT //
-                    && currentEvent.event < E_MQTT_TRANSPORT_CONTEXT_EVENT_MAX   //
-                    && pWks->slotsTransportContext[currentEvent.idTransportContext].status <
-                           E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX) //
+                if (currentEvent.idTransportContext < MQTT_MAX_TRANSPORT_CONTEXT &&
+                    currentEvent.event < E_MQTT_TRANSPORT_CONTEXT_EVENT_MAX &&
+                    pWks->slotsTransportContext[currentEvent.idTransportContext].status <
+                        E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX)
                 {
 #if DEBUG_SCHEDULER == 1
-                    printf("\nCLT %d pre-status = %s\n",                                                        //
-                           currentEvent.idTransportContext,                                                         //
-                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status)); //
+                    printf("\nCLT %d pre-status = %s\n", currentEvent.idTransportContext,
+                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
 #endif
                     /* Save current status, used to check status change after event treatment and raz tick counter */
 
@@ -2970,14 +2931,12 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                                                 [currentEvent.event])
                     {
                         pWks->slotsTransportContext[currentEvent.idTransportContext].status =
-                            tabFsmMqttClient[pWks->slotsTransportContext[currentEvent.idTransportContext]
-                                                 .status][currentEvent.event](
-                                &pWks->slotsTransportContext[currentEvent.idTransportContext], // Transport context
-                                                                                               // workspace
-                                pWks->slotsTransportContext[currentEvent.idTransportContext].status, // Current status
-                                currentEvent.event,                                                  // Current event
-                                currentEvent.pEventData,                                             // Data
-                                currentEvent.size);                                                  // Data size
+                            tabFsmMqttClient[pWks->slotsTransportContext[currentEvent.idTransportContext].status]
+                                            [currentEvent.event](
+                                                &pWks->slotsTransportContext[currentEvent.idTransportContext],
+
+                                                pWks->slotsTransportContext[currentEvent.idTransportContext].status,
+                                                currentEvent.event, currentEvent.pEventData, currentEvent.size);
                     }
 
                     /* RAZ status timeout if status changes. */
@@ -2990,9 +2949,8 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 #endif
                     }
 #if DEBUG_SCHEDULER == 1
-                    printf("\nCLT %d post-status = %s\n",                                                       //
-                           currentEvent.idTransportContext,                                                         //
-                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status)); //
+                    printf("\nCLT %d post-status = %s\n", currentEvent.idTransportContext,
+                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
 #endif
                 }
             }
@@ -3007,8 +2965,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
             if (NULL != currentEvent.clearCallback)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LOOP_ALIVE == 1
-                printf(
-                    "\n================================++ CLEAR CALLBACK ++===================================\n");
+                printf("\n================================++ CLEAR CALLBACK ++===================================\n");
 #endif
                 if (NULL != currentEvent.pEventData)
                 {
@@ -3060,22 +3017,15 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                 if (NULL != tabFsmScheduler[pWks->status][E_MQTT_MANAGER_EVENT_TICK])
                 {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nSCH pre-status = %s - tick = %d\n", //
-                           get_mgr_status_string(pWks->status),       //
-                           pWks->cptStatusTimeout);                   //
+                    printf("\nSCH pre-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
+                           pWks->cptStatusTimeout);
 #endif
-                    pWks->status = tabFsmScheduler[pWks->status][E_MQTT_MANAGER_EVENT_TICK]( //
-                        pWks,                                                                // Mqtt manager workspace
-                        pWks->status,                                                        // Current status
-                        E_MQTT_MANAGER_EVENT_TICK,                                           // Current event
-                        0,    // Transport context async handle (not used)
-                        NULL, // No data
-                        0);   // No data
+                    pWks->status = tabFsmScheduler[pWks->status][E_MQTT_MANAGER_EVENT_TICK](
+                        pWks, pWks->status, E_MQTT_MANAGER_EVENT_TICK, 0, NULL, 0);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nSCH post-status = %s - tick = %d\n", //
-                           get_mgr_status_string(pWks->status),        //
-                           pWks->cptStatusTimeout);                    //
+                    printf("\nSCH post-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
+                           pWks->cptStatusTimeout);
 #endif
                 }
 
@@ -3099,10 +3049,9 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 
                 {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nCLT %d pre-status = %s - tick = %d\n",             //
-                           i,                                                        //
-                           get_status_string(pWks->slotsTransportContext[i].status), //
-                           pWks->slotsTransportContext[i].cptStatusTimeout);         //
+                    printf("\nCLT %d pre-status = %s - tick = %d\n", i,
+                           get_status_string(pWks->slotsTransportContext[i].status),
+                           pWks->slotsTransportContext[i].cptStatusTimeout);
 #endif
 
                     /* Save current status, used to check status change after event treatment and raz tick counter */
@@ -3115,11 +3064,8 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                         pWks->slotsTransportContext[i].status =
                             tabFsmMqttClient[pWks->slotsTransportContext[i].status]
                                             [E_MQTT_TRANSPORT_CONTEXT_EVENT_TICK](
-                                                &pWks->slotsTransportContext[i],       //   Transport context
-                                                pWks->slotsTransportContext[i].status, //   Current status
-                                                E_MQTT_TRANSPORT_CONTEXT_EVENT_TICK,   //   Event
-                                                NULL,                                  //   No data
-                                                0);                                    //   No data
+                                                &pWks->slotsTransportContext[i], pWks->slotsTransportContext[i].status,
+                                                E_MQTT_TRANSPORT_CONTEXT_EVENT_TICK, NULL, 0);
                     }
 
                     /* Raz tick counter if status changed */
@@ -3131,10 +3077,9 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 #endif
                     }
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nCLT %d post-status = %s - tick = %d\n",            //
-                           i,                                                        //
-                           get_status_string(pWks->slotsTransportContext[i].status), //
-                           pWks->slotsTransportContext[i].cptStatusTimeout);         //
+                    printf("\nCLT %d post-status = %s - tick = %d\n", i,
+                           get_status_string(pWks->slotsTransportContext[i].status),
+                           pWks->slotsTransportContext[i].cptStatusTimeout);
 #endif
                 }
             }
@@ -3311,15 +3256,10 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     pGetHandleRequest->connectionConf.uri[sizeof(pGetHandleRequest->connectionConf.uri) - 1] = 0;
     pGetHandleRequest->connectionConf.topicname[sizeof(pGetHandleRequest->connectionConf.topicname) - 1] = 0;
 
-    snprintf(pGetHandleRequest->connectionConf.uri,             //
-             sizeof(pGetHandleRequest->connectionConf.uri) - 1, //
-             "%s",                                              //
-             sUri);                                             //
+    snprintf(pGetHandleRequest->connectionConf.uri, sizeof(pGetHandleRequest->connectionConf.uri) - 1, "%s", sUri);
 
-    snprintf(pGetHandleRequest->connectionConf.topicname,             //
-             sizeof(pGetHandleRequest->connectionConf.topicname) - 1, //
-             "%s",                                                    //
-             sTopicName);                                             //
+    snprintf(pGetHandleRequest->connectionConf.topicname, sizeof(pGetHandleRequest->connectionConf.topicname) - 1, "%s",
+             sTopicName);
 
     pGetHandleRequest->callbacksConf.cbGetHandleSuccess = cbGetHandleSuccess;
     pGetHandleRequest->callbacksConf.cbGetHandleFailure = cbGetHandleFailure;
@@ -3378,29 +3318,19 @@ SOPC_ReturnStatus SOPC_MQTT_MGR_Destroy(MqttManagerHandle** ppWks) /* Return a M
 
 /*** MQTT Transport Asynchrone API ***/
 
-/* SOPC_MQTT_TRANSPORT_ASYNC_GetHandle : Get a new async handle to use with ASYNC API */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(
-    MqttManagerHandle* pWks,                   /* MQTT Manager Handle */
-    void* pUserContext,                        /* User context, pass in parameters of callbacks */
-    const char* uri,                           /* Uri of broker */
-    const char* topicName,                     /* Topic name*/
-    pFctGetHandleResponse cbGetHandleSuccess,  /* Callback of success of GetTransportAsyncHandle */
-    pFctGetHandleResponse cbGetHandleFailure,  /* Callback of failure of GetTransportAsyncHandle */
-    pFctClientStatus cbClientReady,            /* Callback of status change to READY */
-    pFctClientStatus cbClientNotReady,         /* Callback of status change to NOT READY*/
-    pFctMessageReceived cbMessageReceived,     /* Callback of message reception */
-    pFctReleaseHandleResponse cbReleaseHandle) /* Callback of success of ReleaseHandle */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
+                                                      void* pUserContext,
+                                                      const char* uri,
+                                                      const char* topicName,
+                                                      pFctGetHandleResponse cbGetHandleSuccess,
+                                                      pFctGetHandleResponse cbGetHandleFailure,
+                                                      pFctClientStatus cbClientReady,
+                                                      pFctClientStatus cbClientNotReady,
+                                                      pFctMessageReceived cbMessageReceived,
+                                                      pFctReleaseHandleResponse cbReleaseHandle)
 {
-    if (NULL == pWks                  //
-        || NULL == uri                //
-        || NULL == topicName          //
-        || NULL == cbGetHandleSuccess //
-        || NULL == cbClientReady      //
-        || NULL == cbMessageReceived  //
-        || NULL == cbReleaseHandle    //
-        || NULL == cbClientNotReady   //
-        || NULL == cbGetHandleFailure)
+    if (NULL == pWks || NULL == uri || NULL == topicName || NULL == cbGetHandleSuccess || NULL == cbClientReady ||
+        NULL == cbMessageReceived || NULL == cbReleaseHandle || NULL == cbClientNotReady || NULL == cbGetHandleFailure)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3429,17 +3359,9 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(
     }
 
     /* Get handle request data initialization */
-    SOPC_MQTT_MGR_InitializeGetNewHandleRequest(
-        (tMqttGetHandleRequest*) event.pEventData, //   Get handle request
-        uri,                                       //   Uri of broker
-        topicName,                                 //   ...
-        cbGetHandleSuccess,                        //   Get handle request ack response callback
-        cbGetHandleFailure,                        //   Get handle request nack response callback
-        cbClientReady,                             //   Transport context status changed to ready callback
-        cbClientNotReady,                          //   Transport context status changed to not ready callback
-        cbMessageReceived,                         //   Message received callback
-        cbReleaseHandle,                           //   Release handle callbacl
-        pUserContext);                             //   User context
+    SOPC_MQTT_MGR_InitializeGetNewHandleRequest((tMqttGetHandleRequest*) event.pEventData, uri, topicName,
+                                                cbGetHandleSuccess, cbGetHandleFailure, cbClientReady, cbClientNotReady,
+                                                cbMessageReceived, cbReleaseHandle, pUserContext);
 
     event.size = sizeof(tMqttGetHandleRequest);
     event.clearCallback = SOPC_Free;
@@ -3477,8 +3399,6 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_ReleaseHandle(
 
     return result;
 }
-
-/* SOPC_MQTT_TRANSPORT_ASYNC_SendMessage : Send a new message to transport async handle.*/
 
 SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,      /* MQTT Manager Handle */
                                                         MqttTransportAsyncHandle idx, /* MQTT Transport Async Handle */
@@ -3552,9 +3472,8 @@ static void SYNCH_getHandleCb(MqttTransportAsyncHandle idx, void* pCtx)
             ctx->transportId = idx;
             ctx->bReady = false;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX ==> HANDLE SUCCESS\n", //
-                   idx,                                                                                     //
-                   (uint64_t) pCtx);                                                                        //
+            printf("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX ==> HANDLE SUCCESS\n", idx,
+                   (uint64_t) pCtx);
 #endif
             Condition_SignalAll(&ctx->signalHandleOperation);
         }
@@ -3577,9 +3496,8 @@ static void SYNCH_getHandleFailedCb(MqttTransportAsyncHandle idx, void* pCtx)
             ctx->bReady = false;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX ==> HANDLE FAILURE\n", //
-                   idx,                                                                                           //
-                   (uint64_t) pCtx);                                                                              //
+            printf("\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX ==> HANDLE FAILURE\n", idx,
+                   (uint64_t) pCtx);
 #endif
             Condition_SignalAll(&ctx->signalHandleOperation);
         }
@@ -3599,9 +3517,7 @@ static void SYNCH_clientReadyCb(MqttTransportAsyncHandle idx, void* pCtx)
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX ==> READY\n", //
-                   idx,                                                                              //
-                   (uint64_t) pCtx);                                                                 //
+            printf("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX ==> READY\n", idx, (uint64_t) pCtx);
 #endif
             ctx->bReady = true;
             Condition_SignalAll(&ctx->signalStatusChange);
@@ -3622,9 +3538,8 @@ static void SYNCH_clientNotReady(MqttTransportAsyncHandle idx, void* pCtx)
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX ==> NOT READY\n", //
-                   idx,                                                                                   //
-                   (uint64_t) pCtx);                                                                      //
+            printf("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX ==> NOT READY\n", idx,
+                   (uint64_t) pCtx);
 #endif
             ctx->bReady = false;
             Condition_SignalAll(&ctx->signalStatusChange);
@@ -3719,9 +3634,8 @@ static void SYNCH_msgReceived(MqttTransportAsyncHandle idx, uint8_t* bufferData,
                     ctx->nbMessageReceived++;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-                    printf("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > MSG PUSHED\n", //
-                           idx,                                                                                  //
-                           (uint64_t) pCtx);                                                                     //
+                    printf("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > MSG PUSHED\n", idx,
+                           (uint64_t) pCtx);
 #endif
 
                     if (1 == ctx->nbMessageReceived)
@@ -3737,8 +3651,6 @@ static void SYNCH_msgReceived(MqttTransportAsyncHandle idx, uint8_t* bufferData,
 }
 
 /*=== Definition of synchrone API ===*/
-
-/* SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle : Release a transport synchrone handle */
 
 SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
     MqttTransportHandle** ppCtx) /* Transport synchrone handle to release.*/
@@ -3776,8 +3688,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
         else
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-            printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request FAILED\n",
-                   (uint64_t) pCtx);
+            printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request FAILED\n", (uint64_t) pCtx);
 #endif
         }
 
@@ -3823,13 +3734,9 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
     return result;
 }
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage : Read a message received by a transport synchrone handle. If callback of
- * reception has been passed to GetHandle, no data is returned by this function. */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(
-    MqttTransportHandle* pCtx, /* MQTT Transport Synchrone Handle from where read received messages.*/
-    SOPC_Buffer** ppBuffer,    /* If buffer returned, some data has been received. */
-    uint32_t timeoutMs)        /* Timeout of reception in ms.*/
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCtx,
+                                                        SOPC_Buffer** ppBuffer,
+                                                        uint32_t timeoutMs)
 {
     SOPC_Buffer* pBuffer = NULL;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
@@ -3892,13 +3799,10 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(
     return SOPC_STATUS_OK;
 }
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_SendMessage : Send a message to a transport synchrone handle. */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(
-    MqttTransportHandle* pCtx, /* MQTT Transport Synchrone Handle where send message */
-    uint8_t* bufferData,       /* Data to send */
-    uint16_t dataSize,         /* Size of data */
-    uint32_t timeoutMs)        /* Send timeout. UINT32_MAX not recommended. */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCtx,
+                                                        uint8_t* bufferData,
+                                                        uint16_t dataSize,
+                                                        uint32_t timeoutMs)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -3952,8 +3856,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready state, message not sent\n",
-               (uint64_t) pCtx);
+        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready state, message not sent\n", (uint64_t) pCtx);
 #endif
         result = SOPC_STATUS_NOK;
     }
@@ -3967,17 +3870,11 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(
     return result;
 }
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle : Return a new transport synchrone handle */
-/* Note that the returned handle, 1 by new broker connection, is scheduled by the same mqtt manager */
-/* So, callback passed as parameter for 2 client is thread safe between 2 clients.*/
-
-MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-    MqttManagerHandle* pWks,                   /* MQTT Manager handle */
-    const char* uri,                           /* Uri of broker */
-    const char* topicName,                     /* Topic name used for subscribe operation */
-    pFctMessageSyncReceived cbMessageReceived, /* Callback of message reception. If NULL, ReadMessage
-                                         must be used to retrieve message.*/
-    void* pUserContext)                        /* User context */
+MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
+                                                         const char* uri,
+                                                         const char* topicName,
+                                                         pFctMessageSyncReceived cbMessageReceived,
+                                                         void* pUserContext)
 {
     if (NULL == pWks || NULL == uri)
     {
@@ -4045,16 +3942,9 @@ MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
 
     Mutex_Lock(&pCtx->lock);
 
-    result = SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks,                    // MQTT manager workspace
-                                                 pCtx,                    // User context
-                                                 uri,                     // Uri of broker
-                                                 topicName,               // ...
-                                                 SYNCH_getHandleCb,       // Callback used for Get Handle response
-                                                 SYNCH_getHandleFailedCb, // Callback used for Get Handle response error
-                                                 SYNCH_clientReadyCb,     // Callback used to detect READY status
-                                                 SYNCH_clientNotReady,    // Callback used to detect NOT READY status
-                                                 SYNCH_msgReceived,       // Message received
-                                                 SYNCH_handleReleased);   // Callback used for Release handle completion
+    result = SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, pCtx, uri, topicName, SYNCH_getHandleCb, SYNCH_getHandleFailedCb,
+                                                 SYNCH_clientReadyCb, SYNCH_clientNotReady, SYNCH_msgReceived,
+                                                 SYNCH_handleReleased);
 
     if (SOPC_STATUS_OK != result)
     {
