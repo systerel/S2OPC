@@ -134,74 +134,106 @@ typedef void (*pFctMessageSyncReceived)(MqttTransportHandle* pCtx, /* Transport 
 
 /*** MQTT Manager API ***/
 
-/* SOPC_MQTT_MGR_Create : Create a MQTT manager, which is used to manage several MQTT Transport Context*/
+/** \brief Create a MQTT manager, which is used to manage several MQTT Transport Context */
+SOPC_ReturnStatus SOPC_MQTT_MGR_Create(MqttManagerHandle** ppWks);
 
-SOPC_ReturnStatus SOPC_MQTT_MGR_Create(MqttManagerHandle** ppWks); /* Return a MQTT Manager Handle != NULL.*/
-
-/* SOPC_MQTT_MGR_Destroy : Destroy a MQTT manager*/
-
-SOPC_ReturnStatus SOPC_MQTT_MGR_Destroy(MqttManagerHandle** ppWks); /* Return a MQTT Manager Handle set to NULL.*/
+/** \brief Destroy a MQTT manager
+ *
+ * Sets the handle to NULL
+ */
+SOPC_ReturnStatus SOPC_MQTT_MGR_Destroy(MqttManagerHandle** ppWks);
 
 /*** MQTT Transport Asynchrone API ***/
 
-/* SOPC_MQTT_TRANSPORT_ASYNC_GetHandle : Get a new async handle to use with ASYNC API */
+/** \brief Get a new async handle to use with ASYNC API
+ *
+ * \param pWks          MQTT Manager Handle
+ * \param pUserContext  User context, pass in paramters of callbacks
+ * \param uri           Uri of broker
+ * \param topicname     Topic name to subscribe
+ * \param cbGetHandleSuccess Callback of success of GetTransportAsyncHandle
+ * \param cbGetHandleFailure Callback of failure of GetTransportAsyncHandle
+ * \param cbClientReady  Callback of status change to READY
+ * \param cbClientNotReady Callback of status change to NOT READY
+ * \param cbMessageReceived Callback of message reception
+ * \param cbReleaseHandle Callback of success of ReleaseHandle
+ */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
+                                                      void* pUserContext,
+                                                      const char* uri,
+                                                      const char* topicname,
+                                                      pFctGetHandleResponse cbGetHandleSuccess,
+                                                      pFctGetHandleResponse cbGetHandleFailure,
+                                                      pFctClientStatus cbClientReady,
+                                                      pFctClientStatus cbClientNotReady,
+                                                      pFctMessageReceived cbMessageReceived,
+                                                      pFctReleaseHandleResponse cbReleaseHandle);
 
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(
-    MqttManagerHandle* pWks,                    /* MQTT Manager Handle */
-    void* pUserContext,                         /* User context, pass in paramters of callbacks */
-    const char* uri,                            /* Uri of broker */
-    const char* topicname,                      /* Topic name to subscribe */
-    pFctGetHandleResponse cbGetHandleSuccess,   /* Callback of success of GetTransportAsyncHandle */
-    pFctGetHandleResponse cbGetHandleFailure,   /* Callback of failure of GetTransportAsyncHandle */
-    pFctClientStatus cbClientReady,             /* Callback of status change to READY */
-    pFctClientStatus cbClientNotReady,          /* Callback of status change to NOT READY*/
-    pFctMessageReceived cbMessageReceived,      /* Callback of message reception */
-    pFctReleaseHandleResponse cbReleaseHandle); /* Callback of success of ReleaseHandle */
+/** \brief Release transport async handle
+ *
+ * \param pWks  MQTT Manager Handle
+ * \param idx   MQTT Transport Async Handle
+ */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_ReleaseHandle(MqttManagerHandle* pWks, MqttTransportAsyncHandle idx);
 
-/* SOPC_MQTT_TRANSPORT_ASYNC_ReleaseHandle : Release transport async handle */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_ReleaseHandle(
-    MqttManagerHandle* pWks,       /* MQTT Manager Handle */
-    MqttTransportAsyncHandle idx); /* MQTT Transport Async Handle */
-
-/* SOPC_MQTT_TRANSPORT_ASYNC_SendMessage : Send a new message to transport async handle.*/
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,      /* MQTT Manager Handle */
-                                                        MqttTransportAsyncHandle idx, /* MQTT Transport Async Handle */
-                                                        uint8_t* bufferData,          /* Data to send */
-                                                        uint16_t size); /* Size of data to send in bytes */
+/** \brief Send a new message to transport async handle.
+ *
+ * \param pWks      MQTT Manager Handle
+ * \param idx       MQTT Transport Async Handle
+ * \param bufferData Data to send
+ * \param size      Size of data to send in bytes
+ */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,
+                                                        MqttTransportAsyncHandle idx,
+                                                        uint8_t* bufferData,
+                                                        uint16_t size);
 
 /*** MQTT Transport Synchrone API ***/
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle : Return a new transport synchrone handle */
+/** \brief Return a new transport synchrone handle
+ *
+ * Note that the returned handle, 1 by new broker connection, is scheduled by the same mqtt manager.
+ * So, callback passed as parameter for 2 client is thread safe between 2 clients.
+ *
+ * \param pWks  MQTT Manager handle
+ * \param uri   Uri of broker
+ * \param topicName  MQTT topic name used for subscriptions
+ * \param getMsg  Callback of message reception. If NULL, SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage
+ *                must be used to retrieve SOPC_Buffer data message.
+ * \param pUserContext  Passed when calling getMsg
+ */
+MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
+                                                         const char* uri,
+                                                         const char* topicName,
+                                                         pFctMessageSyncReceived getMsg,
 
-MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-    MqttManagerHandle* pWks,        /* MQTT Manager handle */
-    const char* uri,                /* Uri of broker */
-    const char* topicName,          /* ToPiC NaMe used for subscriptions */
-    pFctMessageSyncReceived getMsg, /* Callback of message reception. If NULL, SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage
-                                        must be used to retrieve SOPC_Buffer data message.*/
-    void* pUserContext);            /* User context*/
+                                                         void* pUserContext);
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle : Release a transport synchrone handle */
+/** \brief Release a transport synchrone handle */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(MqttTransportHandle** ppCtx);
 
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
-    MqttTransportHandle** ppCtx); /* Transport synchrone handle to release.*/
+/** \brief Send a message to a transport synchrone handle.
+ *
+ * \param pCtx          MQTT Transport Synchrone Handle where send message
+ * \param bufferData    Data to send
+ * \param dataSize      Size of data
+ * \param timeoutMs     Send timeout. UINT32_MAX not recommended.
+ */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCtx,
+                                                        uint8_t* bufferData,
+                                                        uint16_t dataSize,
+                                                        uint32_t timeoutMs);
 
-/* SOPC_MQTT_TRANSPORT_SYNCH_SendMessage : Send a message to a transport synchrone handle. */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(
-    MqttTransportHandle* pCtx, /* MQTT Transport Synchrone Handle where send message */
-    uint8_t* bufferData,       /* Data to send */
-    uint16_t dataSize,         /* Size of data */
-    uint32_t timeoutMs);       /* Send timeout. UINT32_MAX not recommended. */
-
-/* SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage : Read a message received by a transport synchrone handle. If callback of
- * reception has been passed to GetHandle, no data is returned by this function. */
-
-SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(
-    MqttTransportHandle* pCtx, /* MQTT Transport Synchrone Handle from where read received messages.*/
-    SOPC_Buffer** ppBuffer,    /* If buffer returned, some data has been received. */
-    uint32_t timeoutMs);       /* Timeout of reception in ms.*/
+/** \brief Read a message received by a transport synchrone handle.
+ *
+ * If callback of reception has been passed to GetHandle, no data is returned by this function.
+ *
+ * \param pCtx      MQTT Transport Synchrone Handle from where read received messages.
+ * \param ppBuffer  If buffer returned, some data has been received.
+ * \param timeoutMs Timeout of reception in ms.
+ */
+SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCtx,
+                                                        SOPC_Buffer** ppBuffer,
+                                                        uint32_t timeoutMs);
 
 #endif
