@@ -17,6 +17,9 @@
  * under the License.
  */
 
+#ifndef CONFIG_H_
+#define CONFIG_H_
+
 /** Defaults configuration values for the sample */
 
 #define IS_LOOPBACK "0"
@@ -47,3 +50,5 @@
 
 /* Empty CSV path means no CSV recording, but print some stats on stdout (can be versbose) */
 #define CSV_PREFIX "./rtt"
+
+#endif /* CONFIG_H_ */

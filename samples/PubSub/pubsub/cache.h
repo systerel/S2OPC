@@ -22,8 +22,8 @@
  * GetSource and SetTarget callback will get and set their values in the cache.
  */
 
-#ifndef _CACHE_H_
-#define _CACHE_H_
+#ifndef CACHE_H_
+#define CACHE_H_
 
 #include <stdbool.h>
 
@@ -63,4 +63,4 @@ void Cache_Unlock(void);
 
 void Cache_Clear(void);
 
-#endif /* _CACHE_H_ */
+#endif /* CACHE_H_ */
