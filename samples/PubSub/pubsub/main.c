@@ -197,7 +197,7 @@ int main(int argc, char* const argv[])
         }
         else
         {
-            bool res = SOPC_PubScheduler_Start(config, sourceConfig);
+            bool res = SOPC_PubScheduler_Start(config, sourceConfig, 99);
             if (res)
             {
                 printf("# Info: Publisher started\n");
