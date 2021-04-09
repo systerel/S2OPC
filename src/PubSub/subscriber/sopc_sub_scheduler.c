@@ -480,10 +480,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             }
                             else
                             {
-                                /* TODO: userContext was (void*) &schedulerCtx.transport[iIter].inputNumber */
                                 schedulerCtx.transport[iIter].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
                                     handleMqttMgr, &address[strlen(MQTT_PREFIX)], MQTT_LIB_TOPIC_NAME,
-                                    on_mqtt_message_received, NULL);
+                                    on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
 
                                 if (schedulerCtx.transport[iIter].mqttHandle == NULL)
                                 {
@@ -645,7 +644,6 @@ static bool SOPC_SubScheduler_Start_UDP(void)
         {
             schedulerCtx.sockArray[sockIdx] = schedulerCtx.transport[iIter].sock;
             schedulerCtx.connectionArray[sockIdx] = schedulerCtx.transport[iIter].connection;
-            //    &schedulerCtx.transport[iIter].inputNumber; // Connection input number
             sockIdx++;
         }
     }
