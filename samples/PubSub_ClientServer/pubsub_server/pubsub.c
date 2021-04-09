@@ -198,7 +198,8 @@ bool PubSub_Start(void)
     }
     if (pub_nb_connections > 0)
     {
-        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig);
+        /* TODO: left 0 because this sample is currently used in tests */
+        pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig, 0);
     }
     if (subOK || pubOK)
     {

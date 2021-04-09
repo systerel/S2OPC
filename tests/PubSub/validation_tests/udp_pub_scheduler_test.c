@@ -128,8 +128,8 @@ int main(int argc, char** argv)
     SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(&SOPC_GetSourceVariables_TestFunc);
     assert(NULL != sourceConfig);
 
-    // Start
-    bool status = SOPC_PubScheduler_Start(config, sourceConfig);
+    // Start without priority, as this test is not time-sensitive
+    bool status = SOPC_PubScheduler_Start(config, sourceConfig, 0);
     assert(status);
 
     // Wait until sending some message
