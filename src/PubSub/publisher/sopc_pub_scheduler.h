@@ -27,10 +27,16 @@
  * \brief Starts the Publisher scheduler using the PubSub configuration data
  *        and the source of data information
  *
- * \param config              The PubSub configuration to be used to start the Publisher
- * \param sourceConfig        The source configured to retrieve up to date data referenced in \p config
+ * \param config            The PubSub configuration to be used to start the Publisher
+ * \param sourceConfig      The source configured to retrieve up to date data referenced in \p config
+ * \param threadPriority    Under linux, the publisher wakes up more regularly when the thread is created with
+ *                          a higher priority, but this requires administrative rights.
+ *                          This value must be 0 (thread created with usual priority) or 1 to 99
+ *                          (thread created with FIFO scheduling policy requiring administrative rights)
  */
-bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig);
+bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
+                             SOPC_PubSourceVariableConfig* sourceConfig,
+                             int threadPriority);
 
 void SOPC_PubScheduler_Stop(void);
 

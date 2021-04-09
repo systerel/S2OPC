@@ -510,14 +510,16 @@ static void* thread_start_publish(void* arg)
     return NULL;
 }
 
-bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVariableConfig* sourceConfig)
+bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
+                             SOPC_PubSourceVariableConfig* sourceConfig,
+                             int threadPriority)
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
 
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
 
-    if (NULL == config || NULL == sourceConfig)
+    if (NULL == config || NULL == sourceConfig || threadPriority < 0 || threadPriority > 99)
     {
         return false;
     }
@@ -588,12 +590,19 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config, SOPC_PubSourceVar
         }
     }
 
-    /* Creation of the time-sensitive thread */
+    /* Creation of the thread (time-sensitive or not) */
     if (SOPC_STATUS_OK == resultSOPC)
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
-        resultSOPC =
-            SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL, 99, "Publisher");
+        if (0 == threadPriority)
+        {
+            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL, "Publisher");
+        }
+        else
+        {
+            resultSOPC = SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL,
+                                                       threadPriority, "Publisher");
+        }
     }
 
     if (SOPC_STATUS_OK != resultSOPC)
