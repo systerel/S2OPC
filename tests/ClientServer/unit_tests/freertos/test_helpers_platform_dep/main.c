@@ -47,7 +47,7 @@
 #include "FreeRTOSTest.h"
 
 #include "p_ethernet_if.h"
-//#include "p_logsrv.h"
+//#include "p_sopc_log_srv.h"
 
 Condition* handleCondition;
 tUtilsList list;
@@ -63,7 +63,7 @@ int main(void)
 
     P_ETHERNET_IF_Initialize();
 
-    // p = P_LOG_SRV_CreateAndStart(80,2);
+    // P_LOG_SRV_CreateAndStart(80,2);
     // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
 
     // memset(&list,0,sizeof(tUtilsList));
@@ -88,7 +88,7 @@ int main(void)
 
     // P_UTILS_LIST_DeInit(&list);
 
-    // pLogSrv = P_LOG_SRV_CreateAndStart(60,2);
+    // P_LOG_SRV_CreateAndStart(60,2);
 
     Condition_Init(handleCondition);
 

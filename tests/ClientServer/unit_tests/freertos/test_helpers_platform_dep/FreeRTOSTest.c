@@ -1164,7 +1164,7 @@ static void* cbS2OPC_Thread_PubSub(void* ptr)
     /* Write in PubSub nodes, which starts the PubSub */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_WritePubSubNodes();
+        //status = Server_WritePubSubNodes();
     }
 
     /* Wait for a signal */

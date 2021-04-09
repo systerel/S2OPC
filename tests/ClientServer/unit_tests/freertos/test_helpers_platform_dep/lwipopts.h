@@ -46,8 +46,10 @@
 #define LWIP_TIMEVAL_PRIVATE 0
 #define LWIP_DHCP 0
 #define LWIP_RAW 1
-#define LWIP_MPU_COMPATIBLE 1
+#define LWIP_MPU_COMPATIBLE 0
 #define SO_REUSE 1
+#define LWIP_NETIF_LOOPBACK 1
+#define LWIP_LOOPIF_MULTICAST 1
 /*
  * Add following memory options
  */
@@ -55,6 +57,7 @@
 #define MEM_LIBC_MALLOC (0)
 #define MEMP_NUM_NETBUF (8)
 #define MEMP_NUM_NETCONN (16)
+#define MEMP_NUM_NETDB (16)
 
 /**
  * LWIP_SO_RCVTIMEO==1: Enable receive timeout for sockets/netconns and
