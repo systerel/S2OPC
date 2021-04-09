@@ -47,21 +47,24 @@
 #define ONE_SEC_IN_MILLISEC 1000
 
 /* BOARD 1 */
-
+/*
 #define UDP_PORT_IN 5000
 #define UDP_PORT_OUT 5002
-
-
-/* BOARD 2 */
-/*
-#define UDP_PORT_IN 6000
-#define UDP_PORT_OUT 6002
 */
 
+/* BOARD 2 */
+
+#define UDP_PORT_IN 6000
+#define UDP_PORT_OUT 6002
+
+
 #define MAXSIZE 1024
-#define NBDATA 4
+#define NBDEVICES 5
+#define NBDATA 2
+#define DATAID "ABCDEFGHIJK"
 #define MAXNBCHAR 100
 
+#if 0
 #define DATA0 "data0"
 #define DATA0_TYPE SOPC_UInt32_Id
 #define DATA1 "data1"
@@ -70,28 +73,39 @@
 #define DATA2_TYPE SOPC_Int32_Id
 #define DATA3 "data3"
 #define DATA3_TYPE SOPC_String_Id
+#endif
+
+#define PREFIX "D"
+#define DATA_TYPE SOPC_UInt32_Id
 
 #define NODEID_PREFIX "ns=1;s="
-#define REQUEST_LENGTH 500
+#define SUB_SUFFIX "_Sub"
+
 #define REQUEST_HEADER_1 "POST HTTP/1.1\nHost UDP:"
-#define REQUEST_HEADER_2 "\n{\n\"code\":\"request\",\n\"cid\":"
-#define REQUEST_HEADER_3 ",\n\"adr\":\"\",\n\"data\":{ "
+#define REQUEST_HEADER_2 ",\n\"data\":{ "
 #define REQUEST_END "}\n"
-#define CID 5
+
+#define REQUEST_LENGTH 65535
 
 /* ---------------------------------------- */
 /* TYPES DEFINITION */
 /* ---------------------------------------- */
 typedef struct DataCfg
 {
-    char name[MAXNBCHAR];
+    char DataId;
     SOPC_BuiltinId type;
 } DataCfg;
+
+typedef struct DevCfg
+{
+    int DeviceId;
+    DataCfg Data[NBDATA];
+} DevCfg;
 
 /* ---------------------------------------- */
 /* CONFIGURATION */
 /* ---------------------------------------- */
-static DataCfg Cfg[NBDATA];
+static DevCfg Cfg[NBDEVICES];
 
 /* ---------------------------------------- */
 /* GLOBAL VARIABLES */
@@ -120,7 +134,6 @@ static void* UDP_ManageSending (void* arg);
 static void UDP_DecodeKeyValuesUpdateCache(char* buffer);
 static void UDP_CreateNodeId(char* dataName, char* nodeId_Str);
 static void UDP_CreateRequest(char* request);
-
 
 static SOPC_ReturnStatus UDP_ReceptionConfigure (void)
 {
@@ -185,6 +198,7 @@ SOPC_ReturnStatus UDP_Configure (void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+#if 0
     /* Set configuration */
     strcpy(Cfg[0].name, DATA0);
     Cfg[0].type = DATA0_TYPE;
@@ -194,6 +208,18 @@ SOPC_ReturnStatus UDP_Configure (void)
     Cfg[2].type = DATA2_TYPE;
     strcpy(Cfg[3].name, DATA3);
     Cfg[3].type = DATA3_TYPE;
+#endif
+
+    /* Initialize device and data configuration */
+    for (int i = 0; i < NBDEVICES; i++)
+    {
+        Cfg[i].DeviceId = i;
+        for (int j = 0; j < NBDATA; j++)
+        {
+            Cfg[i].Data[j].DataId = DATAID[j];
+            Cfg[i].Data[j].type = DATA_TYPE;
+        }
+    }
 
     /* Configure Reception */
     status = UDP_ReceptionConfigure();
@@ -218,26 +244,27 @@ static void UDP_CreateNodeId(char* dataName, char* nodeId_Str)
 static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
 {
     uint8_t dataIdx = 0;
-    char* dataArr[NBDATA] = {NULL};
+    char* dataArr[NBDATA*NBDEVICES] = {NULL};
     char nodeId_Str[2*MAXNBCHAR] = {0};
     char comma[] = ",";
     char *data = strtok(buffer, comma);
 
     /* Split different data under format [ Name :Value] */
     /* Data are separated by commas */
-    while ((data != NULL) && (dataIdx < NBDATA))
+    while ((data != NULL) && (dataIdx < (NBDATA*NBDEVICES)))
     {
         dataArr[dataIdx] = data;
         data = strtok(NULL, comma);
         dataIdx++;
     }
-    if (dataIdx < NBDATA)
+    if (dataIdx < (NBDATA*NBDEVICES))
     {
         printf("# Warning: received only %" PRIu8 " values\n", dataIdx);
     }
 
     /* For each data, split value and name */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    Cache_Lock();
     for (int i = 0; SOPC_STATUS_OK == status && i < dataIdx; i++)
     {
         /* The cache keeps the ownership of the NodeId and the DataValue, so we must create new ones */
@@ -250,7 +277,7 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
         char text[MAXNBCHAR];
 
         /* Parse the name and the value */
-        switch (Cfg[i].type)
+        switch (Cfg[i/NBDATA].Data[i%NBDATA].type)
         {
             case SOPC_String_Id :
                 sscanf(dataArr[i], "%s :%s" , name,  text);
@@ -270,7 +297,7 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
                 break;
 
             default :
-                printf("# Warning: Unexpected type in UDP configuration: %d\n", Cfg[i].type);
+                printf("# Warning: Unexpected type in UDP configuration: %d\n", Cfg[i/NBDATA].Data[i%NBDATA].type);
                 status = SOPC_STATUS_NOK;
                 break;
         }
@@ -280,7 +307,7 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
         {
             dataValue->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
             val->ArrayType = SOPC_VariantArrayType_SingleValue;
-            val->BuiltInTypeId = Cfg[i].type;
+            val->BuiltInTypeId = Cfg[i/NBDATA].Data[i%NBDATA].type;
 
             UDP_CreateNodeId(name, nodeId_Str);
             nodeId = SOPC_NodeId_FromCString(nodeId_Str, (int32_t) strlen(nodeId_Str));
@@ -301,6 +328,7 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
             }
         }
     }
+    Cache_Unlock();
 }
 
 static void UDP_DecodeDataAndUpdateCache(char* buffer)
@@ -351,17 +379,37 @@ static void* UDP_ManageReception (void* arg)
 
     char buffer[MAXSIZE]  = {0};
     ssize_t data_len = 0;
+    SOPC_RealTime *next_timeout = SOPC_RealTime_Create(NULL);
+    SOPC_RealTime *now = SOPC_RealTime_Create(NULL);
+    assert(NULL != next_timeout && NULL != now);
+    bool warned = false;
+    bool ok;
 
     printf("# Info: UDP Reception thread running.\n");
 
     while (SOPC_Atomic_Int_Get(&UDP_recepRunning))
     {
+        ok = SOPC_RealTime_GetTime(now);
+        assert(ok && "Failed GetTime");
+
         /* Wait for data reception */
         data_len = recv(recepSockfd, &buffer, MAXSIZE, MSG_DONTWAIT);
 
-        if (data_len < 0)
+        if (data_len < 0 && ok)
         {
-            SOPC_Sleep(ONE_MILLISEC);
+            SOPC_RealTime_AddDuration(next_timeout, 0.5);
+            if (SOPC_RealTime_IsExpired(next_timeout, now) && !warned)
+            {
+                /* The next_timeout has already expired, don't sleep! */
+                /* TODO: find other message ID, such as the PublisherId */
+                printf("# Warning: UDP JSON could not be received in time\n");
+                warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
+            }
+            else
+            {
+                ok = SOPC_RealTime_SleepUntil(next_timeout) == 0;
+                assert(ok && "Failed NanoSleep");
+            }
         }
         else
         {
@@ -382,6 +430,7 @@ static void* UDP_ManageReception (void* arg)
 static void UDP_CreateRequest(char* request)
 {
     char buffer[MAXNBCHAR] = {0};
+    char name[MAXNBCHAR];
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Reset Request content */
@@ -389,77 +438,86 @@ static void UDP_CreateRequest(char* request)
 
     /* Build request header */
     strcpy(request, REQUEST_HEADER_1);
+
     sprintf(buffer, "%d;", UDP_PORT_IN);
     strncat(request, buffer, REQUEST_LENGTH-strlen(request)-1);
     strncat(request, localhost_ip, REQUEST_LENGTH-strlen(request));
     sprintf(buffer, ";%d", UDP_PORT_OUT);
     strncat(request, buffer, REQUEST_LENGTH-strlen(request));
     strncat(request, REQUEST_HEADER_2, REQUEST_LENGTH-strlen(request));
-    sprintf(buffer, "%d", CID);
-    strncat(request, buffer, REQUEST_LENGTH-strlen(request));
-    strncat(request, REQUEST_HEADER_3, REQUEST_LENGTH-strlen(request));
 
     /* Add request data */
-    for (int i = 0; i < NBDATA; i++)
+    Cache_Lock();
+    for (int i = 0; i < NBDEVICES; i++)
     {
-        strncat(request, Cfg[i].name, REQUEST_LENGTH-strlen(request));
-        strncat(request, " :", REQUEST_LENGTH-strlen(request));
-
-        /* Attach the name to a local NodeId to avoid the allocation a NodeId for each Cache_Get */
-        SOPC_NodeId nid = {.IdentifierType = SOPC_IdentifierType_String,
-                           .Namespace = 1};
-        status = SOPC_String_AttachFromCstring(&nid.Data.String, Cfg[i].name);
-        assert(SOPC_STATUS_OK == status);
-
-        SOPC_DataValue *dv = Cache_Get(&nid);
-        if (NULL == dv)
+        for (int j = 0; j < NBDATA; j++)
         {
-            printf("# Error: \"%s\" not found in cache\n", Cfg[i].name);
-            continue;
-        }
+            /* Compute data name : "data<deviceId><dataId>" */
+            memset(name, '\0', MAXNBCHAR);
+            snprintf(name, MAXNBCHAR, "%s%d%c", PREFIX, Cfg[i].DeviceId, Cfg[i].Data[j].DataId);
 
-        SOPC_Variant *val = &dv->Value;
+            strncat(request, name, REQUEST_LENGTH-strlen(request));
+            strncat(request, " :", REQUEST_LENGTH-strlen(request));
 
-        /* Encode the value in the JSON */
-        switch (val->BuiltInTypeId)
-        {
-            case SOPC_String_Id :
-                if (val->Value.String.Length <= 0)
-                {
-                    strncat(request, "\"\"", REQUEST_LENGTH-2);
-                }
-                else
-                {
-                    /* TODO: missing quotes? */
-                    strncat(request, (char*)val->Value.String.Data, REQUEST_LENGTH-strlen(request));
-                }
-                break;
+            /* Attach the name to a local NodeId to avoid the allocation a NodeId for each Cache_Get */
+            SOPC_NodeId nid = {.IdentifierType = SOPC_IdentifierType_String,
+                    .Namespace = 1};
 
-            case SOPC_Int32_Id :
-                sprintf(buffer, "%d", val->Value.Int32);
-                strncat(request, buffer, REQUEST_LENGTH-strlen(request));
-                break;
+            /* Add suffix in order to retrieve received value in cache */
+            strcat(name, SUB_SUFFIX);
+            status = SOPC_String_AttachFromCstring(&nid.Data.String, name);
+            assert(SOPC_STATUS_OK == status);
 
-            case SOPC_UInt32_Id :
-                sprintf(buffer, "%d", val->Value.Uint32);
-                strncat(request, buffer, REQUEST_LENGTH-strlen(request));
-                break;
+            SOPC_DataValue *dv = Cache_Get(&nid);
+            if (NULL == dv)
+            {
+                printf("# Error: \"%s\" not found in cache\n", name);
+                continue;
+            }
 
-            case SOPC_Int16_Id :
-                sprintf(buffer, "%d", val->Value.Int16);
-                strncat(request, buffer, REQUEST_LENGTH-strlen(request));
-                break;
+            SOPC_Variant *val = &dv->Value;
 
-            default :
-                printf("# Warning: Received unexpected type : %d\n", val->BuiltInTypeId);
-                break;
-        }
+            /* Encode the value in the JSON */
+            switch (val->BuiltInTypeId)
+            {
+                case SOPC_String_Id :
+                    if (val->Value.String.Length <= 0)
+                    {
+                        strncat(request, "\"\"", REQUEST_LENGTH-2);
+                    }
+                    else
+                    {
+                        strncat(request, (char*)val->Value.String.Data, REQUEST_LENGTH-strlen(request));
+                    }
+                    break;
 
-        if (NBDATA-1 != i)
-        {
-            strncat(request, ", ", REQUEST_LENGTH-strlen(request));
+                case SOPC_Int32_Id :
+                    sprintf(buffer, "%d", val->Value.Int32);
+                    strncat(request, buffer, REQUEST_LENGTH-strlen(request));
+                    break;
+
+                case SOPC_UInt32_Id :
+                    sprintf(buffer, "%d", val->Value.Uint32);
+                    strncat(request, buffer, REQUEST_LENGTH-strlen(request));
+                    break;
+
+                case SOPC_Int16_Id :
+                    sprintf(buffer, "%d", val->Value.Int16);
+                    strncat(request, buffer, REQUEST_LENGTH-strlen(request));
+                    break;
+
+                default :
+                    printf("# Warning: Received unexpected type : %d\n", val->BuiltInTypeId);
+                    break;
+            }
+
+            if (NBDATA-1 != i)
+            {
+                strncat(request, ", ", REQUEST_LENGTH-strlen(request));
+            }
         }
     }
+    Cache_Unlock();
 
     /* Finalize request (both open curly bracket to be closed) */
     strncat(request, REQUEST_END, REQUEST_LENGTH-strlen(request));

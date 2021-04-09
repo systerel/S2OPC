@@ -1,0 +1,309 @@
+<PubSub publisherId="43">    
+	<!-- PUBLISHER -->
+    <connection address="opc.udp://232.1.3.100:4840" mode="publisher">
+		<message id="1" version="1" publishingInterval="2">
+            <!-- one to many -->
+            <!-- Device 0 -->
+            <variable nodeId="ns=1;s=D0A" displayName="Counter_Device0_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D0B" displayName="Counter_Device0_DataB" dataType="UInt32"/>
+            <!-- Device 1 -->        
+            <variable nodeId="ns=1;s=D1A" displayName="Counter_Device1_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D1B" displayName="Counter_Device1_DataB" dataType="UInt32"/>
+            <!-- Device 2 -->        
+            <variable nodeId="ns=1;s=D2A" displayName="Counter_Device2_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D2B" displayName="Counter_Device2_DataB" dataType="UInt32"/>
+            <!-- Device 3 -->        
+            <variable nodeId="ns=1;s=D3A" displayName="Counter_Device3_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D3B" displayName="Counter_Device3_DataB" dataType="UInt32"/>
+            <!-- Device 4 -->        
+            <variable nodeId="ns=1;s=D4A" displayName="Counter_Device4_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D4B" displayName="Counter_Device4_DataB" dataType="UInt32"/>
+            <!-- Device 5 -->        
+            <variable nodeId="ns=1;s=D5A" displayName="Counter_Device5_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D5B" displayName="Counter_Device5_DataB" dataType="UInt32"/>
+            <!-- Device 6 -->        
+            <variable nodeId="ns=1;s=D6A" displayName="Counter_Device6_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D6B" displayName="Counter_Device6_DataB" dataType="UInt32"/>
+            <!-- Device 7 -->        
+            <variable nodeId="ns=1;s=D7A" displayName="Counter_Device7_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D7B" displayName="Counter_Device7_DataB" dataType="UInt32"/>
+            <!-- Device 8 -->        
+            <variable nodeId="ns=1;s=D8A" displayName="Counter_Device8_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D8B" displayName="Counter_Device8_DataB" dataType="UInt32"/>
+            <!-- Device 9 -->        
+            <variable nodeId="ns=1;s=D9A" displayName="Counter_Device9_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D9B" displayName="Counter_Device9_DataB" dataType="UInt32"/>
+            <!-- Device 10 -->
+            <variable nodeId="ns=1;s=D10A" displayName="Counter_Device10_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D10B" displayName="Counter_Device10_DataB" dataType="UInt32"/>
+            <!-- Device 11 -->                                        
+            <variable nodeId="ns=1;s=D11A" displayName="Counter_Device11_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D11B" displayName="Counter_Device11_DataB" dataType="UInt32"/>
+            <!-- Device 12 -->                                        
+            <variable nodeId="ns=1;s=D12A" displayName="Counter_Device12_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D12B" displayName="Counter_Device12_DataB" dataType="UInt32"/>
+            <!-- Device 13 -->                                        
+            <variable nodeId="ns=1;s=D13A" displayName="Counter_Device13_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D13B" displayName="Counter_Device13_DataB" dataType="UInt32"/>
+            <!-- Device 14 -->                                        
+            <variable nodeId="ns=1;s=D14A" displayName="Counter_Device14_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D14B" displayName="Counter_Device14_DataB" dataType="UInt32"/>
+            <!-- Device 15 -->                                        
+            <variable nodeId="ns=1;s=D15A" displayName="Counter_Device15_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D15B" displayName="Counter_Device15_DataB" dataType="UInt32"/>
+            <!-- Device 16 -->                                        
+            <variable nodeId="ns=1;s=D16A" displayName="Counter_Device16_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D16B" displayName="Counter_Device16_DataB" dataType="UInt32"/>
+            <!-- Device 17 -->                                        
+            <variable nodeId="ns=1;s=D17A" displayName="Counter_Device17_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D17B" displayName="Counter_Device17_DataB" dataType="UInt32"/>
+            <!-- Device 18 -->                                        
+            <variable nodeId="ns=1;s=D18A" displayName="Counter_Device18_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D18B" displayName="Counter_Device18_DataB" dataType="UInt32"/>
+            <!-- Device 19 -->                                        
+            <variable nodeId="ns=1;s=D19A" displayName="Counter_Device19_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D19B" displayName="Counter_Device19_DataB" dataType="UInt32"/>
+			<!-- Device 20 -->
+            <variable nodeId="ns=1;s=D20A" displayName="Counter_Device20_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D20B" displayName="Counter_Device20_DataB" dataType="UInt32"/>
+            <!-- Device 21 -->                                        
+            <variable nodeId="ns=1;s=D21A" displayName="Counter_Device21_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D21B" displayName="Counter_Device21_DataB" dataType="UInt32"/>
+            <!-- Device 22 -->                                        
+            <variable nodeId="ns=1;s=D22A" displayName="Counter_Device22_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D22B" displayName="Counter_Device22_DataB" dataType="UInt32"/>
+            <!-- Device 23 -->                                        
+            <variable nodeId="ns=1;s=D23A" displayName="Counter_Device23_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D23B" displayName="Counter_Device23_DataB" dataType="UInt32"/>
+            <!-- Device 24 -->                                        
+            <variable nodeId="ns=1;s=D24A" displayName="Counter_Device24_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D24B" displayName="Counter_Device24_DataB" dataType="UInt32"/>
+            <!-- Device 25 -->                                        
+            <variable nodeId="ns=1;s=D25A" displayName="Counter_Device25_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D25B" displayName="Counter_Device25_DataB" dataType="UInt32"/>
+            <!-- Device 26 -->                                        
+            <variable nodeId="ns=1;s=D26A" displayName="Counter_Device26_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D26B" displayName="Counter_Device26_DataB" dataType="UInt32"/>
+            <!-- Device 27 -->                                        
+            <variable nodeId="ns=1;s=D27A" displayName="Counter_Device27_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D27B" displayName="Counter_Device27_DataB" dataType="UInt32"/>
+            <!-- Device 28 -->                                        
+            <variable nodeId="ns=1;s=D28A" displayName="Counter_Device28_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D28B" displayName="Counter_Device28_DataB" dataType="UInt32"/>
+            <!-- Device 29 -->                                        
+            <variable nodeId="ns=1;s=D29A" displayName="Counter_Device29_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D29B" displayName="Counter_Device29_DataB" dataType="UInt32"/>
+			<!-- Device 30 -->
+            <variable nodeId="ns=1;s=D30A" displayName="Counter_Device30_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D30B" displayName="Counter_Device30_DataB" dataType="UInt32"/>
+            <!-- Device 31 -->                                        
+            <variable nodeId="ns=1;s=D31A" displayName="Counter_Device31_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D31B" displayName="Counter_Device31_DataB" dataType="UInt32"/>
+            <!-- Device 32 -->                                        
+            <variable nodeId="ns=1;s=D32A" displayName="Counter_Device32_DataA" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D32B" displayName="Counter_Device32_DataB" dataType="UInt32"/>
+        </message>
+    </connection>
+	<!-- SUSCRIBER -->
+    <connection address="opc.udp://232.1.4.100:4840" mode="subscriber">
+		<message id="100" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 0 -->
+            <variable nodeId="ns=1;s=D0A_Sub" displayName="Counter_Device0_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D0B_Sub" displayName="Counter_Device0_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="1" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 1 -->
+            <variable nodeId="ns=1;s=D1A_Sub" displayName="Counter_Device1_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D1B_Sub" displayName="Counter_Device1_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="2" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 2 -->
+            <variable nodeId="ns=1;s=D2A_Sub" displayName="Counter_Device2_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D2B_Sub" displayName="Counter_Device2_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="3" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 3 -->
+            <variable nodeId="ns=1;s=D3A_Sub" displayName="Counter_Device3_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D3B_Sub" displayName="Counter_Device3_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="4" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 4 -->
+            <variable nodeId="ns=1;s=D4A_Sub" displayName="Counter_Device4_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D4B_Sub" displayName="Counter_Device4_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="5" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 5 -->
+            <variable nodeId="ns=1;s=D5A_Sub" displayName="Counter_Device5_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D5B_Sub" displayName="Counter_Device5_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="6" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 6 -->
+            <variable nodeId="ns=1;s=D6A_Sub" displayName="Counter_Device6_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D6B_Sub" displayName="Counter_Device6_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="7" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 7 -->
+            <variable nodeId="ns=1;s=D7A_Sub" displayName="Counter_Device7_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D7B_Sub" displayName="Counter_Device7_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="8" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 8 -->
+            <variable nodeId="ns=1;s=D8A_Sub" displayName="Counter_Device8_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D8B_Sub" displayName="Counter_Device8_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="9" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 9 -->
+            <variable nodeId="ns=1;s=D9A_Sub" displayName="Counter_Device9_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D9B_Sub" displayName="Counter_Device9_DataB_Sub" dataType="UInt32"/>
+        </message>
+		
+		<message id="10" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+		    <!-- Device 10 -->
+            <variable nodeId="ns=1;s=D10A_Sub" displayName="Counter_Device10_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D10B_Sub" displayName="Counter_Device10_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="11" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 11 -->
+            <variable nodeId="ns=1;s=D11A_Sub" displayName="Counter_Device11_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D11B_Sub" displayName="Counter_Device11_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="12" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 12 -->
+            <variable nodeId="ns=1;s=D12A_Sub" displayName="Counter_Device12_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D12B_Sub" displayName="Counter_Device12_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="13" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 13 -->
+            <variable nodeId="ns=1;s=D13A_Sub" displayName="Counter_Device13_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D13B_Sub" displayName="Counter_Device13_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="14" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 14 -->
+            <variable nodeId="ns=1;s=D14A_Sub" displayName="Counter_Device14_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D14B_Sub" displayName="Counter_Device14_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="15" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 15 -->
+            <variable nodeId="ns=1;s=D15A_Sub" displayName="Counter_Device15_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D15B_Sub" displayName="Counter_Device15_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="16" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 16 -->
+            <variable nodeId="ns=1;s=D16A_Sub" displayName="Counter_Device16_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D16B_Sub" displayName="Counter_Device16_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="17" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 17 -->
+            <variable nodeId="ns=1;s=D17A_Sub" displayName="Counter_Device17_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D17B_Sub" displayName="Counter_Device17_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="18" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 18 -->
+            <variable nodeId="ns=1;s=D18A_Sub" displayName="Counter_Device18_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D18B_Sub" displayName="Counter_Device18_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="19" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 19 -->
+            <variable nodeId="ns=1;s=D19A_Sub" displayName="Counter_Device19_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D19B_Sub" displayName="Counter_Device19_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="20" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 20 -->
+            <variable nodeId="ns=1;s=D20A_Sub" displayName="Counter_Device20_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D20B_Sub" displayName="Counter_Device20_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="21" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 21 -->
+            <variable nodeId="ns=1;s=D21A_Sub" displayName="Counter_Device21_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D21B_Sub" displayName="Counter_Device21_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="22" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 22 -->
+            <variable nodeId="ns=1;s=D22A_Sub" displayName="Counter_Device22_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D22B_Sub" displayName="Counter_Device22_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="23" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 23 -->
+            <variable nodeId="ns=1;s=D23A_Sub" displayName="Counter_Device23_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D23B_Sub" displayName="Counter_Device23_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="24" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 24 -->
+            <variable nodeId="ns=1;s=D24A_Sub" displayName="Counter_Device24_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D24B_Sub" displayName="Counter_Device24_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="25" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 25 -->
+            <variable nodeId="ns=1;s=D25A_Sub" displayName="Counter_Device25_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D25B_Sub" displayName="Counter_Device25_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="26" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 26 -->
+            <variable nodeId="ns=1;s=D26A_Sub" displayName="Counter_Device26_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D26B_Sub" displayName="Counter_Device26_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="27" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 27 -->
+            <variable nodeId="ns=1;s=D27A_Sub" displayName="Counter_Device27_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D27B_Sub" displayName="Counter_Device27_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="28" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 28 -->
+            <variable nodeId="ns=1;s=D28A_Sub" displayName="Counter_Device28_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D28B_Sub" displayName="Counter_Device28_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="29" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 29 -->
+            <variable nodeId="ns=1;s=D29A_Sub" displayName="Counter_Device29_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D29B_Sub" displayName="Counter_Device29_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="30" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 30 -->
+            <variable nodeId="ns=1;s=D30A_Sub" displayName="Counter_Device30_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D30B_Sub" displayName="Counter_Device30_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="31" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 31 -->
+            <variable nodeId="ns=1;s=D31A_Sub" displayName="Counter_Device31_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D31B_Sub" displayName="Counter_Device31_DataB_Sub" dataType="UInt32"/>
+        </message>
+		<message id="32" version="1" publishingInterval="2" publisherId="44">
+            <!-- one to many -->
+            <!-- Device 32 -->
+            <variable nodeId="ns=1;s=D32A_Sub" displayName="Counter_Device32_DataA_Sub" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=D32B_Sub" displayName="Counter_Device32_DataB_Sub" dataType="UInt32"/>
+        </message>
+    </connection>
+</PubSub>
