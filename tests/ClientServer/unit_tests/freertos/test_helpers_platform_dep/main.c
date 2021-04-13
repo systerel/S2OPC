@@ -63,6 +63,9 @@ int main(void)
 
     P_ETHERNET_IF_Initialize();
 
+    // Init tick to UTC time (build date)
+    P_TIME_SetInitialDateToBuildTime();
+
     // P_LOG_SRV_CreateAndStart(80,2);
     // gpLogServ = P_LOG_SRV_CreateAndStart(80,4);
 
@@ -90,9 +93,9 @@ int main(void)
 
     // P_LOG_SRV_CreateAndStart(60,2);
 
-    Condition_Init(handleCondition);
+    //Condition_Init(handleCondition);
 
-    FREE_RTOS_TEST_S2OPC_PUBSUB(handleCondition);
+    FREE_RTOS_TEST_S2OPC_PUBSUB(NULL);
 
     vTaskStartScheduler();
 
