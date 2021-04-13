@@ -221,7 +221,10 @@ static void set_new_state(SOPC_PubSubState new)
 }
 
 /* The generic callback that decode message and call the configuration-defined callback SetVariables */
-static SOPC_ReturnStatus on_message_received(void* pInputContext);
+static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderContext,
+                                             SOPC_PubSubState state,
+                                             SOPC_Buffer* buffer,
+                                             SOPC_SubTargetVariableConfig* config);
 
 /* The callback for received messages specific to the UDP transport */
 static void on_udp_message_received(void* pInputIdentifier, Socket sock);
@@ -243,8 +246,10 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, u
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
     {
         memcpy(schedulerCtx.receptionBufferMQTT->data, data, size);
-        schedulerCtx.receptionBufferMQTT->length = size;
-        SOPC_ReturnStatus status = on_message_received(pInputIdentifier);
+        SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferMQTT, 0);
+        SOPC_Buffer_SetDataLength(schedulerCtx.receptionBufferMQTT, size);
+        SOPC_ReturnStatus status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
+                                                       schedulerCtx.receptionBufferMQTT, schedulerCtx.targetConfig);
         /* TODO: what do we do in case of NOK? */
         (void) status;
     }
@@ -262,28 +267,30 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
     // Write input
     if (SOPC_STATUS_OK == status)
     {
-        status = on_message_received(pInputIdentifier);
+        status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
+                                     schedulerCtx.receptionBufferUDP, schedulerCtx.targetConfig);
     }
     /* TODO: else */
     /* TODO: what do we do in case of NOK? */
 }
 
-static SOPC_ReturnStatus on_message_received(void* pInputContext)
+static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderContext,
+                                             SOPC_PubSubState state,
+                                             SOPC_Buffer* buffer,
+                                             SOPC_SubTargetVariableConfig* config)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    SOPC_PubSubConnection* pDecoderContext = (SOPC_PubSubConnection*) pInputContext;
 
     if (NULL == pDecoderContext)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_PubSubState_Operational == schedulerCtx.state)
+    if (SOPC_PubSubState_Operational == state)
     {
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
          *  random bytes found on the network */
-        result = SOPC_Reader_Read_UADP(pDecoderContext, schedulerCtx.receptionBufferUDP, schedulerCtx.targetConfig,
-                                       SOPC_SubScheduler_Get_Security_Infos);
+        result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos);
 
         if (SOPC_STATUS_ENCODING_ERROR == result)
         {
