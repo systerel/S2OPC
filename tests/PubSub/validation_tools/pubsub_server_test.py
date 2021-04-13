@@ -335,7 +335,7 @@ def helpConfigurationChangeAndStart(pPubsubserver, pConfig, pLogger, static=Fals
 def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
     pPubsubserver.setValue(nodeId, NODE_VARIANT_TYPE[nodeId], value)
     expected = pPubsubserver.getValue(nodeId)
-    pLogger.add_test('%s is changed' % nodeId , expected == value)
+    pLogger.add_test('write in %s succeeded' % nodeId , expected == value)
 
 def helpAssertState(psserver, expected, pLogger):
     state = psserver.getPubSubState()
@@ -472,7 +472,7 @@ def testPubSubDynamicConf():
         #
         # TC 6 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
         #
-        logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT) => subscriber variables change through Pub/Sub")
+        logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT): variables change through Pub/Sub")
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
         sleep(DYN_CONF_PUB_INTERVAL_1000)
