@@ -95,6 +95,9 @@ int main(void)
 
     //Condition_Init(handleCondition);
 
+    // Attach S2OPC Mutexes mechanism to mbedtls.
+    mbedtls_threading_initialize();
+
     FREE_RTOS_TEST_S2OPC_PUBSUB(NULL);
 
     vTaskStartScheduler();
