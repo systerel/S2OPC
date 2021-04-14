@@ -44,22 +44,27 @@
 #define TEN_MILLISEC 10
 #define FIVE_MILLISEC 5
 #define ONE_MILLISEC 1
+#define TWO_MILLISEC 2
 #define ONE_SEC_IN_MILLISEC 1000
 
-/* BOARD 1 */
-/*
+#define BOARD1 0
+#define BOARD2 1
+
+#if BOARD1
 #define UDP_PORT_IN 5000
 #define UDP_PORT_OUT 5002
-*/
+#define SUB_SUFFIX "_Sub"
+#endif
 
-/* BOARD 2 */
 
+#if BOARD2
 #define UDP_PORT_IN 6000
 #define UDP_PORT_OUT 6002
+#define SUB_SUFFIX ""
+#endif
 
-
-#define MAXSIZE 1024
-#define NBDEVICES 5
+#define MAXSIZE 65536
+#define NBDEVICES 30
 #define NBDATA 2
 #define DATAID "ABCDEFGHIJK"
 #define MAXNBCHAR 100
@@ -79,7 +84,6 @@
 #define DATA_TYPE SOPC_UInt32_Id
 
 #define NODEID_PREFIX "ns=1;s="
-#define SUB_SUFFIX "_Sub"
 
 #define REQUEST_HEADER_1 "POST HTTP/1.1\nHost UDP:"
 #define REQUEST_HEADER_2 ",\n\"data\":{ "
@@ -314,6 +318,7 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
             if (NULL == nodeId)
             {
                 status = SOPC_STATUS_NOK;
+                printf("# Error: Failed to create Node Id\n");
             }
         }
 
@@ -334,10 +339,10 @@ static void UDP_DecodeKeyValuesUpdateCache(char* buffer)
 static void UDP_DecodeDataAndUpdateCache(char* buffer)
 {
     char dataBuffer[MAXSIZE] = {0};
-    char c = buffer[NBDATA];
+    char c = 0;
     uint8_t nbCurlyBracket = 0;
-    uint8_t buffIdx = 0;
-    uint8_t startIdx = 0;
+    size_t buffIdx = 0;
+    size_t startIdx = 0;
     bool dataIsolated = false;
 
     /* Isolate data part of the received frame */
@@ -365,7 +370,7 @@ static void UDP_DecodeDataAndUpdateCache(char* buffer)
 
         buffIdx++;
         c = buffer[buffIdx];
-    } while (!dataIsolated);
+    } while ((!dataIsolated) && (buffIdx < MAXSIZE) && (c != '\0'));
 
     /* Decode Data name and value */
     UDP_DecodeKeyValuesUpdateCache(dataBuffer);
@@ -552,7 +557,7 @@ static void* UDP_ManageSending (void* arg)
                sizeof(sendSock));
 
         /* Compute the next timeout, adding the wait period in ms (as a float) */
-        SOPC_RealTime_AddDuration(next_timeout, ONE_MILLISEC);
+        SOPC_RealTime_AddDuration(next_timeout, TWO_MILLISEC);
         if (SOPC_RealTime_IsExpired(next_timeout, now) && !warned)
         {
             /* The next_timeout has already expired, don't sleep! */
@@ -585,6 +590,7 @@ bool UDP_Start(void)
     /* Create and start reception thread */
     SOPC_Atomic_Int_Set(&UDP_recepRunning, 1);
     SOPC_ReturnStatus status = SOPC_Thread_Create(&recepThreadId, &UDP_ManageReception, NULL, "ReceiveJSON");
+
     if (SOPC_STATUS_OK == status)
     {
         UDP_recepOK = true;
@@ -593,7 +599,12 @@ bool UDP_Start(void)
 
     /* Create and start sending thread */
     SOPC_Atomic_Int_Set(&UDP_sendRunning, 1);
-    status = SOPC_Thread_CreatePrioritized(&sendThreadId, &UDP_ManageSending, NULL, 98, "SendJSON");
+#if BOARD1
+    status = SOPC_Thread_CreatePrioritized(&sendThreadId, &UDP_ManageSending, NULL, 80, "SendJSON");
+#endif
+#if BOARD2
+    status = SOPC_Thread_Create(&sendThreadId, &UDP_ManageSending, NULL, "SendJSON");
+#endif
     if (SOPC_STATUS_OK == status)
     {
         UDP_sendOK = true;

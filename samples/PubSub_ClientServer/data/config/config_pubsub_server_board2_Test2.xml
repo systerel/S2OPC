@@ -182,24 +182,6 @@
             <variable nodeId="ns=1;s=D29A" displayName="Counter_Device29_DataA" dataType="UInt32"/>
             <variable nodeId="ns=1;s=D29B" displayName="Counter_Device29_DataB" dataType="UInt32"/>
         </message>
-		<message id="30" version="1" publishingInterval="2">
-            <!-- one to many -->
-            <!-- Device 30 -->
-            <variable nodeId="ns=1;s=D30A" displayName="Counter_Device30_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D30B" displayName="Counter_Device30_DataB" dataType="UInt32"/>
-        </message>
-		<message id="31" version="1" publishingInterval="2">
-            <!-- one to many -->
-            <!-- Device 31 -->
-            <variable nodeId="ns=1;s=D31A" displayName="Counter_Device31_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D31B" displayName="Counter_Device31_DataB" dataType="UInt32"/>
-        </message>
-		<message id="32" version="1" publishingInterval="2">
-            <!-- one to many -->
-            <!-- Device 32 -->
-            <variable nodeId="ns=1;s=D32A" displayName="Counter_Device32_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D32B" displayName="Counter_Device32_DataB" dataType="UInt32"/>
-        </message>
     </connection>
     <!-- SUSCRIBER -->
     <connection address="opc.udp://232.1.3.100:4840" mode="subscriber">
@@ -295,15 +277,6 @@
             <!-- Device 29 -->                                        
             <variable nodeId="ns=1;s=D29A" displayName="Counter_Device29_DataA" dataType="UInt32"/>
             <variable nodeId="ns=1;s=D29B" displayName="Counter_Device29_DataB" dataType="UInt32"/>
-			<!-- Device 30 -->
-            <variable nodeId="ns=1;s=D30A" displayName="Counter_Device30_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D30B" displayName="Counter_Device30_DataB" dataType="UInt32"/>
-            <!-- Device 31 -->                                        
-            <variable nodeId="ns=1;s=D31A" displayName="Counter_Device31_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D31B" displayName="Counter_Device31_DataB" dataType="UInt32"/>
-            <!-- Device 32 -->                                        
-            <variable nodeId="ns=1;s=D32A" displayName="Counter_Device32_DataA" dataType="UInt32"/>
-            <variable nodeId="ns=1;s=D32B" displayName="Counter_Device32_DataB" dataType="UInt32"/>
-        </message>
+		</message>
     </connection>
 </PubSub>
