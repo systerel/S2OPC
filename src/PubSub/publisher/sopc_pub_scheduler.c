@@ -121,7 +121,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfigurati
 static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
 
 // Traverse allocated message array to initialize transport context associated to message. Increment "current" field.
-static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
+static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group, SOPC_RealTime *start_time);
 
 /* Finds the message with the smallest next_timeout */
 static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void);
@@ -255,7 +255,7 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.length = 0;
 }
 
-static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group)
+static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group, SOPC_RealTime *start_time)
 {
     assert(ctx != NULL);
     assert(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
@@ -269,7 +269,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     context->warned = false;
 
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
-    context->next_timeout = SOPC_RealTime_Create(NULL);
+    context->next_timeout = SOPC_RealTime_Create(start_time);
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
@@ -528,6 +528,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
+    SOPC_RealTime *start_date = SOPC_RealTime_Create(NULL);
 
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
 
@@ -581,6 +582,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         }
     }
 
+    /* TODO: 1000ms to let the Publisher settle its configuration before actually publishing */
+    SOPC_RealTime_AddDuration(start_date, 1000);
     for (uint32_t i = 0; SOPC_STATUS_OK == resultSOPC && i < nbConnection; i++)
     {
         SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
@@ -595,7 +598,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
 
             /* TODO: call with side effect in if statement */
-            if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
+            if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group, start_date))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }
