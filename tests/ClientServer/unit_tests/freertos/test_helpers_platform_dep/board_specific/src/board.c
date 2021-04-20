@@ -404,9 +404,9 @@ void BOARD_ConfigMPU(void)
     MPU->RBAR = ARM_MPU_RBAR(6, 0x20200000U);
     MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 0, 0, 1, 1, 0, ARM_MPU_REGION_SIZE_512KB);
 
-    /* Region 7 setting: Memory with Normal type, not shareable, outer/inner write back */
+    /* Region 7 setting: Memory with Normal type, not shareable, non-cacheable */
     MPU->RBAR = ARM_MPU_RBAR(7, 0x20280000U);
-    MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 0, 0, 1, 1, 0, ARM_MPU_REGION_SIZE_256KB);
+    MPU->RASR = ARM_MPU_RASR(0, ARM_MPU_AP_FULL, 1, 0, 0, 0, 0, ARM_MPU_REGION_SIZE_256KB);
 
 /* The define sets the cacheable memory to shareable,
  * this suggestion is referred from chapter 2.2.1 Memory regions,
@@ -431,8 +431,8 @@ void BOARD_ConfigMPU(void)
     ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk);
 
     /* Enable I cache and D cache */
-    // SCB_EnableDCache();
-    // SCB_EnableICache();
+    SCB_EnableDCache();
+    SCB_EnableICache();
 }
 
 void BOARD_SD_Pin_Config(uint32_t speed, uint32_t strength)
