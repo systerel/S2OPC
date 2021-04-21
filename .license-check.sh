@@ -156,6 +156,14 @@ read -d '' exclusions <<-EOF
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.c
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.h
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls_config.h
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.h
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.c
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha1_alt.h
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha256_alt.h
+	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/threading_alt.h
 EOF
 for f in $exclusions; do
     mv $f $f"_"
