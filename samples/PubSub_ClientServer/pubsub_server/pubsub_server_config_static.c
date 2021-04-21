@@ -6,8 +6,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-
-
 static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection* connection,
                                                              uint16_t index,
                                                              uint16_t messageId,
@@ -28,8 +26,6 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
     return writer;
 }
 
-
-
 static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfiguration* config,
                                                             uint16_t dataSetIndex,
                                                             SOPC_DataSetWriter* writer,
@@ -41,7 +37,6 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
 
     return dataset;
 }
-
 
 static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
@@ -58,7 +53,6 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
     SOPC_PublishedVariable_Set_NodeId(publishedVar, nodeId);
     SOPC_PublishedVariable_Set_AttributeId(publishedVar, 13); // Value => AttributeId=13
 }
-
 
 static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection* connection,
                                                              uint16_t index,
@@ -86,12 +80,10 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     return NULL;
 }
 
-
 static bool SOPC_PubSubConfig_SetSubNbVariables(SOPC_DataSetReader* reader, uint16_t nbVar)
 {
     return SOPC_DataSetReader_Allocate_FieldMetaData_Array(reader, SOPC_TargetVariablesDataType, nbVar);
 }
-
 
 static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
                                                uint16_t index,
@@ -117,15 +109,14 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 {
     bool alloc = true;
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
-    
+
     SOPC_PubSubConnection* connection;
-    
 
     /* 1 connection pub */
     alloc = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);
-    
+
     /** connection pub 0 **/
-    
+
     if (alloc)
     {
         // Set publisher id and address
@@ -146,19 +137,18 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 2);
     }
 
-        
     /*** Pub Message 14 ***/
-    
+
     SOPC_DataSetWriter* writer = NULL;
-        
+
     if (alloc)
     {
         writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 100, SOPC_SecurityMode_SignAndEncrypt);
         alloc = NULL != writer;
     }
-    
+
     SOPC_PublishedDataSet* dataset = NULL;
-    
+
     if (alloc)
     {
         dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 2);
@@ -166,19 +156,18 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        
         SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubBool", SOPC_Boolean_Id);
         SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubString", SOPC_String_Id);
     }
-    
+
     /*** Pub Message 15 ***/
-    
+
     if (alloc)
     {
         writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000, SOPC_SecurityMode_None);
         alloc = NULL != writer;
     }
-    
+
     if (alloc)
     {
         dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 2);
@@ -186,17 +175,15 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        
         SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubInt", SOPC_Int64_Id);
         SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubUInt", SOPC_UInt64_Id);
     }
-    
 
     /* 1 connection Sub */
     alloc = SOPC_PubSubConfiguration_Allocate_SubConnection_Array(config, 1);
-    
+
     /** connection sub 0 **/
-    
+
     if (alloc)
     {
         // Set subscriber id and address
@@ -210,47 +197,43 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         alloc = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, 2);
     }
 
-        
     SOPC_DataSetReader* reader = NULL;
-        
+
     /*** Sub Message 14 ***/
-    
+
     if (alloc)
     {
         reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, 42, 14, 1, 100, SOPC_SecurityMode_SignAndEncrypt);
         alloc = NULL != reader;
     }
-    
+
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, 2);
     }
     if (alloc)
     {
-        
         SOPC_PubSubConfig_SetSubVariableAt(reader, 0, "ns=1;s=SubBool", SOPC_Boolean_Id);
         SOPC_PubSubConfig_SetSubVariableAt(reader, 1, "ns=1;s=SubString", SOPC_String_Id);
     }
-    
+
     /*** Sub Message 15 ***/
-    
+
     if (alloc)
     {
         reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, 42, 15, 1, 1000, SOPC_SecurityMode_None);
         alloc = NULL != reader;
     }
-    
+
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, 2);
     }
     if (alloc)
     {
-        
         SOPC_PubSubConfig_SetSubVariableAt(reader, 0, "ns=1;s=SubInt", SOPC_Int64_Id);
         SOPC_PubSubConfig_SetSubVariableAt(reader, 1, "ns=1;s=SubUInt", SOPC_UInt64_Id);
     }
-    
 
     if (!alloc)
     {
@@ -260,4 +243,3 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     return config;
 }
-    

@@ -21,7 +21,7 @@
  * \file des_alt.h
  *
  * \brief DES block cipher
- * 
+ *
  */
 
 #ifndef MBEDTLS_DES_ALT_H

@@ -1010,10 +1010,13 @@ static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
 
             if (pBuffer->length > 0)
             {
-                pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length : pBuffer->length - 1] = '\r';
-                pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 1 : pBuffer->length - 1] =
+                pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length : pBuffer->length - 1] =
+                    '\r';
+                pBuffer
+                    ->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 1 : pBuffer->length - 1] =
                     '\n';
-                pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 2 : pBuffer->length - 1] =
+                pBuffer
+                    ->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 2 : pBuffer->length - 1] =
                     0;
 
                 printf((void*) pBuffer->data);
@@ -1070,14 +1073,13 @@ static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
 
                 if (pBuffer->length > 0)
                 {
-                    pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length : pBuffer->length - 1] =
+                    pBuffer
+                        ->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length : pBuffer->length - 1] =
                         '\r';
-                    pBuffer
-                        ->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 1 : pBuffer->length - 1] =
-                        '\n';
-                    pBuffer
-                        ->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 2 : pBuffer->length - 1] =
-                        0;
+                    pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 1
+                                                                                : pBuffer->length - 1] = '\n';
+                    pBuffer->data[pBuffer->length < (pBuffer->maximum_size - 2) ? pBuffer->length + 2
+                                                                                : pBuffer->length - 1] = 0;
 
                     printf((void*) pBuffer->data);
                     fflush(stdout);
@@ -1164,7 +1166,7 @@ static void* cbS2OPC_Thread_PubSub(void* ptr)
     /* Write in PubSub nodes, which starts the PubSub */
     if (SOPC_STATUS_OK == status)
     {
-        //status = Server_WritePubSubNodes();
+        // status = Server_WritePubSubNodes();
     }
 
     /* Wait for a signal */
