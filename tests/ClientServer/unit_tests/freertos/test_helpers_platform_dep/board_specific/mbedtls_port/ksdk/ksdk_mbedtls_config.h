@@ -1,12 +1,4 @@
-/**
- * \file config.h
- *
- * \brief Configuration options (set of defines)
- *
- *  This set of compile-time options may be used to enable
- *  or disable features selectively, and reduce the global
- *  memory footprint.
- *
+/*
  *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *  Copyright 2017 NXP. Not a Contribution
@@ -24,6 +16,16 @@
  *  limitations under the License.
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
+ */
+
+/**
+ * \file config.h
+ *
+ * \brief Configuration options (set of defines)
+ * 
+ * This set of compile-time options may be used to enable
+ * or disable features selectively, and reduce the global
+ * memory footprint.
  */
 
 #ifndef KSDK_MBEDTLS_CONFIG_H

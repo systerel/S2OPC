@@ -147,6 +147,7 @@ read -d '' exclusions <<-EOF
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/lwipopts.h
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/semihost_hardfault.c
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
+    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/MIMXRT1064_features.h
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/peripherals.h
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
     tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.h

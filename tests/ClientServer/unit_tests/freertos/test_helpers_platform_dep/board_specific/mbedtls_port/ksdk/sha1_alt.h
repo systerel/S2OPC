@@ -1,8 +1,4 @@
-/**
- * \file mbedtls_alt_sha1.h
- *
- * \brief SHA-1 cryptographic hash function
- *
+/*
  *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *  Copyright 2017 NXP. Not a Contribution
@@ -20,6 +16,12 @@
  *  limitations under the License.
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
+ */
+
+/**
+ * \file mbedtls_alt_sha1.h
+ *
+ * \brief SHA-1 cryptographic hash function
  */
 #ifndef MBEDTLS_SHA1_ALT_H
 #define MBEDTLS_SHA1_ALT_H

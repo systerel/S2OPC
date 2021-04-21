@@ -5,6 +5,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef _FSL_PHY_H_
 #define _FSL_PHY_H_
 

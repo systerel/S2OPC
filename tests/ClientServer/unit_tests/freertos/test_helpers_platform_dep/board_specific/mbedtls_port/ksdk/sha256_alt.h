@@ -1,8 +1,4 @@
-/**
- * \file mbedtls_sha256.h
- *
- * \brief SHA-224 and SHA-256 cryptographic hash function
- *
+/*
  *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *  Copyright 2017 NXP. Not a Contribution
@@ -21,6 +17,13 @@
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
+
+/**
+ * \file mbedtls_sha256.h
+ *
+ * \brief SHA-224 and SHA-256 cryptographic hash function
+ */
+
 #ifndef MBEDTLS_SHA256_ALT_H
 #define MBEDTLS_SHA256_ALT_H
 
