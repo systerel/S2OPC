@@ -104,59 +104,6 @@ void* pvPortRealloc(void* aptr, size_t nbytes)
     return n_ptr;
 }
 
-// Malloc wrapping function
-void* __attribute__((weak)) _malloc_r(void* reent, size_t size)
-{
-    void* ptr = NULL;
-    ptr = pvPortMalloc(size);
-    return ptr;
-}
-
-void* __attribute__((weak)) _realloc_r(void* reent, void* arg, size_t size)
-{
-    void* ptr = NULL;
-    ptr = pvPortRealloc(arg, size);
-    return ptr;
-}
-
-void* __attribute__((weak)) _calloc_r(void* reeant, size_t n, size_t s)
-{
-    void* ptr = NULL;
-    ptr = pvPortCalloc(n, s);
-    return ptr;
-}
-
-void __attribute__((weak)) _free_r(void* reent, void* ptr)
-{
-    vPortFree(ptr);
-}
-
-void* __attribute__((weak)) malloc(size_t size)
-{
-    void* ptr = NULL;
-    ptr = pvPortMalloc(size);
-    return ptr;
-}
-
-void* __attribute__((weak)) realloc(void* arg, size_t size)
-{
-    void* ptr = NULL;
-    ptr = pvPortRealloc(arg, size);
-    return ptr;
-}
-
-void* __attribute__((weak)) calloc(size_t n, size_t s)
-{
-    void* ptr = NULL;
-    ptr = pvPortCalloc(n, s);
-    return ptr;
-}
-
-void __attribute__((weak)) free(void* ptr)
-{
-    vPortFree(ptr);
-}
-
 // New lib Cleanup stdout reentrant structure. Called by freeRTOS.
 // This structure is redefine, because NewLib consider that reent structure is allocated
 // from the stack, and not from the heap.
