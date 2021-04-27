@@ -111,13 +111,15 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
  * Method call management :
  *-------------------------*/
 
-static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_NodeId* objectId,
+static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* callContextPtr,
+                                                     const SOPC_NodeId* objectId,
                                                      uint32_t nbInputArgs,
                                                      const SOPC_Variant* inputArgs,
                                                      uint32_t* nbOutputArgs,
                                                      SOPC_Variant** outputArgs,
                                                      void* param)
 {
+    (void) callContextPtr;
     (void) objectId;
     (void) nbInputArgs;
     (void) inputArgs;
@@ -128,13 +130,15 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_NodeId* objectId
     return SOPC_STATUS_OK;
 }
 
-static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_NodeId* objectId,
+static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_CallContext* callContextPtr,
+                                                                  const SOPC_NodeId* objectId,
                                                                   uint32_t nbInputArgs,
                                                                   const SOPC_Variant* inputArgs,
                                                                   uint32_t* nbOutputArgs,
                                                                   SOPC_Variant** outputArgs,
                                                                   void* param)
 {
+    (void) callContextPtr;
     (void) objectId;
     (void) nbInputArgs;
     (void) inputArgs;
