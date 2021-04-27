@@ -27,6 +27,7 @@
 #define SOPC_CALL_METHOD_MANAGER_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_service_call_context.h"
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
 typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
@@ -39,6 +40,7 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  * Note: a ByteString could be provided instead of an expected array of Byte and conversely (See Spec 1.03 part 4 -
  * table 66)
  *
+ * \param callContextPtr  context provided by server on connection/session associated to method call
  * \param objectId        a valid pointer to the object on which the method is called or a type if the method is static
  * \param nbInputArgs     number of input argument
  * \param inputArgs       an array of input argument of the method. The size is nbInputArgs.
@@ -48,7 +50,8 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  *
  * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */
-typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
+typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_CallContext* callContextPtr,
+                                                   const SOPC_NodeId* objectId,
                                                    uint32_t nbInputArgs,
                                                    const SOPC_Variant* inputArgs,
                                                    uint32_t* nbOutputArgs,

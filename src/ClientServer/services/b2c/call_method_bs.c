@@ -19,6 +19,7 @@
 
 #include <assert.h>
 
+#include "app_cb_call_context_internal.h"
 #include "call_method_bs.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
@@ -90,9 +91,10 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
     uint32_t noOfOutput;
-    SOPC_StatusCode status_c = method_c->pMethodFunc(objectId, nbInputArgs, inputArgs, &noOfOutput,
+    SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
+    SOPC_StatusCode status_c = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
                                                      &call_method_bs__execResults.variants, method_c->pParam);
-
+    SOPC_CallContext_Free(cc);
     if (noOfOutput <= INT32_MAX)
     {
         call_method_bs__execResults.nb = (int32_t) noOfOutput;

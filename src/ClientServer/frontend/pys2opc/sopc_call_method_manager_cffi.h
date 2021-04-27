@@ -25,8 +25,10 @@
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
 typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
+typedef struct SOPC_CallContext SOPC_CallContext;
 
-typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_NodeId* objectId,
+typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_CallContext* callContextPtr,
+                                                   const SOPC_NodeId* objectId,
                                                    uint32_t nbInputArgs,
                                                    const SOPC_Variant* inputArgs,
                                                    uint32_t* nbOutputArgs,
