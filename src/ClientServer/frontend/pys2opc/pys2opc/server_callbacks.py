@@ -31,11 +31,12 @@ class BaseAddressSpaceHandler:
     Base class for the Address Space notification callback.
     You should derive this class and re-implement its `BaseAddressSpaceHandler.on_datachanged`.
     """
-    def _on_datachanged(self, event, write_value, status):
+    def _on_datachanged(self, ctx, event, write_value, status):
         """
         Internal, translates the input from the C call to something easier to use.
         Please see `BaseAddressSpaceHandler.on_datachanged`.
         """
+        # Note: ctx might be used to acces session user / security mode and policy of connection used to write
         assert event == libsub.AS_WRITE_EVENT, 'Only address space write events are supported for now, received 0x{:X}'.format(event)
         wvi = ffi.cast('OpcUa_WriteValue *', write_value)
         assert wvi.encodeableType == EncodeableType.WriteValue
