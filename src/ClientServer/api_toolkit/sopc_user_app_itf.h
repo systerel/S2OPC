@@ -32,6 +32,7 @@
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
+#include "sopc_service_call_context.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
 
@@ -247,11 +248,6 @@ typedef enum SOPC_App_AddSpace_Event
  * \brief Toolkit communication events application callback type
  */
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
-
-/**
- * \brief Toolkit context provided when a callback is called, see getters available
- */
-typedef struct SOPC_CallContext SOPC_CallContext;
 
 /* The context object and properties can only be used during the callback call */
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr); // only valid for server event
