@@ -35,7 +35,7 @@ static void SOPC_Helper_AdressSpaceNotifCb(SOPC_App_AddSpace_Event event, void* 
 
 #define INITIAL_HELPER_CONFIG                                                   \
     {                                                                           \
-        .initialized = (int32_t) false, .comEventCb = SOPC_Helper_ComEventCb,   \
+        .initialized = (int32_t) false,                                         \
                                                                                 \
         .server = {                                                             \
             .state = SOPC_SERVER_STATE_INITIALIZING,                            \
@@ -499,7 +499,7 @@ SOPC_ReturnStatus SOPC_Helper_Initialize(SOPC_Log_Configuration* optLogConfig)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Toolkit_Initialize(sopc_helper_config.comEventCb);
+        status = SOPC_Toolkit_Initialize(SOPC_Helper_ComEventCb);
     }
     if (SOPC_STATUS_OK == status)
     {

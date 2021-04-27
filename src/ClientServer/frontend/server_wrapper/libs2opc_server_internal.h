@@ -66,8 +66,7 @@ typedef struct SOPC_Helper_Config
     // Flag atomically set when the structure is initialized during call to SOPC_Helper_Initialize
     // and singleton config is initialized
     int32_t initialized;
-    // Communication events callback
-    SOPC_ComEvent_Fct* comEventCb;
+
     // Toolkit configuration structure
     SOPC_S2OPC_Config config;
     struct
