@@ -110,6 +110,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
 /**
  * \brief Type of callback to provide to receive write notification on address space.
  *
+ * \param callCtxPtr   Context provided by server, see getters available (::SOPC_CallContext_GetUser, etc.)
  * \param writeValue   The value resulting from the write operation in case of write success,
  *                     or the value requested to be written in case of failure
  *
@@ -123,7 +124,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
-typedef void SOPC_WriteNotif_Fct(OpcUa_WriteValue* writeValue, SOPC_StatusCode writeStatus);
+typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
+                                 OpcUa_WriteValue* writeValue,
+                                 SOPC_StatusCode writeStatus);
 
 /**
  * \brief Define the write notification callback to be used.

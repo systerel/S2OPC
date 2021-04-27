@@ -31,7 +31,10 @@
 
 /* Internal configuration structure and functions */
 static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t helperContext);
-static void SOPC_Helper_AdressSpaceNotifCb(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
+static void SOPC_Helper_AdressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
+                                           SOPC_App_AddSpace_Event event,
+                                           void* opParam,
+                                           SOPC_StatusCode opStatus);
 
 #define INITIAL_HELPER_CONFIG                                                   \
     {                                                                           \
@@ -416,13 +419,16 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     }
 }
 
-void SOPC_Helper_AdressSpaceNotifCb(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+void SOPC_Helper_AdressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
+                                    SOPC_App_AddSpace_Event event,
+                                    void* opParam,
+                                    SOPC_StatusCode opStatus)
 {
     if (AS_WRITE_EVENT != event || NULL == sopc_helper_config.server.writeNotifCb)
     {
         return;
     }
-    sopc_helper_config.server.writeNotifCb((OpcUa_WriteValue*) opParam, opStatus);
+    sopc_helper_config.server.writeNotifCb(callCtxPtr, (OpcUa_WriteValue*) opParam, opStatus);
 }
 
 static void SOPC_HelperConfigInternal_Initialize(void)
