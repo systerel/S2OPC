@@ -170,3 +170,25 @@ SOPC_User* SOPC_User_Copy(const SOPC_User* user)
     }
     return userCopy;
 }
+
+const char* SOPC_User_ToCString(const SOPC_User* user)
+{
+    if (NULL == user)
+    {
+        return "NULL";
+    }
+
+    switch (user->type)
+    {
+    case USER_LOCAL:
+        return "[local_user]";
+    case USER_ANONYMOUS:
+        return "[anonymous]";
+    case USER_USERNAME:
+        return SOPC_String_GetRawCString(SOPC_User_GetUsername(user));
+    default:
+        assert(false && "Unknown user type");
+    }
+
+    return NULL;
+}

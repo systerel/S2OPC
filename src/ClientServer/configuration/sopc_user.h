@@ -76,4 +76,13 @@ void SOPC_User_Free(SOPC_User** ppUser);
 /** \brief Copy the given user */
 SOPC_User* SOPC_User_Copy(const SOPC_User* user);
 
+/**
+ * \brief Return the user as a const C string description:
+ *        - No user (no session involved): 'NULL'
+ *        - Local user (server local service context): '[local_user]'
+ *        - Anonymous: '[anonymous]'
+ *        - UserName: '&lt;user_name&gt;' (replaced by actual username)
+ */
+const char* SOPC_User_ToCString(const SOPC_User* user);
+
 #endif /* SOPC_USER_H_ */
