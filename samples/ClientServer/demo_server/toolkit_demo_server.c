@@ -35,11 +35,15 @@
 /*
  * Server callback definition used for address space modification notification
  */
-static void Demo_WriteNotificationCallback(OpcUa_WriteValue* writeValue, SOPC_StatusCode writeStatus)
+static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPtr,
+                                           OpcUa_WriteValue* writeValue,
+                                           SOPC_StatusCode writeStatus)
 {
+    const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
     const char* writeSuccess = (SOPC_STATUS_OK == writeStatus ? "success" : "failure");
     char* sNodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "Write notification (%s) on node '%s'", writeSuccess, sNodeId);
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "Write notification (%s) on node '%s' by user '%s'",
+                           writeSuccess, sNodeId, SOPC_User_ToCString(user));
     SOPC_Free(sNodeId);
 }
 

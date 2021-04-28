@@ -62,7 +62,10 @@ static char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
 static char* empty_certs[] = {NULL};
 
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
-static void Server_Event_AddressSpace(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
+static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
+                                      SOPC_App_AddSpace_Event event,
+                                      void* opParam,
+                                      SOPC_StatusCode opStatus);
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
 
@@ -571,8 +574,12 @@ void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
     }
 }
 
-static void Server_Event_AddressSpace(SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus)
+static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
+                                      SOPC_App_AddSpace_Event event,
+                                      void* opParam,
+                                      SOPC_StatusCode opStatus)
 {
+    (void) callCtxPtr;
     /* Watch modifications of configuration paths and the start/stop command */
     if (AS_WRITE_EVENT != event)
     {
