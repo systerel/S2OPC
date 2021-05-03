@@ -1026,7 +1026,7 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
                 {
                     if (is_inputArgument(&targetNode->data.variable))
                     {
-                        result = &targetNode->data.variable.Value;
+                        result = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, targetNode);
                     }
                 }
             }

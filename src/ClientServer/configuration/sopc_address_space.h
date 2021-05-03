@@ -49,7 +49,8 @@ typedef struct
         OpcUa_ObjectNode object;
         OpcUa_ObjectTypeNode object_type;
         OpcUa_ReferenceTypeNode reference_type;
-        OpcUa_VariableNode variable;
+        OpcUa_VariableNode
+            variable; // Note: variable.Value shall never be accessed directly (it is an index in const @space)
         OpcUa_VariableTypeNode variable_type;
         OpcUa_ViewNode view;
     } data;
