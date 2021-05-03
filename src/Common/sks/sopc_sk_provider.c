@@ -281,10 +281,13 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
 
 void SOPC_SKProvider_Clear(SOPC_SKProvider* skp)
 {
-    if (NULL != skp && NULL != skp->ptrClear)
+    if (NULL != skp)
     {
-        skp->ptrClear(skp->data);
+        if (NULL != skp->ptrClear)
+        {
+            skp->ptrClear(skp->data);
+        }
+        SOPC_Free(skp->data);
+        skp->data = NULL;
     }
-    SOPC_Free(skp->data);
-    skp->data = NULL;
 }

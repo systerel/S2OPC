@@ -232,10 +232,13 @@ SOPC_ReturnStatus SOPC_SKBuilder_Update(SOPC_SKBuilder* skb, SOPC_SKProvider* sk
 
 void SOPC_SKBuilder_Clear(SOPC_SKBuilder* skb)
 {
-    if (NULL != skb && NULL != skb->ptrClear)
+    if (NULL != skb)
     {
-        skb->ptrClear(skb->data);
+        if (NULL != skb->ptrClear)
+        {
+            skb->ptrClear(skb->data);
+        }
+        SOPC_Free(skb->data);
+        skb->data = NULL;
     }
-    SOPC_Free(skb->data);
-    skb->data = NULL;
 }
