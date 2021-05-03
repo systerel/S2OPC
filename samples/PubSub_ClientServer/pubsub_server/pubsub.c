@@ -316,7 +316,6 @@ bool PubSub_local_SKS_Start()
 
     SOPC_SKBuilder* builder = NULL;
     SOPC_SKProvider* provider = g_skProvider;
-    g_skProvider = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Initialise SK Manager
@@ -412,13 +411,7 @@ void PubSub_Stop(void)
     SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
 
     Client_Stop();
-    SOPC_LocalSKS_setSkManager(NULL);
-    SOPC_SKscheduler_StopAndClear(g_skScheduler);
-    SOPC_Free(g_skScheduler);
-    g_skScheduler = NULL;
-    SOPC_SKManager_Clear(g_skManager);
-    SOPC_Free(g_skManager);
-    g_skManager = NULL;
+
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }
@@ -437,6 +430,14 @@ static void free_global_configurations(void)
     g_pSourceConfig = NULL;
     SOPC_PubSubConfiguration_Delete(g_pPubSubConfig);
     g_pPubSubConfig = NULL;
+
+    SOPC_LocalSKS_setSkManager(NULL);
+    SOPC_SKscheduler_StopAndClear(g_skScheduler);
+    SOPC_Free(g_skScheduler);
+    g_skScheduler = NULL;
+    SOPC_SKManager_Clear(g_skManager);
+    SOPC_Free(g_skManager);
+    g_skManager = NULL;
 }
 
 static bool PubSub_SearchSKSInArray(SOPC_Array* array, SOPC_SecurityKeyServices* sks)
