@@ -26,6 +26,8 @@ import sys
 
 import wait_publisher
 
+from time import sleep
+
 description = '''Runs a program with a test S2OPC publisher running in the
 background.
 
@@ -59,18 +61,28 @@ if __name__ == '__main__':
         log('Starting Security Keys Server')
         sks_process = subprocess.Popen([args.sks_cmd, "master"])
 
-        
+    if sks_process is not None and not wait_publisher.wait_server(wait_publisher.DEFAULT_SKS_URL, wait_publisher.TIMEOUT):
+        log('Timeout for starting SKS server')
+        sks_process.kill()
+        sks_process.wait()
+
+        sys.exit(1)
+    elif sks_process is not None:
+        # Ensure SKS service is ready for tests
+        # TODO: find a better way to ensure that (call get keys as client ?)
+        sleep(1)
+
     log('Starting publisher')
     publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
 
-    if not wait_publisher.wait_publisher(wait_publisher.DEFAULT_URL, wait_publisher.TIMEOUT):
+    if not wait_publisher.wait_publisher(wait_publisher.DEFAULT_PUB_URL, wait_publisher.TIMEOUT):
         log('Timeout for starting publisher')
         publisher_process.kill()
         publisher_process.wait()
         if sks_process is not None:
             sks_process.kill()
             sks_process.wait()
-            
+
         sys.exit(1)
 
     cmd = [args.cmd] + args.args
@@ -98,7 +110,7 @@ if __name__ == '__main__':
         log('killing Security Keys Server')
         sks_process.kill()
         sks_process.wait()
-        
+
     log('Done')
     running_in_windows = sys.platform.startswith('win32')
     if test_ret == 0:
