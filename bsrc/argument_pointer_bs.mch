@@ -53,16 +53,20 @@ INITIALISATION
 
 OPERATIONS
 
-    p_nb <-- read_variant_nb_argument(p_variant) =
+    p_nb, p_bres <-- read_variant_nb_argument(p_variant, p_node) =
     PRE
         p_variant: t_Variant_i &
-        p_variant: t_Variant
+        p_variant: t_Variant &
+        p_node : t_Node_i &
+        p_node : t_Node
     THEN
         IF p_variant : dom(Variant_Arguments)
         THEN
-            p_nb := size(Variant_Arguments(p_variant))
+            p_nb := size(Variant_Arguments(p_variant)) ||
+            p_bres := TRUE
         ELSE
-            p_nb := 0
+            p_nb := 0 ||
+            p_bres := FALSE
         END
     END
     ;

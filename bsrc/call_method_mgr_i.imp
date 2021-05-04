@@ -389,6 +389,7 @@ OPERATIONS
     StatusCode <-- check_method_call_arguments (p_req_msg, p_callMethod, p_method_node, p_res_msg)=
     VAR
         l_nb_req_arg,
+        l_input_arg_valid,
         l_nb_method_arg,
         l_continue,
         l_input_arg_variant,
@@ -399,13 +400,14 @@ OPERATIONS
     IN
 
         l_input_arg_variant <-- get_InputArguments(p_method_node);
-        l_nb_method_arg <-- read_variant_nb_argument(l_input_arg_variant);
+        l_nb_method_arg, l_input_arg_valid <-- read_variant_nb_argument(l_input_arg_variant, p_method_node);
         l_nb_req_arg <-- read_CallMethod_Nb_InputArguments (p_req_msg, p_callMethod);
-        IF l_nb_req_arg < l_nb_method_arg
+        IF l_input_arg_valid = TRUE & l_nb_req_arg < l_nb_method_arg
         THEN
             StatusCode := e_sc_bad_arguments_missing
-        ELSIF l_nb_req_arg > l_nb_method_arg
+        ELSIF l_nb_req_arg > l_nb_method_arg or l_input_arg_valid = FALSE
         THEN
+            /* Note: in case of issue with the input argument definition in address space we return this status code*/
             StatusCode := e_sc_bad_too_many_arguments
         ELSE
             /* Number of input argument is that was expected, check each argument */

@@ -21,7 +21,7 @@
 
  File Name            : argument_pointer_bs.h
 
- Date                 : 31/10/2019 16:26:42
+ Date                 : 03/05/2021 16:37:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,6 +61,8 @@ extern void argument_pointer_bs__read_variant_argument(
    constants__t_Argument_i * const argument_pointer_bs__p_arg);
 extern void argument_pointer_bs__read_variant_nb_argument(
    const constants__t_Variant_i argument_pointer_bs__p_variant,
-   t_entier4 * const argument_pointer_bs__p_nb);
+   const constants__t_Node_i argument_pointer_bs__p_node,
+   t_entier4 * const argument_pointer_bs__p_nb,
+   t_bool * const argument_pointer_bs__p_bres);
 
 #endif

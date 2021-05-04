@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 25/11/2019 16:52:55
+ Date                 : 03/05/2021 16:37:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -199,6 +199,7 @@ void call_method_mgr__check_method_call_arguments(
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
    {
       t_entier4 call_method_mgr__l_nb_req_arg;
+      t_bool call_method_mgr__l_input_arg_valid;
       t_entier4 call_method_mgr__l_nb_method_arg;
       t_bool call_method_mgr__l_continue;
       constants__t_Variant_i call_method_mgr__l_input_arg_variant;
@@ -210,14 +211,18 @@ void call_method_mgr__check_method_call_arguments(
       address_space__get_InputArguments(call_method_mgr__p_method_node,
          &call_method_mgr__l_input_arg_variant);
       argument_pointer_bs__read_variant_nb_argument(call_method_mgr__l_input_arg_variant,
-         &call_method_mgr__l_nb_method_arg);
+         call_method_mgr__p_method_node,
+         &call_method_mgr__l_nb_method_arg,
+         &call_method_mgr__l_input_arg_valid);
       msg_call_method_bs__read_CallMethod_Nb_InputArguments(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          &call_method_mgr__l_nb_req_arg);
-      if (call_method_mgr__l_nb_req_arg < call_method_mgr__l_nb_method_arg) {
+      if ((call_method_mgr__l_input_arg_valid == true) &&
+         (call_method_mgr__l_nb_req_arg < call_method_mgr__l_nb_method_arg)) {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_arguments_missing;
       }
-      else if (call_method_mgr__l_nb_req_arg > call_method_mgr__l_nb_method_arg) {
+      else if ((call_method_mgr__l_nb_req_arg > call_method_mgr__l_nb_method_arg) ||
+         (call_method_mgr__l_input_arg_valid == false)) {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_too_many_arguments;
       }
       else {
