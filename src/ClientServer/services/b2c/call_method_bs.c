@@ -111,6 +111,10 @@ void call_method_bs__free_exec_result(void)
 {
     if (NULL != call_method_bs__execResults.variants)
     {
+        for (int32_t i = 0; i < call_method_bs__execResults.nb; i++)
+        {
+            SOPC_Variant_Clear(&(call_method_bs__execResults.variants[i]));
+        }
         SOPC_Free(call_method_bs__execResults.variants);
         call_method_bs__execResults.variants = NULL;
     }
