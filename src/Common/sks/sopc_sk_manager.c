@@ -530,7 +530,7 @@ static void SOPC_SKManager_Clear_Default(SOPC_SKManager* skm)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKManager* SOPC_SKManager_Create()
+SOPC_SKManager* SOPC_SKManager_Create(void)
 {
     SOPC_SKManager* skm = SOPC_Malloc(sizeof(SOPC_SKManager));
     if (NULL == skm)

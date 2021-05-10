@@ -205,7 +205,7 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
     return (status);
 }
 
-SOPC_ReturnStatus Client_Setup()
+SOPC_ReturnStatus Client_Setup(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     return (status);
@@ -304,7 +304,7 @@ static uint32_t Client_GetSecureChannelconfig(const char* endpoint_url)
     return 0;
 }
 
-SOPC_ReturnStatus Wait_response_client()
+SOPC_ReturnStatus Wait_response_client(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // Sleep timeout in milliseconds
@@ -531,7 +531,7 @@ SOPC_ReturnStatus Client_CloseSession(void)
     return (status);
 }
 
-void Client_Teardown()
+void Client_Teardown(void)
 {
     for (int32_t i = 0; i <= Client_SecureChannel_Current; i++)
     {

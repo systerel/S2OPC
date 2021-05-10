@@ -764,7 +764,7 @@ static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
     return status;
 }
 
-static SOPC_StatusCode Server_SKS_Start()
+static SOPC_StatusCode Server_SKS_Start(void)
 {
     SOPC_StatusCode status = SOPC_STATUS_OK;
 

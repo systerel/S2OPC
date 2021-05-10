@@ -246,7 +246,7 @@ static void SOPC_SKOrdonnancer_StopAndClear_Default(SOPC_SKscheduler* sko)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKscheduler* SOPC_SKscheduler_Create()
+SOPC_SKscheduler* SOPC_SKscheduler_Create(void)
 {
     SOPC_SKscheduler* sko = SOPC_Calloc(1, sizeof(SOPC_SKscheduler));
     if (NULL == sko)

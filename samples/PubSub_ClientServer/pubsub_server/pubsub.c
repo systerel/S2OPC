@@ -307,7 +307,7 @@ bool PubSub_IsRunning(void)
     return SOPC_Atomic_Int_Get(&pubsubOnline);
 }
 
-bool PubSub_local_SKS_Start()
+bool PubSub_local_SKS_Start(void)
 {
     if (!g_isSecurity || !g_isSks)
     {
@@ -575,7 +575,7 @@ static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
     return result;
 }
 
-static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create()
+static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create(void)
 {
     bool allocSuccess = true;
     SOPC_SKS_Local_Configuration* result = SOPC_Calloc(1, sizeof(SOPC_SKS_Local_Configuration));

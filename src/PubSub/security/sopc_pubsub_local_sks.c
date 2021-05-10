@@ -33,7 +33,7 @@ Mutex g_mutex;
 // indicate this service is initialized
 bool g_init = false;
 
-void SOPC_LocalSKS_init()
+void SOPC_LocalSKS_init(void)
 {
     if (g_init)
     {
