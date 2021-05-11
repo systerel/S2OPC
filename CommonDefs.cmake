@@ -190,13 +190,18 @@ option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attrib
 # Check project and option(s) are compatible
 
 # Function to check only one option (option name provided) is activated for all calls to this function
-function(check_mutually_exclusive_options option_name)
-  if(${${option_name}}) # Check variable of the option_name is defined
-    if(NOT WITH_OPTION_MUTUALLY_EXCLUSIVE) # Check no other option was recorded before
+function(check_mutually_exclusive_options options_names)
+  foreach(option_name IN LISTS options_names)
+    if(${${option_name}}) # Check variable of the option_name is defined
       message("-- ${option_name} S2OPC option set")
-      set(WITH_OPTION_MUTUALLY_EXCLUSIVE ${option_name} PARENT_SCOPE)
+      set(OPTIONS_SET TRUE)
+    endif()
+  endforeach()
+  if(${OPTIONS_SET})
+    if(NOT WITH_OPTION_MUTUALLY_EXCLUSIVE) # Check no other option was recorded before
+      set(WITH_OPTION_MUTUALLY_EXCLUSIVE ${options_names} PARENT_SCOPE)
     else()
-      message(FATAL_ERROR "${option_name} option set with mutually exclusive option ${WITH_OPTION_MUTUALLY_EXCLUSIVE}")
+      message(FATAL_ERROR "${options_names} option(s) set with mutually exclusive option ${WITH_OPTION_MUTUALLY_EXCLUSIVE}")
     endif()
   endif()
 endfunction()
@@ -235,9 +240,8 @@ function(print_if_activated option_name)
 endfunction()
 
 # Check for incompatible options activated
-check_mutually_exclusive_options("WITH_ASAN")
+check_mutually_exclusive_options("WITH_ASAN;WITH_UBSAN")
 check_mutually_exclusive_options("WITH_TSAN")
-check_mutually_exclusive_options("WITH_UBSAN")
 check_mutually_exclusive_options("WITH_COVERAGE")
 check_mutually_exclusive_options("WITH_COVERITY")
 check_mutually_exclusive_options("WITH_GPERF_PROFILER")
