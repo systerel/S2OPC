@@ -46,7 +46,7 @@ Client_Keys_Type Client_Keys = {.init = false};
 int32_t Client_Started = 0;
 
 uint32_t session = 0;
-SessionConnectedState scState = SESSION_CONN_NEW;
+int32_t scState = (int32_t) SESSION_CONN_NEW;
 // use to identify the active session response
 uintptr_t Client_SessionContext = 1;
 
@@ -316,7 +316,8 @@ SOPC_ReturnStatus Wait_response_client(void)
 
     loopCpt = 0;
     while (SOPC_STATUS_OK == status && 1 == SOPC_Atomic_Int_Get(&Client_Started) &&
-           SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_MSG_RECEIVED && loopCpt * sleepTimeout <= loopTimeout)
+           ((SessionConnectedState) SOPC_Atomic_Int_Get(&scState)) != SESSION_CONN_MSG_RECEIVED &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         SOPC_Sleep(sleepTimeout);
@@ -350,7 +351,8 @@ static SOPC_ReturnStatus ActivateSessionWait_client(void)
     uint32_t loopCpt = 0;
 
     /* Wait until session is activated or timeout */
-    while (1 == SOPC_Atomic_Int_Get(&Client_Started) && SOPC_Atomic_Int_Get(&scState) != SESSION_CONN_CONNECTED &&
+    while (1 == SOPC_Atomic_Int_Get(&Client_Started) &&
+           ((SessionConnectedState) SOPC_Atomic_Int_Get(&scState)) != SESSION_CONN_CONNECTED &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
@@ -367,7 +369,8 @@ static SOPC_ReturnStatus ActivateSessionWait_client(void)
         status = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_Atomic_Int_Get(&scState) == SESSION_CONN_CONNECTED && SOPC_Atomic_Int_Get(&sendFailures) == 0)
+    if (((SessionConnectedState) SOPC_Atomic_Int_Get(&scState)) == SESSION_CONN_CONNECTED &&
+        SOPC_Atomic_Int_Get(&sendFailures) == 0)
     {
         printf("# Info: Client sessions activated: OK'\n");
     }
@@ -522,12 +525,12 @@ SOPC_ReturnStatus Client_CloseSession(void)
     sendFailures = 0;
 
     /* Close the session */
-    SessionConnectedState scStateCompare = SOPC_Atomic_Int_Get(&scState);
+    SessionConnectedState scStateCompare = (SessionConnectedState) SOPC_Atomic_Int_Get(&scState);
     if (0 != session1_idx && (scStateCompare == SESSION_CONN_MSG_RECEIVED || scStateCompare == SESSION_CONN_CONNECTED))
     {
         SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
     }
-    SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_NEW);
+    SOPC_Atomic_Int_Set(&scState, (int32_t) SESSION_CONN_NEW);
     return (status);
 }
 
@@ -581,7 +584,7 @@ void Client_Treat_Session_Response(void* param, uintptr_t appContext)
 
         if (encType == &OpcUa_CallResponse_EncodeableType)
         {
-            SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_MSG_RECEIVED);
+            SOPC_Atomic_Int_Set(&scState, (int32_t) SESSION_CONN_MSG_RECEIVED);
             OpcUa_CallResponse* callResp = (OpcUa_CallResponse*) param;
             Client_SKS_GetKeys_Response* response = (Client_SKS_GetKeys_Response*) appContext;
             Client_Copy_CallResponse_To_GetKeysResponse(response, callResp);

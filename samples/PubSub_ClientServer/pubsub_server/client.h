@@ -101,8 +101,8 @@ SOPC_SKProvider* Client_Provider_BySKS_Create(uint32_t SecureChannel_Id);
 extern uint32_t session;
 // use to identify the active session response
 extern uintptr_t Client_SessionContext;
-// Session state
-extern SessionConnectedState scState;
+// Session state (SessionConnectedState)
+extern int32_t scState;
 // indicate that request send failed
 extern int32_t sendFailures;
 

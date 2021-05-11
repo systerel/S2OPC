@@ -457,7 +457,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
         }
         if (0 != appContext && appContext == Client_SessionContext)
         {
-            SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_FAILED);
+            SOPC_Atomic_Int_Set(&scState, (int32_t) SESSION_CONN_FAILED);
         }
         else
         {
@@ -470,7 +470,7 @@ static void Test_ComEvent_FctServer(SOPC_App_Com_Event event, uint32_t idOrStatu
         {
             printf(">>Client debug : SE_ACTIVATED_SESSION RECEIVED\n");
         }
-        SOPC_Atomic_Int_Set((SessionConnectedState*) &scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
+        SOPC_Atomic_Int_Set(&scState, (int32_t) SESSION_CONN_CONNECTED);
         break;
     case SE_SESSION_REACTIVATING:
         if (debug)
