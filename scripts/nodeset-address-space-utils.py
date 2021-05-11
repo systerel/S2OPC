@@ -168,10 +168,6 @@ def remove_max_monit(tree, namespaces):
     #  as there may exist references to unknown nodes in an address space.
     _remove_refs_to_nids(tree, ['i=11714'], namespaces)
 
-def remove_sks(tree, namespaces):
-    # Delete nodes added for SKS
-    _remove_nids(tree, ['i=15000', 'i=15001', 'i=15201', 'i=15202'])
-
 def remove_methods(tree, namespaces):
     # Delete methods that are instances of other methods.
     # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
@@ -328,8 +324,6 @@ if __name__ == '__main__':
                         help='Remove the MaxMonitoredItems node and references to it')
     parser.add_argument('--remove-methods', action='store_true', dest='remove_methods',
                         help='Remove nodes and references that enable the use of methods')
-    parser.add_argument('--remove-sks', action='store_true', dest='remove_sks',
-                        help='Remove nodes and references that enable the use of SKS')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''
             Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
@@ -368,9 +362,6 @@ if __name__ == '__main__':
 
     if args.remove_methods:
         remove_methods(tree, namespaces)
-
-    if args.remove_sks:
-        remove_sks(tree, namespaces)
 
     if args.sanitize:
         res = sanitize(tree, namespaces)
