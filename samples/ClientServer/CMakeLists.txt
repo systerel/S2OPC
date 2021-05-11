@@ -86,15 +86,15 @@ if(ENABLE_SAMPLES)
   endif()
 
   if (WITH_NANO_EXTENDED)
-    set(TEST_SERVER_ADDRESS_SPACE_C "test_sks_address_space.c")
-    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
-    s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
-    add_custom_target(make-sks-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
+    set(TEST_SKS_ADDRESS_SPACE_C "test_sks_address_space.c")
+    set(TEST_SKS_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_sks.xml")
+    s2opc_embed_address_space(${TEST_SKS_ADDRESS_SPACE_C} ${TEST_SKS_ADDRESS_SPACE_XML})
+    add_custom_target(make-sks-address-space DEPENDS ${TEST_SKS_ADDRESS_SPACE_C})
 
     add_executable(toolkit_demo_sks
       "demo_server/toolkit_demo_sks.c"
       "${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server/client.c"
-      ${TEST_SERVER_ADDRESS_SPACE_C})
+      ${TEST_SKS_ADDRESS_SPACE_C})
     set(S2OPC_PUBSUB_CLIENT_INCLUDES ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server)
     target_include_directories(toolkit_demo_sks PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
     target_link_libraries(toolkit_demo_sks PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)

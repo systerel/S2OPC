@@ -432,9 +432,9 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
     call->encodeableType = &OpcUa_CallMethodRequest_EncodeableType;
 
     call->ObjectId =
-        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 15000}};
+        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 14443}};
     call->MethodId =
-        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 15001}};
+        (SOPC_NodeId){.IdentifierType = SOPC_IdentifierType_Numeric, .Namespace = 0, .Data = {.Numeric = 15215}};
 
     call->NoOfInputArguments = (int32_t) 3;
     call->InputArguments = arguments;

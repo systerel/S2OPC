@@ -212,7 +212,7 @@ static SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_getSecurityKeys(const S
                                                                          SOPC_Variant** outputArgs,
                                                                          void* param)
 {
-    (void) objectId; /* Should be "i=15000"*/
+    (void) objectId; /* Should be "i=14443"*/
     (void) param;    /* Should be NULL */
 
     /* Check Input Object */
@@ -887,7 +887,7 @@ static SOPC_StatusCode Server_SKS_Configure(SOPC_Server_Config* serverConfig)
     if (SOPC_STATUS_OK == status)
     {
         // getSecurityKeys method node
-        methodId = SOPC_NodeId_FromCString("i=15001", 7);
+        methodId = SOPC_NodeId_FromCString("i=15215", 7);
         if (NULL != methodId)
         {
             methodIds[nbMethodIds] = methodId;
