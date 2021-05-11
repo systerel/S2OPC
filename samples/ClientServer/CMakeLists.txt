@@ -107,6 +107,7 @@ if(ENABLE_SAMPLES)
     endif()
 
     if (WITH_STATIC_SECURITY_DATA)
+      target_include_directories(toolkit_demo_sks PRIVATE ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
       target_compile_definitions(toolkit_demo_sks PRIVATE "WITH_STATIC_SECURITY_DATA")
     endif()
 
