@@ -235,7 +235,7 @@ def handlePubMessage(message, index, result):
 
     id = int(message.get(ATTRIBUTE_MESSAGE_ID), 10)
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
-    interval = int(message.get(ATTRIBUTE_MESSAGE_INTERVAL), 10)
+    interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
 
     variables = message.findall(TAG_VARIABLE)
@@ -253,7 +253,7 @@ def handlePubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %d, %s);
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s);
         alloc = NULL != writer;
     }
     """ % (index, id, version, interval, getCSecurityMode(securityMode)))
@@ -346,7 +346,7 @@ def handleSubMessage(message, index, result):
         assert attr in message.keys()
     id = int(message.get(ATTRIBUTE_MESSAGE_ID), 10)
     version = int(message.get(ATTRIBUTE_MESSAGE_VERSION), 10)
-    interval = int(message.get(ATTRIBUTE_MESSAGE_INTERVAL), 10)
+    interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
     securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
     publisherId = int(message.get(ATTRIBUTE_MESSAGE_PUBLISHERID), 10)
     variables = message.findall(TAG_VARIABLE)
@@ -364,7 +364,7 @@ def handleSubMessage(message, index, result):
     result.add("""
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %d, %s);
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %d, %d, %d, %f, %s);
         alloc = NULL != reader;
     }
     """ % (index, publisherId, id, version, interval, getCSecurityMode(securityMode)))
@@ -419,7 +419,7 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t index,
                                                              uint16_t messageId,
                                                              uint32_t version,
-                                                             uint64_t interval,
+                                                             double interval,
                                                              SOPC_SecurityMode_Type securityMode)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
@@ -481,7 +481,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
                                                              uint32_t publisherId,
                                                              uint16_t messageId,
                                                              uint32_t version,
-                                                             uint64_t interval,
+                                                             double interval,
                                                              SOPC_SecurityMode_Type securityMode)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
@@ -495,7 +495,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
         SOPC_DataSetReader_Set_WriterGroupVersion(reader, version);
         SOPC_DataSetReader_Set_WriterGroupId(reader, messageId);
         SOPC_DataSetReader_Set_DataSetWriterId(reader, messageId); // Same as WriterGroup
-        SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2 * interval);
+        SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2.0 * interval);
         SOPC_DataSetReader_Set_PublisherId_UInteger(reader, publisherId);
         return reader;
     }
