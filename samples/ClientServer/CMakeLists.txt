@@ -57,10 +57,6 @@ if(ENABLE_SAMPLES)
     target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
     target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_EXPAT")
 
-    if (WITH_STATIC_SECURITY_DATA)
-      target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_STATIC_SECURITY_DATA")
-    endif()
-
     add_custom_command(
       TARGET ${TOOLKIT_DEMO_SERVER} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${SERVER_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
