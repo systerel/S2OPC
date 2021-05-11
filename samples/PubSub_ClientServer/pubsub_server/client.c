@@ -468,7 +468,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(uint32_t SecureChannel_Id,
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    printf("Client_GetSecurityKeys %u\n", SecureChannel_Id);
+    printf("Client_GetSecurityKeys %" PRIu32 "\n", SecureChannel_Id);
 
     const char* pwd = "password";
     // status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, Client_SessionContext,
@@ -766,7 +766,7 @@ void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Response* re
     }
     else
     {
-        printf("# Warning: Call request should have returned one result but returned %d instead of.\n",
+        printf("# Warning: Call request should have returned one result but returned %" PRIi32 " instead of.\n",
                callResp->NoOfResults);
     }
 }

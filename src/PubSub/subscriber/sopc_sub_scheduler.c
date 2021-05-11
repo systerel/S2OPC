@@ -740,7 +740,8 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
         {
             SOPC_LocalSKS_Keys_Delete(keys);
             SOPC_Free(keys);
-            printf("# Error: Subscriber cannot retrieve Security Keys for Publisher %lu and token %u. \n",
+            printf("# Error: Subscriber cannot retrieve Security Keys for Publisher %" PRIu64 " and token %" PRIu32
+                   ". \n",
                    pubId.data.uint, tokenId);
         }
     }

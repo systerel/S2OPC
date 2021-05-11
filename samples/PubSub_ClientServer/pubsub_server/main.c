@@ -69,7 +69,7 @@ static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrSt
         if (debug)
         {
             printf(">>Client debug : SE_SESSION_ACTIVATION_FAILURE RECEIVED\n");
-            printf(">>Client debug : appContext: %lu\n", appContext);
+            printf(">>Client debug : appContext: %" PRIuPTR "\n", appContext);
         }
         if (0 != appContext && appContext == Client_SessionContext)
         {
