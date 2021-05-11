@@ -606,7 +606,7 @@ static SOPC_StatusCode Server_SKS_CreateMasterBuilder(SOPC_SKBuilder** builder, 
     }
 
     /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
-    SOPC_SKBuilder* skbAppend;
+    SOPC_SKBuilder* skbAppend = NULL;
     if (SOPC_STATUS_OK == status)
     {
         skbAppend = SOPC_SKBuilder_Append_Create();
@@ -807,8 +807,8 @@ static SOPC_StatusCode Server_SKS_Start(void)
     }
 
     /* Init SK Builder and SK Provider */
-    SOPC_SKBuilder* skBuilder;
-    SOPC_SKProvider* skProvider;
+    SOPC_SKBuilder* skBuilder = NULL;
+    SOPC_SKProvider* skProvider = NULL;
     uint32_t SecureChannel_Id = 0;
     /* Init SK Builder : adds Keys to Manager and removes obsolete Keys when maximum size is reached */
     if (SOPC_STATUS_OK == status)
