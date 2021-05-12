@@ -170,7 +170,7 @@ string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLA
 ### Manage options for S2OPC compilation ###
 
 # compilation options for S2OPC library code analysis purpose (mutually exclusive options)
-option(WITH_ASAN "build with ASAN" OFF) # address sanitizer
+option(WITH_ASAN "build with ASAN/LSAN" OFF) # address sanitizer / leak sanitizer
 option(WITH_TSAN "build with TSAN" OFF) # thread sanitizer
 option(WITH_UBSAN "build with UBSAN" OFF) # undefined behavior sanitizer
 option(WITH_COVERAGE "build with COVERAGE" OFF) # code coverage
@@ -277,6 +277,7 @@ unset(CMAKE_REQUIRED_LIBRARIES)
 if(WITH_ASAN)
   list(APPEND S2OPC_COMPILER_FLAGS -fsanitize=address)
   list(APPEND S2OPC_LINKER_FLAGS -fsanitize=address)
+  list(APPEND S2OPC_LINKER_FLAGS -fsanitize=leak)
   if(COMPILER_SUPPORTS_SAN_PC)
     list(APPEND S2OPC_COMPILER_FLAGS -fsanitize=pointer-compare)
     list(APPEND S2OPC_LINKER_FLAGS -fsanitize=pointer-compare)
