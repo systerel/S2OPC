@@ -94,7 +94,7 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der",          "revoked/c
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
-/* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
+/* Define application namespaces: ns=1 and ns=2 */
 static char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static char* default_locale_ids[] = {"en-US", "fr-FR"};
 
