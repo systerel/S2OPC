@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> /* getenv, exit */
@@ -37,12 +38,17 @@
 #include "sopc_sk_manager.h"
 #include "sopc_sk_provider.h"
 #include "sopc_sk_scheduler.h"
+#include "sopc_time.h"
 
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
 #include "embedded/sopc_addspace_loader.h"
+
+static int32_t endpointClosed = 0;
+
+static volatile sig_atomic_t stopServer = 0;
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
@@ -115,6 +121,36 @@ bool sksRestart = false;
 /* NodeIds of method for Call Method Service */
 SOPC_NodeId* methodIds[1] = {NULL};
 uint32_t nbMethodIds = 0;
+
+/*
+ * Management of Ctrl-C to stop the server (callback on stop signal)
+ */
+static void Test_StopSignal(int sig)
+{
+    /* avoid unused parameter compiler warning */
+    (void) sig;
+
+    /*
+     * Signal steps:
+     * - 1st signal: activate server shutdown phase of OPC UA server (will stop after <SHUTDOWN_PHASE_IN_SECONDS>s)
+     * - 2nd signal: activate ASAP server shutdown gracefully closing all connections and clearing context
+     * - 3rd signal: abrupt exit with error code '1'
+     */
+    if (stopServer > 1)
+    {
+        exit(1);
+    }
+    else
+    {
+        stopServer++;
+    }
+}
+
+static void Test_ServerStopped_Fct(SOPC_ReturnStatus status)
+{
+    printf("<Test_SKS_Server: server stopped with status %d\n", status);
+    SOPC_Atomic_Int_Set(&endpointClosed, 1);
+}
 
 /*---------------------------------------------------------------------------
  *             PubSub Security Key Service specific configuration
@@ -316,7 +352,7 @@ static SOPC_StatusCode Server_SKS_CreateSlaveBuilder(uint32_t SecureChannel_Id,
 
 static SOPC_StatusCode Server_SKManager_Init(SOPC_SKManager* manager)
 {
-    if (SKS_ServerMode_Master != sksServerMode || false == sksRestart)
+    if (SKS_ServerMode_Master != sksServerMode || !sksRestart)
     {
         return SOPC_STATUS_OK;
     }
@@ -1247,6 +1283,13 @@ static SOPC_ReturnStatus Config_ConfigureSKSServerMode(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+    // Install signal handler to close the server gracefully when server needs to stop
+    signal(SIGINT, Test_StopSignal);
+    signal(SIGTERM, Test_StopSignal);
+
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 500;
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Get the toolkit build information and print it */
@@ -1320,32 +1363,43 @@ int main(int argc, char* argv[])
         status = SOPC_HelperConfigClient_SetRawClientComEvent(SKS_ComEvent_FctClient);
     }
 
-    /* Master retrieve Keys from Slave and start Scheduler */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SKS_Start();
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("<Demo_Server: Server started\n");
-
-        /* Run the server until error  or stop server signal detected (Ctrl-C) */
-        status = SOPC_ServerHelper_Serve(true);
+        /* Run the server  */
+        status = SOPC_ServerHelper_StartServer(Test_ServerStopped_Fct);
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_SKS_Server: Failed to run the server or end to serve with error = '%d'\n", status);
+            printf("<Test_SKS_Server: Failed to run the server with error = '%d'\n", status);
         }
         else
         {
-            printf("<Test_SKS_Server: Server ended to serve successfully\n");
+            printf("<Test_SKS_Server: Server started\n");
         }
     }
     else
     {
         printf("<Test_SKS_Server: Error during configuration phase, see logs in %s directory for details.\n",
                logDirPath);
+    }
+
+    /* Master retrieve Keys from Slave and start Scheduler */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_SKS_Start();
+    }
+
+    /* Run the server until notification that endpoint is closed received
+     *  or stop server signal detected (Ctrl-C) */
+    while (SOPC_STATUS_OK == status && stopServer == 0 && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
+    {
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    /* Asynchronous request to close the endpoint */
+    if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
+    {
+        SOPC_ServerHelper_StopServer();
     }
 
     /* Stop and clear SKS related modules */
