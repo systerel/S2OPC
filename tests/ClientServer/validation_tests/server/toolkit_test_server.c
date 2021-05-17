@@ -140,7 +140,7 @@ static char* x509_Identity_revoked_certs[] = {"revoked_usr/user_cacrl.der",     
 
 #define DEFAULT_CLIENT_REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 
-/* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
+/* Define application namespaces: ns=1 and ns=2 */
 static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
