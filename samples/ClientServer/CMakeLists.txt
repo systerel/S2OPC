@@ -97,7 +97,7 @@ if(ENABLE_SAMPLES)
       ${TEST_SKS_ADDRESS_SPACE_C})
     set(S2OPC_PUBSUB_CLIENT_INCLUDES ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server)
     target_include_directories(toolkit_demo_sks PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
-    target_link_libraries(toolkit_demo_sks PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+    target_link_libraries(toolkit_demo_sks PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
     target_compile_options(toolkit_demo_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
     target_compile_definitions(toolkit_demo_sks PRIVATE ${S2OPC_DEFINITIONS})
 
