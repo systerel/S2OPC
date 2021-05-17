@@ -388,6 +388,43 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1U_appTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     )
 
+  if (WITH_NANO_EXTENDED)
+    set(TEST_SKS_ADDRESS_SPACE_C "test_sks_master_slave_address_space.c")
+    set(TEST_SKS_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_sks.xml")
+    s2opc_embed_address_space(${TEST_SKS_ADDRESS_SPACE_C} ${TEST_SKS_ADDRESS_SPACE_XML})
+    add_custom_target(make-sks-master-slave-address-space DEPENDS ${TEST_SKS_ADDRESS_SPACE_C})
+    add_executable(test_sks_master_slave
+      "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/test_sks_server.c"
+      "${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server/client.c"
+      ${TEST_SKS_ADDRESS_SPACE_C})
+
+    set(S2OPC_PUBSUB_CLIENT_INCLUDES ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/pubsub_server)
+    target_include_directories(test_sks_master_slave PRIVATE ${S2OPC_PUBSUB_CLIENT_INCLUDES})
+    target_link_libraries(test_sks_master_slave PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+    target_compile_options(test_sks_master_slave PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(test_sks_master_slave PRIVATE ${S2OPC_DEFINITIONS})
+
+    if (EXPAT_FOUND)
+      target_link_libraries(test_sks_master_slave PRIVATE s2opc_clientserver-xml-loaders-expat)
+      target_compile_definitions(test_sks_master_slave PRIVATE "WITH_EXPAT")
+    endif()
+
+    if (WITH_STATIC_SECURITY_DATA)
+      target_include_directories(test_sks_master_slave PRIVATE ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
+      target_compile_definitions(test_sks_master_slave PRIVATE "WITH_STATIC_SECURITY_DATA")
+    endif()
+
+    add_custom_command(
+      TARGET test_sks_master_slave POST_BUILD
+
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/sks_keys/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/sks_keys/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/sks_keys/keyNonce.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sks_private/
+      )
+
+  endif()
+
 # Tests run definition #
 
   #Note: use absolute path for scripts to allow ctest to be run from another another path

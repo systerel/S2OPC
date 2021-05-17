@@ -133,7 +133,7 @@ class LocalBenchmarkManager(AbstractBenchmarkManager):
 
     def __init__(self, bindir, max_slave, port_pub, port_sub):
         binary_directory = bindir
-        binary_sks = binary_directory.joinpath('toolkit_demo_sks')
+        binary_sks = binary_directory.joinpath('test_sks_master_slave')
         binary_pubsub_server = binary_directory.joinpath('pubsub_server')
         self.command_sks_master = [str(binary_sks), 'master']
         self.command_sks_slave = [str(binary_sks), 'slave']
