@@ -48,7 +48,7 @@ void call_method_bs__INITIALISATION(void) {}
 void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_req_msg,
                                      const constants__t_CallMethod_i call_method_bs__p_callMethod,
                                      const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
-                                     constants_statuscodes_bs__t_StatusCode_i* const call_method_bs__statusCode)
+                                     constants__t_RawStatusCode* const call_method_bs__rawStatusCode)
 {
     /* Do not call before the memory is freed */
     assert(0 == call_method_bs__execResults.nb && NULL == call_method_bs__execResults.variants);
@@ -67,13 +67,13 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_Endpoint_Config* endpoint_config = SOPC_ToolkitServer_GetEndpointConfig(call_method_bs__p_endpoint_config_idx);
     if (NULL == endpoint_config || NULL == endpoint_config->serverConfigPtr)
     {
-        *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_internal_error;
+        *call_method_bs__rawStatusCode = OpcUa_BadInternalError;
         return;
     }
     SOPC_MethodCallManager* mcm = endpoint_config->serverConfigPtr->mcm;
     if (NULL == mcm || NULL == mcm->pFnGetMethod)
     {
-        *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_not_implemented;
+        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
         return;
     }
 
@@ -82,7 +82,7 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
     if (NULL == method_c)
     {
-        *call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_not_implemented;
+        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
         return;
     }
 
@@ -92,8 +92,8 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
     uint32_t noOfOutput;
     SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
-    SOPC_StatusCode status_c = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
-                                                     &call_method_bs__execResults.variants, method_c->pParam);
+    *call_method_bs__rawStatusCode = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
+                                                           &call_method_bs__execResults.variants, method_c->pParam);
     SOPC_CallContext_Free(cc);
     if (noOfOutput <= INT32_MAX)
     {
@@ -102,9 +102,8 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     else
     {
         call_method_bs__execResults.nb = INT32_MAX;
-        status_c = OpcUa_BadQueryTooComplex;
+        *call_method_bs__rawStatusCode = OpcUa_BadQueryTooComplex;
     }
-    util_status_code__C_to_B(status_c, call_method_bs__statusCode);
 }
 
 void call_method_bs__free_exec_result(void)

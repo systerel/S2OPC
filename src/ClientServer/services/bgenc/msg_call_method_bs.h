@@ -21,7 +21,7 @@
 
  File Name            : msg_call_method_bs.h
 
- Date                 : 25/11/2019 16:53:17
+ Date                 : 18/05/2021 13:56:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -109,6 +109,6 @@ extern void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
 extern void msg_call_method_bs__write_CallMethod_Res_Status(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-   const constants_statuscodes_bs__t_StatusCode_i msg_call_method_bs__statusCode);
+   const constants__t_RawStatusCode msg_call_method_bs__rawStatusCode);
 
 #endif

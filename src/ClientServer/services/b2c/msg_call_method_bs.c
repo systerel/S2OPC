@@ -279,15 +279,12 @@ void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
     result->NoOfOutputArguments++;
 }
 
-void msg_call_method_bs__write_CallMethod_Res_Status(
-    const constants__t_msg_i msg_call_method_bs__p_res_msg,
-    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-    const constants_statuscodes_bs__t_StatusCode_i msg_call_method_bs__statusCode)
+void msg_call_method_bs__write_CallMethod_Res_Status(const constants__t_msg_i msg_call_method_bs__p_res_msg,
+                                                     const constants__t_CallMethod_i msg_call_method_bs__callMethod,
+                                                     const constants__t_RawStatusCode msg_call_method_bs__rawStatusCode)
 {
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
 
-    SOPC_StatusCode status_c;
-    util_status_code__B_to_C(msg_call_method_bs__statusCode, &status_c);
-    result->StatusCode = status_c;
+    result->StatusCode = msg_call_method_bs__rawStatusCode;
 }

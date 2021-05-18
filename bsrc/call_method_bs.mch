@@ -44,7 +44,7 @@ INITIALISATION
 
 OPERATIONS
 
-    statusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx) =
+    rawStatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx) =
     PRE
         p_req_msg : t_msg_i   &
         p_req_msg = c_msg_out &
@@ -53,11 +53,10 @@ OPERATIONS
         p_endpoint_config_idx : t_endpoint_config_idx &
         exec_result = {} /* Do not call before the memory is freed */
     THEN
-        statusCode,
+        rawStatusCode,
         exec_result
         :(
-            statusCode : t_StatusCode_i &
-            statusCode : t_StatusCode   &
+            rawStatusCode : t_RawStatusCode &
             exec_result : seq(t_Variant_i)
         )
     END

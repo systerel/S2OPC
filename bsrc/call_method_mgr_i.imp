@@ -60,6 +60,7 @@ LOCAL_OPERATIONS
         p_endpoint_config_idx : t_endpoint_config_idx
 
     THEN
+        ANY l_RawStatusCode WHERE l_RawStatusCode : t_RawStatusCode THEN
         StatusCode,
         CallMethodRes_status,
         CallMethodRes_AllocatedInputArgumentResult,
@@ -68,16 +69,10 @@ LOCAL_OPERATIONS
         CallMethodRes_OutputArgument
         :(
             StatusCode : t_StatusCode_i &
-            StatusCode : {
-                e_sc_ok,
-                e_sc_bad_arguments_missing,
-                e_sc_bad_too_many_arguments,
-                e_sc_bad_invalid_argument,
-                e_sc_bad_method_invalid,
-                e_sc_bad_not_executable} &
+            StatusCode = conv_RawStatusCode_To_StatusCode(l_RawStatusCode) &
 
             CallMethodRes_Msg                    : t_msg_i &
-            CallMethodRes_status                 : t_CallMethod --> t_StatusCode_i      &
+            CallMethodRes_status                 : t_CallMethod --> t_RawStatusCode      &
             CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
             CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
             CallMethodRes_AllocatedOutputArgument      : t_CallMethod --> NAT1          &
@@ -86,7 +81,7 @@ LOCAL_OPERATIONS
             dom(CallMethodRes_status) = dom(CallMethodRes_OutputArgument) &
 
             {p_callMethod} <<| CallMethodRes_status = {p_callMethod} <<| CallMethodRes_status$0 &
-            CallMethodRes_status(p_callMethod) = StatusCode &
+            CallMethodRes_status(p_callMethod) = l_RawStatusCode &
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
             {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
             {p_callMethod} <<| CallMethodRes_InputArgumentResult =
@@ -113,7 +108,7 @@ LOCAL_OPERATIONS
 
 
         )
-
+        END
     END
     ;
 
@@ -323,11 +318,15 @@ OPERATIONS
     /* LOCAL OPERATIONS */
 
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
-    BEGIN
+    VAR
+        l_rawStatusCode
+    IN
         StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg);
+        l_rawStatusCode <-- getall_conv_StatusCode_To_RawStatusCode(StatusCode);
         IF StatusCode  = e_sc_ok THEN
 
-            StatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx);
+            l_rawStatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx);
+            StatusCode <-- getall_conv_RawStatusCode_To_StatusCode(l_rawStatusCode);
             IF StatusCode  = e_sc_ok THEN
                 StatusCode <-- copy_exec_result (p_res_msg, p_callMethod)
             END
@@ -335,7 +334,7 @@ OPERATIONS
             free_exec_result
         END
         ;
-        write_CallMethod_Res_Status(p_res_msg, p_callMethod, StatusCode)
+        write_CallMethod_Res_Status(p_res_msg, p_callMethod, l_rawStatusCode)
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 03/05/2021 16:37:28
+ Date                 : 18/05/2021 13:55:31
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -103,26 +103,34 @@ void call_method_mgr__treat_one_method_call(
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
    const constants__t_endpoint_config_idx_i call_method_mgr__p_endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
-   call_method_mgr__check_method_call_inputs(call_method_mgr__p_session,
-      call_method_mgr__p_req_msg,
-      call_method_mgr__p_callMethod,
-      call_method_mgr__p_res_msg,
-      call_method_mgr__StatusCode);
-   if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-      call_method_bs__exec_callMethod(call_method_mgr__p_req_msg,
+   {
+      constants__t_RawStatusCode call_method_mgr__l_rawStatusCode;
+      
+      call_method_mgr__check_method_call_inputs(call_method_mgr__p_session,
+         call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
-         call_method_mgr__p_endpoint_config_idx,
+         call_method_mgr__p_res_msg,
          call_method_mgr__StatusCode);
+      constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(*call_method_mgr__StatusCode,
+         &call_method_mgr__l_rawStatusCode);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-         call_method_mgr__copy_exec_result(call_method_mgr__p_res_msg,
+         call_method_bs__exec_callMethod(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
+            call_method_mgr__p_endpoint_config_idx,
+            &call_method_mgr__l_rawStatusCode);
+         constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(call_method_mgr__l_rawStatusCode,
             call_method_mgr__StatusCode);
+         if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
+            call_method_mgr__copy_exec_result(call_method_mgr__p_res_msg,
+               call_method_mgr__p_callMethod,
+               call_method_mgr__StatusCode);
+         }
+         call_method_bs__free_exec_result();
       }
-      call_method_bs__free_exec_result();
+      msg_call_method_bs__write_CallMethod_Res_Status(call_method_mgr__p_res_msg,
+         call_method_mgr__p_callMethod,
+         call_method_mgr__l_rawStatusCode);
    }
-   msg_call_method_bs__write_CallMethod_Res_Status(call_method_mgr__p_res_msg,
-      call_method_mgr__p_callMethod,
-      *call_method_mgr__StatusCode);
 }
 
 void call_method_mgr__check_method_call_inputs(

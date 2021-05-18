@@ -57,7 +57,7 @@ DEFINITIONS
 
     d_inv_out ==
     CallMethodRes_Msg                    : t_msg_i &
-    CallMethodRes_status                 : t_CallMethod --> t_StatusCode_i      &
+    CallMethodRes_status                 : t_CallMethod --> t_RawStatusCode      &
     CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1                & /* Allocated memory */
     CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) & /* Effective data */
     CallMethodRes_AllocatedOutputArgument      : t_CallMethod --> NAT1                & /* Allocated memory */
@@ -217,7 +217,7 @@ OPERATIONS
     END
     ;
 
-    write_CallMethod_Res_Status(p_res_msg, callMethod, statusCode) =
+    write_CallMethod_Res_Status(p_res_msg, callMethod, rawStatusCode) =
     PRE
         p_res_msg : t_msg_i &
         p_res_msg : t_msg   &
@@ -226,10 +226,9 @@ OPERATIONS
         callMethod : t_CallMethod_i &
         callMethod : CallMethods    &
         callMethod : dom(CallMethodRes_status) &
-        statusCode : t_StatusCode_i &
-        statusCode : t_StatusCode
+        rawStatusCode : t_RawStatusCode
     THEN
-        CallMethodRes_status(callMethod) := statusCode
+        CallMethodRes_status(callMethod) := rawStatusCode
     END
     ;
 
