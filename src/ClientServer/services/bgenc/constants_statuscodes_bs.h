@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 13/03/2020 10:50:03
+ Date                 : 18/05/2021 13:27:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -118,7 +118,11 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_semaphore_file_missing,
    constants_statuscodes_bs__e_sc_bad_not_supported,
    constants_statuscodes_bs__e_sc_bad_nonce_invalid,
-   constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded
+   constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded,
+   constants_statuscodes_bs__e_sc_bad_not_found,
+   constants_statuscodes_bs__e_sc_bad_security_mode_insufficient,
+   constants_statuscodes_bs__e_sc_bad_no_communication,
+   constants_statuscodes_bs__e_sc_bad_out_of_range
 } constants_statuscodes_bs__t_StatusCode_i;
 
 /*------------------------

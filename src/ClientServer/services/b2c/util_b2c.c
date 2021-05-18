@@ -841,6 +841,23 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded:
         *status = OpcUa_BadEncodingLimitsExceeded;
         break;
+    case constants_statuscodes_bs__e_sc_bad_not_found:
+        *status = OpcUa_BadNotFound;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_security_mode_insufficient:
+        *status = OpcUa_BadSecurityModeInsufficient;
+        break;
+    /* status code not present in generated file
+    case constants_statuscodes_bs__e_sc_bad_not_executable:
+        *status = OpcUa_BadNotExecutable;
+        break;
+    */
+    case constants_statuscodes_bs__e_sc_bad_no_communication:
+        *status = OpcUa_BadNoCommunication;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_out_of_range:
+        *status = OpcUa_BadOutOfRange;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1148,6 +1165,23 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadEncodingLimitsExceeded:
         *bstatus = constants_statuscodes_bs__e_sc_bad_encoding_limits_exceeded;
+        break;
+    case OpcUa_BadNotFound:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_found;
+        break;
+    case OpcUa_BadSecurityModeInsufficient:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_security_mode_insufficient;
+        break;
+    /* status code not present in generated file
+    case OpcUa_BadNotExecutable:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_not_executable;
+        break;
+    */
+    case OpcUa_BadNoCommunication:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_no_communication;
+        break;
+    case OpcUa_BadOutOfRange:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_out_of_range;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

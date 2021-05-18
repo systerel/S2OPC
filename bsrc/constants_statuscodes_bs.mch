@@ -97,7 +97,11 @@ SETS
                       e_sc_bad_semaphore_file_missing,
                       e_sc_bad_not_supported,
                       e_sc_bad_nonce_invalid,
-                      e_sc_bad_encoding_limits_exceeded}
+                      e_sc_bad_encoding_limits_exceeded,
+                      e_sc_bad_not_found,
+                      e_sc_bad_security_mode_insufficient,
+                      e_sc_bad_no_communication,
+                      e_sc_bad_out_of_range}
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,
