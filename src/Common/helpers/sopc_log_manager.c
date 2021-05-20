@@ -117,59 +117,73 @@ static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
  * \brief same as SOPC_Log_PutLogLine with va_list
  */
 
-static int SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
+static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
         bool addNewline,
         bool inhibitConsole,
         const char* format, va_list args)
 {
     int res = 0;
     char * logBuffer = ((NULL != pLogInst) ? pLogInst->callbackBuffer : NULL);
-    if (!inhibitConsole && pLogInst->consoleFlag)
+    if (NULL != pLogInst && pLogInst->started)
     {
-        va_list args_copy;
-        va_copy(args_copy, args);
-        vprintf(format, args_copy);
-        va_end(args_copy);
-        if (true == addNewline)
+        if (!inhibitConsole && pLogInst->consoleFlag)
         {
-            printf ("\n");
+            va_list args_copy;
+            va_copy(args_copy, args);
+            vprintf(format, args_copy);
+            va_end(args_copy);
+            if (true == addNewline)
+            {
+                printf ("\n");
+            }
+        }
+        if (NULL != pLogInst->logCallback && NULL != logBuffer)
+        {
+            // reminder : logBuffer size is (SOPC_Log_UserMaxLogLen + 1)
+            vsnprintf(logBuffer, SOPC_Log_UserMaxLogLen + 1, format, args);
+            logBuffer[SOPC_Log_UserMaxLogLen] = 0;
+            pLogInst->logCallback(pLogInst->category, logBuffer);
+        }
+        /* Note : "else" increases robustness as va_list "args" cannot be passed twice */
+        else if (NULL != pLogInst->file->pFile)
+        {
+            res = vfprintf(pLogInst->file->pFile, format, args);
+            if (true == addNewline)
+            {
+                res += fprintf(pLogInst->file->pFile, "\n");
+            }
+            if (res > 0)
+            {
+                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
+                {
+                    pLogInst->file->nbBytes += (uint32_t) res;
+                }
+                else
+                {
+                    pLogInst->file->nbBytes = UINT32_MAX;
+                }
+            }
+            else
+            {
+                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
+                SOPC_Log_InstanceFileClose(pLogInst->file);
+            }
         }
     }
-    if (NULL != pLogInst->logCallback && NULL != logBuffer)
-    {
-        // reminder : logBuffer size is (SOPC_Log_UserMaxLogLen + 1)
-        vsnprintf(logBuffer, SOPC_Log_UserMaxLogLen + 1, format, args);
-        logBuffer[SOPC_Log_UserMaxLogLen] = 0;
-        pLogInst->logCallback(pLogInst->category, logBuffer);
-    }
-    /* Note : "else" increases robustness as va_list "args" cannot be passed twice */
-    else if (NULL != pLogInst->file->pFile)
-    {
-        res = vfprintf(pLogInst->file->pFile, format, args);
-        if (true == addNewline)
-        {
-            res += fprintf(pLogInst->file->pFile, "\n");
-        }
-    }
-
-    return res;
 }
 
 /**
  * \brief Print a log line in the right container (file, user callback ,...)
- * \return      The number of character written to a file (if using file)
  */
-static int SOPC_Log_PutLogLine(SOPC_Log_Instance* pLogInst,
+static void SOPC_Log_PutLogLine(SOPC_Log_Instance* pLogInst,
         bool addNewline,
         bool inhibitConsole,
         const char* format, ...)
 {
     va_list args;
     va_start(args, format);
-    int res = 0;
-    res = SOPC_Log_VPutLogLine(pLogInst, addNewline, inhibitConsole, format, args);
+    SOPC_Log_VPutLogLine(pLogInst, addNewline, inhibitConsole, format, args);
     va_end(args);
-    return res;
 }
 
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
@@ -179,7 +193,6 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
 {
     char* timestamp = NULL;
     const char* sLevel = NULL;
-    int res = 0;
     if ((pLogInst->file->pFile != NULL || NULL != pLogInst->logCallback) && pLogInst->started)
     {
         timestamp = SOPC_Time_GetStringOfCurrentTimeUTC(false);
@@ -204,27 +217,11 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         }
         if (!withCategory)
         {
-            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
+            SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
         }
         else
         {
-            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s %s", timestamp, pLogInst->category, sLevel);
-        }
-        if (res > 0)
-        {
-            if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-            {
-                pLogInst->file->nbBytes += (uint32_t) res;
-            }
-            else
-            {
-                pLogInst->file->nbBytes = UINT32_MAX;
-            }
-        }
-        else if (NULL != pLogInst->file->pFile)
-        {
-            printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-            SOPC_Log_InstanceFileClose(pLogInst->file);
+            SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s %s", timestamp, pLogInst->category, sLevel);
         }
         SOPC_Free(timestamp);
     }
@@ -233,7 +230,6 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
 // Print starting timestamp
 static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
 {
-    int res = 0;
     bool result = false;
     if (NULL != pLogInst && !pLogInst->started)
     {
@@ -243,29 +239,8 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
-            res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG START");
-            // JCH TODO : mutualize
-            if (NULL != pLogInst->logCallback)
-            {
-                result = true;
-            }
-            if (res > 0)
-            {
-                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-                {
-                    pLogInst->file->nbBytes += (uint32_t) res;
-                }
-                else
-                {
-                    pLogInst->file->nbBytes = UINT32_MAX;
-                }
-                result = true;
-            }
-            else if (NULL != pLogInst->file->pFile)
-            {
-                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                SOPC_Log_InstanceFileClose(pLogInst->file);
-            }
+            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG START");
+            result = true;
         }
         else
         {
@@ -502,7 +477,6 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
 bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
 {
     bool result = false;
-    int res = 0;
     if (NULL != pLogInst && pLogInst->started)
     {
         const char* levelName = "";
@@ -533,19 +507,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
             break;
         }
 
-        res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
-        // JCH  TODO : mutualize?
-        if (res > 0)
-        {
-            if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-            {
-                pLogInst->file->nbBytes += (uint32_t) res;
-            }
-            else
-            {
-                pLogInst->file->nbBytes = UINT32_MAX;
-            }
-        }
+        SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
@@ -564,7 +526,6 @@ SOPC_Log_Level SOPC_Log_GetLogLevel(SOPC_Log_Instance* pLogInst)
 // Activate output in console
 bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 {
-    int res = 0;
     bool result = false;
     if (NULL != pLogInst && pLogInst->started)
     {
@@ -574,22 +535,7 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
-        res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
-        if (pLogInst->file->pFile != NULL)
-        {
-            // JCH  TODO : mutualize?
-            if (res > 0)
-            {
-                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-                {
-                    pLogInst->file->nbBytes += (uint32_t) res;
-                }
-                else
-                {
-                    pLogInst->file->nbBytes = UINT32_MAX;
-                }
-            }
-        }
+        SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
@@ -633,7 +579,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             assert(res > 0);
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
-            res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);
+            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);
 
             SOPC_Log_InstanceFileClose(pLogInst->file);
             pLogInst->file->pFile = SOPC_Log_InstanceFileOpen(pLogInst->file->filePath);
@@ -645,33 +591,16 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
 
 void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, va_list args)
 {
-    int res = 0;
     if (NULL != pLogInst && pLogInst->started && level <= pLogInst->level)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
         // Check file open
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
-        res = SOPC_Log_VPutLogLine (pLogInst, true, false, format, args);
+        SOPC_Log_VPutLogLine (pLogInst, true, false, format, args);
+
         if (NULL != pLogInst->file->pFile)
         {
-            // TODO JCH : Mutualize
-            if (res > 0)
-            {
-                if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res)
-                {
-                    pLogInst->file->nbBytes += (uint32_t)(res);
-                }
-                else
-                {
-                    pLogInst->file->nbBytes = UINT32_MAX;
-                }
-                SOPC_Log_Flush(pLogInst->file);
-            }
-            else
-            {
-                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                SOPC_Log_InstanceFileClose(pLogInst->file);
-            }
+            SOPC_Log_Flush(pLogInst->file);
             SOPC_Log_CheckFileChangeNoLock(pLogInst);
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
