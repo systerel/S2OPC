@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -72,6 +73,42 @@ void SOPC_Log_Initialize(void)
 {
     SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
     uniquePrefixSet = true;
+}
+
+static void SOPC_Log_InstanceFileClose(SOPC_Log_File* pLogFile)
+{
+#if SOPC_HAS_FILESYSTEM
+    if (NULL != pLogFile)
+    {
+        if (NULL != pLogFile->pFile)
+        {
+            fclose(pLogFile->pFile);
+            pLogFile->pFile = NULL;
+        }
+    }
+#endif
+}
+
+static FILE* SOPC_Log_InstanceFileOpen(const char * filename)
+{
+    FILE* result = NULL;
+#if SOPC_HAS_FILESYSTEM
+    if (NULL != filename)
+    {
+        result = fopen(filename , "w");
+    }
+#endif
+    return result;
+}
+
+static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
+{
+#if SOPC_HAS_FILESYSTEM
+    if (NULL != pLogFile->pFile)
+    {
+        fflush(pLogFile->pFile);
+    }
+#endif
 }
 
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
@@ -134,8 +171,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         else
         {
             printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-            fclose(pLogInst->file->pFile);
-            pLogInst->file->pFile = NULL;
+            SOPC_Log_InstanceFileClose(pLogInst->file);
         }
         SOPC_Free(timestamp);
     }
@@ -171,8 +207,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
                 else
                 {
                     printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                    fclose(pLogInst->file->pFile);
-                    pLogInst->file->pFile = NULL;
+                    SOPC_Log_InstanceFileClose(pLogInst->file);
                 }
             }
         }
@@ -222,7 +257,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
             {
                 res = sprintf(filePath, "%s%s_%s_00001.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName);
                 assert(res > 0);
-                file->pFile = fopen(filePath, "w");
+                file->pFile = SOPC_Log_InstanceFileOpen(filePath);
             }
             if (NULL == file->pFile)
             {
@@ -492,8 +527,8 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
                 assert(res > 0);
             }
 
-            fclose(pLogInst->file->pFile);
-            pLogInst->file->pFile = fopen(pLogInst->file->filePath, "w");
+            SOPC_Log_InstanceFileClose(pLogInst->file);
+            pLogInst->file->pFile = SOPC_Log_InstanceFileOpen(pLogInst->file->filePath);
             pLogInst->file->nbBytes = 0;
         }
     }
@@ -530,13 +565,12 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
                 {
                     pLogInst->file->nbBytes = UINT32_MAX;
                 }
-                fflush(pLogInst->file->pFile);
+                SOPC_Log_Flush(pLogInst->file);
             }
             else
             {
                 printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                fclose(pLogInst->file->pFile);
-                pLogInst->file->pFile = NULL;
+                SOPC_Log_InstanceFileClose(pLogInst->file);
             }
             SOPC_Log_CheckFileChangeNoLock(pLogInst);
         }
@@ -574,8 +608,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         // Note: Unlock mutex in both branches
         if (pLogInst->file->nbRefs <= 1)
         {
-            fclose(pLogInst->file->pFile);
-            pLogInst->file->pFile = NULL;
+            SOPC_Log_InstanceFileClose(pLogInst->file);
             Mutex_Unlock(&pLogInst->file->fileMutex);
             Mutex_Clear(&pLogInst->file->fileMutex);
             SOPC_Free(pLogInst->file->filePath);

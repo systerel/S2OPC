@@ -133,6 +133,11 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY true
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY */
 
+/* @brief Indicates whether the host has a file system */
+#ifndef SOPC_HAS_FILESYSTEM
+#define SOPC_HAS_FILESYSTEM true
+#endif /* SOPC_HAS_FILESYSTEM */
+
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
