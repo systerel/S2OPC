@@ -30,28 +30,16 @@ static SOPC_Log_Instance* pubSubTrace = NULL;
 static SOPC_Log_Instance* secuAudit = NULL;
 static SOPC_Log_Instance* opcUaAudit = NULL;
 
+static const char* SOPC_Log_SecuAuditCategory = "SecuAudit";
 
 /*
  * \brief Initializes the file logger and create the necessary log file(s)
  *
- * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
- * directory separator)
- * \param maxBytes     A maximum amount of bytes by log file before opening a new file incrementing the integer suffix.
- * It is a best effort value (amount verified after each print).
- * \param maxFiles     A maximum number of files to be used, when reached the older log file is overwritten
- * (starting with *_00001.log)
+ * \param pLogInst  An existing log instance used to print in the same log file
+
  *
  * */
-static bool SOPC_Logger_File_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
-
-/*
- * \brief Initializes the user-defined logger
- *
- * \param userConfig    The user-event log configuration
- *
- * */
-static bool SOPC_Logger_User_Initialize(const SOPC_LogSystem_User_Configuration* const userConfig);
-
+static bool SOPC_Logger_AuditInitialize(void);
 
 bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration)
 {
@@ -60,17 +48,25 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     bool result = false;
     int cmpRes = 0;
     SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
+    const SOPC_LogSystem_File_Configuration* pFileConfig = NULL;
     const char* logPath = NULL;
+
+    SOPC_Log_Initialize();
 
     switch (logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
 #if SOPC_HAS_FILESYSTEM
-        logPath = logConfiguration->logSysConfig.fileSystemLogConfig.logDirPath;
+        pFileConfig = &logConfiguration->logSysConfig.fileSystemLogConfig;
+        logPath = pFileConfig->logDirPath;
         if (NULL != logPath)
         {
             cmpRes = SOPC_strcmp_ignore_case("", logPath);
-        } // else: nothing to compare and no directory to create
+        }
+        else
+        {
+            logPath = "";
+        }
         if (0 == cmpRes)
         {
             // Nothing to create (Current folder is used)
@@ -86,9 +82,8 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
             logPath = "";
         }
 
-        result = SOPC_Logger_File_Initialize(logPath,
-                logConfiguration->logSysConfig.fileSystemLogConfig.logMaxBytes,
-                logConfiguration->logSysConfig.fileSystemLogConfig.logMaxFiles);
+        secuAudit = SOPC_Log_CreateFileInstance(pFileConfig->logDirPath, "Trace", SOPC_Log_SecuAuditCategory, pFileConfig->logMaxBytes, pFileConfig->logMaxFiles);
+        result = SOPC_Logger_AuditInitialize();
 #else /* SOPC_HAS_FILESYSTEM */
         /* Status stays OK given that we don't have other alternatives for now */
         fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
@@ -97,7 +92,8 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
         break;
 
     case SOPC_LOG_SYSTEM_USER:
-        result = SOPC_Logger_User_Initialize(&logConfiguration->logSysConfig.userSystemLogConfig);
+        secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory, logConfiguration->logSysConfig.userSystemLogConfig.doLog);
+        result = SOPC_Logger_AuditInitialize();
         break;
     case SOPC_LOG_SYSTEM_NO_LOG:
         result = true;
@@ -121,113 +117,51 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     return result;
 }
 
-
-static bool SOPC_Logger_User_Initialize(const SOPC_LogSystem_User_Configuration* const userConfig)
+static bool SOPC_Logger_AuditInitialize(void)
 {
     bool result = false;
-    if (NULL != userConfig)
+    if (secuAudit != NULL)
     {
-        SOPC_Log_Initialize();
+        result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit
 
-        // TODO JCH : mutualize
-        secuAudit = SOPC_Log_CreateUserInstance("SecuAudit", userConfig->doLog);
-        if (secuAudit != NULL)
+        if (result != false)
         {
-            result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit
-
-            if (result != false)
+            commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
+            if (commonTrace == NULL)
             {
-                commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
-                if (commonTrace == NULL)
-                {
-                    printf("WARNING: Common log creation failed, no Common log will be recorded !");
-                }
+                printf("WARNING: Common log creation failed, no Common log will be recorded !");
+            }
 
-                clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
-                if (clientServerTrace == NULL)
-                {
-                    printf("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
-                }
+            clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
+            if (clientServerTrace == NULL)
+            {
+                printf("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
+            }
 
-                pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
-                if (pubSubTrace == NULL)
-                {
-                    printf("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
-                }
+            pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
+            if (pubSubTrace == NULL)
+            {
+                printf("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
+            }
 
-                opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
-                if (opcUaAudit == NULL)
-                {
-                    printf("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
-                }
-                else
-                {
-                    SOPC_Log_SetLogLevel(opcUaAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for opcUa audit
-                }
+            opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
+            if (opcUaAudit == NULL)
+            {
+                printf("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
             }
             else
             {
-                SOPC_Log_ClearInstance(&secuAudit);
+                SOPC_Log_SetLogLevel(opcUaAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for opcUa audit
             }
         }
         else
         {
-            printf("WARNING: log creation failed, no log will be recorded !\n");
+            SOPC_Log_ClearInstance(&secuAudit);
         }
     }
-    return result;
-}
-
-static bool SOPC_Logger_File_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles)
-{
-    bool result = false;
-    if (logDirPath != NULL)
+    else
     {
-        SOPC_Log_Initialize();
-        secuAudit = SOPC_Log_CreateFileInstance(logDirPath, "Trace", "SecuAudit", maxBytes, maxFiles);
-        if (secuAudit != NULL)
-        {
-            result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit
-
-            if (result != false)
-            {
-                commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
-                if (commonTrace == NULL)
-                {
-                    printf("WARNING: Common log creation failed, no Common log will be recorded !");
-                }
-
-                clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
-                if (clientServerTrace == NULL)
-                {
-                    printf("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
-                }
-
-                pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
-                if (pubSubTrace == NULL)
-                {
-                    printf("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
-                }
-
-                opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
-                if (opcUaAudit == NULL)
-                {
-                    printf("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
-                }
-                else
-                {
-                    SOPC_Log_SetLogLevel(opcUaAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for opcUa audit
-                }
-            }
-            else
-            {
-                SOPC_Log_ClearInstance(&secuAudit);
-            }
-        }
-        else
-        {
-            printf("WARNING: log creation failed, no log will be recorded !\n");
-        }
+        printf("WARNING: log creation failed, no log will be recorded !\n");
     }
     return result;
 }
