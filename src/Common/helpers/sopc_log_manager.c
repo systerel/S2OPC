@@ -185,11 +185,12 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
     return result;
 }
 
-SOPC_Log_Instance* SOPC_Log_CreateInstance(const char* logDirPath,
-                                           const char* logFileName,
-                                           const char* category,
-                                           uint32_t maxBytes,
-                                           uint16_t maxFiles)
+SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
+        const char* logDirPath,
+        const char* logFileName,
+        const char* category,
+        uint32_t maxBytes,
+        uint16_t maxFiles)
 {
     SOPC_Log_Instance* result = NULL;
     SOPC_Log_File* file = NULL;

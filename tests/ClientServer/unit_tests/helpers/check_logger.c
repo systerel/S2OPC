@@ -52,7 +52,7 @@ START_TEST(test_logger_levels)
     char genLogLine[MAX_LINE_LENGTH];
     char* genLogLineBis = NULL;
 
-    otherLog = SOPC_Log_CreateInstance("", "AnotherLogFile", "Other", 10000, 2); // Another testLog file
+    otherLog = SOPC_Log_CreateFileInstance("", "AnotherLogFile", "Other", 10000, 2); // Another testLog file
     ck_assert(otherLog != NULL);
 
     res = SOPC_Log_SetConsoleOutput(otherLog, true);
@@ -173,14 +173,14 @@ START_TEST(test_logger_categories_and_files)
     char* genLogLineBis = NULL;
     char idx = 0;
 
-    testLog = SOPC_Log_CreateInstance("./not_existing_path/", "testLogFile", "Category1", 340, 3);
+    testLog = SOPC_Log_CreateFileInstance("./not_existing_path/", "testLogFile", "Category1", 340, 3);
     ck_assert(testLog == NULL);
-    testLog = SOPC_Log_CreateInstance("", "testLogFile", "Category1", 0, 3);
+    testLog = SOPC_Log_CreateFileInstance("", "testLogFile", "Category1", 0, 3);
     ck_assert(testLog == NULL);
-    testLog = SOPC_Log_CreateInstance("", "testLogFile", "Category1", 340, 0);
+    testLog = SOPC_Log_CreateFileInstance("", "testLogFile", "Category1", 340, 0);
     ck_assert(testLog == NULL);
 
-    testLog = SOPC_Log_CreateInstance("", "TestLogFile", "Category1",
+    testLog = SOPC_Log_CreateFileInstance("", "TestLogFile", "Category1",
                                       340, // 100 bytes reserved for final line (indicating next file) => 240 of trace
                                       3);  // 3 files => generate enough content to have 3 files
     ck_assert(testLog != NULL);
@@ -301,9 +301,9 @@ START_TEST(test_logger_circular)
     char* genLogLineBis = NULL;
     char idx = 0;
 
-    circularLog = SOPC_Log_CreateInstance("", "CircularLogFile", "Circular1",
-                                          340, // Same as testLog
-                                          2);  // TestLog - 1 => first log file overwritten
+    circularLog = SOPC_Log_CreateFileInstance("", "CircularLogFile", "Circular1",
+                                              340, // Same as testLog
+                                              2);  // TestLog - 1 => first log file overwritten
 
     // Start circular log
     res = SOPC_Log_SetLogLevel(circularLog, SOPC_LOG_LEVEL_INFO);

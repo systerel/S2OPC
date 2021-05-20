@@ -27,13 +27,17 @@ static SOPC_Log_Instance* pubSubTrace = NULL;
 static SOPC_Log_Instance* secuAudit = NULL;
 static SOPC_Log_Instance* opcUaAudit = NULL;
 
-bool SOPC_Logger_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles)
+bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration)
 {
+    // temporary workaround while refactoring APIs
+    const char* logDirPath = (NULL == logConfiguration) ? NULL : logConfiguration->logSysConfig.fileSystemLogConfig.logDirPath;
+    uint32_t maxBytes = (NULL == logConfiguration) ? 0 : logConfiguration->logSysConfig.fileSystemLogConfig.logMaxBytes;
+    uint16_t maxFiles = (NULL == logConfiguration) ? 0 : logConfiguration->logSysConfig.fileSystemLogConfig.logMaxFiles;
     bool result = false;
     if (logDirPath != NULL)
     {
         SOPC_Log_Initialize();
-        secuAudit = SOPC_Log_CreateInstance(logDirPath, "Trace", "SecuAudit", maxBytes, maxFiles);
+        secuAudit = SOPC_Log_CreateFileInstance(logDirPath, "Trace", "SecuAudit", maxBytes, maxFiles);
         if (secuAudit != NULL)
         {
             result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit

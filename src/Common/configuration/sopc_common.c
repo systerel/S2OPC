@@ -80,9 +80,7 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
             logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "";
         }
 
-        result = SOPC_Logger_Initialize(logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath,
-                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes,
-                                        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles);
+        result = SOPC_Logger_Initialize(&logConfiguration);
         if (result)
         {
             SOPC_Logger_SetTraceLogLevel(logConfiguration.logLevel);

@@ -51,17 +51,12 @@ typedef enum SOPC_Log_Module
 } SOPC_Log_Module;
 
 /*
- * \brief Initializes the logger and create the necessary log file(s)
+ * \brief Initializes the logger system
  *
- * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
- * directory separator)
- * \param maxBytes     A maximum amount of bytes by log file before opening a new file incrementing the integer suffix.
- * It is a best effort value (amount verified after each print).
- * \param maxFiles     A maximum number of files to be used, when reached the older log file is overwritten
- * (starting with *_00001.log)
+ * \param logConfiguration   Global log configuration
  *
  * */
-bool SOPC_Logger_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
+bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration);
 
 /*
  * \brief Defines the active log level for the given log instance (default: ERROR):
