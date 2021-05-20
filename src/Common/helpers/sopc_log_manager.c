@@ -111,6 +111,55 @@ static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
 #endif
 }
 
+/**
+ * \brief same as SOPC_Log_PutLogLine with va_list
+ */
+
+static int SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
+        bool addNewline,
+        bool inhibitConsole,
+        const char* format, va_list args)
+{
+    int res = 0;
+    if (!inhibitConsole && pLogInst->consoleFlag)
+    {
+        va_list args_copy;
+        va_copy(args_copy, args);
+        vprintf(format, args_copy);
+        va_end(args_copy);
+        if (true == addNewline)
+        {
+            printf ("\n");
+        }
+    }
+   if (NULL != pLogInst->file->pFile)
+    {
+        res = vfprintf(pLogInst->file->pFile, format, args);
+        if (true == addNewline)
+        {
+            res += fprintf(pLogInst->file->pFile, "\n");
+        }
+    }
+
+    return res;
+}
+
+/**
+ * \brief Print a log line in the right container (file, user callback ,...)
+ * \return      The number of character written to a file (if using file)
+ */
+static int SOPC_Log_PutLogLine(SOPC_Log_Instance* pLogInst,
+        bool addNewline,
+        bool inhibitConsole,
+        const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int res = 0;
+    res = SOPC_Log_VPutLogLine(pLogInst, addNewline, inhibitConsole, format, args);
+    va_end(args);
+    return res;
+}
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
                                        SOPC_Log_Level level,
                                        bool withCategory,
@@ -143,19 +192,11 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         }
         if (!withCategory)
         {
-            res = fprintf(pLogInst->file->pFile, "[%s] %s", timestamp, sLevel);
-            if (!inhibitConsole && pLogInst->consoleFlag)
-            {
-                printf("[%s] %s", timestamp, sLevel);
-            }
+            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
         }
         else
         {
-            res = fprintf(pLogInst->file->pFile, "[%s] %s%s", timestamp, pLogInst->category, sLevel);
-            if (!inhibitConsole && pLogInst->consoleFlag)
-            {
-                printf("[%s] %s%s", timestamp, pLogInst->category, sLevel);
-            }
+            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s%s", timestamp, pLogInst->category, sLevel);
         }
         if (res > 0)
         {
@@ -189,9 +230,9 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         {
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
+            res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG START");
             if (NULL != pLogInst->file->pFile)
             {
-                res = fprintf(pLogInst->file->pFile, "LOG START\n");
                 if (res > 0)
                 {
                     if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
@@ -213,7 +254,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         }
         else
         {
-            printf("Log error: impossible to write in NULL stream.");
+            printf("Log error: impossible to write in NULL stream.\n");
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
@@ -400,6 +441,9 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
     int res = 0;
     if (NULL != pLogInst && pLogInst->started)
     {
+        const char* levelName = "";
+        static const size_t maxLogSize = 20;
+        char unknownNameLevel[maxLogSize];
         Mutex_Lock(&pLogInst->file->fileMutex);
         pLogInst->level = level;
         result = true;
@@ -407,24 +451,26 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
 
         if (pLogInst->file->pFile != NULL)
         {
-            switch (level)
-            {
-            case SOPC_LOG_LEVEL_ERROR:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO 'ERROR'\n");
-                break;
-            case SOPC_LOG_LEVEL_WARNING:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO 'WARNING'\n");
-                break;
-            case SOPC_LOG_LEVEL_INFO:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO 'INFO'\n");
-                break;
-            case SOPC_LOG_LEVEL_DEBUG:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO 'DEBUG'\n");
-                break;
-            default:
-                res = fprintf(pLogInst->file->pFile, "LOG LEVEL SET TO '?(%u)'\n", level);
-                break;
-            }
+        switch (level)
+        {
+        case SOPC_LOG_LEVEL_ERROR:
+            levelName = "ERROR";
+            break;
+        case SOPC_LOG_LEVEL_WARNING:
+            levelName = "WARNING";
+            break;
+        case SOPC_LOG_LEVEL_INFO:
+            levelName = "INFO";
+            break;
+        case SOPC_LOG_LEVEL_DEBUG:
+            levelName = "DEBUG";
+            break;
+        default:
+            snprintf(unknownNameLevel, maxLogSize, "?(%u)", level);
+            levelName = unknownNameLevel;
+            break;
+        }
+        res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
             if (res > 0)
             {
                 if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
@@ -465,9 +511,9 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
+        res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
         if (pLogInst->file->pFile != NULL)
         {
-            res = fprintf(pLogInst->file->pFile, "LOG CONSOLE OUTPUT SET TO '%s'\n", activate ? "TRUE" : "FALSE");
             if (res > 0)
             {
                 if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
@@ -521,11 +567,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             assert(res > 0);
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
-            if (pLogInst->file->pFile != NULL)
-            {
-                res = fprintf(pLogInst->file->pFile, "LOG CONTINUE IN NEXT FILE: %s\n", pLogInst->file->filePath);
-                assert(res > 0);
-            }
+            res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);
 
             SOPC_Log_InstanceFileClose(pLogInst->file);
             pLogInst->file->pFile = SOPC_Log_InstanceFileOpen(pLogInst->file->filePath);
@@ -537,29 +579,19 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
 void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, va_list args)
 {
     int res = 0;
-    int res2 = 0;
     if (NULL != pLogInst && pLogInst->started && level <= pLogInst->level)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
         // Check file open
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
+        res = SOPC_Log_VPutLogLine (pLogInst, true, false, format, args);
         if (NULL != pLogInst->file->pFile)
         {
-            if (pLogInst->consoleFlag)
+            if (res > 0)
             {
-                va_list args_copy;
-                va_copy(args_copy, args);
-                vprintf(format, args_copy);
-                va_end(args_copy);
-                printf("\n");
-            }
-            res = vfprintf(pLogInst->file->pFile, format, args);
-            res2 = fprintf(pLogInst->file->pFile, "\n");
-            if (res > 0 && res2 > 0)
-            {
-                if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res + (uint64_t) res2)
+                if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res)
                 {
-                    pLogInst->file->nbBytes += (uint32_t)(res + res2);
+                    pLogInst->file->nbBytes += (uint32_t)(res);
                 }
                 else
                 {
@@ -598,10 +630,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         if (pLogInst->started)
         {
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
-            if (pLogInst->file->pFile != NULL)
-            {
-                fprintf(pLogInst->file->pFile, "LOG STOP\n");
-            }
+            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG STOP");
 
             pLogInst->started = false;
         }
