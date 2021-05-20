@@ -196,7 +196,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         }
         else
         {
-            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s%s", timestamp, pLogInst->category, sLevel);
+            res = SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s %s", timestamp, pLogInst->category, sLevel);
         }
         if (res > 0)
         {
@@ -261,6 +261,30 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
     return result;
 }
 
+// Fill pLogInst->category with category, aligned and truncated to CATEGORY_MAX_LENGTH
+static void SOPC_Log_AlignCategory(
+        const char* category,
+        SOPC_Log_Instance* pLogInst)
+{
+    if (NULL != category && NULL != pLogInst)
+    {
+        const size_t category_len = strlen(category);
+        if (category_len > 0 && category_len <= CATEGORY_MAX_LENGTH)
+        {
+            memcpy(pLogInst->category, category, category_len);
+            pLogInst->category[category_len] = '\0';
+        }
+        else
+        {
+            memcpy(pLogInst->category, category, CATEGORY_MAX_LENGTH);
+            pLogInst->category[CATEGORY_MAX_LENGTH] = '\0';
+        }
+    }
+    else
+    {
+        pLogInst->category[0] = '\0';
+    }
+}
 SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
         const char* logDirPath,
         const char* logFileName,
@@ -270,7 +294,6 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
 {
     SOPC_Log_Instance* result = NULL;
     SOPC_Log_File* file = NULL;
-    size_t category_len = 0;
     char* filePath = NULL;
     int res = 0;
 
@@ -335,27 +358,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
     {
         Mutex_Initialization(&result->file->fileMutex);
         // Fill fields
-        if (category != NULL)
-        {
-            category_len = strlen(category);
-            if (category_len > 0 && category_len <= CATEGORY_MAX_LENGTH)
-            {
-                memcpy(result->category, category, category_len);
-                result->category[category_len] = ' ';
-                result->category[category_len + 1] = '\0';
-            }
-            else
-            {
-                memcpy(result->category, category, CATEGORY_MAX_LENGTH);
-                result->category[CATEGORY_MAX_LENGTH] = ' ';
-                result->category[CATEGORY_MAX_LENGTH + 1] = '\0';
-            }
-        }
-        else
-        {
-            result->category[0] = ' ';
-            result->category[1] = '\0';
-        }
+        SOPC_Log_AlignCategory (category , result);
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->started = false;
@@ -372,7 +375,6 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
 
 SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogInst, const char* category)
 {
-    size_t category_len = 0;
     SOPC_Log_Instance* result = NULL;
 
     if (NULL != pLogInst)
@@ -399,27 +401,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
     if (result != NULL)
     {
         // Fill fields
-        if (category != NULL)
-        {
-            category_len = strlen(category);
-            if (category_len > 0 && category_len <= CATEGORY_MAX_LENGTH)
-            {
-                memcpy(result->category, category, category_len);
-                result->category[category_len] = ' ';
-                result->category[category_len + 1] = '\0';
-            }
-            else
-            {
-                memcpy(result->category, category, CATEGORY_MAX_LENGTH);
-                result->category[CATEGORY_MAX_LENGTH] = ' ';
-                result->category[CATEGORY_MAX_LENGTH + 1] = '\0';
-            }
-        }
-        else
-        {
-            result->category[0] = ' ';
-            result->category[1] = '\0';
-        }
+        SOPC_Log_AlignCategory (category , result);
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
 
