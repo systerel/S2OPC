@@ -40,6 +40,24 @@ typedef enum
     SOPC_LOG_LEVEL_DEBUG = 3
 } SOPC_Log_Level;
 
+/**
+ * \brief Maximum length of a User-defined log line.
+ * */
+#define SOPC_Log_UserMaxLogLen (0x200u)
+
+/**
+ * \brief Log event callback.
+ * \param[in] category  String pointer containing the category. Can be NULL, when
+ *                      not related to any category,
+ * \param[in] line      Non-null string pointer, containing the full log line,
+ *                      including NULL-terminating character but excluding any newline character,
+ *                      so that it can be specificly defined for each platform.
+ *                      The line has already been filtered (level) and formatted by logger core.
+ *                      In all cases, the line is truncated to SOPC_Log_UserMaxLogLen characters.
+ * */
+typedef void SOPC_Log_UserDoLog (
+        const char * category,
+        const char* const line);
 
 /**
  * \brief structure containing the file system log configuration
@@ -52,11 +70,21 @@ typedef struct SOPC_LogSystem_File_Configuration
 } SOPC_LogSystem_File_Configuration;
 
 /**
+ * \brief structure containing the user system log configuration
+ */
+typedef struct SOPC_LogSystem_User_Configuration
+{
+    SOPC_Log_UserDoLog* doLog;   /**< Log event user callback */
+} SOPC_LogSystem_User_Configuration;
+
+/**
  * \brief log system discriminant
  */
 typedef enum SOPC_Log_System
 {
     SOPC_LOG_SYSTEM_FILE, /**< file system logger */
+    SOPC_LOG_SYSTEM_USER, /**< user-implemented system logger */
+    SOPC_LOG_SYSTEM_NO_LOG /**< no system logger */
 } SOPC_Log_System;
 
 /**
@@ -64,6 +92,7 @@ typedef enum SOPC_Log_System
  */
 typedef union SOPC_Log_SystemConfiguration {
     SOPC_LogSystem_File_Configuration fileSystemLogConfig; /**< log file system configuration */
+    SOPC_LogSystem_User_Configuration userSystemLogConfig; /**< log user system configuration */
 } SOPC_Log_SystemConfiguration;
 
 /**
@@ -106,6 +135,19 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
     const char* category,
     uint32_t maxBytes,  // New file created when maxBytes reached (after printing latest trace)
     uint16_t maxFiles); // Old logs overwritten when maxFiles reached
+
+/*
+ * \brief Creates a new log instance for user mode
+ *
+ * \param category     A category name if the log file is used for several categories or NULL. Truncated if more than 9
+ * characters.
+ * \param logCallback  The user logging callback. If set to NULL, no user event is called.
+ *
+ * \return             The log instance to be used to add traces
+ * */
+SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
+    const char* category,
+    SOPC_Log_UserDoLog* logCallback);
 
 /*
  * \brief Creates a new log instance using the same log file than existing log instance and prints the starting

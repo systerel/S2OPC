@@ -19,6 +19,9 @@
 
 #include "sopc_logger.h"
 
+#include "sopc_common_constants.h"
+#include "sopc_filesystem.h"
+#include "sopc_helper_string.h"
 #include <stdio.h>
 
 static SOPC_Log_Instance* commonTrace = NULL;
@@ -27,12 +30,156 @@ static SOPC_Log_Instance* pubSubTrace = NULL;
 static SOPC_Log_Instance* secuAudit = NULL;
 static SOPC_Log_Instance* opcUaAudit = NULL;
 
+
+/*
+ * \brief Initializes the file logger and create the necessary log file(s)
+ *
+ * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
+ * directory separator)
+ * \param maxBytes     A maximum amount of bytes by log file before opening a new file incrementing the integer suffix.
+ * It is a best effort value (amount verified after each print).
+ * \param maxFiles     A maximum number of files to be used, when reached the older log file is overwritten
+ * (starting with *_00001.log)
+ *
+ * */
+static bool SOPC_Logger_File_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles);
+
+/*
+ * \brief Initializes the user-defined logger
+ *
+ * \param userConfig    The user-event log configuration
+ *
+ * */
+static bool SOPC_Logger_User_Initialize(const SOPC_LogSystem_User_Configuration* const userConfig);
+
+
 bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration)
 {
-    // temporary workaround while refactoring APIs
-    const char* logDirPath = (NULL == logConfiguration) ? NULL : logConfiguration->logSysConfig.fileSystemLogConfig.logDirPath;
-    uint32_t maxBytes = (NULL == logConfiguration) ? 0 : logConfiguration->logSysConfig.fileSystemLogConfig.logMaxBytes;
-    uint16_t maxFiles = (NULL == logConfiguration) ? 0 : logConfiguration->logSysConfig.fileSystemLogConfig.logMaxFiles;
+    const SOPC_Log_System logSystem = (NULL == logConfiguration) ? SOPC_LOG_SYSTEM_NO_LOG : logConfiguration->logSystem;
+
+    bool result = false;
+    int cmpRes = 0;
+    SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
+    const char* logPath = NULL;
+
+    switch (logSystem)
+    {
+    case SOPC_LOG_SYSTEM_FILE:
+#if SOPC_HAS_FILESYSTEM
+        logPath = logConfiguration->logSysConfig.fileSystemLogConfig.logDirPath;
+        if (NULL != logPath)
+        {
+            cmpRes = SOPC_strcmp_ignore_case("", logPath);
+        } // else: nothing to compare and no directory to create
+        if (0 == cmpRes)
+        {
+            // Nothing to create (Current folder is used)
+            mkdirRes = SOPC_FileSystem_Creation_OK;
+        }
+        else
+        {
+            mkdirRes = SOPC_FileSystem_mkdir(logPath);
+        }
+        if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
+        {
+            fprintf(stderr, "WARNING: Cannot create log directory ('%d'), defaulting to current directory\n", mkdirRes);
+            logPath = "";
+        }
+
+        result = SOPC_Logger_File_Initialize(logPath,
+                logConfiguration->logSysConfig.fileSystemLogConfig.logMaxBytes,
+                logConfiguration->logSysConfig.fileSystemLogConfig.logMaxFiles);
+#else /* SOPC_HAS_FILESYSTEM */
+        /* Status stays OK given that we don't have other alternatives for now */
+        fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
+        result = SOPC_STATUS_NOT_SUPPORTED;
+#endif
+        break;
+
+    case SOPC_LOG_SYSTEM_USER:
+        result = SOPC_Logger_User_Initialize(&logConfiguration->logSysConfig.userSystemLogConfig);
+        break;
+    case SOPC_LOG_SYSTEM_NO_LOG:
+        result = true;
+        break;
+    default:
+        result = false;
+        break;
+    }
+    if (SOPC_LOG_SYSTEM_NO_LOG != logSystem)
+    {
+        if (result)
+        {
+            SOPC_Logger_SetTraceLogLevel(logConfiguration->logLevel);
+        }
+        else
+        {
+            /* Status stays OK given that we don't have other alternatives for now */
+            fprintf(stderr, "ERROR: S2OPC Logs initialization failed!\n");
+        }
+    }
+    return result;
+}
+
+
+static bool SOPC_Logger_User_Initialize(const SOPC_LogSystem_User_Configuration* const userConfig)
+{
+    bool result = false;
+    if (NULL != userConfig)
+    {
+        SOPC_Log_Initialize();
+
+        // TODO JCH : mutualize
+        secuAudit = SOPC_Log_CreateUserInstance("SecuAudit", userConfig->doLog);
+        if (secuAudit != NULL)
+        {
+            result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit
+
+            if (result != false)
+            {
+                commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
+                if (commonTrace == NULL)
+                {
+                    printf("WARNING: Common log creation failed, no Common log will be recorded !");
+                }
+
+                clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
+                if (clientServerTrace == NULL)
+                {
+                    printf("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
+                }
+
+                pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
+                if (pubSubTrace == NULL)
+                {
+                    printf("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
+                }
+
+                opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
+                if (opcUaAudit == NULL)
+                {
+                    printf("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
+                }
+                else
+                {
+                    SOPC_Log_SetLogLevel(opcUaAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for opcUa audit
+                }
+            }
+            else
+            {
+                SOPC_Log_ClearInstance(&secuAudit);
+            }
+        }
+        else
+        {
+            printf("WARNING: log creation failed, no log will be recorded !\n");
+        }
+    }
+    return result;
+}
+
+static bool SOPC_Logger_File_Initialize(const char* logDirPath, uint32_t maxBytes, uint16_t maxFiles)
+{
     bool result = false;
     if (logDirPath != NULL)
     {

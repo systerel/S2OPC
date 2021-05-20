@@ -23,20 +23,45 @@
  * See s2opc_headers.h
  */
 
+#define SOPC_Log_UserMaxLogLen (0x200u)
+
+/**
+ * \brief Log event callback.
+ * \param[in] category  String pointer containing the category. Can be NULL, when
+ *                      not related to any category,
+ * \param[in] line      Non-null string pointer, containing the full log line,
+ *                      including NULL-terminating character but excluding any newline character,
+ *                      so that it can be specificly defined for each platform.
+ *                      The line has already been filtered (level) and formatted by logger core.
+ *                      In all cases, the line is truncated to SOPC_Log_UserMaxLogLen characters.
+ * */
+typedef void SOPC_Log_UserDoLog(const char* category, const char* const line);
+
 typedef struct SOPC_LogSystem_File_Configuration
 {
-    const char* logDirPath; /**< path of the log directory */
+    const char* logDirPath; /**< path of the log directory ending with directory separator if not empty */
     uint32_t logMaxBytes;   /**< max bytes per log file */
     uint16_t logMaxFiles;   /**< max number of log files */
 } SOPC_LogSystem_File_Configuration;
 
+/**
+ * \brief structure containing the user system log configuration
+ */
+typedef struct SOPC_LogSystem_User_Configuration
+{
+    SOPC_Log_UserDoLog* doLog; /**< Log event user callback */
+} SOPC_LogSystem_User_Configuration;
+
 typedef enum SOPC_Log_System
 {
-    SOPC_LOG_SYSTEM_FILE /**< file system logger */
+    SOPC_LOG_SYSTEM_FILE,  /**< file system logger */
+    SOPC_LOG_SYSTEM_USER,  /**< user-implemented system logger */
+    SOPC_LOG_SYSTEM_NO_LOG /**< no system logger */
 } SOPC_Log_System;
 
 typedef union SOPC_Log_SystemConfiguration {
     SOPC_LogSystem_File_Configuration fileSystemLogConfig; /**< log file system configuration */
+    SOPC_LogSystem_User_Configuration userSystemLogConfig; /**< log user system configuration */
 } SOPC_Log_SystemConfiguration;
 
 typedef struct SOPC_Log_Configuration

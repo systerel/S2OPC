@@ -62,9 +62,11 @@ typedef struct SOPC_Log_File
 
 struct SOPC_Log_Instance
 {
-    char category[CATEGORY_MAX_LENGTH + 2]; // + 2 for blank space after category + NULL termination
+    char category[CATEGORY_MAX_LENGTH + 1]; // + 1 for NULL termination
     SOPC_Log_Level level;
     SOPC_Log_File* file;
+    SOPC_Log_UserDoLog* logCallback;
+    char * callbackBuffer;
     bool consoleFlag;
     bool started;
 };
@@ -121,6 +123,7 @@ static int SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
         const char* format, va_list args)
 {
     int res = 0;
+    char * logBuffer = ((NULL != pLogInst) ? pLogInst->callbackBuffer : NULL);
     if (!inhibitConsole && pLogInst->consoleFlag)
     {
         va_list args_copy;
@@ -132,7 +135,15 @@ static int SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
             printf ("\n");
         }
     }
-   if (NULL != pLogInst->file->pFile)
+    if (NULL != pLogInst->logCallback && NULL != logBuffer)
+    {
+        // reminder : logBuffer size is (SOPC_Log_UserMaxLogLen + 1)
+        vsnprintf(logBuffer, SOPC_Log_UserMaxLogLen + 1, format, args);
+        logBuffer[SOPC_Log_UserMaxLogLen] = 0;
+        pLogInst->logCallback(pLogInst->category, logBuffer);
+    }
+    /* Note : "else" increases robustness as va_list "args" cannot be passed twice */
+    else if (NULL != pLogInst->file->pFile)
     {
         res = vfprintf(pLogInst->file->pFile, format, args);
         if (true == addNewline)
@@ -160,6 +171,7 @@ static int SOPC_Log_PutLogLine(SOPC_Log_Instance* pLogInst,
     va_end(args);
     return res;
 }
+
 static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
                                        SOPC_Log_Level level,
                                        bool withCategory,
@@ -167,8 +179,8 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
 {
     char* timestamp = NULL;
     const char* sLevel = NULL;
-    int res;
-    if (pLogInst->file->pFile != NULL && pLogInst->started)
+    int res = 0;
+    if ((pLogInst->file->pFile != NULL || NULL != pLogInst->logCallback) && pLogInst->started)
     {
         timestamp = SOPC_Time_GetStringOfCurrentTimeUTC(false);
         switch (level)
@@ -209,7 +221,7 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
                 pLogInst->file->nbBytes = UINT32_MAX;
             }
         }
-        else
+        else if (NULL != pLogInst->file->pFile)
         {
             printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
             SOPC_Log_InstanceFileClose(pLogInst->file);
@@ -226,30 +238,33 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
     if (NULL != pLogInst && !pLogInst->started)
     {
         Mutex_Lock(&pLogInst->file->fileMutex);
-        if (NULL != pLogInst->file->pFile)
+        if ((NULL != pLogInst->file->pFile) || (NULL != pLogInst->logCallback))
         {
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
+
             res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG START");
-            if (NULL != pLogInst->file->pFile)
+            // JCH TODO : mutualize
+            if (NULL != pLogInst->logCallback)
             {
-                if (res > 0)
+                result = true;
+            }
+            if (res > 0)
+            {
+                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
                 {
-                    if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-                    {
-                        pLogInst->file->nbBytes += (uint32_t) res;
-                    }
-                    else
-                    {
-                        pLogInst->file->nbBytes = UINT32_MAX;
-                    }
-                    result = true;
+                    pLogInst->file->nbBytes += (uint32_t) res;
                 }
                 else
                 {
-                    printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
-                    SOPC_Log_InstanceFileClose(pLogInst->file);
+                    pLogInst->file->nbBytes = UINT32_MAX;
                 }
+                result = true;
+            }
+            else if (NULL != pLogInst->file->pFile)
+            {
+                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
+                SOPC_Log_InstanceFileClose(pLogInst->file);
             }
         }
         else
@@ -285,8 +300,71 @@ static void SOPC_Log_AlignCategory(
         pLogInst->category[0] = '\0';
     }
 }
-SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
-        const char* logDirPath,
+
+SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
+    const char* category,
+    SOPC_Log_UserDoLog* logCallback)
+{
+    SOPC_Log_Instance* result = NULL;
+    SOPC_Log_File* file = NULL;
+    result = SOPC_Calloc(1, sizeof(SOPC_Log_Instance));
+    if (result != NULL)
+    {
+        file = SOPC_Malloc(sizeof(SOPC_Log_File));
+        // Define file path and try to open it
+        if (file != NULL)
+        {
+            file->pFile = NULL;
+            // + 2 for the 2 '_'
+            file->fileNumberPos = 0;
+            // Attempt to create first log file:
+            // 5 for file number + 4 for file extension +1 for '\0' terminating character => 10
+            file->pFile = NULL;
+            file->filePath = NULL;
+            file->maxBytes = 0; // Keep characters to display file change
+            file->maxFiles = 0;
+            file->nbBytes = 0;
+            file->nbFiles = 1;
+            file->nbRefs = 1;
+            result->file = file;
+            result->logCallback = logCallback;
+            result->callbackBuffer = SOPC_Malloc(SOPC_Log_UserMaxLogLen + 1); // + NULL
+            if (NULL != result->callbackBuffer)
+            {
+                Mutex_Initialization(&result->file->fileMutex);
+                // Fill fields
+                SOPC_Log_AlignCategory (category , result);
+                result->consoleFlag = false;
+                result->level = SOPC_LOG_LEVEL_ERROR;
+                result->started = false;
+                // Starts the log instance
+                bool started = SOPC_Log_Start(result);
+
+                if (!started)
+                {
+                    SOPC_Log_ClearInstance(&result);
+                }
+            }
+            else
+            {
+                /* Allocation of callbackBuffer failed */
+                SOPC_Free(file);
+                SOPC_Free(result);
+                result = NULL;
+            }
+        }
+        else
+        {
+            /* Allocation of file failed */
+            SOPC_Free(result);
+            result = NULL;
+        }
+    }
+
+    return result;
+}
+
+SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
         const char* logFileName,
         const char* category,
         uint32_t maxBytes,
@@ -362,6 +440,8 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->started = false;
+        result->logCallback = NULL;
+        result->callbackBuffer = 0;
         // Starts the log instance
         bool started = SOPC_Log_Start(result);
 
@@ -384,7 +464,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
         if (result != NULL)
         {
             Mutex_Lock(&pLogInst->file->fileMutex);
-            if (pLogInst->file->pFile != NULL && pLogInst->file->nbRefs < UINT8_MAX)
+            if (pLogInst->file->nbRefs < UINT8_MAX)
             {
                 result->file = pLogInst->file;
                 pLogInst->file->nbRefs++;
@@ -404,6 +484,8 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
         SOPC_Log_AlignCategory (category , result);
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
+        result->callbackBuffer = pLogInst->callbackBuffer;
+        result->logCallback = pLogInst->logCallback;
 
         // Starts the log instance
         bool started = SOPC_Log_Start(result);
@@ -431,8 +513,6 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
         result = true;
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
-        if (pLogInst->file->pFile != NULL)
-        {
         switch (level)
         {
         case SOPC_LOG_LEVEL_ERROR:
@@ -452,17 +532,18 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
             levelName = unknownNameLevel;
             break;
         }
+
         res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
-            if (res > 0)
+        // JCH  TODO : mutualize?
+        if (res > 0)
+        {
+            if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
             {
-                if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
-                {
-                    pLogInst->file->nbBytes += (uint32_t) res;
-                }
-                else
-                {
-                    pLogInst->file->nbBytes = UINT32_MAX;
-                }
+                pLogInst->file->nbBytes += (uint32_t) res;
+            }
+            else
+            {
+                pLogInst->file->nbBytes = UINT32_MAX;
             }
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
@@ -496,6 +577,7 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
         res = SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
         if (pLogInst->file->pFile != NULL)
         {
+            // JCH  TODO : mutualize?
             if (res > 0)
             {
                 if ((uint64_t) res <= UINT32_MAX - pLogInst->file->nbBytes)
@@ -530,9 +612,11 @@ char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst)
 
 static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
 {
+#if SOPC_HAS_FILESYSTEM
     assert(pLogInst != NULL);
     int res = 0;
-    if (pLogInst->file->nbBytes >= pLogInst->file->maxBytes)
+    /* Note : for USER-defined logs, maxBytes is set to 0 */
+    if (pLogInst->file->maxBytes > 0 && pLogInst->file->nbBytes >= pLogInst->file->maxBytes)
     {
         if (pLogInst->file->filePath != NULL)
         {
@@ -556,6 +640,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             pLogInst->file->nbBytes = 0;
         }
     }
+#endif
 }
 
 void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, va_list args)
@@ -569,6 +654,7 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
         res = SOPC_Log_VPutLogLine (pLogInst, true, false, format, args);
         if (NULL != pLogInst->file->pFile)
         {
+            // TODO JCH : Mutualize
             if (res > 0)
             {
                 if (UINT32_MAX - pLogInst->file->nbBytes > (uint64_t) res)
@@ -622,8 +708,17 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
             SOPC_Log_InstanceFileClose(pLogInst->file);
             Mutex_Unlock(&pLogInst->file->fileMutex);
             Mutex_Clear(&pLogInst->file->fileMutex);
-            SOPC_Free(pLogInst->file->filePath);
+            if (NULL != pLogInst->file->filePath)
+            {
+                SOPC_Free(pLogInst->file->filePath);
+            }
+            if (NULL != pLogInst->callbackBuffer)
+            {
+                SOPC_Free(pLogInst->callbackBuffer);
+                pLogInst->callbackBuffer = NULL;
+            }
             SOPC_Free(pLogInst->file);
+            pLogInst->file = NULL;
         }
         else
         {
