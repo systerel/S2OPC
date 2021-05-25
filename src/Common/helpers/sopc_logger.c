@@ -19,10 +19,10 @@
 
 #include "sopc_logger.h"
 
+#include <stdio.h>
 #include "sopc_common_constants.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
-#include <stdio.h>
 
 static SOPC_Log_Instance* commonTrace = NULL;
 static SOPC_Log_Instance* clientServerTrace = NULL;
@@ -82,7 +82,8 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
             logPath = "";
         }
 
-        secuAudit = SOPC_Log_CreateFileInstance(pFileConfig->logDirPath, "Trace", SOPC_Log_SecuAuditCategory, pFileConfig->logMaxBytes, pFileConfig->logMaxFiles);
+        secuAudit = SOPC_Log_CreateFileInstance(pFileConfig->logDirPath, "Trace", SOPC_Log_SecuAuditCategory,
+                                                pFileConfig->logMaxBytes, pFileConfig->logMaxFiles);
         result = SOPC_Logger_AuditInitialize();
 #else /* SOPC_HAS_FILESYSTEM */
         /* Status stays OK given that we don't have other alternatives for now */
@@ -92,7 +93,8 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
         break;
 
     case SOPC_LOG_SYSTEM_USER:
-        secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory, logConfiguration->logSysConfig.userSystemLogConfig.doLog);
+        secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory,
+                                                logConfiguration->logSysConfig.userSystemLogConfig.doLog);
         result = SOPC_Logger_AuditInitialize();
         break;
     case SOPC_LOG_SYSTEM_NO_LOG:

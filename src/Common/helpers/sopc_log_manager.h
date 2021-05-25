@@ -55,9 +55,7 @@ typedef enum
  *                      The line has already been filtered (level) and formatted by logger core.
  *                      In all cases, the line is truncated to SOPC_Log_UserMaxLogLen characters.
  * */
-typedef void SOPC_Log_UserDoLog (
-        const char * category,
-        const char* const line);
+typedef void SOPC_Log_UserDoLog(const char* category, const char* const line);
 
 /**
  * \brief structure containing the file system log configuration
@@ -74,7 +72,7 @@ typedef struct SOPC_LogSystem_File_Configuration
  */
 typedef struct SOPC_LogSystem_User_Configuration
 {
-    SOPC_Log_UserDoLog* doLog;   /**< Log event user callback */
+    SOPC_Log_UserDoLog* doLog; /**< Log event user callback */
 } SOPC_LogSystem_User_Configuration;
 
 /**
@@ -82,8 +80,8 @@ typedef struct SOPC_LogSystem_User_Configuration
  */
 typedef enum SOPC_Log_System
 {
-    SOPC_LOG_SYSTEM_FILE, /**< file system logger */
-    SOPC_LOG_SYSTEM_USER, /**< user-implemented system logger */
+    SOPC_LOG_SYSTEM_FILE,  /**< file system logger */
+    SOPC_LOG_SYSTEM_USER,  /**< user-implemented system logger */
     SOPC_LOG_SYSTEM_NO_LOG /**< no system logger */
 } SOPC_Log_System;
 
@@ -145,9 +143,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
  *
  * \return             The log instance to be used to add traces
  * */
-SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
-    const char* category,
-    SOPC_Log_UserDoLog* logCallback);
+SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_UserDoLog* logCallback);
 
 /*
  * \brief Creates a new log instance using the same log file than existing log instance and prints the starting

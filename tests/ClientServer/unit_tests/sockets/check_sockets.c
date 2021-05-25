@@ -122,18 +122,11 @@ START_TEST(test_sockets)
     uint32_t receivedBytes = 0;
     uint32_t totalReceivedBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_LogSystem_File_Configuration logFileConfiguration =
-    {
-    		.logDirPath = "./check_sockets_logs/",
-			.logMaxBytes = 1048576,
-			.logMaxFiles =  5
-    };
-    SOPC_Log_Configuration logConfiguration =
-    		{
-    				.logLevel = SOPC_LOG_LEVEL_INFO,
-					.logSystem = SOPC_LOG_SYSTEM_FILE,
-					.logSysConfig = {.fileSystemLogConfig = logFileConfiguration}
-    		};
+    SOPC_LogSystem_File_Configuration logFileConfiguration = {
+        .logDirPath = "./check_sockets_logs/", .logMaxBytes = 1048576, .logMaxFiles = 5};
+    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_INFO,
+                                               .logSystem = SOPC_LOG_SYSTEM_FILE,
+                                               .logSysConfig = {.fileSystemLogConfig = logFileConfiguration}};
 
     SOPC_EventTimer_Initialize();
     SOPC_Sockets_Initialize();

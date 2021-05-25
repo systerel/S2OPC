@@ -66,7 +66,7 @@ struct SOPC_Log_Instance
     SOPC_Log_Level level;
     SOPC_Log_File* file;
     SOPC_Log_UserDoLog* logCallback;
-    char * callbackBuffer;
+    char* callbackBuffer;
     bool consoleFlag;
     bool started;
 };
@@ -91,13 +91,13 @@ static void SOPC_Log_InstanceFileClose(SOPC_Log_File* pLogFile)
 #endif
 }
 
-static FILE* SOPC_Log_InstanceFileOpen(const char * filename)
+static FILE* SOPC_Log_InstanceFileOpen(const char* filename)
 {
     FILE* result = NULL;
 #if SOPC_HAS_FILESYSTEM
     if (NULL != filename)
     {
-        result = fopen(filename , "w");
+        result = fopen(filename, "w");
     }
 #endif
     return result;
@@ -118,12 +118,13 @@ static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
  */
 
 static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
-        bool addNewline,
-        bool inhibitConsole,
-        const char* format, va_list args)
+                                 bool addNewline,
+                                 bool inhibitConsole,
+                                 const char* format,
+                                 va_list args)
 {
     int res = 0;
-    char * logBuffer = ((NULL != pLogInst) ? pLogInst->callbackBuffer : NULL);
+    char* logBuffer = ((NULL != pLogInst) ? pLogInst->callbackBuffer : NULL);
     if (NULL != pLogInst && pLogInst->started)
     {
         if (!inhibitConsole && pLogInst->consoleFlag)
@@ -134,7 +135,7 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
             va_end(args_copy);
             if (true == addNewline)
             {
-                printf ("\n");
+                printf("\n");
             }
         }
         if (NULL != pLogInst->logCallback && NULL != logBuffer)
@@ -176,9 +177,10 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
  * \brief Print a log line in the right container (file, user callback ,...)
  */
 static void SOPC_Log_PutLogLine(SOPC_Log_Instance* pLogInst,
-        bool addNewline,
-        bool inhibitConsole,
-        const char* format, ...)
+                                bool addNewline,
+                                bool inhibitConsole,
+                                const char* format,
+                                ...)
 {
     va_list args;
     va_start(args, format);
@@ -217,11 +219,11 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
         }
         if (!withCategory)
         {
-            SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
+            SOPC_Log_PutLogLine(pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
         }
         else
         {
-            SOPC_Log_PutLogLine (pLogInst, false, inhibitConsole, "[%s] %s %s", timestamp, pLogInst->category, sLevel);
+            SOPC_Log_PutLogLine(pLogInst, false, inhibitConsole, "[%s] %s %s", timestamp, pLogInst->category, sLevel);
         }
         SOPC_Free(timestamp);
     }
@@ -239,7 +241,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
             pLogInst->started = true;
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
-            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG START");
+            SOPC_Log_PutLogLine(pLogInst, true, true, "LOG START");
             result = true;
         }
         else
@@ -252,9 +254,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
 }
 
 // Fill pLogInst->category with category, aligned and truncated to CATEGORY_MAX_LENGTH
-static void SOPC_Log_AlignCategory(
-        const char* category,
-        SOPC_Log_Instance* pLogInst)
+static void SOPC_Log_AlignCategory(const char* category, SOPC_Log_Instance* pLogInst)
 {
     if (NULL != category && NULL != pLogInst)
     {
@@ -276,9 +276,7 @@ static void SOPC_Log_AlignCategory(
     }
 }
 
-SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
-    const char* category,
-    SOPC_Log_UserDoLog* logCallback)
+SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_UserDoLog* logCallback)
 {
     SOPC_Log_Instance* result = NULL;
     SOPC_Log_File* file = NULL;
@@ -308,7 +306,7 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
             {
                 Mutex_Initialization(&result->file->fileMutex);
                 // Fill fields
-                SOPC_Log_AlignCategory (category , result);
+                SOPC_Log_AlignCategory(category, result);
                 result->consoleFlag = false;
                 result->level = SOPC_LOG_LEVEL_ERROR;
                 result->started = false;
@@ -340,10 +338,10 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(
 }
 
 SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
-        const char* logFileName,
-        const char* category,
-        uint32_t maxBytes,
-        uint16_t maxFiles)
+                                               const char* logFileName,
+                                               const char* category,
+                                               uint32_t maxBytes,
+                                               uint16_t maxFiles)
 {
     SOPC_Log_Instance* result = NULL;
     SOPC_Log_File* file = NULL;
@@ -411,7 +409,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
     {
         Mutex_Initialization(&result->file->fileMutex);
         // Fill fields
-        SOPC_Log_AlignCategory (category , result);
+        SOPC_Log_AlignCategory(category, result);
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->started = false;
@@ -456,7 +454,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
     if (result != NULL)
     {
         // Fill fields
-        SOPC_Log_AlignCategory (category , result);
+        SOPC_Log_AlignCategory(category, result);
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->callbackBuffer = pLogInst->callbackBuffer;
@@ -511,7 +509,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
             pLogInst->level = level;
         }
 
-        SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
+        SOPC_Log_PutLogLine(pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
@@ -539,7 +537,7 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
 
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
-        SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
+        SOPC_Log_PutLogLine(pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
@@ -583,7 +581,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             assert(res > 0);
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
-            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);
+            SOPC_Log_PutLogLine(pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);
 
             SOPC_Log_InstanceFileClose(pLogInst->file);
             pLogInst->file->pFile = SOPC_Log_InstanceFileOpen(pLogInst->file->filePath);
@@ -600,7 +598,7 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
         Mutex_Lock(&pLogInst->file->fileMutex);
         // Check file open
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
-        SOPC_Log_VPutLogLine (pLogInst, true, false, format, args);
+        SOPC_Log_VPutLogLine(pLogInst, true, false, format, args);
 
         if (NULL != pLogInst->file->pFile)
         {
@@ -631,7 +629,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         if (pLogInst->started)
         {
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
-            SOPC_Log_PutLogLine (pLogInst, true, true, "LOG STOP");
+            SOPC_Log_PutLogLine(pLogInst, true, true, "LOG STOP");
 
             pLogInst->started = false;
         }
