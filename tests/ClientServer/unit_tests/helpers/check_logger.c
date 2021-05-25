@@ -400,9 +400,15 @@ END_TEST
 static char* SOPC_Check_Logger_lastUserCategory = NULL;
 static char* SOPC_Check_Logger_lastUserLog = NULL;
 static bool SOPC_Check_Logger_userLogCalled = false;
+static FILE* SOPC_Check_Logger_userFile = NULL;
 static void SOPC_Check_Logger_UserDoLog(const char* category, const char* const line)
 {
+    if (SOPC_Check_Logger_userFile == NULL)
+    {
+        SOPC_Check_Logger_userFile = fopen("check_logger_user.log", "w");
+    }
     fprintf(stderr, "[USER log] [%s] => <<%s>>\n", category, line);
+    fprintf(SOPC_Check_Logger_userFile, "[%s] => <<%s>>\n", category, line);
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);
     SOPC_Check_Logger_lastUserCategory = SOPC_strdup(category);
@@ -423,7 +429,6 @@ START_TEST(test_logger_user)
     static const char* category2 = "CATEGORY2";
     char aChar = 'A';
     size_t index = 0;
-    SOPC_Log_Level readLevel = SOPC_LOG_LEVEL_ERROR;
     // Check user-defined logs
     SOPC_Log_Instance* userLog = NULL;
     SOPC_Log_Instance* userLog2 = NULL;
@@ -478,6 +483,7 @@ START_TEST(test_logger_user)
     userLongLine3[SOPC_Log_UserMaxLogLen + 9] = 0;
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog, SOPC_LOG_LEVEL_WARNING, userLongLine3);
+    SOPC_Free(userLongLine3);
     ck_assert(SOPC_Check_Logger_userLogCalled);
     ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog) == SOPC_Log_UserMaxLogLen, "Was expecting len=%d, but found %d",
                   SOPC_Log_UserMaxLogLen, strlen(SOPC_Check_Logger_lastUserLog));
@@ -507,8 +513,8 @@ START_TEST(test_logger_user)
     // Check unknown level (not taken into account)
     res = SOPC_Log_SetLogLevel(userLog, 4);
     ck_assert(false == res);
-    readLevel = SOPC_Log_GetLogLevel(userLog);
-    ck_assert(SOPC_LOG_LEVEL_WARNING == readLevel);
+    readLogLevel = SOPC_Log_GetLogLevel(userLog);
+    ck_assert(SOPC_LOG_LEVEL_WARNING == readLogLevel);
 
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog, 4, "will be filtered out because level is mismatching");
@@ -542,6 +548,12 @@ static void clear(void)
     SOPC_Log_Clear();
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);
+
+    if (SOPC_Check_Logger_userFile != NULL)
+    {
+        fclose(SOPC_Check_Logger_userFile);
+        SOPC_Check_Logger_userFile = NULL;
+    }
 }
 
 Suite* tests_make_suite_logger(void)
