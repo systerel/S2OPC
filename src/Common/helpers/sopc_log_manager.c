@@ -480,10 +480,8 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
     if (NULL != pLogInst && pLogInst->started)
     {
         const char* levelName = "";
-        static const size_t maxLogSize = 20;
-        char unknownNameLevel[maxLogSize];
+        char unknownNameLevel[20];
         Mutex_Lock(&pLogInst->file->fileMutex);
-        pLogInst->level = level;
         result = true;
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
@@ -502,9 +500,15 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
             levelName = "DEBUG";
             break;
         default:
-            snprintf(unknownNameLevel, maxLogSize, "?(%u)", level);
+            snprintf(unknownNameLevel, sizeof(unknownNameLevel), "?(%u)", level);
+            unknownNameLevel[sizeof(unknownNameLevel) - 1] = 0;
             levelName = unknownNameLevel;
+            result = false;
             break;
+        }
+        if (true == result)
+        {
+            pLogInst->level = level;
         }
 
         SOPC_Log_PutLogLine (pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);

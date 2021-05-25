@@ -425,6 +425,7 @@ START_TEST(test_logger_user)
     static const char * category2 = "CATEGORY2";
     char aChar = 'A';
     size_t index = 0;
+    SOPC_Log_Level readLevel = SOPC_LOG_LEVEL_ERROR;
     // Check user-defined logs
     SOPC_Log_Instance* userLog = NULL;
     SOPC_Log_Instance* userLog2 = NULL;
@@ -500,10 +501,19 @@ START_TEST(test_logger_user)
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog2, SOPC_LOG_LEVEL_WARNING, userlogLine5);
     ck_assert(SOPC_Check_Logger_userLogCalled);
-    ck_assert(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory,category2));
-    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog,userlogLine5),
-            "Was expecting LOG LINE %s, but found %s", userlogLine5, SOPC_Check_Logger_lastUserLog);
+    ck_assert(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category2));
+    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5),
+                  "Was expecting LOG LINE %s, but found %s", userlogLine5, SOPC_Check_Logger_lastUserLog);
 
+    // Check unknown level (not taken into account)
+    res = SOPC_Log_SetLogLevel(userLog, 4);
+    ck_assert(false == res);
+    readLevel = SOPC_Log_GetLogLevel(userLog);
+    ck_assert(SOPC_LOG_LEVEL_WARNING == readLevel);
+
+    SOPC_Check_Logger_userLogCalled = false;
+    SOPC_Log_Trace(userLog, 4, "will be filtered out because level is mismatching");
+    ck_assert(false == SOPC_Check_Logger_userLogCalled);
 
     // Close the second log instance and check first still works
     SOPC_Log_ClearInstance(&userLog2);
