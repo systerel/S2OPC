@@ -24,3 +24,4 @@ the legal rights to contribute.
 * Simon Chollet <simon.chollet-stg@systerel.fr>
 * Kevin P <kevin.phouratsamay-stg@systerel.fr>
 * Adrien COURNAND <adrien@systerel.fr>
+* Jeremie Chabod <jeremie.chabod@systerel.fr>
