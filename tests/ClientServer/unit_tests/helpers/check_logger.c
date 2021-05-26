@@ -108,7 +108,7 @@ START_TEST(test_logger_levels)
     SOPC_Free(filePath);
     filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00001.log", filePathPrefix);
+    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
     ck_assert(ires > 0);
     strcpy(refFilePath, "logAnother.ref");
     // Open the generated log and reference log files
@@ -224,7 +224,7 @@ START_TEST(test_logger_categories_and_files)
     // Check testLog log file content is the expected content
     filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00001.log", filePathPrefix);
+    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
     ck_assert(ires > 0);
     strcpy(refFilePath, "logTest.ref1");
 
@@ -234,7 +234,7 @@ START_TEST(test_logger_categories_and_files)
         refFilePath[11] = (char) (48 + idx); // 48 => '0'
         refLogFile = fopen(refFilePath, "r");
         ck_assert(refLogFile != NULL);
-        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx); // 48 => '0'
+        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx - 1); // 48 => '0'
         genLogFile = fopen(filePath, "r");
         ck_assert(genLogFile != NULL);
 
@@ -327,7 +327,15 @@ START_TEST(test_logger_circular)
     SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "This is a test "); // 6 messages
 
     SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR,
-                   "This is test 2!"); // 7 messages => overwrite first circularLog file
+                   "This is test 2!"); // 7 messages => 3rd file of first testLog creation !
+
+    SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "3rd file test !"); // 8 messages
+
+    SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "message in 2nd!"); // 9 messages
+
+    SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "This is a test "); // 10 messages
+    SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR,
+                   "This is test 3!"); // 11 messages => overwrite first circularLog file
 
     SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "This is the end"); // last message of circularLog
 
@@ -343,11 +351,11 @@ START_TEST(test_logger_circular)
     SOPC_Free(filePath);
     filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
     ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00001.log", filePathPrefix);
+    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
     ck_assert(ires > 0);
     strcpy(refFilePath, "logCircular.ref1");
 
-    for (idx = 1; idx <= 2; idx++)
+    for (idx = 0; idx <= 2; idx++)
     {
         // Open the generated log and reference log files
         refFilePath[15] = (char) (48 + idx); // 48 => '0'

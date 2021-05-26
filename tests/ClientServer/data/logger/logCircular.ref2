@@ -1,5 +1,5 @@
-[2018/03/05 13:57:05.733] Circular1 (Error) Again a test !!
-[2018/03/05 13:57:05.733] Circular1 (Error) 2nd file test !
-[2018/03/05 13:57:05.733] Circular1 (Error) message in 2nd!
-[2018/03/05 13:57:05.733] Circular1 (Error) This is a test 
-[2018/03/05 13:57:05.733] LOG CONTINUE IN NEXT FILE: 20180305_135705_733_CircularLogFile_00001.log
+[2021/05/26 10:21:47.430] Circular1 (Error) This is test 2!
+[2021/05/26 10:21:47.430] Circular1 (Error) 3rd file test !
+[2021/05/26 10:21:47.430] Circular1 (Error) message in 2nd!
+[2021/05/26 10:21:47.430] Circular1 (Error) This is a test 
+[2021/05/26 10:21:47.430] LOG CONTINUE IN NEXT FILE: 20210526_102147_CircularLogFile_00001.log

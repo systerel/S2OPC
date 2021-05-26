@@ -362,6 +362,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
         if (file != NULL)
         {
             file->pFile = NULL;
+            file->nbFiles = 0;
             // + 2 for the 2 '_'
             file->fileNumberPos =
                 (uint8_t)(strlen(logDirPath) + strlen(SOPC_CSTRING_UNIQUE_LOG_PREFIX) + strlen(logFileName) + 2);
@@ -370,7 +371,8 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             filePath = SOPC_Calloc(10u + file->fileNumberPos, sizeof(char));
             if (filePath != NULL)
             {
-                res = sprintf(filePath, "%s%s_%s_00001.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName);
+                res = sprintf(filePath, "%s%s_%s_%05u.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName,
+                              file->nbFiles);
                 assert(res > 0);
                 file->pFile = SOPC_Log_InstanceFileOpen(filePath);
             }
@@ -394,7 +396,6 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             file->maxBytes = maxBytes - RESERVED_BYTES_PRINT_FILE_CHANGE; // Keep characters to display file change
             file->maxFiles = maxFiles;
             file->nbBytes = 0;
-            file->nbFiles = 1;
             file->nbRefs = 1;
             result->file = file;
         }
