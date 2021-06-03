@@ -90,7 +90,7 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     uint32_t nbInputArgs = (0 < methodToCall->NoOfInputArguments) ? (uint32_t) methodToCall->NoOfInputArguments
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
-    uint32_t noOfOutput;
+    uint32_t noOfOutput = 0;
     SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
     *call_method_bs__rawStatusCode = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
                                                            &call_method_bs__execResults.variants, method_c->pParam);
