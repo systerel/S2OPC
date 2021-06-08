@@ -74,6 +74,13 @@ stages:
     - docker
     - linux
 
+.renode_job: &renode_job
+  tags:
+    - docker
+    - renode
+    - zephyr
+    - test
+
 ###
 # Generation jobs
 ###
@@ -227,9 +234,9 @@ generation:
 #    - if: "$WITH_COVERITY != null"
 
 build-publisher:
-  <<: *docker_job
+  <<: *renode_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/renode_test:latest
+  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:8e418a7823995359c96c3636f03cd4ff9611326bdbe509e2c8305ef05cabf744
   script:
     - cd /root/zephyrproject
     - west update
@@ -244,9 +251,9 @@ build-publisher:
     paths: [/root/zephyrproject/pub/zephyr]
 
 build-subscriber:
-  <<: *docker_job
+  <<: *renode_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/renode_test:latest
+  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:8e418a7823995359c96c3636f03cd4ff9611326bdbe509e2c8305ef05cabf744
   script:
     - cd /root/zephyrproject
     - west update
