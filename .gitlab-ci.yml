@@ -227,7 +227,7 @@ generation:
 #    - if: "$WITH_COVERITY != null"
 
 build-publisher:
-  <<: *renode_job
+  <<: *docker_job
   stage: build
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:8e418a7823995359c96c3636f03cd4ff9611326bdbe509e2c8305ef05cabf744
   script:
@@ -244,7 +244,7 @@ build-publisher:
     paths: [/root/zephyrproject/pub/zephyr]
 
 build-subscriber:
-  <<: *renode_job
+  <<: *docker_job
   stage: build
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:8e418a7823995359c96c3636f03cd4ff9611326bdbe509e2c8305ef05cabf744
   script:
