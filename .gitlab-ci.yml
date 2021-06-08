@@ -74,13 +74,6 @@ stages:
     - docker
     - linux
 
-.renode_job: &renode_job
-  tags:
-    - docker
-    - renode
-    - zephyr
-    - test
-
 ###
 # Generation jobs
 ###
