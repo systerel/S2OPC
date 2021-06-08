@@ -241,7 +241,7 @@ build-publisher:
     - sh pub.build.sh
   artifacts:
     name: zephyr.elf
-    path: /root/zephyrproject/pub/zephyr
+    paths: [/root/zephyrproject/pub/zephyr]
 
 build-subscriber:
   <<: *docker_job
@@ -258,7 +258,7 @@ build-subscriber:
     - sh sub.build.sh
   artifacts:
     name: zephyr.elf
-    path: /root/zephyrproject/sub/zephyr
+    paths: [/root/zephyrproject/sub/zephyr]
 
 ###
 # Test jobs
