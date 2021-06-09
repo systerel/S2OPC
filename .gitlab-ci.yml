@@ -239,6 +239,8 @@ build-publisher:
     - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> pub.build.sh
     - echo "west build -b sam_e70_xplained --build-dir pub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> pub.build.sh
     - sh pub.build.sh
+    - pwd
+    - ls -r ./pub/zephyr
   artifacts:
     name: zephyr.elf
     paths: [/root/zephyrproject/pub/zephyr/zephyr.elf]
