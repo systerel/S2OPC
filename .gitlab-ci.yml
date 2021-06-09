@@ -78,30 +78,30 @@ stages:
 # Generation jobs
 ###
 
-generation:
-  <<: *docker_job
-  stage: gen
-  image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
-  script:
-    - ./clean.sh all
-    - ./.pre-build-ext.sh
-    - ./.check_generated_code.sh
-  artifacts:
-    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-    paths:
-      - 'pre-build.log'
-    when: always
-    expire_in: '1 month'
-    when: always
-  rules:
-    - if: "$NO_GEN == null && \
-           $WINDOWS_TEST == null && \
-           $CROSS_COMPILE == null && \
-           $S2OPC_PUBSUB_ONLY == null &&\
-           $ALL_BUILDS == null && \
-           $ALL_TESTS == null && \
-           $WITH_DOC == null"
-      when: on_success
+#generation:
+#  <<: *docker_job
+#  stage: gen
+#  image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
+#  script:
+#    - ./clean.sh all
+#    - ./.pre-build-ext.sh
+#    - ./.check_generated_code.sh
+#  artifacts:
+#    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+#    paths:
+#      - 'pre-build.log'
+#    when: always
+#    expire_in: '1 month'
+#    when: always
+#  rules:
+#    - if: "$NO_GEN == null && \
+#           $WINDOWS_TEST == null && \
+#           $CROSS_COMPILE == null && \
+#           $S2OPC_PUBSUB_ONLY == null &&\
+#           $ALL_BUILDS == null && \
+#           $ALL_TESTS == null && \
+#           $WITH_DOC == null"
+#      when: on_success
 
 ###
 # Compilation jobs
