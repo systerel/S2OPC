@@ -236,8 +236,8 @@ build-publisher:
     - echo "rm -Rf pub" >> pub.build.sh 
     - echo "cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/pubconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml" >> pub.build.sh
     - echo "cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.pub.conf ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.conf" >> pub.build.sh
-    - echo >> "python3 "modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> pub.build.sh
-    - echo >> "west build -b sam_e70_xplained --build-dir pub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> pub.build.sh
+    - echo "python3 "modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> pub.build.sh
+    - echo "west build -b sam_e70_xplained --build-dir pub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> pub.build.sh
     - sh pub.build.sh
   artifacts:
     name: zephyr.elf
@@ -254,7 +254,7 @@ build-subscriber:
     - echo "cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/subconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml" >> sub.build.sh
     - echo "cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.sub.conf ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.conf" >> sub.build.sh
     - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> sub.build.sh
-    - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" sub.build.sh
+    - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
     - sh sub.build.sh
   artifacts:
     name: zephyr.elf
