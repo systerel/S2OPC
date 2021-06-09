@@ -24,7 +24,7 @@ const SOPC_Build_Info sopc_client_server_build_info = {
     .buildVersion = SOPC_TOOLKIT_VERSION,
     .buildSrcCommit = "ECLIPSE BUILD",
     .buildDockerId = "",
-    .buildBuildDate = "2019-05-29+",
+    .buildBuildDate = "2021-06-08+",
 };
 
 SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
