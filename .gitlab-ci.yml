@@ -231,9 +231,6 @@ build-publisher:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:a0287aaa9724bc6374aa4227c03fa4a884e6b98b85a897ece1e34c432f306536
   script:
-    - pwd
-    - cd ../../..
-    - pwd
     - cd /root/zephyrproject
     - west update
     - echo "rm -Rf pub" >> pub.build.sh 
@@ -246,7 +243,8 @@ build-publisher:
     - ls -r ./pub/zephyr
   artifacts:
     # Paths are relatives to the directory where the job was created
-    paths: [../../../root/zephyrproject/pub/zephyr/zephyr.elf]
+    paths: [../../../root/zephyrproject/pub/zephyr]
+    name: zephyr.elf
 
 build-subscriber:
   <<: *docker_job
@@ -262,7 +260,8 @@ build-subscriber:
     - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
     - sh sub.build.sh
   artifacts:
-    paths: [../../../root/zephyrproject/sub/zephyr/zephyr.elf]
+    paths: [../../../root/zephyrproject/sub/zephyr]
+    name: zephyr.elf
 
 ###
 # Test jobs
