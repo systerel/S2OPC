@@ -275,6 +275,16 @@ build-subscriber:
 #           $WITH_COVERITY == null && $WITH_COVERAGE == null"
 #      when: on_success
 
+test-renode:
+  <<: *docker_job
+  stage: test
+  script:
+    - pwd
+    - ls
+  needs:
+    - build-publisher
+    - build-subscriber
+
 # Test check belongs to the test part, however it does not depend on linux build.
 #test-check:
 #  <<: *test_linux
