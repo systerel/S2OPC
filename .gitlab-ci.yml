@@ -240,7 +240,7 @@ build-publisher:
     - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> pub.build.sh
     - echo "west build -b sam_e70_xplained --build-dir pub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> pub.build.sh
     - sh pub.build.sh
-    - mv pub/zephyr/zephyr.elf /pub.zephyr.elf
+    - mv pub/zephyr/zephyr.elf /builds/systerel/S2OPC/pub.zephyr.elf
   artifacts:
     # Paths are relatives to the directory where the job was created
     paths: [pub.zephyr.elf]
@@ -258,7 +258,7 @@ build-subscriber:
     - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> sub.build.sh
     - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
     - sh sub.build.sh
-    - mv sub/zephyr/zephyr.elf /build/systerel/S2OPC/sub.zephyr.elf
+    - mv sub/zephyr/zephyr.elf /builds/systerel/S2OPC/sub.zephyr.elf
   artifacts:
     paths: [sub.zephyr.elf]
 
