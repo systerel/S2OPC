@@ -241,7 +241,7 @@ build-publisher:
     - sh pub.build.sh
     - pwd
     - ls -r ./pub/zephyr
-    - if test -f /root/zephyrproject/sub/zephyr; then echo true; fi
+    - if test -f /root/zephyrproject/sub/zephyr/zephyr.elf; then echo true; fi
   artifacts:
     # Paths are relatives to the directory where the job was created
     paths: [../../../root/zephyrproject/pub/zephyr/zephyr.elf]
