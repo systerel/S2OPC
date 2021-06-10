@@ -242,7 +242,7 @@ build-publisher:
     - pwd
     - ls -r ./pub/zephyr
   artifacts:
-    paths: [/root/zephyrproject/pub/zephyr/zephyr.elf]
+    paths: [pub/zephyr/zephyr.elf]
 
 build-subscriber:
   <<: *docker_job
@@ -258,7 +258,7 @@ build-subscriber:
     - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
     - sh sub.build.sh
   artifacts:
-    paths: [/root/zephyrproject/sub/zephyr/zephyr.elf]
+    paths: [sub/zephyr/zephyr.elf]
 
 ###
 # Test jobs
