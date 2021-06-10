@@ -241,10 +241,10 @@ build-publisher:
     - sh pub.build.sh
     - pwd
     - ls -r ./pub/zephyr
+    - if test -f /root/zephyrproject/sub/zephyr; then echo true; fi
   artifacts:
     # Paths are relatives to the directory where the job was created
-    paths: [../../../root/zephyrproject/pub/zephyr]
-    name: zephyr.elf
+    paths: [../../../root/zephyrproject/pub/zephyr/zephyr.elf]
 
 build-subscriber:
   <<: *docker_job
@@ -260,8 +260,7 @@ build-subscriber:
     - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
     - sh sub.build.sh
   artifacts:
-    paths: [../../../root/zephyrproject/sub/zephyr]
-    name: zephyr.elf
+    paths: [../../../root/zephyrproject/sub/zephyr/zephyr.elf]
 
 ###
 # Test jobs
