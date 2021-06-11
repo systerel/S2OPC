@@ -600,7 +600,7 @@ SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, 
 /**
  * \brief Return a deep copy of a Byte array.
  * \param[out] dest Must be a non-NULL pointer to an uninitialized ByteString. Do not use an already allocated string
- *      or this will lead to a memory leak.
+ *                  or operation will fail.
  * \param bytes A pointer to at least \a length bytes. (Can contain zeros)
  * \param length The number of bytes to copy.
  */

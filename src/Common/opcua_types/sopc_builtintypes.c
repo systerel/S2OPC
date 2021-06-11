@@ -830,7 +830,7 @@ SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, 
 SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOPC_Byte* bytes, int32_t length)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (dest != NULL && bytes != NULL && length > 0)
+    if (dest != NULL && bytes != NULL && length > 0 && NULL == dest->Data)
     {
         dest->Length = length;
         if (length > 0 && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
