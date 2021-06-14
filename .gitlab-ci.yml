@@ -231,19 +231,13 @@ build-publisher:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:a0287aaa9724bc6374aa4227c03fa4a884e6b98b85a897ece1e34c432f306536
   script:
-    - pwd
     - cd /root/zephyrproject
-    - west update
-    - echo "rm -Rf pub" >> pub.build.sh 
-    - echo "cp ~/pubconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml" >> pub.build.sh
-    - echo "cp ~/pubprj.conf ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.conf" >> pub.build.sh
-    - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> pub.build.sh
-    - echo "west build -b sam_e70_xplained --build-dir pub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> pub.build.sh
-    - sh pub.build.sh
-    - mv pub/zephyr/zephyr.elf /builds/systerel/S2OPC/pub.zephyr.elf
+    - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
   artifacts:
     # Paths are relatives to the directory where the job was created
-    paths: [pub.zephyr.elf]
+    # The build bash script will set the output folder of the build command to be at the root of the directory
+    paths: [pub/zephyr/zephyr.elf]
+    name: pub.zephyr.elf
 
 build-subscriber:
   <<: *docker_job
@@ -251,16 +245,10 @@ build-subscriber:
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:a0287aaa9724bc6374aa4227c03fa4a884e6b98b85a897ece1e34c432f306536
   script:
     - cd /root/zephyrproject
-    - west update
-    - rm -Rf sub
-    - echo "cp ~/subconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml" >> sub.build.sh
-    - echo "cp ~/subproj.conf ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.conf" >> sub.build.sh
-    - echo "python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/src/pubsub_config_static.c" >> sub.build.sh
-    - echo "west build -b sam_e70_xplained --build-dir sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON" >> sub.build.sh
-    - sh sub.build.sh
-    - mv sub/zephyr/zephyr.elf /builds/systerel/S2OPC/sub.zephyr.elf
+    - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
   artifacts:
-    paths: [sub.zephyr.elf]
+    paths: [sub/zephyr/zephyr.elf]
+    name: sub.zephyr.elf
 
 ###
 # Test jobs
@@ -278,6 +266,7 @@ build-subscriber:
 test-renode:
   <<: *docker_job
   stage: test
+  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:a0287aaa9724bc6374aa4227c03fa4a884e6b98b85a897ece1e34c432f306536
   script:
     - pwd
     - ls
