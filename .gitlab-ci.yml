@@ -247,7 +247,7 @@ build-subscriber:
   script:
     - cd /root/zephyrproject
     - west update
-    - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
+    - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/sub.build.sh
   artifacts:
     paths: [sub/zephyr/zephyr.elf]
     name: sub.zephyr.elf

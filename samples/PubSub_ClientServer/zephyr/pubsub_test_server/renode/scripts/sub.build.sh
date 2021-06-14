@@ -8,6 +8,3 @@ python3 modules/lib/s2opc/scripts/generate-s2opc_pubsub-static-config.py modules
 
 #building
 west build -b sam_e70_xplained --build-dir /builds/systerel/S2OPC/sub ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server -- -DPUBSUB_STATIC_CONFIG=ON
-
-#moving the artifacts were Gitlab can download it
-mv pub/zephyr/zephyr.elf /builds/systerel/S2OPC/sub.zephyr.elf
