@@ -1,6 +1,3 @@
-#Getting the last version of s2opc
-west update
-
 #Preparing for building
 rm -Rf pub
 cp ~/pubconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml
