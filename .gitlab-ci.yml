@@ -270,8 +270,8 @@ test-renode:
   stage: test
   image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:b9076e6296392ae47c7648c85f9c4ce624b6d2ccefb971492e68bbe11e49ac85
   script:
-    - pwd
-    - ls
+    - cd /root/zephyrproject
+    - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/prepare.sh
   needs:
     - build-publisher
     - build-subscriber
