@@ -277,7 +277,7 @@ test-renode:
 # Moving files insode the repos directory because artifact paths must be inside the repos
     - mkdir -p /builds/systerel/S2OPC/output
     - mv /root/zephyrproject/robot_output.xml /builds/systerel/S2OPC/output/robot_output.xml
-    - mv /root/zephyrproject/log.html /builds/systerel/S2OPC/log.html
+    - mv /root/zephyrproject/log.html /builds/systerel/S2OPC/output/log.html
     - mv /root/zephyrproject/report.html /builds/systerel/S2OPC/output/report.html
   needs:
     - build-publisher
