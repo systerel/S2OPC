@@ -277,7 +277,11 @@ test-renode:
   needs:
     - build-publisher
     - build-subscriber
-
+  artifacts:
+    paths:
+      - /root/zephyrproject/robot_output.xml
+      - /root/zephyrproject/log.html
+      - /root/zephyrproject/report.html
 # Test check belongs to the test part, however it does not depend on linux build.
 #test-check:
 #  <<: *test_linux
