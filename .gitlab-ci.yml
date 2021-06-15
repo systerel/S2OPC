@@ -283,7 +283,7 @@ test-renode:
     - build-publisher
     - build-subscriber
   artifacts:
-    paths: [/builds/systerel/S2OPC/output/report.html]
+    paths: [/builds/systerel/S2OPC/output]
 
 # Test check belongs to the test part, however it does not depend on linux build.
 #test-check:
