@@ -1,0 +1,27 @@
+emulation CreateSwitch "switch0"
+
+using sysbus
+mach create "pub"
+machine LoadPlatformDescription @platforms/cpus/sam_e70.repl
+
+sysbus LoadELF @pub/zephyr/zephyr.elf
+
+cpu VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
+
+connector Connect sysbus.gem switch0
+
+showAnalyzer usart1
+
+mach create "sub"
+machine LoadPlatformDescription @platforms/cpus/sam_e70.repl
+
+sysbus LoadELF @sub/zephyr/zephyr.elf
+
+cpu VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
+
+connector Connect sysbus.gem switch0
+
+showAnalyzer usart1
+
+emulation CreateTap "tap0" "tap" true
+connector Connect host.tap switch0
