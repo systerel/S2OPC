@@ -273,7 +273,7 @@ test-renode:
     - cd /root/zephyrproject
     - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/prepare.sh
-    - renode-test ./test.robot
+    - renode-test modules/lib.s2opc/test.robot
   needs:
     - build-publisher
     - build-subscriber
