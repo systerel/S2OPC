@@ -223,24 +223,23 @@ static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
 
 static void MessageCtx_Array_Clear(void)
 {
-    /* TODO: have a local variable to store pubSchedulerCtx.messages.array */
-    if (pubSchedulerCtx.messages.array != NULL)
+    MessageCtx* arr = pubSchedulerCtx.messages.array;
+    if (NULL != arr)
     {
         /* Destroy message */
         for (uint32_t i = 0; i < pubSchedulerCtx.messages.current; i++)
         {
-            /* TODO: have a local variable to store array[i] */
-            printf("# Info: Network message #%u. destroyed \n", i);
-            SOPC_Dataset_LL_NetworkMessage_Delete(pubSchedulerCtx.messages.array[i].message);
-            pubSchedulerCtx.messages.array[i].message = NULL;
-            SOPC_PubSub_Security_Clear(pubSchedulerCtx.messages.array[i].security);
-            SOPC_Free(pubSchedulerCtx.messages.array[i].security);
-            pubSchedulerCtx.messages.array[i].security = NULL;
-            SOPC_RealTime_Delete(&pubSchedulerCtx.messages.array[i].next_timeout);
+            log_info("# Info: Network message #%u. destroyed \n", i);
+            SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].message);
+            arr[i].message = NULL;
+            SOPC_PubSub_Security_Clear(arr[i].security);
+            SOPC_Free(arr[i].security);
+            arr[i].security = NULL;
+            SOPC_RealTime_Delete(&arr[i].next_timeout);
         }
 
         /* Destroy messages array */
-        SOPC_Free(pubSchedulerCtx.messages.array);
+        SOPC_Free(arr);
     }
     pubSchedulerCtx.messages.array = NULL;
     pubSchedulerCtx.messages.current = 0;
