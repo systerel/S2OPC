@@ -85,8 +85,7 @@ struct SOPC_PubScheduler_TransportCtx
     MqttTransportHandle* mqttHandle;
 };
 
-/* TODO: this type is local to this file and its name may be shortened */
-typedef struct SOPC_PubScheduler_MessageCtx
+typedef struct MessageCtx
 {
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
     SOPC_Dataset_NetworkMessage* message;
@@ -95,30 +94,30 @@ typedef struct SOPC_PubScheduler_MessageCtx
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
     double publishingInterval;
     bool warned; /**< Have we warned about expired messages yet? */
-} SOPC_PubScheduler_MessageCtx;
+} MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
-typedef struct SOPC_PubScheduler_MessageCtx_Array
+typedef struct MessageCtx_Array
 {
-    uint64_t length;                     // Size of this array is SOPC_PubScheduler_Nb_Message
-    uint64_t current;                    // Nb of messages already initialized. Monotonic.
-    SOPC_PubScheduler_MessageCtx* array; // MessageCtx: array of context for each message
-} SOPC_PubScheduler_MessageCtx_Array;
+    uint64_t length;   // Size of this array is SOPC_PubScheduler_Nb_Message
+    uint64_t current;  // Nb of messages already initialized. Monotonic.
+    MessageCtx* array; // MessageCtx: array of context for each message
+} MessageCtx_Array;
 
 // Total of message
 static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config);
 
 // Allocation of message context array (size used returned by _Nb_Message)
-static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config);
+static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config);
 
 // Deallocation of message context array
-static void SOPC_PubScheduler_MessageCtx_Array_Clear(void);
+static void MessageCtx_Array_Clear(void);
 
 // Traverse allocated message array to initialize transport context associated to message. Increment "current" field.
-static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
+static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
 
 /* Finds the message with the smallest next_timeout */
-static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void);
+static MessageCtx* MessageCtxArray_FindMostExpired(void);
 
 static void SOPC_PubScheduler_Context_Clear(void);
 
@@ -144,7 +143,7 @@ static struct
     /* Internal context */
     // Size of transport are number of connection
     uint32_t nbConnection;
-    SOPC_PubScheduler_MessageCtx_Array messages;
+    MessageCtx_Array messages;
 
     // Global Transport context
 
@@ -180,7 +179,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
     SOPC_Thread_Join(pubSchedulerCtx.thPublisher);
 
     /* Destroy messages and messages array */
-    SOPC_PubScheduler_MessageCtx_Array_Clear();
+    MessageCtx_Array_Clear();
 
     /* Destroy transport context */
     if (pubSchedulerCtx.transport != NULL)
@@ -209,11 +208,11 @@ static void SOPC_PubScheduler_Context_Clear(void)
     // pubSchedulerCtx.sequenceNumber = 1;
 }
 
-static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
+static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
 {
     const uint64_t length = SOPC_PubScheduler_Nb_Message(config);
     pubSchedulerCtx.messages.current = 0;
-    pubSchedulerCtx.messages.array = SOPC_Calloc((size_t) length, sizeof(SOPC_PubScheduler_MessageCtx));
+    pubSchedulerCtx.messages.array = SOPC_Calloc((size_t) length, sizeof(MessageCtx));
     if (NULL == pubSchedulerCtx.messages.array)
     {
         return false;
@@ -222,7 +221,7 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Initialize(SOPC_PubSubConfigurati
     return true;
 }
 
-static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
+static void MessageCtx_Array_Clear(void)
 {
     /* TODO: have a local variable to store pubSchedulerCtx.messages.array */
     if (pubSchedulerCtx.messages.array != NULL)
@@ -248,12 +247,12 @@ static void SOPC_PubScheduler_MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.length = 0;
 }
 
-static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group)
+static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group)
 {
     assert(ctx != NULL);
     assert(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
 
-    SOPC_PubScheduler_MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
+    MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
 
     context->transport = ctx;
     context->group = group;
@@ -310,15 +309,15 @@ static bool SOPC_PubScheduler_MessageCtx_Array_Init_Next(SOPC_PubScheduler_Trans
     return result;
 }
 
-static SOPC_PubScheduler_MessageCtx* MessageCtxArray_FindMostExpired(void)
+static MessageCtx* MessageCtxArray_FindMostExpired(void)
 {
-    SOPC_PubScheduler_MessageCtx_Array* messages = &pubSchedulerCtx.messages;
-    SOPC_PubScheduler_MessageCtx* worse = NULL;
+    MessageCtx_Array* messages = &pubSchedulerCtx.messages;
+    MessageCtx* worse = NULL;
 
     assert(messages->length > 0 && messages->current == messages->length);
     for (size_t i = 0; i < messages->length; ++i)
     {
-        SOPC_PubScheduler_MessageCtx* cursor = &messages->array[i];
+        MessageCtx* cursor = &messages->array[i];
         if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
         {
             worse = cursor;
@@ -375,7 +374,7 @@ static void* thread_start_publish(void* arg)
         assert(ok && "Failed GetTime");
 
         /* If a message needs to be sent, send it */
-        SOPC_PubScheduler_MessageCtx* context = MessageCtxArray_FindMostExpired();
+        MessageCtx* context = MessageCtxArray_FindMostExpired();
         if (SOPC_RealTime_IsExpired(context->next_timeout, now))
         {
             /* Steps to send a message (TODO: externalize this):
@@ -389,7 +388,7 @@ static void* thread_start_publish(void* arg)
              *  but we use this info for all the DSMs... -> TODO investigate
              */
             SOPC_Dataset_NetworkMessage* message = context->message;
-            assert(NULL != message); /* TODO: ? */
+            assert(NULL != message);
 
             /* TODO: Problem: single DataSetWriter but maybe-multiple DataSetMessages */
             const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(context->group);
@@ -551,7 +550,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     {
         pubSchedulerCtx.config = config;
         pubSchedulerCtx.sourceConfig = sourceConfig;
-        if (!SOPC_PubScheduler_MessageCtx_Array_Initialize(config))
+        if (!MessageCtx_Array_Initialize(config))
         {
             resultSOPC = SOPC_STATUS_NOK;
         }
@@ -584,7 +583,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
 
             /* TODO: call with side effect in if statement */
-            if (!SOPC_PubScheduler_MessageCtx_Array_Init_Next(transportCtx, group))
+            if (!MessageCtx_Array_Init_Next(transportCtx, group))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }
