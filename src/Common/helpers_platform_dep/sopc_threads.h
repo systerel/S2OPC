@@ -52,7 +52,11 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
  * This function creates a thread with higher priority, which usually requires administrative privileges.
  * It should only be used to create threads that require to be woken up at regular but small intervals (< 1ms).
  *
+ * \param thread    Return parameter for the created thread
+ * \param startFct  Function called at thread start
+ * \param startArgs Arguments of the start function
  * \param priority  Priority of the thread (Linux: 1-99)
+ * \param taskName  Name of the created thread
  *
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *                  or SOPC_STATUS_NOK otherwise.
