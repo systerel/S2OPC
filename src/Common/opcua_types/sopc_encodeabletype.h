@@ -112,6 +112,28 @@ typedef struct SOPC_EncodeableType
 } SOPC_EncodeableType;
 
 /**
+ * \brief       Registers a user-defined encodeable type.
+ *              further calls to SOPC_EncodeableType_GetEncodeableType
+ *              will successfully identify the registered encodeable type
+ *
+ * \note        All registered encoders must be freed by
+ *              SOPC_EncodeableType_RemoveUserType
+ *
+ *  \param encoder        The encoder definition to register
+ *  \return               A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* encoder);
+
+/**
+ * \brief       Removes a user-defined encodeable type previously created by
+ *                      SOPC_EncodeableType_AddUserType
+ *
+ *  \param encoder        The encoder definition to register
+ *  \return               A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encoder);
+
+/**
  *  \brief          Retrieve a defined encodeable object type with the given type Id.
  *
  *  \param typeId         Type identifier for which corresponding encodeable object type must be returned

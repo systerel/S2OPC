@@ -28,16 +28,130 @@
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
 const char* nullType = "NULL";
 const char* noNameType = "NoName";
 
+SOPC_Dict* g_UserEncodeableTypes = NULL;
+
+typedef struct
+{
+    uint32_t typeId;
+} SOPC_EncodeableType_UserTypeKey;
+
+typedef struct
+{
+    SOPC_EncodeableType* encoder;
+} SOPC_EncodeableType_UserTypeValue;
+
+static uint64_t typeId_hash(const void* data)
+{
+    return ((const SOPC_EncodeableType_UserTypeKey*) data)->typeId;
+}
+
+static bool typeId_equal(const void* a, const void* b)
+{
+    return ((const SOPC_EncodeableType_UserTypeKey*) a)->typeId == ((const SOPC_EncodeableType_UserTypeKey*) b)->typeId;
+}
+
+static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, const uint32_t typeId)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    SOPC_EncodeableType_UserTypeKey* pKey = NULL;
+    SOPC_EncodeableType_UserTypeValue* pValue = NULL;
+    bool inserted = false;
+
+    pKey = (SOPC_EncodeableType_UserTypeKey*) SOPC_Malloc(sizeof(*pKey));
+    pValue = (SOPC_EncodeableType_UserTypeValue*) SOPC_Malloc(sizeof(*pValue));
+    if (pKey == NULL || pValue == NULL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    pKey->typeId = typeId;
+    pValue->encoder = pEncoder;
+    inserted = SOPC_Dict_Insert(g_UserEncodeableTypes, (void*) pKey, (void*) pValue);
+
+    if (!inserted)
+    {
+        result = SOPC_STATUS_NOK;
+    }
+
+    return result;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
+{
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+
+    if (NULL == pEncoder)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (g_UserEncodeableTypes == NULL)
+    {
+        // Create dictionnary
+        g_UserEncodeableTypes = SOPC_Dict_Create(NULL, typeId_hash, typeId_equal, SOPC_Free, SOPC_Free);
+        if (g_UserEncodeableTypes == NULL)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            SOPC_Dict_SetTombstoneKey(g_UserEncodeableTypes, (void*) 0xFFFFFFFE);
+        }
+    }
+
+    // Note : Values are released when removed from Dict objects, so that alloactions have to be done
+    // for each value inserted
+
+    // insert both TypeId and BinaryEncodingTypeId keys to allow decoder to be correctly identified
+    if (result == SOPC_STATUS_OK)
+    {
+        result = insertKeyInUserTypes(pEncoder, pEncoder->TypeId);
+    }
+    if (result == SOPC_STATUS_OK)
+    {
+        result = insertKeyInUserTypes(pEncoder, pEncoder->BinaryEncodingTypeId);
+    }
+    return result;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encoder)
+{
+    SOPC_EncodeableType_UserTypeKey key = {0};
+
+    if (encoder == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    if (g_UserEncodeableTypes == NULL)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    key.typeId = encoder->TypeId;
+    SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);
+    key.typeId = encoder->BinaryEncodingTypeId;
+    SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);
+    // Delete the dictionnay if empty
+    if (SOPC_Dict_Size(g_UserEncodeableTypes) == 0)
+    {
+        SOPC_Dict_Delete(g_UserEncodeableTypes);
+        g_UserEncodeableTypes = NULL;
+    }
+    return SOPC_STATUS_OK;
+}
+
 SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
 {
+    SOPC_EncodeableType_UserTypeValue* pValue = NULL;
     SOPC_EncodeableType* current = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
+    bool found = false;
+    void* userCoder = NULL;
     current = SOPC_KnownEncodeableTypes[idx];
     while (current != NULL && NULL == result)
     {
@@ -53,6 +167,19 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
         else
         {
             current = NULL;
+        }
+    }
+    if (result == NULL && g_UserEncodeableTypes != NULL)
+    {
+        // search in user defined encodeable types
+        SOPC_EncodeableType_UserTypeKey key = {.typeId = typeId};
+        userCoder = SOPC_Dict_Get(g_UserEncodeableTypes, (void*) &key, &found);
+        if (found && userCoder != NULL)
+        {
+            pValue = (SOPC_EncodeableType_UserTypeValue*) userCoder;
+            assert(pValue != NULL);
+            result = pValue->encoder;
+            assert(result != NULL);
         }
     }
     return result;
