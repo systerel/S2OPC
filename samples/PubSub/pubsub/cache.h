@@ -20,6 +20,9 @@
 /** \file Provides a cache for data values.
  *
  * GetSource and SetTarget callback will get and set their values in the cache.
+ *
+ * For now, this cache uses a single Mutex to assert that only one thread writes or read.
+ * This could be enhanced with the use of a read/write double buffer for instance.
  */
 
 #ifndef CACHE_H_

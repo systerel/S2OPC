@@ -135,8 +135,6 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-/* TODO: generalize the precise time interface */
-
 SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
 {
     SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
@@ -185,7 +183,7 @@ void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
 {
     assert(NULL != t);
 
-    /* TODO: tv_sec is a time_t, how do we assert the cast?? */
+    /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
     t->tv_sec += (time_t)(duration_ms / 1000);
     t->tv_nsec += (long) (fmod(duration_ms, 1000.) * 1000000); /* This may add a negative or positive number */
 

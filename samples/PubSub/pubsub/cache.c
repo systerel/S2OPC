@@ -118,7 +118,6 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type)
 
 bool Cache_Initialize(SOPC_PubSubConfiguration* config)
 {
-    /* TODO: lock before write or double buffer */
     if (NULL == config)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cache initialization with NULL configuration");
@@ -275,8 +274,12 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
         OpcUa_ReadValueId* rv = &nodesToRead[i];
         SOPC_DataValue* dv = &dvs[i];
 
+        /* IndexRange and DataEncoding are not supported in this cache and should be empty */
+        assert(rv->IndexRange.Length <= 0 && "IndexRange not supported");
+        assert(rv->DataEncoding.NamespaceIndex == 0 && rv->DataEncoding.Name.Length <= 0 &&
+               "DataEncoding not supported");
+
         /* As ownership is given to the caller, we have to copy all values */
-        /* TODO: IndexRange and DataEncoding */
         const SOPC_DataValue* src = SOPC_Dict_Get(g_cache, &rv->NodeId, NULL);
         status = SOPC_DataValue_Copy(dv, src);
 
@@ -309,11 +312,14 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     Cache_Lock();
     for (int32_t i = 0; ok && i < nbValues; ++i)
     {
-        /* TODO: IndexRange */
         /* Note: the cache frees both the key and the value, so we have to give it new ones */
         OpcUa_WriteValue* wv = &nodesToWrite[i];
         SOPC_NodeId* nid = &wv->NodeId;
         SOPC_DataValue* dv = &wv->Value;
+
+        /* IndexRange is not supported in this cache and should be empty */
+        assert(wv->IndexRange.Length <= 0 && "IndexRange not supported");
+
         /* Divert the NodeId and the DataValue (avoid a complete copy) from the OpcUa_WriteValue and give them to our
          * dict */
         SOPC_NodeId* key = SOPC_Malloc(sizeof(SOPC_NodeId));
@@ -323,7 +329,6 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
         {
             *key = *nid;
             SOPC_NodeId_Initialize(nid);
-            assert(NULL != item);
             *item = *dv;
             SOPC_DataValue_Initialize(dv);
 

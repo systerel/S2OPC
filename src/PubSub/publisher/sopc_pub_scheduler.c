@@ -89,7 +89,7 @@ struct SOPC_PubScheduler_TransportCtx
 typedef struct SOPC_PubScheduler_MessageCtx
 {
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
-    SOPC_Dataset_NetworkMessage* message; /* TODO: */
+    SOPC_Dataset_NetworkMessage* message;
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
@@ -190,8 +190,8 @@ static void SOPC_PubScheduler_Context_Clear(void)
             if (pubSchedulerCtx.transport[i].fctClear != NULL)
             {
                 pubSchedulerCtx.transport[i].fctClear(&pubSchedulerCtx.transport[i]);
-                printf("# Info: transport context destroyed for connection #%u (publisher). \n",
-                       pubSchedulerCtx.nbConnection);
+                log_info("# Info: transport context destroyed for connection #%u (publisher). \n",
+                         pubSchedulerCtx.nbConnection);
             }
         }
 
@@ -343,10 +343,11 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 static void display_sched_attr(int policy, struct sched_param* param);
 static void display_sched_attr(int policy, struct sched_param* param)
 {
-    printf("# Thread current sched policy=%s with priority=%d\n",
-           (policy == SCHED_FIFO) ? "SCHED_FIFO"
-                                  : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
-           param->sched_priority);
+    log_info("# Thread current sched policy=%s with priority=%d\n",
+             (policy == SCHED_FIFO)
+                 ? "SCHED_FIFO"
+                 : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
+             param->sched_priority);
 }
 
 static void* thread_start_publish(void* arg)
@@ -728,7 +729,7 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     if (SOPC_STATUS_OK != result)
     {
         // TODO: Some verifications should maybe added...
-        printf("# Error on SOPC_UDP_Socket_SendTo %s ...\n", strerror(errno));
+        log_error("# Error on SOPC_UDP_Socket_SendTo %s ...\n", strerror(errno));
     }
 }
 

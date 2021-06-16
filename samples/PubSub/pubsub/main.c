@@ -26,7 +26,7 @@
 #include <string.h> /* strerror */
 #include <time.h>   /* Timestamped csv */
 
-#include "p_time.h"
+#include "p_time.h" /* SOPC_RealTime API, for now linux only */
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
 #include "sopc_mem_alloc.h"
@@ -39,8 +39,6 @@
 
 #include "cache.h"
 #include "config.h"
-
-#include <time.h> /* For now, requires struct timespec */
 
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -219,7 +217,7 @@ int main(int argc, char* const argv[])
         }
         else
         {
-            /* TODO: state changed callback */
+            /* TODO: handle state changes by installing a state changed callback */
             bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL);
             if (res)
             {
