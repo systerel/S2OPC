@@ -136,6 +136,19 @@
       <uax:DateTime>2021-03-16T16:57:42.12345678Z</uax:DateTime>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:Guid" DataType="Guid" NodeId="ns=1;s=GuidVar" ParentNodeId="ns=1;i=1000">
+    <DisplayName>Guid_1dn</DisplayName>
+    <Description>Guid_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Guid>
+        <uax:String>1c63eeb9-2f4c-4548-bcbd-f6596243c070</uax:String>
+      </uax:Guid>
+    </Value>
+  </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:XmlElement" DataType="XmlElement" NodeId="ns=1;i=1006" ParentNodeId="ns=1;i=1000">
     <DisplayName>XmlElement_1dn</DisplayName>
     <Description>XmlElement_1d</Description>
