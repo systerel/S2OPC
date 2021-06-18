@@ -110,12 +110,12 @@ generation:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:ec567d159562f2559273547909da9414105ff38c3a5997d699a997eae486807a # digest of build:1.25
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:fe5542520a5ea7b975f48da16d65c6dd641f77826784c862d730a2b75c4b8ea8 # digest of build:1.26
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:15a79c5ed94c53698f0c24fcf7bf49a3c37947651f37ce68bc093b56eb1150d5'
+    DOCKER_IMAGE: 'sha256:0bbab53a4c13efb85aaca8fbfddc60e60acb7a776b3491ae75715c21d88b3942'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -174,7 +174,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:c25d3eee22da8cdda2866b1d4f917027d33c5065dc497c87b09fe4e78e8505dd # digest of mingw_build:1.11
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:b9d5619a72109f24f8fe4c7cce03216153542cd20734a9eaae01104ca5166b8a # digest of mingw_build:1.12
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -182,7 +182,7 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:2a9fa163b8d3b8f35717bbd07faaeebf6715704db4d1c8b0ba51d111121ad93e'
+    DOCKER_IMAGE: 'sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
@@ -215,13 +215,13 @@ build-win32:
 build-rpi:
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:dd90af3131fec7e2dc298bcbe34a912b6bba38b435ae3e92f811e0602e6693fa # digest of rpi-build:1.3
+  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:977b5d7083659af98a6279ee12d7d3ca1c94195b8b954c72c605a22386446a7c # digest of rpi-build:1.4
   script:
     - *build_command_line
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_IMAGE: 'sha256:883187f5be25107f5743b8b4c6736ef60f3905e33c2f98aee9d776b4e745a2ef'
+    DOCKER_IMAGE: 'sha256:1d0eb4c4f99214faf186b4af677f138ef6e01945053e1b7533c99edfdf469f0f'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
   artifacts:
@@ -265,9 +265,11 @@ build-linux64-coverity:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:dbf6a13b489deabbebeafe9b72c633ca0787c47e27e83cb765662f5769ac5726 # digest of check:1.13
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:6805805e14420a9b635c2305526a4535f9edd191ff22801fc84cca94410b1a03 # digest of check:1.14
   script:
     - ./.check-code.sh
+  variables:
+      DOCKER_IMAGE: 'sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
