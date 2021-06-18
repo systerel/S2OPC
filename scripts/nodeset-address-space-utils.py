@@ -31,6 +31,8 @@ import xml.etree.ElementTree as ET
 
 INDENT_SPACES = '  '
 
+verbose = False
+
 def indent(level):
     return '\n' + INDENT_SPACES*level
 
@@ -54,7 +56,8 @@ def _remove_nids(tree, nids):
     for nid in nids:
         node = root.find('*[@NodeId="{}"]'.format(nid))
         if node is not None:
-            print('RemoveNode: {}'.format(nid), file=sys.stderr)
+            if verbose:
+                print('RemoveNode: {}'.format(nid), file=sys.stderr)
             root.remove(node)
 
 def _remove_refs_to_nids(tree, nids, namespaces):
@@ -65,7 +68,8 @@ def _remove_refs_to_nids(tree, nids, namespaces):
         refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             if ref.text.strip() in nids:  # The destination node of this reference
-                print('RemoveRef: {} -> {}'.format(nida, ref.text.strip()), file=sys.stderr)
+                if verbose:
+                    print('RemoveRef: {} -> {}'.format(nida, ref.text.strip()), file=sys.stderr)
                 refs.remove(ref)
 
 def _add_ref(node, ref_type, tgt, is_forward=True):
@@ -146,7 +150,8 @@ def merge(tree, new, namespaces):
     for node in new.iterfind('*[@NodeId]'):
         nid = node.get('NodeId')
         if nid in new_nids:
-            print('Merge: add node {}'.format(nid), file=sys.stderr)
+            if verbose:
+                print('Merge: add node {}'.format(nid), file=sys.stderr)
             tree_root.append(new_nodes[nid])
     # References of common nodes are merged
     for nid in set(tree_nodes)&set(new_nodes):
@@ -261,7 +266,8 @@ def sanitize(tree, namespaces):
         if a not in nodes:
             print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
-            print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
+            if verbose:
+                print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
             node = nodes[a]
             _add_ref(node, t, b, is_forward=True)
 
@@ -273,7 +279,8 @@ def sanitize(tree, namespaces):
         if b not in nodes:
             print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
-            print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
+            if verbose:
+                print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
             node = nodes[b]
             _add_ref(node, t, a, is_forward=False)
 
@@ -331,9 +338,14 @@ if __name__ == '__main__':
             generate reciprocal references between nodes when there is a reference in only one direction,
             and remove attribute ParentNodeId when erroneous.
                              ''')
+    parser.add_argument('--verbose', '-v', action='store_true', dest='verbose',
+                        help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
     args = parser.parse_args()
     # Check that '-' is provided only once in input address spaces
     assert args.fns_adds.count('-') < 2, 'You can only take a single XML from the standard input'
+
+    if args.verbose:
+        verbose = True
 
     # Load and merge all address spaces
     tree = None
