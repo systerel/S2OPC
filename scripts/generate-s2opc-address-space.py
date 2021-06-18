@@ -112,7 +112,7 @@ VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT = 18
 VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE = 19
 VALUE_TYPE_LOCALIZEDTEXT = 19
 
-UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_GUID, VALUE_TYPE_DATETIME}
+UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_DATETIME}
 
 C_IDENTIFIER_TYPES = [
     'SOPC_IdentifierType_Numeric',
@@ -437,12 +437,15 @@ def parse_boolean_value(text):
     return text.strip() == 'true'
 
 
-def parse_guid(text):
+def parse_guid(guid):
     try:
-        return uuid.UUID(text)
+        string = guid.find(UA_VALUE_TYPE_STRING)
+        if string is None:
+            return uuid.UUID("")
+        else:
+            return uuid.UUID(string.text)
     except ValueError:
-        raise ParseError('Invalid GUID: %s' % text)
-
+        raise ParseError('Invalid GUID: %s' % guid)
 
 def boolean_to_string(val):
     return 'true' if val else 'false'
@@ -706,7 +709,6 @@ def generate_guid(data):
 
     return '{0x%02x, 0x%02x, 0x%02x, {0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x}}' % tuple(members)
 
-
 def generate_byte_string(data):
     return generate_string(data)
 
@@ -715,6 +717,8 @@ def generate_qname(qname):
     assert isinstance(qname, QName)
     return '{%d, %s}' % (qname.ns or 0, generate_string(qname.name))
 
+def generate_guid_pointer(val):
+    return '(SOPC_Guid[]) {%s}' % generate_guid(val)
 
 def generate_nodeid(nodeid):
     id_type = C_IDENTIFIER_TYPES[nodeid.ty]
@@ -919,6 +923,10 @@ def generate_value_variant(val):
         return generate_variant('SOPC_LocalizedText_Id', 'SOPC_LocalizedText', 'LocalizedText',
                                 val.val, val.is_array,
                                 generate_localized_text if val.is_array else generate_localized_text_pointer)
+    elif val.ty == VALUE_TYPE_GUID:
+        return generate_variant('SOPC_Guid_Id', 'SOPC_Guid', 'Guid',
+                                val.val, val.is_array,
+                                generate_guid if val.is_array else generate_guid_pointer)
     elif val.ty == VALUE_TYPE_NODEID:
         return generate_variant('SOPC_NodeId_Id', 'SOPC_NodeId', 'NodeId',
                                 val.val, val.is_array,

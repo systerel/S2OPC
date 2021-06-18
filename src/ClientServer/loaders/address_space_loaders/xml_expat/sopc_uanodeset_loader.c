@@ -195,6 +195,13 @@ static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
 
 static parse_complex_value_tag_t complex_value_node_id_tags[] = COMPLEX_VALUE_NODE_ID_TAGS;
 
+#define COMPLEX_VALUE_GUID_TAGS                                                 \
+    {                                                                           \
+        {"String", false, NULL, false, NULL, NULL, NULL}, END_COMPLEX_VALUE_TAG \
+    }
+
+static parse_complex_value_tag_t complex_value_guid_tags[] = COMPLEX_VALUE_GUID_TAGS;
+
 #define COMPLEX_VALUE_LOCALIZED_TEXT_TAGS                                                                 \
     {                                                                                                     \
         {"Locale", false, NULL, false, NULL, NULL, NULL}, {"Text", false, NULL, false, NULL, NULL, NULL}, \
@@ -274,7 +281,7 @@ static bool type_id_from_name(const char* name,
         {"Double", SOPC_Double_Id, true, NULL},
         {"String", SOPC_String_Id, true, NULL},
         {"DateTime", SOPC_DateTime_Id, true, NULL},
-        {"Guid", SOPC_Guid_Id, false, NULL},
+        {"Guid", SOPC_Guid_Id, false, complex_value_guid_tags},
         {"ByteString", SOPC_ByteString_Id, true, NULL},
         {"XmlElement", SOPC_XmlElement_Id, true, NULL}, // Shall be XML to be interpreted as string
         {"NodeId", SOPC_NodeId_Id, false, complex_value_node_id_tags},
@@ -1403,6 +1410,41 @@ static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_t
     return true;
 }
 
+static bool set_variant_value_guid(SOPC_Guid** guid, parse_complex_value_tag_array_t tagsContext)
+{
+    assert(NULL != guid);
+
+    parse_complex_value_tag_t* currentTagCtx = NULL;
+    bool id_tag_ok = complex_value_tag_from_tag_name_no_namespace("String", tagsContext, &currentTagCtx);
+    assert(id_tag_ok);
+
+    const char* stringGuid = currentTagCtx->single_value;
+    if (!currentTagCtx->set)
+    {
+        // Null string
+        stringGuid = "";
+    }
+
+    size_t len = strlen(stringGuid);
+    assert(len <= INT32_MAX);
+
+    *guid = SOPC_Malloc(sizeof(SOPC_Guid));
+    if (NULL == *guid)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Guid_FromCString(*guid, stringGuid, len);
+    if (SOPC_STATUS_OK != status)
+    {
+        LOGF("Invalid Guid: '%s'", stringGuid);
+        return false;
+    }
+
+    return true;
+}
+
 static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
                                               parse_complex_value_tag_array_t bodyChildsTagContext)
 {
@@ -1581,10 +1623,11 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
         var->BuiltInTypeId = SOPC_Boolean_Id;
         var->Value.Boolean = (strcmp(val, "true") == 0);
         return true;
-        /*
-    case: all signed/unsigned integer cases managed here:
-        */
+        /* case SOPC_SByte_Id: */
+        /* case SOPC_Int*_Id: */
         FOREACH_SIGNED_VALUE_TYPE(SET_SIGNED_INT_ELEMENT_VALUE_CASE)
+        /* case SOPC_Byte_Id: */
+        /* case SOPC_UInt*_Id: */
         FOREACH_UNSIGNED_VALUE_TYPE(SET_UNSIGNED_INT_ELEMENT_VALUE_CASE)
     case SOPC_Float_Id:
         if (SOPC_strtodouble(val, strlen(val), 32, &var->Value.Floatv))
@@ -1651,11 +1694,11 @@ static bool set_variant_value_complex(SOPC_Variant* var,
     case SOPC_XmlElement_Id: // TODO: not a simple type but not a complex one neither
         assert(false && "Unexpected simple type");
         break;
-    case SOPC_Guid_Id:
-        assert(false && "Guid not managed yet");
-        break;
     case SOPC_QualifiedName_Id:
         assert(false && "QualifiedName not managed yet");
+        break;
+    case SOPC_Guid_Id:
+        ok = set_variant_value_guid(&var->Value.Guid, tagsContext);
         break;
     case SOPC_LocalizedText_Id:
         ok = set_variant_value_localized_text(&var->Value.LocalizedText, tagsContext);
