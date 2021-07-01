@@ -1606,9 +1606,12 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
             {
                 Helpers_Log(SOPC_LOG_LEVEL_INFO, "refNodeId NULL");
             }
-            status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
-            SOPC_NodeId_Clear(refNodeId);
-            SOPC_Free(refNodeId);
+            else
+            {
+                status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
+                SOPC_NodeId_Clear(refNodeId);
+                SOPC_Free(refNodeId);
+            }
         }
         if (SOPC_STATUS_OK == status)
         {
