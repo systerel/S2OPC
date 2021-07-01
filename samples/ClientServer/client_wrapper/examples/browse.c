@@ -94,19 +94,26 @@ int main(int argc, char* const argv[])
         /* Browse specified node */
         res = SOPC_ClientHelper_Browse(connectionId, &browseRequest, 1, &browseResult);
 
-        printf("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
-        for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
+        if (0 == res)
         {
-            printf("Item #%d\n", i);
-            printf("- nodeId: %s\n", browseResult.references[i].nodeId);
-            printf("- displayName: %s\n", browseResult.references[i].displayName);
+            printf("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
+            for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
+            {
+                printf("Item #%d\n", i);
+                printf("- nodeId: %s\n", browseResult.references[i].nodeId);
+                printf("- displayName: %s\n", browseResult.references[i].displayName);
 
-            free(browseResult.references[i].nodeId);
-            free(browseResult.references[i].displayName);
-            free(browseResult.references[i].browseName);
-            free(browseResult.references[i].referenceTypeId);
+                free(browseResult.references[i].nodeId);
+                free(browseResult.references[i].displayName);
+                free(browseResult.references[i].browseName);
+                free(browseResult.references[i].referenceTypeId);
+            }
+            free(browseResult.references);
         }
-        free(browseResult.references);
+        else
+        {
+            printf("Call to Browse service through client wrapper failed with return code: %d\n", res);
+        }
     }
 
     if (connectionId > 0)
