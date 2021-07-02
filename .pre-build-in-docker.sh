@@ -26,29 +26,29 @@
 set -e
 
 PREBUILD=pre-build
-TMP_TOOLING_DIR=$(pwd)/$PREBUILD/tooling
+TMP_TOOLING_DIR="$(pwd)/$PREBUILD/tooling"
 
 DOCKER_IMAGE=sha256:c9763068f1e990534d779f2c327296d33647404b5606cccf1fe63c3b3a18ea17 # gen:1.3
 
 # Create dir to store tooling directory for generation
 \rm -rf $PREBUILD
-mkdir -p $TMP_TOOLING_DIR > /dev/null
-cd $TMP_TOOLING_DIR > /dev/null
+mkdir -p "$TMP_TOOLING_DIR" > /dev/null
+cd "$TMP_TOOLING_DIR" > /dev/null
 
 # Copy tooling repository with git archive from server repository or local one
-if [[ -z $TOOLING_DIR ]]; then
+if [[ -z "$TOOLING_DIR" ]]; then
     echo "Environment variable TOOLING_DIR not set => copy of tooling.git through SSH"
     ssh pcb git --git-dir /git/c838/tooling.git archive master bin | tar x
 else
     echo "Environment variable TOOLING_DIR set to '$TOOLING_DIR' => copy of repository"
-    git --git-dir $TOOLING_DIR/.git archive master bin | tar x
+    git --git-dir "$TOOLING_DIR"/.git archive master bin | tar x
 fi
 cd - > /dev/null
 
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
+    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
 else
-    sudo "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
+    sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
 fi
 

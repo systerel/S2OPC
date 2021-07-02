@@ -26,7 +26,7 @@ set -e
 DOCKER_IMAGE=sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff # check 1.14
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE "$@"
+    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "$@"
 else
-    sudo "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE "$@"
+    sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "$@"
 fi

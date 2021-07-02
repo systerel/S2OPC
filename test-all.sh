@@ -20,7 +20,7 @@
 
 #  Check toolkit tests binaries are present and run them
 
-MY_DIR=$(cd $(dirname $0) && pwd)
+MY_DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
 PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/validation_tests/pys2opc"

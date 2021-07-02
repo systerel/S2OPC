@@ -19,7 +19,7 @@
 
 set -e
 
-SRC_DIR=$(cd $(dirname $0) && pwd)
+SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # See scan-build --help for a list of all checkers
 # This list was originally built for Clang 6.0.0
