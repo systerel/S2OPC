@@ -17,16 +17,15 @@
 # specific language governing permissions and limitations
 # under the License.
 
-
-#
-#  Run the script given parameters in the docker
-#
 set -e
 
-DOCKER_IMAGE=sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff # check 1.14
+IMAGE=$1
+shift
 
-if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE "$@"
-else
-    sudo "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE "$@"
-fi
+# Keep the same user id as the one running this script through sudo
+uid=$(id -u $SUDO_USER)
+
+# Mount point is the path of this script
+mount_point=$PWD/"`dirname $0`"
+
+docker run --rm --user $uid --volume=$mount_point:$mount_point --workdir $PWD --entrypoint /bin/bash $IMAGE -c "$*" 

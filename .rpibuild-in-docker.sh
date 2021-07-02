@@ -25,7 +25,7 @@ set -e
 DOCKER_IMAGE=sha256:1d0eb4c4f99214faf186b4af677f138ef6e01945053e1b7533c99edfdf469f0f # rpi_build:1.4
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_IMAGE=$DOCKER_IMAGE "$@"
+    "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 else
-    sudo /etc/scripts/run-in-docker $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_IMAGE=$DOCKER_IMAGE "$@"
+    sudo "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 fi
