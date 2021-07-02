@@ -25,7 +25,7 @@ set -e
 DOCKER_IMAGE=sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5 # mingw_build:1.12
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
+    "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 else
-    sudo "`dirname $0`/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
+    sudo "$(dirname $0)/".run-in-docker.sh $DOCKER_IMAGE CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE=$DOCKER_IMAGE "$@"
 fi
