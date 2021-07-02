@@ -210,7 +210,7 @@ echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Remove delivery script, docker scripts, .gitignore file and commit"
-git rm -rf .gitignore .*.yml *.yml .*.sh &> /dev/null || exit 1
+git rm -rf .gitignore .*.yml *.yml &> /dev/null || exit 1
 git commit -S -m "Remove delivery script, docker scripts and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
