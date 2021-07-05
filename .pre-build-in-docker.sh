@@ -47,8 +47,8 @@ cd - > /dev/null
 
 
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
+    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
 else
-    sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $@"
+    sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
 fi
 

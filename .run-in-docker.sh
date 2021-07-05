@@ -28,4 +28,4 @@ uid=$(id -u $SUDO_USER)
 # Mount point is the path of this script
 mount_point="$PWD/$(dirname "$0")"
 
-docker run --rm --user $uid --volume=$mount_point:$mount_point --workdir "$PWD" --entrypoint /bin/bash $IMAGE -c "$*" 
+docker run --rm --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
