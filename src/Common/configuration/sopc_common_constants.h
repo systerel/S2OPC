@@ -133,6 +133,11 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY true
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY */
 
+/** \brief Maximum length of a User-defined log line. */
+#ifndef SOPC_LOG_MAX_USER_LINE_LENGTH
+#define SOPC_LOG_MAX_USER_LINE_LENGTH 512
+#endif /* SOPC_LOG_MAX_USER_LINE_LENGTH */
+
 /* @brief Indicates whether the host has a file system */
 #ifndef SOPC_HAS_FILESYSTEM
 #define SOPC_HAS_FILESYSTEM true

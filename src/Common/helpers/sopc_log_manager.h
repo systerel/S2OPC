@@ -41,11 +41,6 @@ typedef enum
 } SOPC_Log_Level;
 
 /**
- * \brief Maximum length of a User-defined log line.
- * */
-#define SOPC_Log_UserMaxLogLen (0x200u)
-
-/**
  * \brief Log event callback.
  * \param[in] category  String pointer containing the category. Can be NULL, when
  *                      not related to any category,

@@ -30,6 +30,7 @@
 
 #include "check_helpers.h"
 
+#include "sopc_common_constants.h"
 #include "sopc_helper_string.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
@@ -478,8 +479,8 @@ START_TEST(test_logger_user)
     ck_assert(!SOPC_Check_Logger_userLogCalled);
 
     // Check line limitation
-    userLongLine3 = (char*) SOPC_Malloc(SOPC_Log_UserMaxLogLen + 10);
-    for (index = 0; index < SOPC_Log_UserMaxLogLen + 9; index++)
+    userLongLine3 = (char*) SOPC_Malloc(SOPC_LOG_MAX_USER_LINE_LENGTH + 10);
+    for (index = 0; index < SOPC_LOG_MAX_USER_LINE_LENGTH + 9; index++)
     {
         userLongLine3[index] = aChar;
         aChar++;
@@ -488,13 +489,14 @@ START_TEST(test_logger_user)
             aChar = ' ';
         }
     }
-    userLongLine3[SOPC_Log_UserMaxLogLen + 9] = 0;
+    userLongLine3[SOPC_LOG_MAX_USER_LINE_LENGTH + 9] = 0;
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog, SOPC_LOG_LEVEL_WARNING, userLongLine3);
     SOPC_Free(userLongLine3);
     ck_assert(SOPC_Check_Logger_userLogCalled);
-    ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog) == SOPC_Log_UserMaxLogLen, "Was expecting len=%d, but found %d",
-                  SOPC_Log_UserMaxLogLen, strlen(SOPC_Check_Logger_lastUserLog));
+    ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog) == SOPC_LOG_MAX_USER_LINE_LENGTH,
+                  "Was expecting len=%z, but found %z", SOPC_LOG_MAX_USER_LINE_LENGTH,
+                  strlen(SOPC_Check_Logger_lastUserLog));
 
     // Check sections
     userLog2 = SOPC_Log_CreateInstanceAssociation(userLog, category2);

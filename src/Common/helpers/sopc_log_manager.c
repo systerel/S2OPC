@@ -140,9 +140,9 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
         }
         if (NULL != pLogInst->logCallback && NULL != logBuffer)
         {
-            // reminder : logBuffer size is (SOPC_Log_UserMaxLogLen + 1)
-            vsnprintf(logBuffer, SOPC_Log_UserMaxLogLen + 1, format, args);
-            logBuffer[SOPC_Log_UserMaxLogLen] = 0;
+            // reminder : logBuffer size is (SOPC_LOG_MAX_USER_LINE_LENGTH + 1)
+            vsnprintf(logBuffer, SOPC_LOG_MAX_USER_LINE_LENGTH + 1, format, args);
+            logBuffer[SOPC_LOG_MAX_USER_LINE_LENGTH] = 0;
             pLogInst->logCallback(pLogInst->category, logBuffer);
         }
         /* Note : "else" increases robustness as va_list "args" cannot be passed twice */
@@ -284,24 +284,23 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_Us
     if (result != NULL)
     {
         file = SOPC_Malloc(sizeof(SOPC_Log_File));
-        // Define file path and try to open it
         if (file != NULL)
         {
+            // As the Log instance is a user-defined callback, The FILE structure is not used.
+            // Set pFile to NULL so that log implementation only uses callbackBuffer field
+            // Only the fields nbFiles and nbRefs are significant, because they allow
+            // detection of instance closure.
             file->pFile = NULL;
-            // + 2 for the 2 '_'
             file->fileNumberPos = 0;
-            // Attempt to create first log file:
-            // 5 for file number + 4 for file extension +1 for '\0' terminating character => 10
-            file->pFile = NULL;
             file->filePath = NULL;
-            file->maxBytes = 0; // Keep characters to display file change
+            file->maxBytes = 0;
             file->maxFiles = 0;
             file->nbBytes = 0;
             file->nbFiles = 1;
             file->nbRefs = 1;
             result->file = file;
             result->logCallback = logCallback;
-            result->callbackBuffer = SOPC_Malloc(SOPC_Log_UserMaxLogLen + 1); // + NULL
+            result->callbackBuffer = SOPC_Malloc(SOPC_LOG_MAX_USER_LINE_LENGTH + 1); // + NULL
             if (NULL != result->callbackBuffer)
             {
                 Mutex_Initialization(&result->file->fileMutex);
@@ -414,6 +413,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
         result->consoleFlag = false;
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->started = false;
+        // Ensure logCallback and callbackBuffer are initialized to 0 in case of FILE log.
         result->logCallback = NULL;
         result->callbackBuffer = 0;
         // Starts the log instance
