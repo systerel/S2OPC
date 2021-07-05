@@ -28,6 +28,7 @@ git clean -fd
 
 # run build and tests
 export SOPC_DOCKER_NEEDS_SUDO=1
+export LOCAL_JENKINS_JOB=1
 # Generate C code from B model and for tests (@ space)
 ./clean.sh all && ./.pre-build-in-docker.sh ./pre-build.sh
 # check that generated C code is up to date in configuration management

@@ -49,6 +49,10 @@ cd - > /dev/null
 if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
     "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
 else
-    sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
+    if [[ -z $LOCAL_JENKINS_JOB ]]; then
+        sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
+    else
+        sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "TOOLING_DIR=$TMP_TOOLING_DIR $*"
+    fi
 fi
 
