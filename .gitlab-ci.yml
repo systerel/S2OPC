@@ -229,7 +229,7 @@ stages:
 build-publisher:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:16b2d1ebc86bb2bd66b014036565c605fc486782f36c6199ac2639bfc01a101f
+  image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
   script:
     - cd /root/zephyrproject
@@ -244,7 +244,7 @@ build-publisher:
 build-subscriber:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:16b2d1ebc86bb2bd66b014036565c605fc486782f36c6199ac2639bfc01a101f
+  image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
     - west update
@@ -268,7 +268,7 @@ build-subscriber:
 test-renode:
   <<: *docker_job
   stage: test
-  image: registry.gitlab.com/systerel/s2opc/test_renode@sha256:16b2d1ebc86bb2bd66b014036565c605fc486782f36c6199ac2639bfc01a101f
+  image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
     - west update
