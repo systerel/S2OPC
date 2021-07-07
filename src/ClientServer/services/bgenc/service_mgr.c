@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 13/03/2020 10:56:00
+ Date                 : 07/07/2021 14:14:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -261,6 +261,11 @@ void service_mgr__treat_session_local_service_req(
       case constants__e_msg_view_browse_req:
          service_set_view__treat_browse_request(constants__c_session_indet,
             service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+         service_set_view__treat_translate_browse_paths_request(service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
          break;

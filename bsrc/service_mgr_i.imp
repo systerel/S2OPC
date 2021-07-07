@@ -514,6 +514,8 @@ OPERATIONS
                 dealloc_write_request_responses
             OR e_msg_view_browse_req THEN
                 StatusCode_service <-- treat_browse_request(c_session_indet, req_msg, resp_msg)
+            OR e_msg_view_translate_browse_paths_to_node_ids_req THEN
+                StatusCode_service <-- treat_translate_browse_paths_request(req_msg, resp_msg)
             ELSE
                 /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
