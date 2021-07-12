@@ -68,6 +68,8 @@ file(GLOB_RECURSE S2OPC_COMMON_SRCS
     "helpers/*.c"
     "crypto/*.c"
     "opcua_types/*.c"
+    "safety_stack/*.c"
+    "safety_stack/pubsub_mapper/*.c"
 )
 
 set(S2OPC_COMMON_PUBLIC_INCLUDES
@@ -75,6 +77,9 @@ set(S2OPC_COMMON_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers"
     "${CMAKE_CURRENT_SOURCE_DIR}/opcua_types"
     "${CMAKE_CURRENT_SOURCE_DIR}/crypto"
+    "${CMAKE_CURRENT_SOURCE_DIR}/safety_stack"
+    "${CMAKE_CURRENT_SOURCE_DIR}/safety_stack/uam"
+    "${CMAKE_CURRENT_SOURCE_DIR}/safety_stack/pubsub_mapper"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep/${PLATFORM_DIR}"
 )

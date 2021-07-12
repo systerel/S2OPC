@@ -14,5 +14,6 @@ endif()
 if(NOT S2OPC_CLIENTSERVER_ONLY)
   # Note: only PubSub_Server samples available for now
   add_subdirectory(PubSub)
+  add_subdirectory(safety_demo)
   add_subdirectory(RT_PubSub)
 endif()

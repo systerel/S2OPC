@@ -51,6 +51,7 @@ set(S2OPC_PUBSUB_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/publisher"
     "${CMAKE_CURRENT_SOURCE_DIR}/security"
     "${CMAKE_CURRENT_SOURCE_DIR}/subscriber"
+    "${CMAKE_CURRENT_SOURCE_DIR}/safety_pubsub_mapper"
     "${CMAKE_CURRENT_SOURCE_DIR}/real_time_api"
 )
 
