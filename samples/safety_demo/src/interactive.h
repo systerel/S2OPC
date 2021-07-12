@@ -17,14 +17,21 @@
  * under the License.
  */
 
-/** \file Provides a simple example of an interactive Pub/sub applcation
- * (using STDIN)
- *
- * GetSource and SetTarget callback will get and set their values in the cache.
+/*============================================================================
+ * DESCRIPTION
+ *===========================================================================*/
+
+/** \file Provides a simple interactive terminal so as to allow "dynamic" and manual tests.
+ * Uses the VT-100 features to create sub-windows, and listens to STDIN for
+ * user specific commands.
  */
 
 #ifndef SOPC_SAFETY_DEMO_INTERACTIVE_H_
 #define SOPC_SAFETY_DEMO_INTERACTIVE_H_
+
+/*============================================================================
+ * INCLUDES
+ *===========================================================================*/
 
 #include <signal.h>
 #include <stdbool.h>
@@ -41,6 +48,9 @@
 #include "sopc_threads.h"
 #include "uam_spduEncoders.h"
 
+/*============================================================================
+ * EXTERNAL TYPES
+ *===========================================================================*/
 typedef struct
 {
     const char* signing_key;
@@ -61,10 +71,23 @@ typedef struct
     UAM_SpduResponseHandle spduResponseId;
 } SafetyDemo_interactive_Context;
 
+/*============================================================================
+ * EXTERNAL SERVICES
+ *===========================================================================*/
+/**
+ * \brief initialize the interactive session.
+ * \param pContext The applicative context
+ */
 void SafetyDemo_Interactive_Initialize(SafetyDemo_interactive_Context* pContext);
 
+/**
+ * \brief Clean-up the interactive session.
+ */
 void SafetyDemo_Interactive_Clear(void);
 
+/**
+ * \brief Force a full refresh of the display
+ */
 void SafetyDemo_Interactive_ForceRefresh(void);
 
 /***

@@ -17,9 +17,20 @@
  * under the License.
  */
 
-/** \file Provides a cache for data values.
+/*============================================================================
+ * DESCRIPTION
+ *===========================================================================*/
+
+/**
+ * \file Main program of Safety demo application.
+ * This main program sequences :
+ * - all initialisations
+ * - calls cyclic events in infinite loop:
+ *  * Process the safety computation (UAM_Cycle) which executes the UAS state machines,
+ *      message exchanges and executes user-specific applications for each Provider/Consumer
+ *  * Calls the interactive cyclic event to check interactions with user on terminal.
+ * - on error or exit request, cleans up everything.
  *
- * GetSource and SetTarget callback will get and set their values in the cache.
  */
 
 /*============================================================================
@@ -57,30 +68,6 @@
 
 #include "uam.h"
 #include "uam_spduEncoders.h"
-
-/*============================================================================
- * DESCRIPTION
- *===========================================================================*/
-/**
-    Basic description (TODO:  TBC)
-
-    This program
-
-    The SafetyProducer demo is:
-    - a Publisher on  TBD1 (SPDUresponse)
-    - a Subscriber on TBD2 (SPDUrequest)
-    The SafetyConsumer demo is:
-    - a Publisher on TBD2 (SPDUrequest)
-    - a Subscriber on TBD1 (SPDUresponse)
-
-    Start the Provider (as root, using config file ./safety_demo_prov.xml):
-    - ./safety_demo prod
-    Start the Consumer (as root, using config file ./safety_demo_cons.xml):
-    - ./safety_demo cons
-
-
-
-*/
 
 /*============================================================================
  * LOCAL PROTOTYPES

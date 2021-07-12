@@ -18,6 +18,21 @@
  */
 
 /*============================================================================
+ * DESCRIPTION
+ *===========================================================================*/
+
+/** \file Provides the implementation of safety UA Mapper (UAM).
+ * All direct links to exported variables or API to UAS module are implemented here so that
+ * user application does not have to rely on it.
+ * TODO: Separate SAFE & NON-SAFE parts of UAM so that:
+ * - UAM/SAFE is linked with UAS and Safe application.
+ * - UAM/NONSAFE is deported on a non-safe device or OS. This part only realizes the
+ *      protocol-level exchanges.
+ * TODO: How can these 2 parts communicate? Define interface file so that there may be different
+ *      implementation depending on the proect-specific constraints.
+ */
+
+/*============================================================================
  * INCLUDES
  *===========================================================================*/
 

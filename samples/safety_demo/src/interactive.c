@@ -18,6 +18,15 @@
  */
 
 /*============================================================================
+ * DESCRIPTION
+ *===========================================================================*/
+/** \file All user-interactive commands are entered in STDIN. They are process when the
+ * full line is confirmed by the "Enter" Key. The first letter of the line providse the command
+ * and all remaining chars may be used as parameters. All commands are generic and created
+ * using "Create_Callback"
+ *
+ */
+/*============================================================================
  * INCLUDES
  *===========================================================================*/
 
@@ -490,17 +499,34 @@ static bool doTest1(SafetyDemo_interactive_Context* pContext, const char* params
 /*============================================================================
  * LOCAL TYPES
  *===========================================================================*/
-
+/**
+ * A user-event callback
+ * \param pContext The execution context
+ * \param params The parameters following the command char.
+ * \return true if command succeeded
+ */
 typedef bool (*Interactive_Callback)(SafetyDemo_interactive_Context* pContext, const char* params);
 
+/**
+ * Configuration of a user event.
+ */
 typedef struct
 {
     Interactive_Callback callback;
     const char* descr;
 } Interactive_CallbackCfg;
 
+/**
+ * List of all possible callback (indexed on unsigned char)
+ */
 static Interactive_CallbackCfg g_callbackList[0x100];
 
+/**
+ * \brief Registers a user interactive callback.
+ * \param key The char key which triggers that command
+ * \param callback The user-event to be called when activated
+ * \param descr The command short description (that can be used to generate HELP text)
+ */
 static void Create_Callback(const char key, Interactive_Callback callback, const char* descr);
 
 /*============================================================================
@@ -509,6 +535,7 @@ static void Create_Callback(const char key, Interactive_Callback callback, const
 #include <unistd.h>
 #define STDIN 0
 #define USER_ENTRY_MAXSIZE (128u)
+/*===========================================================================*/
 void SafetyDemo_Interactive_execute(SafetyDemo_interactive_Context* pContext)
 {
     assert(NULL != pContext);
@@ -594,16 +621,19 @@ void SafetyDemo_Interactive_Initialize(SafetyDemo_interactive_Context* pzContext
     printf("Interactive session initialized. Press 'h' for help\n");
 }
 
+/*===========================================================================*/
 void SafetyDemo_Interactive_Clear(void)
 {
     displayTerminate();
 }
 
+/*===========================================================================*/
 void SafetyDemo_Interactive_ForceRefresh(void)
 {
     zDisplayContent.isModified = true;
 }
 
+/*===========================================================================*/
 static void Create_Callback(const char key, Interactive_Callback callback, const char* descr)
 {
     unsigned char uKey;
@@ -614,6 +644,7 @@ static void Create_Callback(const char key, Interactive_Callback callback, const
     g_callbackList[uKey].descr = descr;
 }
 
+/*===========================================================================*/
 static bool SafetyDemo_interactive_process(SafetyDemo_interactive_Context* pContext, const char* input)
 {
     assert(pContext != NULL);
@@ -641,6 +672,7 @@ static bool SafetyDemo_interactive_process(SafetyDemo_interactive_Context* pCont
     return result;
 }
 
+/*===========================================================================*/
 static bool doHelp(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -659,6 +691,7 @@ static bool doHelp(SafetyDemo_interactive_Context* pContext, const char* params)
     return true;
 }
 
+/*===========================================================================*/
 static bool doQuit(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -668,6 +701,7 @@ static bool doQuit(SafetyDemo_interactive_Context* pContext, const char* params)
     return true;
 }
 
+/*===========================================================================*/
 // May be usefull for scripting ...
 static bool doSleep(SafetyDemo_interactive_Context* pContext, const char* params)
 {
@@ -685,6 +719,7 @@ static bool doSleep(SafetyDemo_interactive_Context* pContext, const char* params
     return true;
 }
 
+/*===========================================================================*/
 static bool doChangeAck(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) params;
@@ -693,6 +728,7 @@ static bool doChangeAck(SafetyDemo_interactive_Context* pContext, const char* pa
     return true;
 }
 
+/*===========================================================================*/
 static bool doBlock(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -701,6 +737,7 @@ static bool doBlock(SafetyDemo_interactive_Context* pContext, const char* params
     return true;
 }
 
+/*===========================================================================*/
 static bool doListCache(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -711,6 +748,7 @@ static bool doListCache(SafetyDemo_interactive_Context* pContext, const char* pa
     return true;
 }
 
+/*===========================================================================*/
 static bool doEditSafeContent(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -772,6 +810,7 @@ static bool doEditSafeContent(SafetyDemo_interactive_Context* pContext, const ch
     return true;
 }
 
+/*===========================================================================*/
 static bool doChangeEnable(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     (void) pContext;
@@ -781,6 +820,7 @@ static bool doChangeEnable(SafetyDemo_interactive_Context* pContext, const char*
     return true;
 }
 
+/*===========================================================================*/
 static void autotestResponseMsg(void)
 {
     SOPC_ReturnStatus bStatus = SOPC_STATUS_OK;
@@ -796,6 +836,7 @@ static void autotestResponseMsg(void)
            response.dwSafetyConsumerId, response.dwMonitoringNumber, response.dwCrc);
 }
 
+/*===========================================================================*/
 static void autotestRequestMsg(void)
 {
     UAS_RequestSpdu_type zRequest;
@@ -806,6 +847,7 @@ static void autotestRequestMsg(void)
     printf("Send MNR=%X\n", zRequest.dwMonitoringNumber);
 }
 
+/*===========================================================================*/
 static bool doTest1(SafetyDemo_interactive_Context* pContext, const char* params)
 {
     SOPC_NodeId nid;
