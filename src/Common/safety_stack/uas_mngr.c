@@ -1,15 +1,19 @@
 /**
  * OPC Foundation OPC UA Safety Stack
  *
+ * Copyright (c) 2021 OPC Foundation. All rights reserved.
+ * This Software is licensed under OPC Foundation's proprietary Enhanced
+ * Commercial Software License Agreement [LINK], and may only be used by
+ * authorized Licensees in accordance with the terms of such license.
+ * THE SOFTWARE IS LICENSED "AS-IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+ * This notice must be included in all copies or substantial portions of the Software.
+ *
  * \file
- * \author
- *    Copyright 2021 (c) ifak e.V.Magdeburg
- *    Copyright 2021 (c) Elke Hintze
  *
  * \brief OPC UA Safety instance manager.
  *
- * \date      2021-05-14
- * \revision  0.2
+ * \date      2021-07-08
+ * \revision  0.4
  * \status    in work
  *
  * Defines the functions of the OPC UA Safety instance manager.
@@ -111,6 +115,11 @@ static UAS_UInt8 byUAS_PostCheck
   UAS_UInt8  byRetVal
 );
 
+/**
+* Check of basic data type definitions
+*/
+static void vUAS_CheckDataTypes( void );
+
 /*--------------------------------------------------------------------------*/
 /******************************** L O C A L *********************************/
 /*--------------------------------------------------------------------------*/
@@ -191,6 +200,7 @@ UAS_UInt8 byUAS_InitSafetyProvider
   if ( 1u EQ bUAS_FirstInit )
   {
     vUASRVAR_Init( );
+    vUAS_CheckDataTypes( );
     bUAS_FirstInit = 0u;
   } /* if */
 
@@ -321,7 +331,7 @@ UAS_UInt8 byUAS_ChangeSafetyProviderSPI
 
       #endif /* UASDEF_DBG */
       } /* else */
-    
+
     } /* else */
   } /* if */
 
@@ -677,17 +687,11 @@ UAS_UInt8 byUAS_InitSafetyConsumer
   if ( 1u EQ bUAS_FirstInit )
   {
     vUASRVAR_Init( );
+    vUAS_CheckDataTypes( );
     bUAS_FirstInit = 0u;
   } /* if */
 
   byRetVal = byUAS_PreCheck ( uInstanceIndex );
-
-  /* Initialize the redundant variables */
-  if ( 1u EQ bUAS_FirstInit )
-  {
-    vUASRVAR_Init( );
-    bUAS_FirstInit = 0u;
-  } /* if */
 
   if ( UAS_OK EQ byRetVal )
   {
@@ -1336,11 +1340,17 @@ static UAS_UInt8 byUAS_UniqueProvIdentifiers
           byRetVal = UAS_FCT_PARAM_ERR;
         } /* if */
         /* Compare the safety identifiers */
-        else if ( ( pzNewSafetyProvider->zSPI.dwSafetyProviderId EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId ) &&
-          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.dwPart1 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart1 ) &&
-          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.dwPart2 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart2 ) &&
-          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.dwPart3 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart3 ) &&
-          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.dwPart4 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart4 ) )
+        else if ( ( pzNewSafetyProvider->zSPI.dwSafetyProviderId EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId )AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.dwData1      EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwData1 ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.wData2       EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.wData2 ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.wData3       EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.wData3 ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[0]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[0] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[1]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[2] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[2]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[3] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[3]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[4] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[4]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[5] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[5]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[6] ) AND
+          ( pzNewSafetyProvider->zSPI.zSafetyBaseId.abyData4[7]  EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[7] ) )
         {
           /* IDs always used! */
           byRetVal = UAS_FCT_PARAM_ERR;
@@ -1432,14 +1442,21 @@ static UAS_UInt8 byUAS_UniqueConsIdentifiers
           byRetVal = UAS_FCT_PARAM_ERR;
         } /* if */
           /* Compare the safety identifiers */
-        else if ( ( pzNewSafetyConsumer->zSPI.dwSafetyProviderId    EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId ) &&
-                  ( pzNewSafetyConsumer->zSPI.dwSafetyConsumerId    EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerId ) &&
-                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.dwPart1 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart1 ) &&
-                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.dwPart2 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart2 ) &&
-                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.dwPart3 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart3 ) &&
-                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.dwPart4 EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart4 ) )
+        else if ( ( pzNewSafetyConsumer->zSPI.dwSafetyProviderId        EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId ) AND
+                  ( pzNewSafetyConsumer->zSPI.dwSafetyConsumerId        EQ pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerId ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.dwData1     EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwData1 ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.wData2      EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.wData2 ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.wData3      EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.wData3 ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[0] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[0] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[1] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[1] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[2] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[2] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[3] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[3] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[4] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[4] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[5] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[5] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[6] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[6] ) AND
+                  ( pzNewSafetyConsumer->zSPI.zSafetyBaseId.abyData4[7] EQ pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.abyData4[7] ) )
         {
-          /* Handle always used! */
+          /* Safety identifiers always used! */
           byRetVal = UAS_FCT_PARAM_ERR;
         } /* else if */
         else
@@ -1529,13 +1546,35 @@ static UAS_UInt8 byUAS_PostCheck
     /* Store the error code */
     UASRVAR_SET_USIGN8( byUAS_Error, byRetVal );
     /* Reset all UAS instances */
-    /*TODO*/ vUAS_ResetAllInstances();
+    vUAS_ResetAllInstances();
   } /* if */
 
   return byRetVal;
 
 } /* end of function */
 
+
+/**
+* Check of basic data type definitions
+* This function checks the basic data type definitions.
+*/
+static void vUAS_CheckDataTypes( void )
+{
+  if ( ( 1 NOT_EQ sizeof( UAS_Bool ) ) OR
+       ( 1 NOT_EQ sizeof( UAS_Char ) ) OR
+       ( 1 NOT_EQ sizeof( UAS_Int8 ) ) OR
+       ( 2 NOT_EQ sizeof( UAS_Int16 ) ) OR
+       ( 4 NOT_EQ sizeof( UAS_Int32 ) ) OR
+       ( 8 NOT_EQ sizeof( UAS_Int64 ) ) OR
+       ( 1 NOT_EQ sizeof( UAS_UInt8 ) ) OR
+       ( 2 NOT_EQ sizeof( UAS_UInt16 ) ) OR
+       ( 4 NOT_EQ sizeof( UAS_UInt32 ) ) OR
+       ( 8 NOT_EQ sizeof( UAS_UInt64 ) ) OR
+       ( sizeof ( UAS_Int8 *) NOT_EQ sizeof ( UAS_INVERSE_PTR ) ) )
+  {
+    UASRVAR_SET_USIGN8( byUAS_Error, UAS_MEMORY_ERR );
+  } /* if */
+}
 
 /* end of file */
 

@@ -1,15 +1,19 @@
 /**
  * OPC Foundation OPC UA Safety Stack
  *
+ * Copyright (c) 2021 OPC Foundation. All rights reserved.
+ * This Software is licensed under OPC Foundation's proprietary Enhanced
+ * Commercial Software License Agreement [LINK], and may only be used by
+ * authorized Licensees in accordance with the terms of such license.
+ * THE SOFTWARE IS LICENSED "AS-IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+ * This notice must be included in all copies or substantial portions of the Software.
+ *
  * \file
- * \author
- *    Copyright 2021 (c) ifak e.V.Magdeburg
- *    Copyright 2021 (c) Elke Hintze
  *
  * \brief OPC UA Safety timer definition.
  *
- * \date      2021-05-14
- * \revision  0.2
+ * \date      2021-07-08
+ * \revision  0.4
  * \status    in work
  *
  * Defines the functions of the OPC UA Safety timer module.

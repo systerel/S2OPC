@@ -1,15 +1,19 @@
 /**
  * OPC Foundation OPC UA Safety Stack
  *
+ * Copyright (c) 2021 OPC Foundation. All rights reserved.
+ * This Software is licensed under OPC Foundation's proprietary Enhanced
+ * Commercial Software License Agreement [LINK], and may only be used by
+ * authorized Licensees in accordance with the terms of such license.
+ * THE SOFTWARE IS LICENSED "AS-IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+ * This notice must be included in all copies or substantial portions of the Software.
+ *
  * \file
- * \author
- *    Copyright 2021 (c) ifak e.V.Magdeburg
- *    Copyright 2021 (c) Elke Hintze
  *
  * \brief OPC UA SafetyConsumer debug functions
  *
- * \date      2021-05-14
- * \revision  0.2
+ * \date      2021-07-08
+ * \revision  0.4
  * \status    in work
  *
  * Defines the functions of the debug output module for the SafetyConsumer.
@@ -62,7 +66,7 @@
 /* This Makro is used to read the value of a single bit from a byte. */
 #define /*lint -e(961)*/ UASCDBG_GET_BIT(byte,bit)   /*lint -e(835)*/ (UAS_Bool)( ( ( byte ) BITAND (UAS_UInt8)( 0x01u << ( bit ) ) ) >> ( bit ) )
 
-#endif /* DBG_FDL_DETAILS */
+#endif /* UASDEF_DBG_DETAILS */
 
 /*-------------*/
 /*  T Y P E S  */
@@ -72,6 +76,23 @@
 /*---------------------*/
 /*  F U N C T I O N S  */
 /*---------------------*/
+
+/**
+* UAS debug output of BaseID.
+*/
+void vUASCDBG_PrintBaseId
+(
+  const UAS_Char *pszName,      /**< name of the BaseID parameter */
+  const UAS_GUID_type *wBaseId  /**< pointer to the BaseID parameter */
+);
+
+/**
+* querying the error type string
+*/
+const UAS_Char * vUASCDBG_SafetyDiagnosticIdToString
+(
+  const UAS_SafetyDiagIdentifier_type nSafetyDiagnosticId  /**< SafetyDiagnosticID */
+);
 
 
 /*****************************************************************************
@@ -110,59 +131,59 @@ void vUASCDBG_PrintSafetyConsumerState
       "S17_Error",
       "S18_ProvideSafetyData",
     };
+    UAS_SafetyConsumer_type *pzInstanceData = pzStateMachine->pzInstanceData;
 
     UASDEF_LOG_DEBUG( "  ### Configuration parameters" );
-    UASDEF_LOG_DEBUG( "        Handle                       = %u (0x%08X)", pzStateMachine->pzInstanceData->dwHandle, pzStateMachine->pzInstanceData->dwHandle );
-    UASDEF_LOG_DEBUG( "        SafetyDataLength             = %u", pzStateMachine->pzInstanceData->wSafetyDataLength );
-    UASDEF_LOG_DEBUG( "        NonSafetyDataLength          = %u", pzStateMachine->pzInstanceData->wNonSafetyDataLength );
+    UASDEF_LOG_DEBUG( "        Handle                       = %u (0x%08X)", pzInstanceData->dwHandle, pzInstanceData->dwHandle );
+    UASDEF_LOG_DEBUG( "        SafetyDataLength             = %u", pzInstanceData->wSafetyDataLength );
+    UASDEF_LOG_DEBUG( "        NonSafetyDataLength          = %u", pzInstanceData->wNonSafetyDataLength );
     UASDEF_LOG_DEBUG( "  ### SPI parameters" );
-    UASDEF_LOG_DEBUG( "        SafetyProviderID             = %u (0x%08X)", pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId, pzStateMachine->pzInstanceData->zSPI.dwSafetyProviderId );
-    UASDEF_LOG_DEBUG( "        SafetyBaseID                 = 0x%08X-%08X-%08X-%08X",
-      pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart1, pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart2, pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart3, pzStateMachine->pzInstanceData->zSPI.zSafetyBaseId.dwPart4 );
-    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerId, pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerId );
-    UASDEF_LOG_DEBUG( "        SafetyProviderLevel          = %u", pzStateMachine->pzInstanceData->zSPI.bySafetyProviderLevel );
-    UASDEF_LOG_DEBUG( "        SafetyStructureSignature     = %u (0x%08X)", pzStateMachine->pzInstanceData->zSPI.dwSafetyStructureSignature, pzStateMachine->pzInstanceData->zSPI.dwSafetyStructureSignature );
+    UASDEF_LOG_DEBUG( "        SafetyProviderID             = %u (0x%08X)", pzInstanceData->zSPI.dwSafetyProviderId, pzInstanceData->zSPI.dwSafetyProviderId );
+    vUASCDBG_PrintBaseId( "        SafetyBaseID                ", &pzInstanceData->zSPI.zSafetyBaseId );
+    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzInstanceData->zSPI.dwSafetyConsumerId, pzInstanceData->zSPI.dwSafetyConsumerId );
+    UASDEF_LOG_DEBUG( "        SafetyProviderLevel          = %u", pzInstanceData->zSPI.bySafetyProviderLevel );
+    UASDEF_LOG_DEBUG( "        SafetyStructureSignature     = %u (0x%08X)", pzInstanceData->zSPI.dwSafetyStructureSignature, pzInstanceData->zSPI.dwSafetyStructureSignature );
     UASDEF_LOG_DEBUG( "        SafetyStructureSignatureVersion is not used in the UAS" );
     UASDEF_LOG_DEBUG( "        SafetyStructureIdentifier is not used in the UAS" );
-    UASDEF_LOG_DEBUG( "        SafetyConsumerTimeout        = %u", pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerTimeout );
-    UASDEF_LOG_DEBUG( "        SafetyOperatorAckNecessary   = %u", pzStateMachine->pzInstanceData->zSPI.bSafetyOperatorAckNecessary );
-    UASDEF_LOG_DEBUG( "        SafetyErrorIntervalLimit     = %u", pzStateMachine->pzInstanceData->zSPI.wSafetyErrorIntervalLimit );
+    UASDEF_LOG_DEBUG( "        SafetyConsumerTimeout        = %u", pzInstanceData->zSPI.dwSafetyConsumerTimeout );
+    UASDEF_LOG_DEBUG( "        SafetyOperatorAckNecessary   = %u", pzInstanceData->zSPI.bSafetyOperatorAckNecessary );
+    UASDEF_LOG_DEBUG( "        SafetyErrorIntervalLimit     = %u", pzInstanceData->zSPI.wSafetyErrorIntervalLimit );
     UASDEF_LOG_DEBUG( "  ### SAPI input parameters" );
-    UASDEF_LOG_DEBUG( "        Enable                       = %u", pzStateMachine->pzInstanceData->zInputSAPI.bEnable );
-    UASDEF_LOG_DEBUG( "        OperatorAckConsumer          = %u", pzStateMachine->pzInstanceData->zInputSAPI.bOperatorAckConsumer );
-    UASDEF_LOG_DEBUG( "        SafetyProviderID             = %u (0x%08X)", pzStateMachine->pzInstanceData->zInputSAPI.dwSafetyProviderId, pzStateMachine->pzInstanceData->zInputSAPI.dwSafetyProviderId );
-    UASDEF_LOG_DEBUG( "        SafetyBaseID                 = 0x%08X-%08X-%08X-%08X",
-      pzStateMachine->pzInstanceData->zInputSAPI.zSafetyBaseId.dwPart1, pzStateMachine->pzInstanceData->zInputSAPI.zSafetyBaseId.dwPart2, pzStateMachine->pzInstanceData->zInputSAPI.zSafetyBaseId.dwPart3, pzStateMachine->pzInstanceData->zInputSAPI.zSafetyBaseId.dwPart4 );
-    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzStateMachine->pzInstanceData->zInputSAPI.dwSafetyConsumerId, pzStateMachine->pzInstanceData->zInputSAPI.dwSafetyConsumerId );
+    UASDEF_LOG_DEBUG( "        Enable                       = %u", pzInstanceData->zInputSAPI.bEnable );
+    UASDEF_LOG_DEBUG( "        OperatorAckConsumer          = %u", pzInstanceData->zInputSAPI.bOperatorAckConsumer );
+    UASDEF_LOG_DEBUG( "        SafetyProviderID             = %u (0x%08X)", pzInstanceData->zInputSAPI.dwSafetyProviderId, pzInstanceData->zInputSAPI.dwSafetyProviderId );
+    vUASCDBG_PrintBaseId( "        SafetyBaseID                ", &pzInstanceData->zSPI.zSafetyBaseId );
+    UASDEF_LOG_DEBUG( "        SafetyBaseID                ", &pzInstanceData->zInputSAPI.zSafetyBaseId );
+    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzInstanceData->zInputSAPI.dwSafetyConsumerId, pzInstanceData->zInputSAPI.dwSafetyConsumerId );
     UASDEF_LOG_DEBUG( "  ### SAPI output parameters" );
-    UASDEF_LOG_DATA ( "        SerializedSafetyData        ", pzStateMachine->pzInstanceData->wSafetyDataLength, pzStateMachine->pzInstanceData->zOutputSAPI.pbySerializedSafetyData );
-    UASDEF_LOG_DATA ( "        SerializedNonSafetyData     ", pzStateMachine->pzInstanceData->wNonSafetyDataLength, pzStateMachine->pzInstanceData->zOutputSAPI.pbySerializedNonSafetyData );
-    UASDEF_LOG_DEBUG( "        FSV_Activated                = %u", pzStateMachine->pzInstanceData->zOutputSAPI.bFsvActivated );
-    UASDEF_LOG_DEBUG( "        OperatorAckRequested         = %u", pzStateMachine->pzInstanceData->zOutputSAPI.bOperatorAckRequested );
-    UASDEF_LOG_DEBUG( "        OperatorAckProvider          = %u", pzStateMachine->pzInstanceData->zOutputSAPI.bOperatorAckProvider );
-    UASDEF_LOG_DEBUG( "        TestModeActivated            = %u", pzStateMachine->pzInstanceData->zOutputSAPI.bTestModeActivated );
+    UASDEF_LOG_DATA ( "        SerializedSafetyData        ", pzInstanceData->wSafetyDataLength, pzInstanceData->zOutputSAPI.pbySerializedSafetyData );
+    UASDEF_LOG_DATA ( "        SerializedNonSafetyData     ", pzInstanceData->wNonSafetyDataLength, pzInstanceData->zOutputSAPI.pbySerializedNonSafetyData );
+    UASDEF_LOG_DEBUG( "        FSV_Activated                = %u", pzInstanceData->zOutputSAPI.bFsvActivated );
+    UASDEF_LOG_DEBUG( "        OperatorAckRequested         = %u", pzInstanceData->zOutputSAPI.bOperatorAckRequested );
+    UASDEF_LOG_DEBUG( "        OperatorAckProvider          = %u", pzInstanceData->zOutputSAPI.bOperatorAckProvider );
+    UASDEF_LOG_DEBUG( "        TestModeActivated            = %u", pzInstanceData->zOutputSAPI.bTestModeActivated );
     UASDEF_LOG_DEBUG( "  ### DI parameters" );
-    UASDEF_LOG_DEBUG( "        SafetyDiagnosticID           = 0x%04X", pzStateMachine->pzInstanceData->zDI.nSafetyDiagnosticId );
-    UASDEF_LOG_DEBUG( "        Permanent                    = %u", pzStateMachine->pzInstanceData->zDI.bPermanent );
+    UASDEF_LOG_DEBUG( "        SafetyDiagnosticID           = 0x%04X (%s)", pzInstanceData->zDI.nSafetyDiagnosticId, vUASCDBG_SafetyDiagnosticIdToString( pzInstanceData->zDI.nSafetyDiagnosticId ) );
+    UASDEF_LOG_DEBUG( "        Permanent                    = %u", pzInstanceData->zDI.bPermanent );
     UASDEF_LOG_DEBUG( "  ### RequestSPDU parameters" );
-    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzStateMachine->pzInstanceData->zRequestSPDU.dwSafetyConsumerId, pzStateMachine->pzInstanceData->zRequestSPDU.dwSafetyConsumerId );
-    UASDEF_LOG_DEBUG( "        MonitoringNumber             = %u (0x%08X)", pzStateMachine->pzInstanceData->zRequestSPDU.dwMonitoringNumber, pzStateMachine->pzInstanceData->zRequestSPDU.dwMonitoringNumber );
-    UASDEF_LOG_DEBUG( "        Flags                        = 0x%02X", pzStateMachine->pzInstanceData->zRequestSPDU.byFlags );
-    UASDEF_LOG_DEBUG( "        Flags.CommunicationError     = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_COMMUNICATION_ERROR ) );
-    UASDEF_LOG_DEBUG( "        Flags.OperatorAckRequested   = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_OPERATOR_ACK_REQUESTED ) );
-    UASDEF_LOG_DEBUG( "        Flags.FSV_Activated          = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_FSV_ACTIVATED ) );
+    UASDEF_LOG_DEBUG( "        SafetyConsumerID             = %u (0x%08X)", pzInstanceData->zRequestSPDU.dwSafetyConsumerId, pzInstanceData->zRequestSPDU.dwSafetyConsumerId );
+    UASDEF_LOG_DEBUG( "        MonitoringNumber             = %u (0x%08X)", pzInstanceData->zRequestSPDU.dwMonitoringNumber, pzInstanceData->zRequestSPDU.dwMonitoringNumber );
+    UASDEF_LOG_DEBUG( "        Flags                        = 0x%02X", pzInstanceData->zRequestSPDU.byFlags );
+    UASDEF_LOG_DEBUG( "        Flags.CommunicationError     = %u", UASCDBG_GET_BIT( pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_COMMUNICATION_ERROR ) );
+    UASDEF_LOG_DEBUG( "        Flags.OperatorAckRequested   = %u", UASCDBG_GET_BIT( pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_OPERATOR_ACK_REQUESTED ) );
+    UASDEF_LOG_DEBUG( "        Flags.FSV_Activated          = %u", UASCDBG_GET_BIT( pzInstanceData->zRequestSPDU.byFlags, UAS_BITPOS_FSV_ACTIVATED ) );
     UASDEF_LOG_DEBUG( "  ### ResponseSPDU parameters" );
-    UASDEF_LOG_DATA ( "        SerializedSafetyData        ", pzStateMachine->pzInstanceData->wSafetyDataLength, pzStateMachine->pzInstanceData->zResponseSPDU.pbySerializedSafetyData );
-    UASDEF_LOG_DEBUG( "        Flags                        = 0x%02X", pzStateMachine->pzInstanceData->zResponseSPDU.byFlags );
-    UASDEF_LOG_DEBUG( "        Flags.OperatorAckProvider    = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_OPERATOR_ACK_PROVIDER ) );
-    UASDEF_LOG_DEBUG( "        Flags.ActivateFSV            = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_ACTIVATE_FSV ) );
-    UASDEF_LOG_DEBUG( "        Flags.TestModeActivated      = %u", UASCDBG_GET_BIT( pzStateMachine->pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_TEST_MODE_ACTIVATED ) );
+    UASDEF_LOG_DATA ( "        SerializedSafetyData        ", pzInstanceData->wSafetyDataLength, pzInstanceData->zResponseSPDU.pbySerializedSafetyData );
+    UASDEF_LOG_DEBUG( "        Flags                        = 0x%02X", pzInstanceData->zResponseSPDU.byFlags );
+    UASDEF_LOG_DEBUG( "        Flags.OperatorAckProvider    = %u", UASCDBG_GET_BIT( pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_OPERATOR_ACK_PROVIDER ) );
+    UASDEF_LOG_DEBUG( "        Flags.ActivateFSV            = %u", UASCDBG_GET_BIT( pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_ACTIVATE_FSV ) );
+    UASDEF_LOG_DEBUG( "        Flags.TestModeActivated      = %u", UASCDBG_GET_BIT( pzInstanceData->zResponseSPDU.byFlags, UAS_BITPOS_TEST_MODE_ACTIVATED ) );
     UASDEF_LOG_DEBUG( "        SPDU_ID                      = 0x%08X-%08X-%08X",
-      pzStateMachine->pzInstanceData->zResponseSPDU.zSpduId.dwPart1, pzStateMachine->pzInstanceData->zResponseSPDU.zSpduId.dwPart2, pzStateMachine->pzInstanceData->zResponseSPDU.zSpduId.dwPart3 );
-    UASDEF_LOG_DEBUG( "        SafetyConsumerId             = %u (0x%08X)", pzStateMachine->pzInstanceData->zResponseSPDU.dwSafetyConsumerId, pzStateMachine->pzInstanceData->zResponseSPDU.dwSafetyConsumerId );
-    UASDEF_LOG_DEBUG( "        MonitoringNumber             = %u (0x%08X)", pzStateMachine->pzInstanceData->zResponseSPDU.dwMonitoringNumber, pzStateMachine->pzInstanceData->zResponseSPDU.dwMonitoringNumber );
-    UASDEF_LOG_DEBUG( "        CRC                          = %u (0x%08X)", pzStateMachine->pzInstanceData->zResponseSPDU.dwCrc, pzStateMachine->pzInstanceData->zResponseSPDU.dwCrc );
-    UASDEF_LOG_DATA ( "        SerializedNonSafetyData", pzStateMachine->pzInstanceData->wNonSafetyDataLength, pzStateMachine->pzInstanceData->zResponseSPDU.pbySerializedNonSafetyData );
+      pzInstanceData->zResponseSPDU.zSpduId.dwPart1, pzInstanceData->zResponseSPDU.zSpduId.dwPart2, pzInstanceData->zResponseSPDU.zSpduId.dwPart3 );
+    UASDEF_LOG_DEBUG( "        SafetyConsumerId             = %u (0x%08X)", pzInstanceData->zResponseSPDU.dwSafetyConsumerId, pzInstanceData->zResponseSPDU.dwSafetyConsumerId );
+    UASDEF_LOG_DEBUG( "        MonitoringNumber             = %u (0x%08X)", pzInstanceData->zResponseSPDU.dwMonitoringNumber, pzInstanceData->zResponseSPDU.dwMonitoringNumber );
+    UASDEF_LOG_DEBUG( "        CRC                          = %u (0x%08X)", pzInstanceData->zResponseSPDU.dwCrc, pzInstanceData->zResponseSPDU.dwCrc );
+    UASDEF_LOG_DATA ( "        SerializedNonSafetyData", pzInstanceData->wNonSafetyDataLength, pzInstanceData->zResponseSPDU.pbySerializedNonSafetyData );
     UASDEF_LOG_DEBUG( "  ### Internal items" );
     if ( ( pzStateMachine->nState < UASCDBG_FIRST_STATE ) OR ( pzStateMachine->nState > UASCDBG_LAST_STATE ) )
     {
@@ -170,7 +191,7 @@ void vUASCDBG_PrintSafetyConsumerState
     } /* else if */
     else
     {
-      UASDEF_LOG_DEBUG( "        State                        = %u (%s)", pzStateMachine->nState, pcSConsStateName[( (UAS_Int16)pzStateMachine->nState - UASCDBG_FIRST_STATE ) + 1] );
+      UASDEF_LOG_DEBUG( "        State                        = %u (%s)", pzStateMachine->nState, pcSConsStateName[(UAS_Int16)pzStateMachine->nState - UASCDBG_FIRST_STATE] );
     } /* else */
     UASDEF_LOG_DEBUG( "        FaultReqOA_i                 = %u", pzStateMachine->bFaultReqOA_i );
     UASDEF_LOG_DEBUG( "        OperatorAckConsumerAllowed_i = %u", pzStateMachine->bOperatorAckConsumerAllowed_i );
@@ -179,13 +200,13 @@ void vUASCDBG_PrintSafetyConsumerState
     UASDEF_LOG_DEBUG( "        ConsumerID_i                 = %u (0x%08X)", pzStateMachine->dwConsumerID_i, pzStateMachine->dwConsumerID_i );
     UASDEF_LOG_DEBUG( "        CRCCheck_i                   = %u", pzStateMachine->bCRCCheck_i );
     UASDEF_LOG_DEBUG( "        SPDUCheck_i                  = %u", pzStateMachine->bSPDUCheck_i );
-    UASDEF_LOG_DEBUG( "        SPDU_ID_1_i                  = 0x%08X-%08X-%08X",
+    UASDEF_LOG_DEBUG( "        SPDU_ID_i                    = 0x%08X-%08X-%08X",
       pzStateMachine->zSPDUID_i.dwPart1, pzStateMachine->zSPDUID_i.dwPart2, pzStateMachine->zSPDUID_i.dwPart3 );
     UASDEF_LOG_DEBUG( "        PrevActivateFSV_i            = %u", pzStateMachine->bPrevActivateFSV_i );
     UASDEF_LOG_DEBUG( "        ConsumerTimerExpired         = %u", pzStateMachine->bConsumerTimerExpired );
     UASDEF_LOG_DEBUG( "        bErrorIntervalTimerExpired   = %u", pzStateMachine->bErrorIntervalTimerExpired );
-    UASDEF_LOG_DEBUG( "        CommDone                     = %u", pzStateMachine->pzInstanceData->bCommDone );
-    UASDEF_LOG_DEBUG( "        AppDone                      = %u", pzStateMachine->pzInstanceData->bAppDone );
+    UASDEF_LOG_DEBUG( "        CommDone                     = %u", pzInstanceData->bCommDone );
+    UASDEF_LOG_DEBUG( "        AppDone                      = %u", pzInstanceData->bAppDone );
     UASDEF_LOG_DEBUG( "" );
 
   #else /* UASDEF_DBG_DETAILS */
@@ -230,6 +251,126 @@ void vUASCDBG_PrintTransitionName
 /*************** I M P L E M E N T A T I O N   ( L O C A L S ) **************/
 /*--------------------------------------------------------------------------*/
 
+/**
+* UAS debug output of BaseID.
+* This function prints a BaseID parameter.
+* \param[in]  pszName - name of the BaseID parameter.
+* \param[in]  zBaseId - pointer to the BaseID parameter.
+*/
+void vUASCDBG_PrintBaseId
+(
+  const UAS_Char *pszName,
+  const UAS_GUID_type *pzBaseId
+)
+{
+  /* Guid values to be represented in form <Data1>-<Data2>-<Data3>-<Data4[0:1]>-<Data4[2:7]> */
+  UASDEF_LOG_DEBUG( "%s = %08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X", pszName,
+    pzBaseId->dwData1, pzBaseId->wData2, pzBaseId->wData3,
+    pzBaseId->abyData4[0], pzBaseId->abyData4[1],
+    pzBaseId->abyData4[2], pzBaseId->abyData4[3],
+    pzBaseId->abyData4[4], pzBaseId->abyData4[5],
+    pzBaseId->abyData4[6], pzBaseId->abyData4[7] );
+}
+
+
+/**
+* querying the error type string
+* This function returns the error type string of the SafetyDiagnosticID.
+* \param[in]  nSafetyDiagnosticId - SafetyDiagnosticID.
+*/
+const UAS_Char * vUASCDBG_SafetyDiagnosticIdToString
+(
+  const UAS_SafetyDiagIdentifier_type nSafetyDiagnosticId
+)
+{
+  UAS_Char * pszRetValue = NULL;
+
+  switch ( nSafetyDiagnosticId )
+  {
+    case UAS_DIAG_OK:
+    {
+      pszRetValue = "no error";
+      break;
+    } /* case */
+    case UAS_DIAG_SD_ID_ERR_IGN:
+    {
+      pszRetValue = "The SafetyConsumer has discarded a message due to an incorrect ID.";
+      break;
+    } /* case */
+    case UAS_DIAG_SD_ID_ERR_OA_1:
+    {
+      pszRetValue = "Mismatch of SafetyBaseID. The SafetyConsumer has switched to fail-safe substitute values due to an incorrect ID. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_SD_ID_ERR_OA_2:
+    {
+      pszRetValue = "Mismatch of SafetyProviderID. The SafetyConsumer has switched to fail-safe substitute values due to an incorrect ID. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_SD_ID_ERR_OA_3:
+    {
+      pszRetValue = "Mismatch of safety data structure or identifier. The SafetyConsumer has switched to fail-safe substitute values due to an incorrect ID. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_SD_ID_ERR_OA_4:
+    {
+      pszRetValue = "Mismatch of SafetyProviderLevel. The SafetyConsumer has switched to fail-safe substitute values due to an incorrect ID. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_CRC_ERR_IGN:
+    {
+      pszRetValue = "The SafetyConsumer has discarded a message due to a CRC error (data corruption).";
+      break;
+    } /* case */
+    case UAS_DIAG_CRC_ERR_OA:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values due to a CRC error (data corruption). Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_COID_ERR_IGN:
+    {
+      pszRetValue = "The SafetyConsumer has discarded a message due to an incorrect ConsumerID.";
+      break;
+    } /* case */
+    case UAS_DIAG_COID_ERR_OA:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values due to an incorrect consumer ID. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_MNR_ERR_IGN:
+    {
+      pszRetValue = "The SafetyConsumer has discarded a message due to an incorrect monitoring number.";
+      break;
+    } /* case */
+    case UAS_DIAG_MNR_ERR_OA:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values due to an incorrect monitoring number. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    case UAS_DIAG_COMM_ERR_TO:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values due to timeout.";
+      break;
+    } /* case */
+    case UAS_DIAG_APPL_ERR_TO:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values at the request of the safety application.";
+      break;
+    } /* case */
+    case UAS_DIAG_FSV_REQUESTED:
+    {
+      pszRetValue = "The SafetyConsumer has switched to fail-safe substitute values at the request of the SafetyProvider. Operator acknowledgment is required.";
+      break;
+    } /* case */
+    default:
+    {
+      pszRetValue = "unknown";
+      break;
+    } /* default */
+  } /* switch */
+
+  return ( pszRetValue );
+}
 
 
 #endif /* ifdef UASDEF_DBG */

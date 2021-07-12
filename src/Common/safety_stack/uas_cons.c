@@ -1,15 +1,19 @@
 /**
  * OPC Foundation OPC UA Safety Stack
  *
+ * Copyright (c) 2021 OPC Foundation. All rights reserved.
+ * This Software is licensed under OPC Foundation's proprietary Enhanced
+ * Commercial Software License Agreement [LINK], and may only be used by
+ * authorized Licensees in accordance with the terms of such license.
+ * THE SOFTWARE IS LICENSED "AS-IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+ * This notice must be included in all copies or substantial portions of the Software.
+ *
  * \file
- * \author
- *    Copyright 2021 (c) ifak e.V.Magdeburg
- *    Copyright 2021 (c) Elke Hintze
  *
  * \brief OPC UA SafetyConsumer definition
  *
- * \date      2021-05-14
- * \revision  0.2
+ * \date      2021-07-08
+ * \revision  0.4
  * \status    in work
  *
  * Defines the functions of the OPC UA SafetyConsumer.
@@ -163,7 +167,7 @@ static UAS_UInt8 byUASCONS_CheckRedundantData
 /**
  * Calculation of an FCS over the static instance data
  */
-static UAS_UInt32  byUASCONS_CalculateFcs
+static UAS_UInt32  dwUASCONS_CalculateFcs
 (
   const UAS_SafetyConsumer_type * const pzInstance     /**< Pointer to the instance data   */
 );
@@ -191,8 +195,27 @@ static UAS_ParameterError_type nUASCONS_ValidInstanceData
  */
 static UAS_ParameterError_type nUASCONS_ValidSPIParam
 (
-  const UAS_SafetyConsumerSPI_type * const pzSPI   /**< Pointer to the primary state machine data   */
+  const UAS_SafetyConsumerSPI_type * const pzSPI   /**< Pointer to the parameters of the SPI */
 );
+
+/**
+* Check for valid Parameters
+*/
+static UAS_Bool bUASCONS_ParametersOK
+(
+  const UAS_SafetyConsumerSPI_type * const pzSPI,     /**< Pointer to the parameters of the SPI */
+  const UAS_SafetyConsumerSAPII_type * const pzSAPI   /**< Pointer to the input parameters of the SAPI */
+);
+
+/**
+* Check for empty SPDU
+*/
+static UAS_Bool bUASCONS_NoEmptySPDU
+(
+  const UAS_ResponseSpdu_type * const pzResponseSpdu  /** Pointer to the ResponseSPDU */
+);
+
+
 
 /*---------------------*/
 /*  V A R I A B L E S  */
@@ -263,7 +286,7 @@ UAS_UInt8 byUASCONS_Init
         vUASCONS_ResetInstanceData( pzStateMachine, r_pzStateMachine, 1u );
 
         /* Accept instance parameter */
-        dwFcs = byUASCONS_CalculateFcs( pzInstance );
+        dwFcs = dwUASCONS_CalculateFcs( pzInstance );
 
         /* Initialize state machine parameters */
         UASRVAR_SET_POINTER( pzStateMachine->pzInstanceData, pzInstance );
@@ -326,7 +349,7 @@ UAS_UInt8 byUASCONS_Reset
 
   if (UASCONS_OK EQ byRetVal )
   {
-    if ( UASCONS_S10_INITIALIZE NOT_EQ pzStateMachine->nState )
+    if ( UASCONS_S10_INITIALIZE < pzStateMachine->nState )
     {
       byRetVal = byUASCONS_Stop( pzStateMachine, r_pzStateMachine );
     } /* if */
@@ -384,7 +407,7 @@ UAS_UInt8 byUASCONS_ChangeSPI
         pzStateMachine->pzInstanceData->zSPI = *pzNewSPI;
 
         /* Calculate and store the new FCS over the static driver parameter */
-        dwFcs = byUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
+        dwFcs = dwUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
         UASRVAR_SET_USIGN32( pzStateMachine->dwParamFcs, dwFcs );
       } /* if */
       byRetVal = UASCONS_OK;
@@ -438,7 +461,7 @@ UAS_UInt8 byUASCONS_ChangeTimeout
         pzStateMachine->pzInstanceData->zSPI.dwSafetyConsumerTimeout = dwTimeout;
 
         /* Calculate and store the new FCS over the static driver parameter */
-        dwFcs = byUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
+        dwFcs = dwUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
         UASRVAR_SET_USIGN32( pzStateMachine->dwParamFcs, dwFcs );
 
         *pnResult = UAS_PARAMETER_OK;
@@ -645,28 +668,40 @@ static UAS_UInt8 byUASCONS_StateWaitForEvent
   {
     case UASCONS_S11_WAIT_FOR_RESTART:
     {
-      /*** T13 ***/
       if ( 0u NOT_EQ pzInstance->zInputSAPI.bEnable )
       {
-        /* */
-        if ( UAS_MNR_MIN > pzStateMachine->dwMNR_i )
+        /*** T13 ***/
+        if ( bUASCONS_ParametersOK( &pzInstance->zSPI, &pzInstance->zInputSAPI ) )
         {
-          UASRVAR_SET_USIGN32( pzStateMachine->dwMNR_i, UAS_MNR_MIN );
-        } /* if */
+          if ( UAS_MNR_MIN > pzStateMachine->dwMNR_i )
+          {
+            UASRVAR_SET_USIGN32( pzStateMachine->dwMNR_i, UAS_MNR_MIN );
+          } /* if */
 #ifdef UASDEF_DBG
-        vUASCDBG_PrintTransitionName( "T13" );
+          vUASCDBG_PrintTransitionName( "T13" );
 #endif /* ifdef UASDEF_DBG */
-        vUASTIME_StartErrorIntervalLimit( &pzStateMachine->zErrorIntervalTimer, &r_pzStateMachine->zErrorIntervalTimer, dwCurrentTime, pzInstance->zSPI.wSafetyErrorIntervalLimit );
-        vUASCONS_CalcSpduId_i( pzStateMachine, r_pzStateMachine );
-        UASRVAR_SET_CONSSTATE( pzStateMachine->nState, UASCONS_S12_INITIALIZE_MNR );
+          vUASTIME_StartErrorIntervalLimit( &pzStateMachine->zErrorIntervalTimer, &r_pzStateMachine->zErrorIntervalTimer, dwCurrentTime, pzInstance->zSPI.wSafetyErrorIntervalLimit );
+          vUASCONS_CalcSpduId_i( pzStateMachine, r_pzStateMachine );
+          UASRVAR_SET_CONSSTATE( pzStateMachine->nState, UASCONS_S12_INITIALIZE_MNR );
 
-        /*** T14 ***/
+          /*** T14 ***/
 #ifdef UASDEF_DBG
-        vUASCDBG_PrintTransitionName( "T14" );
+          vUASCDBG_PrintTransitionName( "T14" );
 #endif /* ifdef UASDEF_DBG */
-        vUASTIME_StartWatchdog( &pzStateMachine->zConsumerTimer, &r_pzStateMachine->zConsumerTimer, dwCurrentTime, pzInstance->zSPI.dwSafetyConsumerTimeout);
-        UASRVAR_SET_CONSSTATE( pzStateMachine->nState, UASCONS_S13_PREPARE_REQUEST );
-        byRetVal = byUASCONS_StatePrepareRequest( pzStateMachine, r_pzStateMachine );
+          vUASTIME_StartWatchdog( &pzStateMachine->zConsumerTimer, &r_pzStateMachine->zConsumerTimer, dwCurrentTime, pzInstance->zSPI.dwSafetyConsumerTimeout);
+          UASRVAR_SET_CONSSTATE( pzStateMachine->nState, UASCONS_S13_PREPARE_REQUEST );
+          byRetVal = byUASCONS_StatePrepareRequest( pzStateMachine, r_pzStateMachine );
+        } /* if */
+
+        /*** T27 ***/
+        else
+        {
+#ifdef UASDEF_DBG
+          vUASCDBG_PrintTransitionName( "T27" );
+#endif /* ifdef UASDEF_DBG */
+          vUASCONS_SetDiag( &pzInstance->zDI, &pzInstance->zRequestSPDU, UAS_DIAG_PARAMETERS_INVALID, 1u );
+          byRetVal = UASCONS_OK;
+        }
       } /* if */
       else
       {
@@ -706,7 +741,7 @@ static UAS_UInt8 byUASCONS_StateWaitForEvent
       } /* if */
 
       /*** T17 ***/
-      else if ( pzResponseSpdu->dwMonitoringNumber NOT_EQ pzStateMachine->dwPrevMNR_i )
+      else if ( ( bUASCONS_NoEmptySPDU( pzResponseSpdu ) ) && ( pzResponseSpdu->dwMonitoringNumber NOT_EQ pzStateMachine->dwPrevMNR_i ))
       {
 #ifdef UASDEF_DBG
         vUASCDBG_PrintTransitionName( "T17" );
@@ -1000,7 +1035,6 @@ static UAS_UInt8 byUASCONS_StateCheckResponseSPDU
         else
         {
           /* do nothing */
-          UASRVAR_SET_BOOL( pzStateMachine->bSPDUCheck_i, 0u );
         } /* else */
 
         /* Set Flags if OA requested */
@@ -1121,7 +1155,7 @@ static UAS_UInt8 byUASCONS_StateCheckResponseSPDU
                ( pzResponseSpdu->zSpduId.dwPart2 NOT_EQ pzStateMachine->zSPDUID_i.dwPart2 ) ||
                ( pzResponseSpdu->zSpduId.dwPart3 NOT_EQ pzStateMachine->zSPDUID_i.dwPart3 ) )
           {
-            vUASCONS_SetDiag( &pzInstance->zDI, pzRequestSpdu, UAS_DIAG_SD_ID_ERR_OA, 1u );
+            vUASCONS_SetDiag( &pzInstance->zDI, pzRequestSpdu, UAS_DIAG_SD_ID_ERR_OA_1, 1u );
           } /* if */
           else
           {
@@ -1323,6 +1357,7 @@ static void vUASCONS_CalcSpduId_i
   UAS_UInt32 dwSafetyLevelId = 0uL;
   UAS_UInt32 dwProviderId = 0uL;
   UAS_GUID_type zBaseId = { 0uL, 0uL, 0uL, 0uL };
+  UAS_UInt32 dwSpduId_x = 0uL;
 
   switch ( pzInstance->zSPI.bySafetyProviderLevel )
   {
@@ -1354,10 +1389,17 @@ static void vUASCONS_CalcSpduId_i
   } /* switch */
 
   /* Determine the SafetyBaseID to be used */
-  if ( ( 0uL EQ pzInstance->zInputSAPI.zSafetyBaseId.dwPart1 ) AND
-       ( 0uL EQ pzInstance->zInputSAPI.zSafetyBaseId.dwPart2 ) AND
-       ( 0uL EQ pzInstance->zInputSAPI.zSafetyBaseId.dwPart3 ) AND
-       ( 0uL EQ pzInstance->zInputSAPI.zSafetyBaseId.dwPart4 ) )
+  if ( ( 0uL EQ pzInstance->zInputSAPI.zSafetyBaseId.dwData1 ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.wData2 ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.wData3 ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[0] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[1] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[2] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[3] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[4] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[5] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[6] ) AND
+       ( 0u EQ pzInstance->zInputSAPI.zSafetyBaseId.abyData4[7] ) )
   {
     zBaseId = pzInstance->zSPI.zSafetyBaseId;
   } /* if */
@@ -1377,11 +1419,17 @@ static void vUASCONS_CalcSpduId_i
   } /* else */
 
   /* SPDU_ID_1_i := BaseID (bytes 0…3) XOR SafetyProviderLevel_ID */
-  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart1, zBaseId.dwPart1 XOR dwSafetyLevelId );
-  /* SPDU_ID_2_i := BaseID (bytes 4…7) XOR SPI_.SafetyStructureSignature_i */
-  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart2, zBaseId.dwPart2 XOR pzInstance->zSPI.dwSafetyStructureSignature );
+  dwSpduId_x = zBaseId.dwData1 XOR dwSafetyLevelId;
+  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart1, dwSpduId_x );
+  /* SPDU_ID_2_i := BaseID (bytes 4…7) XOR SafetyStructureSignature_i */
+  dwSpduId_x = ( ( (UAS_UInt32)zBaseId.wData2 ) + (UAS_UInt32)zBaseId.wData3 * 256uL * 256uL )  XOR pzInstance->zSPI.dwSafetyStructureSignature;
+  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart2, dwSpduId_x );
   /* SPDU_ID_3_i := BaseID (bytes 8…11) XOR BaseID (bytes 12…15) XOR ProviderID */
-  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart3, zBaseId.dwPart3 XOR zBaseId.dwPart4 ^ dwProviderId );
+  dwSpduId_x =
+    ( ( (UAS_UInt32)zBaseId.abyData4[0] ) + ( (UAS_UInt32)zBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)zBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( zBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
+    ( ( (UAS_UInt32)zBaseId.abyData4[4] ) + ( (UAS_UInt32)zBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)zBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( zBaseId.abyData4[7] * 256uL * 256uL * 256uL ) ) XOR
+      dwProviderId;
+  UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart3, dwSpduId_x );
 } /* end of function */
 
 
@@ -1535,11 +1583,10 @@ static UAS_UInt8 byUASCONS_CheckRedundantData
   {
     byRetVal = UASCONS_POINTER_ERR;
   } /* if */
-  /* TODO
-  else if ( UASRVAR_INVALID_USIGN32( pzStateMachine->dwStaticParamFcs ) )
+  else if ( UASRVAR_INVALID_USIGN32( pzStateMachine->dwParamFcs ) )
   {
     byRetVal = UASCONS_SOFT_ERR;
-  } else if */
+  } /* else if */
   else if ( UASRVAR_INVALID_CONSSTATE  ( pzStateMachine->nState ) )
   {
     byRetVal = UASCONS_SOFT_ERR;
@@ -1550,16 +1597,15 @@ static UAS_UInt8 byUASCONS_CheckRedundantData
   } /* else if */
   else
   {
-    /* TODO UAS_UInt32  dwParamFcs = byUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
-    if ( dwStaticParamFcs NOT_EQ pzStateMachine->dwStaticParamFcs )
+    UAS_UInt32 dwParamFcs = dwUASCONS_CalculateFcs( pzStateMachine->pzInstanceData );
+    if ( dwParamFcs NOT_EQ pzStateMachine->dwParamFcs )
     {
       byRetVal = UASCONS_SOFT_ERR;
-    } if */
-    /* TODO else
+    } /* if */
+    else
     {
-      TODO */
-    byRetVal = UASCONS_OK;
-    /* TODO } else */
+      byRetVal = UASCONS_OK;
+    } /* else */
   } /* else */
 
   return byRetVal;
@@ -1572,7 +1618,7 @@ static UAS_UInt8 byUASCONS_CheckRedundantData
   * \param[in]  pzStateMachine - Pointer to the instance data
   * \return FSC over the static instance parameter
   */
-static UAS_UInt32  byUASCONS_CalculateFcs
+static UAS_UInt32  dwUASCONS_CalculateFcs
 (
   const UAS_SafetyConsumer_type * const pzInstance
 )
@@ -1752,30 +1798,15 @@ static UAS_ParameterError_type nUASCONS_ValidSPIParam
 {
   UAS_ParameterError_type nResult = UAS_PARAMETER_OK;
 
-  /*** check the SafetyProviderID ***/
-  if ( 0uL EQ pzSPI->dwSafetyProviderId )
-  {
-    nResult = UAS_INVALID_SAFETY_PROVIDER_ID;
-  } /* if */
+  /*** check the SafetyProviderID: all values are valid ***/
 
-  /*** check the BaseID ***/
-  else if ( ( 0uL EQ pzSPI->zSafetyBaseId.dwPart1 ) AND
-  ( 0uL EQ pzSPI->zSafetyBaseId.dwPart2 ) AND
-  ( 0uL EQ pzSPI->zSafetyBaseId.dwPart3 ) AND
-  ( 0uL EQ pzSPI->zSafetyBaseId.dwPart4 ) )
-  {
-    nResult = UAS_INVALID_SAFETY_BASE_ID;
-  } /* if */
+  /*** check the BaseID: all values are valid ***/
 
-  /*** check the SafetyConsumerID ***/
-  else if ( 0uL EQ pzSPI->dwSafetyConsumerId )
-  {
-    nResult = UAS_INVALID_SAFETY_PROVIDER_ID;
-  } /* if */
+  /*** check the SafetyConsumerID: all values are valid ***/
 
   /*** check the SafetyProviderLevel ***/
-  else if ( ( UAS_SAFETY_LEVEL_1 > pzSPI->bySafetyProviderLevel ) AND
-            ( UAS_SAFETY_LEVEL_4 < pzSPI->bySafetyProviderLevel ) )
+  if ( ( UAS_SAFETY_LEVEL_1 > pzSPI->bySafetyProviderLevel ) OR
+       ( UAS_SAFETY_LEVEL_4 < pzSPI->bySafetyProviderLevel ) )
   {
     nResult = UAS_INVALID_SAFETY_PROVIDER_LEVEL;
   } /* if */
@@ -1793,10 +1824,10 @@ static UAS_ParameterError_type nUASCONS_ValidSPIParam
   } /* if */
 
   /*** check the SafetyErrorIntervalLimit ***/
-  else if ( 0uL EQ pzSPI->wSafetyErrorIntervalLimit )
+  else if ( (   6u NOT_EQ pzSPI->wSafetyErrorIntervalLimit ) AND
+            (  60u NOT_EQ pzSPI->wSafetyErrorIntervalLimit ) AND
+            ( 600u NOT_EQ pzSPI->wSafetyErrorIntervalLimit ) )
   {
-    /* TODO: check the valid range (6, 60, 600) */
-    /* all values allowed during development */
     nResult = UAS_INVALID_SAFETY_ERROR_INTERVAL_LIMIT;
   } /* if */
 
@@ -1810,7 +1841,84 @@ static UAS_ParameterError_type nUASCONS_ValidSPIParam
 } /* end of function */
 
 
+/**
+  * Check for valid Parameters
+  * This function checks the values of the ID parameters. They shall not have the value 0
+  * at both interfaces (SPI, SAPI).
+  * No plausibility checks for instance data will be done here, these checks were done
+  * by the corresponding UAS function before calling this function.
+  * \param[in]  pzResponseSpdu - Pointer to the ResponseSPDU
+  * \return 0 if Parameters invalid otherwise 1
+  */
+static UAS_Bool bUASCONS_ParametersOK
+(
+  const UAS_SafetyConsumerSPI_type * const pzSPI,     /**< Pointer to the parameters of the SPI */
+  const UAS_SafetyConsumerSAPII_type * const pzSAPI   /**< Pointer to the input parameters of the SAPI */
+)
+{
+  UAS_Bool bResult = 1;
 
+  if ( ( 0 EQ pzSAPI->zSafetyBaseId.dwData1     ) AND ( 0 EQ pzSPI->zSafetyBaseId.dwData1     ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.wData2      ) AND ( 0 EQ pzSPI->zSafetyBaseId.wData2      ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.wData3      ) AND ( 0 EQ pzSPI->zSafetyBaseId.wData3      ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[0] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[0] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[1] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[1] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[2] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[2] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[3] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[3] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[4] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[4] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[5] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[5] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[6] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[6] ) AND
+       ( 0 EQ pzSAPI->zSafetyBaseId.abyData4[7] ) AND ( 0 EQ pzSPI->zSafetyBaseId.abyData4[7] ) )
+  {
+    bResult = 0;
+  } /* if */
+
+  if ( ( 0 EQ pzSAPI->dwSafetyProviderId ) AND ( 0 EQ pzSPI->dwSafetyProviderId ) )
+  {
+    bResult = 0;
+  } /* if */
+
+  if ( ( 0 EQ pzSAPI->dwSafetyConsumerId ) AND ( 0 EQ pzSPI->dwSafetyConsumerId ) )
+  {
+    bResult = 0;
+  } /* if */
+
+  if ( 0 EQ pzSPI->dwSafetyStructureSignature )
+  {
+    bResult = 0;
+  } /* if */
+
+  return ( bResult );
+
+}
+
+/**
+  * Check for empty SPDU
+  * This function checks if the ResponseSPDU is empty.
+  * [RQ3.3] SPDUs with all values ( incl.CRC signature ) being zero shall be ignored by the receiver.
+  * No plausibility checks for instance data will be done here, these checks were done
+  * by the corresponding UAS function before calling this function.
+  * \param[in]  pzResponseSpdu - Pointer to the ResponseSPDU
+  * \return 0 if SPDU is empty otherwise 1
+  */
+static UAS_Bool bUASCONS_NoEmptySPDU
+(
+  const UAS_ResponseSpdu_type * const pzResponseSpdu
+)
+{
+  UAS_Bool bRetVal = 0;
+
+  if ( 0uL NOT_EQ pzResponseSpdu->dwMonitoringNumber)
+  {
+    bRetVal = 1;
+  } /* if */
+  else if ( 0uL NOT_EQ pzResponseSpdu->dwCrc )
+  {
+    bRetVal = 1;
+  } /* else if */
+
+  return bRetVal;
+}
 
 
 

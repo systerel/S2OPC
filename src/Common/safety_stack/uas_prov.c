@@ -1,15 +1,19 @@
 /**
  * OPC Foundation OPC UA Safety Stack
  *
+ * Copyright (c) 2021 OPC Foundation. All rights reserved.
+ * This Software is licensed under OPC Foundation's proprietary Enhanced
+ * Commercial Software License Agreement [LINK], and may only be used by
+ * authorized Licensees in accordance with the terms of such license.
+ * THE SOFTWARE IS LICENSED "AS-IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+ * This notice must be included in all copies or substantial portions of the Software.
+ *
  * \file
- * \author
- *    Copyright 2021 (c) ifak e.V.Magdeburg
- *    Copyright 2021 (c) Elke Hintze
  *
  * \brief OPC UA SafetyProvider definition
  *
- * \date      2021-05-14
- * \revision  0.2
+ * \date      2021-07-08
+ * \revision  0.4
  * \status    in work
  *
  * Defines the functions of the OPC UA SafetyProvider.
@@ -237,9 +241,9 @@ UAS_UInt8 byUASPROV_Init
         } /* for */
 
         /* Initialize the SAPI outputs */
-        pzInstance->zOutputSAPI.bOperatorAckRequested = 0u;
-        pzInstance->zOutputSAPI.dwSafetyConsumerId = 0uL;
         pzInstance->zOutputSAPI.dwMonitoringNumber = 0uL;
+        pzInstance->zOutputSAPI.dwSafetyConsumerId = 0uL;
+        pzInstance->zOutputSAPI.bOperatorAckRequested = 0u;
 
         /* Store the FCS over the static driver parameter */
         UASRVAR_SET_USIGN32( pzStateMachine->dwParamFcs, dwFcs );
@@ -384,7 +388,6 @@ UAS_UInt8 byUASPROV_Start
 #ifdef UASDEF_DBG
       vUASPDBG_PrintTransitionName( "Initialization" );
 #endif /* ifdef UASDEF_DBG */
-      /* TODO: Review specification: "SAPI.SafetyData:= 0" is invalid writing to input data */
       for ( wIndex = 0u; wIndex < pzStateMachine->pzInstanceData->wSafetyDataLength; wIndex++ )
       {
         /*lint -e(960) */  /* supress warning "pointer arithmetic other than array indexing used"
@@ -397,7 +400,6 @@ UAS_UInt8 byUASPROV_Start
       UASRVAR_SET_USIGN32( pzStateMachine->zRequestSpdu_i.dwSafetyConsumerId, 0uL );
       UASRVAR_SET_USIGN32( pzStateMachine->zRequestSpdu_i.dwMonitoringNumber, 0uL );
       UASRVAR_SET_USIGN8( pzStateMachine->zRequestSpdu_i.byFlags, 0u );
-      vUASPROV_BuildResponseSPDU ( pzStateMachine );
 
       /*** T1 ****/
 #ifdef UASDEF_DBG
@@ -676,11 +678,14 @@ static void vUASPROV_BuildResponseSPDU
   UAS_UInt16 wIndex;
   UAS_UInt16 wDataLength;
 
+  /* Copy the SafetyData */
   wDataLength = pzStateMachine->pzInstanceData->wSafetyDataLength;
   for ( wIndex = 0u; wIndex < wDataLength; wIndex++ )
   {
     pzResponseSpdu->pbySerializedSafetyData[wIndex] = pzInputSAPI->pbySerializedSafetyData[wIndex];
   } /* for */
+
+  /* Copy the Flags */
   pzResponseSpdu->byFlags = 0u;
   if ( pzInputSAPI->bActivateFsv )
   {
@@ -694,22 +699,39 @@ static void vUASPROV_BuildResponseSPDU
   {
     UASPROV_SET_BIT( pzResponseSpdu->byFlags, UAS_BITPOS_TEST_MODE_ACTIVATED );
   } /* if */
-  if ( ( 0uL EQ pzInputSAPI->zSafetyBaseId.dwPart1 ) AND
-       ( 0uL EQ pzInputSAPI->zSafetyBaseId.dwPart2 ) AND
-       ( 0uL EQ pzInputSAPI->zSafetyBaseId.dwPart3 ) AND
-       ( 0uL EQ pzInputSAPI->zSafetyBaseId.dwPart4 ) )
 
+  /* Determine the SafetyBaseID to be used in SPDU_ID */
+  if ( ( 0uL EQ pzInputSAPI->zSafetyBaseId.dwData1     ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.wData2      ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.wData3      ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[0] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[1] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[2] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[3] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[4] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[5] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[6] ) AND
+       ( 0u  EQ pzInputSAPI->zSafetyBaseId.abyData4[7] ) )
   {
-    pzResponseSpdu->zSpduId.dwPart1 = pzSPI->zSafetyBaseId.dwPart1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
-    pzResponseSpdu->zSpduId.dwPart2 = pzSPI->zSafetyBaseId.dwPart2 XOR pzSPI->dwSafetyStructureSignature;
-    pzResponseSpdu->zSpduId.dwPart3 = pzSPI->zSafetyBaseId.dwPart3 XOR pzSPI->zSafetyBaseId.dwPart4;
+    /* SPDU_ID_1_i := BaseID (bytes 0…3) XOR SafetyProviderLevel_ID */
+    pzResponseSpdu->zSpduId.dwPart1 = pzSPI->zSafetyBaseId.dwData1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
+    /* SPDU_ID_2_i := BaseID (bytes 4…7) XOR SafetyStructureSignature_i */
+    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.wData2 ) + (UAS_UInt32)pzSPI->zSafetyBaseId.wData3 * 256uL * 256uL )  XOR pzSPI->dwSafetyStructureSignature;
+    /* SPDU_ID_3_i := BaseID (bytes 8…11) XOR BaseID (bytes 12…15) XOR ProviderID */
+    pzResponseSpdu->zSpduId.dwPart3 =
+    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[0] ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
+    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[4] ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[7] * 256uL * 256uL * 256uL ) );
   } /* if */
   else
   {
-    pzResponseSpdu->zSpduId.dwPart1 = pzInputSAPI->zSafetyBaseId.dwPart1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
-    pzResponseSpdu->zSpduId.dwPart2 = pzInputSAPI->zSafetyBaseId.dwPart2 XOR pzSPI->dwSafetyStructureSignature;
-    pzResponseSpdu->zSpduId.dwPart3 = pzInputSAPI->zSafetyBaseId.dwPart3 XOR pzInputSAPI->zSafetyBaseId.dwPart4;
+    pzResponseSpdu->zSpduId.dwPart1 = pzInputSAPI->zSafetyBaseId.dwData1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
+    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData2 ) + (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData3 * 256uL * 256uL )  XOR pzSPI->dwSafetyStructureSignature;
+    pzResponseSpdu->zSpduId.dwPart3 =
+    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[0] ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
+    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[4] ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[7] * 256uL * 256uL * 256uL ) );
   } /* else */
+
+  /* Determine the ProviderID to be used in SPDU_ID */
   if ( 0uL EQ pzInputSAPI->dwSafetyProviderId )
   {
     pzResponseSpdu->zSpduId.dwPart3 = pzResponseSpdu->zSpduId.dwPart3 XOR pzSPI->dwSafetyProviderId;
@@ -721,6 +743,8 @@ static void vUASPROV_BuildResponseSPDU
   pzResponseSpdu->dwSafetyConsumerId = pzStateMachine->zRequestSpdu_i.dwSafetyConsumerId;
   pzResponseSpdu->dwMonitoringNumber = pzStateMachine->zRequestSpdu_i.dwMonitoringNumber;
   pzResponseSpdu->dwCrc = dwUASCRC_Calculate( pzResponseSpdu, pzStateMachine->pzInstanceData->wSafetyDataLength );
+
+  /* Copy the NonSafetyData */
   wDataLength = pzStateMachine->pzInstanceData->wNonSafetyDataLength;
   for ( wIndex = 0u; wIndex < wDataLength; wIndex++ )
   {
@@ -751,11 +775,10 @@ static UAS_UInt8 byUASPROV_CheckRedundantData
   {
     byRetVal = UASPROV_POINTER_ERR;
   } /* if */
-  /* TODO
-  else if ( UASRVAR_INVALID_USIGN32( pzStateMachine->dwStaticParamFcs ) )
+  else if ( UASRVAR_INVALID_USIGN32( pzStateMachine->dwParamFcs ) )
   {
     byRetVal = UASPROV_SOFT_ERR;
-  } else if */
+  } /* else if */
   else if ( UASRVAR_INVALID_PROVSTATE  ( pzStateMachine->nState ) )
   {
     byRetVal = UASPROV_SOFT_ERR;
@@ -961,10 +984,17 @@ static UAS_ParameterError_type nUASPROV_ValidSPIParam
   UAS_ParameterError_type nResult = UAS_PARAMETER_OK;
 
   /*** check the BaseID ***/
-  if ( ( 0uL EQ pzSPI->zSafetyBaseId.dwPart1 ) AND
-       ( 0uL EQ pzSPI->zSafetyBaseId.dwPart2 ) AND
-       ( 0uL EQ pzSPI->zSafetyBaseId.dwPart3 ) AND
-       ( 0uL EQ pzSPI->zSafetyBaseId.dwPart4 ) )
+  if ( ( 0uL EQ pzSPI->zSafetyBaseId.dwData1 ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.wData2 ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.wData3 ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[0] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[1] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[2] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[3] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[4] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[5] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[6] ) AND
+       ( 0uL EQ pzSPI->zSafetyBaseId.abyData4[7] ) )
   {
     nResult = UAS_INVALID_SAFETY_BASE_ID;
   } /* if */
