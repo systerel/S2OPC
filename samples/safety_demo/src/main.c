@@ -63,7 +63,7 @@
 
 #include "config.h"
 #include "interactive.h"
-#include "safetyTypes.h"
+#include "safetyDemo.h"
 #include "uam_cache.h"
 
 #include "uam.h"
@@ -342,7 +342,7 @@ static void SafetyDemo_Initialize_UAM(SafetyDemo_interactive_Context* pContext, 
         assert((NULL != pContext) && (NULL != pContext->pConfig));
         if (pContext->isProvider)
         {
-            *pStatus = SafetyTypes_Create_ProviderSample();
+            *pStatus = SafetyDemo_Create_ProviderSample();
 
             if (SOPC_STATUS_OK != *pStatus)
             {
@@ -351,7 +351,7 @@ static void SafetyDemo_Initialize_UAM(SafetyDemo_interactive_Context* pContext, 
         }
         else
         {
-            *pStatus = SafetyTypes_Create_ConsumerSample();
+            *pStatus = SafetyDemo_Create_ConsumerSample();
 
             if (SOPC_STATUS_OK != *pStatus)
             {

@@ -44,7 +44,7 @@
 
 #include "config.h"
 #include "interactive.h"
-#include "safetyTypes.h"
+#include "safetyDemo.h"
 #include "uam_cache.h"
 #include "uam_spduEncoders.h"
 
@@ -724,7 +724,7 @@ static bool doChangeAck(SafetyDemo_interactive_Context* pContext, const char* pa
 {
     (void) params;
     (void) pContext;
-    SafetyTypes_DoAck();
+    SafetyDemo_DoAck();
     return true;
 }
 
@@ -773,29 +773,29 @@ static bool doEditSafeContent(SafetyDemo_interactive_Context* pContext, const ch
         if (strncmp(params, "b1", strlen("b1")) == 0)
         {
             printf("Set B1 to %u\n", uParam2);
-            SafetyTypes_SetSafetyDataB1(uParam2);
+            SafetyDemo_SetSafetyDataB1(uParam2);
         }
         else if (strncmp(params, "b2", strlen("b2")) == 0)
         {
             printf("Set B2 to %u\n", uParam2);
-            SafetyTypes_SetSafetyDataB2(uParam2);
+            SafetyDemo_SetSafetyDataB2(uParam2);
         }
         else if (strncmp(params, "v1", strlen("v1")) == 0)
         {
             printf("Set V1 to %u\n", uParam2);
-            SafetyTypes_SetSafetyDataV1((uint8_t) uParam2);
+            SafetyDemo_SetSafetyDataV1((uint8_t) uParam2);
         }
         else if (strncmp(params, "v2", strlen("v2")) == 0)
         {
             printf("Set v2 to %u\n", uParam2);
-            SafetyTypes_SetSafetyDataV2((uint8_t) uParam2);
+            SafetyDemo_SetSafetyDataV2((uint8_t) uParam2);
         }
         else if (strncmp(params, "txt", strlen("txt")) == 0)
         {
             char txt[10] = {0};
             strncpy(txt, &params[pos2], 9);
             printf("Set Txt to <%s>\n", txt);
-            SafetyTypes_SetSafetyDataTxt(&params[pos2]);
+            SafetyDemo_SetSafetyDataTxt(&params[pos2]);
         }
         else
         {
@@ -815,7 +815,7 @@ static bool doChangeEnable(SafetyDemo_interactive_Context* pContext, const char*
 {
     (void) pContext;
     (void) params;
-    SafetyTypes_SwitchEnableFlag();
+    SafetyDemo_SwitchEnableFlag();
     SafetyDemo_Interactive_ForceRefresh();
     return true;
 }

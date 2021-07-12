@@ -21,10 +21,12 @@
 /******************************* I M P O R T ********************************/
 /*--------------------------------------------------------------------------*/
 
-#include "safetyTypes.h"
+#include "safetyDemo.h"
 #include "config.h"
 
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -56,7 +58,7 @@ static const UAS_SafetyConsumerSPI_type SPI1C_Sample = {.dwSafetyProviderId = SA
                                                         .dwSafetyStructureSignature = SAMPLE_PROVID1_SIGN,
                                                         .dwSafetyConsumerTimeout = SAMPLE_PROVID1_TIMEOUT_MS,
                                                         .bSafetyOperatorAckNecessary = false,
-                                                        .wSafetyErrorIntervalLimit = 5};
+                                                        .wSafetyErrorIntervalLimit = 60};
 static UAM_ProviderHandle hProviderHandle = UAM_NoHandle;
 static UAM_ConsumerHandle hConsumerHandle = UAM_NoHandle;
 
@@ -102,7 +104,7 @@ static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
     memcpy(safeData.sText10, sSafetyDataText10, 10);
 
     // Set output flags
-    pzAppOutputs->bOperatorAckProvider = SafetyTypes_hasAcknowledgement();
+    pzAppOutputs->bOperatorAckProvider = SafetyDemo_hasAcknowledgement();
 
     // Set Output Non Safe data
     assert(pzAppOutputs->pbySerializedNonSafetyData != NULL);
@@ -133,10 +135,10 @@ static bool fConsumer1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
 
     if (!pzAppInputs->bOperatorAckRequested && pzAppOutputs->bOperatorAckConsumer)
     {
-        SafetyTypes_ClearAck();
+        SafetyDemo_ClearAck();
     }
-    pzAppOutputs->bOperatorAckConsumer = SafetyTypes_hasAcknowledgement();
-    pzAppOutputs->bEnable = SafetyTypes_GetEnableFlag();
+    pzAppOutputs->bOperatorAckConsumer = SafetyDemo_hasAcknowledgement();
+    pzAppOutputs->bEnable = SafetyDemo_GetEnableFlag();
 
     printf("\033[17;1H");
     printf("Safe Data = [b1=%d,b2=%d,v1=%02X, v2=%02X,... , txt=<%s>]\033[0K\n", safeUnion.pzType->bData1,
@@ -145,49 +147,49 @@ static bool fConsumer1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
     return true;
 }
 
-void SafetyTypes_DoAck(void)
+void SafetyDemo_DoAck(void)
 {
     bHasAcknowledgement = true;
 }
 
-void SafetyTypes_ClearAck(void)
+void SafetyDemo_ClearAck(void)
 {
     bHasAcknowledgement = false;
 }
-bool SafetyTypes_hasAcknowledgement(void)
+bool SafetyDemo_hasAcknowledgement(void)
 {
     return bHasAcknowledgement;
 }
 
-void SafetyTypes_SwitchEnableFlag(void)
+void SafetyDemo_SwitchEnableFlag(void)
 {
     bIsEnabledFlag = !bIsEnabledFlag;
 }
 
-void SafetyTypes_SetSafetyDataB1(const bool b1Val)
+void SafetyDemo_SetSafetyDataB1(const bool b1Val)
 {
     bSafetyDataB1 = b1Val;
 }
 
-void SafetyTypes_SetSafetyDataB2(const bool b2Val)
+void SafetyDemo_SetSafetyDataB2(const bool b2Val)
 {
     bSafetyDataB2 = b2Val;
 }
-void SafetyTypes_SetSafetyDataV1(const uint8_t v1Val)
+void SafetyDemo_SetSafetyDataV1(const uint8_t v1Val)
 {
     bSafetyDataV1 = v1Val;
 }
 
-void SafetyTypes_SetSafetyDataV2(const uint8_t v2Val)
+void SafetyDemo_SetSafetyDataV2(const uint8_t v2Val)
 {
     bSafetyDataV2 = v2Val;
 }
-void SafetyTypes_SetSafetyDataTxt(const char* text)
+void SafetyDemo_SetSafetyDataTxt(const char* text)
 {
     memcpy(sSafetyDataText10, text, 10);
 }
 
-bool SafetyTypes_GetEnableFlag(void)
+bool SafetyDemo_GetEnableFlag(void)
 {
     return bIsEnabledFlag;
 }
@@ -197,7 +199,7 @@ static const UAM_SafetyConfiguration_type yInstanceConfigSample1 = {.dwRequestHa
                                                                     .wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
                                                                     .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN};
 
-SOPC_ReturnStatus SafetyTypes_Create_ProviderSample(void)
+SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void)
 {
     SOPC_ReturnStatus byUasRetval;
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;
@@ -209,6 +211,7 @@ SOPC_ReturnStatus SafetyTypes_Create_ProviderSample(void)
     if (SOPC_STATUS_OK == byUasRetval)
     {
         LOG_Trace(LOG_INFO, "byUAS_InitSafetyProvider( handle = 0x%08X ) succeeded", hProviderHandle);
+        SafetyDemo_SetSafetyDataTxt ("Hello!");
     } /* if */
     else
     {
@@ -218,7 +221,7 @@ SOPC_ReturnStatus SafetyTypes_Create_ProviderSample(void)
     return byUasRetval;
 }
 
-SOPC_ReturnStatus SafetyTypes_Create_ConsumerSample(void)
+SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void)
 {
     SOPC_ReturnStatus byUasRetval;
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;

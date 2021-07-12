@@ -21,6 +21,7 @@
   INCLUDES
  *===========================================================================*/
 #include <assert.h>
+#include <string.h>
 
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"

@@ -19,7 +19,7 @@ find_package(s2opc)
 if(ENABLE_SAMPLES)
   # Demo PubSub
   add_executable(safety_demo "src/main.c"
-                        "src/safetyTypes.c"
+                        "src/safetyDemo.c"
                         "src/interactive.c"
                         )
   target_compile_options(safety_demo PRIVATE ${S2OPC_COMPILER_FLAGS})

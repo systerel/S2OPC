@@ -46,6 +46,7 @@
 #include "sopc_mem_alloc.h"
 
 #include <assert.h>
+#include <string.h>
 
 /*============================================================================
  * LOCAL TYPES
@@ -301,7 +302,7 @@ SOPC_ReturnStatus UAM_StartSafety(void)
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
     UAS_UInt8 byRetVal = UAS_OK;
-    UInt16 wInstanceCount = 0u;
+    UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextProviderFreeHandle; wInstanceCount++)
     {
@@ -335,7 +336,7 @@ static void ExecuteSafetyConsumers(void)
 {
     UAS_UInt8 byUasRetval = UAS_OK;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    UInt16 wInstanceCount = 0u;
+    UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextConsumerFreeHandle; wInstanceCount++)
     {
@@ -409,7 +410,7 @@ static void ExecuteSafetyProviders(void)
 {
     UAS_UInt8 byUasRetval = UAS_OK;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    UInt16 wInstanceCount = 0u;
+    UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextProviderFreeHandle; wInstanceCount++)
     {

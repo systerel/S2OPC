@@ -19,11 +19,13 @@
 
 /** \file Provides a simple example of use of UAM mapper
  *
- * GetSource and SetTarget callback will get and set their values in the cache.
+ * Create a dummy sample safe structure (SafetyDemo_Sample_Safe1_type).
+ * The provider can modify the content of SAFE data instance.
+ * Provide an acknowledgement simulation
  */
 
-#ifndef SOPC_SAFETY_DEMO_SAFETYTYPES_H_
-#define SOPC_SAFETY_DEMO_SAFETYTYPES_H_
+#ifndef SOPC_SAFETY_DEMO_SAFETYDEMO_H_
+#define SOPC_SAFETY_DEMO_SAFETYDEMO_H_
 
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
@@ -69,7 +71,7 @@ typedef struct
 #define SAMPLE_PROVID1_SIGN 0x5194A101
 #define SAMPLE_PROVID1_GUID                             \
     {                                                   \
-        0x11111111u, 0x22222222, 0x33333333, 0x44444444 \
+        0x11111111u, 0x2222, 0x2222, {0x01, 0x02, 0x03, 0x04, 0x50, 0x60, 0x70, 0x80} \
     }
 #define SAMPLE_PROVID1_HANDLE (SAMPLE_PROVIDER_HDL_TAG + 1)
 
@@ -88,22 +90,22 @@ typedef struct
 //// DEFINITIONS OF EXTERNAL SERVICES
 /////////////////////////////////////////////////////////
 
-SOPC_ReturnStatus SafetyTypes_Create_ProviderSample(void);
-SOPC_ReturnStatus SafetyTypes_Create_ConsumerSample(void);
+SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void);
+SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void);
 
 /** Signals an acknowledgement */
-void SafetyTypes_DoAck(void);
-void SafetyTypes_ClearAck(void);
-/* Checks for an acknwoledgement, \see SafetyTypes_DoAck */
-bool SafetyTypes_hasAcknowledgement(void);
+void SafetyDemo_DoAck(void);
+void SafetyDemo_ClearAck(void);
+/* Checks for an acknwoledgement, \see SafetyDemo_DoAck */
+bool SafetyDemo_hasAcknowledgement(void);
 
 /** Switch enable flag (CONSUMER only) */
-void SafetyTypes_SwitchEnableFlag(void);
-bool SafetyTypes_GetEnableFlag(void);
+void SafetyDemo_SwitchEnableFlag(void);
+bool SafetyDemo_GetEnableFlag(void);
 
-void SafetyTypes_SetSafetyDataB1(const bool b1Val);
-void SafetyTypes_SetSafetyDataB2(const bool b2Val);
-void SafetyTypes_SetSafetyDataV1(const uint8_t v1Val);
-void SafetyTypes_SetSafetyDataV2(const uint8_t v2Val);
-void SafetyTypes_SetSafetyDataTxt(const char* text);
-#endif /* SOPC_SAFETY_DEMO_SAFETYTYPES_H_ */
+void SafetyDemo_SetSafetyDataB1(const bool b1Val);
+void SafetyDemo_SetSafetyDataB2(const bool b2Val);
+void SafetyDemo_SetSafetyDataV1(const uint8_t v1Val);
+void SafetyDemo_SetSafetyDataV2(const uint8_t v2Val);
+void SafetyDemo_SetSafetyDataTxt(const char* text);
+#endif /* SOPC_SAFETY_DEMO_SAFETYDEMO_H_ */
