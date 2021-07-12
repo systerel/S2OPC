@@ -22,6 +22,10 @@
 /******************************* I M P O R T ********************************/
 /*--------------------------------------------------------------------------*/
 #include <stdio.h>
+// SYSTEREL REVIEW : implicit declaration of strcat... (not sure to understand STDFUNC_xxx indirection???)
+#include <string.h>
+// SYSTEREL REVIEW : implicit declaration of va_list:  missing stdarg.h
+#include <stdarg.h>
 #include "sopc_types.h"
 #include "uas_stdtypes.h"
 

@@ -716,19 +716,23 @@ static void vUASPROV_BuildResponseSPDU
     /* SPDU_ID_1_i := BaseID (bytes 0…3) XOR SafetyProviderLevel_ID */
     pzResponseSpdu->zSpduId.dwPart1 = pzSPI->zSafetyBaseId.dwData1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
     /* SPDU_ID_2_i := BaseID (bytes 4…7) XOR SafetyStructureSignature_i */
-    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.wData2 ) + (UAS_UInt32)pzSPI->zSafetyBaseId.wData3 * 256uL * 256uL )  XOR pzSPI->dwSafetyStructureSignature;
+    // SYSTEREL REVIEW : Same remark as uas_conv => this computation leads to intermediate U64 values. Use shifts!
+    // Do not use 256uL !
+    // Note that this is an example of implementation, but it should be made more readable using MACROS in UAS_TYPES.h
+    // (Or revert to initial code...)
+    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.wData2 ) + ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.wData3) << 16 ) )  XOR pzSPI->dwSafetyStructureSignature;
     /* SPDU_ID_3_i := BaseID (bytes 8…11) XOR BaseID (bytes 12…15) XOR ProviderID */
     pzResponseSpdu->zSpduId.dwPart3 =
-    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[0] ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
-    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[4] ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[7] * 256uL * 256uL * 256uL ) );
+    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[0] ) + ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[1] ) << 8 ) + ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[2] ) << 16 ) + ( (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[3] ) << 24 ) ) XOR
+    ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[4] ) + ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[5] ) << 8 ) + ( ( (UAS_UInt32)pzSPI->zSafetyBaseId.abyData4[6] ) << 16 ) + ( (UAS_UInt32)( pzSPI->zSafetyBaseId.abyData4[7] ) << 24 ) );
   } /* if */
   else
   {
     pzResponseSpdu->zSpduId.dwPart1 = pzInputSAPI->zSafetyBaseId.dwData1 XOR UASDEF_SAFETY_PROVIDER_LEVEL_ID;
-    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData2 ) + (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData3 * 256uL * 256uL )  XOR pzSPI->dwSafetyStructureSignature;
+    pzResponseSpdu->zSpduId.dwPart2 = ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData2 ) + ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.wData3) << 16 ) )  XOR pzSPI->dwSafetyStructureSignature;
     pzResponseSpdu->zSpduId.dwPart3 =
-    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[0] ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
-    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[4] ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[7] * 256uL * 256uL * 256uL ) );
+    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[0] ) + ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[1] ) << 8 ) + ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[2] ) << 16 ) + ( (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[3] ) << 24 ) ) XOR
+    ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[4] ) + ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[5] ) << 8 ) + ( ( (UAS_UInt32)pzInputSAPI->zSafetyBaseId.abyData4[6] ) << 16 ) + ( (UAS_UInt32)( pzInputSAPI->zSafetyBaseId.abyData4[7] ) << 24 ) );
   } /* else */
 
   /* Determine the ProviderID to be used in SPDU_ID */
@@ -819,7 +823,8 @@ static UAS_UInt32  byUASPROV_CalculateFcs
 
   if ( NULL NOT_EQ pzInstance )
   {
-    UAS_UInt8 *pbyParam;
+      // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 * (You MUST configure your compiler to show that issue)
+    const UAS_UInt8 *pbyParam;
     UAS_UInt8 byIndex;
 
     /* build FCS across local parameter */
@@ -833,42 +838,48 @@ static UAS_UInt32  byUASPROV_CalculateFcs
     because of block operations to calculate a frame check sequence across the static instance parameter */
 
     /* build FCS across pointer to SafetyProvider instance data */
-    pbyParam = (UAS_UInt8 *)( &pzInstance );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance );
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to SafetyData in the SAPI */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zInputSAPI.pbySerializedSafetyData);
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zInputSAPI.pbySerializedSafetyData);
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to NonSafetyData in the SAPI */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zInputSAPI.pbySerializedNonSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zInputSAPI.pbySerializedNonSafetyData );
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to SafetyData in the ResponseSPDU */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedSafetyData );
     for ( byIndex = 0u; byIndex < sizeof ( UAS_UInt8 * ); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to NonSafetyData in the ResponseSPDU */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedNonSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedNonSafetyData );
     for ( byIndex = 0u; byIndex < sizeof ( UAS_UInt8 * ); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across SPI parameter */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zSPI );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zSPI );
     for ( byIndex = 0u; byIndex < sizeof (UAS_SafetyProviderSPI_type); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];

@@ -65,6 +65,8 @@
 /*lint -restore */
 /**@}*/
 
+// SYSTEREL REVIEW :Add SHIFT operators
+
 
 /**
  * Length of the CRC in octets.
@@ -151,6 +153,8 @@
  * Data type definition for universal unique identifier version4
  * (UUIDv4, also called globally unique identifier (GUID))  attributes.
  */
+// SYSTEREL REVIEW : Why did you change the easy-useable GUID to that inefficient structure (Yes I know
+// it matches "official definition", but this leads to much more complex code...
 typedef struct UAS_GUID_struct
 {
   UAS_UInt32 dwData1;

@@ -422,6 +422,9 @@ UAS_Bool bUASTIME_PreCheck
 )
 {
   /*TODO*/
+    // SYSTEREL REVIEW : (need to use parameters)
+    (void)pzTimerInst;
+    (void)r_pzTimerInst;
   return 1u;
 }
 

@@ -1492,7 +1492,10 @@ static UAS_UInt8 byUAS_PreCheck
 {
   UAS_UInt8  byRetVal = UAS_DEFAULT_ERR;
 
-  if ( UASRVAR_INVALID_USIGN8( byUAS_Error ) )
+  // Note SYSTEREL: The following line is correct but produced an unavoidable GCC warning...
+  // if ( UASRVAR_INVALID_USIGN8( byUAS_Error ) )
+  const unsigned char tmp8 = (unsigned char)( ~ ( r_byUAS_Error ) );
+  if ( byUAS_Error !=  tmp8)
   {
     /* Inconsistent error code --> return soft error! */
     byRetVal = UAS_SOFT_ERR;

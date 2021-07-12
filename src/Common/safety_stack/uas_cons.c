@@ -1356,7 +1356,8 @@ static void vUASCONS_CalcSpduId_i
   UAS_SafetyConsumer_type * pzInstance = pzStateMachine->pzInstanceData;
   UAS_UInt32 dwSafetyLevelId = 0uL;
   UAS_UInt32 dwProviderId = 0uL;
-  UAS_GUID_type zBaseId = { 0uL, 0uL, 0uL, 0uL };
+  // SYSTEREL REVIEW : Elements do not match anymore the structure...
+  UAS_GUID_type zBaseId = { 0uL, 0uL, 0uL, {0uL} };
   UAS_UInt32 dwSpduId_x = 0uL;
 
   switch ( pzInstance->zSPI.bySafetyProviderLevel )
@@ -1422,12 +1423,19 @@ static void vUASCONS_CalcSpduId_i
   dwSpduId_x = zBaseId.dwData1 XOR dwSafetyLevelId;
   UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart1, dwSpduId_x );
   /* SPDU_ID_2_i := BaseID (bytes 4…7) XOR SafetyStructureSignature_i */
-  dwSpduId_x = ( ( (UAS_UInt32)zBaseId.wData2 ) + (UAS_UInt32)zBaseId.wData3 * 256uL * 256uL )  XOR pzInstance->zSPI.dwSafetyStructureSignature;
+  // SYSTEREL REVIEW : Why did you replace existing code with 4 * UInt32 ?
+  // Do not use *256 hard coded, but please use SHIFTS thanks to MACROS in "uas_type.h"
+  // This code is not safety-compliant because it mixes up INT and LONG int values (which have different sizes)
+  //  -> 256UL is LONG so that the sum is UINT64, not UINT32, which leads to truncation in final operation.
+  // Once again, initial definition of GUID was way much obvious and maintainable.
+  dwSpduId_x = ( ( (UAS_UInt32)zBaseId.wData2 ) + ( ( (UAS_UInt32)zBaseId.wData3) << 16 ) ) XOR pzInstance->zSPI.dwSafetyStructureSignature;
   UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart2, dwSpduId_x );
+
+  // SYSTEREL REVIEW : Warning : Non ascii chars "..." on next line.
   /* SPDU_ID_3_i := BaseID (bytes 8…11) XOR BaseID (bytes 12…15) XOR ProviderID */
   dwSpduId_x =
-    ( ( (UAS_UInt32)zBaseId.abyData4[0] ) + ( (UAS_UInt32)zBaseId.abyData4[1] * 256uL ) + ( (UAS_UInt32)zBaseId.abyData4[2] * 256u * 256uL ) + (UAS_UInt32)( zBaseId.abyData4[3] * 256uL * 256uL * 256uL ) ) XOR
-    ( ( (UAS_UInt32)zBaseId.abyData4[4] ) + ( (UAS_UInt32)zBaseId.abyData4[5] * 256uL ) + ( (UAS_UInt32)zBaseId.abyData4[6] * 256u * 256uL ) + (UAS_UInt32)( zBaseId.abyData4[7] * 256uL * 256uL * 256uL ) ) XOR
+    ( ( (UAS_UInt32)zBaseId.abyData4[0] ) + ( ( (UAS_UInt32)zBaseId.abyData4[1]) << 8 ) + ( ( (UAS_UInt32)zBaseId.abyData4[2]) << 16 ) + ( ( (UAS_UInt32) zBaseId.abyData4[3]) << 24 ) ) XOR
+    ( ( (UAS_UInt32)zBaseId.abyData4[4] ) + ( ( (UAS_UInt32)zBaseId.abyData4[5])  << 8 ) + ( ( (UAS_UInt32)zBaseId.abyData4[6]) << 16 ) + ( ( (UAS_UInt32) zBaseId.abyData4[7]) << 24 ) ) XOR
       dwProviderId;
   UASRVAR_SET_USIGN32( pzStateMachine->zSPDUID_i.dwPart3, dwSpduId_x );
 } /* end of function */
@@ -1627,7 +1635,9 @@ static UAS_UInt32  dwUASCONS_CalculateFcs
 
   if ( NULL NOT_EQ pzInstance )
   {
-    UAS_UInt8 *pbyParam;
+      // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 * (You MUST configure your compiler to show that issue)
+      // pbyParam MUST be pointing to const
+    const UAS_UInt8 *pbyParam;
     UAS_UInt8 byIndex;
 
     /* build FCS across local parameter */
@@ -1641,42 +1651,48 @@ static UAS_UInt32  dwUASCONS_CalculateFcs
     because of block operations to calculate a frame check sequence across the static instance parameter */
 
     /* build FCS across pointer to SafetyConsumer instance data */
-    pbyParam = (UAS_UInt8 *)( &pzInstance );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance );
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to SafetyData in the SAPI */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zOutputSAPI.pbySerializedSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zOutputSAPI.pbySerializedSafetyData );
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
       /* build FCS across pointer to NonSafetyData in the SAPI */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zOutputSAPI.pbySerializedNonSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zOutputSAPI.pbySerializedNonSafetyData );
     for ( byIndex = 0u; byIndex < sizeof (UAS_UInt8 *); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to SafetyData in the ResponseSPDU */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedSafetyData );
     for ( byIndex = 0u; byIndex < sizeof ( UAS_UInt8 * ); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
     /* build FCS across pointer to NonSafetyData in the ResponseSPDU */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedNonSafetyData );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zResponseSPDU.pbySerializedNonSafetyData );
     for ( byIndex = 0u; byIndex < sizeof ( UAS_UInt8 * ); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];
     } /* for */
 
       /* build FCS across SPI parameter */
-    pbyParam = (UAS_UInt8 *)( &pzInstance->zSPI );
+    // SYSTEREL REVIEW : No way to map a struct const * to a UAS_UInt8 *
+    pbyParam = (const UAS_UInt8 *)( &pzInstance->zSPI );
     for ( byIndex = 0u; byIndex < sizeof (UAS_SafetyConsumerSPI_type); byIndex++ )
     {
       dwParamFcs += pbyParam[byIndex];

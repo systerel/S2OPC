@@ -89,11 +89,32 @@ typedef uint64_t           UAS_UInt64; /**< An integer value between 0 and 18446
 /** size of a pointer, to be adapted ( UAS_Int16, UAS_Int32, UAS_Int64 )
   * only used for the redundant (inverse) storage of pointer variables
   */
-#define UAS_INVERSE_PTR    UAS_Int32
+// SYSTEREL REVIEW : uintptr_t or intptr_t type ensures the compatibility with pointers.
+#define UAS_INVERSE_PTR    uintptr_t
 
 /*---------------------*/
 /*  F U N C T I O N S  */
 /*---------------------*/
+
+// SYSTEREL REVIEW :Add undefined symbols.. TBC
+//#define UInt8 UAS_UInt8
+//#define UInt16 UAS_UInt16
+//#define UInt32 UAS_UInt32
+//#define Int8 UAS_Int8
+//#define Int16 UAS_Int16
+//#define Int32 UAS_Int32
+#define LARGE_INTEGER uint64_t
+#define STDFUNC_LARGE_INTEGER LARGE_INTEGER
+#define STDFUNC_strcpy strcpy
+#define STDFUNC_strcat strcat
+#define STDFUNC_strncat strncat
+#define STDFUNC_snprintf snprintf
+#define STDFUNC_vsnprintf vsnprintf
+#define STDFUNC_strtoul strtoul
+#define STDFUNC_strtol strtol
+#define STDFUNC_strcmp strcmp
+#define STDFUNC_memset memset
+#define STDFUNC_strlen strlen
 
 
 /*---------------------*/
