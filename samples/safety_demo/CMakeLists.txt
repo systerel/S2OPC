@@ -17,6 +17,16 @@ find_package(s2opc)
 
 
 if(ENABLE_SAMPLES)
+  # Demo NonSafe Producer
+  add_executable(prod_ns "src/prod_ns.c"
+                        )
+                        
+  target_compile_options(prod_ns PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(prod_ns PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")
+
+  target_link_libraries(prod_ns PRIVATE s2opc_pubsub s2opc_clientserver-xml-loaders-expat)
+  target_include_directories(prod_ns PRIVATE safety_demo)
+  
   # Demo PubSub
   add_executable(safety_demo "src/main.c"
                         "src/safetyDemo.c"

@@ -70,7 +70,16 @@ typedef struct UAM_DynamicSafetyData_struct
 /**
  * Content of all Providers and Consumers configurations
  */
-static UAM_DynamicSafetyData_type uamDynamicSafetyData = {false, false, 0, 0, {{0}}, {{0}}, {0}, {0}};
+static UAM_DynamicSafetyData_type uamDynamicSafetyData =
+{
+        .bInitialized = false,
+        .bLocked = false,
+        .bNextConsumerFreeHandle = 0,
+        .azProviderConfiguration = {{0}},
+        .azConsumerConfiguration = {{0}},
+        .apfProviderCycle = {0},
+        .apfConsumerCycle = {0}
+};
 
 /**
  * Read the SPDURequest received on a provider and copy it to pzProvider->zRequestSPDU

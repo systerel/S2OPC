@@ -96,6 +96,18 @@ void UAM_Cache_Lock(void);
 void UAM_Cache_Unlock(void);
 
 /**
+ * TODO
+ */
+typedef void (*UAM_Cache_Notify_CB) (const SOPC_NodeId* const  pNid,
+        const SOPC_DataValue* const pDv);
+
+/**
+ * TODO
+ */
+void UAM_Cache_SetNotify(UAM_Cache_Notify_CB pfNotify);
+
+
+/**
  * Module cleanup function. Shall be called before software exit
  */
 void UAM_Cache_Clear(void);

@@ -43,6 +43,7 @@ SOPC_Dict* g_cache = NULL;
  * Mutex on g_cache accesses
  */
 Mutex g_lock;
+UAM_Cache_Notify_CB g_pfNotify = NULL;
 
 /*===========================================================================*/
 static void free_datavalue(void* value)
@@ -510,6 +511,10 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
 
             ok = UAM_Cache_Set(key, item);
         }
+        if (ok && g_pfNotify != NULL)
+        {
+            (* g_pfNotify) (key, item);
+        }
 
         /* As we have ownership of the wv, clear it */
         OpcUa_WriteValue_Clear(wv);
@@ -518,6 +523,13 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
     SOPC_Free(nodesToWrite);
 
     return ok;
+}
+
+/*===========================================================================*/
+void UAM_Cache_SetNotify(UAM_Cache_Notify_CB pfNotify)
+{
+    assert (pfNotify != NULL);
+    // TODO
 }
 
 /*===========================================================================*/

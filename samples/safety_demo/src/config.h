@@ -22,8 +22,6 @@
 
 /** Defaults configuration values for the sample */
 
-#define IS_LOOPBACK "0"
-
 /* Default paths */
 #define SAFETY_XML_PROVIDER_DEMO "./safety_demo_prov.xml"
 #define SAFETY_XML_CONSUMER_DEMO "./safety_demo_cons.xml"
@@ -39,11 +37,5 @@
 #define NODEID_SPDU_REQUEST_NUM 0x01000001
 
 #define NODEID_SPDU_RESPONSE_NUM 0x01000002
-
-/* Number of recorded timestamps in the RTT calculations */
-#define RTT_SAMPLES "1024"
-
-/* Empty CSV path means no CSV recording, but print some stats on stdout (can be versbose) */
-#define CSV_PREFIX "./rtt"
 
 #endif /* CONFIG_H_ */

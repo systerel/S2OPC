@@ -113,6 +113,17 @@ typedef UAS_UInt8 UAM_ProviderHandle;
  */
 typedef UAS_UInt8 UAM_ConsumerHandle;
 
+/**
+ * Safe Channel Redundancy settings
+ */
+typedef enum UAM_RedundancySetting_enum
+{
+    /** There is only one SAFE channel */
+    UAM_RDD_SINGLE_CHANNEL,
+    /** There are two diversified channel. */
+    UAM_RDD_DUAL_CHANNEL,
+} UAM_RedundancySetting_type;
+
 /*============================================================================
  * EXPORTED CONSTANTS
  *===========================================================================*/
