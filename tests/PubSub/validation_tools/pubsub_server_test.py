@@ -18,6 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from os import error
 from time import sleep
 from shutil import copyfile, move
 import argparse
@@ -345,7 +346,7 @@ def helpAssertState(psserver, expected, pLogger):
 def testPubSubDynamicConf():
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+    pubsubserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
 
     defaultXml2Restore = False
 
@@ -703,7 +704,7 @@ def testPubSubDynamicConf():
 def testPubSubStaticConf():
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+    pubsubserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
 
     defaultXml2Restore = False
 
@@ -789,6 +790,9 @@ def testPubSubStaticConf():
         logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint is changed', 1245 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', 9874 == pubsubserver.getValue(NID_SUB_INT))
+    
+    except error:
+        print(error)
 
     finally:
         pubsubserver.disconnect()
@@ -799,12 +803,13 @@ def testPubSubStaticConf():
 
 
 if __name__=='__main__':
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument('--static', action='store_true', default=False,
-                           help='Flag to indicates that Pub-Sub configuration is static. Default is false')
-    args = argparser.parse_args()
-
-    if args.static:
-        testPubSubStaticConf()
-    else:
-        testPubSubDynamicConf()
+#    argparser = argparse.ArgumentParser()
+#    argparser.add_argument('--static', action='store_true', default=False,
+#                           help='Flag to indicates that Pub-Sub configuration is static. Default is false')
+#    args = argparser.parse_args()
+#
+#    if args.static:
+#        testPubSubStaticConf()
+#    else:
+#        testPubSubDynamicConf()
+	testPubSubStaticConf()
