@@ -60,7 +60,7 @@
 //
 #include "config.h"
 //#include "interactive.h"
-//#include "safetyDemo.h"
+#include "safetyDemo.h"
 
 #include "uas_logitf.h"
 #include "uam_cache.h"
@@ -68,7 +68,7 @@
 //
 #include "uam.h"
 #include "uam_ns.h"
-//#include "uam_spduEncoders.h"
+#include "uam_spduEncoders.h"
 
 /*============================================================================
  * LOCAL TYPES
@@ -81,8 +81,15 @@ typedef struct
     volatile sig_atomic_t stopSignal;
     SOPC_PubSourceVariableConfig* sourceConfig;
     SOPC_SubTargetVariableConfig* targetConfig;
-    UAM_NS_SpduHandle spduHandle;
+    UAM_SessionHandle spduHandle;
 } ProdNS_Demo_interactive_Context;
+
+typedef struct
+{
+    UAS_UInt32 spduSafeToNsHandle;
+    UAS_UInt32 spduNsToSafeHandle;
+} ProdNS_Demo_UAM_User_Params;
+
 
 /*============================================================================
  * LOCAL PROTOTYPES
@@ -94,11 +101,19 @@ static void prod_ns_cycle(void);
 static void prod_ns_stop(void);
 static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv);
 
+static bool prod_ns_OnReceiveSpdu (const UAM_SessionHandle dwHandle, const void * const pSpdu, const size_t sLen);
+
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
 static SOPC_ReturnStatus g_status = SOPC_STATUS_OK;
 static ProdNS_Demo_interactive_Context g_context;
+
+static ProdNS_Demo_UAM_User_Params zUAM_UserParams =
+{
+        .spduSafeToNsHandle = NODEID_SPDU_RESPONSE_NUM,
+        .spduNsToSafeHandle = NODEID_SPDU_REQUEST_NUM,
+};
 
 /*============================================================================
  * LOCAL FUNCTIONS
@@ -278,18 +293,50 @@ static void prod_ns_initialize_sks(void)
 /*===========================================================================*/
 static void prod_ns_initialize_uam(void)
 {
+    bool result = false;
+    if (SOPC_STATUS_OK == g_status)
+    {
+        g_status = UAM_SpduEncoder_Initialize();
+    }
+
+
+    if (SOPC_STATUS_OK == g_status)
+    {
+        // : note SPDU request is created on both PROV (Sub) & CONS (Pub)
+        g_status = UAM_SpduEncoder_CreateSpduRequest(NODEID_SPDU_REQUEST_NUM);
+        if (SOPC_STATUS_OK != g_status)
+        {
+            printf("[EE] Failed to create SPDU Response with NodeId=[ns=%d;i=%d]\n", UAM_NAMESPACE,
+                    NODEID_SPDU_REQUEST_NUM);
+            printf("     => This variable must be defined in configuration file with dataType=\"Structure\"\n");
+        }
+    }
+    if (SOPC_STATUS_OK == g_status)
+    {
+        g_status = UAM_SpduEncoder_CreateSpduResponse(NODEID_SPDU_RESPONSE_NUM, SAMPLE1_SAFETY_DATA_LEN,
+                SAMPLE1_UNSAFE_DATA_LEN);
+        if (SOPC_STATUS_OK != g_status)
+        {
+            printf("[EE] Failed to create SPDU Response with NodeId=[ns=%d;i=%d]\n", UAM_NAMESPACE,
+                    NODEID_SPDU_RESPONSE_NUM);
+            printf("     => This variable must be defined in configuration file with dataType=\"Structure\"\n");
+        }
+    }
+
     if (SOPC_STATUS_OK == g_status)
     {
         UAM_NS_Configuration_type zConfig =
         {
                 .eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
-                .dwInputHandle = NODEID_SPDU_REQUEST_NUM,
-                .dwOutputHandle = NODEID_SPDU_RESPONSE_NUM
+                .dwHandle = SESSION_UAM_ID,
+                .pfSetup = NULL,
+                .pfOnSpduReceive = prod_ns_OnReceiveSpdu,
+                .pUserParams = (void*)&zUAM_UserParams,
         };
         UAM_NS_Initialize();
 
-        g_context.spduHandle = UAM_NS_CreateSpdu(&zConfig);
-        if (g_context.spduHandle == UAM_NoHandle)
+        result = UAM_NS_CreateSpdu(&zConfig);
+        if (result == false)
         {
             printf("# UAM_NS_CreateSpdu failed\n");
             g_status = SOPC_STATUS_NOK;
@@ -344,16 +391,52 @@ static void prod_ns_cycle(void)
     }
 }
 
+
+/*===========================================================================*/
+static bool prod_ns_OnReceiveSpdu (const UAM_SessionHandle dwHandle, const void * const pSpdu, const size_t sLen)
+{
+
+    return true;
+}
+
 /*===========================================================================*/
 static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv)
 {
+    // Reminder: this function is called when the Cache is updated (in this case: on Pub-Sub new reception)
     if (pNid == NULL || pDv == NULL)
     {
         return;
     }
-    if (pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id)
+    if (pNid->Namespace == UAM_NAMESPACE &&
+            pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
+            pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+            pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id)
     {
-        printf("recevied NodeId = %d\n", pNid->Data.Numeric);
+        // We received an extension object (not of array type) on the correct namespace.
+
+        // Retrieve and copy the object
+        SOPC_ExtensionObject* pzExtension = pDv->Value.Value.ExtObject;
+        assert (pzExtension->Length > 0 && "unexpected empty SPDU!");
+        assert (pzExtension->Length < 0x1000 && "unexpected large SPDU!");
+        size_t sLen = (size_t) pzExtension->Length;
+
+        UAS_UInt8* puBuffer = SOPC_Malloc(sLen);
+        assert (puBuffer != NULL);
+
+        memcpy(puBuffer, pzExtension->Body.Object.Value, sLen);
+
+        // Check whether this is a SPDU received data
+        switch (pNid->Data.Numeric) {
+        case NODEID_SPDU_REQUEST_NUM:
+            printf("Received Ext NODEID_SPDU_REQUEST_NUM (l=%d)!!\n", pzExtension->Length);
+
+            break;
+        default:
+            break;
+        }
+
+        // relese buffer
+        SOPC_Free(puBuffer);
     }
 }
 

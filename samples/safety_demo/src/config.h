@@ -33,6 +33,9 @@
 /* Sleep period of the main loop */
 #define SLEEP_TIMEOUT (100)
 
+/* Session Id for UAM */
+#define SESSION_UAM_ID ((UAM_SessionHandle) 0x010203u)
+
 /* NodeIds of SPDUs, shall match the configuration */
 #define NODEID_SPDU_REQUEST_NUM 0x01000001
 

@@ -36,27 +36,79 @@
 #include "sopc_common.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_dict.h"
 
 #include <assert.h>
 #include <string.h>
+#include <stdint.h>
 
 /*============================================================================
  * LOCAL TYPES
  *===========================================================================*/
-typedef struct UAM_NS_DynamicConfig_struct
-{
-    UAM_NS_SpduHandle hNextFreeHandle;
-} UAM_NS_DynamicConfig_type;
 
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
-static UAM_NS_DynamicConfig_type zConfig;
-static bool bInitialized = false;
+/**
+ * A dictionary object { UAM_SessionHandle* : UAM_NS_Configuration_type* }
+ */
+static SOPC_Dict* gSessions = NULL; // TODO : not sure that is really useful!
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
+/*===========================================================================*/
+static uint64_t Session_KeyHash_Fct(const void* pKey)
+{
+    uint64_t result = 0xFFFFFFFFFFFFFFFF;
+    if (pKey != 0)
+    {
+        const UAM_SessionHandle* pHandle = (const UAM_SessionHandle*)pKey;
+        return *pHandle;
+    }
+    return result;
+}
+
+/*===========================================================================*/
+static bool Session_KeyEqual_Fct (const void* a, const void* b)
+{
+    const UAM_SessionHandle h1 = *(const UAM_SessionHandle*)a;
+    const UAM_SessionHandle h2 = *(const UAM_SessionHandle*)b;
+    return h1 == h2;
+}
+
+/*===========================================================================*/
+static UAM_NS_Configuration_type* Session_Get (const UAM_SessionHandle key)
+{
+    return SOPC_Dict_Get (gSessions, &key, NULL);
+}
+
+/*===========================================================================*/
+static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
+{
+    bool bResult = false;
+    assert (NULL != pzConfig);
+
+    UAM_NS_Configuration_type* pzPrevConfig = Session_Get (pzConfig->dwHandle);
+    if (pzPrevConfig == NULL)
+    {
+        UAM_NS_Configuration_type* pzNewConfig = SOPC_Malloc (sizeof(*pzNewConfig));
+        UAM_SessionHandle* pKey = NULL;
+        bResult = (NULL != pzNewConfig);
+        if (bResult)
+        {
+            memcpy(pzNewConfig, pzConfig, sizeof(*pzConfig));
+            pKey = SOPC_Malloc(sizeof(*pKey));
+            bResult = (NULL != pKey);
+        }
+        if (bResult)
+        {
+            // Note : Values and Keys are freed
+            SOPC_Dict_Insert (gSessions, pKey, pzNewConfig);
+        }
+    }
+    return bResult;
+}
 
 /*============================================================================
  * IMPLEMENTATION OF EXTERNAL SERVICES
@@ -65,30 +117,30 @@ static bool bInitialized = false;
 /*===========================================================================*/
 void UAM_NS_Initialize(void)
 {
-    assert (!bInitialized);
-    zConfig.hNextFreeHandle = 0;
-    //TODO
-
-    bInitialized = true;
+    assert (gSessions == NULL);
+    gSessions = SOPC_Dict_Create (NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, SOPC_Free, SOPC_Free);
+    assert (gSessions != NULL);
 }
 
 
 /*===========================================================================*/
-UAM_NS_SpduHandle UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
+bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
 {
-    UAM_NS_SpduHandle hResult = UAM_NoHandle;
-    if  (bInitialized &&  pzConfig != NULL)
+    bool bResult = false;
+    if  (gSessions != NULL &&  pzConfig != NULL)
     {
-        hResult = zConfig.hNextFreeHandle;
-        zConfig.hNextFreeHandle++;
-        //TODO
+        bResult = Session_Add (pzConfig);
+        if (bResult && pzConfig->pfSetup != NULL)
+        {
+            bResult = (*pzConfig->pfSetup) (pzConfig->dwHandle, pzConfig->pUserParams);
+        }
     }
-    return hResult;
+    return bResult;
 }
 
 /*===========================================================================*/
 void UAM_NS_Clear(void)
 {
-    //TODO
-    bInitialized = false;
+    SOPC_Dict_Delete(gSessions);
+    gSessions = NULL;
 }

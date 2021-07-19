@@ -31,6 +31,8 @@
 #include "uam_cache.h"
 //#include "spduEncoders.h"
 
+#define UAM_CACHE_DEBUG 0
+
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
@@ -277,10 +279,12 @@ SOPC_DataValue* UAM_Cache_Get(const SOPC_NodeId* nid)
     SOPC_DataValue* dv = NULL;
 
     dv = (SOPC_DataValue*) SOPC_Dict_Get(g_cache, nid, NULL);
+#if UAM_CACHE_DEBUG
     if (dv == NULL)
     {
         printf("NULL\n");
     }
+#endif
     return dv;
 }
 
@@ -467,7 +471,9 @@ SOPC_DataValue* UAM_Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int
 
     if (SOPC_STATUS_OK != status)
     {
+#if UAM_CACHE_DEBUG
         printf("STATUS NOK in GetVariables : %d\n", status);
+#endif
         for (int32_t i = 0; i < nbValues; ++i)
         {
             SOPC_DataValue_Clear(&dvs[i]);
@@ -510,6 +516,9 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
             SOPC_DataValue_Initialize(dv);
 
             ok = UAM_Cache_Set(key, item);
+#if UAM_CACHE_DEBUG
+            printf("UAM_Cache_Set %d %d\n", key->Data.Numeric, item->Value.BuiltInTypeId);
+#endif
         }
         if (ok && g_pfNotify != NULL)
         {
@@ -529,7 +538,7 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
 void UAM_Cache_SetNotify(UAM_Cache_Notify_CB pfNotify)
 {
     assert (pfNotify != NULL);
-    // TODO
+    g_pfNotify = pfNotify;
 }
 
 /*===========================================================================*/
@@ -551,4 +560,5 @@ void UAM_Cache_Clear(void)
 {
     SOPC_Dict_Delete(g_cache);
     g_cache = NULL;
+    g_pfNotify = NULL;
 }

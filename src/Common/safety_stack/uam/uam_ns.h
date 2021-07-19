@@ -52,16 +52,28 @@
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
+typedef UAS_UInt32 UAM_SessionHandle; // TODO move in SAFE or common part
+
+/** TODO*/
+typedef bool (*UAM_NS_pfCommunicationSetup) (const UAM_SessionHandle dwHandle, void * pUserParams);
+
+/**
+ * Event called when a message has been received on communication side (pub/sub, client/server etc)
+*/
+typedef bool (*UAM_NS_pfOnReceiveMessage) (const UAM_SessionHandle dwHandle, const void * const pSpdu, const size_t sLen);
+
 typedef struct UAM_NS_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
-    /** The numeric part of the OPC NodeId defining the SPDU from NonSafe App to Safe App. */
-    UAS_UInt32 dwInputHandle;
-    /** The numeric part of the OPC NodeId defining the SPDU from Safe App to NonSafe App. */
-    UAS_UInt32 dwOutputHandle;
+    /** Session handle. */
+    UAM_SessionHandle dwHandle;
+    /** Setup function. Can be NULL if not used */
+    UAM_NS_pfCommunicationSetup pfSetup;
+    UAM_NS_pfOnReceiveMessage pfOnSpduReceive;
+    /** User-parameters */
+    void * pUserParams;
 } UAM_NS_Configuration_type;
 
-typedef UAS_UInt8 UAM_NS_SpduHandle;
 
 /*============================================================================
  * EXPORTED CONSTANTS
@@ -82,10 +94,16 @@ void UAM_NS_Initialize(void);
 
 /**
  * \brief Create a SPDU
- * \param pzConfig TODO
- * \return UAM_NoHandle in case of error.
+ * \param pzConfig A pointer to the configuration. The pointer can be freed after call, but not the data pointed
+ *      by pzConfig->pUserParams
+ * \return false in case of error.
  */
-UAM_NS_SpduHandle UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
+bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
+
+/**
+ * \brief Call this function when a message has been received on communication side
+ */
+void UAM_NS_MessageReceived (const void* pData, const size_t sLen);
 
 /**
  * \brief Stop all safety consumers and Producer. Removes all memory allocations
