@@ -114,7 +114,7 @@ struct SOPC_WriterGroup
 {
     SOPC_PubSubConnection* parent;
     uint16_t id;
-    double publishingInterval;
+    double publishingIntervalMs;
     SOPC_UadpWriterGroup messageSettings;
 
     uint8_t dataSetWriters_length;
@@ -770,13 +770,13 @@ void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version)
 double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group)
 {
     assert(NULL != group);
-    return group->publishingInterval;
+    return group->publishingIntervalMs;
 }
 
 void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms)
 {
     assert(NULL != group);
-    group->publishingInterval = interval_ms;
+    group->publishingIntervalMs = interval_ms;
 }
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group)
