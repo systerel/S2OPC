@@ -194,6 +194,11 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
 static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_String* securityPolicy)
 {
     const SOPC_CryptoProfile* secPolicy = SOPC_CryptoProfile_Get(SOPC_String_GetRawCString(securityPolicy));
+    if (NULL == secPolicy)
+    {
+        // Unknown security policy, return unrecommended endpoint value
+        return 0;
+    }
     SOPC_Byte secuPolicyWeight = 0;
 
     switch (secPolicy->SecurityPolicyID)
