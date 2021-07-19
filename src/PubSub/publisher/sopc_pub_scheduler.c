@@ -338,7 +338,6 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
-static void display_sched_attr(int policy, struct sched_param* param);
 static void display_sched_attr(int policy, struct sched_param* param)
 {
     log_info("# Thread current sched policy=%s with priority=%d\n",
@@ -489,7 +488,8 @@ static void* thread_start_publish(void* arg)
             {
                 /* This message next publish cycle was already expired before we encoded the previous one */
                 /* TODO: find other message ID, such as the PublisherId */
-                log_warning("# Warning: message with writerGroupId %" PRIu16 " could not be sent in time\n",
+                log_warning("# Warning: (warned once only) message with writerGroupId %" PRIu16
+                            " could not be sent in time\n",
                             SOPC_WriterGroup_Get_Id(context->group));
                 context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
             }
