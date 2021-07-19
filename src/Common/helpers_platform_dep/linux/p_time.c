@@ -161,7 +161,7 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
     int res = clock_gettime(CLOCK_MONOTONIC, t);
     if (-1 == res)
     {
-        /* TODO: use thread safe function */
+        /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
         return false;
     }
@@ -210,7 +210,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
         int res = clock_gettime(CLOCK_MONOTONIC, &t1);
         if (-1 == res)
         {
-            /* TODO: use thread safe function */
+            /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
             ok = false;
         }
@@ -233,7 +233,7 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
     /* TODO: handle the EINTR case more accurately */
     if (-1 == res && !warned)
     {
-        /* TODO: use thread safe function */
+        /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_nanosleep failed (warn once): %d (%s)", errno,
                                strerror(errno));
         warned = true;

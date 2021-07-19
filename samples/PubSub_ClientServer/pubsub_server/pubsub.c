@@ -198,7 +198,8 @@ bool PubSub_Start(void)
     }
     if (pub_nb_connections > 0)
     {
-        /* TODO: left 0 because this sample is currently used in tests */
+        /* Note: the priority is 0 here because other values require higher execution privileges.
+         *  However, this sample is currently used in tests, so it should not require admin privileges to be run */
         pubOK = SOPC_PubScheduler_Start(g_pPubSubConfig, g_pSourceConfig, 0);
     }
     if (subOK || pubOK)

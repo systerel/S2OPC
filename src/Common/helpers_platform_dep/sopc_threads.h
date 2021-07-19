@@ -46,8 +46,10 @@
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName);
 
 /**
- *  \brief Function to create a high priority thread
+ * \brief Function to create a high priority thread
  *
+ * \note Only supported under Linux for now.
+
  * See SOPC_Thread_Create.
  * This function creates a thread with higher priority, which usually requires administrative privileges.
  * It should only be used to create threads that require to be woken up at regular but small intervals (< 1ms).

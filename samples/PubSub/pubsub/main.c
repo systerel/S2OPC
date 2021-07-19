@@ -257,7 +257,7 @@ int main(int argc, char* const argv[])
         }
         else
         {
-            /* TODO: handle state changes by installing a state changed callback */
+            /* Note: a state changed callback can be made to handle PubSub state changes (unused here) */
             bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL);
             if (res)
             {
