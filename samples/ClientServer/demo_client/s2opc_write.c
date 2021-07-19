@@ -312,6 +312,8 @@ static bool ParseValue(const char* val)
         assert(false);
     }
 
+    g_dv.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+
     return 0 != scanRes;
 }
 
