@@ -17,6 +17,47 @@
  * under the License.
  */
 
+/** \file
+ *
+ * \brief This real-time pubsub sample shows how to interface the PubSub callbacks with a simplistic Cache.
+ *
+ * \note This example is only available on Linux for now.
+ *
+ * The Cache is a simple dictionary (see cache.h).
+ * The sample follows the required step to use the PubSub library:
+ * - initialize S2OPC and logs,
+ * - configure the PubSub using an XML file,
+ * - setup the PubSub callbacks (GetSourceVariables, SetTargetVariables),
+ * - setup some very simple encryption/signature,
+ * - start the PubSub,
+ * - stop and cleanup.
+ *
+ * In its main loop (main thread), it only waits indefinitely until a SIGINT or SIGTERM is sent.
+ * The work is done by the callback which are called by another thread by the S2OPC library.
+ *
+ * This sample is used to measure round trip times of PubSub messages.
+ * The same executable should be executed on two different machines:
+ * - the emitter publishes an integer that is incremented by one each cycle,
+ * - the receiver subscribes and receives the values over time,
+ * - the receiver is also a publisher and sends back the last value it received,
+ * - the emitter is also a subscriber and receives the value that was sent back by the receiver.
+ *
+ * The emitter then computes round trip times and print the results on stdout or save them to a CSV file.
+ *
+ * By default, the program starts the Publisher thread with a high scheduling priority, which requires admin privileges.
+ * It is possible to change this by modifying the priority in the call to SOPC_PubScheduler_Start
+ *
+ * Different environment variables control the behavior of the program.
+ * These values all have a default value (see config.h):
+ * - IS_LOOPBACK: set to 0 for the emitter and 1 for the receiver,
+ * - LOG_PATH should point to the folder in which to save logs,
+ * - RTT_SAMPLES: the number of round trip time samples to save,
+ * - PUBSUB_XML_CONFIG: path to the pubsub XML configuration,
+ *   usually forked from samples/PubSub/data/ XMLs,
+ * - CSV_PREFIX: when set, enables CSV printing instead of stdout printing,
+ *   the saved CSV will be named $CSV_PREFIX-YYYYMMDD-HHMMSS.csv according to the current date.
+ */
+
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -80,7 +121,6 @@ int main(int argc, char* const argv[])
     signal(SIGTERM, signal_stop_server);
 
     /* Parse command line arguments ? */
-    /* argparse */
     (void) argc;
     (void) argv;
 
@@ -267,7 +307,8 @@ int main(int argc, char* const argv[])
 
 static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
 {
-    /* Pre-hook: filter and increment the counter */
+    /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_SEND,
+     * increments its value */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_SEND;
 
     Cache_Lock();
@@ -303,7 +344,8 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
 
 static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
-    /* Pre-hook: filter and use the new counter value to compute the round trip time */
+    /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_RECV,
+     * use the new counter value to compute the round trip time */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_RECV;
 
     Cache_Lock();
@@ -385,6 +427,7 @@ static inline long diff_timespec(struct timespec* a, struct timespec* b)
 
 static void save_rtt_to_csv(void)
 {
+    /* Format a filename with CSV_PREFIX and current date */
     time_t now = time(NULL);
     struct tm* tm_now = localtime(&now);
     char time_fmt[16] = {0};

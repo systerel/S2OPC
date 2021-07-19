@@ -17,9 +17,12 @@
  * under the License.
  */
 
-/** \file Provides a cache for data values.
+/** \file
  *
- * GetSource and SetTarget callback will get and set their values in the cache.
+ * \brief Provides a cache for data values.
+ *
+ * This cached is based on a SOPC_Dict whose keys are SOPC_NodeId and values are SOPC_DataVariant.
+ * Functions Cache_GetSourceVariables and Cache_SetTargetVariables are callback that interface PubSub with the cache.
  *
  * For now, this cache uses a single Mutex to assert that only one thread writes or read.
  * This could be enhanced with the use of a read/write double buffer for instance.
