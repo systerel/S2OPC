@@ -27,6 +27,13 @@ if(ENABLE_SAMPLES)
   target_link_libraries(pubsub PRIVATE s2opc_pubsub s2opc_clientserver-xml-loaders-expat)
   target_include_directories(pubsub PRIVATE pubsub)
 
+  # Demo TSN PubSub server
+  add_definitions(-D_GNU_SOURCE)
+  add_executable(udp_rt_pub "tsn/udp_rt_pub.c")
+  target_compile_options(udp_rt_pub PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_rt_pub PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(udp_rt_pub PRIVATE s2opc_pubsub)
+
   # Copy data
   add_custom_command(
     TARGET pubsub POST_BUILD
