@@ -45,7 +45,8 @@ typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 typedef enum
 {
     SOPC_USER_AUTHORIZATION_OPERATION_READ,
-    SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+    SOPC_USER_AUTHORIZATION_OPERATION_WRITE, /*!< includes CurrentWrite, StatusWrite, TimestampWrite in UserAccessLevel
+                                              */
     SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE
 } SOPC_UserAuthorization_OperationType;
 
