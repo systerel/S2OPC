@@ -22,7 +22,9 @@
  *===========================================================================*/
 
 /** \file
- * TODO:
+ *      Implementation of services defined in "uam_ns2s_itf.h" using "Named pipes":
+ *      - Sending a SPDU to Safe partition
+ *      - Reading a SPDU from Safe partition
  */
 
 /*============================================================================
@@ -34,15 +36,12 @@
 #include "uam.h"
 #include "uas.h"
 
-
-#include "sopc_common.h"
-#include "sopc_log_manager.h"
-#include "sopc_mem_alloc.h"
 #include "sopc_dict.h"
 
 #include <assert.h>
-#include <string.h>
-#include <stdint.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /*============================================================================
  * LOCAL TYPES
@@ -52,48 +51,42 @@
  * LOCAL VARIABLES
  *===========================================================================*/
 /**
- * A dictionary object { UAM_SessionHandle : UAM_NS_Configuration_type* }
+ * A dictionary object { UAM_SessionHandle : FifoFileHandle }
  */
-static SOPC_Dict* gSessions = NULL; // TODO : not sure that is really useful!
+static SOPC_Dict* gFifos = NULL;
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
-static uint64_t Session_KeyHash_Fct(const void* pKey)
+static uint64_t fifo_KeyHash_Fct(const void* pKey)
 {
     return (const UAM_SessionHandle)(const UAS_INVERSE_PTR)pKey;
 }
 
 /*===========================================================================*/
-static bool Session_KeyEqual_Fct (const void* a, const void* b)
+static bool fifo_KeyEqual_Fct (const void* a, const void* b)
 {
     return a == b;
 }
 
 /*===========================================================================*/
-static void Session_CloseFcn (const void* key, const void* value, void* user_data)
+static int fifo_Get (const UAM_SessionHandle key)
 {
-    assert (user_data == NULL);
-    assert (value != NULL);
-    UAM_NS2S_Clear((const UAM_SessionHandle)(const UAS_INVERSE_PTR)key);
+    return (int)(UAS_INVERSE_PTR) SOPC_Dict_Get (gFifos, (void*) (UAS_INVERSE_PTR) key, NULL);
 }
 
 /*===========================================================================*/
-static UAM_NS_Configuration_type* Session_Get (const UAM_SessionHandle key)
-{
-    return SOPC_Dict_Get (gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
-}
-
-/*===========================================================================*/
-static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
+static bool fifo_Add (const UAM_SessionHandle dwHandle, const char* const sFilename)
 {
     bool bResult = false;
-    assert (NULL != pzConfig);
+    assert (NULL != sFilename);
 
-    UAM_NS_Configuration_type* pzPrevConfig = Session_Get (pzConfig->dwHandle);
-    if (pzPrevConfig == NULL)
+    int pzPrevHandle = fifo_Get (dwHandle);
+    if (pzPrevHandle == 0)
     {
+        int handle= TODO (open file);
+        // TODO WIP
         UAM_NS_Configuration_type* pzNewConfig = SOPC_Malloc (sizeof(*pzNewConfig));
         bResult = (NULL != pzNewConfig);
         if (bResult)
@@ -106,57 +99,46 @@ static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
     return bResult;
 }
 
+
 /*============================================================================
  * IMPLEMENTATION OF EXTERNAL SERVICES
  *===========================================================================*/
-
 /*===========================================================================*/
-void UAM_NS_Initialize(void)
+bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
 {
-    assert (gSessions == NULL);
-    gSessions = SOPC_Dict_Create (NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, NULL, SOPC_Free);
-    assert (gSessions != NULL);
-    LOG_Trace (LOG_DEBUG, "UAM_NS_Initialize OK!");
-}
+    LOG_Trace (LOG_DEBUG, "UAM_NS2S_Initialize (%u)", (unsigned) dwHandle);
+    char filename [50];
+    int iResult =  -1;
 
-
-/*===========================================================================*/
-bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
-{
-    bool bResult = false;
-    if  (gSessions != NULL &&  pzConfig != NULL)
+    if (gFifos == NULL)
     {
-        bResult = Session_Add (pzConfig);
-        if (bResult && pzConfig->pfSetup != NULL)
-        {
-            LOG_Trace (LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u",(unsigned) pzConfig->dwHandle);
-            bResult = (*pzConfig->pfSetup) (pzConfig->dwHandle, pzConfig->pUserParams);
-            if (bResult)
-            {
-                bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
-            }
-        }
+        gFifos = SOPC_Dict_Create (NULL, fifo_KeyHash_Fct, fifo_KeyEqual_Fct, NULL, NULL);
+        assert (gFifos != NULL);
     }
-    return bResult;
+    snprintf(filename, sizeof(filename), "/tmp/uas-sh%u.fifo", dwHandle);
+    iResult = mkfifo (filename, 0666);
+    // Todo : store in gFifos
+
+    return  iResult == 0;
 }
 
 /*===========================================================================*/
-void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen)
+void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM_SessionHandle dwHandle)
 {
-    const UAM_NS_Configuration_type* pzConfig  = Session_Get (dwHandle);
-
-    if (pzConfig != NULL)
+    assert (dwHandle == 0x010203u); // TODO remove
+    if (pData == NULL || sLen == 0)
     {
-        LOG_Trace (LOG_DEBUG, "Received message on HDL=%u (len=%u)", (unsigned) dwHandle, (unsigned) sLen);
-        UAM_NS2S_SendSpduImpl (pData, sLen, dwHandle);
+        return;
     }
+    LOG_Trace (LOG_DEBUG, "UAM_NS2S_SendSpduImpl(%p, %u, %u)\n", pData, (unsigned)sLen, (unsigned) dwHandle);
+    // TODO
+
 }
 
 /*===========================================================================*/
-void UAM_NS_Clear(void)
+void UAM_NS2S_Clear(const UAM_SessionHandle dwHandle)
 {
-    assert (gSessions != NULL);
-    SOPC_Dict_ForEach(gSessions, &Session_CloseFcn, NULL);
-    SOPC_Dict_Delete(gSessions);
-    gSessions = NULL;
+    LOG_Trace (LOG_DEBUG, "UAM_NS2S_Clear (%u)", (unsigned) dwHandle);
+    // TODO
 }
+

@@ -32,78 +32,54 @@
 /*============================================================================
  * DESCRIPTION
  *===========================================================================*/
-/** \file This file contains the UAM interface from non-safe user point of view
- * So as to distinguish messages on COMMUNICATION side from those on SAFE side,
- * the frames from COMMUNCATION are named "Messages", whereas those on SAFE side
- * are named "SPDU"
+/** \file This file contains the interface used to send data from NonSafe to Safe
+ * It only provides the interface that shall be implemented by a user-application, which
+ * makes it independent from technical means available on each target.
+ * For example, a possible implementation may use shared memories, shares files, sockets, ...
  */
 
-#ifndef SOPC_UAM_NS_H_
-#define SOPC_UAM_NS_H_ 1
+#ifndef SOPC_UAM_NS2S_H_
+#define SOPC_UAM_NS2S_H_ 1
 
 /*============================================================================
  * INCLUDES
  *===========================================================================*/
 
-#include "sopc_builtintypes.h"
-#include "sopc_common.h"
-#include "sopc_enum_types.h"
 #include "uam.h"
 #include "uas.h"
 
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
-typedef UAS_UInt32 UAM_SessionHandle; // TODO move in SAFE or common part
-
-/** TODO*/
-typedef bool (*UAM_NS_pfCommunicationSetup) (const UAM_SessionHandle dwHandle, void * pUserParams);
-
-typedef struct UAM_NS_Configuration_struct
-{
-    UAM_RedundancySetting_type eRedundancyType;
-    /** Session handle. */
-    UAM_SessionHandle dwHandle;
-    /** Setup function. Can be NULL if not used */
-    UAM_NS_pfCommunicationSetup pfSetup;
-    /** User-parameters */
-    void * pUserParams;
-} UAM_NS_Configuration_type;
-
 
 /*============================================================================
  * EXPORTED CONSTANTS
  *===========================================================================*/
-
-/** The OPC UA namespace used */
-#define UAM_NAMESPACE 1
 
 /*============================================================================
  * EXTERNAL SERVICES
  *===========================================================================*/
 
 /**
- * \brief Shall be called before the module is used
+ * \brief Will be called once per SPDU couple on initialization.
+ * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \return true in case of success
  */
-void UAM_NS_Initialize(void);
+bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle);
 
 /**
- * \brief Create a SPDU
- * \param pzConfig A pointer to the configuration. The pointer can be freed after call, but not the data pointed
- *      by pzConfig->pUserParams
- * \return false in case of error.
+ * \brief Implementation of a SPDU sending from Non-Safe to Safe partition
+ * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \param pData The data to be sent? Shall point to at least sLen bytes.
+ * \param sLen The data length
  */
-bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
+void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM_SessionHandle dwHandle);
 
 /**
- * \brief Call this function when a message has been received on communication side. This will trigger a
- * further call to UAM_NS2S_SendSpduImpl.
+ * \brief Will be called once per SPDU couple on cleanup.
+ * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
  */
-void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen);
+void UAM_NS2S_Clear(const UAM_SessionHandle dwHandle);
 
-/**
- * \brief Stop all safety consumers and Producer. Removes all memory allocations
- */
-void UAM_NS_Clear(void);
 
 #endif

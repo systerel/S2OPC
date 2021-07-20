@@ -101,8 +101,6 @@ static void prod_ns_cycle(void);
 static void prod_ns_stop(void);
 static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv);
 
-static bool prod_ns_OnReceiveSpdu (const UAM_SessionHandle dwHandle, const void * const pSpdu, const size_t sLen);
-
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
@@ -330,7 +328,6 @@ static void prod_ns_initialize_uam(void)
                 .eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
                 .dwHandle = SESSION_UAM_ID,
                 .pfSetup = NULL,
-                .pfOnSpduReceive = prod_ns_OnReceiveSpdu,
                 .pUserParams = (void*)&zUAM_UserParams,
         };
         UAM_NS_Initialize();
@@ -393,13 +390,6 @@ static void prod_ns_cycle(void)
 
 
 /*===========================================================================*/
-static bool prod_ns_OnReceiveSpdu (const UAM_SessionHandle dwHandle, const void * const pSpdu, const size_t sLen)
-{
-
-    return true;
-}
-
-/*===========================================================================*/
 static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv)
 {
     // Reminder: this function is called when the Cache is updated (in this case: on Pub-Sub new reception)
@@ -410,33 +400,23 @@ static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValu
     if (pNid->Namespace == UAM_NAMESPACE &&
             pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
             pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
-            pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id)
+            pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id &&
+            pDv->Value.Value.ExtObject->Length > 0)
     {
         // We received an extension object (not of array type) on the correct namespace.
 
         // Retrieve and copy the object
         SOPC_ExtensionObject* pzExtension = pDv->Value.Value.ExtObject;
-        assert (pzExtension->Length > 0 && "unexpected empty SPDU!");
-        assert (pzExtension->Length < 0x1000 && "unexpected large SPDU!");
+        const void * pData  = (const void*)pzExtension->Body.Object.Value;
         size_t sLen = (size_t) pzExtension->Length;
 
-        UAS_UInt8* puBuffer = SOPC_Malloc(sLen);
-        assert (puBuffer != NULL);
-
-        memcpy(puBuffer, pzExtension->Body.Object.Value, sLen);
+        assert (sLen < 0x1000 && "unexpected large SPDU!");
 
         // Check whether this is a SPDU received data
-        switch (pNid->Data.Numeric) {
-        case NODEID_SPDU_REQUEST_NUM:
-            printf("Received Ext NODEID_SPDU_REQUEST_NUM (l=%d)!!\n", pzExtension->Length);
-
-            break;
-        default:
-            break;
+        if (pNid->Data.Numeric == NODEID_SPDU_REQUEST_NUM)
+        {
+            UAM_NS_MessageReceived (SESSION_UAM_ID, pData, sLen);
         }
-
-        // relese buffer
-        SOPC_Free(puBuffer);
     }
 }
 
