@@ -42,6 +42,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdint.h>
 
 /*============================================================================
@@ -123,6 +124,7 @@ void UAM_NS_Initialize(void)
 /*===========================================================================*/
 bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
 {
+    assert (gSessions != NULL); // TODO Remove
     bool bResult = false;
     if  (gSessions != NULL &&  pzConfig != NULL)
     {
@@ -131,10 +133,11 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
         {
             LOG_Trace (LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u",(unsigned) pzConfig->dwHandle);
             bResult = (*pzConfig->pfSetup) (pzConfig->dwHandle, pzConfig->pUserParams);
-            if (bResult)
-            {
-                bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
-            }
+        }
+        if (bResult)
+        {
+            bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
+            printf("UAM_NS2S_Initialize ret= %d\n", bResult); // TODO
         }
     }
     return bResult;

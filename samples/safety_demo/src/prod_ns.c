@@ -437,6 +437,7 @@ int main(int argc, char* argv[])
 
     prod_ns_init();
 
+    printf ("Start Cycles\n");
     // Wait for a signal
     while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
     {
@@ -446,6 +447,7 @@ int main(int argc, char* argv[])
         // Wait for next cycle
         SOPC_Sleep(msCycle);
     }
+    printf ("End Cycles\n");
 
     // Clean and quit
     prod_ns_stop();
