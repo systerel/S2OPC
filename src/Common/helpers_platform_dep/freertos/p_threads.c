@@ -112,54 +112,6 @@ static void cbInternalCallback(void* ptr)
     vTaskDelete(NULL);
 }
 
-// Destruction handle
-void P_THREAD_Destroy(Thread** ptr)
-{
-    if (NULL != ptr && NULL != (*ptr))
-    {
-        P_THREAD_Join(*ptr);
-        // Raz leaved memory
-        memset(*ptr, 0, sizeof(Thread));
-        SOPC_Free(*ptr);
-        *ptr = NULL;
-        DEBUG_decrementCpt();
-    }
-}
-// Creation workspace
-Thread*                                   // Handle workspace
-P_THREAD_Create(tPtrFct fct,              // Callback
-                void* args,               // Argument callback
-                const char* taskName,     // Name of the task
-                tPtrFct fctWatingForJoin, // Debug thread waiting join
-                tPtrFct fctReadyToSignal) // Debug thread ended
-{
-    Thread* ptrWks = NULL;
-
-    ptrWks = SOPC_Malloc(sizeof(Thread));
-
-    if (NULL != ptrWks)
-    {
-        DEBUG_incrementCpt();
-        memset(ptrWks, 0, sizeof(Thread));
-
-        // Initialization
-        SOPC_ReturnStatus result = P_THREAD_Init(ptrWks,            //
-                                                 MAX_THREADS,       //
-                                                 fct,               //
-                                                 args,              //
-                                                 taskName,          //
-                                                 fctWatingForJoin,  //
-                                                 fctReadyToSignal); //
-        if (SOPC_STATUS_OK != result)                               //
-        {
-            P_THREAD_Destroy(&ptrWks);
-            ptrWks = NULL;
-        }
-    }
-
-    return ptrWks;
-}
-
 // Initializes created thread then launches it.
 SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
                                 uint16_t wMaxRDV,          // Max join
@@ -654,11 +606,6 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 }
 
 // Relative task delay
-void P_THREAD_Sleep(uint32_t milliseconds)
-{
-    vTaskDelay(pdMS_TO_TICKS(milliseconds));
-}
-
 /*****Public s2opc thread api*****/
 
 // Create and initialize a thread
@@ -683,5 +630,5 @@ SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
 // Pause thread execution
 void SOPC_Sleep(unsigned int milliseconds)
 {
-    P_THREAD_Sleep(milliseconds);
+    vTaskDelay(pdMS_TO_TICKS(milliseconds));
 }
