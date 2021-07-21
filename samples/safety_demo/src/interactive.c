@@ -143,7 +143,7 @@ static void displayCheckModified(SafetyDemo_interactive_Context* pContext)
 
     zResponse.pbySerializedSafetyData = (void*) &zSafeData;
     zResponse.pbySerializedNonSafetyData = (void*) &zNonSafeData;
-    bReturn = UAM_SpduEncoder_GetResponse(pContext->spduRequestId, &zResponse);
+    bReturn = UAM_SpduEncoder_GetResponse(pContext->spduRequestId, &zResponse, NULL, NULL);
     if (bReturn == SOPC_STATUS_OK && uResponseMnr != zResponse.dwMonitoringNumber)
     {
         uResponseMnr = zResponse.dwMonitoringNumber;
@@ -285,7 +285,7 @@ static void displayShowResponse(const UAM_SpduResponseHandle handle, UAS_UInt32*
     zSpdu.pbySerializedSafetyData = (void*) &zSafeData;
     zSpdu.pbySerializedNonSafetyData = (void*) &zNonSafeData;
 
-    bReturn = UAM_SpduEncoder_GetResponse(handle, &zSpdu);
+    bReturn = UAM_SpduEncoder_GetResponse(handle, &zSpdu, NULL, NULL);
     if (bReturn == SOPC_STATUS_OK)
     {
         displaySetCursorLocation(18, *pYPos);
@@ -829,7 +829,7 @@ static void autotestResponseMsg(void)
     static int x = 10;
     x++;
 
-    bStatus = UAM_SpduEncoder_GetResponse(NODEID_SPDU_RESPONSE_NUM, &response);
+    bStatus = UAM_SpduEncoder_GetResponse(NODEID_SPDU_RESPONSE_NUM, &response, NULL, NULL);
     assert(bStatus == SOPC_STATUS_OK);
 
     printf("Current RESPONSE= [F=%02Xh, CONSID=%08Xh, MNR = %d, CRC=%08Xh]\n", response.byFlags,

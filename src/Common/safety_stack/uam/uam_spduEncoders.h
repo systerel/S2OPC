@@ -43,6 +43,7 @@
 #include <stdlib.h>
 
 #include "uam.h"
+#include "uam_ns.h"
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
@@ -69,15 +70,6 @@
 /*============================================================================
  * TYPES DEFINITIONS
  *===========================================================================*/
-
-/**
- * A Handle (identifier) for a SPDU request
- */
-typedef UAS_UInt32 UAM_SpduRequestHandle;
-/**
- * A Handle (identifier) for a SPDU response
- */
-typedef UAS_UInt32 UAM_SpduResponseHandle;
 
 /*============================================================================
  * EXTERNAL SERVICES
@@ -137,7 +129,13 @@ SOPC_ReturnStatus UAM_SpduEncoder_GetRequest(const UAM_SpduRequestHandle dwNumer
  *
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu);
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu, size_t* puSafeSize, size_t*puNonSafeSize);
+
+/**
+ * \brief
+ *  Retreives the sizes of safe & non safe fields
+ */
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(const UAM_SpduResponseHandle dwNumericId, size_t* puSafeSize, size_t*puNonSafeSize);
 
 /**
  * \brief Set the content of the Request SPDU. This function ensures thread-safety access to the data
@@ -157,7 +155,8 @@ SOPC_ReturnStatus UAM_SpduEncoder_SetRequest(const UAM_SpduRequestHandle dwNumer
  *    It will typically written by a provider.
  * \pre UAM_SpduEncoder_Initialize must have been called
  * \param[in] dwHandle The numeric part of the OPC NodeId defining the request.
- * \param[in] pzSpdu The SPDU to write.
+ * \param[in] pzSpdu The SPDU to write. The data pointed to in Safe and non Safe buffers are copied and can be freed
+ *      after call.
  * \return SOPC_STATUS_OK in case of success
  */
 SOPC_ReturnStatus UAM_SpduEncoder_SetResponse(const UAM_SpduResponseHandle dwNumericId,

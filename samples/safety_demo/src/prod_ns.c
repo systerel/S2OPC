@@ -84,13 +84,6 @@ typedef struct
     UAM_SessionHandle spduHandle;
 } ProdNS_Demo_interactive_Context;
 
-typedef struct
-{
-    UAS_UInt32 spduSafeToNsHandle;
-    UAS_UInt32 spduNsToSafeHandle;
-} ProdNS_Demo_UAM_User_Params;
-
-
 /*============================================================================
  * LOCAL PROTOTYPES
  *===========================================================================*/
@@ -106,12 +99,6 @@ static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValu
  *===========================================================================*/
 static SOPC_ReturnStatus g_status = SOPC_STATUS_OK;
 static ProdNS_Demo_interactive_Context g_context;
-
-static ProdNS_Demo_UAM_User_Params zUAM_UserParams =
-{
-        .spduSafeToNsHandle = NODEID_SPDU_RESPONSE_NUM,
-        .spduNsToSafeHandle = NODEID_SPDU_REQUEST_NUM,
-};
 
 /*============================================================================
  * LOCAL FUNCTIONS
@@ -202,7 +189,7 @@ static void prod_ns_initialize_cache(void)
     {
         assert(NULL != g_context.pConfig);
 
-        res = UAM_Cache_Initialize(g_context.pConfig);
+        res = UAM_Cache_Initialize(g_context.pConfig); // TODO should be moved in UAM NS?
 
         if (!res)
         {
@@ -327,8 +314,9 @@ static void prod_ns_initialize_uam(void)
         {
                 .eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
                 .dwHandle = SESSION_UAM_ID,
-                .pfSetup = NULL,
-                .pUserParams = (void*)&zUAM_UserParams,
+                .bIsProvider = true,
+                .uUserRequestId = NODEID_SPDU_REQUEST_NUM,
+                .uUserResponseId = NODEID_SPDU_RESPONSE_NUM
         };
         UAM_NS_Initialize();
 
@@ -366,7 +354,6 @@ static void prod_ns_init(void)
 
         prod_ns_initialize_uam();
 
-        // TODO init
         // TODO : interactive!
     }
 }
@@ -374,7 +361,8 @@ static void prod_ns_init(void)
 /*===========================================================================*/
 static void prod_ns_stop(void)
 {
-    // TODO stop
+    // TODO stop cleany everything
+
     UAM_NS_Clear();
     printf("# EXITING (code =%02X)\n" , g_status);
 }
@@ -384,11 +372,11 @@ static void prod_ns_cycle(void)
 {
     if (g_status == SOPC_STATUS_OK)
     {
-
+        // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
+        UAM_NS_CheckSpduReception (SESSION_UAM_ID);
         // TODO
     }
 }
-
 
 /*===========================================================================*/
 static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv)
@@ -407,16 +395,15 @@ static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValu
         // We received an extension object (not of array type) on the correct namespace.
 
         // Retrieve and copy the object
-        SOPC_ExtensionObject* pzExtension = pDv->Value.Value.ExtObject;
-        const void * pData  = (const void*)pzExtension->Body.Object.Value;
-        size_t sLen = (size_t) pzExtension->Length;
-
-        assert (sLen < 0x1000 && "unexpected large SPDU!");
-
         // Check whether this is a SPDU received data
+        // TODO : this could be made more generic!
         if (pNid->Data.Numeric == NODEID_SPDU_REQUEST_NUM)
         {
-            UAM_NS_MessageReceived (SESSION_UAM_ID, pData, sLen);
+            UAM_NS_RequestMessageReceived (SESSION_UAM_ID);
+        }
+        if (pNid->Data.Numeric == NODEID_SPDU_RESPONSE_NUM)
+        {
+            UAM_NS_ResponseMessageReceived (SESSION_UAM_ID);
         }
     }
 }
@@ -442,7 +429,7 @@ int main(int argc, char* argv[])
     // Wait for a signal
     while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
     {
-        static const uint32_t msCycle = 100;
+        static const uint32_t msCycle = 50;
         prod_ns_cycle();
 
         // Wait for next cycle

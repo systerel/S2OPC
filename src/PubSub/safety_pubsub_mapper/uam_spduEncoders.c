@@ -523,28 +523,28 @@ SOPC_ReturnStatus UAM_SpduEncoder_SetResponse(const UAM_SpduResponseHandle dwNum
         pDv->Value.Value.ExtObject->Encoding == SOPC_ExtObjBodyEncoding_Object &&
         pDv->Value.Value.ExtObject->Body.Object.ObjType == &SPDUResponse_EncodeableType)
     {
-        SPDUResponse* pReq = (SPDUResponse*) (pDv->Value.Value.ExtObject->Body.Object.Value);
-        assert(pReq != NULL);
+        SPDUResponse* pResp = (SPDUResponse*) (pDv->Value.Value.ExtObject->Body.Object.Value);
+        assert(pResp != NULL);
         bRetval = SOPC_STATUS_OK;
 
         // Retreive and copy content of request into user-level structure.
-        pReq->byFlags = pzSpdu->byFlags;
-        pReq->zSpduId = pzSpdu->zSpduId;
-        pReq->dwSafetyConsumerId = pzSpdu->dwSafetyConsumerId;
-        pReq->dwMonitoringNumber = pzSpdu->dwMonitoringNumber;
-        pReq->dwCrc = pzSpdu->dwCrc;
+        pResp->byFlags = pzSpdu->byFlags;
+        pResp->zSpduId = pzSpdu->zSpduId;
+        pResp->dwSafetyConsumerId = pzSpdu->dwSafetyConsumerId;
+        pResp->dwMonitoringNumber = pzSpdu->dwMonitoringNumber;
+        pResp->dwCrc = pzSpdu->dwCrc;
         // Convert Safety Data ByteString
-        SOPC_ByteString_Clear(&pReq->zSerializedSafetyData);
-        bRetval = SOPC_ByteString_InitializeFixedSize(&pReq->zSerializedSafetyData, pzSpduType->wSafetyDataLength);
+        SOPC_ByteString_Clear(&pResp->zSerializedSafetyData);
+        bRetval = SOPC_ByteString_InitializeFixedSize(&pResp->zSerializedSafetyData, pzSpduType->wSafetyDataLength);
         assert(bRetval == SOPC_STATUS_OK);
-        memcpy(pReq->zSerializedSafetyData.Data, pzSpdu->pbySerializedSafetyData, pzSpduType->wSafetyDataLength);
+        memcpy(pResp->zSerializedSafetyData.Data, pzSpdu->pbySerializedSafetyData, pzSpduType->wSafetyDataLength);
 
         // Convert NonSafety Data ByteString
-        SOPC_ByteString_Clear(&pReq->zSerializedNonSafetyData);
+        SOPC_ByteString_Clear(&pResp->zSerializedNonSafetyData);
         bRetval =
-            SOPC_ByteString_InitializeFixedSize(&pReq->zSerializedNonSafetyData, pzSpduType->wNonSafetyDataLength);
+            SOPC_ByteString_InitializeFixedSize(&pResp->zSerializedNonSafetyData, pzSpduType->wNonSafetyDataLength);
         assert(bRetval == SOPC_STATUS_OK);
-        memcpy(pReq->zSerializedNonSafetyData.Data, pzSpdu->pbySerializedNonSafetyData,
+        memcpy(pResp->zSerializedNonSafetyData.Data, pzSpdu->pbySerializedNonSafetyData,
                pzSpduType->wNonSafetyDataLength);
     }
 
@@ -555,10 +555,45 @@ SOPC_ReturnStatus UAM_SpduEncoder_SetResponse(const UAM_SpduResponseHandle dwNum
 }
 
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu)
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(
+        const UAM_SpduResponseHandle dwNumericId, size_t* puSafeSize, size_t*puNonSafeSize)
+{
+    SOPC_ReturnStatus bRetval = SOPC_STATUS_INVALID_PARAMETERS;
+    assert(UAM_SpduEncoder_Initialized);
+
+    SPDU_type* pzSpduType = NULL;
+    SOPC_NodeId nid;
+
+    SOPC_NodeId_Initialize(&nid);
+    nid.Namespace = UAM_NAMESPACE;
+    nid.IdentifierType = SOPC_IdentifierType_Numeric;
+    nid.Data.Numeric = (UAS_UInt32) dwNumericId;
+
+    pzSpduType = SOPC_Dict_Get(gRequests, &nid, NULL);
+
+    if (pzSpduType != NULL)
+    {
+        if (puSafeSize != NULL)
+        {
+            *puSafeSize = (size_t) pzSpduType->wSafetyDataLength;
+        }
+        if (puNonSafeSize != NULL)
+        {
+            *puNonSafeSize = (size_t) pzSpduType->wNonSafetyDataLength;
+        }
+    }
+
+    SOPC_NodeId_Clear(&nid);
+    return bRetval;
+}
+
+/*===========================================================================*/
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(
+        const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu,
+        size_t* puSafeSize, size_t*puNonSafeSize)
 {
     assert(UAM_SpduEncoder_Initialized);
-    assert(NULL != pzSpdu);
+    assert (pzSpdu != NULL);
 
     SOPC_DataValue* pDv = NULL;
     SPDU_type* pzSpduType = NULL;
@@ -594,6 +629,10 @@ SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNum
         {
             memcpy(pzSpdu->pbySerializedSafetyData, pResp->zSerializedSafetyData.Data,
                    (size_t) pResp->zSerializedSafetyData.Length);
+            if (puSafeSize != NULL)
+            {
+                *puSafeSize = (size_t) pResp->zSerializedSafetyData.Length;
+            }
         }
         else
         {
@@ -604,6 +643,10 @@ SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNum
             // TODO : allow a dynamic-length feature for non-safe data?
             memcpy(pzSpdu->pbySerializedNonSafetyData, pResp->zSerializedNonSafetyData.Data,
                    (size_t) pResp->zSerializedNonSafetyData.Length);
+            if (puNonSafeSize != NULL)
+            {
+                *puNonSafeSize = (size_t) pResp->zSerializedNonSafetyData.Length;
+            }
         }
         else
         {

@@ -111,7 +111,7 @@ static SOPC_ReturnStatus Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider)
 }
 
 /*===========================================================================*/
-static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer)
+static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer, size_t* puSafeSize, size_t*puNonSafeSize)
 {
     assert(NULL != pzConsumer);
     assert(pzConsumer->dwHandle < UASDEF_MAX_SAFETYCONSUMERS);
@@ -119,7 +119,7 @@ static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer)
     const UAM_SafetyConfiguration_type* pzSafetyCfg =
         &uamDynamicSafetyData.azConsumerConfiguration[pzConsumer->dwHandle];
 
-    bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU);
+    bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU,puSafeSize ,puNonSafeSize);
 
     return bResult;
 }
@@ -354,7 +354,7 @@ static void ExecuteSafetyConsumers(void)
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azConsumerConfiguration[wInstanceCount];
 
         /* Get ResponseSPDU */
-        status = Get_SPDU_Response(pzInstance);
+        status = Get_SPDU_Response(pzInstance, NULL, NULL);
         if (SOPC_STATUS_OK != status)
         {
             printf("Get_SPDU_Response failed for Consumer #%d\n", wInstanceCount);

@@ -44,7 +44,9 @@
 #include <string.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 
 /*============================================================================
@@ -53,9 +55,10 @@
 typedef int HANDLE;
 typedef struct
 {
-    HANDLE hFileNs2S;
-    HANDLE hFileS2Ns;
-} UAM_NS2S_FifosFiles_type;
+    HANDLE hSocketWriteNS2S;
+    HANDLE hSocketWriteS2NS;
+    struct sockaddr_in zSAddrTo;
+} UAM_NS2S_Impl_type;
 
 /*============================================================================
  * LOCAL VARIABLES
@@ -64,24 +67,26 @@ typedef struct
  * A dictionary object { UAM_SessionHandle : UAM_NS2S_FifosFles_type* }
  */
 static SOPC_Dict* gFifos = NULL;
-static const UAS_UInt16 iPort = 8888u;
+static const UAS_UInt16 iPortNS2S = 8888u;
+static const UAS_UInt16 iPortS2NS = iPortNS2S + 1u;
 
+#define MAX_RECEPTION_BUFFER_SIZE (2048u)
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
 static void fifoFilesFree (void* data)
 {
-    UAM_NS2S_FifosFiles_type* pFiles = (UAM_NS2S_FifosFiles_type*) data;
+    UAM_NS2S_Impl_type* pFiles = (UAM_NS2S_Impl_type*) data;
     if (pFiles)
     {
-        if (pFiles->hFileNs2S > 0)
+        if (pFiles->hSocketWriteNS2S > 0)
         {
-            close(pFiles->hFileNs2S);
+            close(pFiles->hSocketWriteNS2S);
         }
-        if (pFiles->hFileS2Ns > 0)
+        if (pFiles->hSocketWriteS2NS > 0)
         {
-            close(pFiles->hFileS2Ns);
+            close(pFiles->hSocketWriteS2NS);
         }
     }
 }
@@ -99,34 +104,29 @@ static bool fifo_KeyEqual_Fct (const void* a, const void* b)
 }
 
 /*===========================================================================*/
-static UAM_NS2S_FifosFiles_type* fifo_Get (const UAM_SessionHandle key)
+static UAM_NS2S_Impl_type* fifo_Get (const UAM_SessionHandle key)
 {
     if (gFifos == NULL)
     {
         return NULL;
     }
-    return (UAM_NS2S_FifosFiles_type*) SOPC_Dict_Get (gFifos, (void*) (UAS_INVERSE_PTR) key, NULL);
+    return (UAM_NS2S_Impl_type*) SOPC_Dict_Get (gFifos, (void*) (UAS_INVERSE_PTR) key, NULL);
 }
 
 /*===========================================================================*/
-static HANDLE socket_Create (const UAM_SessionHandle dwHandle, bool isNs2S)
+static HANDLE socket_Create (const UAM_SessionHandle dwHandle)
 {
-    (void) isNs2S;
     HANDLE iHandle = 0;
     int iResult =  0;
 
     const HANDLE hSock=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
-
-
     // Ensure the handle is not already used!
-    UAM_NS2S_FifosFiles_type* pzPrevHandle = fifo_Get (dwHandle);
+    UAM_NS2S_Impl_type* pzPrevHandle = fifo_Get (dwHandle);
     if (pzPrevHandle == 0 && hSock >= 0)
     {
         if (iResult == 0)
         {
-            printf ("Created SOCKET %d for port %d\n", hSock, (unsigned) iPort); // TODO remove
-            LOG_Trace (LOG_DEBUG, "Created SOCKET %d for port %d\n", hSock, (unsigned) iPort);
             iHandle= hSock;
         }
     }
@@ -150,15 +150,45 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
         assert (gFifos != NULL);
     }
 
-    UAM_NS2S_FifosFiles_type* pFiles = (UAM_NS2S_FifosFiles_type*) SOPC_Malloc( sizeof(* pFiles));
+    UAM_NS2S_Impl_type* pFiles = (UAM_NS2S_Impl_type*) SOPC_Malloc( sizeof(* pFiles));
     assert (pFiles != NULL);
 
-    pFiles->hFileNs2S = socket_Create (dwHandle, true);
-    if (pFiles->hFileNs2S > 0)
+    pFiles->hSocketWriteNS2S = socket_Create (dwHandle);
+    pFiles->hSocketWriteS2NS = socket_Create (dwHandle);
+
+
+    memset((char *) &pFiles->zSAddrTo, 0, sizeof (pFiles->zSAddrTo));
+
+    pFiles->zSAddrTo.sin_family = AF_INET;
+    pFiles->zSAddrTo.sin_port = htons(iPortNS2S);
+    pFiles->zSAddrTo.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+    if (pFiles->hSocketWriteNS2S > 0 && pFiles->hSocketWriteS2NS)
     {
-        pFiles->hFileS2Ns = socket_Create (dwHandle, false);
-        if (pFiles->hFileNs2S > 0)
+        // Bind read socket to input port.
+        static const int trueInt = true;
+        struct sockaddr_in server_addr;
+        int iResult = -1;
+
+        memset((char *) &server_addr, 0, sizeof(server_addr));
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_port = htons(iPortS2NS);
+        server_addr.sin_addr.s_addr = INADDR_ANY;
+
+        fcntl(pFiles->hSocketWriteS2NS, F_SETFL, fcntl(pFiles->hSocketWriteS2NS, F_GETFL) | O_NONBLOCK);
+
+        setsockopt(pFiles->hSocketWriteS2NS, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+
+        iResult = bind(pFiles->hSocketWriteS2NS, (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+
+        if (iResult < 0)
         {
+            perror("Bind error");
+            LOG_Trace (LOG_ERROR, "UAM_NS2S_Initialize failed to bind port %u", (unsigned) iPortS2NS);
+        }
+        else
+        {
+            LOG_Trace (LOG_DEBUG, "UAM_NS2S_Initialize bound HDL=%d to port %u", (int) dwHandle,  (unsigned) iPortS2NS);
             bResult = SOPC_Dict_Insert (gFifos, key, (void*)pFiles);
         }
     }
@@ -167,27 +197,20 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
 }
 
 /*===========================================================================*/
-void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM_SessionHandle dwHandle)
+void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen)
 {
-    assert (dwHandle == 0x010203u); // TODO remove
+    assert (dwHandle == 0x010203u); // TODO remove, just for POC
     ssize_t iNbWritten = 0;
-    UAM_NS2S_FifosFiles_type* pzFifos = fifo_Get (dwHandle);
+    UAM_NS2S_Impl_type* pzFifos = fifo_Get (dwHandle);
     if (pData == NULL || sLen == 0 || pzFifos == NULL)
     {
         return;
     }
     LOG_Trace (LOG_DEBUG, "UAM_NS2S_SendSpduImpl(%p, %u, %u)\n", pData, (unsigned)sLen, (unsigned) dwHandle);
 
-    struct sockaddr_in zSAddrTo;
-    static const socklen_t siLen = sizeof(zSAddrTo);
+    static const socklen_t siLen = sizeof(struct sockaddr_in);
 
-    memset((char *) &zSAddrTo, 0, siLen);
-
-    zSAddrTo.sin_family = AF_INET;
-    zSAddrTo.sin_port = htons(iPort);
-    zSAddrTo.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-    iNbWritten = sendto (pzFifos->hFileNs2S, pData, sLen, 0, (struct sockaddr *)&zSAddrTo, siLen);
+    iNbWritten = sendto (pzFifos->hSocketWriteNS2S, pData, sLen, 0, (struct sockaddr *)&pzFifos->zSAddrTo, siLen);
 
     if (iNbWritten < 0 || ((size_t)iNbWritten) < sLen)
     {
@@ -195,6 +218,37 @@ void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM
         printf ("UAM_NS2S_SendSpduImpl failed to send %u bytes (res=%d)\n", (unsigned)sLen, (int)iNbWritten);
         assert (false); // TODO
     }
+}
+
+/*===========================================================================*/
+void UAM_NS2S_ReceiveSpduImpl (const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen)
+{
+    assert (dwHandle == 0x010203u); // TODO remove, just for POC
+    ssize_t iNbRead = 0;
+    UAM_NS2S_Impl_type* pzFifos = fifo_Get (dwHandle);
+
+    if (pData == NULL || sReadLen == NULL || pzFifos == NULL)
+    {
+        return;
+    }
+    *sReadLen = 0;
+
+    struct sockaddr_in zSAddrFrom;
+    socklen_t siLen = sizeof(zSAddrFrom);
+
+    memset((char *) &zSAddrFrom, 0, siLen);
+
+    zSAddrFrom.sin_family = AF_INET;
+    zSAddrFrom.sin_port = htons(iPortS2NS);
+    zSAddrFrom.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+    iNbRead = recv(pzFifos->hSocketWriteS2NS, pData, sMaxLen, 0);
+    if (iNbRead > 0)
+    {
+        *sReadLen = (size_t)iNbRead;
+        printf("UAM_NS2S_ReceiveSpduImpl:Rcvd %u bytes\n",(unsigned) iNbRead);
+    }
+
 }
 
 /*===========================================================================*/

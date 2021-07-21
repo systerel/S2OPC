@@ -73,9 +73,17 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle);
  * \param pData The data to be sent? Shall point to at least sLen bytes.
  * \param sLen The data length
  */
-void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM_SessionHandle dwHandle);
+void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen);
 
-void UAM_NS2S_ReceiveSpduImpl (void); // TODO
+/**
+ * \brief Implementation of a SPDU reception on Non-Safe from Safe partition.
+ *      The call shall not be blocking.
+ * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \param pData A non-null pointer that points to an area where message can be received.
+ * \param sMaxLen The maximum buffer length
+ * \param[out] sReadLen Return the length of read buffer (0 in case of error)
+ */
+void UAM_NS2S_ReceiveSpduImpl (const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
 
 /**
  * \brief Will be called once  on cleanup.

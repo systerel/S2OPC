@@ -56,20 +56,26 @@
  *===========================================================================*/
 typedef UAS_UInt32 UAM_SessionHandle; // TODO move in SAFE or common part
 
-/** TODO*/
-typedef bool (*UAM_NS_pfCommunicationSetup) (const UAM_SessionHandle dwHandle, void * pUserParams);
+/**
+ * A Handle (identifier) for a SPDU request
+ */
+typedef UAS_UInt32 UAM_SpduRequestHandle;
+/**
+ * A Handle (identifier) for a SPDU response
+ */
+typedef UAS_UInt32 UAM_SpduResponseHandle;
+
 
 typedef struct UAM_NS_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
     /** Session handle. */
     UAM_SessionHandle dwHandle;
-    /** Setup function. Can be NULL if not used */
-    UAM_NS_pfCommunicationSetup pfSetup;
+    bool bIsProvider;
     /** User-parameters */
-    void * pUserParams;
+    UAM_SpduRequestHandle uUserRequestId;
+    UAM_SpduResponseHandle uUserResponseId;
 } UAM_NS_Configuration_type;
-
 
 /*============================================================================
  * EXPORTED CONSTANTS
@@ -96,13 +102,24 @@ void UAM_NS_Initialize(void);
 bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
 
 /**
- * \brief Call this function when a message has been received on communication side. This will trigger a
+ * \brief Call this function when a SPDU request message has been received on communication side. This will trigger a
  * further call to UAM_NS2S_SendSpduImpl.
- * \param pData A pointer to the data received. It can be freed after call.
- * \param sLen Length of pData.
+ * \param pzExt The extension object received
  */
-void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen);
+void UAM_NS_RequestMessageReceived (UAM_SessionHandle dwHandle);
 
+/**
+ * \brief Call this function when a SPDU response message has been received on communication side. This will trigger a
+ * further call to UAM_NS2S_SendSpduImpl.
+ * \param pzExt The extension object received
+ */
+void UAM_NS_ResponseMessageReceived (UAM_SessionHandle dwHandle);
+
+/**
+ * \brief Call this function to poll reception of SPDU from SAFE component
+ * \param pzExt The extension object received
+ */
+void UAM_NS_CheckSpduReception (UAM_SessionHandle dwHandle);
 /**
  * \brief Stop all safety consumers and Producer. Removes all memory allocations
  */
