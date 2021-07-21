@@ -26,6 +26,7 @@
 #include "sopc_crypto_provider.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_mutexes.h"
@@ -314,11 +315,12 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.targetConfig = NULL;
     schedulerCtx.stateCallback = NULL;
 
-    printf("# Info: Stop Subscriber thread.\n");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stop Subscriber thread");
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
         schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
-        printf("# Info: transport context destroyed for connection #%" PRIu32 " (subscriber).\n", i);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
+                              "Transport context freed for connection #%" PRIu32 " (subscriber)", i);
     }
     schedulerCtx.nbConnections = 0;
     schedulerCtx.nbSockets = 0;

@@ -28,6 +28,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_pub_scheduler.h"
@@ -38,12 +39,6 @@
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
-
-/* TODO: use the correct log system */
-#define log_error(...) printf(__VA_ARGS__)
-#define log_warning(...) printf(__VA_ARGS__)
-#define log_info(...) printf(__VA_ARGS__)
-#define log_debug(...) printf(__VA_ARGS__)
 
 /* Transport context. One per connection */
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
@@ -189,8 +184,8 @@ static void SOPC_PubScheduler_Context_Clear(void)
             if (pubSchedulerCtx.transport[i].fctClear != NULL)
             {
                 pubSchedulerCtx.transport[i].fctClear(&pubSchedulerCtx.transport[i]);
-                log_info("# Info: transport context destroyed for connection #%u (publisher). \n",
-                         pubSchedulerCtx.nbConnection);
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Transport context freed for connection #%u (publisher).",
+                                      pubSchedulerCtx.nbConnection);
             }
         }
 
@@ -229,7 +224,7 @@ static void MessageCtx_Array_Clear(void)
         /* Destroy message */
         for (uint32_t i = 0; i < pubSchedulerCtx.messages.current; i++)
         {
-            log_info("# Info: Network message #%u. destroyed \n", i);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Network message #%u freed", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].message);
             arr[i].message = NULL;
             SOPC_PubSub_Security_Clear(arr[i].security);
@@ -270,7 +265,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
 
     if (NULL == context->message || NULL == context->next_timeout || !result)
     {
-        log_error("# Error Publisher: cannot allocate message context\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot allocate message context");
         return false;
     }
 
@@ -286,7 +281,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
         context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
         if (NULL == context->security->groupKeys || NULL == context->security->provider)
         {
-            log_error("# Error Publisher: cannot create security provider\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot create security provider");
             result = false; /* TODO: it should be possible to avoid this variable and the partial frees when false */
         }
     }
@@ -302,7 +297,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
     }
     else
     {
-        log_debug("# Info Publisher: message created #%d\n", (int32_t) pubSchedulerCtx.messages.current);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Publisher: message created #%d",
+                               (int32_t) pubSchedulerCtx.messages.current);
         pubSchedulerCtx.messages.current++;
     }
     return result;
@@ -340,18 +336,18 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 
 static void display_sched_attr(int policy, struct sched_param* param)
 {
-    log_info("# Thread current sched policy=%s with priority=%d\n",
-             (policy == SCHED_FIFO)
-                 ? "SCHED_FIFO"
-                 : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
-             param->sched_priority);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Publisher thread current scheduling policy=%s with priority=%d\n",
+                          (policy == SCHED_FIFO)
+                              ? "SCHED_FIFO"
+                              : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
+                          param->sched_priority);
 }
 
 static void* thread_start_publish(void* arg)
 {
     (void) arg;
 
-    log_info("# Time-sensitive publisher thread started\n");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
 
     { /* TODO: remove me/refactor me */
         int policy = -1;
@@ -438,7 +434,9 @@ static void* thread_start_publish(void* arg)
 
                     if (!isCompatible)
                     {
-                        log_error("# Error: incompatible variants returned.\n");
+                        SOPC_Logger_TraceError(
+                            SOPC_LOG_MODULE_PUBSUB,
+                            "GetSourceVariables returned values incompatible with the current PubSub configuration");
                     }
                     typeCheckingSuccess = false;
                 }
@@ -488,9 +486,10 @@ static void* thread_start_publish(void* arg)
             {
                 /* This message next publish cycle was already expired before we encoded the previous one */
                 /* TODO: find other message ID, such as the PublisherId */
-                log_warning("# Warning: (warned once only) message with writerGroupId %" PRIu16
-                            " could not be sent in time\n",
-                            SOPC_WriterGroup_Get_Id(context->group));
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                         "Publisher could not send message with writerGroupId %" PRIu16
+                                         " in time (warned once only)",
+                                         SOPC_WriterGroup_Get_Id(context->group));
                 context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
             }
         }
@@ -503,7 +502,7 @@ static void* thread_start_publish(void* arg)
         }
     }
 
-    log_info("# Time-sensitive publisher thread stopped\n");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
     SOPC_RealTime_Delete(&now);
 
     return NULL;
@@ -623,17 +622,17 @@ void SOPC_PubScheduler_Stop(void)
     if (false == SOPC_Atomic_Int_Get(&pubSchedulerCtx.isStarted) ||
         true == SOPC_Atomic_Int_Get(&pubSchedulerCtx.processingStartStop))
     {
-        log_info("# Scheduler already stopping or stopped\n");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Pub Scheduler already stopping or stopped");
         return;
     }
 
-    log_info("# Stop Scheduler...\n");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stopping Pub Scheduler...");
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true); /* TODO: ? -> remove when using an enum */
     SOPC_PubScheduler_Context_Clear();
 
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, false);
-    log_info("# Scheduler stopped\n");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Pub Scheduler stopped");
 }
 
 static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const SOPC_WriterGroup* group)
@@ -727,7 +726,7 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     if (SOPC_STATUS_OK != result)
     {
         // TODO: Some verifications should maybe added...
-        log_error("# Error on SOPC_UDP_Socket_SendTo %s ...\n", strerror(errno));
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_UDP_Socket_SendTo error %s ...", strerror(errno));
     }
 }
 
