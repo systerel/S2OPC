@@ -22,7 +22,7 @@
  *===========================================================================*/
 
 /** \file
- *      Implementation of services defined in "uam_ns2s_itf.h" using "UDP sockets":
+ *      Implementation of services defined in "uam_ns2s_itf.h" using "UDP sockets" (loopback):
  *      - Sending a SPDU to Safe partition
  *      - Reading a SPDU from Safe partition
  */
@@ -177,7 +177,6 @@ void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM
         return;
     }
     LOG_Trace (LOG_DEBUG, "UAM_NS2S_SendSpduImpl(%p, %u, %u)\n", pData, (unsigned)sLen, (unsigned) dwHandle);
-    printf ("UAM_NS2S_SendSpduImpl(%p, %u, %u)\n", pData, (unsigned)sLen, (unsigned) dwHandle);
 
     struct sockaddr_in zSAddrTo;
     static const socklen_t siLen = sizeof(zSAddrTo);
@@ -186,7 +185,7 @@ void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM
 
     zSAddrTo.sin_family = AF_INET;
     zSAddrTo.sin_port = htons(iPort);
-    zSAddrTo.sin_addr.s_addr = htonl(INADDR_ANY);
+    zSAddrTo.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     iNbWritten = sendto (pzFifos->hFileNs2S, pData, sLen, 0, (struct sockaddr *)&zSAddrTo, siLen);
 
@@ -199,9 +198,9 @@ void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM
 }
 
 /*===========================================================================*/
-void UAM_NS2S_Clear(const UAM_SessionHandle dwHandle)
+void UAM_NS2S_Clear(void)
 {
-    LOG_Trace (LOG_DEBUG, "UAM_NS2S_Clear (%u)", (unsigned) dwHandle);
+    LOG_Trace (LOG_DEBUG, "UAM_NS2S_Clear ()");
 
     SOPC_Dict_Delete(gFifos);
     gFifos = NULL;

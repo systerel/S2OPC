@@ -75,11 +75,12 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle);
  */
 void UAM_NS2S_SendSpduImpl(const void* const pData, const size_t sLen, const UAM_SessionHandle dwHandle);
 
+void UAM_NS2S_ReceiveSpduImpl (void); // TODO
+
 /**
- * \brief Will be called once per SPDU couple on cleanup.
- * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \brief Will be called once  on cleanup.
  */
-void UAM_NS2S_Clear(const UAM_SessionHandle dwHandle);
+void UAM_NS2S_Clear(void);
 
 
 #endif

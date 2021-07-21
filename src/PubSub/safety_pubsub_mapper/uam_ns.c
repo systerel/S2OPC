@@ -23,6 +23,7 @@
 
 /** \file
  * TODO:
+ *  Using SOPC Asynchronous queues to stores SPDU & messages before forwarding
  */
 
 /*============================================================================
@@ -35,31 +36,97 @@
 #include "uas.h"
 
 
+#include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_dict.h"
+#include "sopc_threads.h"
+
+#include "sopc_async_queue.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 
+#include <signal.h>
+
 /*============================================================================
  * LOCAL TYPES
  *===========================================================================*/
+typedef struct
+{
+    SOPC_ByteString bString;
+    UAM_SessionHandle dwHandle;
+} QueueElement_type;
 
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
+
 /**
  * A dictionary object { UAM_SessionHandle : UAM_NS_Configuration_type* }
  */
 static SOPC_Dict* gSessions = NULL; // TODO : not sure that is really useful!
 
+/**
+ * A Queue containing some QueueElement_type*
+ */
+static SOPC_AsyncQueue* pzQueue;
+
+/** The processing message thread */
+static Thread gThread;
+
+static volatile sig_atomic_t stopSignal = 0;
+
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
+static const UAS_UInt32 NoHandle = 0xFFFFFFFEu;
+
+/*===========================================================================*/
+static void EnqueueEvent (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen)
+{
+    QueueElement_type* event = SOPC_Malloc(sizeof(*event));
+    event->dwHandle = dwHandle;
+
+    SOPC_ByteString_Initialize (&event->bString);
+    SOPC_ByteString_CopyFromBytes(&event->bString, (const SOPC_Byte*)pData, (int32_t) sLen);
+    SOPC_AsyncQueue_BlockingEnqueue (pzQueue, event);
+}
+/*===========================================================================*/
+static void EnqueueNoEvent (void)
+{
+    QueueElement_type* event = SOPC_Malloc(sizeof(*event));
+    event->dwHandle = NoHandle;
+
+    SOPC_ByteString_Initialize (&event->bString);
+    SOPC_AsyncQueue_BlockingEnqueue (pzQueue, event);
+}
+
+/*===========================================================================*/
+static void* Thread_Impl(void* data)
+{
+    assert (data == NULL);
+    while (stopSignal == 0)
+    {
+        QueueElement_type* pEvent = NULL;
+        SOPC_AsyncQueue_BlockingDequeue (pzQueue, (void**) &pEvent);
+
+        if (pEvent != NULL && pEvent->bString.Length > 0)
+        {
+            // TODO
+            printf("Thread proc evt %d (len=%d)\n", pEvent->dwHandle, pEvent->bString.Length);
+
+            UAM_NS2S_SendSpduImpl (pEvent->bString.Data, (size_t)pEvent->bString.Length, pEvent->dwHandle);
+            SOPC_ByteString_Clear(&pEvent->bString);
+            SOPC_Free(pEvent);
+        }
+    }
+    return NULL;
+}
+
 /*===========================================================================*/
 static uint64_t Session_KeyHash_Fct(const void* pKey)
 {
@@ -73,17 +140,13 @@ static bool Session_KeyEqual_Fct (const void* a, const void* b)
 }
 
 /*===========================================================================*/
-static void Session_CloseFcn (const void* key, const void* value, void* user_data)
-{
-    assert (user_data == NULL);
-    assert (value != NULL);
-    UAM_NS2S_Clear((const UAM_SessionHandle)(const UAS_INVERSE_PTR)key);
-}
-
-/*===========================================================================*/
 static UAM_NS_Configuration_type* Session_Get (const UAM_SessionHandle key)
 {
-    return SOPC_Dict_Get (gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
+    if (gSessions == NULL)
+    {
+        return NULL;
+    }
+    return (UAM_NS_Configuration_type*) SOPC_Dict_Get (gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
 }
 
 /*===========================================================================*/
@@ -99,7 +162,7 @@ static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
         bResult = (NULL != pzNewConfig);
         if (bResult)
         {
-            memcpy(pzNewConfig, pzConfig, sizeof(*pzConfig));
+            *pzNewConfig = *pzConfig;
             // Note : Values and Keys are freed
             bResult = SOPC_Dict_Insert (gSessions, (void*)(UAS_INVERSE_PTR)pzConfig->dwHandle, pzNewConfig);
         }
@@ -114,9 +177,17 @@ static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
 /*===========================================================================*/
 void UAM_NS_Initialize(void)
 {
+    SOPC_ReturnStatus sopcResult = SOPC_STATUS_INVALID_PARAMETERS;
     assert (gSessions == NULL);
     gSessions = SOPC_Dict_Create (NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, NULL, SOPC_Free);
     assert (gSessions != NULL);
+
+    sopcResult = SOPC_AsyncQueue_Init (&pzQueue, "UAM_NS_Events");
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        sopcResult = SOPC_Thread_Create (&gThread, &Thread_Impl, NULL, "UAM_NS_Events task");
+    }
+
     LOG_Trace (LOG_DEBUG, "UAM_NS_Initialize OK!");
 }
 
@@ -137,7 +208,6 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
         if (bResult)
         {
             bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
-            printf("UAM_NS2S_Initialize ret= %d\n", bResult); // TODO
         }
     }
     return bResult;
@@ -146,12 +216,13 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
 /*===========================================================================*/
 void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen)
 {
-    const UAM_NS_Configuration_type* pzConfig  = Session_Get (dwHandle);
+    const UAM_NS_Configuration_type* pzSession  = Session_Get (dwHandle);
 
-    if (pzConfig != NULL)
+    if (pzSession != NULL && pzQueue != NULL)
     {
         LOG_Trace (LOG_DEBUG, "Received message on HDL=%u (len=%u)", (unsigned) dwHandle, (unsigned) sLen);
-        UAM_NS2S_SendSpduImpl (pData, sLen, dwHandle);
+
+        EnqueueEvent (dwHandle, pData, sLen);
     }
 }
 
@@ -159,7 +230,18 @@ void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, cons
 void UAM_NS_Clear(void)
 {
     assert (gSessions != NULL);
-    SOPC_Dict_ForEach(gSessions, &Session_CloseFcn, NULL);
+
+    // Request the Thread to terminate, using an empty event
+    stopSignal = 1;
+    EnqueueNoEvent();
+
     SOPC_Dict_Delete(gSessions);
     gSessions = NULL;
+
+
+    LOG_Trace (LOG_INFO, "UAM_NS_Clear : waiting for Thread termination...");
+    SOPC_Thread_Join(gThread);
+    LOG_Trace (LOG_INFO, "UAM_NS_Clear : Thread terminated");
+    SOPC_AsyncQueue_Free (&pzQueue);
+    UAM_NS2S_Clear();
 }

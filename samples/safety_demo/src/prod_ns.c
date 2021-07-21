@@ -375,6 +375,7 @@ static void prod_ns_init(void)
 static void prod_ns_stop(void)
 {
     // TODO stop
+    UAM_NS_Clear();
     printf("# EXITING (code =%02X)\n" , g_status);
 }
 

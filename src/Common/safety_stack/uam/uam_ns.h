@@ -98,6 +98,8 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
 /**
  * \brief Call this function when a message has been received on communication side. This will trigger a
  * further call to UAM_NS2S_SendSpduImpl.
+ * \param pData A pointer to the data received. It can be freed after call.
+ * \param sLen Length of pData.
  */
 void UAM_NS_MessageReceived (UAM_SessionHandle dwHandle, const void* pData, const size_t sLen);
 
