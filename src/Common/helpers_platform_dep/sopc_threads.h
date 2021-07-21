@@ -57,7 +57,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
  * \param thread    Return parameter for the created thread
  * \param startFct  Function called at thread start
  * \param startArgs Arguments of the start function
- * \param priority  Priority of the thread (Linux: 1-99)
+ * \param priority  Priority of the thread (Linux: 1-99, FreeRTOS: 1-configMAX_PRIORITIES)
  * \param taskName  Name of the created thread
  *
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS

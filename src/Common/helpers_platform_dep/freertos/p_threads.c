@@ -36,7 +36,6 @@
 #include "p_utils.h"           /* private list include */
 
 #define MAX_THREADS MAX_WAITERS
-#define configPRIORITY_S2OPC 0
 
 /* Private structure definition */
 
@@ -113,10 +112,11 @@ static void cbInternalCallback(void* ptr)
 }
 
 // Initializes created thread then launches it.
-SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
-                                uint16_t wMaxRDV,          // Max join
-                                tPtrFct fct,               // Callback
-                                void* args,                // Args
+SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
+                                uint16_t wMaxRDV, // Max join
+                                tPtrFct fct,      // Callback
+                                void* args,       // Args
+                                int priority,
                                 const char* taskName,      // Name of the task
                                 tPtrFct fctWaitingForJoin, // Debug wait for join
                                 tPtrFct fctReadyToSignal)  // Debug wait for
@@ -223,14 +223,8 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,            // Workspace
     }
     if (SOPC_STATUS_OK == resPTHR)
     {
-        BaseType_t resTaskCreate =
-            xTaskCreate(cbInternalCallback,                        // Callback
-                        taskName == NULL ? "appThread" : taskName, // Friendly name
-                        configMINIMAL_STACK_SIZE,                  // Stack size
-                        handleWks,                                 // Workspace thread
-                        (configPRIORITY_S2OPC > (configMAX_PRIORITIES - 1)) ? configMAX_PRIORITIES - 1
-                                                                            : configPRIORITY_S2OPC, // Priority
-                        &handleWks->handleTask);                                                    // Task handle
+        BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
+                                               configMINIMAL_STACK_SIZE, handleWks, priority, &handleWks->handleTask);
 
         if (pdPASS != resTaskCreate)
         {
@@ -611,7 +605,21 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 // Create and initialize a thread
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, 0, taskName, NULL, NULL);
+}
+
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
+                                                void* (*startFct)(void*),
+                                                void* startArgs,
+                                                int priority,
+                                                const char* taskName)
+{
+    if (priority < 1 || priority > configMAX_PRIORITIES)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, priority, taskName, NULL, NULL);
 }
 
 // Join then destroy a thread
