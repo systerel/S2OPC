@@ -230,15 +230,13 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
 /* The callback for received messages specific to the UDP transport */
 static void on_udp_message_received(void* pInputIdentifier, Socket sock);
 
-/* The callback for received messages specific to the MQTT transport
+/** \brief The callback for received messages specific to the MQTT transport
  *
  * \param pCtx  Transport context handle
  * \param data  Pointer to received data
  * \param size  Size of data received, in bytes
  * \param pInputIdentifier  User context identifying the connection
  */
-static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier);
-
 static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
     (void) pCtx;
@@ -251,11 +249,8 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, u
         SOPC_Buffer_SetDataLength(schedulerCtx.receptionBufferMQTT, size);
         SOPC_ReturnStatus status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
                                                        schedulerCtx.receptionBufferMQTT, schedulerCtx.targetConfig);
-        /* TODO: what do we do in case of NOK? */
         (void) status;
     }
-    /* TODO: else if size? */
-    /* TODO: else if status? */
 }
 
 static void on_udp_message_received(void* pInputIdentifier, Socket sock)
@@ -271,8 +266,6 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
         status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
                                      schedulerCtx.receptionBufferUDP, schedulerCtx.targetConfig);
     }
-    /* TODO: else */
-    /* TODO: what do we do in case of NOK? */
 }
 
 static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderContext,
@@ -304,7 +297,6 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
             set_new_state(SOPC_PubSubState_Error);
         }
     }
-    /* TODO: else */
 
     return result;
 }
@@ -447,7 +439,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             // Add socket to multicast group
                             if (SOPC_STATUS_OK == status)
                             {
-                                /* TODO: eight indentation level -> reduce */
                                 status = SOPC_UDP_Socket_AddMembership(*sock, multicastAddr, localAddr);
                             }
                             else

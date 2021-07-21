@@ -580,7 +580,6 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
 
-            /* TODO: call with side effect in if statement */
             if (!MessageCtx_Array_Init_Next(transportCtx, group))
             {
                 resultSOPC = SOPC_STATUS_NOK;
@@ -644,7 +643,6 @@ static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const
 }
 
 // Get Socket and Multicast Address then save it in context
-/* TODO: rename, it does more than a Get */
 static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
                                                        SOPC_PubSubConnection* connection,
                                                        SOPC_PubScheduler_TransportCtx** ctx)
