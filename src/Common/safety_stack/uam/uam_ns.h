@@ -54,16 +54,6 @@
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
-typedef UAS_UInt32 UAM_SessionHandle; // TODO move in SAFE or common part
-
-/**
- * A Handle (identifier) for a SPDU request
- */
-typedef UAS_UInt32 UAM_SpduRequestHandle;
-/**
- * A Handle (identifier) for a SPDU response
- */
-typedef UAS_UInt32 UAM_SpduResponseHandle;
 
 typedef struct UAM_NS_Configuration_struct
 {

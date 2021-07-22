@@ -55,6 +55,16 @@
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
+typedef UAS_UInt32 UAM_SessionHandle;
+
+/**
+ * A Handle (identifier) for a SPDU request
+ */
+typedef UAS_UInt32 UAM_SpduRequestHandle;
+/**
+ * A Handle (identifier) for a SPDU response
+ */
+typedef UAS_UInt32 UAM_SpduResponseHandle;
 
 /**
  *  Redefine interface types with UAS so that the names match actual significance from
@@ -67,6 +77,9 @@ typedef UAS_SafetyConsumerSAPII_type UAM_ConsumerSAPI_Output;
 
 typedef struct UAM_SafetyConfiguration_struct
 {
+    /* TODO: dwRequestHandle & dwResponseHandle cannot be shared to SAFE partition.
+     * It shall be known by NonSafe only
+     */
     /** The numeric part of the OPC NodeId defining the request. */
     UAS_UInt32 dwRequestHandle;
     /** The numeric part of the OPC NodeId defining the response. */
@@ -144,8 +157,7 @@ void UAM_Initialize(void);
 
 /**
  * \brief Helper function for set-up of a Safety provider. Calls byUAS_InitSafetyProvider
- * \param[in] pzInstanceConfiguration. Pointers inside pzInstanceConfiguration must have
- *      static linkage, and must remain available and constant.
+ * \param[in] pzInstanceConfiguration. Configuration of safety provider.
  * \param[in] pzSPI. Pointer to an existing SPI configuration. Shall not be NULL.
  *      Can be freed/released after called
  * \param[in] pfProviderCycle. Pointer to the user cycle application.

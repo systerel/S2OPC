@@ -27,11 +27,8 @@
 #ifndef SOPC_SAFETY_DEMO_SAFETYDEMO_H_
 #define SOPC_SAFETY_DEMO_SAFETYDEMO_H_
 
-#include "sopc_builtintypes.h"
-#include "sopc_common.h"
-
-#include "uam.h"
 #include "uas.h"
+#include "uam.h"
 
 // Note : this example supposes that CONS and PROV use the same endianness!
 typedef struct
@@ -57,6 +54,9 @@ typedef struct
 {
     char sText10[30];
 } SafetyDemo_Sample_NonSafe1_type;
+
+/* Session Id for UAM */
+#define SAMPLE1_SESSION_UAM_ID ((UAM_SessionHandle) 0x010203u)
 
 #define SAMPLE1_SAFETY_DATA_LEN (sizeof(SafetyDemo_Sample_Safe1_type))
 #define SAMPLE1_UNSAFE_DATA_LEN (sizeof(SafetyDemo_Sample_NonSafe1_type))

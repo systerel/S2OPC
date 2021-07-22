@@ -27,6 +27,16 @@ if(ENABLE_SAMPLES)
   target_link_libraries(prod_ns PRIVATE s2opc_pubsub s2opc_clientserver-xml-loaders-expat)
   target_include_directories(prod_ns PRIVATE safety_demo)
 
+  # Demo Safe Producer
+  add_executable(prod_s "src/prod_s.c"
+                        )
+
+  target_compile_options(prod_s PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(prod_s PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")
+
+  target_link_libraries(prod_s PRIVATE s2opc_common)
+  target_include_directories(prod_s PRIVATE safety_demo)
+
   # Demo PubSub
   add_executable(safety_demo "src/main.c"
                         "src/safetyDemo.c"

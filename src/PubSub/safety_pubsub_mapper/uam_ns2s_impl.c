@@ -27,6 +27,15 @@
  *      - Reading a SPDU from Safe partition
  */
 
+/* TODO list
+ * - This example implementation will not work with several SPDU couples defined, because all
+ *      are using the same port 8888 / 8889. The port must be configured for each session.
+ * - Move all utility functions in separate file to ease functional understanding
+ * - This file contains both implementations of "uam_ns_impl.h" and "uam_ns2s_itf.h".
+ *      This may be separated.
+ * - A Trace channel should be added to forward SAFE logs to NON SAFE partition so that
+ *      safe logs can be archived or seen at run-time.
+ */
 /*============================================================================
  * INCLUDES
  *===========================================================================*/

@@ -32,23 +32,22 @@
 /*============================================================================
  * DESCRIPTION
  *===========================================================================*/
-/** \file This file contains the interface used to send data from NonSafe to Safe
+/** \file This file contains the interface used to send data from Safe to NonSafe
  * It only provides the interface that shall be implemented by a user-application, which
  * makes it independent from technical means available on each target.
  * For example, a possible implementation may use shared memories, shares files, sockets, ...
- *  \see "uam_s2ns_itf.h"
- *
+ * IT shall provide reverse encoding/decoding functions than those defined in "uam_ns2s_itf.h"
  */
 
-#ifndef SOPC_UAM_NS2S_H_
-#define SOPC_UAM_NS2S_H_ 1
+#ifndef SOPC_UAM_S2NS_H_
+#define SOPC_UAM_S2NS_H_ 1
 
 /*============================================================================
  * INCLUDES
  *===========================================================================*/
 
 #include "uam.h"
-#include "uam_ns.h"
+#include "uam_s.h"
 #include "uas.h"
 
 /*============================================================================
@@ -68,29 +67,29 @@
  * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
  * \return true in case of success
  */
-bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle);
+bool UAM_S2NS_Initialize(const UAM_SessionHandle dwHandle);
 
 /**
- * \brief Implementation of a SPDU sending from Non-Safe to Safe partition
+ * \brief Implementation of a SPDU sending from Safe to Non-Safe partition
  * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
  * \param pData The data to be sent. Shall point to at least sLen bytes.
  * \param sLen The data length
  */
-void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen);
+void UAM_S2NS_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen);
 
 /**
- * \brief Implementation of a SPDU reception on Non-Safe from Safe partition.
+ * \brief Implementation of a SPDU reception on Safe from Non-Safe partition.
  *      The call shall not be blocking.
  * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
  * \param pData A non-null pointer that points to an area where message can be received.
  * \param sMaxLen The maximum buffer length
  * \param[out] sReadLen Return the length of read buffer (0 in case of error)
  */
-void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
+void UAM_S2NS_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
 
 /**
  * \brief Will be called once  on cleanup.
  */
-void UAM_NS2S_Clear(void);
+void UAM_S2NS_Clear(void);
 
 #endif
