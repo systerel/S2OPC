@@ -395,8 +395,8 @@ static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type even
     assert(pEvent != NULL);
     pEvent->dwHandle = dwHandle;
     pEvent->eEvent = event;
-
-    LOG_Trace(LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwHandle, event);
+//
+//    LOG_Trace(LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwHandle, event);
 
     SOPC_AsyncQueue_BlockingEnqueue(pzQueue, pEvent);
 }
@@ -423,8 +423,8 @@ static void* Thread_Impl(void* data)
 
         const UAM_NS_Configuration_type* pzSession = Session_Get(pEvent->dwHandle);
 
-        LOG_Trace(LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwHandle, pEvent->eEvent,
-                  pzSession);
+//        LOG_Trace(LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwHandle, pEvent->eEvent,
+//                  pzSession);
         if (pzSession != NULL && pEvent != NULL)
         {
             switch (pEvent->eEvent)
