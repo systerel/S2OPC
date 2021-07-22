@@ -88,6 +88,7 @@ static void fifoFilesFree(void* data)
         {
             close(pFiles->hSocketWriteS2NS);
         }
+        SOPC_Free(pFiles);
     }
 }
 

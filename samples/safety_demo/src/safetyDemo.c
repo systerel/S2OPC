@@ -45,7 +45,7 @@ static bool bSafetyDataB1;
 static bool bSafetyDataB2;
 static uint8_t bSafetyDataV1;
 static uint8_t bSafetyDataV2;
-static char sSafetyDataText10[10] = {0};
+static char sSafetyDataText10[11] = {0};
 
 static const UAS_SafetyProviderSPI_type SPI1P_Sample = {.dwSafetyProviderId = SAMPLE_PROVID1_ID,
                                                         .zSafetyBaseId = SAMPLE_PROVID1_GUID,

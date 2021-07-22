@@ -414,10 +414,10 @@ static void* Thread_Impl(void* data)
     bool bResult = false;
     size_t uSafeSize;
     size_t uNonSafeSize;
-    SOPC_Byte* pBytesToSafe = NULL;
 
     while (stopSignal == 0)
     {
+        SOPC_Byte* pBytesToSafe = NULL;
         QueueElement_type* pEvent = NULL;
         SOPC_AsyncQueue_BlockingDequeue(pzQueue, (void**) &pEvent);
 
@@ -469,7 +469,13 @@ static void* Thread_Impl(void* data)
                 // Send it to SAFE
                 UAM_NS2S_SendSpduImpl(pEvent->dwHandle, pBytesToSafe, sLen);
             }
+            if (pBytesToSafe != NULL)
+            {
+                SOPC_Free (pBytesToSafe);
+            }
         }
+
+        SOPC_Free(pEvent);
     }
     LOG_Trace(LOG_DEBUG, "UALM_NS:  Thread_Impl stopped signal=%d", stopSignal);
     return NULL;
