@@ -25,8 +25,8 @@
 #include "config.h"
 
 #include <assert.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -186,7 +186,7 @@ void SafetyDemo_SetSafetyDataV2(const uint8_t v2Val)
 }
 void SafetyDemo_SetSafetyDataTxt(const char* text)
 {
-    memcpy(sSafetyDataText10, text, 10);
+    strncpy(sSafetyDataText10, text, 10);
 }
 
 bool SafetyDemo_GetEnableFlag(void)
@@ -211,7 +211,7 @@ SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void)
     if (SOPC_STATUS_OK == byUasRetval)
     {
         LOG_Trace(LOG_INFO, "byUAS_InitSafetyProvider( handle = 0x%08X ) succeeded", hProviderHandle);
-        SafetyDemo_SetSafetyDataTxt ("Hello!");
+        SafetyDemo_SetSafetyDataTxt("Hello!");
     } /* if */
     else
     {

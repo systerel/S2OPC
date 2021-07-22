@@ -21,18 +21,15 @@
  * Safety-Related: yes
  */
 
-
 #ifndef INC_UASCRC_H
 
 #define INC_UASCRC_H
-
 
 /*--------------------------------------------------------------------------*/
 /******************************* I M P O R T ********************************/
 /*--------------------------------------------------------------------------*/
 
 #include "uas_type.h"
-
 
 /*--------------------------------------------------------------------------*/
 /******************************* E X P O R T ********************************/
@@ -42,29 +39,23 @@
 /*  M A C R O S  */
 /*---------------*/
 
-
 /*-------------*/
 /*  T Y P E S  */
 /*-------------*/
-
 
 /*---------------------*/
 /*  F U N C T I O N S  */
 /*---------------------*/
 
 /**
-  * 32 bit CRC calculation
-  */
-extern UAS_UInt32 dwUASCRC_Calculate
-(
-  const UAS_ResponseSpdu_type *pzResponseSpdu, /**< Pointer to the ResponseSPDU */
-  const UAS_UInt16 wSafetyDataLen   /**< Length of the serialized SafetyData */
+ * 32 bit CRC calculation
+ */
+extern UAS_UInt32 dwUASCRC_Calculate(const UAS_ResponseSpdu_type* pzResponseSpdu, /**< Pointer to the ResponseSPDU */
+                                     const UAS_UInt16 wSafetyDataLen /**< Length of the serialized SafetyData */
 );
-
 
 /*---------------------*/
 /*  V A R I A B L E S  */
 /*---------------------*/
-
 
 #endif /* INC_UASTIME_H */

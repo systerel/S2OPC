@@ -83,12 +83,11 @@ void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const p
  * \param sMaxLen The maximum buffer length
  * \param[out] sReadLen Return the length of read buffer (0 in case of error)
  */
-void UAM_NS2S_ReceiveSpduImpl (const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
+void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
 
 /**
  * \brief Will be called once  on cleanup.
  */
 void UAM_NS2S_Clear(void);
-
 
 #endif

@@ -21,11 +21,9 @@
  * Safety-Related: no
  */
 
-
 #ifndef INC_UASSTDTYPES_H
 
 #define INC_UASSTDTYPES_H
-
 
 /*--------------------------------------------------------------------------*/
 /******************************* I M P O R T ********************************/
@@ -45,26 +43,26 @@
  *  These macros define the values of the boolean data type.
  */
 /**@{*/
-#define UAS_FALSE    0x00u /**< Value 'false' of a boolean data type. */
-#define UAS_TRUE     0x01u /**< Value 'true' of a boolean data type.  */
+#define UAS_FALSE 0x00u /**< Value 'false' of a boolean data type. */
+#define UAS_TRUE 0x01u  /**< Value 'true' of a boolean data type.  */
 /**@}*/
 
 /**
  * Value of an uninitialized pointer (NULL).
  */
 #ifdef NULL
-  #define UAS_NULL   NULL
+#define UAS_NULL NULL
 #else
-  #define UAS_NULL   ((void *)0)
+#define UAS_NULL ((void*) 0)
 #endif
 
 /**
  * Value of an unspecific pointer (VOID).
  */
 #ifdef VOID
-  #define UAS_VOID   VOID
+#define UAS_VOID VOID
 #else
-  #define UAS_VOID   void
+#define UAS_VOID void
 #endif
 
 /*-------------*/
@@ -75,22 +73,22 @@
  *  These type definitions define the basic data types used in the UAS.
  */
 /**@{*/
-typedef unsigned char      UAS_Bool;   /**< A two-state logical value (Bool). */
-typedef char               UAS_Char;   /**< An character value (Char). */
-typedef int8_t             UAS_Int8;   /**< An integer value between -128 and 127 (Int8). */
-typedef int16_t            UAS_Int16;  /**< An integer value between -32768 and 32767 (Int16). */
-typedef int32_t            UAS_Int32;  /**< An integer value between -2147483648 and 2147483647 (Int32). */
-typedef int64_t            UAS_Int64;  /**< An integer value between -9223372036854775808 and 9223372036854775807 (Int64). */
-typedef uint8_t            UAS_UInt8;  /**< An integer value between 0 and 255 (UInt8).  */
-typedef uint16_t           UAS_UInt16; /**< An integer value between 0 and 65535 (UInt16).  */
-typedef uint32_t           UAS_UInt32; /**< An integer value between 0 and 4294967295 (UInt32). */
-typedef uint64_t           UAS_UInt64; /**< An integer value between 0 and 18446744073709551615 (UInt64). */
+typedef unsigned char UAS_Bool; /**< A two-state logical value (Bool). */
+typedef char UAS_Char;          /**< An character value (Char). */
+typedef int8_t UAS_Int8;        /**< An integer value between -128 and 127 (Int8). */
+typedef int16_t UAS_Int16;      /**< An integer value between -32768 and 32767 (Int16). */
+typedef int32_t UAS_Int32;      /**< An integer value between -2147483648 and 2147483647 (Int32). */
+typedef int64_t UAS_Int64;      /**< An integer value between -9223372036854775808 and 9223372036854775807 (Int64). */
+typedef uint8_t UAS_UInt8;      /**< An integer value between 0 and 255 (UInt8).  */
+typedef uint16_t UAS_UInt16;    /**< An integer value between 0 and 65535 (UInt16).  */
+typedef uint32_t UAS_UInt32;    /**< An integer value between 0 and 4294967295 (UInt32). */
+typedef uint64_t UAS_UInt64;    /**< An integer value between 0 and 18446744073709551615 (UInt64). */
 
 /** size of a pointer, to be adapted ( UAS_Int16, UAS_Int32, UAS_Int64 )
-  * only used for the redundant (inverse) storage of pointer variables
-  */
+ * only used for the redundant (inverse) storage of pointer variables
+ */
 // SYSTEREL REVIEW : uintptr_t or intptr_t type ensures the compatibility with pointers.
-#define UAS_INVERSE_PTR    uintptr_t
+#define UAS_INVERSE_PTR uintptr_t
 
 /*---------------------*/
 /*  F U N C T I O N S  */
@@ -116,10 +114,8 @@ typedef uint64_t           UAS_UInt64; /**< An integer value between 0 and 18446
 #define STDFUNC_memset memset
 #define STDFUNC_strlen strlen
 
-
 /*---------------------*/
 /*  V A R I A B L E S  */
 /*---------------------*/
-
 
 #endif /* ifndef INC_UASSTDTYPES_H */

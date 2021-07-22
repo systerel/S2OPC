@@ -33,26 +33,25 @@
  *===========================================================================*/
 
 #include "uam_ns.h"
+#include "uam.h"
 #include "uam_ns2s_itf.h"
 #include "uam_spduEncoders.h"
-#include "uam.h"
 #include "uas.h"
-
 
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
+#include "sopc_dict.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_dict.h"
 #include "sopc_threads.h"
 
 #include "sopc_async_queue.h"
 
 #include <assert.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <netinet/in.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <signal.h>
 
@@ -100,53 +99,56 @@ static const UAS_UInt32 NoHandle = 0xFFFFFFFEu;
 /*============================================================================
  * DECLARATION OF INTERNAL SERVICES
  *===========================================================================*/
-static UAM_NS_Configuration_type* Session_Get (const UAM_SessionHandle key);
+static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key);
 
-static void EnqueueEvent (UAM_SessionHandle dwHandle, const QueueAction_type event);
-static void EnqueueNoEvent (void);
+static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type event);
+static void EnqueueNoEvent(void);
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
-static void serialize_UInt32 (const UAS_UInt32 uVal, UAS_UInt8* pData, const size_t sLen, size_t* pPos)
+static void serialize_UInt32(const UAS_UInt32 uVal, UAS_UInt8* pData, const size_t sLen, size_t* pPos)
 {
-    UAS_UInt32* puTmp = (UAS_UInt32*) (&pData [*pPos]);
+    UAS_UInt32* puTmp = (UAS_UInt32*) (&pData[*pPos]);
     *pPos += sizeof(UAS_UInt32);
 
     if (*pPos <= sLen)
     {
-        (* puTmp) = ntohl (uVal);
+        (*puTmp) = ntohl(uVal);
     }
 }
 
 /*===========================================================================*/
-static void serialize_UInt8 (const UAS_UInt8 uVal, UAS_UInt8* pData, const size_t sLen, size_t* pPos)
+static void serialize_UInt8(const UAS_UInt8 uVal, UAS_UInt8* pData, const size_t sLen, size_t* pPos)
 {
-    UAS_UInt8* puTmp = (UAS_UInt8*) (&pData [*pPos]);
+    UAS_UInt8* puTmp = (UAS_UInt8*) (&pData[*pPos]);
     *pPos += sizeof(UAS_UInt8);
 
     if (*pPos <= sLen)
     {
-        (* puTmp) = uVal;
+        (*puTmp) = uVal;
     }
 }
 
 /*===========================================================================*/
-static void serialize_String (const UAS_UInt8* pzVal, const size_t sValLen, UAS_UInt8* pData,
-        const size_t sLen, size_t* pPos)
+static void serialize_String(const UAS_UInt8* pzVal,
+                             const size_t sValLen,
+                             UAS_UInt8* pData,
+                             const size_t sLen,
+                             size_t* pPos)
 {
     if (sValLen + (*pPos) <= sLen)
     {
-        memcpy(&pData [*pPos], pzVal, sValLen);
+        memcpy(&pData[*pPos], pzVal, sValLen);
         *pPos += sValLen;
     }
 }
 
 /*===========================================================================*/
-static UAS_UInt32 deserialize_UInt32 (const UAS_UInt8* pData, const size_t sLen, size_t* pPos)
+static UAS_UInt32 deserialize_UInt32(const UAS_UInt8* pData, const size_t sLen, size_t* pPos)
 {
-    const UAS_UInt32* puTmp = (const UAS_UInt32*) (&pData [*pPos]);
+    const UAS_UInt32* puTmp = (const UAS_UInt32*) (&pData[*pPos]);
     *pPos += sizeof(UAS_UInt32);
 
     if (*pPos > sLen)
@@ -154,13 +156,13 @@ static UAS_UInt32 deserialize_UInt32 (const UAS_UInt8* pData, const size_t sLen,
         return 0;
     }
 
-    return ntohl (* puTmp);
+    return ntohl(*puTmp);
 }
 
 /*===========================================================================*/
-static UAS_UInt8 deserialize_UInt8 (const UAS_UInt8* pData, const size_t sLen, size_t* pPos)
+static UAS_UInt8 deserialize_UInt8(const UAS_UInt8* pData, const size_t sLen, size_t* pPos)
 {
-    const UAS_UInt8* puTmp = (const UAS_UInt8*) (&pData [*pPos]);
+    const UAS_UInt8* puTmp = (const UAS_UInt8*) (&pData[*pPos]);
     *pPos += sizeof(UAS_UInt8);
 
     if (*pPos > sLen)
@@ -168,20 +170,24 @@ static UAS_UInt8 deserialize_UInt8 (const UAS_UInt8* pData, const size_t sLen, s
         return 0;
     }
 
-    return * puTmp;
+    return *puTmp;
 }
 
 /*===========================================================================*/
-static void deserialize_String (const UAS_UInt8* pData, const size_t sLen, size_t* pPos, SOPC_ByteString* pzDest, const size_t sValLen)
+static void deserialize_String(const UAS_UInt8* pData,
+                               const size_t sLen,
+                               size_t* pPos,
+                               SOPC_ByteString* pzDest,
+                               const size_t sValLen)
 {
     if (sValLen + *pPos <= sLen)
     {
-        SOPC_ByteString_CopyFromBytes (pzDest, pData + *pPos, (int32_t)sValLen);
+        SOPC_ByteString_CopyFromBytes(pzDest, pData + *pPos, (int32_t) sValLen);
     }
     else
     {
-//        printf("deserialize_String fail : sValLen= %u, pos=%u, sLen=%u\n",
-//                (unsigned) sValLen, (unsigned) *pPos, (unsigned) sLen); // TODO clean
+        //        printf("deserialize_String fail : sValLen= %u, pos=%u, sLen=%u\n",
+        //                (unsigned) sValLen, (unsigned) *pPos, (unsigned) sLen); // TODO clean
     }
     *pPos += sValLen;
 }
@@ -199,19 +205,19 @@ static bool EncodeSpduRequest(const UAS_RequestSpdu_type* pzSpdu, SOPC_Byte** pp
     if (pzSpdu != NULL && ppBytes != NULL && sLen != NULL)
     {
         *ppBytes = (SOPC_Byte*) SOPC_Malloc(expLen);
-        assert (NULL != *ppBytes);
-        serialize_UInt32 (pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
-        serialize_UInt8 (pzSpdu->byFlags, *ppBytes, expLen, sLen);
+        assert(NULL != *ppBytes);
+        serialize_UInt32(pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
+        serialize_UInt8(pzSpdu->byFlags, *ppBytes, expLen, sLen);
         if ((*sLen) == expLen)
         {
             bResult = true;
-            LOG_Trace (LOG_DEBUG, "UAM_NS:EncodeSpduRequest Result is %u bytes long", (unsigned)(*sLen));
+            LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduRequest Result is %u bytes long", (unsigned) (*sLen));
         }
         else
         {
-            LOG_Trace (LOG_WARN, "UAM_NS:Failed to EncodeSpduRequest for sending to PubSub layer (len = %u, exp = %u)",
-                    (unsigned)(*sLen), (unsigned)expLen);
+            LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduRequest for sending to PubSub layer (len = %u, exp = %u)",
+                      (unsigned) (*sLen), (unsigned) expLen);
         }
     }
 
@@ -222,37 +228,39 @@ static bool EncodeSpduRequest(const UAS_RequestSpdu_type* pzSpdu, SOPC_Byte** pp
 /**
  * \param ppBytes Must be freed by caller after use
  */
-static bool EncodeSpduResponse(
-        const UAS_ResponseSpdu_type* pzSpdu, SOPC_Byte** ppBytes,
-        size_t* sLen, size_t uSafeSize, size_t uNonSafeSize)
+static bool EncodeSpduResponse(const UAS_ResponseSpdu_type* pzSpdu,
+                               SOPC_Byte** ppBytes,
+                               size_t* sLen,
+                               size_t uSafeSize,
+                               size_t uNonSafeSize)
 {
     bool bResult = false;
 
     sLen = 0;
     if (!(pzSpdu == NULL || ppBytes == NULL || sLen == NULL))
     {
-        const size_t expLen = 25  + uSafeSize + uNonSafeSize;
+        const size_t expLen = 25 + uSafeSize + uNonSafeSize;
         *ppBytes = (SOPC_Byte*) SOPC_Malloc(expLen);
-        assert (NULL != *ppBytes);
+        assert(NULL != *ppBytes);
         // SAFE data
-        serialize_String (pzSpdu->pbySerializedSafetyData, uSafeSize, *ppBytes, expLen, sLen);
-        serialize_UInt8 (pzSpdu->byFlags, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->zSpduId.dwPart1, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->zSpduId.dwPart2, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->zSpduId.dwPart3, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
-        serialize_UInt32 (pzSpdu->dwCrc, *ppBytes, expLen, sLen);
-        serialize_String (pzSpdu->pbySerializedNonSafetyData, uNonSafeSize, *ppBytes, expLen, sLen);
+        serialize_String(pzSpdu->pbySerializedSafetyData, uSafeSize, *ppBytes, expLen, sLen);
+        serialize_UInt8(pzSpdu->byFlags, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->zSpduId.dwPart1, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->zSpduId.dwPart2, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->zSpduId.dwPart3, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
+        serialize_UInt32(pzSpdu->dwCrc, *ppBytes, expLen, sLen);
+        serialize_String(pzSpdu->pbySerializedNonSafetyData, uNonSafeSize, *ppBytes, expLen, sLen);
         if ((*sLen) == expLen)
         {
             bResult = true;
-            LOG_Trace (LOG_DEBUG, "UAM_NS:EncodeSpduResponse Result is %u bytes long", (unsigned)(*sLen));
+            LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduResponse Result is %u bytes long", (unsigned) (*sLen));
         }
         else
         {
-            LOG_Trace (LOG_WARN, "UAM_NS:Failed to EncodeSpduResponse for sending to PubSub layer (len = %u, exp = %u)",
-                    (unsigned)(*sLen), (unsigned)expLen);
+            LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduResponse for sending to PubSub layer (len = %u, exp = %u)",
+                      (unsigned) (*sLen), (unsigned) expLen);
         }
     }
 
@@ -276,46 +284,47 @@ static bool DecodeSpduResponse(const UAM_SpduResponseHandle dwNumericId, const S
     SOPC_ByteString bsSafeData;
     SOPC_ByteString bsNonSafeData;
 
-    UAM_SpduEncoder_GetResponseSizes (dwNumericId, &uSafeSize, &uNonSafeSize);
-    SOPC_ByteString_Initialize (&bsSafeData);
-    SOPC_ByteString_Initialize (&bsNonSafeData);
-    const size_t expLen = 25  + uSafeSize + uNonSafeSize;
+    UAM_SpduEncoder_GetResponseSizes(dwNumericId, &uSafeSize, &uNonSafeSize);
+    SOPC_ByteString_Initialize(&bsSafeData);
+    SOPC_ByteString_Initialize(&bsNonSafeData);
+    const size_t expLen = 25 + uSafeSize + uNonSafeSize;
 
     // de-serialize Safe data
-    deserialize_String (pBytes ,sLen , &pos ,&bsSafeData, uSafeSize);
+    deserialize_String(pBytes, sLen, &pos, &bsSafeData, uSafeSize);
     zSpdu.pbySerializedSafetyData = bsSafeData.Data;
     // de-serialize byFlags
-    zSpdu.byFlags = deserialize_UInt8 (pBytes ,sLen , &pos);
+    zSpdu.byFlags = deserialize_UInt8(pBytes, sLen, &pos);
     // de-serialize zSpduId
-    zSpdu.zSpduId.dwPart1 = deserialize_UInt32 (pBytes ,sLen , &pos);
-    zSpdu.zSpduId.dwPart2 = deserialize_UInt32 (pBytes ,sLen , &pos);
-    zSpdu.zSpduId.dwPart3 = deserialize_UInt32 (pBytes ,sLen , &pos);
+    zSpdu.zSpduId.dwPart1 = deserialize_UInt32(pBytes, sLen, &pos);
+    zSpdu.zSpduId.dwPart2 = deserialize_UInt32(pBytes, sLen, &pos);
+    zSpdu.zSpduId.dwPart3 = deserialize_UInt32(pBytes, sLen, &pos);
     // de-serialize dwSafetyConsumerId
-    zSpdu.dwSafetyConsumerId = deserialize_UInt32 (pBytes ,sLen , &pos);
+    zSpdu.dwSafetyConsumerId = deserialize_UInt32(pBytes, sLen, &pos);
     // de-serialize dwMonitoringNumber
-    zSpdu.dwMonitoringNumber = deserialize_UInt32 (pBytes ,sLen , &pos);
+    zSpdu.dwMonitoringNumber = deserialize_UInt32(pBytes, sLen, &pos);
     // de-serialize dwCrc
-    zSpdu.dwCrc = deserialize_UInt32 (pBytes ,sLen , &pos);
+    zSpdu.dwCrc = deserialize_UInt32(pBytes, sLen, &pos);
     // de-serialize NonSafe data
-    deserialize_String (pBytes ,sLen , &pos ,&bsNonSafeData, uNonSafeSize);
+    deserialize_String(pBytes, sLen, &pos, &bsNonSafeData, uNonSafeSize);
     zSpdu.pbySerializedNonSafetyData = bsNonSafeData.Data;
 
     if (pos == expLen && pos == sLen)
     {
-        LOG_Trace (LOG_DEBUG, "Encoded message to Safe(%08X). LEN= %u, Safe len = %d, NonSafe len = %d",
-                (unsigned)dwNumericId, (unsigned)sLen, (int)bsSafeData.Length, (int)bsNonSafeData.Length);
+        LOG_Trace(LOG_DEBUG, "Encoded message to Safe(%08X). LEN= %u, Safe len = %d, NonSafe len = %d",
+                  (unsigned) dwNumericId, (unsigned) sLen, (int) bsSafeData.Length, (int) bsNonSafeData.Length);
         // Simply put the SPDU in encoder cache.
-        UAM_SpduEncoder_SetResponse (dwNumericId, &zSpdu);
+        UAM_SpduEncoder_SetResponse(dwNumericId, &zSpdu);
         bResult = true;
     }
     else
     {
-        LOG_Trace (LOG_WARN, "Failed to decode SPDU RESPONSE %08X for sending to PubSub layer (len = %u, pos= %u, exp = %u)",
-                dwNumericId, (unsigned)pos, (unsigned)sLen, (unsigned)expLen);
+        LOG_Trace(LOG_WARN,
+                  "Failed to decode SPDU RESPONSE %08X for sending to PubSub layer (len = %u, pos= %u, exp = %u)",
+                  dwNumericId, (unsigned) pos, (unsigned) sLen, (unsigned) expLen);
     }
 
-    SOPC_ByteString_Clear (&bsSafeData);
-    SOPC_ByteString_Clear (&bsNonSafeData);
+    SOPC_ByteString_Clear(&bsSafeData);
+    SOPC_ByteString_Clear(&bsNonSafeData);
 
     return bResult;
 }
@@ -331,9 +340,9 @@ static bool DecodeSpduRequest(UAM_SpduRequestHandle dwNumericId, const SOPC_Byte
     }
 
     UAS_RequestSpdu_type zSpdu;
-    zSpdu.dwSafetyConsumerId = deserialize_UInt32 (pBytes ,sLen , &pos);
-    zSpdu.dwMonitoringNumber = deserialize_UInt32 (pBytes ,sLen , &pos);
-    zSpdu.byFlags = deserialize_UInt8 (pBytes ,sLen , &pos);
+    zSpdu.dwSafetyConsumerId = deserialize_UInt32(pBytes, sLen, &pos);
+    zSpdu.dwMonitoringNumber = deserialize_UInt32(pBytes, sLen, &pos);
+    zSpdu.byFlags = deserialize_UInt8(pBytes, sLen, &pos);
 
     if (pos == sLen)
     {
@@ -342,32 +351,32 @@ static bool DecodeSpduRequest(UAM_SpduRequestHandle dwNumericId, const SOPC_Byte
     }
     else
     {
-//        printf ("Failed to DecodeSpduRequest to PubSub layer (len = %u, exp = %u)\n",
-//                (unsigned)pos, (unsigned)sLen); // TODO clean
+        //        printf ("Failed to DecodeSpduRequest to PubSub layer (len = %u, exp = %u)\n",
+        //                (unsigned)pos, (unsigned)sLen); // TODO clean
     }
     return bResult;
 }
 
 /*===========================================================================*/
-static void DoPollSafeMessages (const UAM_NS_Configuration_type* pzSession)
+static void DoPollSafeMessages(const UAM_NS_Configuration_type* pzSession)
 {
-    assert (pzSession != NULL);
-    void * pzBuffer;
+    assert(pzSession != NULL);
+    void* pzBuffer;
     size_t sReadLen = 0;
 
     pzBuffer = SOPC_Malloc(MAX_SOCKET_READ_SIZE);
-    assert (pzBuffer != NULL);
+    assert(pzBuffer != NULL);
 
-    UAM_NS2S_ReceiveSpduImpl (pzSession->dwHandle, pzBuffer, MAX_SOCKET_READ_SIZE, &sReadLen);
+    UAM_NS2S_ReceiveSpduImpl(pzSession->dwHandle, pzBuffer, MAX_SOCKET_READ_SIZE, &sReadLen);
 
     if (sReadLen > 0)
     {
-        LOG_Trace (LOG_DEBUG, "DoPollSafeMessages received %u bytes", (unsigned) sReadLen);
-        printf ( "DoPollSafeMessages received %u bytes\n", (unsigned) sReadLen);
+        LOG_Trace(LOG_DEBUG, "DoPollSafeMessages received %u bytes", (unsigned) sReadLen);
+        printf("DoPollSafeMessages received %u bytes\n", (unsigned) sReadLen);
         if (pzSession->bIsProvider)
         {
             // For provider the SPDU from SAFE is a response
-            DecodeSpduResponse (pzSession->uUserResponseId, pzBuffer, sReadLen);
+            DecodeSpduResponse(pzSession->uUserResponseId, pzBuffer, sReadLen);
         }
         else
         {
@@ -380,19 +389,19 @@ static void DoPollSafeMessages (const UAM_NS_Configuration_type* pzSession)
 }
 
 /*===========================================================================*/
-static void EnqueueEvent (UAM_SessionHandle dwHandle, const QueueAction_type event)
+static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type event)
 {
     QueueElement_type* pEvent = SOPC_Malloc(sizeof(*pEvent));
-    assert (pEvent != NULL);
+    assert(pEvent != NULL);
     pEvent->dwHandle = dwHandle;
     pEvent->eEvent = event;
 
-    LOG_Trace (LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwHandle, event);
+    LOG_Trace(LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwHandle, event);
 
-    SOPC_AsyncQueue_BlockingEnqueue (pzQueue, pEvent);
+    SOPC_AsyncQueue_BlockingEnqueue(pzQueue, pEvent);
 }
 /*===========================================================================*/
-static void EnqueueNoEvent (void)
+static void EnqueueNoEvent(void)
 {
     EnqueueEvent(NoHandle, qaWakeEvent);
 }
@@ -400,7 +409,7 @@ static void EnqueueNoEvent (void)
 /*===========================================================================*/
 static void* Thread_Impl(void* data)
 {
-    assert (data == NULL);
+    assert(data == NULL);
     size_t sLen;
     bool bResult = false;
     size_t uSafeSize;
@@ -410,11 +419,12 @@ static void* Thread_Impl(void* data)
     while (stopSignal == 0)
     {
         QueueElement_type* pEvent = NULL;
-        SOPC_AsyncQueue_BlockingDequeue (pzQueue, (void**) &pEvent);
+        SOPC_AsyncQueue_BlockingDequeue(pzQueue, (void**) &pEvent);
 
-        const UAM_NS_Configuration_type* pzSession = Session_Get (pEvent->dwHandle);
+        const UAM_NS_Configuration_type* pzSession = Session_Get(pEvent->dwHandle);
 
-        LOG_Trace (LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwHandle, pEvent->eEvent, pzSession);
+        LOG_Trace(LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwHandle, pEvent->eEvent,
+                  pzSession);
         if (pzSession != NULL && pEvent != NULL)
         {
             switch (pEvent->eEvent)
@@ -424,9 +434,9 @@ static void* Thread_Impl(void* data)
                 // A message was received on PUBSUB side and has to be forwarded on SAFE
                 // Convert the message for SAFE
                 UAS_RequestSpdu_type zSpdu;
-                UAM_SpduEncoder_GetRequest (pzSession->uUserRequestId, &zSpdu);
+                UAM_SpduEncoder_GetRequest(pzSession->uUserRequestId, &zSpdu);
 
-                bResult = EncodeSpduRequest (&zSpdu, &pBytesToSafe, &sLen);
+                bResult = EncodeSpduRequest(&zSpdu, &pBytesToSafe, &sLen);
 
                 break;
             }
@@ -454,56 +464,55 @@ static void* Thread_Impl(void* data)
                 break;
             }
 
-
             if (bResult && sLen > 0 && pBytesToSafe != NULL)
             {
                 // Send it to SAFE
-                UAM_NS2S_SendSpduImpl (pEvent->dwHandle, pBytesToSafe, sLen);
+                UAM_NS2S_SendSpduImpl(pEvent->dwHandle, pBytesToSafe, sLen);
             }
         }
     }
-    LOG_Trace (LOG_DEBUG, "UALM_NS:  Thread_Impl stopped signal=%d", stopSignal);
+    LOG_Trace(LOG_DEBUG, "UALM_NS:  Thread_Impl stopped signal=%d", stopSignal);
     return NULL;
 }
 
 /*===========================================================================*/
 static uint64_t Session_KeyHash_Fct(const void* pKey)
 {
-    return (const UAM_SessionHandle)(const UAS_INVERSE_PTR)pKey;
+    return (const UAM_SessionHandle)(const UAS_INVERSE_PTR) pKey;
 }
 
 /*===========================================================================*/
-static bool Session_KeyEqual_Fct (const void* a, const void* b)
+static bool Session_KeyEqual_Fct(const void* a, const void* b)
 {
     return a == b;
 }
 
 /*===========================================================================*/
-static UAM_NS_Configuration_type* Session_Get (const UAM_SessionHandle key)
+static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key)
 {
     if (gSessions == NULL)
     {
         return NULL;
     }
-    return (UAM_NS_Configuration_type*) SOPC_Dict_Get (gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
+    return (UAM_NS_Configuration_type*) SOPC_Dict_Get(gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
 }
 
 /*===========================================================================*/
-static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
+static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
 {
     bool bResult = false;
-    assert (NULL != pzConfig);
+    assert(NULL != pzConfig);
 
-    UAM_NS_Configuration_type* pzPrevConfig = Session_Get (pzConfig->dwHandle);
+    UAM_NS_Configuration_type* pzPrevConfig = Session_Get(pzConfig->dwHandle);
     if (pzPrevConfig == NULL)
     {
-        UAM_NS_Configuration_type* pzNewConfig = SOPC_Malloc (sizeof(*pzNewConfig));
+        UAM_NS_Configuration_type* pzNewConfig = SOPC_Malloc(sizeof(*pzNewConfig));
         bResult = (NULL != pzNewConfig);
         if (bResult)
         {
             *pzNewConfig = *pzConfig;
             // Note : Values and Keys are freed
-            bResult = SOPC_Dict_Insert (gSessions, (void*)(UAS_INVERSE_PTR)pzConfig->dwHandle, pzNewConfig);
+            bResult = SOPC_Dict_Insert(gSessions, (void*) (UAS_INVERSE_PTR) pzConfig->dwHandle, pzNewConfig);
         }
     }
     return bResult;
@@ -517,28 +526,27 @@ static bool Session_Add (const UAM_NS_Configuration_type* const pzConfig)
 void UAM_NS_Initialize(void)
 {
     SOPC_ReturnStatus sopcResult = SOPC_STATUS_INVALID_PARAMETERS;
-    assert (gSessions == NULL);
-    gSessions = SOPC_Dict_Create (NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, NULL, SOPC_Free);
-    assert (gSessions != NULL);
+    assert(gSessions == NULL);
+    gSessions = SOPC_Dict_Create(NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, NULL, SOPC_Free);
+    assert(gSessions != NULL);
 
-    sopcResult = SOPC_AsyncQueue_Init (&pzQueue, "UAM_NS_Events");
+    sopcResult = SOPC_AsyncQueue_Init(&pzQueue, "UAM_NS_Events");
     if (SOPC_STATUS_OK == sopcResult)
     {
-        sopcResult = SOPC_Thread_Create (&gThread, &Thread_Impl, NULL, "UAM_NS_Events task");
+        sopcResult = SOPC_Thread_Create(&gThread, &Thread_Impl, NULL, "UAM_NS_Events task");
     }
 
-    LOG_Trace (LOG_DEBUG, "UAM_NS_Initialize OK!");
+    LOG_Trace(LOG_DEBUG, "UAM_NS_Initialize OK!");
 }
-
 
 /*===========================================================================*/
 bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
 {
     bool bResult = false;
-    if  (gSessions != NULL &&  pzConfig != NULL)
+    if (gSessions != NULL && pzConfig != NULL)
     {
-        LOG_Trace (LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u",(unsigned) pzConfig->dwHandle);
-        bResult = Session_Add (pzConfig);
+        LOG_Trace(LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u", (unsigned) pzConfig->dwHandle);
+        bResult = Session_Add(pzConfig);
         if (bResult)
         {
             bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
@@ -548,40 +556,40 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
 }
 
 /*===========================================================================*/
-void UAM_NS_RequestMessageReceived (UAM_SessionHandle dwHandle)
+void UAM_NS_RequestMessageReceived(UAM_SessionHandle dwHandle)
 {
     // Simply notify the sending thread because Cache is already up to date.
-    (void)dwHandle;
+    (void) dwHandle;
 
     if (pzQueue != NULL)
     {
-        EnqueueEvent (dwHandle, qaSpduRequestToSafe);
+        EnqueueEvent(dwHandle, qaSpduRequestToSafe);
     }
 }
 
 /*===========================================================================*/
-void UAM_NS_ResponseMessageReceived (UAM_SessionHandle dwHandle)
+void UAM_NS_ResponseMessageReceived(UAM_SessionHandle dwHandle)
 {
     // Simply notify the sending thread because Cache is already up to date.
     if (pzQueue != NULL)
     {
-        EnqueueEvent (dwHandle, qaSpduResponseToSafe);
+        EnqueueEvent(dwHandle, qaSpduResponseToSafe);
     }
 }
 
 /*===========================================================================*/
-void UAM_NS_CheckSpduReception (UAM_SessionHandle dwHandle)
+void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle)
 {
     if (pzQueue != NULL)
     {
-        EnqueueEvent (dwHandle, qaSpduPollSafe);
+        EnqueueEvent(dwHandle, qaSpduPollSafe);
     }
 }
 
 /*===========================================================================*/
 void UAM_NS_Clear(void)
 {
-    assert (gSessions != NULL);
+    assert(gSessions != NULL);
 
     // Request the Thread to terminate, using an empty event
     stopSignal = 1;
@@ -590,10 +598,9 @@ void UAM_NS_Clear(void)
     SOPC_Dict_Delete(gSessions);
     gSessions = NULL;
 
-
-    LOG_Trace (LOG_INFO, "UAM_NS_Clear : waiting for Thread termination...");
+    LOG_Trace(LOG_INFO, "UAM_NS_Clear : waiting for Thread termination...");
     SOPC_Thread_Join(gThread);
-    LOG_Trace (LOG_INFO, "UAM_NS_Clear : Thread terminated");
-    SOPC_AsyncQueue_Free (&pzQueue);
+    LOG_Trace(LOG_INFO, "UAM_NS_Clear : Thread terminated");
+    SOPC_AsyncQueue_Free(&pzQueue);
     UAM_NS2S_Clear();
 }

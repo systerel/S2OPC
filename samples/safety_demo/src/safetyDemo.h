@@ -69,9 +69,9 @@ typedef struct
 #define SAMPLE_PROVID1_TIMEOUT_MS 1000
 #define SAMPLE_PROVID1_ID 0x10001234u
 #define SAMPLE_PROVID1_SIGN 0x5194A101
-#define SAMPLE_PROVID1_GUID                             \
-    {                                                   \
-        0x11111111u, 0x2222, 0x2222, {0x01, 0x02, 0x03, 0x04, 0x50, 0x60, 0x70, 0x80} \
+#define SAMPLE_PROVID1_GUID                                                             \
+    {                                                                                   \
+        0x11111111u, 0x2222, 0x2222, { 0x01, 0x02, 0x03, 0x04, 0x50, 0x60, 0x70, 0x80 } \
     }
 #define SAMPLE_PROVID1_HANDLE (SAMPLE_PROVIDER_HDL_TAG + 1)
 

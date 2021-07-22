@@ -62,8 +62,8 @@
 //#include "interactive.h"
 #include "safetyDemo.h"
 
-#include "uas_logitf.h"
 #include "uam_cache.h"
+#include "uas_logitf.h"
 
 //
 #include "uam.h"
@@ -92,7 +92,7 @@ static int prod_ns_help(const char* argv0);
 static void prod_ns_init(void);
 static void prod_ns_cycle(void);
 static void prod_ns_stop(void);
-static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv);
+static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv);
 
 /*============================================================================
  * LOCAL VARIABLES
@@ -262,7 +262,6 @@ static void prod_ns_initialize_subscriber(void)
                 g_status = SOPC_STATUS_NOK;
             }
         }
-
     }
 }
 
@@ -284,7 +283,6 @@ static void prod_ns_initialize_uam(void)
         g_status = UAM_SpduEncoder_Initialize();
     }
 
-
     if (SOPC_STATUS_OK == g_status)
     {
         // : note SPDU request is created on both PROV (Sub) & CONS (Pub)
@@ -292,32 +290,29 @@ static void prod_ns_initialize_uam(void)
         if (SOPC_STATUS_OK != g_status)
         {
             printf("[EE] Failed to create SPDU Response with NodeId=[ns=%d;i=%d]\n", UAM_NAMESPACE,
-                    NODEID_SPDU_REQUEST_NUM);
+                   NODEID_SPDU_REQUEST_NUM);
             printf("     => This variable must be defined in configuration file with dataType=\"Structure\"\n");
         }
     }
     if (SOPC_STATUS_OK == g_status)
     {
         g_status = UAM_SpduEncoder_CreateSpduResponse(NODEID_SPDU_RESPONSE_NUM, SAMPLE1_SAFETY_DATA_LEN,
-                SAMPLE1_UNSAFE_DATA_LEN);
+                                                      SAMPLE1_UNSAFE_DATA_LEN);
         if (SOPC_STATUS_OK != g_status)
         {
             printf("[EE] Failed to create SPDU Response with NodeId=[ns=%d;i=%d]\n", UAM_NAMESPACE,
-                    NODEID_SPDU_RESPONSE_NUM);
+                   NODEID_SPDU_RESPONSE_NUM);
             printf("     => This variable must be defined in configuration file with dataType=\"Structure\"\n");
         }
     }
 
     if (SOPC_STATUS_OK == g_status)
     {
-        UAM_NS_Configuration_type zConfig =
-        {
-                .eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
-                .dwHandle = SESSION_UAM_ID,
-                .bIsProvider = true,
-                .uUserRequestId = NODEID_SPDU_REQUEST_NUM,
-                .uUserResponseId = NODEID_SPDU_RESPONSE_NUM
-        };
+        UAM_NS_Configuration_type zConfig = {.eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
+                                             .dwHandle = SESSION_UAM_ID,
+                                             .bIsProvider = true,
+                                             .uUserRequestId = NODEID_SPDU_REQUEST_NUM,
+                                             .uUserResponseId = NODEID_SPDU_RESPONSE_NUM};
         UAM_NS_Initialize();
 
         result = UAM_NS_CreateSpdu(&zConfig);
@@ -364,7 +359,7 @@ static void prod_ns_stop(void)
     // TODO stop cleany everything
 
     UAM_NS_Clear();
-    printf("# EXITING (code =%02X)\n" , g_status);
+    printf("# EXITING (code =%02X)\n", g_status);
 }
 
 /*===========================================================================*/
@@ -373,24 +368,22 @@ static void prod_ns_cycle(void)
     if (g_status == SOPC_STATUS_OK)
     {
         // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
-        UAM_NS_CheckSpduReception (SESSION_UAM_ID);
+        UAM_NS_CheckSpduReception(SESSION_UAM_ID);
         // TODO
     }
 }
 
 /*===========================================================================*/
-static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValue* const pDv)
+static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv)
 {
     // Reminder: this function is called when the Cache is updated (in this case: on Pub-Sub new reception)
     if (pNid == NULL || pDv == NULL)
     {
         return;
     }
-    if (pNid->Namespace == UAM_NAMESPACE &&
-            pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
-            pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
-            pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id &&
-            pDv->Value.Value.ExtObject->Length > 0)
+    if (pNid->Namespace == UAM_NAMESPACE && pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
+        pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+        pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id && pDv->Value.Value.ExtObject->Length > 0)
     {
         // We received an extension object (not of array type) on the correct namespace.
 
@@ -399,11 +392,11 @@ static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValu
         // TODO : this could be made more generic!
         if (pNid->Data.Numeric == NODEID_SPDU_REQUEST_NUM)
         {
-            UAM_NS_RequestMessageReceived (SESSION_UAM_ID);
+            UAM_NS_RequestMessageReceived(SESSION_UAM_ID);
         }
         if (pNid->Data.Numeric == NODEID_SPDU_RESPONSE_NUM)
         {
-            UAM_NS_ResponseMessageReceived (SESSION_UAM_ID);
+            UAM_NS_ResponseMessageReceived(SESSION_UAM_ID);
         }
     }
 }
@@ -411,7 +404,6 @@ static void cache_Notify_CB (const SOPC_NodeId* const  pNid, const SOPC_DataValu
 /*===========================================================================*/
 int main(int argc, char* argv[])
 {
-
     if (argc >= 2)
     {
         return prod_ns_help(argv[0]);
@@ -425,7 +417,7 @@ int main(int argc, char* argv[])
 
     prod_ns_init();
 
-    printf ("Start Cycles\n");
+    printf("Start Cycles\n");
     // Wait for a signal
     while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
     {
@@ -435,7 +427,7 @@ int main(int argc, char* argv[])
         // Wait for next cycle
         SOPC_Sleep(msCycle);
     }
-    printf ("End Cycles\n");
+    printf("End Cycles\n");
 
     // Clean and quit
     prod_ns_stop();

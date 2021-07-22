@@ -555,8 +555,9 @@ SOPC_ReturnStatus UAM_SpduEncoder_SetResponse(const UAM_SpduResponseHandle dwNum
 }
 
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(
-        const UAM_SpduResponseHandle dwNumericId, size_t* puSafeSize, size_t*puNonSafeSize)
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(const UAM_SpduResponseHandle dwNumericId,
+                                                   size_t* puSafeSize,
+                                                   size_t* puNonSafeSize)
 {
     SOPC_ReturnStatus bRetval = SOPC_STATUS_INVALID_PARAMETERS;
     assert(UAM_SpduEncoder_Initialized);
@@ -588,12 +589,13 @@ SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(
 }
 
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(
-        const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu,
-        size_t* puSafeSize, size_t*puNonSafeSize)
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId,
+                                              UAS_ResponseSpdu_type* pzSpdu,
+                                              size_t* puSafeSize,
+                                              size_t* puNonSafeSize)
 {
     assert(UAM_SpduEncoder_Initialized);
-    assert (pzSpdu != NULL);
+    assert(pzSpdu != NULL);
 
     SOPC_DataValue* pDv = NULL;
     SPDU_type* pzSpduType = NULL;

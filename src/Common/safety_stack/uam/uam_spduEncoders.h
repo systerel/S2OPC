@@ -129,13 +129,18 @@ SOPC_ReturnStatus UAM_SpduEncoder_GetRequest(const UAM_SpduRequestHandle dwNumer
  *
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId, UAS_ResponseSpdu_type* pzSpdu, size_t* puSafeSize, size_t*puNonSafeSize);
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponse(const UAM_SpduResponseHandle dwNumericId,
+                                              UAS_ResponseSpdu_type* pzSpdu,
+                                              size_t* puSafeSize,
+                                              size_t* puNonSafeSize);
 
 /**
  * \brief
  *  Retreives the sizes of safe & non safe fields
  */
-SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(const UAM_SpduResponseHandle dwNumericId, size_t* puSafeSize, size_t*puNonSafeSize);
+SOPC_ReturnStatus UAM_SpduEncoder_GetResponseSizes(const UAM_SpduResponseHandle dwNumericId,
+                                                   size_t* puSafeSize,
+                                                   size_t* puNonSafeSize);
 
 /**
  * \brief Set the content of the Request SPDU. This function ensures thread-safety access to the data

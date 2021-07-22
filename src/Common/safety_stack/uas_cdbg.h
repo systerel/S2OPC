@@ -21,19 +21,16 @@
  * Safety-Related: no
  */
 
-
 #ifndef INC_UASCDBG_H
 
 #define INC_UASCDBG_H
-
 
 /*--------------------------------------------------------------------------*/
 /******************************* I M P O R T ********************************/
 /*--------------------------------------------------------------------------*/
 
-#include "uas_stdtypes.h"
 #include "uas_cons.h"
-
+#include "uas_stdtypes.h"
 
 /*--------------------------------------------------------------------------*/
 /******************************* E X P O R T ********************************/
@@ -43,39 +40,30 @@
 /*  M A C R O S  */
 /*---------------*/
 
-
 /*-------------*/
 /*  T Y P E S  */
 /*-------------*/
-
 
 /*---------------------*/
 /*  F U N C T I O N S  */
 /*---------------------*/
 
 /**
-  * Debug output of SafetyConsumer state infos
-  */
-extern void vUASCDBG_PrintSafetyConsumerState
-(
-  /** Pointer to the state machine data */
-  const UASCONS_StateMachine_type * const pzStateMachine
-);
+ * Debug output of SafetyConsumer state infos
+ */
+extern void vUASCDBG_PrintSafetyConsumerState(
+    /** Pointer to the state machine data */
+    const UASCONS_StateMachine_type* const pzStateMachine);
 
 /**
-  * DBG output of transition name
-  */
-extern void vUASCDBG_PrintTransitionName
-(
-  /** Name of the transition */
-  const UAS_Char * const pszTransitionName
-);
-
+ * DBG output of transition name
+ */
+extern void vUASCDBG_PrintTransitionName(
+    /** Name of the transition */
+    const UAS_Char* const pszTransitionName);
 
 /*---------------------*/
 /*  V A R I A B L E S  */
 /*---------------------*/
 
-
 #endif /* INC_UASCDBG_H */
-

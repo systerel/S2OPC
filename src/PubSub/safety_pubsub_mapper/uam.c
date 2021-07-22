@@ -70,16 +70,13 @@ typedef struct UAM_DynamicSafetyData_struct
 /**
  * Content of all Providers and Consumers configurations
  */
-static UAM_DynamicSafetyData_type uamDynamicSafetyData =
-{
-        .bInitialized = false,
-        .bLocked = false,
-        .bNextConsumerFreeHandle = 0,
-        .azProviderConfiguration = {{0}},
-        .azConsumerConfiguration = {{0}},
-        .apfProviderCycle = {0},
-        .apfConsumerCycle = {0}
-};
+static UAM_DynamicSafetyData_type uamDynamicSafetyData = {.bInitialized = false,
+                                                          .bLocked = false,
+                                                          .bNextConsumerFreeHandle = 0,
+                                                          .azProviderConfiguration = {{0}},
+                                                          .azConsumerConfiguration = {{0}},
+                                                          .apfProviderCycle = {0},
+                                                          .apfConsumerCycle = {0}};
 
 /**
  * Read the SPDURequest received on a provider and copy it to pzProvider->zRequestSPDU
@@ -111,7 +108,9 @@ static SOPC_ReturnStatus Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider)
 }
 
 /*===========================================================================*/
-static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer, size_t* puSafeSize, size_t*puNonSafeSize)
+static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer,
+                                           size_t* puSafeSize,
+                                           size_t* puNonSafeSize)
 {
     assert(NULL != pzConsumer);
     assert(pzConsumer->dwHandle < UASDEF_MAX_SAFETYCONSUMERS);
@@ -119,7 +118,8 @@ static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer, 
     const UAM_SafetyConfiguration_type* pzSafetyCfg =
         &uamDynamicSafetyData.azConsumerConfiguration[pzConsumer->dwHandle];
 
-    bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU,puSafeSize ,puNonSafeSize);
+    bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU, puSafeSize,
+                                          puNonSafeSize);
 
     return bResult;
 }

@@ -65,7 +65,6 @@ typedef UAS_UInt32 UAM_SpduRequestHandle;
  */
 typedef UAS_UInt32 UAM_SpduResponseHandle;
 
-
 typedef struct UAM_NS_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
@@ -106,20 +105,20 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
  * further call to UAM_NS2S_SendSpduImpl.
  * \param pzExt The extension object received
  */
-void UAM_NS_RequestMessageReceived (UAM_SessionHandle dwHandle);
+void UAM_NS_RequestMessageReceived(UAM_SessionHandle dwHandle);
 
 /**
  * \brief Call this function when a SPDU response message has been received on communication side. This will trigger a
  * further call to UAM_NS2S_SendSpduImpl.
  * \param pzExt The extension object received
  */
-void UAM_NS_ResponseMessageReceived (UAM_SessionHandle dwHandle);
+void UAM_NS_ResponseMessageReceived(UAM_SessionHandle dwHandle);
 
 /**
  * \brief Call this function to poll reception of SPDU from SAFE component
  * \param pzExt The extension object received
  */
-void UAM_NS_CheckSpduReception (UAM_SessionHandle dwHandle);
+void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle);
 /**
  * \brief Stop all safety consumers and Producer. Removes all memory allocations
  */

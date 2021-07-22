@@ -522,7 +522,7 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
         }
         if (ok && g_pfNotify != NULL)
         {
-            (* g_pfNotify) (key, item);
+            (*g_pfNotify)(key, item);
         }
 
         /* As we have ownership of the wv, clear it */
@@ -537,7 +537,7 @@ bool UAM_Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
 /*===========================================================================*/
 void UAM_Cache_SetNotify(UAM_Cache_Notify_CB pfNotify)
 {
-    assert (pfNotify != NULL);
+    assert(pfNotify != NULL);
     g_pfNotify = pfNotify;
 }
 
