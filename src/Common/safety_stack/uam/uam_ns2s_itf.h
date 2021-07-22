@@ -46,6 +46,7 @@
  *===========================================================================*/
 
 #include "uam.h"
+#include "uam_ns.h"
 #include "uas.h"
 
 /*============================================================================
@@ -70,7 +71,7 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle);
 /**
  * \brief Implementation of a SPDU sending from Non-Safe to Safe partition
  * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
- * \param pData The data to be sent? Shall point to at least sLen bytes.
+ * \param pData The data to be sent. Shall point to at least sLen bytes.
  * \param sLen The data length
  */
 void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen);

@@ -32,14 +32,11 @@
 /*============================================================================
  * DESCRIPTION
  *===========================================================================*/
-/** \file This file contains the UAM interface from non-safe user point of view
- * So as to distinguish messages on COMMUNICATION side from those on SAFE side,
- * the frames from COMMUNCATION are named "Messages", whereas those on SAFE side
- * are named "SPDU"
+/** \file This file contains the UAM PubSub implementation specific interface
  */
 
-#ifndef SOPC_UAM_NS_H_
-#define SOPC_UAM_NS_H_ 1
+#ifndef SOPC_UAM_NS_IMPL_H_
+#define SOPC_UAM_NS_IMPL_H_ 1
 
 /*============================================================================
  * INCLUDES
@@ -48,40 +45,16 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_enum_types.h"
-#include "uam.h"
+#include "uam_ns.h"
 #include "uas.h"
 
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
-typedef UAS_UInt32 UAM_SessionHandle; // TODO move in SAFE or common part
-
-/**
- * A Handle (identifier) for a SPDU request
- */
-typedef UAS_UInt32 UAM_SpduRequestHandle;
-/**
- * A Handle (identifier) for a SPDU response
- */
-typedef UAS_UInt32 UAM_SpduResponseHandle;
-
-typedef struct UAM_NS_Configuration_struct
-{
-    UAM_RedundancySetting_type eRedundancyType;
-    /** Session handle. */
-    UAM_SessionHandle dwHandle;
-    bool bIsProvider;
-    /** User-parameters */
-    UAM_SpduRequestHandle uUserRequestId;
-    UAM_SpduResponseHandle uUserResponseId;
-} UAM_NS_Configuration_type;
 
 /*============================================================================
  * EXPORTED CONSTANTS
  *===========================================================================*/
-
-/** The OPC UA namespace used */
-#define UAM_NAMESPACE 1
 
 /*============================================================================
  * EXTERNAL SERVICES
@@ -89,39 +62,14 @@ typedef struct UAM_NS_Configuration_struct
 
 /**
  * \brief Shall be called before the module is used
+ * \pre user must have initialized SKS parameters before this call (typically 'SOPC_LocalSKS_init')
+ * \return The Result status code
  */
-SOPC_ReturnStatus UAM_NS_Initialize(void);
+SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile);
 
 /**
- * \brief Create a SPDU
- * \param pzConfig A pointer to the configuration. The pointer can be freed after call, but not the data pointed
- *      by pzConfig->pUserParams
- * \return false in case of error.
+ * \brief Clear the module
  */
-bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
-
-/**
- * \brief Call this function when a SPDU request message has been received on communication side. This will trigger a
- * further call to UAM_NS2S_SendSpduImpl.
- * \param pzExt The extension object received
- */
-void UAM_NS_RequestMessageReceived(UAM_SessionHandle dwHandle);
-
-/**
- * \brief Call this function when a SPDU response message has been received on communication side. This will trigger a
- * further call to UAM_NS2S_SendSpduImpl.
- * \param pzExt The extension object received
- */
-void UAM_NS_ResponseMessageReceived(UAM_SessionHandle dwHandle);
-
-/**
- * \brief Call this function to poll reception of SPDU from SAFE component
- * \param pzExt The extension object received
- */
-void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle);
-/**
- * \brief Stop all safety consumers and Producer. Removes all memory allocations
- */
-void UAM_NS_Clear(void);
+void UAM_NS_Impl_Clear(void);
 
 #endif

@@ -32,7 +32,6 @@
  *===========================================================================*/
 
 #include "uam.h"
-#include "uam_ns.h"
 #include "uam_ns2s_itf.h"
 #include "uas.h"
 
@@ -48,6 +47,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "uam_ns_impl.h"
 
 /*============================================================================
  * LOCAL TYPES
@@ -205,7 +205,6 @@ void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const p
     {
         return;
     }
-    LOG_Trace(LOG_DEBUG, "UAM_NS2S_SendSpduImpl(%p, %u, %u)\n", pData, (unsigned) sLen, (unsigned) dwHandle);
 
     static const socklen_t siLen = sizeof(struct sockaddr_in);
 
@@ -213,7 +212,6 @@ void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const p
 
     if (iNbWritten < 0 || ((size_t) iNbWritten) < sLen)
     {
-        // TODO
         printf("UAM_NS2S_SendSpduImpl failed to send %u bytes (res=%d)\n", (unsigned) sLen, (int) iNbWritten);
         assert(false); // TODO
     }
@@ -245,7 +243,7 @@ void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, siz
     if (iNbRead > 0)
     {
         *sReadLen = (size_t) iNbRead;
-        printf("UAM_NS2S_ReceiveSpduImpl:Rcvd %u bytes\n", (unsigned) iNbRead);
+        printf("UAM_NS2S_ReceiveSpduImpl:Rcvd %u bytes\n", (unsigned) iNbRead); // TODO
     }
 }
 

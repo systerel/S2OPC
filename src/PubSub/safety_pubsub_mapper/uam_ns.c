@@ -32,10 +32,10 @@
  * INCLUDES
  *===========================================================================*/
 
-#include "uam_ns.h"
 #include "uam.h"
 #include "uam_ns2s_itf.h"
 #include "uam_spduEncoders.h"
+#include "uam_cache.h"
 #include "uas.h"
 
 #include "sopc_builtintypes.h"
@@ -44,6 +44,12 @@
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
+#include "sopc_pub_scheduler.h"
+#include "sopc_sub_scheduler.h"
+#include "sopc_pub_source_variable.h"
+#include "sopc_pubsub_conf.h"
+#include "sopc_sub_target_variable.h"
+#include "sopc_xml_loader.h"
 
 #include "sopc_async_queue.h"
 
@@ -54,6 +60,7 @@
 #include <string.h>
 
 #include <signal.h>
+#include "uam_ns_impl.h"
 
 /*============================================================================
  * LOCAL TYPES
@@ -73,14 +80,28 @@ typedef struct
     UAM_SessionHandle dwHandle;
 } QueueElement_type;
 
+typedef struct
+{
+    SOPC_PubSubConfiguration* pConfig;
+    SOPC_PubSourceVariableConfig* sourceConfig;
+    SOPC_SubTargetVariableConfig* targetConfig;
+} UAM_NS_interactive_Context;
+
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
+
+static UAM_NS_interactive_Context g_interactive_Context;
 
 /**
  * A dictionary object { UAM_SessionHandle : UAM_NS_Configuration_type* }
  */
 static SOPC_Dict* gSessions = NULL;
+
+/**
+ * A dictionary object { UAS_UInt32 : UAM_SessionHandle }
+ */
+static SOPC_Dict* gNodeIdsDict = NULL;
 
 /**
  * A Queue containing some QueueElement_type*
@@ -103,6 +124,9 @@ static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key);
 
 static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type event);
 static void EnqueueNoEvent(void);
+
+static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv);
+
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
@@ -372,7 +396,6 @@ static void DoPollSafeMessages(const UAM_NS_Configuration_type* pzSession)
     if (sReadLen > 0)
     {
         LOG_Trace(LOG_DEBUG, "DoPollSafeMessages received %u bytes", (unsigned) sReadLen);
-        printf("DoPollSafeMessages received %u bytes\n", (unsigned) sReadLen);
         if (pzSession->bIsProvider)
         {
             // For provider the SPDU from SAFE is a response
@@ -482,13 +505,13 @@ static void* Thread_Impl(void* data)
 }
 
 /*===========================================================================*/
-static uint64_t Session_KeyHash_Fct(const void* pKey)
+static uint64_t Intptr_KeyHash_Fct(const void* pKey)
 {
-    return (const UAM_SessionHandle)(const UAS_INVERSE_PTR) pKey;
+    return (const uint64_t)(const UAS_INVERSE_PTR) pKey;
 }
 
 /*===========================================================================*/
-static bool Session_KeyEqual_Fct(const void* a, const void* b)
+static bool Intptr_KeyEqual_Fct(const void* a, const void* b)
 {
     return a == b;
 }
@@ -501,6 +524,16 @@ static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key)
         return NULL;
     }
     return (UAM_NS_Configuration_type*) SOPC_Dict_Get(gSessions, (void*) (UAS_INVERSE_PTR) key, NULL);
+}
+
+/*===========================================================================*/
+static UAM_NS_Configuration_type* NumricIdToSession(const UAS_UInt32 key)
+{
+    if (gNodeIdsDict == NULL)
+    {
+        return NULL;
+    }
+    return (UAM_NS_Configuration_type*) SOPC_Dict_Get(gNodeIdsDict, (void*) (UAS_INVERSE_PTR) key, NULL);
 }
 
 /*===========================================================================*/
@@ -519,9 +552,108 @@ static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
             *pzNewConfig = *pzConfig;
             // Note : Values and Keys are freed
             bResult = SOPC_Dict_Insert(gSessions, (void*) (UAS_INVERSE_PTR) pzConfig->dwHandle, pzNewConfig);
+
+            SOPC_Dict_Insert (gNodeIdsDict, (void*) (UAS_INVERSE_PTR) pzConfig->uUserRequestId, pzNewConfig);
+            SOPC_Dict_Insert (gNodeIdsDict, (void*) (UAS_INVERSE_PTR) pzConfig->uUserResponseId, pzNewConfig);
         }
     }
     return bResult;
+}
+
+/*===========================================================================*/
+static void PubSub_initialize_publisher(SOPC_ReturnStatus* pResult)
+{
+    assert (NULL != pResult);
+    SOPC_PubSubConnection* firstConnection = NULL;
+    uint32_t nbPub = 0;
+    if (SOPC_STATUS_OK == *pResult)
+    {
+        assert(NULL != g_interactive_Context.pConfig);
+
+        g_interactive_Context.sourceConfig = SOPC_PubSourceVariableConfig_Create(&UAM_Cache_GetSourceVariables);
+
+        nbPub = SOPC_PubSubConfiguration_Nb_PubConnection(g_interactive_Context.pConfig);
+        if (0 == nbPub)
+        {
+            LOG_Trace(LOG_DEBUG, "# Info: No Publisher configured");
+        }
+        else
+        {
+            bool res = SOPC_PubScheduler_Start(g_interactive_Context.pConfig, g_interactive_Context.sourceConfig, 0);
+            if (res)
+            {
+                firstConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(g_interactive_Context.pConfig, 0);
+                LOG_Trace(LOG_DEBUG, "# Info: Publisher started on %s", SOPC_PubSubConnection_Get_Address(firstConnection));
+            }
+            else
+            {
+                LOG_Trace(LOG_DEBUG, "# Error while starting the Publisher, do you have administrator privileges?");
+                *pResult = SOPC_STATUS_NOK;
+            }
+        }
+    }
+}
+
+/*===========================================================================*/
+static void PubSub_initialize_subscriber(SOPC_ReturnStatus* pResult)
+{
+    assert (NULL != pResult);
+    SOPC_PubSubConnection* firstConnection = NULL;
+    uint32_t nbSub = 0;
+    if (SOPC_STATUS_OK == *pResult)
+    {
+        assert(NULL != g_interactive_Context.pConfig);
+
+        g_interactive_Context.targetConfig = SOPC_SubTargetVariableConfig_Create(&UAM_Cache_SetTargetVariables);
+
+        nbSub = SOPC_PubSubConfiguration_Nb_SubConnection(g_interactive_Context.pConfig);
+        if (0 < nbSub)
+        {
+            bool res = SOPC_SubScheduler_Start(g_interactive_Context.pConfig, g_interactive_Context.targetConfig, NULL);
+            if (res)
+            {
+                firstConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(g_interactive_Context.pConfig, 0);
+                LOG_Trace(LOG_DEBUG, "# Info: Subscriber started %s", SOPC_PubSubConnection_Get_Address(firstConnection));
+            }
+            else
+            {
+                LOG_Trace(LOG_DEBUG, "# Error while starting the Subscriber");
+                *pResult = SOPC_STATUS_NOK;
+            }
+        }
+    }
+}
+
+/*===========================================================================*/
+static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv)
+{
+    // Reminder: this function is called when the Cache is updated (in this case: on Pub-Sub new reception)
+    if (pNid == NULL || pDv == NULL)
+    {
+        return;
+    }
+    if (pNid->Namespace == UAM_NAMESPACE && pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
+        pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+        pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id && pDv->Value.Value.ExtObject->Length > 0)
+    {
+        // We received an extension object (not of array type) on the correct namespace.
+        const UAM_NS_Configuration_type* pzSession = NumricIdToSession (pNid->Data.Numeric);
+
+        if (pzSession != NULL)
+        {
+            // Retrieve and copy the object
+            // Check whether this is a SPDU received data
+
+            if (pNid->Data.Numeric == pzSession->uUserRequestId)
+            {
+                UAM_NS_RequestMessageReceived(pzSession->dwHandle);
+            }
+            if (pNid->Data.Numeric == pzSession->uUserResponseId)
+            {
+                UAM_NS_ResponseMessageReceived(pzSession->dwHandle);
+            }
+        }
+    }
 }
 
 /*============================================================================
@@ -529,12 +661,15 @@ static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
  *===========================================================================*/
 
 /*===========================================================================*/
-void UAM_NS_Initialize(void)
+SOPC_ReturnStatus UAM_NS_Initialize(void)
 {
     SOPC_ReturnStatus sopcResult = SOPC_STATUS_INVALID_PARAMETERS;
     assert(gSessions == NULL);
-    gSessions = SOPC_Dict_Create(NULL, Session_KeyHash_Fct, Session_KeyEqual_Fct, NULL, SOPC_Free);
+    gSessions = SOPC_Dict_Create(NULL, Intptr_KeyHash_Fct, Intptr_KeyEqual_Fct, NULL, SOPC_Free);
     assert(gSessions != NULL);
+    assert (gNodeIdsDict == NULL);
+    gNodeIdsDict = SOPC_Dict_Create(NULL, Intptr_KeyHash_Fct, Intptr_KeyEqual_Fct, NULL, NULL);
+    assert (gNodeIdsDict != NULL);
 
     sopcResult = SOPC_AsyncQueue_Init(&pzQueue, "UAM_NS_Events");
     if (SOPC_STATUS_OK == sopcResult)
@@ -542,7 +677,84 @@ void UAM_NS_Initialize(void)
         sopcResult = SOPC_Thread_Create(&gThread, &Thread_Impl, NULL, "UAM_NS_Events task");
     }
 
-    LOG_Trace(LOG_DEBUG, "UAM_NS_Initialize OK!");
+    return sopcResult;
+}
+
+/*===========================================================================*/
+SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
+{
+    SOPC_ReturnStatus sopcResult = SOPC_STATUS_OK;
+    FILE* fd;
+
+    g_interactive_Context.pConfig = NULL;
+
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        fd = fopen(pubSubXmlConfigFile, "r");
+        if (NULL == fd)
+        {
+            LOG_Trace(LOG_ERROR, "Cannot read configuration file %s", pubSubXmlConfigFile);
+            sopcResult = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        g_interactive_Context.pConfig = SOPC_PubSubConfig_ParseXML(fd);
+        int closed = fclose(fd);
+
+        sopcResult = (0 == closed && NULL != g_interactive_Context.pConfig) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
+        if (SOPC_STATUS_OK != sopcResult)
+        {
+            LOG_Trace(LOG_ERROR, "Error while loading PubSub configuration from %s", pubSubXmlConfigFile);
+        }
+        else
+        {
+            LOG_Trace(LOG_DEBUG, "[OK] PUBSUB initialized: (%s)", pubSubXmlConfigFile);
+        }
+    }
+
+    // CACHE
+
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        bool res;
+        assert(NULL != g_interactive_Context.pConfig);
+
+        res = UAM_Cache_Initialize(g_interactive_Context.pConfig); // TODO should be moved in UAM NS?
+
+        if (!res)
+        {
+            LOG_Trace(LOG_ERROR, "Error while initializing the cache, refer to log files");
+            sopcResult = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            UAM_Cache_SetNotify(&cache_Notify_CB);
+        }
+    }
+
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        PubSub_initialize_publisher(&sopcResult);
+        LOG_Trace(LOG_DEBUG, "PubSub_initialize_publisher returned %d", sopcResult);
+    }
+
+    if (SOPC_STATUS_OK == sopcResult)
+    {
+        PubSub_initialize_subscriber(&sopcResult);
+        LOG_Trace(LOG_DEBUG, "PubSub_initialize_subscriber returned %d", sopcResult);
+    }
+    return sopcResult;
+}
+
+/*===========================================================================*/
+void UAM_NS_Impl_Clear(void)
+{
+    if (g_interactive_Context.pConfig != NULL)
+    {
+        SOPC_PubSubConfiguration_Delete (g_interactive_Context.pConfig);
+    }
 }
 
 /*===========================================================================*/
@@ -595,14 +807,22 @@ void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle)
 /*===========================================================================*/
 void UAM_NS_Clear(void)
 {
-    assert(gSessions != NULL);
 
     // Request the Thread to terminate, using an empty event
     stopSignal = 1;
     EnqueueNoEvent();
 
-    SOPC_Dict_Delete(gSessions);
-    gSessions = NULL;
+    if (gSessions != NULL)
+    {
+        SOPC_Dict_Delete(gSessions);
+        gSessions = NULL;
+    }
+
+    if (gNodeIdsDict != NULL)
+    {
+        SOPC_Dict_Delete(gNodeIdsDict);
+        gNodeIdsDict = NULL;
+    }
 
     LOG_Trace(LOG_INFO, "UAM_NS_Clear : waiting for Thread termination...");
     SOPC_Thread_Join(gThread);

@@ -46,29 +46,24 @@
 #include "sopc_common_build_info.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_local_sks.h"
-#include "sopc_sub_scheduler.h"
 #include "sopc_time.h"
-#include "sopc_xml_loader.h"
 
 #include "sopc_builtintypes.h"
-#include "sopc_pub_source_variable.h"
-#include "sopc_pubsub_conf.h"
-#include "sopc_sub_target_variable.h"
+#include "sopc_threads.h"
 //
 #include "config.h"
 //#include "interactive.h"
 #include "safetyDemo.h"
 
-#include "uam_cache.h"
 #include "uas_logitf.h"
 
 //
 #include "uam.h"
 #include "uam_ns.h"
 #include "uam_spduEncoders.h"
+#include "uam_ns_impl.h"
 
 /*============================================================================
  * LOCAL TYPES
@@ -77,10 +72,7 @@
 typedef struct
 {
     SOPC_Dict* pCache;
-    SOPC_PubSubConfiguration* pConfig;
     volatile sig_atomic_t stopSignal;
-    SOPC_PubSourceVariableConfig* sourceConfig;
-    SOPC_SubTargetVariableConfig* targetConfig;
     UAM_SessionHandle spduHandle;
 } ProdNS_Demo_interactive_Context;
 
@@ -92,13 +84,13 @@ static int prod_ns_help(const char* argv0);
 static void prod_ns_init(void);
 static void prod_ns_cycle(void);
 static void prod_ns_stop(void);
-static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv);
 
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
 static SOPC_ReturnStatus g_status = SOPC_STATUS_OK;
 static ProdNS_Demo_interactive_Context g_context;
+static Thread gCycleThread;
 
 /*============================================================================
  * LOCAL FUNCTIONS
@@ -150,119 +142,13 @@ static void prod_ns_initialize_logs(void)
 /*===========================================================================*/
 static void prod_ns_initialize_pubsub(void)
 {
-    FILE* fd;
     const char* config_path = SAFETY_XML_PROVIDER_DEMO;
 
     if (SOPC_STATUS_OK == g_status)
     {
-        fd = fopen(config_path, "r");
-        if (NULL == fd)
-        {
-            printf("Cannot read configuration file %s\n", config_path);
-            g_status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+        g_status = UAM_NS_Impl_Initialize (config_path);
     }
 
-    if (SOPC_STATUS_OK == g_status)
-    {
-        g_context.pConfig = SOPC_PubSubConfig_ParseXML(fd);
-        int closed = fclose(fd);
-
-        g_status = (0 == closed && NULL != g_context.pConfig) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
-        if (SOPC_STATUS_OK != g_status)
-        {
-            printf("Error while loading PubSub configuration from %s\n", config_path);
-        }
-        else
-        {
-            printf("[OK] PUBSUB initialized: (%s)\n", config_path);
-            // Add SPDUs to
-        }
-    }
-}
-
-/*===========================================================================*/
-static void prod_ns_initialize_cache(void)
-{
-    bool res = false;
-    if (SOPC_STATUS_OK == g_status)
-    {
-        assert(NULL != g_context.pConfig);
-
-        res = UAM_Cache_Initialize(g_context.pConfig); // TODO should be moved in UAM NS?
-
-        if (!res)
-        {
-            printf("Error while initializing the cache, refer to log files\n");
-            g_status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            UAM_Cache_SetNotify(&cache_Notify_CB);
-        }
-    }
-}
-
-/*===========================================================================*/
-static void prod_ns_initialize_publisher(void)
-{
-    SOPC_PubSubConnection* firstConnection = NULL;
-    uint32_t nbPub = 0;
-    if (SOPC_STATUS_OK == g_status)
-    {
-        assert(NULL != g_context.pConfig);
-
-        g_context.sourceConfig = SOPC_PubSourceVariableConfig_Create(&UAM_Cache_GetSourceVariables);
-
-        nbPub = SOPC_PubSubConfiguration_Nb_PubConnection(g_context.pConfig);
-        if (0 == nbPub)
-        {
-            printf("# Info: No Publisher configured\n");
-        }
-        else
-        {
-            bool res = SOPC_PubScheduler_Start(g_context.pConfig, g_context.sourceConfig, 0);
-            if (res)
-            {
-                firstConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(g_context.pConfig, 0);
-                printf("# Info: Publisher started on %s\n", SOPC_PubSubConnection_Get_Address(firstConnection));
-            }
-            else
-            {
-                printf("# Error while starting the Publisher, do you have administrator privileges?\n");
-                g_status = SOPC_STATUS_NOK;
-            }
-        }
-    }
-}
-
-/*===========================================================================*/
-static void prod_ns_initialize_subscriber(void)
-{
-    SOPC_PubSubConnection* firstConnection = NULL;
-    uint32_t nbSub = 0;
-    if (SOPC_STATUS_OK == g_status)
-    {
-        assert(NULL != g_context.pConfig);
-
-        g_context.targetConfig = SOPC_SubTargetVariableConfig_Create(&UAM_Cache_SetTargetVariables);
-
-        nbSub = SOPC_PubSubConfiguration_Nb_SubConnection(g_context.pConfig);
-        if (0 < nbSub)
-        {
-            bool res = SOPC_SubScheduler_Start(g_context.pConfig, g_context.targetConfig, NULL);
-            if (res)
-            {
-                firstConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(g_context.pConfig, 0);
-                printf("# Info: Subscriber started %s\n", SOPC_PubSubConnection_Get_Address(firstConnection));
-            }
-            else
-            {
-                printf("# Error while starting the Subscriber\n");
-                g_status = SOPC_STATUS_NOK;
-            }
-        }
-    }
 }
 
 /*===========================================================================*/
@@ -338,19 +224,30 @@ static void prod_ns_init(void)
     {
         prod_ns_initialize_logs();
 
-        prod_ns_initialize_pubsub();
-
-        prod_ns_initialize_cache();
-
         prod_ns_initialize_sks();
 
-        prod_ns_initialize_publisher();
-        prod_ns_initialize_subscriber();
+        prod_ns_initialize_pubsub();
 
         prod_ns_initialize_uam();
-
-        // TODO : interactive!
     }
+}
+
+/*===========================================================================*/
+static void* prod_ns_threadImpl (void* arg)
+{
+    assert (arg == NULL);
+    LOG_Trace(LOG_DEBUG, "APP:Start Cycles");
+    // Wait for a signal
+    while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
+    {
+        static const uint32_t msCycle = 50;
+        prod_ns_cycle();
+
+        // Wait for next cycle
+        SOPC_Sleep(msCycle);
+    }
+    LOG_Trace(LOG_DEBUG, "APP:End Cycles");
+    return NULL;
 }
 
 /*===========================================================================*/
@@ -358,6 +255,7 @@ static void prod_ns_stop(void)
 {
     // TODO stop cleany everything
 
+    UAM_NS_Impl_Clear();
     UAM_NS_Clear();
     printf("# EXITING (code =%02X)\n", g_status);
 }
@@ -373,33 +271,76 @@ static void prod_ns_cycle(void)
     }
 }
 
-/*===========================================================================*/
-static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv)
-{
-    // Reminder: this function is called when the Cache is updated (in this case: on Pub-Sub new reception)
-    if (pNid == NULL || pDv == NULL)
-    {
-        return;
-    }
-    if (pNid->Namespace == UAM_NAMESPACE && pNid->IdentifierType == SOPC_IdentifierType_Numeric &&
-        pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
-        pDv->Value.BuiltInTypeId == SOPC_ExtensionObject_Id && pDv->Value.Value.ExtObject->Length > 0)
-    {
-        // We received an extension object (not of array type) on the correct namespace.
 
-        // Retrieve and copy the object
-        // Check whether this is a SPDU received data
-        // TODO : this could be made more generic!
-        if (pNid->Data.Numeric == NODEID_SPDU_REQUEST_NUM)
+/*===========================================================================*/
+/*===========================================================================*/
+// TODO : move that "interactive" part in a new  file
+#include <sys/ioctl.h>
+#include "sopc_raw_sockets.h"
+#include <unistd.h>
+#define STDIN 0
+#define USER_ENTRY_MAXSIZE (128u)
+
+/*===========================================================================*/
+static bool prod_ns_interactive_processCommand (const char* cmd)
+{
+    switch (cmd[0])
+    {
+        case 'q':
+            g_context.stopSignal = 1;
+            return true;
+            break;
+        default:
+            break;
+    }
+    return false;
+}
+
+/*===========================================================================*/
+static void prod_ns_interactive_cycle(void)
+{
+    if (g_status == SOPC_STATUS_OK)
+    {
+        SOPC_SocketSet fdSet;
+        int maxfd = STDIN;
+        int result = 0;
+        ssize_t nbRead = 0;
+
+        struct timeval* ptv = NULL;
+    #define WAIT_MS 10 * 1000
+    #if WAIT_MS > 0
+        struct timeval tv;
+        tv.tv_sec = WAIT_MS / (1000 * 1000);
+        tv.tv_usec = WAIT_MS % (1000 * 1000);
+        ptv = &tv;
+    #endif
+        char entry[USER_ENTRY_MAXSIZE];
+
+        SOPC_SocketSet_Clear(&fdSet);
+        SOPC_SocketSet_Add(STDIN, &fdSet);
+
+        result = select(maxfd + 1, &fdSet.set, NULL, NULL, ptv);
+        if (result < 0)
         {
-            UAM_NS_RequestMessageReceived(SESSION_UAM_ID);
+            printf("SELECT failed: %d\n", result);
+            g_context.stopSignal = 1;
         }
-        if (pNid->Data.Numeric == NODEID_SPDU_RESPONSE_NUM)
+        if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
         {
-            UAM_NS_ResponseMessageReceived(SESSION_UAM_ID);
+            nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);
+            while (nbRead > 0 && entry[nbRead - 1] < ' ')
+            {
+                entry[nbRead - 1] = 0;
+                nbRead--;
+            }
+            if (nbRead > 0)
+            {
+                prod_ns_interactive_processCommand(entry);
+            }
         }
     }
 }
+
 
 /*===========================================================================*/
 int main(int argc, char* argv[])
@@ -417,17 +358,15 @@ int main(int argc, char* argv[])
 
     prod_ns_init();
 
-    printf("Start Cycles\n");
-    // Wait for a signal
-    while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
-    {
-        static const uint32_t msCycle = 50;
-        prod_ns_cycle();
+    SOPC_Thread_Create(&gCycleThread, &prod_ns_threadImpl, NULL, "prod_ns_threadImpl");
 
-        // Wait for next cycle
-        SOPC_Sleep(msCycle);
+    // Wait for a signal
+    while (0 == g_context.stopSignal)
+    {
+        // Note : interactions with keyboard only work correctly in main thread.
+        prod_ns_interactive_cycle ();
+        SOPC_Sleep(10);
     }
-    printf("End Cycles\n");
 
     // Clean and quit
     prod_ns_stop();
