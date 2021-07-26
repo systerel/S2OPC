@@ -64,10 +64,6 @@ typedef struct UAM_SafetyConfiguration_struct
     /* TODO: dwRequestHandle & dwResponseHandle cannot be shared to SAFE partition.
      * It shall be known by NonSafe only
      */
-    /** The numeric part of the OPC NodeId defining the request. */
-    UAS_UInt32 dwRequestHandle;
-    /** The numeric part of the OPC NodeId defining the response. */
-    UAS_UInt32 dwResponseHandle;
     /** IN: Length of SafetyData*/
     UAS_UInt16 wSafetyDataLength;
     /** IN: Length of NonSafetyData*/

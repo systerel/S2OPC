@@ -22,7 +22,7 @@
  *===========================================================================*/
 
 /**
- * \file This is the main program of the safe producer.
+ * \file This is the main program of the safe producer. This will probably be a single-threaded application
  */
 
 /*============================================================================
@@ -44,6 +44,70 @@
 #include "uam.h"
 #include "uam_s.h"
 #include "uam_s2ns_itf.h"
+
+
+/* ============================================================================
+   ============================================================================
+   ============================================================================
+   ============================================================================ */
+/** NOte:  this section is aimed to be auto-generated, so that it will be more maintainable
+ * to create a template file for each connection (PROD or CONS)
+ */
+
+static UAM_S_ProviderHandle hProviderHandle = UAM_NoHandle;
+static const UAM_SafetyConfiguration_type yInstanceConfigSample1 = {.wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
+                                                                    .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN};
+static const UAS_SafetyProviderSPI_type SPI1P_Sample = {.dwSafetyProviderId = SAMPLE_PROVID1_ID,
+                                                        .zSafetyBaseId = SAMPLE_PROVID1_GUID,
+                                                        .dwSafetyStructureSignature = SAMPLE_PROVID1_SIGN};
+static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
+                                  const UAM_S_ProviderSAPI_Input* pzAppInputs,
+                                  UAM_S_ProviderSAPI_Output* pzAppOutputs)
+{
+    assert(pzConfiguration != NULL);
+    assert(pzAppInputs != NULL);
+    assert(pzAppOutputs != NULL);
+
+    // Do some simulation stuff...
+    static UAS_UInt32 u32Cycle = 0;
+    static char sSafetyDataText10[10] = {'0','1','2','3','4','5','6','7','8','9'};
+    static UAS_UInt32 uDemoCounter = 0;
+    static SafetyDemo_Sample_Safe1_type safeData = {0, 0, 0, 0, 0, 0, {0}};
+    uDemoCounter++;
+    u32Cycle ++ ;
+
+    UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# Execution of PROVIDER1 APP, cycle = ", u32Cycle);
+    if (safeData.u8Val1 < 100)
+    {
+        safeData.u8Val1++;
+    }
+    else
+    {
+        safeData.u8Val1 = 10;
+    }
+    safeData.bData1 = 0;
+    safeData.bData2 = 1;
+    safeData.u8Val2 = 12;
+
+    memcpy(safeData.sText10, sSafetyDataText10, 10);
+
+    // Set output flags
+    pzAppOutputs->bOperatorAckProvider = 0;
+
+    // Set Output Non Safe data
+    assert(pzAppOutputs->pbySerializedNonSafetyData != NULL);
+    memset(pzAppOutputs->pbySerializedNonSafetyData, 0, pzConfiguration->wNonSafetyDataLength);
+    snprintf((char*) pzAppOutputs->pbySerializedNonSafetyData, pzConfiguration->wSafetyDataLength, "NonSafety Data %u",
+             pzAppInputs->dwMonitoringNumber);
+
+    // Set Output Safe data
+    assert(pzAppOutputs->pbySerializedSafetyData != NULL);
+    assert(sizeof(safeData) == pzConfiguration->wSafetyDataLength);
+    memcpy(pzAppOutputs->pbySerializedSafetyData, (void*) &safeData, sizeof(safeData));
+
+    return true;
+}
+
 
 /*============================================================================
  * LOCAL TYPES
@@ -87,72 +151,13 @@ static void signal_stop_server(int sig)
     }
 }
 
-/**
- * ENVIRONNEMENT CONFIGURATION AND SETUP
- */
-
-/*===========================================================================*/
-static void prod_s_initialize_logs(void)
-{
-    if (SOPC_STATUS_OK == g_status)
-    {
-        // TODO : a special feature for SAFE log may have to be imagined
-        // E.g: throwing logs over or any channel to Non safe, so that they can be
-        // processed real-time by NonSafe
-        // See UAM_S_DoLog
-    }
-}
-
-/*===========================================================================*/
-static void prod_s_initialize_uam(void)
-{
-    // TODO
-}
-
-/*===========================================================================*/
-static void prod_s_init(void)
-{
-    if (g_status == SOPC_STATUS_OK)
-    {
-        prod_s_initialize_logs();
-
-        prod_s_initialize_uam();
-    }
-}
-
-/*===========================================================================*/
-static void prod_s_threadImpl (void)
-{
-    prod_s_cycle();
-    return;
-}
-
-/*===========================================================================*/
-static void prod_s_stop(void)
-{
-    // TODO stop cleany everything
-
-    // UAM_S_Clear(); TODO
-    UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# EXITING ; code = ", g_status);
-}
-
-/*===========================================================================*/
-static void prod_s_cycle(void)
-{
-    if (g_status == SOPC_STATUS_OK)
-    {
-        // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
-
-        // TODO  UAM_S_CheckSpduReception(SESSION_UAM_ID);
-    }
-}
 
 
 /*===========================================================================*/
 /*===========================================================================*/
-// TODO : move that "interactive" part in a new  file
+// TODO : move that "interactive" part in a new  file ?
 #include <sys/ioctl.h>
-#include "sopc_raw_sockets.h"
+#include "sopc_raw_sockets.h" // TODO: remove dependency to S2OPC!
 #include <unistd.h>
 #define STDIN 0
 #define USER_ENTRY_MAXSIZE (128u)
@@ -218,11 +223,105 @@ static void prod_s_interactive_cycle(void)
 }
 
 
+/**
+ * ENVIRONNEMENT CONFIGURATION AND SETUP
+ */
+
+/*===========================================================================*/
+static void prod_s_initialize_logs(void)
+{
+    if (SOPC_STATUS_OK == g_status)
+    {
+        // TODO : a special feature for SAFE log may have to be imagined
+        // E.g: throwing logs over or any channel to Non safe, so that they can be
+        // processed real-time by NonSafe
+        // See UAM_S_DoLog
+    }
+}
+
+/*===========================================================================*/
+static void prod_s_initialize_uam(void)
+{
+    UAS_UInt8 uResult;
+    // TODO : use safetyDemo application (see main.c) to see how the non-splitted implementation is realized.
+    UAM_S_Initialize();
+
+    uResult = UAM_S_InitSafetyProvider (&yInstanceConfigSample1, &SPI1P_Sample, &fProvider1SampleCycle, &hProviderHandle);
+    if (UAS_OK == uResult)
+    {
+        UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "UAM_S_InitSafetyProvider Succeeded for HDL : ", hProviderHandle);
+
+    }
+    else
+        {
+        UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "Fatal error: UAM_S_InitSafetyProvider failed with code : ", uResult);
+        signal_stop_server(0);
+    }
+
+    // TODO UAM_S_InitSafetyConsumer
+
+    if (UAS_OK == uResult)
+    {
+        uResult = UAM_S_StartSafety();
+        if (UAS_OK == uResult)
+        {
+            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "UAM_S_StartSafety Succeeded for HDL : ", hProviderHandle);
+
+        }
+        else
+            {
+            UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "Fatal error: UAM_S_StartSafety failed with code : ", uResult);
+            signal_stop_server(0);
+        }
+    }
+}
+
+/*===========================================================================*/
+static void prod_s_init(void)
+{
+    if (g_status == SOPC_STATUS_OK)
+    {
+        prod_s_initialize_logs();
+
+        prod_s_initialize_uam();
+    }
+}
+
+/*===========================================================================*/
+static void prod_s_stop(void)
+{
+    // TODO stop cleany everything
+
+    UAM_S_Clear();
+    UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# EXITING ; code = ", g_status);
+}
+
+/*===========================================================================*/
+static void prod_s_cycle(void)
+{
+    UAS_UInt8 uResult;
+    if (g_status == SOPC_STATUS_OK)
+    {
+        // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
+
+        // TODO  UAM_S_CheckSpduReception(SESSION_UAM_ID);
+
+        uResult = UAM_S_Cycle ();
+
+        if (UAS_OK != uResult)
+        {
+            UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "Fatal error: UAM_S_Cycle failed with code : ", uResult);
+            signal_stop_server(0);
+        }
+    }
+}
+
 /*===========================================================================*/
 int main(int argc, char* argv[])
 {
     (void)argc;
     (void)argv;
+    static const unsigned cycleMs = 1000;
     gContext.stopSignal = 0;
 
     /* Signal handling: close the server gracefully when interrupted */
@@ -236,8 +335,9 @@ int main(int argc, char* argv[])
     {
         // Note : interactions with keyboard only work correctly in main thread.
         prod_s_interactive_cycle ();
-        prod_s_threadImpl();
-        usleep(1000 * 5);
+
+        prod_s_cycle();
+        usleep(1000 * cycleMs);
     }
 
     // Clean and quit

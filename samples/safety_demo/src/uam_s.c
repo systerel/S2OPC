@@ -155,8 +155,6 @@ void UAM_S_Initialize(void)
     for (index = 0; index < UASDEF_MAX_SAFETYPROVIDERS; ++index)
     {
         UAM_SafetyConfiguration_type* pzConf = &uamDynamicSafetyData.azProviderConfiguration[index];
-        pzConf->dwRequestHandle = UAM_NoHandle;
-        pzConf->dwResponseHandle = UAM_NoHandle;
         pzConf->wNonSafetyDataLength = 0;
         pzConf->wSafetyDataLength = 0;
         uamDynamicSafetyData.apfProviderCycle[index] = NULL;
@@ -164,8 +162,6 @@ void UAM_S_Initialize(void)
     for (index = 0; index < UASDEF_MAX_SAFETYCONSUMERS; ++index)
     {
         UAM_SafetyConfiguration_type* pzConf = &uamDynamicSafetyData.azConsumerConfiguration[index];
-        pzConf->dwRequestHandle = UAM_NoHandle;
-        pzConf->dwResponseHandle = UAM_NoHandle;
         pzConf->wNonSafetyDataLength = 0;
         pzConf->wSafetyDataLength = 0;
         uamDynamicSafetyData.apfConsumerCycle[index] = NULL;
