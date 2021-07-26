@@ -23,14 +23,14 @@
 #include <assert.h>
 #include <string.h>
 
+#include "uam_ns_spduEncoders.h"
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
 #include "sopc_encodeable.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
-#include "uam_cache.h"
-#include "uam_spduEncoders.h"
+#include "uam_ns_cache.h"
 
 /*============================================================================
   LOCAL TYPES

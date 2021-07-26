@@ -44,9 +44,9 @@
 
 #include "config.h"
 #include "interactive.h"
+
 #include "safetyDemo.h"
-#include "uam_cache.h"
-#include "uam_spduEncoders.h"
+#include "uam_ns_cache.h"
 
 /*============================================================================
  * NCURSES-LIKE DISPLAY

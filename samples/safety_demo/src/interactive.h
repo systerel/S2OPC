@@ -39,6 +39,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "uam_ns_spduEncoders.h"
+
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_dict.h"
@@ -46,7 +48,6 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_target_variable.h"
 #include "sopc_threads.h"
-#include "uam_spduEncoders.h"
 
 /*============================================================================
  * EXTERNAL TYPES

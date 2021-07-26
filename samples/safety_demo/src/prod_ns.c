@@ -62,7 +62,7 @@
 //
 #include "uam.h"
 #include "uam_ns.h"
-#include "uam_spduEncoders.h"
+#include "uam_ns_spduEncoders.h"
 #include "uam_ns_impl.h"
 
 /*============================================================================

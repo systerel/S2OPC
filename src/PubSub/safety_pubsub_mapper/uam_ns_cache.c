@@ -28,7 +28,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
 
-#include "uam_cache.h"
+#include "uam_ns_cache.h"
 //#include "spduEncoders.h"
 
 #define UAM_CACHE_DEBUG 0

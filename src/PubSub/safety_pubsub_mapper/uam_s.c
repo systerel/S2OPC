@@ -36,57 +36,17 @@
 #include "uas.h"
 
 #include "assert.h"
-#include <string.h>
-// TODO SAFE :replace memset by user app fill (cannot use STD libs)
 
+#define KILOBYTE (1024lu)
+#define HEAP_SIZE (128u * KILOBYTE)
+#include "uam_libs.h"
 
 /**************************************************************************
  **************************************************************************
  **************************************************************************
  **************************************************************************/
 // TODO : put these MALLOC/FREE features in a separate module?
-#define KILOBYTE (1024lu)
-#define HEAP_SIZE (128u * KILOBYTE)
 
-typedef struct
-{
-    bool initialized;
-    UAS_UInt64 pos;
-    char buffer[HEAP_SIZE];
-} zHeap_type;
-
-static void HEAP_Init(zHeap_type* pzHeap);
-static void* HEAP_Malloc(zHeap_type* pzHeap, const size_t len);
-static void HEAP_Clear(zHeap_type* pzHeap);
-
-static void HEAP_Init(zHeap_type* pzHeap)
-{
-    assert (pzHeap != 0);
-    assert (!pzHeap->initialized);
-    pzHeap->pos = 0;
-    pzHeap->initialized = true;
-}
-
-static void* HEAP_Malloc(zHeap_type* pzHeap, const size_t len)
-{
-    void* pResult = NULL;
-    if (pzHeap != 0 && pzHeap->initialized &&
-            (pzHeap->pos + len <= sizeof(pzHeap->buffer)))
-    {
-        pResult = pzHeap->buffer + pzHeap->pos;
-        pzHeap->pos += len;
-    }
-    return pResult;
-}
-
-static void HEAP_Clear(zHeap_type* pzHeap)
-{
-    assert (pzHeap != 0);
-    if (pzHeap->initialized)
-    {
-        pzHeap->initialized = false;
-    }
-}
 
 
 /**************************************************************************
@@ -128,7 +88,7 @@ static UAM_DynamicSafetyData_type uamDynamicSafetyData = {.bInitialized = false,
                                                           .apfProviderCycle = {0},
                                                           .apfConsumerCycle = {0}};
 
-static zHeap_type zHeap;
+static UAM_LIBS_Heap_type zHeap;
 
 /*============================================================================
  * DECLARATION OF INTERNAL SERVICES
@@ -198,8 +158,8 @@ void UAM_S_Initialize(void)
     assert(!uamDynamicSafetyData.bInitialized);
     UAS_UInt16 index = 0;
 
-    HEAP_Init (&zHeap);
-    memset(azUAS_SafetyProviders, 0, sizeof(azUAS_SafetyProviders));
+    UAM_LIBS_HEAP_Init (&zHeap);
+    UAM_LIBS_MemZero(azUAS_SafetyProviders, sizeof(azUAS_SafetyProviders));
     uamDynamicSafetyData.bNextProviderFreeHandle = 0;
     uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
 
@@ -249,19 +209,19 @@ UAS_UInt8 UAM_S_InitSafetyProvider(const UAM_SafetyConfiguration_type* const pzI
     uamDynamicSafetyData.bNextProviderFreeHandle++;
 
     // Initialize all in/out
-    memset(&pzSafetyProvider->zInputSAPI, 0, sizeof(pzSafetyProvider->zInputSAPI));
-    memset(&pzSafetyProvider->zOutputSAPI, 0, sizeof(pzSafetyProvider->zOutputSAPI));
+    UAM_LIBS_MemZero(&pzSafetyProvider->zInputSAPI, sizeof(pzSafetyProvider->zInputSAPI));
+    UAM_LIBS_MemZero(&pzSafetyProvider->zOutputSAPI, sizeof(pzSafetyProvider->zOutputSAPI));
     pzSafetyProvider->bAppDone = 0;
     pzSafetyProvider->bCommDone = 0;
     // Allocate buffers for IN/OUTs
     pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zInputSAPI.pbySerializedSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     assert(NULL != pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData);
     assert(NULL != pzSafetyProvider->zInputSAPI.pbySerializedSafetyData);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
@@ -304,13 +264,13 @@ UAS_UInt8 UAM_S_InitSafetyConsumer(const UAM_SafetyConfiguration_type* const pzI
 
     // Allocate buffers for IN/OUTs
     pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     pzSafetyProvider->zOutputSAPI.pbySerializedNonSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zOutputSAPI.pbySerializedSafetyData =
-        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) UAM_LIBS_HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData);
     assert(NULL != pzSafetyProvider->zOutputSAPI.pbySerializedSafetyData);
@@ -418,7 +378,7 @@ void UAM_S_Clear(void)
     uamDynamicSafetyData.bNextProviderFreeHandle = 0;
     uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
     uamDynamicSafetyData.bInitialized = false;
-    HEAP_Clear (&zHeap);
+    UAM_LIBS_HEAP_Clear (&zHeap);
 }
 
 /*===========================================================================*/

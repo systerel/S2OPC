@@ -34,8 +34,8 @@
 
 #include "uam.h"
 #include "uam_ns2s_itf.h"
-#include "uam_spduEncoders.h"
-#include "uam_cache.h"
+#include "uam_ns_spduEncoders.h"
+#include "uam_ns_cache.h"
 #include "uas.h"
 
 #include "sopc_builtintypes.h"
@@ -60,6 +60,7 @@
 #include <string.h>
 
 #include <signal.h>
+
 #include "uam_ns_impl.h"
 
 /*============================================================================
