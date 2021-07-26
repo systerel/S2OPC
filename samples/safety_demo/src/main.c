@@ -33,6 +33,7 @@
  *
  */
 
+#if 0
 /*============================================================================
  * INCLUDES
  *===========================================================================*/
@@ -361,7 +362,7 @@ static void SafetyDemo_Initialize_UAM(SafetyDemo_interactive_Context* pContext, 
     }
     if (SOPC_STATUS_OK == *pStatus)
     {
-        *pStatus = UAM_StartSafety();
+        *pStatus = UAM_S_StartSafety();
     }
 }
 
@@ -377,7 +378,7 @@ static void SafetyDemo_Stop(SafetyDemo_interactive_Context* pContext)
 
     UAM_SpduEncoder_Clear();
     UAM_Cache_Clear();
-    UAM_Clear();
+    UAM_S_Clear();
 }
 
 /*===========================================================================*/
@@ -436,7 +437,7 @@ int main(int argc, char* argv[])
         static const uint32_t msCycle = 100;
         SafetyDemo_Interactive_execute(&g_context);
 
-        status = UAM_Cycle();
+        status = UAM_S_Cycle();
 
         // Wait for next cycle
         SOPC_Sleep(msCycle);
@@ -447,3 +448,12 @@ int main(int argc, char* argv[])
     printf("# Info: PubSub stopped\n");
     return 0;
 }
+#else
+
+int main(int argc, char* argv[])
+{
+    (void)argc;
+    (void)argv;
+    return 0;
+}
+#endif

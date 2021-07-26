@@ -21,32 +21,82 @@
  * DESCRIPTION
  *===========================================================================*/
 
-/** \file Provides the implementation of safety UA Mapper (UAM).
- * All direct links to exported variables or API to UAS module are implemented here so that
- * user application does not have to rely on it.
- * TODO: Separate SAFE & NON-SAFE parts of UAM so that:
- * - UAM/SAFE is linked with UAS and Safe application.
- * - UAM/NONSAFE is deported on a non-safe device or OS. This part only realizes the
- *      protocol-level exchanges.
- * TODO: How can these 2 parts communicate? Define interface file so that there may be different
- *      implementation depending on the proect-specific constraints.
+/** \file
+ * Creates an asynchronous queue (pzQueue) which are dequeued in dedicated thread (gThread).
+ * When a Request or Response message is received, the event is enqueued. When processed by the task,
+ * the message is encoded in a raw buffer which is then sent to SAFE using interface (UAM_NS2S_xxx)
+ * UAM_NS_CheckSpduReception shall be called periodically to check the reception of a SPDU from SAFE.
  */
 
 /*============================================================================
  * INCLUDES
  *===========================================================================*/
 
-#include "uam.h"
-#include "uam_cache.h"
-#include "uam_spduEncoders.h"
+#include "uam_s.h"
 #include "uas.h"
 
-#include "sopc_common.h"
-#include "sopc_log_manager.h"
-#include "sopc_mem_alloc.h"
-
-#include <assert.h>
+#include "assert.h"
 #include <string.h>
+// TODO SAFE :replace memset by user app fill (cannot use STD libs)
+
+
+/**************************************************************************
+ **************************************************************************
+ **************************************************************************
+ **************************************************************************/
+// TODO : put these MALLOC/FREE features in a separate module?
+#define KILOBYTE (1024lu)
+#define HEAP_SIZE (128u * KILOBYTE)
+
+typedef struct
+{
+    bool initialized;
+    UAS_UInt64 pos;
+    char buffer[HEAP_SIZE];
+} zHeap_type;
+
+static void HEAP_Init(zHeap_type* pzHeap);
+static void* HEAP_Malloc(zHeap_type* pzHeap, const size_t len);
+static void HEAP_Clear(zHeap_type* pzHeap);
+
+static void HEAP_Init(zHeap_type* pzHeap)
+{
+    assert (pzHeap != 0);
+    assert (!pzHeap->initialized);
+    pzHeap->pos = 0;
+    pzHeap->initialized = true;
+}
+
+static void* HEAP_Malloc(zHeap_type* pzHeap, const size_t len)
+{
+    void* pResult = NULL;
+    if (pzHeap != 0 && pzHeap->initialized &&
+            (pzHeap->pos + len <= sizeof(pzHeap->buffer)))
+    {
+        pResult = pzHeap->buffer + pzHeap->pos;
+        pzHeap->pos += len;
+    }
+    return pResult;
+}
+
+static void HEAP_Clear(zHeap_type* pzHeap)
+{
+    assert (pzHeap != 0);
+    if (pzHeap->initialized)
+    {
+        pzHeap->initialized = false;
+    }
+}
+
+
+/**************************************************************************
+ **************************************************************************
+ **************************************************************************
+ **************************************************************************/
+// TODO : replace printf by a deported LOG feature
+#include <stdio.h>
+#define DO_DEBUG printf
+
 
 /*============================================================================
  * LOCAL TYPES
@@ -56,12 +106,12 @@ typedef struct UAM_DynamicSafetyData_struct
 {
     bool bInitialized;
     bool bLocked;
-    UAM_ProviderHandle bNextProviderFreeHandle;
-    UAM_ConsumerHandle bNextConsumerFreeHandle;
+    UAM_S_ProviderHandle bNextProviderFreeHandle;
+    UAM_S_ConsumerHandle bNextConsumerFreeHandle;
     UAM_SafetyConfiguration_type azProviderConfiguration[UASDEF_MAX_SAFETYPROVIDERS];
     UAM_SafetyConfiguration_type azConsumerConfiguration[UASDEF_MAX_SAFETYCONSUMERS];
-    UAM_pfProviderApplicationCycle apfProviderCycle[UASDEF_MAX_SAFETYPROVIDERS];
-    UAM_pfConsumerApplicationCycle apfConsumerCycle[UASDEF_MAX_SAFETYCONSUMERS];
+    UAM_S_pfProviderApplicationCycle apfProviderCycle[UASDEF_MAX_SAFETYPROVIDERS];
+    UAM_S_pfConsumerApplicationCycle apfConsumerCycle[UASDEF_MAX_SAFETYCONSUMERS];
 } UAM_DynamicSafetyData_type;
 
 /*============================================================================
@@ -78,6 +128,11 @@ static UAM_DynamicSafetyData_type uamDynamicSafetyData = {.bInitialized = false,
                                                           .apfProviderCycle = {0},
                                                           .apfConsumerCycle = {0}};
 
+static zHeap_type zHeap;
+
+/*============================================================================
+ * DECLARATION OF INTERNAL SERVICES
+ *===========================================================================*/
 /**
  * Read the SPDURequest received on a provider and copy it to pzProvider->zRequestSPDU
  * \param[inout] pzProvider A non-NULL pointer to a provider configuration.
@@ -85,27 +140,31 @@ static UAM_DynamicSafetyData_type uamDynamicSafetyData = {.bInitialized = false,
  */
 static SOPC_ReturnStatus Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider);
 
+static void ExecuteSafetyProviders(void);
+static void ExecuteSafetyConsumers(void);
+
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 static SOPC_ReturnStatus Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider)
-{
-    assert(NULL != pzProvider);
-    assert(pzProvider->dwHandle < UASDEF_MAX_SAFETYPROVIDERS);
-    SOPC_ReturnStatus bResult = SOPC_STATUS_NOK;
-    const UAM_SafetyConfiguration_type* pzSafetyCfg =
-        &uamDynamicSafetyData.azProviderConfiguration[pzProvider->dwHandle];
-    UAS_RequestSpdu_type zSpdu;
+ {
+     assert(NULL != pzProvider);
+     assert(pzProvider->dwHandle < UASDEF_MAX_SAFETYPROVIDERS);
+     SOPC_ReturnStatus bResult = SOPC_STATUS_NOK;
+     // TODO @BEM : replace UAM_SpduEncoder by request received from NON SAFE
+     /* const UAM_SafetyConfiguration_type* pzSafetyCfg =
+         &uamDynamicSafetyData.azProviderConfiguration[pzProvider->dwHandle];
+     UAS_RequestSpdu_type zSpdu;
 
-    bResult = UAM_SpduEncoder_GetRequest(pzSafetyCfg->dwRequestHandle, &zSpdu);
-    if (bResult == SOPC_STATUS_OK)
-    {
-        pzProvider->zRequestSPDU = zSpdu;
+     bResult = UAM_SpduEncoder_GetRequest(pzSafetyCfg->dwRequestHandle, &zSpdu);
+     if (bResult == SOPC_STATUS_OK)
+     {
+         pzProvider->zRequestSPDU = zSpdu;
 
-        bResult = SOPC_STATUS_OK;
-    }
-    return bResult;
-}
+         bResult = SOPC_STATUS_OK;
+     }*/
+     return bResult;
+ }
 
 /*===========================================================================*/
 static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer,
@@ -115,24 +174,31 @@ static SOPC_ReturnStatus Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer,
     assert(NULL != pzConsumer);
     assert(pzConsumer->dwHandle < UASDEF_MAX_SAFETYCONSUMERS);
     SOPC_ReturnStatus bResult = SOPC_STATUS_NOK;
+    (void)puSafeSize;
+    (void)puNonSafeSize;
+    // TODO @BEM : replace UAM_SpduEncoder_GetResponse by response received from NON SAFE
+    /*
     const UAM_SafetyConfiguration_type* pzSafetyCfg =
         &uamDynamicSafetyData.azConsumerConfiguration[pzConsumer->dwHandle];
 
     bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU, puSafeSize,
                                           puNonSafeSize);
-
+*/
     return bResult;
 }
+
 
 /*============================================================================
  * IMPLEMENTATION OF EXTERNAL SERVICES
  *===========================================================================*/
 
 /*===========================================================================*/
-void UAM_Initialize(void)
+void UAM_S_Initialize(void)
 {
     assert(!uamDynamicSafetyData.bInitialized);
     UAS_UInt16 index = 0;
+
+    HEAP_Init (&zHeap);
     memset(azUAS_SafetyProviders, 0, sizeof(azUAS_SafetyProviders));
     uamDynamicSafetyData.bNextProviderFreeHandle = 0;
     uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
@@ -160,53 +226,10 @@ void UAM_Initialize(void)
 }
 
 /*===========================================================================*/
-void UAM_Clear(void)
-{
-    UAS_UInt16 index = 0;
-    for (index = 0; index < uamDynamicSafetyData.bNextProviderFreeHandle; ++index)
-    {
-        UAS_SafetyProvider_type* pzSafetyProvider = &(azUAS_SafetyProviders[index]);
-        assert(pzSafetyProvider->zInputSAPI.pbySerializedSafetyData != NULL);
-        assert(pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData != NULL);
-        assert(pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData != NULL);
-        assert(pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData != NULL);
-        SOPC_Free(pzSafetyProvider->zInputSAPI.pbySerializedSafetyData);
-        SOPC_Free(pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData);
-        SOPC_Free(pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData);
-        SOPC_Free(pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
-        pzSafetyProvider->zInputSAPI.pbySerializedSafetyData = NULL;
-        pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData = NULL;
-        pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData = NULL;
-        pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData = NULL;
-        uamDynamicSafetyData.apfProviderCycle[index] = NULL;
-    }
-    for (index = 0; index < uamDynamicSafetyData.bNextConsumerFreeHandle; ++index)
-    {
-        UAS_SafetyConsumer_type* pzSafetyConsumer = &(azUAS_SafetyConsumers[index]);
-        assert(pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData != NULL);
-        assert(pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData != NULL);
-        assert(pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData != NULL);
-        assert(pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData != NULL);
-        SOPC_Free(pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData);
-        SOPC_Free(pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData);
-        SOPC_Free(pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData);
-        SOPC_Free(pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData);
-        pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData = NULL;
-        pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData = NULL;
-        pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData = NULL;
-        pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData = NULL;
-        uamDynamicSafetyData.apfConsumerCycle[index] = NULL;
-    }
-    uamDynamicSafetyData.bNextProviderFreeHandle = 0;
-    uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
-    uamDynamicSafetyData.bInitialized = false;
-}
-
-/*===========================================================================*/
-SOPC_ReturnStatus UAM_InitSafetyProvider(const UAM_SafetyConfiguration_type* const pzInstanceConfiguration,
+UAS_UInt8 UAM_S_InitSafetyProvider(const UAM_SafetyConfiguration_type* const pzInstanceConfiguration,
                                          const UAS_SafetyProviderSPI_type* const pzSPI,
-                                         UAM_pfProviderApplicationCycle pfProviderCycle,
-                                         UAM_ProviderHandle* phHandle)
+                                         UAM_S_pfProviderApplicationCycle pfProviderCycle,
+                                         UAM_S_ProviderHandle* phHandle)
 {
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
@@ -232,13 +255,13 @@ SOPC_ReturnStatus UAM_InitSafetyProvider(const UAM_SafetyConfiguration_type* con
     pzSafetyProvider->bCommDone = 0;
     // Allocate buffers for IN/OUTs
     pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zInputSAPI.pbySerializedSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     assert(NULL != pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData);
     assert(NULL != pzSafetyProvider->zInputSAPI.pbySerializedSafetyData);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
@@ -253,14 +276,14 @@ SOPC_ReturnStatus UAM_InitSafetyProvider(const UAM_SafetyConfiguration_type* con
     pzSafetyProvider->zSPI = *pzSPI;
 
     byRetVal = byUAS_InitSafetyProvider(pzSafetyProvider, handle, &nResult);
-    return UAM_UasToSopcCode(byRetVal);
+    return byRetVal;
 }
 
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_InitSafetyConsumer(const UAM_SafetyConfiguration_type* const pzInstanceConfiguration,
+UAS_UInt8 UAM_S_InitSafetyConsumer(const UAM_SafetyConfiguration_type* const pzInstanceConfiguration,
                                          const UAS_SafetyConsumerSPI_type* const pzSPI,
-                                         UAM_pfConsumerApplicationCycle pfConsumerCycle,
-                                         UAM_ProviderHandle* phHandle)
+                                         UAM_S_pfConsumerApplicationCycle pfConsumerCycle,
+                                         UAM_S_ProviderHandle* phHandle)
 {
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
@@ -281,13 +304,13 @@ SOPC_ReturnStatus UAM_InitSafetyConsumer(const UAM_SafetyConfiguration_type* con
 
     // Allocate buffers for IN/OUTs
     pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     pzSafetyProvider->zOutputSAPI.pbySerializedNonSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wNonSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wNonSafetyDataLength);
     pzSafetyProvider->zOutputSAPI.pbySerializedSafetyData =
-        (UAS_UInt8*) SOPC_Malloc(pzInstanceConfiguration->wSafetyDataLength);
+        (UAS_UInt8*) HEAP_Malloc(&zHeap, pzInstanceConfiguration->wSafetyDataLength);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
     assert(NULL != pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData);
     assert(NULL != pzSafetyProvider->zOutputSAPI.pbySerializedSafetyData);
@@ -302,11 +325,10 @@ SOPC_ReturnStatus UAM_InitSafetyConsumer(const UAM_SafetyConfiguration_type* con
     pzSafetyProvider->zSPI = *pzSPI;
 
     byRetVal = byUAS_InitSafetyConsumer(pzSafetyProvider, handle, &nResult);
-    return UAM_UasToSopcCode(byRetVal);
+    return byRetVal;
 }
-
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_StartSafety(void)
+UAS_UInt8 UAM_S_StartSafety(void)
 {
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
@@ -337,7 +359,66 @@ SOPC_ReturnStatus UAM_StartSafety(void)
     {
         uamDynamicSafetyData.bLocked = true;
     }
-    return UAM_UasToSopcCode(byRetVal);
+    return byRetVal;
+}
+/*===========================================================================*/
+UAS_UInt8 UAM_S_Cycle(void)
+{
+    UAS_UInt8 byRetVal = UAS_OK;
+    assert(uamDynamicSafetyData.bInitialized);
+    assert(uamDynamicSafetyData.bLocked);
+
+    ExecuteSafetyProviders();
+
+    ExecuteSafetyConsumers();
+
+    return byRetVal;
+}
+
+/*===========================================================================*/
+void UAM_S_Clear(void)
+{
+    UAS_UInt16 index = 0;
+    for (index = 0; index < uamDynamicSafetyData.bNextProviderFreeHandle; ++index)
+    {
+        UAS_SafetyProvider_type* pzSafetyProvider = &(azUAS_SafetyProviders[index]);
+        assert(pzSafetyProvider->zInputSAPI.pbySerializedSafetyData != NULL);
+        assert(pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData != NULL);
+        assert(pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData != NULL);
+        assert(pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData != NULL);
+        // Frees managed by HEAP_Clear
+//        free(pzSafetyProvider->zInputSAPI.pbySerializedSafetyData);
+//        free(pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData);
+//        free(pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData);
+//        free(pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData);
+        pzSafetyProvider->zInputSAPI.pbySerializedSafetyData = NULL;
+        pzSafetyProvider->zInputSAPI.pbySerializedNonSafetyData = NULL;
+        pzSafetyProvider->zResponseSPDU.pbySerializedSafetyData = NULL;
+        pzSafetyProvider->zResponseSPDU.pbySerializedNonSafetyData = NULL;
+        uamDynamicSafetyData.apfProviderCycle[index] = NULL;
+    }
+    for (index = 0; index < uamDynamicSafetyData.bNextConsumerFreeHandle; ++index)
+    {
+        UAS_SafetyConsumer_type* pzSafetyConsumer = &(azUAS_SafetyConsumers[index]);
+        assert(pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData != NULL);
+        assert(pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData != NULL);
+        assert(pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData != NULL);
+        assert(pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData != NULL);
+        // Frees managed by HEAP_Clear
+//        free(pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData);
+//        free(pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData);
+//        free(pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData);
+//        free(pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData);
+        pzSafetyConsumer->zOutputSAPI.pbySerializedSafetyData = NULL;
+        pzSafetyConsumer->zOutputSAPI.pbySerializedNonSafetyData = NULL;
+        pzSafetyConsumer->zResponseSPDU.pbySerializedSafetyData = NULL;
+        pzSafetyConsumer->zResponseSPDU.pbySerializedNonSafetyData = NULL;
+        uamDynamicSafetyData.apfConsumerCycle[index] = NULL;
+    }
+    uamDynamicSafetyData.bNextProviderFreeHandle = 0;
+    uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
+    uamDynamicSafetyData.bInitialized = false;
+    HEAP_Clear (&zHeap);
 }
 
 /*===========================================================================*/
@@ -357,7 +438,7 @@ static void ExecuteSafetyConsumers(void)
         status = Get_SPDU_Response(pzInstance, NULL, NULL);
         if (SOPC_STATUS_OK != status)
         {
-            printf("Get_SPDU_Response failed for Consumer #%d\n", wInstanceCount);
+            DO_DEBUG("Get_SPDU_Response failed for Consumer #%d\n", wInstanceCount);
         }
         else
         {
@@ -390,14 +471,14 @@ static void ExecuteSafetyConsumers(void)
             {
                 LOG_Trace(LOG_ERROR, "byUAS_ExecuteSafetyConsumer(%d) failed with error code 0x%02X",
                           pzInstance->dwHandle, byUasRetval);
-                printf("e");
             }
         }
 
         /* Set RequestSPDU */
         if (SOPC_STATUS_OK == status)
         {
-            status = UAM_SpduEncoder_SetRequest(pzConfig->dwRequestHandle, &pzInstance->zRequestSPDU);
+            // TODO @ BEM : replace by REQUEST encoding and sending to NONSAFE
+            // status = UAM_SpduEncoder_SetRequest(pzConfig->dwRequestHandle, &pzInstance->zRequestSPDU);
             if (SOPC_STATUS_OK == status)
             {
                 LOG_Trace(LOG_DEBUG, "UAM_SetRequestSPDU(%d):", pzInstance->dwHandle);
@@ -437,7 +518,7 @@ static void ExecuteSafetyProviders(void)
         status = Get_SPDU_Request(pzInstance);
         if (SOPC_STATUS_OK != status)
         {
-            printf("Get_SPDU_Request failed for Provider #%d\n", wInstanceCount);
+            DO_DEBUG("Get_SPDU_Request failed for Provider #%d\n", wInstanceCount);
         }
         else
         {
@@ -466,7 +547,8 @@ static void ExecuteSafetyProviders(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = UAM_SpduEncoder_SetResponse(pzConfig->dwResponseHandle, &pzInstance->zResponseSPDU);
+            // TODO @ BEM : replace by RESPONSE encoding and sending to NONSAFE
+//            status = UAM_SpduEncoder_SetResponse(pzConfig->dwResponseHandle, &pzInstance->zResponseSPDU);
             if (SOPC_STATUS_OK == status)
             {
                 LOG_Trace(LOG_DEBUG, "UAM_SetResponseSPDU(%d) succeeded:", pzInstance->dwHandle);
@@ -492,46 +574,7 @@ static void ExecuteSafetyProviders(void)
 }
 
 /*===========================================================================*/
-SOPC_ReturnStatus UAM_Cycle(void)
-{
-    UAS_UInt8 byRetVal = UAS_OK;
-    assert(uamDynamicSafetyData.bInitialized);
-    assert(uamDynamicSafetyData.bLocked);
-
-    ExecuteSafetyProviders();
-
-    ExecuteSafetyConsumers();
-
-    return UAM_UasToSopcCode(byRetVal);
-}
-
-/*===========================================================================*/
-SOPC_ReturnStatus UAM_UasToSopcCode(UAS_UInt8 bUasCode)
-{
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    switch (bUasCode)
-    {
-    case UAS_OK:
-        result = SOPC_STATUS_OK;
-        break;
-    case UAS_MEMORY_ERR:
-        result = SOPC_STATUS_OUT_OF_MEMORY;
-        break;
-    case UAS_NOT_IMPL:
-        result = SOPC_STATUS_NOT_SUPPORTED;
-        break;
-    case UAS_POINTER_ERR:
-        result = SOPC_STATUS_INVALID_PARAMETERS;
-        break;
-    default:
-        result = SOPC_STATUS_NOK;
-        break;
-    }
-    return result;
-}
-
-/*===========================================================================*/
-UAS_SafetyProvider_type* UAM_GetProvider(const UAM_ProviderHandle hHandle)
+UAS_SafetyProvider_type* UAM_S_GetProvider(const UAM_S_ProviderHandle hHandle)
 {
     assert(uamDynamicSafetyData.bInitialized);
     assert(uamDynamicSafetyData.bLocked);
@@ -543,7 +586,7 @@ UAS_SafetyProvider_type* UAM_GetProvider(const UAM_ProviderHandle hHandle)
     return pzResult;
 }
 /*===========================================================================*/
-UAS_SafetyConsumer_type* UAM_GetConsumer(const UAM_ConsumerHandle hHandle)
+UAS_SafetyConsumer_type* UAM_S_GetConsumer(const UAM_S_ConsumerHandle hHandle)
 {
     assert(uamDynamicSafetyData.bInitialized);
     UAS_SafetyConsumer_type* pzResult = NULL;
@@ -553,3 +596,4 @@ UAS_SafetyConsumer_type* UAM_GetConsumer(const UAM_ConsumerHandle hHandle)
     }
     return pzResult;
 }
+

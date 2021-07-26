@@ -56,8 +56,6 @@ typedef struct
 {
     bool isProvider;
     volatile sig_atomic_t stopSignal;
-    UAM_SpduRequestHandle spduRequestId;
-    UAM_SpduResponseHandle spduResponseId;
 } prod_s_interactive_Context;
 
 
@@ -148,7 +146,7 @@ static void prod_s_stop(void)
 {
     // TODO stop cleany everything
 
-    UAM_S_Clear();
+    // UAM_S_Clear(); TODO
     printf("# EXITING (code =%02X)\n", g_status);
 }
 

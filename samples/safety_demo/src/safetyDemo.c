@@ -59,18 +59,18 @@ static const UAS_SafetyConsumerSPI_type SPI1C_Sample = {.dwSafetyProviderId = SA
                                                         .dwSafetyConsumerTimeout = SAMPLE_PROVID1_TIMEOUT_MS,
                                                         .bSafetyOperatorAckNecessary = false,
                                                         .wSafetyErrorIntervalLimit = 60};
-static UAM_ProviderHandle hProviderHandle = UAM_NoHandle;
-static UAM_ConsumerHandle hConsumerHandle = UAM_NoHandle;
+static UAM_S_ProviderHandle hProviderHandle = UAM_NoHandle;
+static UAM_S_ConsumerHandle hConsumerHandle = UAM_NoHandle;
 
 /*---------------------*/
 /*  F U N C T I O N S  */
 /*---------------------*/
 static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
-                                  const UAM_ProviderSAPI_Input* pzAppInputs,
-                                  UAM_ProviderSAPI_Output* pzAppOutputs);
+                                  const UAM_S_ProviderSAPI_Input* pzAppInputs,
+                                  UAM_S_ProviderSAPI_Output* pzAppOutputs);
 static bool fConsumer1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
-                                  const UAM_ConsumerSAPI_Input* pzAppInputs,
-                                  UAM_ConsumerSAPI_Output* pzAppOutputs);
+                                  const UAM_S_ConsumerSAPI_Input* pzAppInputs,
+                                  UAM_S_ConsumerSAPI_Output* pzAppOutputs);
 
 /*------------------------------*/
 /*  I M P L E ME N T A T I O N  */
@@ -78,8 +78,8 @@ static bool fConsumer1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
 
 /** Example of PROVIDER behavior */
 static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
-                                  const UAM_ProviderSAPI_Input* pzAppInputs,
-                                  UAM_ProviderSAPI_Output* pzAppOutputs)
+                                  const UAM_S_ProviderSAPI_Input* pzAppInputs,
+                                  UAM_S_ProviderSAPI_Output* pzAppOutputs)
 {
     assert(pzConfiguration != NULL);
     assert(pzAppInputs != NULL);
@@ -122,8 +122,8 @@ static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
 
 /** Example of CONSUMER behavior */
 static bool fConsumer1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
-                                  const UAM_ConsumerSAPI_Input* pzAppInputs,
-                                  UAM_ConsumerSAPI_Output* pzAppOutputs)
+                                  const UAM_S_ConsumerSAPI_Input* pzAppInputs,
+                                  UAM_S_ConsumerSAPI_Output* pzAppOutputs)
 {
     assert(pzConfiguration != NULL);
     assert(pzAppInputs != NULL);
@@ -205,9 +205,9 @@ SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void)
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;
     const UAS_SafetyProviderSPI_type zSPI = SPI1P_Sample;
 
-    UAM_Initialize();
+    UAM_S_Initialize();
 
-    byUasRetval = UAM_InitSafetyProvider(&zInstanceConfiguration, &zSPI, &fProvider1SampleCycle, &hProviderHandle);
+    byUasRetval = UAM_S_InitSafetyProvider(&zInstanceConfiguration, &zSPI, &fProvider1SampleCycle, &hProviderHandle);
     if (SOPC_STATUS_OK == byUasRetval)
     {
         LOG_Trace(LOG_INFO, "byUAS_InitSafetyProvider( handle = 0x%08X ) succeeded", hProviderHandle);
@@ -227,13 +227,13 @@ SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void)
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;
     const UAS_SafetyConsumerSPI_type zSPI = SPI1C_Sample;
 
-    UAM_Initialize();
+    UAM_S_Initialize();
 
-    byUasRetval = UAM_InitSafetyConsumer(&zInstanceConfiguration, &zSPI, &fConsumer1SampleCycle, &hConsumerHandle);
+    byUasRetval = UAM_S_InitSafetyConsumer(&zInstanceConfiguration, &zSPI, &fConsumer1SampleCycle, &hConsumerHandle);
     if (SOPC_STATUS_OK == byUasRetval)
     {
         LOG_Trace(LOG_INFO, "UAM_InitSafetyConsumer( handle = 0x%08X ) succeeded", hConsumerHandle);
-        UAS_SafetyConsumer_type* pzInstance = UAM_GetConsumer(hConsumerHandle);
+        UAS_SafetyConsumer_type* pzInstance = UAM_S_GetConsumer(hConsumerHandle);
         assert(pzInstance != NULL);
         memset(&pzInstance->zInputSAPI, 0, sizeof(pzInstance->zInputSAPI));
         pzInstance->zInputSAPI.bEnable = 1;

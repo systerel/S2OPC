@@ -266,7 +266,7 @@ static void prod_ns_cycle(void)
     if (g_status == SOPC_STATUS_OK)
     {
         // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
-        UAM_NS_CheckSpduReception(SESSION_UAM_ID);
+        UAM_NS_CheckSpduReception(SAMPLE1_SESSION_UAM_ID);
         // TODO
     }
 }

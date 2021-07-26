@@ -28,7 +28,7 @@
 #define SOPC_SAFETY_DEMO_SAFETYDEMO_H_
 
 #include "uas.h"
-#include "uam.h"
+#include "uam_s.h"
 
 // Note : this example supposes that CONS and PROV use the same endianness!
 typedef struct

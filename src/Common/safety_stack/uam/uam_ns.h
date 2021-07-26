@@ -55,6 +55,15 @@
  * EXTERNAL TYPES
  *===========================================================================*/
 
+/**
+ * A Handle (identifier) for a SPDU request
+ */
+typedef UAS_UInt32 UAM_SpduRequestHandle;
+/**
+ * A Handle (identifier) for a SPDU response
+ */
+typedef UAS_UInt32 UAM_SpduResponseHandle;
+
 typedef struct UAM_NS_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
@@ -76,6 +85,13 @@ typedef struct UAM_NS_Configuration_struct
 /*============================================================================
  * EXTERNAL SERVICES
  *===========================================================================*/
+
+/**
+ *  \brief Convert a UAS return code to SOPC_ReturnStatus
+ *  \param bUasCode The UAS internal code
+ *  \return the equivalent SOPC return code
+ */
+SOPC_ReturnStatus UAM_NS_UasToSopcCode(UAS_UInt8 bUasCode);
 
 /**
  * \brief Shall be called before the module is used
