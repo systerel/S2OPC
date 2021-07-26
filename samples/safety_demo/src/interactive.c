@@ -565,7 +565,7 @@ void SafetyDemo_Interactive_execute(SafetyDemo_interactive_Context* pContext)
         pContext->stopSignal = 1;
     }
 
-    if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
+    else if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
     {
         displayClearWin2();
         nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);

@@ -199,40 +199,39 @@ static const UAM_SafetyConfiguration_type yInstanceConfigSample1 = {.dwRequestHa
                                                                     .wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
                                                                     .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN};
 
-SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void)
+bool SafetyDemo_Create_ProviderSample(void)
 {
-    SOPC_ReturnStatus byUasRetval;
+    UAS_UInt8 byUasRetval = UAS_SOFT_ERR;
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;
     const UAS_SafetyProviderSPI_type zSPI = SPI1P_Sample;
 
     UAM_S_Initialize();
 
     byUasRetval = UAM_S_InitSafetyProvider(&zInstanceConfiguration, &zSPI, &fProvider1SampleCycle, &hProviderHandle);
-    if (SOPC_STATUS_OK == byUasRetval)
+    if (UAS_OK == byUasRetval)
     {
-        LOG_Trace(LOG_INFO, "byUAS_InitSafetyProvider( handle = 0x%08X ) succeeded", hProviderHandle);
+        UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "byUAS_InitSafetyProvider( ) succeeded, handle = ", hProviderHandle);
         SafetyDemo_SetSafetyDataTxt("Hello!");
     } /* if */
     else
     {
-        LOG_Trace(LOG_ERROR, "byUAS_InitSafetyProvider( handle ) failed, error code = 0x%02X", hProviderHandle,
-                  byUasRetval);
+        UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "byUAS_InitSafetyProvider( handle ) failed, error code = ", byUasRetval);
     } /* else */
-    return byUasRetval;
+    return byUasRetval == UAS_OK;
 }
 
-SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void)
+bool SafetyDemo_Create_ConsumerSample(void)
 {
-    SOPC_ReturnStatus byUasRetval;
+    UAS_UInt8 byUasRetval = UAS_SOFT_ERR;
     UAM_SafetyConfiguration_type zInstanceConfiguration = yInstanceConfigSample1;
     const UAS_SafetyConsumerSPI_type zSPI = SPI1C_Sample;
 
     UAM_S_Initialize();
 
     byUasRetval = UAM_S_InitSafetyConsumer(&zInstanceConfiguration, &zSPI, &fConsumer1SampleCycle, &hConsumerHandle);
-    if (SOPC_STATUS_OK == byUasRetval)
+    if (UAS_OK == byUasRetval)
     {
-        LOG_Trace(LOG_INFO, "UAM_InitSafetyConsumer( handle = 0x%08X ) succeeded", hConsumerHandle);
+        UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "UAM_InitSafetyConsumer( ) succeeded, handle = ", hConsumerHandle);
         UAS_SafetyConsumer_type* pzInstance = UAM_S_GetConsumer(hConsumerHandle);
         assert(pzInstance != NULL);
         memset(&pzInstance->zInputSAPI, 0, sizeof(pzInstance->zInputSAPI));
@@ -241,8 +240,7 @@ SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void)
     } /* if */
     else
     {
-        LOG_Trace(LOG_ERROR, "UAM_InitSafetyConsumer( handle ) failed, error code = 0x%02X", hConsumerHandle,
-                  byUasRetval);
+        UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "UAM_InitSafetyConsumer( handle ) failed, error code = ",  byUasRetval);
     } /* else */
-    return byUasRetval;
+    return byUasRetval == UAS_OK;
 }

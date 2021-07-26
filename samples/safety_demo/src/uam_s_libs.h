@@ -33,18 +33,16 @@
  * DESCRIPTION
  *===========================================================================*/
 /** \file This file contains the UAM utility functions. They can be used by both
- * SAFE and NON-SAFE softwares (no system depandancies
+ * SAFE and NON-SAFE softwares (no system dependencies)
  */
 
-#ifndef SOPC_UAM_LIBS_H_
-#define SOPC_UAM_LIBS_H_ 1
+#ifndef SOPC_UAM_S_LIBS_H_
+#define SOPC_UAM_S_LIBS_H_ 1
 
 /*============================================================================
  * INCLUDES
  *===========================================================================*/
 #include "uas.h"
-
-#include <stdbool.h>
 
 /*============================================================================
  * EXTERNAL TYPES
@@ -58,33 +56,23 @@
  * EXTERNAL SERVICES
  *===========================================================================*/
 
-void UAM_LIBS_MemZero(void* pAddr,  const UAS_UInt32 sLen);
-
 /*===========================================================================*/
-void UAM_LIBS_serialize_UInt32(const UAS_UInt32 uVal, UAS_UInt8* pData, const UAS_UInt32 sLen, UAS_UInt32* pPos);
 
-/*===========================================================================*/
-void UAM_LIBS_serialize_UInt8(const UAS_UInt8 uVal, UAS_UInt8* pData, const UAS_UInt32 sLen, UAS_UInt32* pPos);
-/*===========================================================================*/
-void UAM_LIBS_serialize_String(const UAS_UInt8* pzVal,
-                             const UAS_UInt32 sValLen,
-                             UAS_UInt8* pData,
-                             const UAS_UInt32 sLen,
-                             UAS_UInt32* pPos);
+#ifndef HEAP_SIZE
+#define HEAP_SIZE 1024ul * 128u
+#endif
 
-/*===========================================================================*/
-UAS_UInt32 UAM_LIBS_deserialize_UInt32(const UAS_UInt8* pData, const UAS_UInt32 sLen, UAS_UInt32* pPos);
-
-/*===========================================================================*/
-UAS_UInt8 UAM_LIBS_deserialize_UInt8(const UAS_UInt8* pData, const UAS_UInt32 sLen, UAS_UInt32* pPos);
+typedef struct UAM_LIBS_Heap_struct
+{
+    bool initialized;
+    UAS_UInt64 pos;
+    char buffer[HEAP_SIZE];
+} UAM_LIBS_Heap_type;
 
 
-/*===========================================================================*/
-void UAM_LIBS_deserialize_String(const UAS_UInt8* pData,
-                                const UAS_UInt32 sLen,
-                                UAS_UInt32* pPos,
-                                void * pzDest,
-                                const UAS_UInt32 sValLen);
-
+void UAM_S_LIBS_HEAP_Init(UAM_LIBS_Heap_type* pzHeap);
+void* UAM_S_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const UAS_UInt32 len);
+void UAM_S_LIBS_HEAP_Clear(UAM_LIBS_Heap_type* pzHeap);
+void UAM_S_LIBS_MemZero(void* pAddr,  const UAS_UInt32 sLen);
 
 #endif

@@ -281,7 +281,8 @@ UAS_UInt8 byUAS_ChangeSafetyProviderSPI(UAS_UInt16 uInstanceIndex,
 
     UASDEF_LOG_DEBUG("  byUAS_ChangeSafetyProviderSPI: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
-
+#else
+    (void)dwHandle;
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -363,6 +364,8 @@ UAS_UInt8 byUAS_StartSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHand
     UASDEF_LOG_DEBUG("  byUAS_StartSafetyProvider: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+    (void)dwHandle;
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -433,6 +436,8 @@ UAS_UInt8 byUAS_ExecuteSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHa
     UASDEF_LOG_DEBUG("  byUAS_ExecuteSafetyProvider: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+    (void)dwHandle;
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -516,6 +521,8 @@ UAS_UInt8 byUAS_StopSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHandl
     UASDEF_LOG_DEBUG("  byUAS_StopSafetyProvider: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+    (void)dwHandle;
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -542,6 +549,10 @@ UAS_UInt8 byUAS_StopSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHandl
 #ifdef UASDEF_DBG
 
     UASDEF_LOG_DEBUG("  byUAS_StopSafetyProvider: Exit. byRetVal = %02Xh", byRetVal);
+
+#else
+
+    (void)dwHandle;
 
 #endif /* UASDEF_DBG */
 
@@ -579,6 +590,10 @@ UAS_UInt8 byUAS_ResetSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHand
     UASDEF_LOG_DEBUG("  byUAS_ResetSafetyProvider: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+
+    (void)dwHandle;
+
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -595,6 +610,10 @@ UAS_UInt8 byUAS_ResetSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHand
 #ifdef UASDEF_DBG
 
     UASDEF_LOG_DEBUG("  byUAS_ResetSafetyProvider: Exit. byRetVal = %02Xh", byRetVal);
+
+#else
+
+    (void)dwHandle;
 
 #endif /* UASDEF_DBG */
 
@@ -742,6 +761,10 @@ UAS_UInt8 byUAS_ChangeSafetyConsumerSPI(UAS_UInt16 uInstanceIndex,
     UASDEF_LOG_DEBUG("  byUAS_ChangeSafetyConsumerSPI: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+
+    (void)dwHandle;
+
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -830,6 +853,10 @@ UAS_UInt8 byUAS_ChangeSafetyConsumerTimeout(UAS_UInt16 uInstanceIndex,
     UASDEF_LOG_DEBUG("  byUAS_ChangeSafetyConsumerTimeout: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh",
                      uInstanceIndex, dwHandle);
 
+#else
+
+    (void)dwHandle;
+
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -910,6 +937,10 @@ UAS_UInt8 byUAS_StartSafetyConsumer(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHand
     UASDEF_LOG_DEBUG("  byUAS_StartSafetyConsumer: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+
+    (void)dwHandle;
+
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -979,6 +1010,10 @@ UAS_UInt8 byUAS_ExecuteSafetyConsumer(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHa
 
     UASDEF_LOG_DEBUG("  byUAS_ExecuteSafetyConsumer: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
+
+#else
+
+    (void)dwHandle;
 
 #endif /* UASDEF_DBG */
 
@@ -1063,6 +1098,10 @@ UAS_UInt8 byUAS_StopSafetyConsumer(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHandl
     UASDEF_LOG_DEBUG("  byUAS_StopSafetyConsumer: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
 
+#else
+
+    (void)dwHandle;
+
 #endif /* UASDEF_DBG */
 
     if (UAS_OK EQ byRetVal)
@@ -1125,6 +1164,10 @@ UAS_UInt8 byUAS_ResetSafetyConsumer(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHand
 
     UASDEF_LOG_DEBUG("  byUAS_ResetSafetyConsumer: Entry. uInstanceIndex = %04Xh, dwHandle = %08Xh", uInstanceIndex,
                      dwHandle);
+
+#else
+
+    (void)dwHandle;
 
 #endif /* UASDEF_DBG */
 

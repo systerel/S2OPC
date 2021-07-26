@@ -343,19 +343,21 @@ static void SafetyDemo_Initialize_UAM(SafetyDemo_interactive_Context* pContext, 
         assert((NULL != pContext) && (NULL != pContext->pConfig));
         if (pContext->isProvider)
         {
-            *pStatus = SafetyDemo_Create_ProviderSample();
+            const bool boolRes = SafetyDemo_Create_ProviderSample();
 
-            if (SOPC_STATUS_OK != *pStatus)
+            if (! boolRes)
             {
+                *pStatus = SOPC_STATUS_NOK;
                 printf("# Error while starting Create_ProviderSample : code= %02X\n", *pStatus);
             }
         }
         else
         {
-            *pStatus = SafetyDemo_Create_ConsumerSample();
+            const bool boolRes = SafetyDemo_Create_ConsumerSample();
 
-            if (SOPC_STATUS_OK != *pStatus)
+            if (! boolRes)
             {
+                *pStatus = SOPC_STATUS_NOK;
                 printf("# Error while starting Create_ConsumerSample : code= %02X\n", *pStatus);
             }
         }

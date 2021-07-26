@@ -237,12 +237,16 @@ static bool EncodeSpduRequest(const UAS_RequestSpdu_type* pzSpdu, SOPC_Byte** pp
         if ((*sLen) == expLen)
         {
             bResult = true;
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduRequest Result is %u bytes long", (unsigned) (*sLen));
+#endif
         }
         else
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduRequest for sending to PubSub layer (len = %u, exp = %u)",
                       (unsigned) (*sLen), (unsigned) expLen);
+#endif
         }
     }
 
@@ -280,12 +284,16 @@ static bool EncodeSpduResponse(const UAS_ResponseSpdu_type* pzSpdu,
         if ((*sLen) == expLen)
         {
             bResult = true;
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduResponse Result is %u bytes long", (unsigned) (*sLen));
+#endif
         }
         else
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduResponse for sending to PubSub layer (len = %u, exp = %u)",
                       (unsigned) (*sLen), (unsigned) expLen);
+#endif
         }
     }
 
@@ -335,17 +343,22 @@ static bool DecodeSpduResponse(const UAM_SpduResponseHandle dwNumericId, const S
 
     if (pos == expLen && pos == sLen)
     {
+
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_DEBUG, "Encoded message to Safe(%08X). LEN= %u, Safe len = %d, NonSafe len = %d",
                   (unsigned) dwNumericId, (unsigned) sLen, (int) bsSafeData.Length, (int) bsNonSafeData.Length);
+#endif
         // Simply put the SPDU in encoder cache.
         UAM_SpduEncoder_SetResponse(dwNumericId, &zSpdu);
         bResult = true;
     }
     else
     {
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_WARN,
                   "Failed to decode SPDU RESPONSE %08X for sending to PubSub layer (len = %u, pos= %u, exp = %u)",
                   dwNumericId, (unsigned) pos, (unsigned) sLen, (unsigned) expLen);
+#endif
     }
 
     SOPC_ByteString_Clear(&bsSafeData);
@@ -396,7 +409,9 @@ static void DoPollSafeMessages(const UAM_NS_Configuration_type* pzSession)
 
     if (sReadLen > 0)
     {
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_DEBUG, "DoPollSafeMessages received %u bytes", (unsigned) sReadLen);
+#endif
         if (pzSession->bIsProvider)
         {
             // For provider the SPDU from SAFE is a response
@@ -501,7 +516,9 @@ static void* Thread_Impl(void* data)
 
         SOPC_Free(pEvent);
     }
-    LOG_Trace(LOG_DEBUG, "UALM_NS:  Thread_Impl stopped signal=%d", stopSignal);
+#ifdef UASDEF_DBG
+   LOG_Trace(LOG_DEBUG, "UAM_NS:  Thread_Impl stopped signal=%d", stopSignal);
+#endif
     return NULL;
 }
 
@@ -565,7 +582,6 @@ static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
 static void PubSub_initialize_publisher(SOPC_ReturnStatus* pResult)
 {
     assert (NULL != pResult);
-    SOPC_PubSubConnection* firstConnection = NULL;
     uint32_t nbPub = 0;
     if (SOPC_STATUS_OK == *pResult)
     {
@@ -576,19 +592,25 @@ static void PubSub_initialize_publisher(SOPC_ReturnStatus* pResult)
         nbPub = SOPC_PubSubConfiguration_Nb_PubConnection(g_interactive_Context.pConfig);
         if (0 == nbPub)
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_DEBUG, "# Info: No Publisher configured");
+#endif
         }
         else
         {
             bool res = SOPC_PubScheduler_Start(g_interactive_Context.pConfig, g_interactive_Context.sourceConfig, 0);
             if (res)
             {
-                firstConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(g_interactive_Context.pConfig, 0);
+#ifdef UASDEF_DBG
+                SOPC_PubSubConnection* firstConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(g_interactive_Context.pConfig, 0);
                 LOG_Trace(LOG_DEBUG, "# Info: Publisher started on %s", SOPC_PubSubConnection_Get_Address(firstConnection));
+#endif
             }
             else
             {
-                LOG_Trace(LOG_DEBUG, "# Error while starting the Publisher, do you have administrator privileges?");
+#ifdef UASDEF_DBG
+                LOG_Trace(LOG_DEBUG, "# ERROR WHILE STARTING THE PUBLISHER, DO YOU HAVE ADMINISTRATOR PRIVILEGES?");
+#endif
                 *pResult = SOPC_STATUS_NOK;
             }
         }
@@ -599,7 +621,6 @@ static void PubSub_initialize_publisher(SOPC_ReturnStatus* pResult)
 static void PubSub_initialize_subscriber(SOPC_ReturnStatus* pResult)
 {
     assert (NULL != pResult);
-    SOPC_PubSubConnection* firstConnection = NULL;
     uint32_t nbSub = 0;
     if (SOPC_STATUS_OK == *pResult)
     {
@@ -613,12 +634,17 @@ static void PubSub_initialize_subscriber(SOPC_ReturnStatus* pResult)
             bool res = SOPC_SubScheduler_Start(g_interactive_Context.pConfig, g_interactive_Context.targetConfig, NULL);
             if (res)
             {
-                firstConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(g_interactive_Context.pConfig, 0);
+#ifdef UASDEF_DBG
+                SOPC_PubSubConnection* firstConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(g_interactive_Context.pConfig, 0);
                 LOG_Trace(LOG_DEBUG, "# Info: Subscriber started %s", SOPC_PubSubConnection_Get_Address(firstConnection));
+#endif
             }
             else
             {
+
+#ifdef UASDEF_DBG
                 LOG_Trace(LOG_DEBUG, "# Error while starting the Subscriber");
+#endif
                 *pResult = SOPC_STATUS_NOK;
             }
         }
@@ -694,7 +720,9 @@ SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
         fd = fopen(pubSubXmlConfigFile, "r");
         if (NULL == fd)
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_ERROR, "Cannot read configuration file %s", pubSubXmlConfigFile);
+#endif
             sopcResult = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
@@ -705,6 +733,7 @@ SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
         int closed = fclose(fd);
 
         sopcResult = (0 == closed && NULL != g_interactive_Context.pConfig) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
+#ifdef UASDEF_DBG
         if (SOPC_STATUS_OK != sopcResult)
         {
             LOG_Trace(LOG_ERROR, "Error while loading PubSub configuration from %s", pubSubXmlConfigFile);
@@ -713,6 +742,7 @@ SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
         {
             LOG_Trace(LOG_DEBUG, "[OK] PUBSUB initialized: (%s)", pubSubXmlConfigFile);
         }
+#endif
     }
 
     // CACHE
@@ -726,7 +756,9 @@ SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
 
         if (!res)
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_ERROR, "Error while initializing the cache, refer to log files");
+#endif
             sopcResult = SOPC_STATUS_NOK;
         }
         else
@@ -738,13 +770,17 @@ SOPC_ReturnStatus UAM_NS_Impl_Initialize(const char * pubSubXmlConfigFile)
     if (SOPC_STATUS_OK == sopcResult)
     {
         PubSub_initialize_publisher(&sopcResult);
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_DEBUG, "PubSub_initialize_publisher returned %d", sopcResult);
+#endif
     }
 
     if (SOPC_STATUS_OK == sopcResult)
     {
         PubSub_initialize_subscriber(&sopcResult);
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_DEBUG, "PubSub_initialize_subscriber returned %d", sopcResult);
+#endif
     }
     return sopcResult;
 }
@@ -764,7 +800,9 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
     bool bResult = false;
     if (gSessions != NULL && pzConfig != NULL)
     {
+#ifdef UASDEF_DBG
         LOG_Trace(LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u", (unsigned) pzConfig->dwHandle);
+#endif
         bResult = Session_Add(pzConfig);
         if (bResult)
         {
@@ -825,9 +863,13 @@ void UAM_NS_Clear(void)
         gNodeIdsDict = NULL;
     }
 
+#ifdef UASDEF_DBG
     LOG_Trace(LOG_INFO, "UAM_NS_Clear : waiting for Thread termination...");
+#endif
     SOPC_Thread_Join(gThread);
+#ifdef UASDEF_DBG
     LOG_Trace(LOG_INFO, "UAM_NS_Clear : Thread terminated");
+#endif
     SOPC_AsyncQueue_Free(&pzQueue);
     UAM_NS2S_Clear();
 }

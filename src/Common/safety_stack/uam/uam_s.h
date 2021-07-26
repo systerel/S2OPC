@@ -45,6 +45,8 @@
 #include "uam.h"
 #include "uas.h"
 
+#include <stdbool.h>
+
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
@@ -195,5 +197,34 @@ UAS_SafetyProvider_type* UAM_S_GetProvider(const UAM_S_ProviderHandle hHandle);
  * \return NULL if the handle is incorrect. The Consumer object otherwise
  */
 UAS_SafetyConsumer_type* UAM_S_GetConsumer(const UAM_S_ConsumerHandle hHandle);
+
+
+/*============================================================================
+ * LOGS FEATURES
+ *===========================================================================*/
+
+/**
+ * log levels.
+ */
+typedef enum
+{
+    UAM_S_LOG_DEFAULT, /**< Default messages are logged */
+    UAM_S_LOG_ERROR,   /**< Error messages are logged   */
+    UAM_S_LOG_WARN,    /**< Warn messages are logged    */
+    UAM_S_LOG_INFO,    /**< Info messages are logged    */
+    UAM_S_LOG_DEBUG,   /**< Debug messages are logged   */
+    UAM_S_LOG_ALL,     /**< All messages are logged     */
+} UAM_S_LOG_LEVEL;
+
+/**
+ * Note: SAFE application cannot use variadic parameters, so that the DEBUG features
+ * provide ease functions to display different basic parameters
+ */
+void UAM_S_DoLog(const UAM_S_LOG_LEVEL level, const char* txt);
+void UAM_S_DoLog_UHex32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32);
+void UAM_S_DoLog_UInt32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32);
+void UAM_S_DoLog_Int32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_Int32 s32);
+void UAM_S_DoLog_Text (const UAM_S_LOG_LEVEL level, const char* txt, const char* ptxt);
+void UAM_S_DoLog_Pointer (const UAM_S_LOG_LEVEL level, const char* txt, const void* pAddr);
 
 #endif

@@ -325,7 +325,7 @@ static void prod_ns_interactive_cycle(void)
             printf("SELECT failed: %d\n", result);
             g_context.stopSignal = 1;
         }
-        if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
+        else if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
         {
             nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);
             while (nbRead > 0 && entry[nbRead - 1] < ' ')

@@ -112,14 +112,14 @@ UAS_UInt8 UAM_LIBS_deserialize_UInt8(const UAS_UInt8* pData, const UAS_UInt32 sL
 
 /*===========================================================================*/
 void UAM_LIBS_deserialize_String(const UAS_UInt8* pData,
-                               const UAS_UInt32 sLen,
-                               UAS_UInt32* pPos,
-                               SOPC_ByteString* pzDest,
-                               const UAS_UInt32 sValLen)
+        const UAS_UInt32 sLen,
+        UAS_UInt32* pPos,
+        void * pzDest,
+        const UAS_UInt32 sValLen)
 {
     if (sValLen + *pPos <= sLen)
     {
-        SOPC_ByteString_CopyFromBytes(pzDest, pData + *pPos, (int32_t) sValLen);
+        memcpy(pzDest, pData + *pPos, (size_t) sValLen);
     }
     else
     {
@@ -129,32 +129,3 @@ void UAM_LIBS_deserialize_String(const UAS_UInt8* pData,
     *pPos += sValLen;
 }
 
-
-void UAM_LIBS_HEAP_Init(UAM_LIBS_Heap_type* pzHeap)
-{
-    assert (pzHeap != 0);
-    assert (!pzHeap->initialized);
-    pzHeap->pos = 0;
-    pzHeap->initialized = true;
-}
-
-void* UAM_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const size_t len)
-{
-    void* pResult = NULL;
-    if (pzHeap != 0 && pzHeap->initialized &&
-            (pzHeap->pos + len <= sizeof(pzHeap->buffer)))
-    {
-        pResult = pzHeap->buffer + pzHeap->pos;
-        pzHeap->pos += len;
-    }
-    return pResult;
-}
-
-void UAM_LIBS_HEAP_Clear(UAM_LIBS_Heap_type* pzHeap)
-{
-    assert (pzHeap != 0);
-    if (pzHeap->initialized)
-    {
-        pzHeap->initialized = false;
-    }
-}

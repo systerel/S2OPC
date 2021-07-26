@@ -90,8 +90,8 @@ typedef struct
 //// DEFINITIONS OF EXTERNAL SERVICES
 /////////////////////////////////////////////////////////
 
-SOPC_ReturnStatus SafetyDemo_Create_ProviderSample(void);
-SOPC_ReturnStatus SafetyDemo_Create_ConsumerSample(void);
+bool SafetyDemo_Create_ProviderSample(void);
+bool SafetyDemo_Create_ConsumerSample(void);
 
 /** Signals an acknowledgement */
 void SafetyDemo_DoAck(void);

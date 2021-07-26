@@ -149,7 +149,9 @@ static HANDLE socket_Create(const UAM_SessionHandle dwHandle)
 /*===========================================================================*/
 bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
 {
+#ifdef UASDEF_DBG
     LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize (%u)", (unsigned) dwHandle);
+#endif
     bool bResult = false;
     void* key = (void*) (UAS_INVERSE_PTR) dwHandle;
 
@@ -192,11 +194,15 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
         if (iResult < 0)
         {
             perror("Bind error");
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_ERROR, "UAM_NS2S_Initialize failed to bind port %u", (unsigned) iPortS2NS);
+#endif
         }
         else
         {
+#ifdef UASDEF_DBG
             LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize bound HDL=%d to port %u", (int) dwHandle, (unsigned) iPortS2NS);
+#endif
             bResult = SOPC_Dict_Insert(gFifos, key, (void*) pFiles);
         }
     }
@@ -259,7 +265,9 @@ void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, siz
 /*===========================================================================*/
 void UAM_NS2S_Clear(void)
 {
+#ifdef UASDEF_DBG
     LOG_Trace(LOG_DEBUG, "UAM_NS2S_Clear ()");
+#endif
 
     SOPC_Dict_Delete(gFifos);
     gFifos = NULL;

@@ -29,6 +29,8 @@ if(ENABLE_SAMPLES)
 
   # Demo Safe Producer
   add_executable(prod_s "src/prod_s.c"
+                        "src/uam_s_libs.c"
+                        "src/uam_s.c"
                         )
 
   target_compile_options(prod_s PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -39,8 +41,8 @@ if(ENABLE_SAMPLES)
 
   # Demo PubSub
   add_executable(safety_demo "src/main.c"
-                        "src/safetyDemo.c"
-                        "src/interactive.c"
+  #                      "src/safetyDemo.c"
+   #                     "src/interactive.c"
                         )
   target_compile_options(safety_demo PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(safety_demo PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")

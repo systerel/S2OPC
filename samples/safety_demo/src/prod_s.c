@@ -39,9 +39,6 @@
 
 #include "safetyDemo.h"
 
-#include "sopc_threads.h"
-#include "sopc_time.h"
-
 #include "uas_logitf.h"
 //
 #include "uam.h"
@@ -72,7 +69,6 @@ static void prod_s_stop(void);
  *===========================================================================*/
 static SOPC_ReturnStatus g_status = SOPC_STATUS_OK;
 static prod_s_interactive_Context gContext;
-static Thread gCycleThread;
 
 /*============================================================================
  * LOCAL FUNCTIONS
@@ -80,7 +76,7 @@ static Thread gCycleThread;
 static void signal_stop_server(int sig)
 {
     (void) sig;
-
+    UAM_S_DoLog_Int32 (UAM_S_LOG_ERROR, "Trapped signal :", sig);
     if (gContext.stopSignal != 0)
     {
         exit(1);
@@ -103,6 +99,7 @@ static void prod_s_initialize_logs(void)
         // TODO : a special feature for SAFE log may have to be imagined
         // E.g: throwing logs over or any channel to Non safe, so that they can be
         // processed real-time by NonSafe
+        // See UAM_S_DoLog
     }
 }
 
@@ -124,21 +121,10 @@ static void prod_s_init(void)
 }
 
 /*===========================================================================*/
-static void* prod_s_threadImpl (void* arg)
+static void prod_s_threadImpl (void)
 {
-    assert (arg == NULL);
-    LOG_Trace(LOG_DEBUG, "APP:Start Cycles");
-    // Wait for a signal
-    while (SOPC_STATUS_OK == g_status && 0 == gContext.stopSignal)
-    {
-        static const uint32_t msCycle = 50;
-        prod_s_cycle();
-
-        // Wait for next cycle
-        SOPC_Sleep(msCycle);
-    }
-    LOG_Trace(LOG_DEBUG, "APP:End Cycles");
-    return NULL;
+    prod_s_cycle();
+    return;
 }
 
 /*===========================================================================*/
@@ -147,7 +133,7 @@ static void prod_s_stop(void)
     // TODO stop cleany everything
 
     // UAM_S_Clear(); TODO
-    printf("# EXITING (code =%02X)\n", g_status);
+    UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# EXITING ; code = ", g_status);
 }
 
 /*===========================================================================*/
@@ -212,10 +198,10 @@ static void prod_s_interactive_cycle(void)
         result = select(maxfd + 1, &fdSet.set, NULL, NULL, ptv);
         if (result < 0)
         {
-            printf("SELECT failed: %d\n", result);
+            UAM_S_DoLog(UAM_S_LOG_ERROR, "SELECT failed");
             gContext.stopSignal = 1;
         }
-        if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
+        else if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
         {
             nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);
             while (nbRead > 0 && entry[nbRead - 1] < ' ')
@@ -245,14 +231,13 @@ int main(int argc, char* argv[])
 
     prod_s_init();
 
-    SOPC_Thread_Create(&gCycleThread, &prod_s_threadImpl, NULL, "prod_s_threadImpl");
-
     // Wait for a signal
     while (0 == gContext.stopSignal)
     {
         // Note : interactions with keyboard only work correctly in main thread.
         prod_s_interactive_cycle ();
-        SOPC_Sleep(10);
+        prod_s_threadImpl();
+        usleep(1000 * 5);
     }
 
     // Clean and quit
