@@ -13,3 +13,9 @@ deleted/
 __pycache__/
 genc/
 *.log
+
+# Robot output files
+log.html
+report.html
+results-test.robot.xml
+robot_output.xml
