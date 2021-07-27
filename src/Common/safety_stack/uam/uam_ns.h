@@ -101,7 +101,8 @@ SOPC_ReturnStatus UAM_NS_Initialize(void);
 /**
  * \brief Create a SPDU
  * \param pzConfig A pointer to the configuration. The pointer can be freed after call, but not the data pointed
- *      by pzConfig->pUserParams
+ *      by pzConfig->pUserParams. The value of dwHandle shall match the session handle provided by SAFE in call to
+ *      UAM_S_InitSafetyProvider or UAM_S_InitSafetyConsumer
  * \return false in case of error.
  */
 bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);

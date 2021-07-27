@@ -55,8 +55,13 @@
  */
 
 static UAM_S_ProviderHandle hProviderHandle = UAM_NoHandle;
-static const UAM_SafetyConfiguration_type yInstanceConfigSample1 = {.wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
-                                                                    .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN};
+static const UAM_SafetyConfiguration_type yInstanceConfigSample1 =
+{
+        .dwHandle = SAMPLE1_SESSION_UAM_ID,
+        .wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
+        .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN
+};
+
 static const UAS_SafetyProviderSPI_type SPI1P_Sample = {.dwSafetyProviderId = SAMPLE_PROVID1_ID,
                                                         .zSafetyBaseId = SAMPLE_PROVID1_GUID,
                                                         .dwSafetyStructureSignature = SAMPLE_PROVID1_SIGN};

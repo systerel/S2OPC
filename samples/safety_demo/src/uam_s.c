@@ -112,6 +112,18 @@ static bool Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider)
 
          bResult = SOPC_STATUS_OK;
      }*/
+
+     const UAM_SafetyConfiguration_type* pzSafetyCfg =
+              &uamDynamicSafetyData.azProviderConfiguration[pzProvider->dwHandle];
+     UAS_RequestSpdu_type zSpdu;
+     bResult = UAM_SpduEncoder_GetRequest(pzSafetyCfg->dwRequestHandle, &zSpdu);
+     if (bResult == SOPC_STATUS_OK)
+     {
+         pzProvider->zRequestSPDU = zSpdu;
+
+         bResult = SOPC_STATUS_OK;
+     }
+
      return bResult;
  }
 
