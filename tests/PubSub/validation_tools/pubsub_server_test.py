@@ -701,16 +701,23 @@ def testPubSubDynamicConf():
         logger.finalize_report()
 
 # test with static configuration : data/xml_test/config_pubsub_server.xml
-def testPubSubStaticConf():
+def testPubSubStaticConf(separateIP):
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+
+    if separateIP == None:
+    	pubsubserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+    else:
+        pubserver = PubSubServer('opc.tcp://' + separateIP[0] + ':4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+        subserver = PubSubServer('opc.tcp://' + separateIP[1] + ':4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
 
     defaultXml2Restore = False
 
     try:
         # secure channel connection
-        pubsubserver.connect()
+        #pubsubserver.connect()
+        pubserver.connect()
+        subserver.connect()
 
         #
         # TC 1 : Test with Static Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
@@ -803,13 +810,16 @@ def testPubSubStaticConf():
 
 
 if __name__=='__main__':
-#    argparser = argparse.ArgumentParser()
-#    argparser.add_argument('--static', action='store_true', default=False,
-#                           help='Flag to indicates that Pub-Sub configuration is static. Default is false')
-#    args = argparser.parse_args()
-#
-#    if args.static:
-#        testPubSubStaticConf()
-#    else:
-#        testPubSubDynamicConf()
-	testPubSubStaticConf()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--static', action='store_true', default=False,
+                           help='Flag to indicates that Pub-Sub configuration is static. Default is false')
+    argparser.add_argument('--separate', nargs=2, metavar=('PUBLISHER_IP', 'SUBSCRIBER_IP'), help="Indicates that the publisher and the subscriber run separately. "
+																								"The IP addresses for both of theme must be provided after on command line. "
+																								"Default is false: pub and sub on the same program")
+    args = argparser.parse_args(['--static','--separate','192.0.2.100', '192.0.2.101'])
+
+    if args.static:
+        testPubSubStaticConf(args.separate)
+    else:
+        testPubSubDynamicConf()
+#   testPubSubStaticConf()
