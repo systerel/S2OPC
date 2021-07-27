@@ -318,7 +318,8 @@ def helpConfigurationChange(pPubsubserver, pConfig, pLogger):
 # Change the configuration and restart PubSub Server
 # Test connection, status and configuration
 
-def helpConfigurationChangeAndStartTest(pPubserver, pSubserver, pConfig, pLogger, static=False, possibleFail=False):
+#pXserver is either a pubserver or a subsever
+def helpConfigurationChangeAndStartTest(pXserver, pConfig, pLogger, static=False, possibleFail=False):
     fd = open(DEFAULT_XML_PATH, "r")
     oldConfig = fd.read()
     fd.close()
@@ -719,8 +720,8 @@ def testPubSubStaticConf(separateIP):
     logger = TapLogger("pubsub_server_test.tap")
 
     if separateIP == None:
-        pubserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
-        subserver = PubSubServer('opc.tcp://192.0.2.100:4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+        pubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
+        subserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
     else:
         pubserver = PubSubServer('opc.tcp://' + separateIP[0] + ':4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
         subserver = PubSubServer('opc.tcp://' + separateIP[1] + ':4841', NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
@@ -762,7 +763,6 @@ def testPubSubStaticConf(separateIP):
         logger.add_test('Subscriber int is changed', -30 == subserver.getValue(NID_SUB_INT))
 
 
-        #TODO: demander à Vincent
         #
         # TC 2 : Pub-Sub server is stopped => no change in Subscriber variables
         #
@@ -789,7 +789,6 @@ def testPubSubStaticConf(separateIP):
         logger.add_test('Subscriber uint is changed', 5800 == subserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', -30 == subserver.getValue(NID_SUB_INT))
 
-        #TODO: aussi demander à Vincent
         #
         # TC 3 : Pub-Sub server is restarted => Subscriber variables changed
         #
@@ -808,27 +807,27 @@ def testPubSubStaticConf(separateIP):
 
         sleep(STATIC_CONF_PUB_INTERVAL)
 
-        #logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
-        #logger.add_test('Subscriber uint is changed', 7777 == pubsubserver.getValue(NID_SUB_UINT))
-        #logger.add_test('Subscriber int is changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber bool is changed', False == subserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint is changed', 7777 == subserver.getValue(NID_SUB_UINT))
+        logger.add_test('Subscriber int is changed', 123654 == subserver.getValue(NID_SUB_INT))
 
         #
         # TC 4 : Change Pub-Sub server configuration => configuration cannot be changed in static mode
         #
-        logger.begin_section("TC 4 : Change Pub-Sub server configuration")
+        #logger.begin_section("TC 4 : Change Pub-Sub server configuration")
         # Change Pub-Sub configuration node and check file is not change
-        helpConfigurationChangeAndStartTest(pubserver, subserver, XML_SUBSCRIBER_ONLY, logger, static=True)
+        #helpConfigurationChangeAndStartTest(subserver, XML_SUBSCRIBER_ONLY, logger, static=True)
 
         # Check Pub-Sub module is still running
-        helpTestSetValue(pubserver, NID_PUB_BOOL, True, logger)
-        helpTestSetValue(pubserver, NID_PUB_UINT, 1245, logger)
-        helpTestSetValue(pubserver, NID_PUB_INT, 9874, logger)
+        #helpTestSetValue(pubserver, NID_PUB_BOOL, True, logger)
+        #helpTestSetValue(pubserver, NID_PUB_UINT, 1245, logger)
+        #helpTestSetValue(pubserver, NID_PUB_INT, 9874, logger)
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        #sleep(STATIC_CONF_PUB_INTERVAL)
 
-        logger.add_test('Subscriber bool is changed', True == subserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint is changed', 1245 == subserver.getValue(NID_SUB_UINT))
-        logger.add_test('Subscriber int is changed', 9874 == subserver.getValue(NID_SUB_INT))
+        #logger.add_test('Subscriber bool is changed', True == subserver.getValue(NID_SUB_BOOL))
+        #logger.add_test('Subscriber uint is changed', 1245 == subserver.getValue(NID_SUB_UINT))
+        #logger.add_test('Subscriber int is changed', 9874 == subserver.getValue(NID_SUB_INT))
     
     except error:
         print(error)
@@ -853,7 +852,7 @@ if __name__=='__main__':
     argparser.add_argument('--separate', nargs=2, metavar=('PUBLISHER_IP', 'SUBSCRIBER_IP'),  help="Indicates that the publisher and the subscriber run separately. "
                                                                                                    "The IP addresses for both of theme must be provided after on command line. "
                                                                                                    "Default is false: pub and sub on the same host")
-    args = argparser.parse_args(['--static', '--separate', '192.0.2.100', '192.0.2.101'])
+    args = argparser.parse_args()
     #args = argparser.parse_args()
 
     if args.static:
