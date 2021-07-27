@@ -1,6 +1,6 @@
 <PubSub publisherId="42">
     <!-- one to many -->
-    <connection address="opc.udp://232.1.2.101:4840" mode="subscriber">
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
         <message id="14" version="1" publishingInterval="100" publisherId="42" securityMode="signAndEncrypt">
             <!-- one to many -->
