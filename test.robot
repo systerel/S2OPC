@@ -11,7 +11,6 @@ Library			S2OPCTest.py
 Publisher is Running
 	Log To Console		Launching renode server
 	Execute Command		path add @/builds/systerel/S2OPC
-	Execute Command		path add @${EXECDIR}
 	Execute Command		help path
 	Execute Script		ci.repl
 	Start Emulation
@@ -25,7 +24,6 @@ Publisher is Running
 Good PubSub Communication
 	Log To Console		Launching renode server
 	Execute Command		path add @/builds/systerel/S2OPC
-	Execute Command		path add @${EXECDIR}
 	Execute Script		ci.repl
 	Start Emulation
 

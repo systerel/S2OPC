@@ -19,3 +19,8 @@ log.html
 report.html
 results-test.robot.xml
 robot_output.xml
+
+# West build output
+# To have the same configuration localy and on github, the build output of west needs to be on the s2opc folder
+pub
+sub
