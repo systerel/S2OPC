@@ -45,8 +45,6 @@
 #include "uam.h"
 #include "uas.h"
 
-#include <stdbool.h>
-
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
@@ -56,7 +54,7 @@ typedef struct UAM_S_Configuration_struct
     UAM_RedundancySetting_type eRedundancyType;
     /** Session Identifier. */
     UAM_SessionId dwSessionId;
-    bool bIsProvider;
+    UAS_Bool bIsProvider;
 } UAM_S_Configuration_type;
 
 typedef struct UAM_SafetyConfiguration_struct

@@ -30,6 +30,7 @@ if(ENABLE_SAMPLES)
   # Demo Safe Producer
   add_executable(prod_s "src/prod_s.c"
                         "src/uam_s_libs.c"
+                        "src/uam_s2ns_itf.c"
                         "src/uam_s.c"
                         )
 

@@ -57,7 +57,7 @@
 static UAM_S_ProviderHandle hProviderHandle = UAM_NoHandle;
 static const UAM_SafetyConfiguration_type yInstanceConfigSample1 =
 {
-        .dwHandle = SAMPLE1_SESSION_UAM_ID,
+        .dwSessionId = SAMPLE1_SESSION_UAM_ID,
         .wSafetyDataLength = SAMPLE1_SAFETY_DATA_LEN,
         .wNonSafetyDataLength = SAMPLE1_UNSAFE_DATA_LEN
 };

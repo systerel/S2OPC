@@ -73,7 +73,7 @@ typedef struct
 {
     SOPC_Dict* pCache;
     volatile sig_atomic_t stopSignal;
-    UAM_SessionHandle spduHandle;
+    UAM_SessionId sessionId;
 } ProdNS_Demo_interactive_Context;
 
 /*============================================================================
@@ -195,7 +195,7 @@ static void prod_ns_initialize_uam(void)
     if (SOPC_STATUS_OK == g_status)
     {
         UAM_NS_Configuration_type zConfig = {.eRedundancyType = UAM_RDD_SINGLE_CHANNEL,
-                                             .dwHandle = SAMPLE1_SESSION_UAM_ID,
+                                             .dwSessionId = SAMPLE1_SESSION_UAM_ID,
                                              .bIsProvider = true,
                                              .uUserRequestId = NODEID_SPDU_REQUEST_NUM,
                                              .uUserResponseId = NODEID_SPDU_RESPONSE_NUM};

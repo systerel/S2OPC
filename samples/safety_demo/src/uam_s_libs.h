@@ -43,6 +43,7 @@
  * INCLUDES
  *===========================================================================*/
 #include "uas.h"
+#include "uam_s.h"
 
 /*============================================================================
  * EXTERNAL TYPES
@@ -71,8 +72,30 @@ typedef struct UAM_LIBS_Heap_struct
 
 
 void UAM_S_LIBS_HEAP_Init(UAM_LIBS_Heap_type* pzHeap);
-void* UAM_S_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const UAS_UInt32 len);
+void* UAM_S_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const UAM_S_Size len);
 void UAM_S_LIBS_HEAP_Clear(UAM_LIBS_Heap_type* pzHeap);
-void UAM_S_LIBS_MemZero(void* pAddr,  const UAS_UInt32 sLen);
+void UAM_S_LIBS_MemZero(void* pAddr,  const UAM_S_Size sLen);
+#define UAM_S_LIBS_VarZero(v) UAM_S_LIBS_MemZero (&(v) , sizeof(v) );
+void UAM_S_LIBS_MemCopy(void* pDest,  const void* pSource,  const UAM_S_Size sLen);
+UAS_UInt32 UAM_S_LIBS_nothl(const UAS_UInt32 uLong);
+UAS_UInt16 UAM_S_LIBS_noths(const UAS_UInt16 ushort);
+void UAM_S_LIBS_ExitFailure (const UAS_Int32 sCode);
+
+
+#define _UAM_S_LIBS_XSTRINGIFY(s) _UAM_S_LIBS_STRINGIFY(s)
+#define _UAM_S_LIBS_STRINGIFY(s) #s
+#define UAM_S_LIBS_ASSERT(c) do \
+    { \
+        if (! (c)) \
+        {\
+        	UAM_S_DoLog (UAM_S_LOG_ERROR, "ASSERT failed from file "__FILE__" line " _UAM_S_LIBS_XSTRINGIFY(__LINE__) ", assert = <" _UAM_S_LIBS_XSTRINGIFY(c) ">");\
+        	UAM_S_LIBS_ExitFailure (1); \
+        }\
+    } while (0)
+
+
+// TODO : include somewhere in the build environment
+#define IS_LITTLE_ENDIAN
+
 
 #endif
