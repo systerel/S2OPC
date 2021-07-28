@@ -284,6 +284,7 @@ test-renode:
     - build-subscriber
   artifacts:
     paths: [/builds/systerel/S2OPC/output]
+    when: always
 
 # Test check belongs to the test part, however it does not depend on linux build.
 #test-check:
