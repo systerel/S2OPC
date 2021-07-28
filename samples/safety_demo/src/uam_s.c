@@ -97,9 +97,12 @@ static void ReadSpduFromSlave(void);
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
-static void ReadSpduFromSlave(void)
+static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, void* pData, size_t sMaxLen, size_t* sReadLen)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ReadSpduFromSlave-In");
+// TODO
 
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ReadSpduFromSlave-Out");
 }
 
 /*===========================================================================*/
@@ -158,6 +161,7 @@ static bool Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer,
 /*===========================================================================*/
 void UAM_S_Initialize(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Initialize-In");
     assert(!uamDynamicSafetyData.bInitialized);
     UAS_UInt16 index = 0;
 
@@ -182,6 +186,7 @@ void UAM_S_Initialize(void)
     }
     uamDynamicSafetyData.bInitialized = true;
     uamDynamicSafetyData.bLocked = false;
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Initialize-Out");
 }
 
 /*===========================================================================*/
@@ -190,6 +195,7 @@ UAS_UInt8 UAM_S_InitSafetyProvider(const UAM_SafetyConfiguration_type* const pzI
                                          UAM_S_pfProviderApplicationCycle pfProviderCycle,
                                          UAM_S_ProviderHandle* phHandle)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_InitSafetyProvider-In");
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
     assert(NULL != pzSPI);
@@ -235,6 +241,7 @@ UAS_UInt8 UAM_S_InitSafetyProvider(const UAM_SafetyConfiguration_type* const pzI
     pzSafetyProvider->zSPI = *pzSPI;
 
     byRetVal = byUAS_InitSafetyProvider(pzSafetyProvider, handle, &nResult);
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_InitSafetyProvider-Out");
     return byRetVal;
 }
 
@@ -244,6 +251,7 @@ UAS_UInt8 UAM_S_InitSafetyConsumer(const UAM_SafetyConfiguration_type* const pzI
                                          UAM_S_pfConsumerApplicationCycle pfConsumerCycle,
                                          UAM_S_ProviderHandle* phHandle)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_InitSafetyConsumer-In");
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
     assert(NULL != pzSPI);
@@ -284,11 +292,13 @@ UAS_UInt8 UAM_S_InitSafetyConsumer(const UAM_SafetyConfiguration_type* const pzI
     pzSafetyProvider->zSPI = *pzSPI;
 
     byRetVal = byUAS_InitSafetyConsumer(pzSafetyProvider, handle, &nResult);
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_InitSafetyConsumer-Out");
     return byRetVal;
 }
 /*===========================================================================*/
 UAS_UInt8 UAM_S_StartSafety(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_StartSafety-In");
     assert(uamDynamicSafetyData.bInitialized);
     assert(!uamDynamicSafetyData.bLocked);
     UAS_UInt8 byRetVal = UAS_OK;
@@ -318,27 +328,31 @@ UAS_UInt8 UAM_S_StartSafety(void)
     {
         uamDynamicSafetyData.bLocked = true;
     }
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_StartSafety-Out");
     return byRetVal;
 }
 /*===========================================================================*/
 UAS_UInt8 UAM_S_Cycle(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Cycle-In");
     UAS_UInt8 byRetVal = UAS_OK;
     assert(uamDynamicSafetyData.bInitialized);
     assert(uamDynamicSafetyData.bLocked);
 
-    ReadSpduFromSlave();
+    UAM_S2NS_ReceiveAllSpdusFromNonSafe(&ReadSpduFromSlave);
 
     ExecuteSafetyProviders();
 
     ExecuteSafetyConsumers();
 
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Cycle-Out");
     return byRetVal;
 }
 
 /*===========================================================================*/
 void UAM_S_Clear(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Clear-In");
     UAS_UInt16 index = 0;
     for (index = 0; index < uamDynamicSafetyData.bNextProviderFreeHandle; ++index)
     {
@@ -380,17 +394,20 @@ void UAM_S_Clear(void)
     uamDynamicSafetyData.bNextConsumerFreeHandle = 0;
     uamDynamicSafetyData.bInitialized = false;
     UAM_S_LIBS_HEAP_Clear (&zHeap);
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Clear-Out");
 }
 
 /*===========================================================================*/
 static void ExecuteSafetyConsumers(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers-In");
     UAS_UInt8 byUasRetval = UAS_OK;
     bool bStatus = true;
     UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextConsumerFreeHandle; wInstanceCount++)
     {
+        UAM_S_DoLog_UInt32(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers, Id=", wInstanceCount);
         assert(NULL != uamDynamicSafetyData.apfConsumerCycle);
         UAS_SafetyConsumer_type* pzInstance = &azUAS_SafetyConsumers[wInstanceCount];
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azConsumerConfiguration[wInstanceCount];
@@ -434,17 +451,20 @@ static void ExecuteSafetyConsumers(void)
             }
         }
     } /* for wNumberOfSafetyConsumers */
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers-Out");
 }
 
 /*===========================================================================*/
 static void ExecuteSafetyProviders(void)
 {
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders-In");
     UAS_UInt8 byUasRetval;
     bool bStatus = true;
     UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextProviderFreeHandle; wInstanceCount++)
     {
+        UAM_S_DoLog_UInt32(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders, Id=", wInstanceCount);
         assert(NULL != uamDynamicSafetyData.apfProviderCycle);
         UAS_SafetyProvider_type* pzInstance = &azUAS_SafetyProviders[wInstanceCount];
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azProviderConfiguration[wInstanceCount];
@@ -498,6 +518,7 @@ static void ExecuteSafetyProviders(void)
             }
         }
     } /* for wNumberOfSafetyProviders */
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders-Out");
 }
 
 /*===========================================================================*/

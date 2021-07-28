@@ -210,7 +210,7 @@ typedef enum
     UAM_S_LOG_WARN,    /**< Warn messages are logged    */
     UAM_S_LOG_INFO,    /**< Info messages are logged    */
     UAM_S_LOG_DEBUG,   /**< Debug messages are logged   */
-    UAM_S_LOG_ALL,     /**< All messages are logged     */
+    UAM_S_LOG_SEQUENCE,     /**< All messages are logged     */
 } UAM_S_LOG_LEVEL;
 
 /**
