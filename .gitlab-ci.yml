@@ -273,12 +273,8 @@ test-renode:
     - cd /root/zephyrproject
     - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/prepare.sh
-    - renode-test modules/lib/s2opc/test.robot
-# Moving files insode the repos directory because artifact paths must be inside the repos
-    - mkdir -p /builds/systerel/S2OPC/output
-    - mv /root/zephyrproject/robot_output.xml /builds/systerel/S2OPC/output/robot_output.xml
-    - mv /root/zephyrproject/log.html /builds/systerel/S2OPC/output/log.html
-    - mv /root/zephyrproject/report.html /builds/systerel/S2OPC/output/report.html
+      # Outputing robot result files to the artifacts path
+    - renode-test --results-dir=/builds/systerel/S2OPC/output modules/lib/s2opc/test.robot
   needs:
     - build-publisher
     - build-subscriber
