@@ -56,7 +56,6 @@
 /*============================================================================
  * DECLARATION OF INTERNAL SERVICES
  *===========================================================================*/
-// TODO serialize_UInt32 & co are duplicated with uam_ns.c
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
@@ -225,7 +224,6 @@ void UAM_S2NS_InitializeSpdu(const UAM_SessionId dwSessionId)
 void UAM_S2NS_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pData, const UAM_S_Size sLen)
 {
     UAM_S_DoLog_UInt(UAM_S_LOG_SEQUENCE, "UAM_S2NS_SendSpduImpl-In, HDL=", dwSessionId);
-    UAM_S_LIBS_ASSERT(dwSessionId == 0x010203u); // TODO remove, just for POC
     UAS_Int64 iNbWritten = 0;
 
     UAM_NS2S_Impl_type * pzSocket = socket_Get (dwSessionId);
@@ -331,7 +329,6 @@ void UAM_S2NS_Clear(void)
         pzSocket->hSocketWriteNS2S = -1;
         pzSocket->hSocketWriteS2NS = -1;
         pzSocket->dwSessionId = UAM_NoHandle;
-        // TODO : clear socket
     }
     gNextFreeSocket = 0;
 #if USE_SELECT

@@ -40,20 +40,9 @@ if(ENABLE_SAMPLES)
   target_link_libraries(prod_s PRIVATE s2opc_common)
   target_include_directories(prod_s PRIVATE safety_demo)
 
-  # Demo PubSub
-  add_executable(safety_demo "src/main.c"
-  #                      "src/safetyDemo.c"
-   #                     "src/interactive.c"
-                        )
-  target_compile_options(safety_demo PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(safety_demo PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")
-
-  target_link_libraries(safety_demo PRIVATE s2opc_pubsub s2opc_clientserver-xml-loaders-expat)
-  target_include_directories(safety_demo PRIVATE safety_demo)
-
   # Copy data
   add_custom_command(
-    TARGET safety_demo POST_BUILD
+    TARGET prod_ns POST_BUILD
     # Reuse configurations and security from PubSub_ClientServer samples
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/PubSub_ClientServer/data/security/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/

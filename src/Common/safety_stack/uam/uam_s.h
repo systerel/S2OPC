@@ -94,9 +94,9 @@ typedef UAS_UInt8 UAM_S_ConsumerHandle;
  * \param pzAppInputs The applicative input.
  * \param pzAppOutputs The applicative outputs. They are set to previous cycle values and may
  *          be updated only if required.
- * \return true in case of success.
+ * \return 1 in case of success.
  */
-typedef bool (*UAM_S_pfProviderApplicationCycle)(const UAM_SafetyConfiguration_type* const pzConfiguration,
+typedef UAS_Bool (*UAM_S_pfProviderApplicationCycle)(const UAM_SafetyConfiguration_type* const pzConfiguration,
                                                const UAM_S_ProviderSAPI_Input* pzAppInputs,
                                                UAM_S_ProviderSAPI_Output* pzAppOutputs);
 
@@ -107,9 +107,9 @@ typedef bool (*UAM_S_pfProviderApplicationCycle)(const UAM_SafetyConfiguration_t
  * \param pzAppInputs The applicative input.
  * \param pzAppOutputs The applicative outputs. They are set to previous cycle values and may
  *          be updated only if required.
- * \return true in case of success.
+ * \return 1 in case of success.
  */
-typedef bool (*UAM_S_pfConsumerApplicationCycle)(const UAM_SafetyConfiguration_type* const pzConfiguration,
+typedef UAS_Bool (*UAM_S_pfConsumerApplicationCycle)(const UAM_SafetyConfiguration_type* const pzConfiguration,
                                                const UAM_S_ConsumerSAPI_Input* pzAppInputs,
                                                UAM_S_ConsumerSAPI_Output* pzAppOutputs);
 

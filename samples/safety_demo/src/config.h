@@ -38,4 +38,7 @@
 
 #define NODEID_SPDU_RESPONSE_NUM 0x01000002
 
+/** User cyclic application time (ms) */
+#define USER_APP_CYCLE_DURATION_MS (50u)
+
 #endif /* CONFIG_H_ */

@@ -37,12 +37,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//
-#include <assert.h>
 
 #include "safetyDemo.h"
+#include "config.h"
 
 #include "uas_logitf.h"
+#include "uam_s_libs.h"
 //
 #include "uam.h"
 #include "uam_s.h"
@@ -53,7 +53,7 @@
    ============================================================================
    ============================================================================
    ============================================================================ */
-/** NOte:  this section is aimed to be auto-generated, so that it will be more maintainable
+/** Note:  this section is aimed to be auto-generated, so that it will be more maintainable
  * to create a template file for each connection (PROD or CONS)
  */
 
@@ -68,13 +68,13 @@ static const UAM_SafetyConfiguration_type yInstanceConfigSample1 =
 static const UAS_SafetyProviderSPI_type SPI1P_Sample = {.dwSafetyProviderId = SAMPLE_PROVID1_ID,
                                                         .zSafetyBaseId = SAMPLE_PROVID1_GUID,
                                                         .dwSafetyStructureSignature = SAMPLE_PROVID1_SIGN};
-static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
+static UAS_Bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzConfiguration,
                                   const UAM_S_ProviderSAPI_Input* pzAppInputs,
                                   UAM_S_ProviderSAPI_Output* pzAppOutputs)
 {
-    assert(pzConfiguration != NULL);
-    assert(pzAppInputs != NULL);
-    assert(pzAppOutputs != NULL);
+    UAM_S_LIBS_ASSERT(pzConfiguration != NULL);
+    UAM_S_LIBS_ASSERT(pzAppInputs != NULL);
+    UAM_S_LIBS_ASSERT(pzAppOutputs != NULL);
 
     // Do some simulation stuff...
     static UAS_UInt32 u32Cycle = 0;
@@ -97,23 +97,23 @@ static bool fProvider1SampleCycle(const UAM_SafetyConfiguration_type* const pzCo
     safeData.bData2 = 1;
     safeData.u8Val2 = 12;
 
-    memcpy(safeData.sText10, sSafetyDataText10, 10);
+    UAM_S_LIBS_MemCopy(safeData.sText10, sSafetyDataText10, 10);
 
     // Set output flags
     pzAppOutputs->bOperatorAckProvider = 0;
 
     // Set Output Non Safe data
-    assert(pzAppOutputs->pbySerializedNonSafetyData != NULL);
-    memset(pzAppOutputs->pbySerializedNonSafetyData, 0, pzConfiguration->wNonSafetyDataLength);
+    UAM_S_LIBS_ASSERT(pzAppOutputs->pbySerializedNonSafetyData != NULL);
+    UAM_S_LIBS_MemZero(pzAppOutputs->pbySerializedNonSafetyData, pzConfiguration->wNonSafetyDataLength);
     snprintf((char*) pzAppOutputs->pbySerializedNonSafetyData, pzConfiguration->wSafetyDataLength, "NonSafety Data %u",
              pzAppInputs->dwMonitoringNumber);
 
     // Set Output Safe data
-    assert(pzAppOutputs->pbySerializedSafetyData != NULL);
-    assert(sizeof(safeData) == pzConfiguration->wSafetyDataLength);
-    memcpy(pzAppOutputs->pbySerializedSafetyData, (void*) &safeData, sizeof(safeData));
+    UAM_S_LIBS_ASSERT(pzAppOutputs->pbySerializedSafetyData != NULL);
+    UAM_S_LIBS_ASSERT(sizeof(safeData) == pzConfiguration->wSafetyDataLength);
+    UAM_S_LIBS_MemCopy(pzAppOutputs->pbySerializedSafetyData, (void*) &safeData, sizeof(safeData));
 
-    return true;
+    return 1;
 }
 
 
@@ -231,6 +231,7 @@ static void prod_s_interactive_cycle(void)
 }
 
 
+/*===========================================================================*/
 /**
  * ENVIRONNEMENT CONFIGURATION AND SETUP
  */
@@ -239,7 +240,6 @@ static void prod_s_interactive_cycle(void)
 static void prod_s_initialize_uam(UAM_S_LOG_LEVEL initLogLevel)
 {
     UAS_UInt8 uResult;
-    // TODO : use safetyDemo application (see main.c) to see how the non-splitted implementation is realized.
     UAM_S_Initialize(initLogLevel);
 
     uResult = UAM_S_InitSafetyProvider (&yInstanceConfigSample1, &SPI1P_Sample, &fProvider1SampleCycle, &hProviderHandle);
@@ -254,7 +254,7 @@ static void prod_s_initialize_uam(UAM_S_LOG_LEVEL initLogLevel)
         signal_stop_server(0);
     }
 
-    // TODO UAM_S_InitSafetyConsumer
+    // Note: That would be the place to call UAM_S_InitSafetyConsumer .
 
     if (UAS_OK == uResult)
     {
@@ -307,7 +307,7 @@ static void prod_s_init(int argc, char* argv[])
 /*===========================================================================*/
 static void prod_s_stop(void)
 {
-    // TODO stop cleany everything
+    // TODO stop cleany everything. USE LIBASAN ?
 
     UAM_S_Clear();
     UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# EXITING ; code = ", g_status);
@@ -319,10 +319,6 @@ static void prod_s_cycle(void)
     UAS_UInt8 uResult;
     if (g_status == SOPC_STATUS_OK)
     {
-        // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
-
-        // TODO  UAM_S_CheckSpduReception(SESSION_UAM_ID);
-
         uResult = UAM_S_Cycle ();
 
         if (UAS_OK != uResult)
@@ -338,7 +334,6 @@ int main(int argc, char* argv[])
 {
     (void)argc;
     (void)argv;
-    static const unsigned cycleMs = 50;
     gContext.stopSignal = 0;
 
     /* Signal handling: close the server gracefully when interrupted */
@@ -355,7 +350,7 @@ int main(int argc, char* argv[])
         prod_s_interactive_cycle ();
 
         prod_s_cycle();
-        usleep(1000 * cycleMs);
+        usleep(1000 * USER_APP_CYCLE_DURATION_MS);
     }
 
     // Clean and quit
