@@ -48,6 +48,7 @@
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
+typedef UAS_UInt64 UAM_S_Size;
 
 typedef struct UAM_S_Configuration_struct
 {
@@ -112,6 +113,19 @@ typedef bool (*UAM_S_pfConsumerApplicationCycle)(const UAM_SafetyConfiguration_t
                                                const UAM_S_ConsumerSAPI_Input* pzAppInputs,
                                                UAM_S_ConsumerSAPI_Output* pzAppOutputs);
 
+/**
+ * log levels.
+ */
+typedef enum
+{
+    UAM_S_LOG_DEFAULT, /**< Default messages are logged */
+    UAM_S_LOG_ERROR,   /**< Error messages are logged   */
+    UAM_S_LOG_WARN,    /**< Warn messages are logged    */
+    UAM_S_LOG_INFO,    /**< Info messages are logged    */
+    UAM_S_LOG_DEBUG,   /**< Debug messages are logged   */
+    UAM_S_LOG_SEQUENCE,     /**< All messages are logged     */
+} UAM_S_LOG_LEVEL;
+
 /*============================================================================
  * EXPORTED CONSTANTS
  *===========================================================================*/
@@ -124,7 +138,7 @@ typedef bool (*UAM_S_pfConsumerApplicationCycle)(const UAM_SafetyConfiguration_t
 /**
  * \brief Shall be called before the module is used
  */
-void UAM_S_Initialize(void);
+void UAM_S_Initialize(const UAM_S_LOG_LEVEL initLogLevel);
 
 /**
  * \brief Helper function for set-up of a Safety provider. Calls byUAS_InitSafetyProvider
@@ -193,32 +207,14 @@ UAS_SafetyProvider_type* UAM_S_GetProvider(const UAM_S_ProviderHandle hHandle);
  */
 UAS_SafetyConsumer_type* UAM_S_GetConsumer(const UAM_S_ConsumerHandle hHandle);
 
-
-/*============================================================================
- * LOGS FEATURES
- *===========================================================================*/
-
-/**
- * log levels.
- */
-typedef enum
-{
-    UAM_S_LOG_DEFAULT, /**< Default messages are logged */
-    UAM_S_LOG_ERROR,   /**< Error messages are logged   */
-    UAM_S_LOG_WARN,    /**< Warn messages are logged    */
-    UAM_S_LOG_INFO,    /**< Info messages are logged    */
-    UAM_S_LOG_DEBUG,   /**< Debug messages are logged   */
-    UAM_S_LOG_SEQUENCE,     /**< All messages are logged     */
-} UAM_S_LOG_LEVEL;
-
 /**
  * Note: SAFE application cannot use variadic parameters, so that the DEBUG features
  * provide ease functions to display different basic parameters
  */
 void UAM_S_DoLog(const UAM_S_LOG_LEVEL level, const char* txt);
 void UAM_S_DoLog_UHex32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32);
-void UAM_S_DoLog_UInt32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32);
-void UAM_S_DoLog_Int32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_Int32 s32);
+void UAM_S_DoLog_UInt (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt64 u64);
+void UAM_S_DoLog_Int (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_Int64 s64);
 void UAM_S_DoLog_Text (const UAM_S_LOG_LEVEL level, const char* txt, const char* ptxt);
 void UAM_S_DoLog_Pointer (const UAM_S_LOG_LEVEL level, const char* txt, const void* pAddr);
 

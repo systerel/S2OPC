@@ -264,37 +264,38 @@ static bool EncodeSpduResponse(const UAS_ResponseSpdu_type* pzSpdu,
                                size_t uNonSafeSize)
 {
     bool bResult = false;
-
-    sLen = 0;
-    if (!(pzSpdu == NULL || ppBytes == NULL || sLen == NULL))
+    if (sLen == NULL || pzSpdu == NULL || ppBytes == NULL)
     {
-        const size_t expLen = 25 + uSafeSize + uNonSafeSize;
-        *ppBytes = (SOPC_Byte*) SOPC_Malloc(expLen);
-        assert(NULL != *ppBytes);
-        // SAFE data
-        serialize_String(pzSpdu->pbySerializedSafetyData, uSafeSize, *ppBytes, expLen, sLen);
-        serialize_UInt8(pzSpdu->byFlags, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->zSpduId.dwPart1, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->zSpduId.dwPart2, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->zSpduId.dwPart3, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
-        serialize_UInt32(pzSpdu->dwCrc, *ppBytes, expLen, sLen);
-        serialize_String(pzSpdu->pbySerializedNonSafetyData, uNonSafeSize, *ppBytes, expLen, sLen);
-        if ((*sLen) == expLen)
-        {
-            bResult = true;
+        return false;
+    }
+
+    *sLen = 0;
+    const size_t expLen = 25 + uSafeSize + uNonSafeSize;
+    *ppBytes = (SOPC_Byte*) SOPC_Malloc(expLen);
+    assert(NULL != *ppBytes);
+    // SAFE data
+    serialize_String(pzSpdu->pbySerializedSafetyData, uSafeSize, *ppBytes, expLen, sLen);
+    serialize_UInt8(pzSpdu->byFlags, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->zSpduId.dwPart1, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->zSpduId.dwPart2, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->zSpduId.dwPart3, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->dwSafetyConsumerId, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->dwMonitoringNumber, *ppBytes, expLen, sLen);
+    serialize_UInt32(pzSpdu->dwCrc, *ppBytes, expLen, sLen);
+    serialize_String(pzSpdu->pbySerializedNonSafetyData, uNonSafeSize, *ppBytes, expLen, sLen);
+    if ((*sLen) == expLen)
+    {
+        bResult = true;
 #ifdef UASDEF_DBG
-            LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduResponse Result is %u bytes long", (unsigned) (*sLen));
+LOG_Trace(LOG_DEBUG, "UAM_NS:EncodeSpduResponse Result is %u bytes long", (unsigned) (*sLen));
 #endif
-        }
-        else
-        {
+    }
+    else
+    {
 #ifdef UASDEF_DBG
-            LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduResponse for sending to PubSub layer (len = %u, exp = %u)",
-                      (unsigned) (*sLen), (unsigned) expLen);
+        LOG_Trace(LOG_WARN, "UAM_NS:Failed to EncodeSpduResponse for sending to PubSub layer (len = %u, exp = %u)",
+                (unsigned) (*sLen), (unsigned) expLen);
 #endif
-        }
     }
 
     return bResult;

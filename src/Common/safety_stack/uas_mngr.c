@@ -464,6 +464,13 @@ UAS_UInt8 byUAS_ExecuteSafetyProvider(UAS_UInt16 uInstanceIndex, UAS_UInt32 dwHa
             } /* if */
             else
             {
+#ifdef UASDEF_DBG
+
+    UASDEF_LOG_DEBUG("  byUAS_ExecuteSafetyProvider: Set error to UAS_STATE_ERR : bCommDone = %d, bAppDone=%d", pzInstanceData->bCommDone,
+            pzInstanceData->bAppDone);
+
+#endif /* UASDEF_DBG */
+
                 byRetVal = UAS_STATE_ERR;
             } /* else */
         }     /* else */

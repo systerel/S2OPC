@@ -33,7 +33,7 @@
  *===========================================================================*/
 
 /*===========================================================================*/
-void UAM_S_LIBS_MemZero(void* pAddr,  const UAS_UInt32 sLen)
+void UAM_S_LIBS_MemZero(void* pAddr,  const UAM_S_Size sLen)
 {
     memset (pAddr, 0, sLen);
     // TODO : to replace memset, we can do a loop with UINT32 filled to 0 and then filling last bytes with 0
@@ -41,7 +41,7 @@ void UAM_S_LIBS_MemZero(void* pAddr,  const UAS_UInt32 sLen)
 }
 
 /*===========================================================================*/
-void UAM_S_LIBS_MemCopy(void* pDest,  const void* pSource,  const UAS_UInt32 sLen)
+void UAM_S_LIBS_MemCopy(void* pDest,  const void* pSource,  const UAM_S_Size sLen)
 {
     memcpy (pDest, pSource, sLen);
     // TODO : memcpy,
@@ -104,7 +104,7 @@ void UAM_S_LIBS_HEAP_Init(UAM_LIBS_Heap_type* pzHeap)
 }
 
 /*===========================================================================*/
-void* UAM_S_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const UAS_UInt32 len)
+void* UAM_S_LIBS_HEAP_Malloc(UAM_LIBS_Heap_type* pzHeap, const UAM_S_Size len)
 {
     void* pResult = NULL;
     if (pzHeap != 0 && pzHeap->initialized &&
@@ -125,3 +125,83 @@ void UAM_S_LIBS_HEAP_Clear(UAM_LIBS_Heap_type* pzHeap)
         pzHeap->initialized = false;
     }
 }
+/*===========================================================================*/
+void UAM_S_LIBS_serialize_UInt32(const UAS_UInt32 uVal, UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos)
+{
+    UAS_UInt32* puTmp = (UAS_UInt32*) (&pData[*pPos]);
+    *pPos += sizeof(UAS_UInt32);
+
+    if (*pPos <= sLen)
+    {
+        (*puTmp) = UAM_S_LIBS_nothl(uVal);
+    }
+}
+
+/*===========================================================================*/
+void UAM_S_LIBS_serialize_UInt8(const UAS_UInt8 uVal, UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos)
+{
+    UAS_UInt8* puTmp = (UAS_UInt8*) (&pData[*pPos]);
+    *pPos += sizeof(UAS_UInt8);
+
+    if (*pPos <= sLen)
+    {
+        (*puTmp) = uVal;
+    }
+}
+
+/*===========================================================================*/
+void UAM_S_LIBS_serialize_String(const UAS_UInt8* pzVal,
+                             const UAM_S_Size sValLen,
+                             UAS_UInt8* pData,
+                             const UAM_S_Size sLen,
+                             UAM_S_Size* pPos)
+{
+    if (sValLen + (*pPos) <= sLen)
+    {
+        UAM_S_LIBS_MemCopy(&pData[*pPos], pzVal, sValLen);
+        *pPos += sValLen;
+    }
+}
+
+/*===========================================================================*/
+UAS_UInt32 UAM_S_LIBS_deserialize_UInt32(const UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos)
+{
+    const UAS_UInt32* puTmp = (const UAS_UInt32*) (&pData[*pPos]);
+    *pPos += sizeof(UAS_UInt32);
+
+    if (*pPos > sLen)
+    {
+        return 0;
+    }
+
+    return UAM_S_LIBS_nothl(*puTmp);
+}
+
+/*===========================================================================*/
+UAS_UInt8 UAM_S_LIBS_deserialize_UInt8(const UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos)
+{
+    const UAS_UInt8* puTmp = (const UAS_UInt8*) (&pData[*pPos]);
+    *pPos += sizeof(UAS_UInt8);
+
+    if (*pPos > sLen)
+    {
+        return 0;
+    }
+
+    return *puTmp;
+}
+
+/*===========================================================================*/
+void UAM_S_LIBS_deserialize_String(const UAS_UInt8* pData,
+                               const UAM_S_Size sLen,
+                               UAM_S_Size* pPos,
+                               UAS_UInt8* pDest,
+                               const UAM_S_Size sValLen)
+{
+    if (sValLen + *pPos <= sLen)
+    {
+        UAM_S_LIBS_MemCopy (pDest, pData, sValLen);
+    }
+    *pPos += sValLen;
+}
+

@@ -93,6 +93,22 @@ void UAM_S_LIBS_ExitFailure (const UAS_Int32 sCode);
         }\
     } while (0)
 
+/*===========================================================================*/
+void UAM_S_LIBS_serialize_UInt32(const UAS_UInt32 uVal, UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos);
+void UAM_S_LIBS_serialize_UInt8(const UAS_UInt8 uVal, UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos);
+void UAM_S_LIBS_serialize_String(const UAS_UInt8* pzVal,
+                             const UAM_S_Size sValLen,
+                             UAS_UInt8* pData,
+                             const UAM_S_Size sLen,
+                             UAM_S_Size* pPos);
+UAS_UInt32 UAM_S_LIBS_deserialize_UInt32(const UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos);
+UAS_UInt8 UAM_S_LIBS_deserialize_UInt8(const UAS_UInt8* pData, const UAM_S_Size sLen, UAM_S_Size* pPos);
+void UAM_S_LIBS_deserialize_String(const UAS_UInt8* pData,
+                               const UAM_S_Size sLen,
+                               UAM_S_Size* pPos,
+                               UAS_UInt8* pDest,
+                               const UAM_S_Size sValLen);
+
 
 // TODO : include somewhere in the build environment
 #define IS_LITTLE_ENDIAN

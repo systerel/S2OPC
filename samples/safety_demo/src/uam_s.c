@@ -65,6 +65,7 @@ typedef struct UAM_DynamicSafetyData_struct
 /*============================================================================
  * LOCAL VARIABLES
  *===========================================================================*/
+static UAM_S_LOG_LEVEL gLogLevel = UAM_S_LOG_ERROR;
 /**
  * Content of all Providers and Consumers configurations
  */
@@ -78,21 +79,188 @@ static UAM_DynamicSafetyData_type uamDynamicSafetyData = {.bInitialized = false,
 
 static UAM_LIBS_Heap_type zHeap;
 
+// TODO : make that variable configurable?
+#define UAS_ENCODING_BUFFER_SIZE ( (UAM_S_Size) 1500u)
+
+static UAS_Char aEncodingBuffer [UAS_ENCODING_BUFFER_SIZE];
+
 /*============================================================================
  * DECLARATION OF INTERNAL SERVICES
  *===========================================================================*/
-static void ExecuteSafetyProviders(void);
-static void ExecuteSafetyConsumers(void);
+static UAS_UInt8 ExecuteSafetyProviders(void);
+static UAS_UInt8 ExecuteSafetyConsumers(void);
+
 /**
  * \brief This method is called for each received message from NonSafe.
  */
-static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData, const UAS_UInt16 sReadLen);
+static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData, const UAM_S_Size sReadLen);
+
+/**
+ * Convert a SPDU response to a raw buffer.
+ */
+static void EncodeSpduReponse(void* pData, const UAM_S_Size sMaxLen, UAM_S_Size* psLen,
+        const UAM_SafetyConfiguration_type* pzConfig, const UAS_ResponseSpdu_type* pzResponse);
+
+/**
+ * Convert a SPDU Request to a raw buffer.
+ */
+static void EncodeSpduRequest(void* pData, const UAM_S_Size sMaxLen, UAM_S_Size* psLen, const UAS_RequestSpdu_type* pzRequest);
+
+/**
+ * \brief Implementation of SPDU Request decoding from raw buffer.
+ * \param pData A non-null pointer to the data
+ * \param sLen Length of pData
+ * \param[OUT] pzRequest non null pointer to the Request to decode. The data shall not be modified
+ *          in case of decoding error (typically, mismatching size)
+ */
+static void DecodeSpduRequest(const void* pData, UAM_S_Size sLen, UAS_RequestSpdu_type* pzRequest);
+
+/**
+ * \brief Implementation of SPDU Response decoding from raw buffer.
+ * \param pData A non-null pointer to the data
+ * \param sLen Length of pData
+ * \param pzConfig A non-null pointer to the Safety configuration of matching message.
+ * \param[OUT] pzResponse non null pointer to the Request to decode. The data shall not be modified
+ *          in case of decoding error (typically, mismatching size)
+ */
+static void DecodeSpduResponse(const void* pData, UAM_S_Size sLen, const UAM_SafetyConfiguration_type* pzConfig, UAS_ResponseSpdu_type* pzResponse);
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
-static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData, const UAS_UInt16 sReadLen)
+static void DecodeSpduRequest(const void* pData, UAM_S_Size sLen, UAS_RequestSpdu_type* pzRequest)
+{
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "DecodeSpduRequest-In");
+    // This function proceeds to the reverse decoding of EncodeSpduRequest() of NON-SAFE
+    UAM_S_LIBS_ASSERT (pData != NULL);
+    UAM_S_LIBS_ASSERT (pzRequest != NULL);
+
+    UAM_S_Size pos = 0;
+    const UAS_UInt8* pBytes = pData;
+    static const UAM_S_Size sExpectedLength = 9;
+
+    if (sExpectedLength == sLen)
+    {
+        pzRequest->dwSafetyConsumerId = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        pzRequest->dwMonitoringNumber = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        pzRequest->byFlags = UAM_S_LIBS_deserialize_UInt8(pBytes, sLen, &pos);
+        UAM_S_DoLog_UInt (UAM_S_LOG_DEBUG, "DecodeSpduRequest => decoding OK. Received len = ", sLen);
+        UAM_S_LIBS_ASSERT (pos == sLen);
+    }
+    else
+    {
+        UAM_S_DoLog_UInt (UAM_S_LOG_WARN, "Mismatching size in DecodeSpduRequest. Received len = ", sLen);
+    }
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "DecodeSpduRequest-Out");
+}
+
+
+/*===========================================================================*/
+static void DecodeSpduResponse(const void* pData, UAM_S_Size sLen, const UAM_SafetyConfiguration_type* pzConfig,
+        UAS_ResponseSpdu_type* pzResponse)
+{
+    // This function proceeds to the reverse decoding of EncodeSpduResponse()
+    UAM_S_LIBS_ASSERT (pData != NULL);
+    UAM_S_LIBS_ASSERT (pzConfig != NULL);
+    UAM_S_LIBS_ASSERT (pzResponse != NULL);
+    UAM_S_DoLog_UHex32(UAM_S_LOG_SEQUENCE, "DecodeSpduResponse-In, HDL = ", pzConfig->dwSessionId);
+
+    UAM_S_Size pos = 0;
+    const UAS_UInt8* pBytes = pData;
+    static const UAM_S_Size sStaticLength = 25u;
+    const UAM_S_Size sExpectedLength = sStaticLength + pzConfig->wNonSafetyDataLength + pzConfig->wSafetyDataLength;
+
+    if (sExpectedLength == sLen)
+    {
+        // de-serialize Safe data
+        UAM_S_LIBS_deserialize_String(pBytes, sLen, &pos, pzResponse->pbySerializedSafetyData, pzConfig->wSafetyDataLength);
+        // de-serialize byFlags
+        pzResponse->byFlags = UAM_S_LIBS_deserialize_UInt8(pBytes, sLen, &pos);
+        // de-serialize zSpduId
+        pzResponse->zSpduId.dwPart1 = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        pzResponse->zSpduId.dwPart2 = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        pzResponse->zSpduId.dwPart3 = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        // de-serialize dwSafetyConsumerId
+        pzResponse->dwSafetyConsumerId = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        // de-serialize dwMonitoringNumber
+        pzResponse->dwMonitoringNumber = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        // de-serialize dwCrc
+        pzResponse->dwCrc = UAM_S_LIBS_deserialize_UInt32(pBytes, sLen, &pos);
+        // de-serialize NonSafe data
+        UAM_S_LIBS_deserialize_String(pBytes, sLen, &pos, pzResponse->pbySerializedNonSafetyData, pzConfig->wNonSafetyDataLength);
+        UAM_S_LIBS_ASSERT (pos == sLen);
+
+        UAM_S_DoLog_UInt (UAM_S_LOG_DEBUG, "DecodeSpduRequest => decoding OK. Received len = ", sLen);
+    }
+    else
+    {
+        UAM_S_DoLog_UInt (UAM_S_LOG_WARN, "Mismatching size in DecodeSpduRequest. Received len = ", sLen);
+    }
+    UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "DecodeSpduResponse-Out");
+}
+
+/*===========================================================================*/
+static void EncodeSpduRequest(void* pData, const UAM_S_Size sMaxLen, UAM_S_Size* psLen, const UAS_RequestSpdu_type* pzRequest)
+{
+    if (psLen == NULL)
+    {
+        return;
+    }
+    *psLen = 0;
+    if (pzRequest == NULL || pData == NULL)
+    {
+        return;
+    }
+
+    static const size_t expLen = 9u;
+    UAM_S_LIBS_ASSERT (sMaxLen >- expLen && "Insufficient buffer size for EncodeSpduRequest");
+
+    UAM_S_LIBS_serialize_UInt32(pzRequest->dwSafetyConsumerId, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzRequest->dwMonitoringNumber, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt8(pzRequest->byFlags, pData, expLen, psLen);
+    UAM_S_DoLog_UInt(UAM_S_LOG_DEBUG, "EncodeSpduRequest len=", (unsigned) (*psLen));
+    UAM_S_LIBS_ASSERT ((*psLen) == expLen);
+
+    return;
+}
+
+/*===========================================================================*/
+static void EncodeSpduReponse(void* pData, const UAM_S_Size sMaxLen, UAM_S_Size* psLen,
+        const UAM_SafetyConfiguration_type* pzConfig, const UAS_ResponseSpdu_type* pzResponse)
+{
+    static const UAM_S_Size sStaticLength = 25u;
+    if (psLen == NULL)
+    {
+        return;
+    }
+    *psLen = 0;
+    if (pzResponse == NULL || pData == NULL)
+    {
+        return;
+    }
+
+    const size_t expLen = sStaticLength + pzConfig->wNonSafetyDataLength + pzConfig->wSafetyDataLength;
+    UAM_S_LIBS_ASSERT (sMaxLen >= expLen && "Insufficient buffer size for EncodeSpduRequest");
+
+    // SAFE data
+    UAM_S_LIBS_serialize_String(pzResponse->pbySerializedSafetyData, pzConfig->wSafetyDataLength, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt8(pzResponse->byFlags, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->zSpduId.dwPart1, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->zSpduId.dwPart2, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->zSpduId.dwPart3, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->dwSafetyConsumerId, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->dwMonitoringNumber, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_UInt32(pzResponse->dwCrc, pData, expLen, psLen);
+    UAM_S_LIBS_serialize_String(pzResponse->pbySerializedNonSafetyData, pzConfig->wNonSafetyDataLength, pData, expLen, psLen);
+    UAM_S_DoLog_UInt(UAM_S_LOG_DEBUG, "EncodeSpduReponse len=", (unsigned) (*psLen));
+    UAM_S_LIBS_ASSERT ((*psLen) == expLen);
+
+    return;
+}
+
+/*===========================================================================*/
+static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData, const UAM_S_Size sReadLen)
 {
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ReadSpduFromSlave-In");
 
@@ -110,10 +278,8 @@ static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData
 
         if (pzSafetyCfg->dwSessionId == dwSessionId)
         {
-            UAM_S_DoLog_UHex32(UAM_S_LOG_SEQUENCE, "UAM_S2NS_DecodeSpduRequest-In, HDL = ", dwSessionId);
             // For a provider the received SPDU is the REQUEST. Update buffer for UAS
-            UAM_S2NS_DecodeSpduRequest (pData, sReadLen, &pzProvider->zRequestSPDU);
-            UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S2NS_DecodeSpduRequest-Out");
+            DecodeSpduRequest (pData, sReadLen, &pzProvider->zRequestSPDU);
         }
     }
 
@@ -127,10 +293,8 @@ static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData
 
         if (pzSafetyCfg->dwSessionId == dwSessionId)
         {
-            UAM_S_DoLog_UHex32(UAM_S_LOG_SEQUENCE, "UAM_S2NS_DecodeSpduResponse-In, HDL = ", dwSessionId);
             // For a consumer the received SPDU is the RESPONSE. Update buffer for UAS
-            UAM_S2NS_DecodeSpduResponse (pData, sReadLen, pzSafetyCfg, &pzConsumer->zResponseSPDU);
-            UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S2NS_DecodeSpduResponse-Out");
+            DecodeSpduResponse (pData, sReadLen, pzSafetyCfg, &pzConsumer->zResponseSPDU);
         }
     }
 
@@ -143,12 +307,14 @@ static void ReadSpduFromSlave(const UAM_SessionId dwSessionId, const void* pData
  *===========================================================================*/
 
 /*===========================================================================*/
-void UAM_S_Initialize(void)
+void UAM_S_Initialize(const UAM_S_LOG_LEVEL initLogLevel)
 {
+    UAM_S_DoLog_UInt(UAM_S_LOG_DEFAULT, "Logs initialized with level :", initLogLevel);
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Initialize-In");
     UAM_S_LIBS_ASSERT(!uamDynamicSafetyData.bInitialized);
     UAS_UInt16 index = 0;
 
+    gLogLevel = initLogLevel;
     UAM_S_LIBS_HEAP_Init (&zHeap);
     UAM_S_LIBS_MemZero(azUAS_SafetyProviders, sizeof(azUAS_SafetyProviders));
     uamDynamicSafetyData.bNextProviderFreeHandle = 0;
@@ -324,15 +490,17 @@ UAS_UInt8 UAM_S_StartSafety(void)
 UAS_UInt8 UAM_S_Cycle(void)
 {
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Cycle-In");
-    UAS_UInt8 byRetVal = UAS_OK;
+    UAS_UInt8 byRetVal = UAS_SOFT_ERR;
     UAM_S_LIBS_ASSERT(uamDynamicSafetyData.bInitialized);
     UAM_S_LIBS_ASSERT(uamDynamicSafetyData.bLocked);
 
     UAM_S2NS_ReceiveAllSpdusFromNonSafe(&ReadSpduFromSlave);
 
-    ExecuteSafetyProviders();
-
-    ExecuteSafetyConsumers();
+    byRetVal = ExecuteSafetyProviders();
+    if (byRetVal == UAS_OK)
+    {
+        byRetVal = ExecuteSafetyConsumers();
+    }
 
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "UAM_S_Cycle-Out");
     return byRetVal;
@@ -389,108 +557,109 @@ void UAM_S_Clear(void)
 }
 
 /*===========================================================================*/
-static void ExecuteSafetyConsumers(void)
+static UAS_UInt8 ExecuteSafetyConsumers(void)
 {
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers-In");
     UAS_UInt8 byUasRetval = UAS_OK;
-    bool bStatus = true;
     UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextConsumerFreeHandle; wInstanceCount++)
     {
-        UAM_S_DoLog_UInt32(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers, Id=", wInstanceCount);
+        UAM_S_DoLog_UInt(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers, Id=", wInstanceCount);
         UAM_S_LIBS_ASSERT(NULL != uamDynamicSafetyData.apfConsumerCycle);
         UAS_SafetyConsumer_type* pzInstance = &azUAS_SafetyConsumers[wInstanceCount];
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azConsumerConfiguration[wInstanceCount];
 
         /* Get ResponseSPDU */
         // Note: reception of SPDU Response (in pzProvider->zResponsePDU) has already been performed in ReadSpduFromSlave()
-        pzInstance->bCommDone = 1u; // TODO : ensure if this has to be called only when a new message is received.
+        pzInstance->bCommDone = 1u;
 
         pzInstance->bAppDone =
             (*uamDynamicSafetyData.apfConsumerCycle)(pzConfig, &pzInstance->zOutputSAPI, &pzInstance->zInputSAPI);
 
         /* Execute SafetyConsumer */
-        if (bStatus)
+        if (byUasRetval == UAS_OK)
         {
             byUasRetval = byUAS_ExecuteSafetyConsumer(wInstanceCount, pzInstance->dwHandle);
-            if (UAS_OK == byUasRetval)
+            if (UAS_OK != byUasRetval)
             {
-            } /* if */
-            else
-            {
-                UAM_S_DoLog_UInt32(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyConsumer() failed for HDL = ", pzInstance->dwHandle);
+                UAM_S_DoLog_UInt(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyConsumer() failed for HDL = ", pzInstance->dwHandle);
                 UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyConsumer() code was = ", byUasRetval);
             }
         }
 
         /* Set RequestSPDU */
-        if (bStatus)
+        if (byUasRetval == UAS_OK)
         {
-            // TODO @ BEM : replace by REQUEST encoding and sending to NONSAFE
-            // status = UAM_SpduEncoder_SetRequest(pzConfig->dwRequestHandle, &pzInstance->zRequestSPDU);
-            if (bStatus)
+            UAM_S_Size sLen = 0;
+            EncodeSpduRequest(aEncodingBuffer, UAS_ENCODING_BUFFER_SIZE, &sLen, &pzInstance->zRequestSPDU);
+            if (sLen > 0)
             {
-                UAM_S_DoLog_UInt32(UAM_S_LOG_DEBUG, "UAM_SetRequestSPDU HDL =", pzInstance->dwHandle);
+                UAM_S2NS_SendSpduImpl (pzConfig->dwSessionId, aEncodingBuffer, sLen);
+                UAM_S_DoLog_UInt(UAM_S_LOG_DEBUG, "UAM_SetRequestSPDU HDL =", pzInstance->dwHandle);
                 UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SafetyConsumerId = ", pzInstance->zRequestSPDU.dwSafetyConsumerId);
                 UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   MonitoringNumber = ", pzInstance->zRequestSPDU.dwMonitoringNumber);
                 UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   Flags            = ", pzInstance->zRequestSPDU.byFlags);
             } /* if */
             else
             {
-                UAM_S_DoLog_UInt32(UAM_S_LOG_ERROR, "UAM_SetRequestSPDU() failed for HDL = ", pzInstance->dwHandle);
+                UAM_S_DoLog_UInt(UAM_S_LOG_ERROR, "UAM_SetRequestSPDU() failed for HDL = ", pzInstance->dwHandle);
             }
         }
     } /* for wNumberOfSafetyConsumers */
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyConsumers-Out");
+    return byUasRetval;
 }
 
 /*===========================================================================*/
-static void ExecuteSafetyProviders(void)
+static UAS_UInt8 ExecuteSafetyProviders(void)
 {
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders-In");
-    UAS_UInt8 byUasRetval;
-    bool bStatus = true;
+    UAS_UInt8 byUasRetval = UAS_OK;
     UAS_UInt16 wInstanceCount = 0u;
 
     for (wInstanceCount = 0u; wInstanceCount < uamDynamicSafetyData.bNextProviderFreeHandle; wInstanceCount++)
     {
-        UAM_S_DoLog_UInt32(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders, Id=", wInstanceCount);
+        UAM_S_DoLog_UInt(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders, Id=", wInstanceCount);
         UAM_S_LIBS_ASSERT(NULL != uamDynamicSafetyData.apfProviderCycle);
         UAS_SafetyProvider_type* pzInstance = &azUAS_SafetyProviders[wInstanceCount];
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azProviderConfiguration[wInstanceCount];
 
+        pzInstance->bCommDone = 1;
         /* Execute the application */
         pzInstance->bAppDone =
             (*uamDynamicSafetyData.apfProviderCycle)(pzConfig, &pzInstance->zOutputSAPI, &pzInstance->zInputSAPI);
         if (pzInstance->bAppDone != 1u)
         {
-            bStatus = false;
+            UAM_S_DoLog(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyProvider( ) Application cycle (apfProviderCycle) returned an error");
+            byUasRetval = UAS_SOFT_ERR;
         }
         // Note: reception of SPDU request (in pzProvider->zRequestSPDU) has already been performed in ReadSpduFromSlave()
-        pzInstance->bCommDone = 1; // TODO : ensure if this has to be set only in case of reception.
-
-        /* Execute SafetyProvider */
-        byUasRetval = byUAS_ExecuteSafetyProvider(wInstanceCount, pzInstance->dwHandle);
+        else
+        {
+            /* Execute SafetyProvider */
+            byUasRetval = byUAS_ExecuteSafetyProvider(wInstanceCount, pzInstance->dwHandle);
+        }
 
         if (UAS_OK == byUasRetval)
         {
-            UAM_S_DoLog_UInt32(UAM_S_LOG_DEBUG, "byUAS_ExecuteSafetyProvider() succeeded, HDL = ", pzInstance->dwHandle);
+            UAM_S_DoLog_UInt(UAM_S_LOG_DEBUG, "byUAS_ExecuteSafetyProvider() succeeded, HDL = ", pzInstance->dwHandle);
         } /* if */
         else
         {
-            UAM_S_DoLog_UInt32(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyProvider( ) HDL = ", pzInstance->dwHandle);
+            UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "byUAS_ExecuteSafetyProvider( ) RET = ", byUasRetval);
         }
 
         /* Set ResponseSPDU */
 
-        if (bStatus)
+        if (UAS_OK == byUasRetval)
         {
-            // TODO @ BEM : replace by RESPONSE encoding and sending to NONSAFE
-//            bStatus = UAM_SpduEncoder_SetResponse(pzConfig->dwResponseHandle, &pzInstance->zResponseSPDU);
-            if (bStatus)
+            UAM_S_Size sLen = 0;
+            EncodeSpduReponse (aEncodingBuffer, UAS_ENCODING_BUFFER_SIZE, &sLen, pzConfig, &pzInstance->zResponseSPDU);
+            if (sLen > 0)
             {
-                UAM_S_DoLog_UInt32(UAM_S_LOG_DEBUG, "UAM_SetResponseSPDU succeeded:", pzInstance->dwHandle);
+                UAM_S2NS_SendSpduImpl (pzConfig->dwSessionId, aEncodingBuffer, sLen);
+                UAM_S_DoLog_UInt(UAM_S_LOG_DEBUG, "UAM_SetResponseSPDU succeeded:", pzInstance->dwHandle);
 //                LOG_Data(LOG_DEBUG, "   SafetyData      ", pzInstance->wSafetyDataLength,
 //                         pzInstance->zResponseSPDU.pbySerializedSafetyData);
                 UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   Flags            = 0x%02X", pzInstance->zResponseSPDU.byFlags);
@@ -505,11 +674,12 @@ static void ExecuteSafetyProviders(void)
             }
             else
             {
-                UAM_S_DoLog_UInt32(UAM_S_LOG_ERROR, "UAM_SetResponseSPDU() failed for HDL = ", pzInstance->dwHandle);
+                UAM_S_DoLog_UInt(UAM_S_LOG_ERROR, "UAM_SetResponseSPDU() failed for HDL = ", pzInstance->dwHandle);
             }
         }
     } /* for wNumberOfSafetyProviders */
     UAM_S_DoLog(UAM_S_LOG_SEQUENCE, "ExecuteSafetyProviders-Out");
+    return byUasRetval;
 }
 
 /*===========================================================================*/
@@ -553,40 +723,43 @@ void UAM_S_DoLog(const UAM_S_LOG_LEVEL level, const char* txt)
     // TODO: use a channel to NON SAFE! Create a function UAM_S2NS_SendLogData (const char* ptext);
     // TODO : ensure the log limit size on each text line!
     // TOOD: should not  use either snprintf or such function!
-    printf("%s%s\n",log_prefix (level), txt);
+    if (txt != NULL && level <= gLogLevel)
+    {
+        printf("%s%s\n",log_prefix (level), txt);
+    }
 }
 
 /*===========================================================================*/
 void UAM_S_DoLog_UHex32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32)
 {
-    if (txt != NULL)
+    if (txt != NULL && level <= gLogLevel)
     {
         printf("%s%s:0x%08X\n",log_prefix (level), txt, (unsigned) u32);
     }
 }
 
 /*===========================================================================*/
-void UAM_S_DoLog_UInt32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt32 u32)
+void UAM_S_DoLog_UInt (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_UInt64 u64)
 {
-    if (txt != NULL)
+    if (txt != NULL && level <= gLogLevel)
     {
-        printf("%s%s:%u\n",log_prefix (level), txt, (unsigned) u32);
+        printf("%s%s:%lu\n",log_prefix (level), txt, (unsigned long) u64);
     }
 }
 
 /*===========================================================================*/
-void UAM_S_DoLog_Int32 (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_Int32 s32)
+void UAM_S_DoLog_Int (const UAM_S_LOG_LEVEL level, const char* txt, const UAS_Int64 s64)
 {
-    if (txt != NULL)
+    if (txt != NULL && level <= gLogLevel)
     {
-    printf("%s%s:%d\n",log_prefix (level), txt, (int) s32);
+    printf("%s%s:%ld\n",log_prefix (level), txt, (long int) s64);
     }
 }
 
 /*===========================================================================*/
 void UAM_S_DoLog_Text (const UAM_S_LOG_LEVEL level, const char* txt, const char* ptxt)
 {
-    if (txt != NULL)
+    if (txt != NULL && level <= gLogLevel)
     {
         printf("%s%s:%s\n",log_prefix (level), txt, (ptxt == NULL ? "NULL": ptxt) );
     }
@@ -594,7 +767,7 @@ void UAM_S_DoLog_Text (const UAM_S_LOG_LEVEL level, const char* txt, const char*
 /*===========================================================================*/
 void UAM_S_DoLog_Pointer (const UAM_S_LOG_LEVEL level, const char* txt, const void* pAddr)
 {
-    if (txt != NULL)
+    if (txt != NULL && level <= gLogLevel)
     {
         printf("%s%s:%p\n",log_prefix (level), txt, pAddr );
     }

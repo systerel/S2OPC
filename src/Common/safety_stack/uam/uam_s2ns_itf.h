@@ -53,7 +53,7 @@
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
-typedef void (*UAM_S2NS_SpduReceptionEvent) (const UAM_SessionId dwSessionId, const void* pData, UAS_UInt16 sLen);
+typedef void (*UAM_S2NS_SpduReceptionEvent) (const UAM_SessionId dwSessionId, const void* pData, UAM_S_Size sLen);
 
 /*============================================================================
  * EXPORTED CONSTANTS
@@ -81,7 +81,7 @@ void UAM_S2NS_InitializeSpdu (const UAM_SessionId dwSessionId);
  * \param pData The data to be sent. Shall point to at least sLen bytes.
  * \param sLen The data length
  */
-void UAM_S2NS_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pData, const UAS_UInt16 sLen);
+void UAM_S2NS_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pData, const UAM_S_Size sLen);
 
 /**
  * \brief Implementation of SPDUs reception on Safe from Non-Safe partition.
@@ -89,25 +89,6 @@ void UAM_S2NS_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pD
  * \param pfMessageProcess The function to call for each received message.
  */
 void UAM_S2NS_ReceiveAllSpdusFromNonSafe(UAM_S2NS_SpduReceptionEvent pfMessageProcess);
-
-/**
- * \brief Implementation of SPDU Request decoding from raw buffer.
- * \param pData A non-null pointer to the data
- * \param sLen Length of pData
- * \param[OUT] pzRequest non null pointer to the Request to decode. The data shall not be modified
- *          in case of decoding error (typically, mismatching size)
- */
-void UAM_S2NS_DecodeSpduRequest(const void* pData, UAS_UInt16 sLen, UAS_RequestSpdu_type* pzRequest);
-
-/**
- * \brief Implementation of SPDU Response decoding from raw buffer.
- * \param pData A non-null pointer to the data
- * \param sLen Length of pData
- * \param pzConfig A non-null pointer to the Safety configuration of matching message.
- * \param[OUT] pzResponse non null pointer to the Request to decode. The data shall not be modified
- *          in case of decoding error (typically, mismatching size)
- */
-void UAM_S2NS_DecodeSpduResponse(const void* pData, UAS_UInt16 sLen, const UAM_SafetyConfiguration_type* pzConfig, UAS_ResponseSpdu_type* pzResponse);
 
 /**
  * \brief Will be called once  on cleanup.

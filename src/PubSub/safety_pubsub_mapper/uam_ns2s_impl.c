@@ -173,7 +173,7 @@ bool UAM_NS2S_Initialize(const UAM_SessionId dwSessionId)
     pFiles->zSAddrTo.sin_port = htons(iPortNS2S);
     pFiles->zSAddrTo.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    if (pFiles->hSocketWriteNS2S > 0 && pFiles->hSocketWriteS2NS)
+    if (pFiles->hSocketWriteNS2S > 0 && pFiles->hSocketWriteS2NS > 0)
     {
         // Bind read socket to input port.
         static const int trueInt = true;

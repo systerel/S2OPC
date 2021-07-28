@@ -23,6 +23,9 @@
 
 /**
  * \file This is the main program of the safe producer. This will probably be a single-threaded application
+ * \usage
+ *  optional parameter: v<X> to set verbose level of UAM/APP modules to X (0 = No logs  to 5 = verbooooose)
+ *  optional parameter: V<X> to set verbose level of UAS module to X (0 = No logs  to 5 = verbooooose)
  */
 
 /*============================================================================
@@ -129,7 +132,7 @@ typedef struct
  * LOCAL PROTOTYPES
  *===========================================================================*/
 static void signal_stop_server(int sig);
-static void prod_s_init(void);
+static void prod_s_init(int argc, char* argv[]);
 static void prod_s_cycle(void);
 static void prod_s_stop(void);
 
@@ -145,7 +148,7 @@ static prod_s_interactive_Context gContext;
 static void signal_stop_server(int sig)
 {
     (void) sig;
-    UAM_S_DoLog_Int32 (UAM_S_LOG_ERROR, "Trapped signal :", sig);
+    UAM_S_DoLog_Int (UAM_S_LOG_DEFAULT, "Trapped signal :", sig);
     if (gContext.stopSignal != 0)
     {
         exit(1);
@@ -233,28 +236,16 @@ static void prod_s_interactive_cycle(void)
  */
 
 /*===========================================================================*/
-static void prod_s_initialize_logs(void)
-{
-    if (SOPC_STATUS_OK == g_status)
-    {
-        // TODO : a special feature for SAFE log may have to be imagined
-        // E.g: throwing logs over or any channel to Non safe, so that they can be
-        // processed real-time by NonSafe
-        // See UAM_S_DoLog
-    }
-}
-
-/*===========================================================================*/
-static void prod_s_initialize_uam(void)
+static void prod_s_initialize_uam(UAM_S_LOG_LEVEL initLogLevel)
 {
     UAS_UInt8 uResult;
     // TODO : use safetyDemo application (see main.c) to see how the non-splitted implementation is realized.
-    UAM_S_Initialize();
+    UAM_S_Initialize(initLogLevel);
 
     uResult = UAM_S_InitSafetyProvider (&yInstanceConfigSample1, &SPI1P_Sample, &fProvider1SampleCycle, &hProviderHandle);
     if (UAS_OK == uResult)
     {
-        UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "UAM_S_InitSafetyProvider Succeeded for HDL : ", hProviderHandle);
+        UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "UAM_S_InitSafetyProvider Succeeded for HDL : ", hProviderHandle);
 
     }
     else
@@ -270,7 +261,7 @@ static void prod_s_initialize_uam(void)
         uResult = UAM_S_StartSafety();
         if (UAS_OK == uResult)
         {
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "UAM_S_StartSafety Succeeded for HDL : ", hProviderHandle);
+            UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "UAM_S_StartSafety Succeeded for HDL : ", hProviderHandle);
 
         }
         else
@@ -282,13 +273,34 @@ static void prod_s_initialize_uam(void)
 }
 
 /*===========================================================================*/
-static void prod_s_init(void)
+static void prod_s_init(int argc, char* argv[])
 {
+    UAM_S_LOG_LEVEL initLogLevel = UAM_S_LOG_WARN;
+    LOG_LEVEL uasLogLevel = LOG_WARN;
+    for (int argp = 1 ; argp < argc; argp++)
+    {
+        const char c = argv[argp][0];
+        if (c == 'v')
+        {
+            initLogLevel = (UAM_S_LOG_LEVEL) atoi(&argv[argp][1]);
+        }
+        else if (c == 'V')
+        {
+            uasLogLevel = (LOG_LEVEL) atoi(&argv[argp][1]);
+        }
+        else
+        {
+            UAM_S_DoLog(UAM_S_LOG_DEFAULT, "Usage: ./prod_s [vX]");
+            UAM_S_DoLog(UAM_S_LOG_DEFAULT, "Options:");
+            UAM_S_DoLog(UAM_S_LOG_DEFAULT, "  optional parameter: v<X> to set verbose level of UAM/APP modules to X (0 = No logs  to 5 = verbooooose)");
+            UAM_S_DoLog(UAM_S_LOG_DEFAULT, "  optional parameter: V<X> to set verbose level of UAS module to X (0 = No logs  to 5 = verbooooose)");
+        }
+    }
+
     if (g_status == SOPC_STATUS_OK)
     {
-        prod_s_initialize_logs();
-
-        prod_s_initialize_uam();
+        prod_s_initialize_uam(initLogLevel);
+        LOG_SetLevel((LOG_LEVEL)uasLogLevel);
     }
 }
 
@@ -316,7 +328,7 @@ static void prod_s_cycle(void)
         if (UAS_OK != uResult)
         {
             UAM_S_DoLog_UHex32(UAM_S_LOG_ERROR, "Fatal error: UAM_S_Cycle failed with code : ", uResult);
-            signal_stop_server(0);
+            gContext.stopSignal = 1;
         }
     }
 }
@@ -326,15 +338,16 @@ int main(int argc, char* argv[])
 {
     (void)argc;
     (void)argv;
-    static const unsigned cycleMs = 1000;
+    static const unsigned cycleMs = 50;
     gContext.stopSignal = 0;
 
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
     signal(SIGTERM, signal_stop_server);
 
-    prod_s_init();
+    prod_s_init(argc, argv);
 
+    UAM_S_DoLog(UAM_S_LOG_DEFAULT, "End of Initialization. Starting Cyclic treatment");
     // Wait for a signal
     while (0 == gContext.stopSignal)
     {
