@@ -39,61 +39,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "uam_ns_spduEncoders.h"
-
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_dict.h"
-#include "sopc_pub_source_variable.h"
-#include "sopc_pubsub_conf.h"
-#include "sopc_sub_target_variable.h"
 #include "sopc_threads.h"
+
+#include "uas.h"
 
 /*============================================================================
  * EXTERNAL TYPES
  *===========================================================================*/
-typedef struct
-{
-    const char* signing_key;
-    const char* encryption_key;
-    const char* nonce;
-} SafetyDemo_interactive_SKS_Params;
-
-typedef struct
-{
-    bool isProvider;
-    SOPC_Dict* pCache;
-    SafetyDemo_interactive_SKS_Params sks;
-    SOPC_PubSubConfiguration* pConfig;
-    volatile sig_atomic_t stopSignal;
-    SOPC_PubSourceVariableConfig* sourceConfig;
-    SOPC_SubTargetVariableConfig* targetConfig;
-    UAM_SpduRequestHandle spduRequestId;
-    UAM_SpduResponseHandle spduResponseId;
-} SafetyDemo_interactive_Context;
+typedef bool (*pfUtils_Interactive_Event)(const char* params, void* pUserParam);
 
 /*============================================================================
- * EXTERNAL SERVICES
+ * EXTERNAL SERVICES - INTERACTIVE
  *===========================================================================*/
 /**
  * \brief initialize the interactive session.
- * \param pContext The applicative context
  */
-void SafetyDemo_Interactive_Initialize(SafetyDemo_interactive_Context* pContext);
+void Utils_Interactive_Initialize(void);
 
 /**
  * \brief Clean-up the interactive session.
  */
-void SafetyDemo_Interactive_Clear(void);
+void Utils_Interactive_Clear(void);
+
+/**
+ * \brief Register an interactive command
+ * \param key The command key trigerring a call to pfEvent
+ * \param pfEvent the event to call
+ * \param pDescr A short human-readable description of the function
+ * \param pUserParam A user defined pointer that will be passed to pfUtils_Interactive_Event
+ */
+void Utils_Interactive_AddCallback(const char key, const char* pDescr, pfUtils_Interactive_Event pfEvent, void* pUserParam);
 
 /**
  * \brief Force a full refresh of the display
  */
-void SafetyDemo_Interactive_ForceRefresh(void);
+void Utils_Interactive_ForceRefresh(void);
+
+/***
+ * Show basic helpd.
+ */
+void Utils_Interactive_printHelp(void);
 
 /***
  * The user_interactive thread.
  */
-void SafetyDemo_Interactive_execute(SafetyDemo_interactive_Context* pContext);
+void Utils_Interactive_execute(void);
 
+
+/*============================================================================
+ * EXTERNAL SERVICES - DISPLAY
+ *===========================================================================*/
+void Utils_Interactive_displayPushPosition(void);
+void Utils_Interactive_displayPopPosition(void);
+
+void Utils_Interactive_displayClearEOL(void);
+void Utils_Interactive_displaySetCursorLocation(const UAS_UInt32 x, const UAS_UInt32 y);
+void Utils_Interactive_displayClearScreen(void);
 #endif /* SOPC_SAFETY_DEMO_INTERACTIVE_H_ */

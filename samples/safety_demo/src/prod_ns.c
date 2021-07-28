@@ -54,7 +54,7 @@
 #include "sopc_threads.h"
 //
 #include "config.h"
-//#include "interactive.h"
+#include "interactive.h"
 #include "safetyDemo.h"
 
 #include "uas_logitf.h"
@@ -74,6 +74,7 @@ typedef struct
     SOPC_Dict* pCache;
     volatile sig_atomic_t stopSignal;
     UAM_SessionId sessionId;
+    bool bBlock;
 } ProdNS_Demo_interactive_Context;
 
 /*============================================================================
@@ -84,6 +85,9 @@ static int prod_ns_help(const char* argv0);
 static void prod_ns_init(void);
 static void prod_ns_cycle(void);
 static void prod_ns_stop(void);
+
+static bool pfOnQuitEvent (const char* params, void* pUserParam);
+static bool pfOnPubSubBlockUnblock (const char* params, void* pUserParam);
 
 /*============================================================================
  * LOCAL VARIABLES
@@ -107,6 +111,25 @@ static void signal_stop_server(int sig)
     {
         g_context.stopSignal = 1;
     }
+}
+
+/*===========================================================================*/
+static bool pfOnQuitEvent (const char* params, void* pUserParam)
+{
+    (void)params;
+    (void)pUserParam;
+    g_context.stopSignal = 1 ;
+    return true;
+}
+
+/*===========================================================================*/
+static bool pfOnPubSubBlockUnblock (const char* params, void* pUserParam)
+{
+    (void)params;
+    (void)pUserParam;
+    g_context.bBlock = !g_context.bBlock;
+    printf("Current Blocked status: %d\n", g_context.bBlock);
+    return true;
 }
 
 /**
@@ -217,11 +240,17 @@ static int prod_ns_help(const char* argv0)
     return -1;
 }
 
+
 /*===========================================================================*/
 static void prod_ns_init(void)
 {
+
     if (g_status == SOPC_STATUS_OK)
     {
+        Utils_Interactive_Initialize();
+        Utils_Interactive_AddCallback ('q', "Quit", &pfOnQuitEvent, NULL);
+        Utils_Interactive_AddCallback ('b', "Block/Unblock PubSub communication", &pfOnPubSubBlockUnblock, NULL);
+
         prod_ns_initialize_logs();
 
         prod_ns_initialize_sks();
@@ -241,7 +270,10 @@ static void* prod_ns_threadImpl (void* arg)
     while (SOPC_STATUS_OK == g_status && 0 == g_context.stopSignal)
     {
         static const uint32_t msCycle = 50;
-        prod_ns_cycle();
+        if (!g_context.bBlock )
+        {
+            prod_ns_cycle();
+        }
 
         // Wait for next cycle
         SOPC_Sleep(msCycle);
@@ -254,7 +286,7 @@ static void* prod_ns_threadImpl (void* arg)
 static void prod_ns_stop(void)
 {
     // TODO stop cleany everything
-
+    Utils_Interactive_Clear();
     UAM_NS_Impl_Clear();
     UAM_NS_Clear();
     printf("# EXITING (code =%02X)\n", g_status);
@@ -272,73 +304,11 @@ static void prod_ns_cycle(void)
 }
 
 
-/*===========================================================================*/
-/*===========================================================================*/
-// TODO : move that "interactive" part in a new  file
-#include <sys/ioctl.h>
-#include "sopc_raw_sockets.h"
-#include <unistd.h>
-#define STDIN 0
-#define USER_ENTRY_MAXSIZE (128u)
-
-/*===========================================================================*/
-static bool prod_ns_interactive_processCommand (const char* cmd)
-{
-    switch (cmd[0])
-    {
-        case 'q':
-            g_context.stopSignal = 1;
-            return true;
-            break;
-        default:
-            break;
-    }
-    return false;
-}
 
 /*===========================================================================*/
 static void prod_ns_interactive_cycle(void)
 {
-    if (g_status == SOPC_STATUS_OK)
-    {
-        SOPC_SocketSet fdSet;
-        int maxfd = STDIN;
-        int result = 0;
-        ssize_t nbRead = 0;
-
-        struct timeval* ptv = NULL;
-    #define WAIT_MS 10 * 1000
-    #if WAIT_MS > 0
-        struct timeval tv;
-        tv.tv_sec = WAIT_MS / (1000 * 1000);
-        tv.tv_usec = WAIT_MS % (1000 * 1000);
-        ptv = &tv;
-    #endif
-        char entry[USER_ENTRY_MAXSIZE];
-
-        SOPC_SocketSet_Clear(&fdSet);
-        SOPC_SocketSet_Add(STDIN, &fdSet);
-
-        result = select(maxfd + 1, &fdSet.set, NULL, NULL, ptv);
-        if (result < 0)
-        {
-            printf("SELECT failed: %d\n", result);
-            g_context.stopSignal = 1;
-        }
-        else if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
-        {
-            nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);
-            while (nbRead > 0 && entry[nbRead - 1] < ' ')
-            {
-                entry[nbRead - 1] = 0;
-                nbRead--;
-            }
-            if (nbRead > 0)
-            {
-                prod_ns_interactive_processCommand(entry);
-            }
-        }
-    }
+    Utils_Interactive_execute();
 }
 
 
@@ -351,6 +321,7 @@ int main(int argc, char* argv[])
     }
 
     g_context.stopSignal = 0;
+    g_context.bBlock = false;
 
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);

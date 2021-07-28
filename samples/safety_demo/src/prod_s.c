@@ -307,7 +307,7 @@ static void prod_s_init(int argc, char* argv[])
 /*===========================================================================*/
 static void prod_s_stop(void)
 {
-    // TODO stop cleany everything. USE LIBASAN ?
+    // TODO stop cleany everything. Use LIBASAN to check memeory leaks?
 
     UAM_S_Clear();
     UAM_S_DoLog_UHex32(UAM_S_LOG_INFO, "# EXITING ; code = ", g_status);

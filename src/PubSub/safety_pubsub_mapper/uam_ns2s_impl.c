@@ -258,7 +258,6 @@ void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionId dwSessionId, void* pData, size
     if (iNbRead > 0)
     {
         *sReadLen = (size_t) iNbRead;
-        printf("UAM_NS2S_ReceiveSpduImpl:Rcvd %u bytes\n", (unsigned) iNbRead); // TODO
     }
 }
 

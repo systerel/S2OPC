@@ -19,6 +19,7 @@ find_package(s2opc)
 if(ENABLE_SAMPLES)
   # Demo NonSafe Producer
   add_executable(prod_ns "src/prod_ns.c"
+                        "src/interactive.c"
                         )
 
   target_compile_options(prod_ns PRIVATE ${S2OPC_COMPILER_FLAGS})
