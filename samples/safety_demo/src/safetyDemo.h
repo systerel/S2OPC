@@ -56,7 +56,7 @@ typedef struct
 } SafetyDemo_Sample_NonSafe1_type;
 
 /* Session Id for UAM */
-#define SAMPLE1_SESSION_UAM_ID ((UAM_SessionHandle) 0x010203u)
+#define SAMPLE1_SESSION_UAM_ID ((UAM_SessionId) 0x010203u)
 
 #define SAMPLE1_SAFETY_DATA_LEN (sizeof(SafetyDemo_Sample_Safe1_type))
 #define SAMPLE1_UNSAFE_DATA_LEN (sizeof(SafetyDemo_Sample_NonSafe1_type))

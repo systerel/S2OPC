@@ -83,7 +83,7 @@ static UAM_LIBS_Heap_type zHeap;
  * DECLARATION OF INTERNAL SERVICES
  *===========================================================================*/
 /**
- * Read the SPDURequest received on a provider and copy it to pzProvider->zRequestSPDU
+ * Read the SPDURequest received on a provider from the NON-SAFE and copy it to pzProvider->zRequestSPDU
  * \param[inout] pzProvider A non-NULL pointer to a provider configuration.
  *          Reads dwRequestHandle to get the SPDU content and updates zRequestSPDU
  */
@@ -91,31 +91,35 @@ static bool Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider);
 
 static void ExecuteSafetyProviders(void);
 static void ExecuteSafetyConsumers(void);
+static void ReadSpduFromSlave(void);
 
 /*============================================================================
  * IMPLEMENTATION OF INTERNAL SERVICES
  *===========================================================================*/
+/*===========================================================================*/
+static void ReadSpduFromSlave(void)
+{
+
+}
+
+/*===========================================================================*/
 static bool Get_SPDU_Request(UAS_SafetyProvider_type* pzProvider)
  {
      assert(NULL != pzProvider);
      assert(pzProvider->dwHandle < UASDEF_MAX_SAFETYPROVIDERS);
      bool bResult = false;
-     // TODO @BEM : replace UAM_SpduEncoder by request received from NON SAFE
-     /* const UAM_SafetyConfiguration_type* pzSafetyCfg =
-         &uamDynamicSafetyData.azProviderConfiguration[pzProvider->dwHandle];
-     UAS_RequestSpdu_type zSpdu;
-
-     bResult = UAM_SpduEncoder_GetRequest(pzSafetyCfg->dwRequestHandle, &zSpdu);
-     if (bResult == SOPC_STATUS_OK)
+     // TODO DELETE
+     const UAM_S_pfProviderApplicationCycle* pzDynData = uamDynamicSafetyData.apfProviderCycle[pzProvider->dwHandle];
+     if (pzDynData == NULL)
      {
-         pzProvider->zRequestSPDU = zSpdu;
-
-         bResult = SOPC_STATUS_OK;
-     }*/
+         UAM_S_DoLog_UInt32 (UAM_S_LOG_ERROR, "Get_SPDU_Request called with unknown HDL :", pzProvider->dwHandle);
+         return false;
+     }
 
      const UAM_SafetyConfiguration_type* pzSafetyCfg =
               &uamDynamicSafetyData.azProviderConfiguration[pzProvider->dwHandle];
      UAS_RequestSpdu_type zSpdu;
+
      bResult = UAM_SpduEncoder_GetRequest(pzSafetyCfg->dwRequestHandle, &zSpdu);
      if (bResult == SOPC_STATUS_OK)
      {
@@ -137,14 +141,12 @@ static bool Get_SPDU_Response(UAS_SafetyConsumer_type* pzConsumer,
     bool bResult = false;
     (void)puSafeSize;
     (void)puNonSafeSize;
-    // TODO @BEM : replace UAM_SpduEncoder_GetResponse by response received from NON SAFE
-    /*
+    // TODO DELETE
     const UAM_SafetyConfiguration_type* pzSafetyCfg =
         &uamDynamicSafetyData.azConsumerConfiguration[pzConsumer->dwHandle];
 
     bResult = UAM_SpduEncoder_GetResponse(pzSafetyCfg->dwResponseHandle, &pzConsumer->zResponseSPDU, puSafeSize,
                                           puNonSafeSize);
-*/
     return bResult;
 }
 
@@ -325,6 +327,8 @@ UAS_UInt8 UAM_S_Cycle(void)
     assert(uamDynamicSafetyData.bInitialized);
     assert(uamDynamicSafetyData.bLocked);
 
+    ReadSpduFromSlave();
+
     ExecuteSafetyProviders();
 
     ExecuteSafetyConsumers();
@@ -392,28 +396,8 @@ static void ExecuteSafetyConsumers(void)
         UAM_SafetyConfiguration_type* pzConfig = &uamDynamicSafetyData.azConsumerConfiguration[wInstanceCount];
 
         /* Get ResponseSPDU */
-        bStatus = Get_SPDU_Response(pzInstance, NULL, NULL);
-        if (bStatus)
-        {
-            UAM_S_DoLog_UInt32(UAM_S_LOG_WARN, "Get_SPDU_Response failed for Consumer #\n", wInstanceCount);
-        }
-        else
-        {
-            UAM_S_DoLog_UInt32(UAM_S_LOG_INFO, "Get_SPDU_Response succeeded HDL=:", pzInstance->dwHandle);
-//            LOG_Data(LOG_DEBUG, "   SafetyData      ", pzInstance->wSafetyDataLength,
-//                     pzInstance->zResponseSPDU.pbySerializedSafetyData);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   Flags            = ", pzInstance->zResponseSPDU.byFlags);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SpduId1          = ", pzInstance->zResponseSPDU.zSpduId.dwPart1);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SpduId2          = ", pzInstance->zResponseSPDU.zSpduId.dwPart2);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SpduId3          = ", pzInstance->zResponseSPDU.zSpduId.dwPart3);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SafetyConsumerId = ", pzInstance->zResponseSPDU.dwSafetyConsumerId);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   MonitoringNumber = ", pzInstance->zResponseSPDU.dwMonitoringNumber);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   Crc              = ", pzInstance->zResponseSPDU.dwCrc);
-//            LOG_Trace(LOG_DEBUG, "   NonSafetyData    =");
-//            LOG_Data(LOG_DEBUG, "   NonSafetyData   ", pzInstance->wNonSafetyDataLength,
-//                     pzInstance->zResponseSPDU.pbySerializedNonSafetyData);
-        }
-        pzInstance->bCommDone = 1u;
+        // Note: reception of SPDU Response (in pzProvider->zResponsePDU) has already been performed in ReadSpduFromSlave()
+        pzInstance->bCommDone = 1u; // TODO : ensure if this has to be called only when a new message is received.
 
         pzInstance->bAppDone =
             (*uamDynamicSafetyData.apfConsumerCycle)(pzConfig, &pzInstance->zOutputSAPI, &pzInstance->zInputSAPI);
@@ -472,19 +456,8 @@ static void ExecuteSafetyProviders(void)
         {
             bStatus = false;
         }
-        bStatus = Get_SPDU_Request(pzInstance);
-        if (bStatus)
-        {
-            UAM_S_DoLog_UInt32(UAM_S_LOG_WARN, "Get_SPDU_Request failed for Provider #\n", wInstanceCount);
-        }
-        else
-        {
-            pzInstance->bCommDone = 1;
-            UAM_S_DoLog_UInt32(UAM_S_LOG_INFO, "Get_SPDU_Request succeeded for HDL:", pzInstance->dwHandle);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   SafetyConsumerId = ", pzInstance->zRequestSPDU.dwSafetyConsumerId);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   MonitoringNumber = ", pzInstance->zRequestSPDU.dwMonitoringNumber);
-            UAM_S_DoLog_UHex32(UAM_S_LOG_DEBUG, "   Flags            = ", pzInstance->zRequestSPDU.byFlags);
-        }
+        // Note: reception of SPDU request (in pzProvider->zRequestSPDU) has already been performed in ReadSpduFromSlave()
+        pzInstance->bCommDone = 1; // TODO : ensure if this has to be set only in case of reception.
 
         /* Execute SafetyProvider */
         byUasRetval = byUAS_ExecuteSafetyProvider(wInstanceCount, pzInstance->dwHandle);

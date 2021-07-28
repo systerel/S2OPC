@@ -73,7 +73,7 @@ typedef struct
  * LOCAL VARIABLES
  *===========================================================================*/
 /**
- * A dictionary object { UAM_SessionHandle : UAM_NS2S_FifosFles_type* }
+ * A dictionary object { UAM_SessionId : UAM_NS2S_FifosFles_type* }
  */
 static SOPC_Dict* gFifos = NULL;
 static const UAS_UInt16 iPortNS2S = 8888u;
@@ -104,7 +104,7 @@ static void fifoFilesFree(void* data)
 /*===========================================================================*/
 static uint64_t fifo_KeyHash_Fct(const void* pKey)
 {
-    return (const UAM_SessionHandle)(const UAS_INVERSE_PTR) pKey;
+    return (const UAM_SessionId)(const UAS_INVERSE_PTR) pKey;
 }
 
 /*===========================================================================*/
@@ -114,7 +114,7 @@ static bool fifo_KeyEqual_Fct(const void* a, const void* b)
 }
 
 /*===========================================================================*/
-static UAM_NS2S_Impl_type* fifo_Get(const UAM_SessionHandle key)
+static UAM_NS2S_Impl_type* fifo_Get(const UAM_SessionId key)
 {
     if (gFifos == NULL)
     {
@@ -124,7 +124,7 @@ static UAM_NS2S_Impl_type* fifo_Get(const UAM_SessionHandle key)
 }
 
 /*===========================================================================*/
-static HANDLE socket_Create(const UAM_SessionHandle dwHandle)
+static HANDLE socket_Create(const UAM_SessionId dwSessionId)
 {
     HANDLE iHandle = 0;
     int iResult = 0;
@@ -132,7 +132,7 @@ static HANDLE socket_Create(const UAM_SessionHandle dwHandle)
     const HANDLE hSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     // Ensure the handle is not already used!
-    UAM_NS2S_Impl_type* pzPrevHandle = fifo_Get(dwHandle);
+    UAM_NS2S_Impl_type* pzPrevHandle = fifo_Get(dwSessionId);
     if (pzPrevHandle == 0 && hSock >= 0)
     {
         if (iResult == 0)
@@ -147,13 +147,13 @@ static HANDLE socket_Create(const UAM_SessionHandle dwHandle)
  * IMPLEMENTATION OF EXTERNAL SERVICES
  *===========================================================================*/
 /*===========================================================================*/
-bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
+bool UAM_NS2S_Initialize(const UAM_SessionId dwSessionId)
 {
 #ifdef UASDEF_DBG
-    LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize (%u)", (unsigned) dwHandle);
+    LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize (%u)", (unsigned) dwSessionId);
 #endif
     bool bResult = false;
-    void* key = (void*) (UAS_INVERSE_PTR) dwHandle;
+    void* key = (void*) (UAS_INVERSE_PTR) dwSessionId;
 
     if (gFifos == NULL)
     {
@@ -164,8 +164,8 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
     UAM_NS2S_Impl_type* pFiles = (UAM_NS2S_Impl_type*) SOPC_Malloc(sizeof(*pFiles));
     assert(pFiles != NULL);
 
-    pFiles->hSocketWriteNS2S = socket_Create(dwHandle);
-    pFiles->hSocketWriteS2NS = socket_Create(dwHandle);
+    pFiles->hSocketWriteNS2S = socket_Create(dwSessionId);
+    pFiles->hSocketWriteS2NS = socket_Create(dwSessionId);
 
     memset((char*) &pFiles->zSAddrTo, 0, sizeof(pFiles->zSAddrTo));
 
@@ -201,7 +201,7 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
         else
         {
 #ifdef UASDEF_DBG
-            LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize bound HDL=%d to port %u", (int) dwHandle, (unsigned) iPortS2NS);
+            LOG_Trace(LOG_DEBUG, "UAM_NS2S_Initialize bound HDL=%d to port %u", (int) dwSessionId, (unsigned) iPortS2NS);
 #endif
             bResult = SOPC_Dict_Insert(gFifos, key, (void*) pFiles);
         }
@@ -211,11 +211,11 @@ bool UAM_NS2S_Initialize(const UAM_SessionHandle dwHandle)
 }
 
 /*===========================================================================*/
-void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen)
+void UAM_NS2S_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pData, const size_t sLen)
 {
-    assert(dwHandle == 0x010203u); // TODO remove, just for POC
+    assert(dwSessionId == 0x010203u); // TODO remove, just for POC
     ssize_t iNbWritten = 0;
-    UAM_NS2S_Impl_type* pzFifos = fifo_Get(dwHandle);
+    UAM_NS2S_Impl_type* pzFifos = fifo_Get(dwSessionId);
     if (pData == NULL || sLen == 0 || pzFifos == NULL)
     {
         return;
@@ -233,11 +233,11 @@ void UAM_NS2S_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const p
 }
 
 /*===========================================================================*/
-void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen)
+void UAM_NS2S_ReceiveSpduImpl(const UAM_SessionId dwSessionId, void* pData, size_t sMaxLen, size_t* sReadLen)
 {
-    assert(dwHandle == 0x010203u); // TODO remove, just for POC
+    assert(dwSessionId == 0x010203u); // TODO remove, just for POC
     ssize_t iNbRead = 0;
-    UAM_NS2S_Impl_type* pzFifos = fifo_Get(dwHandle);
+    UAM_NS2S_Impl_type* pzFifos = fifo_Get(dwSessionId);
 
     if (pData == NULL || sReadLen == NULL || pzFifos == NULL)
     {

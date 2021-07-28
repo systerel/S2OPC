@@ -68,7 +68,7 @@ typedef struct UAM_NS_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
     /** Session handle. */
-    UAM_SessionHandle dwHandle;
+    UAM_SessionId dwSessionId;
     bool bIsProvider;
     /** User-parameters */
     UAM_SpduRequestHandle uUserRequestId;
@@ -101,7 +101,7 @@ SOPC_ReturnStatus UAM_NS_Initialize(void);
 /**
  * \brief Create a SPDU
  * \param pzConfig A pointer to the configuration. The pointer can be freed after call, but not the data pointed
- *      by pzConfig->pUserParams. The value of dwHandle shall match the session handle provided by SAFE in call to
+ *      by pzConfig->pUserParams. The value of dwSessionId shall match the session handle provided by SAFE in call to
  *      UAM_S_InitSafetyProvider or UAM_S_InitSafetyConsumer
  * \return false in case of error.
  */
@@ -110,22 +110,22 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig);
 /**
  * \brief Call this function when a SPDU request message has been received on communication side. This will trigger a
  * further call to UAM_NS2S_SendSpduImpl.
- * \param pzExt The extension object received
+ * \param dwSessionId The session ID
  */
-void UAM_NS_RequestMessageReceived(UAM_SessionHandle dwHandle);
+void UAM_NS_RequestMessageReceived(UAM_SessionId dwSessionId);
 
 /**
  * \brief Call this function when a SPDU response message has been received on communication side. This will trigger a
  * further call to UAM_NS2S_SendSpduImpl.
- * \param pzExt The extension object received
+ * \param dwSessionId The session ID
  */
-void UAM_NS_ResponseMessageReceived(UAM_SessionHandle dwHandle);
+void UAM_NS_ResponseMessageReceived(UAM_SessionId dwSessionId);
 
 /**
  * \brief Call this function to poll reception of SPDU from SAFE component
- * \param pzExt The extension object received
+ * \param dwSessionId The session ID
  */
-void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle);
+void UAM_NS_CheckSpduReception(UAM_SessionId dwSessionId);
 /**
  * \brief Stop all safety consumers and Producer. Removes all memory allocations
  */

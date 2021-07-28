@@ -53,12 +53,12 @@
  * EXTERNAL TYPES
  *===========================================================================*/
 /**
- * A Session handle is a unique identifier, defined by user application. Each
+ * A Session Identifier is a unique identifier, defined by user application. Each
  * UAM_SessionHandle identifies a SPDU REQ/RESP couple. This value allows the
  * UAM Safe and NON-safe layers to map correctly items. Of course, the handle
- * provided to SAFE and NNON-SAFE parts for a given SPDU couple shall be identical..
+ * provided to SAFE and NON-SAFE parts for a given SPDU couple shall be identical..
  */
-typedef UAS_UInt32 UAM_SessionHandle;
+typedef UAS_UInt32 UAM_SessionId;
 
 /**
  * Safe Channel Redundancy settings

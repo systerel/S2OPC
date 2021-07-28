@@ -64,28 +64,28 @@
 
 /**
  * \brief Will be called once per SPDU couple on initialization.
- * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \param dwSessionId The session ID, as defined in call to UAM_NS_CreateSpdu
  * \return true in case of success
  */
-bool UAM_S2NS_Initialize(const UAM_SessionHandle dwHandle);
+bool UAM_S2NS_Initialize(const UAM_SessionId dwSessionId);
 
 /**
  * \brief Implementation of a SPDU sending from Safe to Non-Safe partition
- * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \param dwSessionId The session ID, as defined in call to UAM_NS_CreateSpdu
  * \param pData The data to be sent. Shall point to at least sLen bytes.
  * \param sLen The data length
  */
-void UAM_S2NS_SendSpduImpl(const UAM_SessionHandle dwHandle, const void* const pData, const size_t sLen);
+void UAM_S2NS_SendSpduImpl(const UAM_SessionId dwSessionId, const void* const pData, const size_t sLen);
 
 /**
  * \brief Implementation of a SPDU reception on Safe from Non-Safe partition.
  *      The call shall not be blocking.
- * \param dwHandle The session handle, as defined in call to UAM_NS_CreateSpdu
+ * \param dwSessionId The session ID, as defined in call to UAM_NS_CreateSpdu
  * \param pData A non-null pointer that points to an area where message can be received.
  * \param sMaxLen The maximum buffer length
  * \param[out] sReadLen Return the length of read buffer (0 in case of error)
  */
-void UAM_S2NS_ReceiveSpduImpl(const UAM_SessionHandle dwHandle, void* pData, size_t sMaxLen, size_t* sReadLen);
+void UAM_S2NS_ReceiveSpduImpl(const UAM_SessionId dwSessionId, void* pData, size_t sMaxLen, size_t* sReadLen);
 
 /**
  * \brief Will be called once  on cleanup.

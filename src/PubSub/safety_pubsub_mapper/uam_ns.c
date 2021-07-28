@@ -78,7 +78,7 @@ typedef struct
 {
     /** True for a message from NonSafe to Safe, false for a message from Safe to NonSafe */
     QueueAction_type eEvent;
-    UAM_SessionHandle dwHandle;
+    UAM_SessionId dwSessionId;
 } QueueElement_type;
 
 typedef struct
@@ -95,12 +95,12 @@ typedef struct
 static UAM_NS_interactive_Context g_interactive_Context;
 
 /**
- * A dictionary object { UAM_SessionHandle : UAM_NS_Configuration_type* }
+ * A dictionary object { UAM_SessionId : UAM_NS_Configuration_type* }
  */
 static SOPC_Dict* gSessions = NULL;
 
 /**
- * A dictionary object { UAS_UInt32 : UAM_SessionHandle }
+ * A dictionary object { UAS_UInt32 : UAM_SessionId }
  */
 static SOPC_Dict* gNodeIdsDict = NULL;
 
@@ -121,9 +121,9 @@ static const UAS_UInt32 NoHandle = 0xFFFFFFFEu;
 /*============================================================================
  * DECLARATION OF INTERNAL SERVICES
  *===========================================================================*/
-static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key);
+static UAM_NS_Configuration_type* Session_Get(const UAM_SessionId key);
 
-static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type event);
+static void EnqueueEvent(UAM_SessionId dwSessionId, const QueueAction_type event);
 static void EnqueueNoEvent(void);
 
 static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue* const pDv);
@@ -405,7 +405,7 @@ static void DoPollSafeMessages(const UAM_NS_Configuration_type* pzSession)
     pzBuffer = SOPC_Malloc(MAX_SOCKET_READ_SIZE);
     assert(pzBuffer != NULL);
 
-    UAM_NS2S_ReceiveSpduImpl(pzSession->dwHandle, pzBuffer, MAX_SOCKET_READ_SIZE, &sReadLen);
+    UAM_NS2S_ReceiveSpduImpl(pzSession->dwSessionId, pzBuffer, MAX_SOCKET_READ_SIZE, &sReadLen);
 
     if (sReadLen > 0)
     {
@@ -428,14 +428,14 @@ static void DoPollSafeMessages(const UAM_NS_Configuration_type* pzSession)
 }
 
 /*===========================================================================*/
-static void EnqueueEvent(UAM_SessionHandle dwHandle, const QueueAction_type event)
+static void EnqueueEvent(UAM_SessionId dwSessionId, const QueueAction_type event)
 {
     QueueElement_type* pEvent = SOPC_Malloc(sizeof(*pEvent));
     assert(pEvent != NULL);
-    pEvent->dwHandle = dwHandle;
+    pEvent->dwSessionId = dwSessionId;
     pEvent->eEvent = event;
 //
-//    LOG_Trace(LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwHandle, event);
+//    LOG_Trace(LOG_DEBUG, "EnqueueEvent HDL=%u Evt=%d", (unsigned) dwSessionId, event);
 
     SOPC_AsyncQueue_BlockingEnqueue(pzQueue, pEvent);
 }
@@ -460,9 +460,9 @@ static void* Thread_Impl(void* data)
         QueueElement_type* pEvent = NULL;
         SOPC_AsyncQueue_BlockingDequeue(pzQueue, (void**) &pEvent);
 
-        const UAM_NS_Configuration_type* pzSession = Session_Get(pEvent->dwHandle);
+        const UAM_NS_Configuration_type* pzSession = Session_Get(pEvent->dwSessionId);
 
-//        LOG_Trace(LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwHandle, pEvent->eEvent,
+//        LOG_Trace(LOG_DEBUG, "DequeueEvent HDL=%u Evt=%d, pzSession= %p", (unsigned) pEvent->dwSessionId, pEvent->eEvent,
 //                  pzSession);
         if (pzSession != NULL && pEvent != NULL)
         {
@@ -506,7 +506,7 @@ static void* Thread_Impl(void* data)
             if (bResult && sLen > 0 && pBytesToSafe != NULL)
             {
                 // Send it to SAFE
-                UAM_NS2S_SendSpduImpl(pEvent->dwHandle, pBytesToSafe, sLen);
+                UAM_NS2S_SendSpduImpl(pEvent->dwSessionId, pBytesToSafe, sLen);
             }
             if (pBytesToSafe != NULL)
             {
@@ -535,7 +535,7 @@ static bool Intptr_KeyEqual_Fct(const void* a, const void* b)
 }
 
 /*===========================================================================*/
-static UAM_NS_Configuration_type* Session_Get(const UAM_SessionHandle key)
+static UAM_NS_Configuration_type* Session_Get(const UAM_SessionId key)
 {
     if (gSessions == NULL)
     {
@@ -560,7 +560,7 @@ static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
     bool bResult = false;
     assert(NULL != pzConfig);
 
-    UAM_NS_Configuration_type* pzPrevConfig = Session_Get(pzConfig->dwHandle);
+    UAM_NS_Configuration_type* pzPrevConfig = Session_Get(pzConfig->dwSessionId);
     if (pzPrevConfig == NULL)
     {
         UAM_NS_Configuration_type* pzNewConfig = SOPC_Malloc(sizeof(*pzNewConfig));
@@ -569,7 +569,7 @@ static bool Session_Add(const UAM_NS_Configuration_type* const pzConfig)
         {
             *pzNewConfig = *pzConfig;
             // Note : Values and Keys are freed
-            bResult = SOPC_Dict_Insert(gSessions, (void*) (UAS_INVERSE_PTR) pzConfig->dwHandle, pzNewConfig);
+            bResult = SOPC_Dict_Insert(gSessions, (void*) (UAS_INVERSE_PTR) pzConfig->dwSessionId, pzNewConfig);
 
             SOPC_Dict_Insert (gNodeIdsDict, (void*) (UAS_INVERSE_PTR) pzConfig->uUserRequestId, pzNewConfig);
             SOPC_Dict_Insert (gNodeIdsDict, (void*) (UAS_INVERSE_PTR) pzConfig->uUserResponseId, pzNewConfig);
@@ -673,11 +673,11 @@ static void cache_Notify_CB(const SOPC_NodeId* const pNid, const SOPC_DataValue*
 
             if (pNid->Data.Numeric == pzSession->uUserRequestId)
             {
-                UAM_NS_RequestMessageReceived(pzSession->dwHandle);
+                UAM_NS_RequestMessageReceived(pzSession->dwSessionId);
             }
             if (pNid->Data.Numeric == pzSession->uUserResponseId)
             {
-                UAM_NS_ResponseMessageReceived(pzSession->dwHandle);
+                UAM_NS_ResponseMessageReceived(pzSession->dwSessionId);
             }
         }
     }
@@ -801,45 +801,45 @@ bool UAM_NS_CreateSpdu(const UAM_NS_Configuration_type* const pzConfig)
     if (gSessions != NULL && pzConfig != NULL)
     {
 #ifdef UASDEF_DBG
-        LOG_Trace(LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u", (unsigned) pzConfig->dwHandle);
+        LOG_Trace(LOG_DEBUG, "UAM_NS_CreateSpdu, HDL=%u", (unsigned) pzConfig->dwSessionId);
 #endif
         bResult = Session_Add(pzConfig);
         if (bResult)
         {
-            bResult = UAM_NS2S_Initialize(pzConfig->dwHandle);
+            bResult = UAM_NS2S_Initialize(pzConfig->dwSessionId);
         }
     }
     return bResult;
 }
 
 /*===========================================================================*/
-void UAM_NS_RequestMessageReceived(UAM_SessionHandle dwHandle)
+void UAM_NS_RequestMessageReceived(UAM_SessionId dwSessionId)
 {
     // Simply notify the sending thread because Cache is already up to date.
-    (void) dwHandle;
+    (void) dwSessionId;
 
     if (pzQueue != NULL)
     {
-        EnqueueEvent(dwHandle, qaSpduRequestToSafe);
+        EnqueueEvent(dwSessionId, qaSpduRequestToSafe);
     }
 }
 
 /*===========================================================================*/
-void UAM_NS_ResponseMessageReceived(UAM_SessionHandle dwHandle)
+void UAM_NS_ResponseMessageReceived(UAM_SessionId dwSessionId)
 {
     // Simply notify the sending thread because Cache is already up to date.
     if (pzQueue != NULL)
     {
-        EnqueueEvent(dwHandle, qaSpduResponseToSafe);
+        EnqueueEvent(dwSessionId, qaSpduResponseToSafe);
     }
 }
 
 /*===========================================================================*/
-void UAM_NS_CheckSpduReception(UAM_SessionHandle dwHandle)
+void UAM_NS_CheckSpduReception(UAM_SessionId dwSessionId)
 {
     if (pzQueue != NULL)
     {
-        EnqueueEvent(dwHandle, qaSpduPollSafe);
+        EnqueueEvent(dwSessionId, qaSpduPollSafe);
     }
 }
 

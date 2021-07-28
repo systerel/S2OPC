@@ -54,15 +54,15 @@
 typedef struct UAM_S_Configuration_struct
 {
     UAM_RedundancySetting_type eRedundancyType;
-    /** Session handle. */
-    UAM_SessionHandle dwHandle;
+    /** Session Identifier. */
+    UAM_SessionId dwSessionId;
     bool bIsProvider;
 } UAM_S_Configuration_type;
 
 typedef struct UAM_SafetyConfiguration_struct
 {
-    /** Session handle. */
-    UAM_SessionHandle dwHandle;
+    /** Session Identifier. */
+    UAM_SessionId dwSessionId;
     /** IN: Length of SafetyData*/
     UAS_UInt16 wSafetyDataLength;
     /** IN: Length of NonSafetyData*/
@@ -131,7 +131,7 @@ void UAM_S_Initialize(void);
 /**
  * \brief Helper function for set-up of a Safety provider. Calls byUAS_InitSafetyProvider
  * \param[in] pzInstanceConfiguration. Configuration of safety provider.
- *          The dwHandle filed shall be identical to Session handle provided by Non safe
+ *          The dwSessionId filed shall be identical to Session handle provided by Non safe
  *          in call to UAM_NS_CreateSpdu
  * \param[in] pzSPI. Pointer to an existing SPI configuration. Shall not be NULL.
  *      Can be freed/released after called
