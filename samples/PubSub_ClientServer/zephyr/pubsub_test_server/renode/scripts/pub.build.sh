@@ -1,5 +1,5 @@
 #Preparing for building
-rm -Rf pub
+rm -Rf /builds/systerel/S2OPC/pub
 cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/pubconfig.xml ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/data/config/config_pubsub_server.xml
 cp ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/pubprj.conf ~/zephyrproject/modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/prj.conf
 
