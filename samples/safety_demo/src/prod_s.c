@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h> // for usleep
 
 #include "safetyDemo.h"
 #include "config.h"
@@ -160,77 +161,6 @@ static void signal_stop_server(int sig)
 }
 
 
-
-/*===========================================================================*/
-/*===========================================================================*/
-// TODO : move that "interactive" part in a new  file ?
-#include <sys/ioctl.h>
-#include "sopc_raw_sockets.h" // TODO: remove dependency to S2OPC!
-#include <unistd.h>
-#define STDIN 0
-#define USER_ENTRY_MAXSIZE (128u)
-
-/*===========================================================================*/
-static bool prod_s_interactive_processCommand (const char* cmd)
-{
-    switch (cmd[0])
-    {
-        case 'q':
-            gContext.stopSignal = 1;
-            return true;
-            break;
-        default:
-            break;
-    }
-    return false;
-}
-
-/*===========================================================================*/
-static void prod_s_interactive_cycle(void)
-{
-    if (g_status == SOPC_STATUS_OK)
-    {
-        SOPC_SocketSet fdSet;
-        int maxfd = STDIN;
-        int result = 0;
-        ssize_t nbRead = 0;
-
-        struct timeval* ptv = NULL;
-    #define WAIT_MS 10 * 1000
-    #if WAIT_MS > 0
-        struct timeval tv;
-        tv.tv_sec = WAIT_MS / (1000 * 1000);
-        tv.tv_usec = WAIT_MS % (1000 * 1000);
-        ptv = &tv;
-    #endif
-        char entry[USER_ENTRY_MAXSIZE];
-
-        SOPC_SocketSet_Clear(&fdSet);
-        SOPC_SocketSet_Add(STDIN, &fdSet);
-
-        result = select(maxfd + 1, &fdSet.set, NULL, NULL, ptv);
-        if (result < 0)
-        {
-            UAM_S_DoLog(UAM_S_LOG_ERROR, "SELECT failed");
-            gContext.stopSignal = 1;
-        }
-        else if (SOPC_SocketSet_IsPresent(STDIN, &fdSet))
-        {
-            nbRead = read(STDIN, entry, USER_ENTRY_MAXSIZE - 1);
-            while (nbRead > 0 && entry[nbRead - 1] < ' ')
-            {
-                entry[nbRead - 1] = 0;
-                nbRead--;
-            }
-            if (nbRead > 0)
-            {
-                prod_s_interactive_processCommand(entry);
-            }
-        }
-    }
-}
-
-
 /*===========================================================================*/
 /**
  * ENVIRONNEMENT CONFIGURATION AND SETUP
@@ -346,12 +276,10 @@ int main(int argc, char* argv[])
     // Wait for a signal
     while (0 == gContext.stopSignal)
     {
-        // Note : interactions with keyboard only work correctly in main thread.
-        prod_s_interactive_cycle ();
-
         prod_s_cycle();
         usleep(1000 * USER_APP_CYCLE_DURATION_MS);
     }
+    UAM_S_DoLog(UAM_S_LOG_DEFAULT, "Leaving Cyclic treatment loop");
 
     // Clean and quit
     prod_s_stop();

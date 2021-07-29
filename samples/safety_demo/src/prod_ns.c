@@ -71,7 +71,6 @@
 
 typedef struct
 {
-    SOPC_Dict* pCache;
     volatile sig_atomic_t stopSignal;
     UAM_SessionId sessionId;
     bool bBlock;
@@ -286,6 +285,7 @@ static void* prod_ns_threadImpl (void* arg)
 static void prod_ns_stop(void)
 {
     // TODO stop cleany everything
+    // TODO : check memory leaks (LIBASAN?)
     Utils_Interactive_Clear();
     UAM_NS_Impl_Clear();
     UAM_NS_Clear();
@@ -297,9 +297,7 @@ static void prod_ns_cycle(void)
 {
     if (g_status == SOPC_STATUS_OK)
     {
-        // TODO : replace UAM_NS_CheckSpduReception by an event-based reading rather than periodic polling
         UAM_NS_CheckSpduReception(SAMPLE1_SESSION_UAM_ID);
-        // TODO
     }
 }
 
