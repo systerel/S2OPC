@@ -10,6 +10,4 @@ class S2OPCTest:
 			raise Exception(f"Cannot connect to publisher at {tests.PubSub.scripts.wait_publisher.DEFAULT_URL}")
 	
 	def test_static_configuration(self):
-		pass
-	#	ret = tests.PubSub.validation_tools.pubsub_server_test.testPubSubStaticConf()
-	#	print("Test")
+		tests.PubSub.validation_tools.pubsub_server_test.testPubSubStaticConf(['192.0.2.100', '192.0.2.101'])
