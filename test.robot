@@ -11,7 +11,6 @@ Library			S2OPCTest.py
 Publisher is Running
 	Log To Console		Launching renode server
 	Execute Command		path add @/builds/systerel/S2OPC
-	Execute Command		help path
 	Execute Script		ci.repl
 	Start Emulation
 

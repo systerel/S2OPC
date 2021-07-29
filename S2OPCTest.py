@@ -1,7 +1,7 @@
 from sys import modules
 
 import tests.PubSub.scripts.wait_publisher
-#import tests.PubSub.validation_tools.pubsub_server_test
+import tests.PubSub.validation_tools.pubsub_server_test
 
 class S2OPCTest:
 	def wait_publisher(self):

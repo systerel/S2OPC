@@ -273,6 +273,7 @@ test-renode:
     - cd /root/zephyrproject
     - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/prepare.sh
+    - export PYTHONPATH="/builds/systerel/S2OPC/tests/PubSub/validation_tools"
       # Outputing robot result files to the artifacts path
     - renode-test --results-dir=/builds/systerel/S2OPC/output modules/lib/s2opc/test.robot
   needs:
