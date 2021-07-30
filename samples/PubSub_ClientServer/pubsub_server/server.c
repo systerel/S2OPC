@@ -69,11 +69,17 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
 
+static void log_printf(const char* category, const char* const line)
+{
+    printf("LOG: %s: %s\n", category, line);
+}
+
+
 SOPC_ReturnStatus Server_Initialize(void)
 {
-    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = LOG_PATH;
-    logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
+    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
+                                               .logSystem = SOPC_LOG_SYSTEM_USER,
+                                               .logSysConfig.userSystemLogConfig.doLog = log_printf};
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
     if (SOPC_STATUS_OK == status)

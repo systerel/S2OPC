@@ -260,6 +260,7 @@ zephyr_library_sources(
 ../src/ClientServer/secure_channels/sopc_secure_channels_internal_ctx.c
 ../src/ClientServer/secure_channels/sopc_secure_listener_state_mgr.c
 ../src/ClientServer/secure_channels/sopc_secure_channels_api.c
+../src/ClientServer/services/b2c/app_cb_call_context_bs.c
 ../src/PubSub/common/sopc_pubsub_helpers.c
 ../src/PubSub/common/sopc_pubsub_conf.c
 ../src/PubSub/real_time_api/sopc_rt_subscriber.c
