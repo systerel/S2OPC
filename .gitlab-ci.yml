@@ -232,6 +232,7 @@ build-publisher:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
+    - west update
     - ls -l modules/lib/s2opc
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
   artifacts:
@@ -246,6 +247,7 @@ build-subscriber:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
+    - west update
     - ls -l modules/lib/s2opc
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/sub.build.sh
   artifacts:
