@@ -231,9 +231,7 @@ build-publisher:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
-  script:
     - cd /root/zephyrproject
-    - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
   artifacts:
     # Paths are relatives to the directory where the job was created
@@ -247,7 +245,6 @@ build-subscriber:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
-    - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/sub.build.sh
   artifacts:
     paths: [sub/zephyr/zephyr.elf]
@@ -271,16 +268,18 @@ test-renode:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
-    - west update
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/prepare.sh
     - export PYTHONPATH="/builds/systerel/S2OPC/tests/PubSub/validation_tools"
       # Outputing robot result files to the artifacts path
     - renode-test --results-dir=/builds/systerel/S2OPC/output modules/lib/s2opc/test.robot
+
+    # The log output of the test is moved inside the gitlab repo to be abble to be in the artifacts
+    - mv pubsub_server_test.tap /builds/systerel/S2OPC/
   needs:
     - build-publisher
     - build-subscriber
   artifacts:
-    paths: [/builds/systerel/S2OPC/output]
+    paths: [/builds/systerel/S2OPC/output, /builds/systerel/S2OPC/output/pubsub_server_test.tap ]
     when: always
 
 # Test check belongs to the test part, however it does not depend on linux build.
