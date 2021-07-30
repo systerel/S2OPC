@@ -232,7 +232,7 @@ build-publisher:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
-    - ls -l modules/lib
+    - ls -l modules/lib/s2opc
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/pub.build.sh
   artifacts:
     # Paths are relatives to the directory where the job was created
@@ -246,7 +246,7 @@ build-subscriber:
   image: registry.gitlab.com/systerel/s2opc/test_renode
   script:
     - cd /root/zephyrproject
-    - ls -l modules/lib
+    - ls -l modules/lib/s2opc
     - sh modules/lib/s2opc/samples/PubSub_ClientServer/zephyr/pubsub_test_server/renode/scripts/sub.build.sh
   artifacts:
     paths: [sub/zephyr/zephyr.elf]
