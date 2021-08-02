@@ -78,153 +78,153 @@ stages:
 # Generation jobs
 ###
 
-#generation:
-#  <<: *docker_job
-#  stage: gen
-#  image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
-#  script:
-#    - ./clean.sh all
-#    - ./.pre-build-ext.sh
-#    - ./.check_generated_code.sh
-#  artifacts:
-#    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - 'pre-build.log'
-#    when: always
-#    expire_in: '1 month'
-#    when: always
-#  rules:
-#    - if: "$NO_GEN == null && \
-#           $WINDOWS_TEST == null && \
-#           $CROSS_COMPILE == null && \
-#           $S2OPC_PUBSUB_ONLY == null &&\
-#           $ALL_BUILDS == null && \
-#           $ALL_TESTS == null && \
-#           $WITH_DOC == null"
-#      when: on_success
+generation:
+  <<: *docker_job
+  stage: gen
+  image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
+  script:
+    - ./clean.sh all
+    - ./.pre-build-ext.sh
+    - ./.check_generated_code.sh
+  artifacts:
+    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'pre-build.log'
+    when: always
+    expire_in: '1 month'
+    when: always
+  rules:
+    - if: "$NO_GEN == null && \
+           $WINDOWS_TEST == null && \
+           $CROSS_COMPILE == null && \
+           $S2OPC_PUBSUB_ONLY == null &&\
+           $ALL_BUILDS == null && \
+           $ALL_TESTS == null && \
+           $WITH_DOC == null"
+      when: on_success
 
 ###
 # Compilation jobs
 ###
 
-#.build-linux: &build_linux
-#  <<: *docker_job
-#  stage: build
-#  image: registry.gitlab.com/systerel/s2opc/build@sha256:0b462da8ab4c786c28041ee4bb6e99272bf7e3f63c74b039717bbd2aecab6119 # digest of build:1.24
-#  script:
-#    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
-#  variables: &build_linux_variables
-#    CMAKE_INSTALL_PREFIX: '../install_linux64'
-#    DOCKER_IMAGE: 'sha256:a2ff15f9670d471d04872ea86f8d01502f7741c24669b024a9e16f92966a8c18'
-#    BUILD_DIR: build
-#  artifacts:
-#    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - '*.log'
-#      - 'install_linux64/'
-#      - 'build/'  # Required when using coverage analysis
-#    expire_in: '1 month'
-#    when: always
+.build-linux: &build_linux
+  <<: *docker_job
+  stage: build
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:0b462da8ab4c786c28041ee4bb6e99272bf7e3f63c74b039717bbd2aecab6119 # digest of build:1.24
+  script:
+    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
+  variables: &build_linux_variables
+    CMAKE_INSTALL_PREFIX: '../install_linux64'
+    DOCKER_IMAGE: 'sha256:a2ff15f9670d471d04872ea86f8d01502f7741c24669b024a9e16f92966a8c18'
+    BUILD_DIR: build
+  artifacts:
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - '*.log'
+      - 'install_linux64/'
+      - 'build/'  # Required when using coverage analysis
+    expire_in: '1 month'
+    when: always
 # Common rules overwritten by each job using this template
 #  rules: # note: should be repeated in each child job of *build_linux
 #    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && $WITH_DOC == null"
 #      when: on_success
 
 # Used by "normal" pipeline
-#build-linux64-ASan:
-#  <<: *build_linux
-#  variables:
-#    <<: *build_linux_variables
-#    WITH_ASAN: 1
-#  rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
-#    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-#           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-#           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
-#      when: on_success
+build-linux64-ASan:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+    WITH_ASAN: 1
+  rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
+      when: on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
-#build-linux64-pys2opc:
-#  <<: *build_linux
-#  variables:
-#    <<: *build_linux_variables
-#    <<: *all-tests_build_variables # add pys2opc
-#  rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
-#    - if: "$ALL_TESTS != null || $NO_ASAN != null && $WITH_NANO_EXTENDED == '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
-#      when: on_success
+build-linux64-pys2opc:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+    <<: *all-tests_build_variables # add pys2opc
+  rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
+    - if: "$ALL_TESTS != null || $NO_ASAN != null && $WITH_NANO_EXTENDED == '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
+      when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
-#build-linux64-static-conf:
-#  <<: *build_linux
-#  variables:
-#    <<: *build_linux_variables
-#    <<: *all-builds_build_variables # add static conf
-#  rules: # single case rule of ALL_BUILDS
-#    - if: "$ALL_BUILDS != null"
-#      when: on_success
+build-linux64-static-conf:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+    <<: *all-builds_build_variables # add static conf
+  rules: # single case rule of ALL_BUILDS
+    - if: "$ALL_BUILDS != null"
+      when: on_success
 
-#build-linux64-NoASan-NoPyS2OPC:
-#  <<: *build_linux
-#  variables:
-#    <<: *build_linux_variables
-#  rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
-#    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $WITH_NANO_EXTENDED != '1'"
-#      when: on_success#
+build-linux64-NoASan-NoPyS2OPC:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+  rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
+    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $WITH_NANO_EXTENDED != '1'"
+      when: on_success
 
-#build-win64: &build_win64
-#  <<: *docker_job
-#  stage: build-others
-#  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:c25d3eee22da8cdda2866b1d4f917027d33c5065dc497c87b09fe4e78e8505dd # digest of mingw_build:1.11
-#  script:
-#    # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
-#    - 'export WITH_PYS2OPC=OFF'
-#    - *build_command_line
-#  variables: &build_win64_variables
-#    CMAKE_INSTALL_PREFIX: '../install_win64'
-#    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-#    DOCKER_IMAGE: 'sha256:2a9fa163b8d3b8f35717bbd07faaeebf6715704db4d1c8b0ba51d111121ad93e'
-#    BUILD_SHARED_LIBS: 'true'
-#    BUILD_DIR: build_toolchain
-#    S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
-#  artifacts:
-#    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - '$BUILD_DIR/bin'
-#      - 'install_win64/'
-#    expire_in: '1 month'
-#  rules:
-#   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
-#     when: always # run even if previous job in pipeline failed
-#
-#build-win32:
-#  <<: *build_win64
-#  variables:
-#    <<: *build_win64_variables
-#    CMAKE_INSTALL_PREFIX: '../install_win32'
-#    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
-#  artifacts:
-#    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - '$BUILD_DIR/bin/'
-#      - 'install_win32/'
-#    expire_in: '1 month'
-#  rules:
-#   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
-#     when: always # run even if previous job in pipeline failed
+build-win64: &build_win64
+  <<: *docker_job
+  stage: build-others
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:c25d3eee22da8cdda2866b1d4f917027d33c5065dc497c87b09fe4e78e8505dd # digest of mingw_build:1.11
+  script:
+    # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
+    - 'export WITH_PYS2OPC=OFF'
+    - *build_command_line
+  variables: &build_win64_variables
+    CMAKE_INSTALL_PREFIX: '../install_win64'
+    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
+    DOCKER_IMAGE: 'sha256:2a9fa163b8d3b8f35717bbd07faaeebf6715704db4d1c8b0ba51d111121ad93e'
+    BUILD_SHARED_LIBS: 'true'
+    BUILD_DIR: build_toolchain
+    S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
+  artifacts:
+    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - '$BUILD_DIR/bin'
+      - 'install_win64/'
+    expire_in: '1 month'
+  rules:
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+     when: always # run even if previous job in pipeline failed
+
+build-win32:
+  <<: *build_win64
+  variables:
+    <<: *build_win64_variables
+    CMAKE_INSTALL_PREFIX: '../install_win32'
+    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
+  artifacts:
+    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - '$BUILD_DIR/bin/'
+      - 'install_win32/'
+    expire_in: '1 month'
+  rules:
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+     when: always # run even if previous job in pipeline failed
 
 # Used by coverity, also starts the analysis
-#build-linux64-coverity:
-#  <<: *docker_job
-#  stage: build
-#  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:ba1676af8d9f52cf6c2634af775a63eae9324c281590d6bc29985e9afedb36a4 # digest of coverity:1.5
-#  script: |-
-#    mkdir build
-#    cd build
-#    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_NANO_EXTENDED=1 ..
-#    /opt/cov-analysis-linux64-2019.03/bin/cov-build --dir cov-int make
-#    tar czf cov-int.tar.gz cov-int
-#    curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
-#  rules:
-#    - if: "$WITH_COVERITY != null"
+build-linux64-coverity:
+  <<: *docker_job
+  stage: build
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:ba1676af8d9f52cf6c2634af775a63eae9324c281590d6bc29985e9afedb36a4 # digest of coverity:1.5
+  script: |-
+    mkdir build
+    cd build
+    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_NANO_EXTENDED=1 ..
+    /opt/cov-analysis-linux64-2019.03/bin/cov-build --dir cov-int make
+    tar czf cov-int.tar.gz cov-int
+    curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
+  rules:
+    - if: "$WITH_COVERITY != null"
 
 build-publisher:
   <<: *docker_job
@@ -262,6 +262,96 @@ build-subscriber:
 #           $WITH_COVERITY == null && $WITH_COVERAGE == null"
 #      when: on_success
 
+# Test check belongs to the test part, however it does not depend on linux build.
+test-check:
+  <<: *test_linux
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:678c92905ecb853b1cad6ef2948fb6a40309cf17d1dbbda92ac326f79454925a # digest of check:1.11
+  script:
+    - ./.check-code.sh
+  artifacts:
+    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'pre-build-check.log'
+      - 'clang_tidy.log'
+      - 'build-analyzer/analyzer-report'
+    when: on_failure
+    expire_in: '1 month'
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $ALL_TESTS == null && $ALL_BUILDS == null"
+      when: on_success
+
+.test-unit: &test_unit
+  <<: *test_linux
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:833082e232ca3a26fd758eda093242bebcc57305713d3eb2de5a95f58ff9bc31  # digest of test:2.8
+  script:
+    - 'adduser --system mosquitto'
+    - 'mosquitto -d'
+    - './test-all.sh'
+  artifacts:
+    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build/'
+    when: always
+    expire_in: '1 month'
+# Common rules defined by test-unit job below
+
+# Test unit for ALL_TESTS variable (add dynamic configuration)
+test-unit-all-tests:
+  <<: *test_unit
+  variables:
+    <<: *all-tests_test_variables
+  script:
+    - 'adduser --system mosquitto'
+    - 'mosquitto -d'
+    - './test-all.sh'
+  rules:
+    - if: "$ALL_TESTS != null"
+      when: on_success
+
+# Test unit for NOT ALL_TESTS variable
+test-unit:
+  <<: *test_unit
+  rules: # repeat .test-linux variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_DOC == null && \
+           $ALL_TESTS == null" # + excludes ALL_TESTS
+      when: on_success
+
+.test-uactt: &test_uactt
+  <<: *test_linux
+  image: com.systerel.fr:5000/c838/uactt-win@sha256:5be484563b6d9ba9bc96ace1e0f4a7c2f44acbf44197db7ef020a24beb140e03 # digest of uactt-win:1.8
+  script:
+    - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
+  artifacts:
+    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build/'
+      - 'tests/ClientServer/acceptance_tools/*.log'
+    when: always
+    expire_in: '1 month'
+
+# Test unit for ALL_TESTS variable (add dynamic configuration)
+test-uactt-all-tests:
+  <<: *test_uactt
+  variables:
+    <<: *all-tests_test_variables
+  rules:
+    - if: "$ALL_TESTS != null && \
+           $S2OPC_PUBSUB_ONLY == null && \
+           $ALL_BUILDS == null" # + no UACTT tests on PubSub + excludes ALL_BUILDS
+
+# Test unit for NOT ALL_TESTS variable
+test-uactt:
+  <<: *test_uactt
+  rules: # repeat .test-uactt variables exception since overwritten here
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
+           # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
+      when: on_success
+
 test-renode:
   <<: *docker_job
   stage: test
@@ -282,155 +372,65 @@ test-renode:
     paths: [/builds/systerel/S2OPC/output, /builds/systerel/S2OPC/output/pubsub_server_test.tap ]
     when: always
 
-# Test check belongs to the test part, however it does not depend on linux build.
-#test-check:
-#  <<: *test_linux
-#  image: registry.gitlab.com/systerel/s2opc/check@sha256:678c92905ecb853b1cad6ef2948fb6a40309cf17d1dbbda92ac326f79454925a # digest of check:1.11
-#  script:
-#    - ./.check-code.sh
-#  artifacts:
-#    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - 'pre-build-check.log'
-#      - 'clang_tidy.log'
-#      - 'build-analyzer/analyzer-report'
-#    when: on_failure
-#    expire_in: '1 month'
-#  rules: # repeat .test-linux variables exception since overwritten here
-#    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-#           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-#           $ALL_TESTS == null && $ALL_BUILDS == null"
-#      when: on_success
-#
-#.test-unit: &test_unit
-#  <<: *test_linux
-#  image: registry.gitlab.com/systerel/s2opc/test@sha256:833082e232ca3a26fd758eda093242bebcc57305713d3eb2de5a95f58ff9bc31  # digest of test:2.8
-#  script:
-#    - 'adduser --system mosquitto'
-#    - 'mosquitto -d'
-#    - './test-all.sh'
-#  artifacts:
-#    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - 'build/'
-#    when: always
-#    expire_in: '1 month'
-## Common rules defined by test-unit job below
-#
-## Test unit for ALL_TESTS variable (add dynamic configuration)
-#test-unit-all-tests:
-#  <<: *test_unit
-#  variables:
-#    <<: *all-tests_test_variables
-#  script:
-#    - 'adduser --system mosquitto'
-#    - 'mosquitto -d'
-#    - './test-all.sh'
-#  rules:
-#    - if: "$ALL_TESTS != null"
-#      when: on_success
-#
-## Test unit for NOT ALL_TESTS variable
-#test-unit:
-#  <<: *test_unit
-#  rules: # repeat .test-linux variables exception since overwritten here
-#    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-#           $WITH_COVERITY == null && $WITH_DOC == null && \
-#           $ALL_TESTS == null" # + excludes ALL_TESTS
-#      when: on_success
-#
-#.test-uactt: &test_uactt
-#  <<: *test_linux
-#  image: com.systerel.fr:5000/c838/uactt-win@sha256:5be484563b6d9ba9bc96ace1e0f4a7c2f44acbf44197db7ef020a24beb140e03 # digest of uactt-win:1.8
-#  script:
-#    - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
-#  artifacts:
-#    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - 'build/'
-#      - 'tests/ClientServer/acceptance_tools/*.log'
-#    when: always
-#    expire_in: '1 month'
-#
-## Test unit for ALL_TESTS variable (add dynamic configuration)
-#test-uactt-all-tests:
-#  <<: *test_uactt
-#  variables:
-#    <<: *all-tests_test_variables
-#  rules:
-#    - if: "$ALL_TESTS != null && \
-#           $S2OPC_PUBSUB_ONLY == null && \
-#           $ALL_BUILDS == null" # + no UACTT tests on PubSub + excludes ALL_BUILDS
-#
-## Test unit for NOT ALL_TESTS variable
-#test-uactt:
-#  <<: *test_uactt
-#  rules: # repeat .test-uactt variables exception since overwritten here
-#    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-#           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-#           $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
-#           # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
-#      when: on_success
-#
+##
+# Windows native build and tests (done in "build-others" stage)
+##
+
+windows-appveyor:
+  stage: build-others
+  image: docker.io/library/debian@sha256:de3eac83cd481c04c5d6c7344cd7327625a1d8b2540e82a8231b5675cef0ae5f  # debian:9
+  script:
+    - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
+  tags:
+    - linux
+  rules:
+    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || \
+           $CI_COMMIT_BRANCH == 'master' && \
+           $ALL_TESTS == null && $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $NO_ASAN == null && $NO_GEN == null && \
+           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
+      when: always # run even if previous job in pipeline failed
+
 ###
-## Windows native build and tests (done in "build-others" stage)
+# Analysis jobs
 ###
-#
-#windows-appveyor:
-#  stage: build-others
-#  image: docker.io/library/debian@sha256:de3eac83cd481c04c5d6c7344cd7327625a1d8b2540e82a8231b5675cef0ae5f  # debian:9
-#  script:
-#    - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
-#  tags:
-#    - linux
-#  rules:
-#    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || \
-#           $CI_COMMIT_BRANCH == 'master' && \
-#           $ALL_TESTS == null && $WITH_COVERITY == null && $WITH_COVERAGE == null && \
-#           $NO_ASAN == null && $NO_GEN == null && \
-#           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
-#      when: always # run even if previous job in pipeline failed
-#
-####
-## Analysis jobs
-####
-#
-#coverage-analysis:
-#  <<: *docker_job
-#  stage: analyses
-#  image: registry.gitlab.com/systerel/s2opc/test@sha256:b8fc17972b668928fa1053abe7aa970fa6d887580f02fc32bb9aa9f8b5366eb3 # digest of test:2.7
-#  script:
-#    - ./.gen_coverage.sh
-#  artifacts:
-#    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
-#    paths:
-#      - 'report'
-#    expire_in: '1 month'
-#  rules:
-#    - if: "$WITH_COVERAGE != null"
-#
-####
-## Documentation generation and publication
-####
-#
-## The job name must be "pages", and the html must be in "public/" and put in an artifact.
-#pages:
-#  <<: *build_linux
-#  stage: doc
-#  dependencies: []
-#  rules:
-#    - if: "$WITH_DOC != null"
-#    - if: "$CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == 'master'"
-#  variables:
-#    <<: *build_linux_variables
-#  script:
-#    - mkdir $BUILD_DIR
-#    - cd $BUILD_DIR
-#    # PyS2OPC relies on subscriptions
-#    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
-#    - cmake --build . --target doc
-#    - mv apidoc/html ../public/
-#  artifacts:
-#    paths:
-#    - public
-#    expire_in: 30 days
+
+coverage-analysis:
+  <<: *docker_job
+  stage: analyses
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:b8fc17972b668928fa1053abe7aa970fa6d887580f02fc32bb9aa9f8b5366eb3 # digest of test:2.7
+  script:
+    - ./.gen_coverage.sh
+  artifacts:
+    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'report'
+    expire_in: '1 month'
+  rules:
+    - if: "$WITH_COVERAGE != null"
+
+###
+# Documentation generation and publication
+###
+
+# The job name must be "pages", and the html must be in "public/" and put in an artifact.
+pages:
+  <<: *build_linux
+  stage: doc
+  dependencies: []
+  rules:
+    - if: "$WITH_DOC != null"
+    - if: "$CI_PIPELINE_SOURCE == 'push' && $CI_COMMIT_BRANCH == 'master'"
+  variables:
+    <<: *build_linux_variables
+  script:
+    - mkdir $BUILD_DIR
+    - cd $BUILD_DIR
+    # PyS2OPC relies on subscriptions
+    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
+    - cmake --build . --target doc
+    - mv apidoc/html ../public/
+  artifacts:
+    paths:
+    - public
+    expire_in: 30 days
