@@ -235,6 +235,10 @@ Those parameters are defined by kernel configuration variables. Default values a
 
 ~\zephyrproject\modules\lib\s2opc\samples\PubSub_ClientServer\zephyr\pubsub_test_server\prj.conf
 
+[edit] 02/08/2021
+
+COURNAND Adrien : This file is now saved as `prj.conf.save` copy this file and rename it correctly if you need it
+
 # Instantiate OPC-UA PubSub server 1
 
 The first instance of the OPC-UA PubSub server listens for OPC-UA Client connection on the following address:

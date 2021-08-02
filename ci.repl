@@ -1,13 +1,19 @@
 emulation CreateSwitch "switch0"
 
 using sysbus
+
+#Creation of the VM
 mach create "pub"
+
+#Loading of dscription of the platform
 machine LoadPlatformDescription @platforms/cpus/sam_e70.repl
 
+#Loading the ELF file inside the board
 sysbus LoadELF @pub/zephyr/zephyr.elf
 
 cpu VectorTableOffset `sysbus GetSymbolAddress "_vector_table"`
 
+#Connecting the board to the switch
 connector Connect sysbus.gem switch0
 
 showAnalyzer usart1
@@ -23,5 +29,6 @@ connector Connect sysbus.gem switch0
 
 showAnalyzer usart1
 
+# Connecting the tap interface to the switch the the host and the VM can communicate
 emulation CreateTap "tap0" "tap" true
 connector Connect host.tap switch0
