@@ -22,15 +22,6 @@
 #
 set -e
 
-# com2.systerel.fr:5000/c838/uactt-win: 1.8
-DOCKER_IMAGE=sha256:6c5d97dd84cf85269c4f89250e6b12601fdd0298eeee14675c8600e0972d953e
+source "$(dirname "$0")/".docker-images.sh
 
-if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "$@"
-else
-    if [[ -z $LOCAL_JENKINS_JOB ]]; then
-        sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE "$@"
-    else
-        sudo /etc/scripts/run-in-docker $DOCKER_IMAGE "$@"
-    fi
-fi
+"$(dirname "$0")/".run-in-docker.sh "$UACTT_WIN_IMAGE" "$@"

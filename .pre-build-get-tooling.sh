@@ -25,11 +25,21 @@
 
 set -e
 
-PREBUILD=pre-build
-TMP_TOOLING_DIR="$(pwd)/$PREBUILD/tooling"
+TMP_TOOLING_DIR=$1
 
-source "$(dirname "$0")/".docker-images.sh
+# Create dir to store tooling directory for generation
+\rm -rf $PREBUILD
+mkdir -p "$TMP_TOOLING_DIR" > /dev/null
+cd "$TMP_TOOLING_DIR" > /dev/null
 
-"$(dirname "$0")/".pre-build-get-tooling.sh "$TMP_TOOLING_DIR"
+# Copy tooling repository with git archive from server repository or local one
+if [[ -z "$TOOLING_DIR" ]]; then
+    echo "Environment variable TOOLING_DIR not set => copy of tooling.git through SSH"
+    ssh pcb git --git-dir /git/c838/tooling.git archive master bin | tar x
+else
+    echo "Environment variable TOOLING_DIR set to '$TOOLING_DIR' => copy of repository"
+    git --git-dir "$TOOLING_DIR"/.git archive master bin | tar x
+fi
+cd - > /dev/null
 
-"$(dirname "$0")/".run-in-docker.sh "$GEN_IMAGE" TOOLING_DIR="$TMP_TOOLING_DIR" "$@"
+

@@ -27,21 +27,22 @@ git reset --hard
 git clean -fd
 
 # run build and tests
-export SOPC_DOCKER_NEEDS_SUDO=1
-export LOCAL_JENKINS_JOB=1
+source .docker-images.sh
 # Generate C code from B model and for tests (@ space)
-./clean.sh all && ./.pre-build-in-docker.sh ./pre-build.sh
+PREBUILD=pre-build
+TMP_TOOLING_DIR="$(pwd)/$PREBUILD/tooling"
+./clean.sh all && ./.pre-build-get-tooling.sh "$TMP_TOOLING_DIR" && sudo /etc/scripts/run-in-docker "$GEN_IMAGE" TOOLING_DIR="$TMP_TOOLING_DIR" ./pre-build.sh
 # check that generated C code is up to date in configuration management
 ./clean.sh && ./.check_generated_code.sh
 # Check rules on source code and automatic formatting compliance
-./.check-in-docker.sh ./.check-code.sh
+sudo /etc/scripts/run-in-docker "$CHECK_IMAGE" ./.check-code.sh
 # Build binaries for Linux target
-./clean.sh && ./.build-in-docker.sh WITH_NANO_EXTENDED=1 ./build.sh
+./clean.sh && sudo /etc/scripts/run-in-docker "$BUILD_IMAGE" WITH_NANO_EXTENDED=1 ./build.sh
 # Run tests on Linux target
-./.test-in-docker.sh "mosquitto -d && ./test-all.sh"
+sudo /etc/scripts/run-in-docker "$TEST_IMAGE" "mosquitto -d && ./test-all.sh"
 # run acceptance tests on Linux target
 pushd tests/ClientServer/acceptance_tools/
-../../../.run-uactt-win-in-docker.sh WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
+sudo /etc/scripts/run-in-docker "$UACTT_WIN_IMAGE" WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
 popd
 # Build binaries for Windows target on Linux host
-./.mingwbuild-in-docker.sh S2OPC_CLIENTSERVER_ONLY=1 ./build.sh
+sudo /etc/scripts/run-in-docker "$MINGW_IMAGE" S2OPC_CLIENTSERVER_ONLY=1 ./build.sh

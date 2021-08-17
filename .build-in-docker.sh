@@ -22,14 +22,6 @@
 #
 set -e
 
-DOCKER_IMAGE=sha256:0bbab53a4c13efb85aaca8fbfddc60e60acb7a776b3491ae75715c21d88b3942 # build:1.26
+source "$(dirname "$0")/".docker-images.sh
 
-if [[ -z $SOPC_DOCKER_NEEDS_SUDO ]]; then
-    "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
-else
-    if [[ -z $LOCAL_JENKINS_JOB ]]; then
-        sudo "$(dirname "$0")/".run-in-docker.sh $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
-    else
-        sudo /etc/scripts/run-in-docker $DOCKER_IMAGE DOCKER_IMAGE=$DOCKER_IMAGE "$@"
-    fi
-fi
+"$(dirname "$0")/".run-in-docker.sh "$BUILD_IMAGE" DOCKER_IMAGE="$BUILD_IMAGE" "$@"
