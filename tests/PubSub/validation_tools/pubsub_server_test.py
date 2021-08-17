@@ -45,8 +45,8 @@ NID_PUB_INT = u"ns=1;s=PubInt"
 
 DEFAULT_XML_PATH = 'config_pubsub_server.xml'
 
-# PublishingInterval (seconds) of XML default configuration (*2 due to double buffering)
-STATIC_CONF_PUB_INTERVAL = 2.1
+# PublishingInterval (seconds) of XML default configuration
+STATIC_CONF_PUB_INTERVAL = 1.2
 DYN_CONF_PUB_INTERVAL_1000 = 2.1
 DYN_CONF_PUB_INTERVAL_200 = 0.5
 
