@@ -91,11 +91,20 @@ static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, con
 SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    SOPC_EncodeableType* prevEncoder = NULL;
 
     if (NULL == pEncoder)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    prevEncoder = SOPC_EncodeableType_GetEncodeableType(pEncoder->TypeId);
+    if (prevEncoder != NULL)
+    {
+        // This TypeId is already used.
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+
     if (g_UserEncodeableTypes == NULL)
     {
         // Create dictionnary
@@ -128,17 +137,24 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
 SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encoder)
 {
     SOPC_EncodeableType_UserTypeKey key = {0};
-
+    SOPC_EncodeableType* prevEncoder = NULL;
     if (encoder == NULL)
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (g_UserEncodeableTypes == NULL)
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     key.typeId = encoder->TypeId;
+
+    prevEncoder = SOPC_Dict_GetKey(g_UserEncodeableTypes, (const void*) &key, NULL);
+    if (prevEncoder == NULL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);
     key.typeId = encoder->BinaryEncodingTypeId;
     SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);

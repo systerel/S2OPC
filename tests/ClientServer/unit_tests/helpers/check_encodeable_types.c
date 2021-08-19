@@ -29,6 +29,7 @@
 
 #include "check_helpers.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_types.h"
@@ -432,6 +433,188 @@ START_TEST(test_TranslateBrowsePathsToNodeIdsRequest)
 }
 END_TEST
 
+/*===========================================================================*/
+/*===========================================================================*/
+/*    USER EBCODING TYPES */
+/*===========================================================================*/
+/*===========================================================================*/
+
+#define OpcUaId_SPDURequest 10000001
+#define OpcUaId_SPDURequest_Encoding_DefaultBinary 10000002
+#define OpcUaId_SPDURequest_Encoding_DefaultXml 10000003
+
+static SOPC_ReturnStatus SPDURequest_Encode(const void* pValue, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel);
+static SOPC_ReturnStatus SPDURequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
+static void SPDURequest_Initialize(void* pValue);
+static void SPDURequest_Clear(void* pValue);
+
+typedef struct UAS_RequestSpdu_struct
+{
+    /** Safety Consumer Identifier - the identifier of the SafetyConsumer instance. */
+    uint32_t dwSafetyConsumerId;
+    /** Monitoring Number (MNR) of the RequestSPDU. The SafetyConsumer uses the MNR
+     * to detect mistimed SPDUs, e.g. such SPDUs which are continuously repeated
+     * by an erroneous network storing element. A different MNR is used in every
+     * RequestSPDU of a given SafetyConsumer, and a ResponseSPDU will only be accepted,
+     * if its MNR is identical to its matching RequestSPDU. */
+    uint32_t dwMonitoringNumber;
+    /** Non safety Flags from SafetyConsumer. */
+    uint8_t byFlags;
+} UAS_RequestSpdu_type;
+
+typedef struct
+{
+    SOPC_EncodeableType* encodeableType;
+    UAS_RequestSpdu_type zSpdu;
+} SPDURequest;
+
+/*============================================================================
+ * Field descriptors of the SPDURequest encodeable type.
+ *===========================================================================*/
+static const SOPC_EncodeableType_FieldDescriptor SPDURequest_Fields[] = {
+    {
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
+        (uint32_t) offsetof(SPDURequest, zSpdu.dwSafetyConsumerId) // offset
+    },
+    {
+        true,                                                      // isBuiltIn
+        false,                                                     // isArrayLength
+        true,                                                      // isToEncode
+        (uint32_t) SOPC_UInt32_Id,                                 // typeIndex
+        (uint32_t) offsetof(SPDURequest, zSpdu.dwMonitoringNumber) // offset
+    },
+    {
+        true,                                           // isBuiltIn
+        false,                                          // isArrayLength
+        true,                                           // isToEncode
+        (uint32_t) SOPC_Byte_Id,                        // typeIndex
+        (uint32_t) offsetof(SPDURequest, zSpdu.byFlags) // offset
+    },
+};
+
+SOPC_EncodeableType SPDURequest_EncodeableType = {
+    "SPDURequest",
+    OpcUaId_SPDURequest,
+    OpcUaId_SPDURequest_Encoding_DefaultBinary,
+    OpcUaId_SPDURequest_Encoding_DefaultXml,
+    NULL,
+    sizeof(SPDURequest),
+    SPDURequest_Initialize,
+    SPDURequest_Clear,
+    NULL,
+    SPDURequest_Encode,
+    SPDURequest_Decode,
+    sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+    SPDURequest_Fields};
+
+SOPC_EncodeableType SPDURequest_EncodeableType2 = {
+    "SPDURequest",
+    OpcUaId_ReferenceNode,
+    OpcUaId_SPDURequest_Encoding_DefaultBinary,
+    OpcUaId_SPDURequest_Encoding_DefaultXml,
+    NULL,
+    sizeof(SPDURequest),
+    SPDURequest_Initialize,
+    SPDURequest_Clear,
+    NULL,
+    SPDURequest_Encode,
+    SPDURequest_Decode,
+    sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+    SPDURequest_Fields};
+
+/*===========================================================================*/
+static SOPC_ReturnStatus SPDURequest_Encode(const void* pValue, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel)
+{
+    return SOPC_EncodeableObject_Encode(&SPDURequest_EncodeableType, pValue, msgBuffer, nestedStructLevel);
+}
+
+/*===========================================================================*/
+static SOPC_ReturnStatus SPDURequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
+{
+    return SOPC_EncodeableObject_Decode(&SPDURequest_EncodeableType, pValue, buf, nestedStructLevel);
+}
+
+/*===========================================================================*/
+static void SPDURequest_Initialize(void* pValue)
+{
+    SOPC_EncodeableObject_Initialize(&SPDURequest_EncodeableType, pValue);
+}
+
+/*===========================================================================*/
+static void SPDURequest_Clear(void* pValue)
+{
+    SOPC_EncodeableObject_Clear(&SPDURequest_EncodeableType, pValue);
+}
+
+static void check_SpduRequestDataType(const void* untypedObject)
+{
+    const SPDURequest* obj = untypedObject;
+
+    ck_assert_encodeable_type(obj, SPDURequest);
+    ck_assert_int_eq(obj->zSpdu.byFlags, 0x11);
+    ck_assert_int_eq(obj->zSpdu.dwSafetyConsumerId, 0x12345678);
+    ck_assert_int_eq(obj->zSpdu.dwMonitoringNumber, 0xABCDEF05);
+}
+
+START_TEST(test_UserEncodeableType)
+{
+    SOPC_ReturnStatus res;
+    SOPC_EncodeableType* pEncoder = NULL;
+    uint8_t frame[] = {
+        0x78, 0x56, 0x34, 0x12, // dwSafetyConsumerId
+        0x05, 0xEF, 0xCD, 0xAB, // dwMonitoringNumber
+        0x11,                   // byFlags
+    };
+
+    // Encoder is not known
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    ck_assert(pEncoder == NULL);
+
+    // Check default parameters
+    res = SOPC_EncodeableType_AddUserType(NULL);
+    ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
+
+    // Cannot register over a pre-defined type
+    res = SOPC_EncodeableType_AddUserType(&SPDURequest_EncodeableType2);
+    ck_assert(res == SOPC_STATUS_NOT_SUPPORTED);
+
+    // Cannot unregister a pre-defined type
+    res = SOPC_EncodeableType_RemoveUserType(&SPDURequest_EncodeableType2);
+    ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
+
+    // Register type
+    res = SOPC_EncodeableType_AddUserType(&SPDURequest_EncodeableType);
+    ck_assert(res == SOPC_STATUS_OK);
+
+    // Cannot unregister a pre-defined type
+    res = SOPC_EncodeableType_RemoveUserType(&SPDURequest_EncodeableType2);
+    ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
+
+    // Encoder is now known
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    ck_assert(pEncoder == &SPDURequest_EncodeableType);
+
+    checkEncodeableType(pEncoder, check_SpduRequestDataType, frame, (uint32_t) sizeof frame);
+
+    // Cannot register twice the same ID
+    res = SOPC_EncodeableType_AddUserType(&SPDURequest_EncodeableType);
+    ck_assert(res == SOPC_STATUS_NOT_SUPPORTED);
+
+    res = SOPC_EncodeableType_RemoveUserType(&SPDURequest_EncodeableType);
+    ck_assert(res == SOPC_STATUS_OK);
+
+    res = SOPC_EncodeableType_RemoveUserType(&SPDURequest_EncodeableType);
+    ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
+
+    // Encoder is not known
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    ck_assert(pEncoder == NULL);
+}
+END_TEST
+
 Suite* tests_make_suite_encodeable_types(void)
 {
     Suite* s;
@@ -447,6 +630,7 @@ Suite* tests_make_suite_encodeable_types(void)
     tcase_add_test(tc_encodeable_types, test_BrowsePath);
     tcase_add_test(tc_encodeable_types, test_DeleteSubscriptionsRequest);
     tcase_add_test(tc_encodeable_types, test_TranslateBrowsePathsToNodeIdsRequest);
+    tcase_add_test(tc_encodeable_types, test_UserEncodeableType);
     suite_add_tcase(s, tc_encodeable_types);
 
     return s;
