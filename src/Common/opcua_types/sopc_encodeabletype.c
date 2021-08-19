@@ -64,9 +64,14 @@ static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, con
     bool inserted = false;
 
     pKey = (SOPC_EncodeableType_UserTypeKey*) SOPC_Malloc(sizeof(*pKey));
-    pValue = (SOPC_EncodeableType_UserTypeValue*) SOPC_Malloc(sizeof(*pValue));
-    if (pKey == NULL || pValue == NULL)
+    if (pKey == NULL)
     {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    pValue = (SOPC_EncodeableType_UserTypeValue*) SOPC_Malloc(sizeof(*pValue));
+    if (pValue == NULL)
+    {
+        SOPC_Free(pKey);
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     pKey->typeId = typeId;
@@ -75,6 +80,8 @@ static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, con
 
     if (!inserted)
     {
+        SOPC_Free(pKey);
+        SOPC_Free(pValue);
         result = SOPC_STATUS_NOK;
     }
 
@@ -103,7 +110,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
         }
     }
 
-    // Note : Values are released when removed from Dict objects, so that alloactions have to be done
+    // Note : Values are released when removed from Dict objects, so that allocations have to be done
     // for each value inserted
 
     // insert both TypeId and BinaryEncodingTypeId keys to allow decoder to be correctly identified
