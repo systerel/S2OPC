@@ -115,7 +115,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
         }
         else
         {
-            SOPC_Dict_SetTombstoneKey(g_UserEncodeableTypes, (void*) 0xFFFFFFFE);
+            SOPC_Dict_SetTombstoneKey(g_UserEncodeableTypes, (void*) (uintptr_t) 0xFFFFFFFE);
         }
     }
 
