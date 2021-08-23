@@ -35,9 +35,9 @@ TMP_TOOLING_DIR="$(pwd)/$PREBUILD/tooling"
 # check that generated C code is up to date in configuration management
 ./clean.sh && ./.check_generated_code.sh
 # Check rules on source code and automatic formatting compliance
-sudo /etc/scripts/run-in-docker "$CHECK_IMAGE" ./.check-code.sh
+sudo /etc/scripts/run-in-docker "$CHECK_IMAGE" DOCKER_IMAGE="$CHECK_IMAGE" ./.check-code.sh
 # Build binaries for Linux target
-./clean.sh && sudo /etc/scripts/run-in-docker "$BUILD_IMAGE" WITH_NANO_EXTENDED=1 ./build.sh
+./clean.sh && sudo /etc/scripts/run-in-docker "$BUILD_IMAGE" WITH_NANO_EXTENDED=1 DOCKER_IMAGE="$BUILD_IMAGE" ./build.sh
 # Run tests on Linux target
 sudo /etc/scripts/run-in-docker "$TEST_IMAGE" "mosquitto -d && ./test-all.sh"
 # run acceptance tests on Linux target
@@ -45,4 +45,4 @@ pushd tests/ClientServer/acceptance_tools/
 sudo /etc/scripts/run-in-docker "$UACTT_WIN_IMAGE" WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh
 popd
 # Build binaries for Windows target on Linux host
-sudo /etc/scripts/run-in-docker "$MINGW_IMAGE" S2OPC_CLIENTSERVER_ONLY=1 ./build.sh
+sudo /etc/scripts/run-in-docker "$MINGW_IMAGE" S2OPC_CLIENTSERVER_ONLY=1 CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE="$MINGW_IMAGE" ./build.sh
