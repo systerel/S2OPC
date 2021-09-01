@@ -1664,7 +1664,6 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
                            status);
             return false;
         }
-        return true;
     case SOPC_String_Id:
         SET_STR_ELEMENT_VALUE_CASE(String)
     case SOPC_ByteString_Id:
