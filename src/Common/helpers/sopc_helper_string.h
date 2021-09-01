@@ -167,7 +167,7 @@ char* SOPC_strdup(const char* s);
  * \param datetime         The string containing a XSD datetime value to parse
  * \param len              The length of the the string (strlen(datetime) if datetime is a C string)
  *
- * \param pYear            Pointer set to year provided in datetime string as a 4 digits number.
+ * \param pYear            Pointer set to year provided in datetime string as a minimum 4 digits number.
  *                         It might be preceded by a '-' sign.
  * \param pMonth           Pointer set to month provided in datetime string as a 2 digit number.
  * \param pDay             Pointer set to day provided in datetime string as a 2 digit number.

@@ -408,15 +408,13 @@ static bool parseTwoDigitsUint8(const char* startPointer, size_t len, const char
 {
     assert(NULL != startPointer);
     assert(NULL != pOut);
-    char* endPointer = memchr(startPointer, endChar, len);
 
-    if (NULL == endPointer || endPointer - startPointer != 2)
+    if ((len > 2 && startPointer[2] != endChar) || len < 2)
     {
-        // End character not found or month != 2 digits
         return false;
     }
 
-    SOPC_ReturnStatus status = SOPC_strtouint8_t(startPointer, pOut, 10, *endPointer);
+    SOPC_ReturnStatus status = SOPC_strtouint8_t(startPointer, pOut, 10, endChar);
     if (SOPC_STATUS_OK != status)
     {
         return false;
@@ -466,18 +464,13 @@ bool SOPC_stringToDateTime(const char* datetime,
      */
     // Check if year is prefixed by '-'
     const char* endPointer = NULL;
-    if ('-' == *currentPointer)
-    {
-        endPointer = memchr(currentPointer + 1, '-', remainingLength - 1);
-    }
-    else
-    {
-        endPointer = memchr(currentPointer, '-', remainingLength);
-    }
 
-    if (NULL == endPointer || endPointer - currentPointer < 4)
+    // Manage the case of negative year by searching from next character
+    // since at least 4 digits are expected in both cases
+    endPointer = memchr(currentPointer + 1, '-', remainingLength - 1);
+    if (NULL == endPointer || endPointer - currentPointer < (*currentPointer == '-' ? 5 : 4))
     {
-        // End character not found or year < 4 digits
+        // End character not found or year < 4 digits year
         return false;
     }
 
@@ -536,7 +529,7 @@ bool SOPC_stringToDateTime(const char* datetime,
      */
     res = parseTwoDigitsUint8(currentPointer, remainingLength, ':', &hour);
     // Note: accept hour = 24 for case 24:00:00.0 to be check after parsing minutes and seconds
-    if (!res || hour > 25)
+    if (!res || hour > 24)
     {
         return false;
     }
@@ -643,7 +636,6 @@ bool SOPC_stringToDateTime(const char* datetime,
         }
 
         // Parse the seconds with fraction as a double value
-        assert(endPointer > currentPointer);
         res = SOPC_strtodouble(currentPointer, (size_t)(endPointer - currentPointer), 64, &secondAndFraction);
         // Note: we do not need to check for actual value since we already controlled each digit individually
         // If something went wrong it is either due to SOPC_strtodouble or due to double representation
@@ -651,7 +643,6 @@ bool SOPC_stringToDateTime(const char* datetime,
         {
             return false;
         }
-        assert(endPointer > currentPointer);
         remainingLength -= (size_t)(endPointer - currentPointer);
         currentPointer = endPointer;
     }
