@@ -2027,8 +2027,7 @@ static void* test_async_queue_blocking_dequeue_fct(void* args)
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
     bool success = true;
-    // Dequeue expected number of messages with increased value sequence as
-    // action parameter
+    // Dequeue expected number of messages with increased value sequence as action parameter
     while (nbDequeued < param->nbMsgs && success != false)
     {
         SOPC_Atomic_Int_Add(&param->dequeue_pending, 1);
@@ -2058,8 +2057,7 @@ static void* test_async_queue_nonblocking_dequeue_fct(void* args)
     uint8_t nbDequeued = 0;
     uint8_t lastValueDeq = 0;
     bool success = true;
-    // Dequeue expected number of messages with increased value sequence as
-    // action parameter
+    // Dequeue expected number of messages with increased value sequence as action parameter
     while (nbDequeued < param->nbMsgs && success != false)
     {
         status = SOPC_AsyncQueue_NonBlockingDequeue(param->queue, &arg);
