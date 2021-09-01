@@ -809,83 +809,76 @@ def generate_argument_ext_obj(obj):
             )
            )
 
-def parse_datetime(val):
-  dt = re.match('''^
-    (?P<year>-?[0-9]{4}) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
-    T (?P<hour>[0-2][0-9]) : (?P<minute>[0-5][0-9]) : (?P<second>[0-5][0-9])
-    (?P<sec_frac>\.[0-9]{1,})?
-    (?P<tz>
-      Z | (?P<tz_sign>[-+]) (?P<tz_hr>[0-1][0-9]) : (?P<tz_min>[0-5][0-9])
-    )?
-    $''', val, re.X)
-  if dt is not None:
-    values = dt.groupdict()
-    # Manage UTC offset
-    if not values['tz'] in ('Z', None):
-      td = timedelta(hours=int(values['tz_hr']), minutes=int(values['tz_min']))
-      values['tzinfo'] = timezone(td) if values['tz_sign'] == '+' else timezone(-td)
-    else:
-      values['tzinfo'] = timezone.utc
+def parse_xml_datetime(val):
+    dt = re.match('''^
+      (?P<year>-?[0-9]{4}) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
+      T (?P<hour>[0-2][0-9]) : (?P<minute>[0-5][0-9]) : (?P<second>[0-5][0-9])
+      (?P<sec_frac>\.[0-9]{1,})?
+      (?P<tz>
+        Z | (?P<tz_sign>[-+]) (?P<tz_hr>[0-1][0-9]) : (?P<tz_min>[0-5][0-9])
+      )?
+      $''', val, re.X)
+    if dt is not None:
+        values = dt.groupdict()
 
-    del values['tz']
-    del values['tz_sign']
-    del values['tz_hr']
-    del values['tz_min']
+        # Retrieve sec_frac if present
+        sec_frac = 0 if values['sec_frac'] is None else float(values['sec_frac'])
 
-    filtered_values = dict()
-    for k, v in values.items():
-        if k == 'tzinfo':
-            filtered_values[k] = v
-        elif k == 'sec_frac':
-            None
-        elif isinstance(v, str):
-            filtered_values[k] = int(v)
+        # Compute UTC offset
+        if not values['tz'] in ('Z', None):
+            td = timedelta(hours=int(values['tz_hr']), minutes=int(values['tz_min']))
+            tzinfo = timezone(td) if values['tz_sign'] == '+' else timezone(-td)
         else:
-            assert False, 'Unexpected parsed key "{}" value "{}"'.format(k,v)
+            tzinfo = timezone.utc
 
-    sec_frac = None if values['sec_frac'] is None else float(values['sec_frac'])
+        del values['sec_frac']
+        del values['tz']
+        del values['tz_sign']
+        del values['tz_hr']
+        del values['tz_min']
 
-    # Manage special cases
-    delta = timedelta()
-    # 24:00:00 case
-    if filtered_values['hour'] == 24:
-        if sec_frac is not None or filtered_values['minute'] != 0 or filtered_values['second'] != 0:
-            raise ValueError('Only time allowed with 24 hour is 24:00:00, "{}" not compliant'.format(val))
-        filtered_values['hour'] = 23
-        delta = timedelta(hours=1)
-    # 14:00 utc offset is min/max
-    if abs(filtered_values['tzinfo'].utcoffset(None)) > timedelta(hours=14, minutes=00):
-            raise ValueError('Min/Max UTC offset is -14:00/14:00, "{}" not compliant'.format(filtered_values['tzinfo']))
-    try:
-        final_dt = datetime(**filtered_values) + delta
-    except OverflowError:
-        # Manage 24:00:00 on 9999-12-31 (no microseconds included)
-        final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=filtered_values['tzinfo'])
-    return final_dt, sec_frac
+        values = {k:int(v) for k,v in values.items()}
+        values['tzinfo'] = tzinfo
 
-def generate_datetime_int(val):
+        # Manage special cases
+        delta = timedelta()
+        # 24:00:00 case
+        if values['hour'] == 24:
+            if sec_frac != 0 or values['minute'] != 0 or values['second'] != 0:
+                raise ValueError('Only time allowed with 24 hour is 24:00:00, "{}" not compliant'.format(val))
+            values['hour'] = 23
+            delta = timedelta(hours=1)
+            # 14:00 utc offset is min/max
+        if abs(values['tzinfo'].utcoffset(None)) > timedelta(hours=14, minutes=00):
+            raise ValueError('Min/Max UTC offset is -14:00/14:00, "{}" not compliant'.format(values['tzinfo']))
+        try:
+            final_dt = datetime(**values) + delta
+        except OverflowError:
+            # Manage 24:00:00 on 9999-12-31 (no microseconds included)
+            final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=values['tzinfo'])
+        return final_dt, sec_frac
+    else:
+        raise ValueError('Parsed value {} does not match XML datetime format'.format(val))
+
+def generate_datetime_str(val):
     # Parse xsd:datetime string to a Python datetime + seconds fraction (might be None)
-    dt, sec_frac = parse_datetime(val)
-    # Convert Python datetime to POSIX timestamp
-    ts = dt.timestamp()
-    ts_1601_min=-11644473600 # 1601-01-01 12:00:00AM UTC
-    ts_9999_max=253402300799 # 9999-12-31 11:59:59PM UTC
+    dt, sec_frac = parse_xml_datetime(val)
+    dt_epoch_1601=datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     # Filter min/max values for binary format
-    if ts <= ts_1601_min:
+    if dt <= dt_epoch_1601:
         # A date/time value is encoded as 0 if is equal to or earlier than 1601-01-01 12:00AM UTC
-        return 0
-    elif ts >= ts_9999_max:
+        return str(0)
+    elif dt >= datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc):
         ## A date/time is encoded as the maximum value for an Int64 if
         ## the value is equal to or greater than 9999-12-31 11:59:59PM UTC
-        return 2**63-1
+        return str(2**63-1)
     # Convert POSIX timestamp to OPC UA DateTime (number of 100ns)
-    secs_between_epochs = 11644473600
-    sec_to_100ns = 10000000
-    sec_frac_to_100ns = int(0 if sec_frac is None else sec_frac * sec_to_100ns)
-    return int(ts + secs_between_epochs) * sec_to_100ns + sec_frac_to_100ns
-
-def generate_datetime(val):
-    return str(generate_datetime_int(val))
+    # Offset the date to convert to OPC UA date format
+    offset = datetime.fromtimestamp(0, tz=timezone.utc) - datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    sec_to_100ns = int(1e7)
+    # Convert fraction of seconds into a number of 100ns if present
+    sec_frac_to_100ns = int(sec_frac * sec_to_100ns)
+    return str(int(dt.timestamp() + offset.total_seconds()) * sec_to_100ns + sec_frac_to_100ns)
 
 def generate_value_variant(val):
     if val is None:
@@ -938,7 +931,7 @@ def generate_value_variant(val):
         return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
                                 val.val, val.is_array, extension_object_generator)
     elif val.ty == VALUE_TYPE_DATETIME:
-        return generate_variant('SOPC_DateTime_Id', 'SOPC_DateTime', 'Date', val.val, val.is_array, generate_datetime)
+        return generate_variant('SOPC_DateTime_Id', 'SOPC_DateTime', 'Date', val.val, val.is_array, generate_datetime_str)
     elif val.ty in UNSUPPORTED_POINTER_VARIANT_TYPES:
         # FIXME: The variant requires a pointer here, we need to wrap the value inside a 1-sized
         # array to trick the compiler.
