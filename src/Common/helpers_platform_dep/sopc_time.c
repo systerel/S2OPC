@@ -188,38 +188,47 @@ SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dateTime, time_t* res)
 static int64_t daysSince1601(int16_t year, uint8_t month, uint8_t day)
 {
     assert(year >= 1601);
-    assert(year <= 9999);
+    assert(year <= 10000);
 
-    // Change base year from 1 to 1601 (safe since 1601 <= year <= 9999)
-    int16_t yearBased1601 = (int16_t)(year - 1600);
+    // Years since 1601
+    int16_t elapsedYearsSince1601 = (int16_t)(year - 1601);
 
     // Month-to-day offset for non-leap-years.
     const int64_t monthDaysElapsed[12] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-    // Number of February months (no year 0)
-    int64_t nbFebs = yearBased1601 - (month <= 2 ? 1 : 0);
+    // Number of February months since 01/01/1601
+    int64_t nbFebs = elapsedYearsSince1601 + (1 - (month <= 2 ? 1 : 0));
 
-    // Total number of leap days
+    // Total number of leap days since 01/01/1601
     int64_t leapDays = (nbFebs / 4) - (nbFebs / 100) + (nbFebs / 400);
 
     // Total number of days =
     // 365 * elapsed years + elapsed leap days + elapsed days in current year before current month (without leap day)
     // + elapsed days in current month (- 1 since current day not elapsed yet)
-    int64_t days = 365 * (yearBased1601 - 1) + leapDays + monthDaysElapsed[month - 1] + day - 1;
+    int64_t days = 365 * elapsedYearsSince1601 + leapDays + monthDaysElapsed[month - 1] + day - 1;
 
     return days;
 }
 
 static int64_t secondsSince1601(int16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
 {
-    assert(year >= 1601);
-    assert(year <= 9999);
+    assert(year >= 1601 || (year == 1600 && month == 12 && day == 31));
+    assert(year <= 10000);
 
-    const int64_t secsByDay = 86400;
-    const int64_t secsCurrentDay = hour * 3600 + minute * 60 + second;
-    const int64_t nbDaysSince1601 = daysSince1601(year, month, day);
+    if (year >= 1601) // number of seconds since 1601
+    {
+        const int64_t secsByDay = 86400;
+        const int64_t secsCurrentDay = hour * 3600 + minute * 60 + second;
+        const int64_t nbDaysSince1601 = daysSince1601(year, month, day);
 
-    return secsByDay * nbDaysSince1601 + secsCurrentDay;
+        return secsByDay * nbDaysSince1601 + secsCurrentDay;
+    }
+    else // number of seconds until 01/01/1601 (from day 31/12/1600)
+    {
+        const int64_t secsUntil1601 = (24 - hour) * 3600 - minute * 60 - second;
+        // negative number of seconds since reference is 1601
+        return -1 * secsUntil1601;
+    }
 }
 
 SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, int64_t* res)
@@ -246,26 +255,20 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (year < 1601 ||
-        (1601 == year && 1 == month && 1 == day &&
-         // when year is 1601, check if equal to minimum time in UTC case or equal/earlier in UTC+<HH:MM> offset case
-         ((utc && 00 == hour && 00 == minute && 00 == second && secondAndFraction < sec_fraction_100ns) ||
-          (!utc && !utc_neg_off && (utc_hour_off > hour || (utc_hour_off == hour && utc_min_off >= minute))))))
+    if (year < 1601 && (year != 1600 || month != 12 || day != 31))
     {
-        // A date/time value is encoded as 0 if is equal to or earlier than 1601-01-01 12:00AM UTC
+        // A date/time value is encoded as 0 if is equal to or earlier than 1601-01-01 12:00AM UTC.
+        // Due to timezone offset to be considered, we keep a 24:00:00 margin as a first approximation.
+        // It excludes any date earlier than 31-12-1600.
         *res = 0;
         return SOPC_STATUS_OK;
     }
-    else if (year > 9999 ||
-             (9999 == year && 12 == month && 31 == day &&
-              // when year is 9999, check if equal to maximum time in UTC case or equal/greater in
-              // UTC-<HH:MM> offset case
-              ((utc && (24 == hour || (23 == hour && 59 == minute && 59 == second))) ||
-               (!utc && utc_neg_off &&
-                (utc_hour_off + hour > 23 || (utc_hour_off + hour == 23 && utc_min_off + minute >= 59))))))
+    else if (year > 9999 && (year != 10000 || month != 1 || day != 1))
     {
         // A date/time is encoded as the maximum value for an Int64 if
         // the value is equal to or greater than 9999-12-31 11:59:59PM UTC
+        // Due to timezone offset to be considered, we keep a 24:00:00 margin as a first approximation.
+        // It excludes any date greater than 01-01-10000.
         *res = INT64_MAX;
         return SOPC_STATUS_OK;
     }
@@ -288,12 +291,30 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
         }
     }
 
+    // Check date >= 1601-01-01 12:00AM UTC
+    if (secsSince1601 < 0)
+    {
+        // A date/time value is encoded as 0 if is equal to or earlier than 1601-01-01 12:00AM UTC.
+        // Due to timezone offset to be considered, we keep a 24:00:00 margin as a first approximation.
+        // It excludes any date earlier than 31-12-1600.
+        *res = 0;
+        return SOPC_STATUS_OK;
+    }
+    else if (secsSince1601 >= 265046774399) // Check date < 9999-12-31 11:59:59PM UTC
+    {
+        // Note: 265046774399 == secondsSince1601(9999, 12, 31, 23, 59, 59)
+
+        // A date/time is encoded as the maximum value for an Int64 if
+        // the value is equal to or greater than 9999-12-31 11:59:59PM UTC
+        *res = INT64_MAX;
+        return SOPC_STATUS_OK;
+    }
+
     // Compute seconds fraction if significant
     double sec_fraction = secondAndFraction - (double) second;
     int64_t hundredOfNanoseconds = (int64_t)(sec_fraction / sec_fraction_100ns);
 
-    // Note: no overflow possible for 1601 <= year <= 9999
+    // Note: no overflow possible for 1601 <= year <= 10000
     *res = secsSince1601 * SOPC_SECOND_TO_100_NANOSECONDS + hundredOfNanoseconds;
-
     return SOPC_STATUS_OK;
 }
