@@ -1868,14 +1868,61 @@ START_TEST(test_string_datetime_no_timezone)
     // Note: parser do not check day/month/year coherency
 
     // First day
-    check_ok_string_datetime_no_timezeone("2021-02-01T18:13:01.168764999", 2021, 02, 01, 18, 13, 01,
+    check_ok_string_datetime_no_timezeone("2021-02-01T18:13:01.168764999", 2021, 2, 1, 18, 13, 1, (double) 1.168764999);
+    // Last day of each month
+    check_ok_string_datetime_no_timezeone("2021-01-31T18:13:01.168764999", 2021, 1, 31, 18, 13, 1,
                                           (double) 1.168764999);
-    // Last last day
-    check_ok_string_datetime_no_timezeone("2021-02-31T18:13:01.168764999", 2021, 02, 31, 18, 13, 01,
+
+    check_ok_string_datetime_no_timezeone("2021-02-28T18:13:01.168764999", 2021, 2, 28, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("1700-02-28T18:13:01.168764999", 1700, 2, 28, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2000-02-29T18:13:01.168764999", 2000, 2, 29, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2004-02-29T18:13:01.168764999", 2004, 2, 29, 18, 13, 1,
+                                          (double) 1.168764999);
+
+    check_ok_string_datetime_no_timezeone("2021-03-31T18:13:01.168764999", 2021, 3, 31, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-04-30T18:13:01.168764999", 2021, 4, 30, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-05-31T18:13:01.168764999", 2021, 5, 31, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-06-30T18:13:01.168764999", 2021, 6, 30, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-07-31T18:13:01.168764999", 2021, 7, 31, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-08-31T18:13:01.168764999", 2021, 8, 31, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-09-30T18:13:01.168764999", 2021, 9, 30, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-10-31T18:13:01.168764999", 2021, 10, 31, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-11-30T18:13:01.168764999", 2021, 11, 30, 18, 13, 1,
+                                          (double) 1.168764999);
+    check_ok_string_datetime_no_timezeone("2021-12-31T18:13:01.168764999", 2021, 12, 31, 18, 13, 1,
                                           (double) 1.168764999);
     // Invalid out of [min, max] days range
-    check_nok_string_datetime_no_timezeone("2021-02-00T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (double) 0);
-    check_nok_string_datetime_no_timezeone("2021-02-32T18:13:01.168764999", 2021, 02, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-01-00T18:13:01.168764999", 2021, 1, 0, 0, 0, 0, (double) 0);
+    // Max 31
+    check_nok_string_datetime_no_timezeone("2021-01-32T18:13:01.168764999", 2021, 1, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-03-32T18:13:01.168764999", 2021, 3, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-05-32T18:13:01.168764999", 2021, 5, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-07-32T18:13:01.168764999", 2021, 7, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-08-32T18:13:01.168764999", 2021, 8, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-10-32T18:13:01.168764999", 2021, 10, 0, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-12-32T18:13:01.168764999", 2021, 12, 0, 0, 0, 0, (double) 0);
+    // Max 30
+    check_nok_string_datetime_no_timezeone("2021-04-31T18:13:01.168764999", 2021, 4, 31, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-06-31T18:13:01.168764999", 2021, 6, 31, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-09-31T18:13:01.168764999", 2021, 9, 31, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2021-11-31T18:13:01.168764999", 2021, 11, 31, 0, 0, 0, (double) 0);
+    // Max 29
+    check_nok_string_datetime_no_timezeone("2000-02-30T18:13:01.168764999", 2000, 2, 30, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("2004-02-30T18:13:01.168764999", 2004, 2, 30, 0, 0, 0, (double) 0);
+    // Max 28
+    check_nok_string_datetime_no_timezeone("2021-02-29T18:13:01.168764999", 2021, 2, 29, 0, 0, 0, (double) 0);
+    check_nok_string_datetime_no_timezeone("1700-02-29T18:13:01.168764999", 1700, 2, 29, 0, 0, 0, (double) 0);
 
     // First hour
     check_ok_string_datetime_no_timezeone("2021-02-16T00:13:01.168764999", 2021, 02, 16, 00, 13, 01,

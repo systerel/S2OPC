@@ -524,6 +524,26 @@ bool SOPC_stringToDateTime(const char* datetime,
     }
 
     /*
+     *  Check constraint: Day-of-month Values
+     *  The day value must be no more than 30 if month is one of 4, 6, 9, or 11;
+     *  no more than 28 if month is 2 and year is not divisible by 4,
+     *  or is divisible by 100 but not by 400;
+     *  and no more than 29 if month is 2 and year is divisible by 400, or by 4 but not by 100.
+     */
+    if (day > 30 && (4 == month || 6 == month || 9 == month || 11 == month))
+    {
+        return false;
+    }
+    if (day > 28 && (2 == month && (year % 4 != 0 || (0 == year % 100 && 0 != year % 400))))
+    {
+        return false;
+    }
+    if (day > 29 && 2 == month) // No more than 29 days in February
+    {
+        return false;
+    }
+
+    /*
      * Parse Hour:
      * ([01][0-9]|2[0-4]):
      */
