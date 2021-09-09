@@ -42,6 +42,7 @@
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
+#include "sopc_helper_time.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
@@ -1770,36 +1771,26 @@ END_TEST
 
 // Note: use macros to keep line number of caller
 
-#define check_string_datetime(datetime, success, expYear, expMonth, expDay, expHour, expMinute, expSecond,          \
-                              expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off)        \
-    {                                                                                                               \
-        int16_t year = 0;                                                                                           \
-        uint8_t month = 0;                                                                                          \
-        uint8_t day = 0;                                                                                            \
-        uint8_t hour = 0;                                                                                           \
-        uint8_t minute = 0;                                                                                         \
-        uint8_t second = 0;                                                                                         \
-        double secondAndFraction = 0.0;                                                                             \
-        bool utc = true;                                                                                            \
-        bool utc_neg_off = false;                                                                                   \
-        uint8_t utc_hour_off = 0;                                                                                   \
-        uint8_t utc_min_off = 0;                                                                                    \
-                                                                                                                    \
-        size_t len = strlen(datetime);                                                                              \
-        bool parseRes = SOPC_stringToDateTime(datetime, len, &year, &month, &day, &hour, &minute, &second,          \
-                                              &secondAndFraction, &utc, &utc_neg_off, &utc_hour_off, &utc_min_off); \
-        ck_assert(parseRes == success);                                                                             \
-        ck_assert_int_eq(expYear, year);                                                                            \
-        ck_assert_uint_eq(expMonth, month);                                                                         \
-        ck_assert_uint_eq(expDay, day);                                                                             \
-        ck_assert_uint_eq(expHour, hour);                                                                           \
-        ck_assert_uint_eq(expMinute, minute);                                                                       \
-        ck_assert_uint_eq(expSecond, second);                                                                       \
-        ck_assert_double_eq_tol(expSecondAndFraction, secondAndFraction, (double) 0.000000001);                     \
-        ck_assert(utc == expUtc);                                                                                   \
-        ck_assert_uint_eq(expUtc_neg_off, utc_neg_off);                                                             \
-        ck_assert_uint_eq(expUtc_hour_off, utc_hour_off);                                                           \
-        ck_assert_uint_eq(expUtc_min_off, utc_min_off);                                                             \
+#define check_string_datetime(datetime, success, expYear, expMonth, expDay, expHour, expMinute, expSecond,   \
+                              expSecondAndFraction, expUtc, expUtc_neg_off, expUtc_hour_off, expUtc_min_off) \
+    {                                                                                                        \
+        SOPC_tm res;                                                                                         \
+        memset(&res, 0, sizeof(res));                                                                        \
+                                                                                                             \
+        size_t len = strlen(datetime);                                                                       \
+        bool parseRes = SOPC_tm_FromXsdDateTime(datetime, len, &res);                                        \
+        ck_assert(parseRes == success);                                                                      \
+        ck_assert_int_eq(expYear, res.year);                                                                 \
+        ck_assert_uint_eq(expMonth, res.month);                                                              \
+        ck_assert_uint_eq(expDay, res.day);                                                                  \
+        ck_assert_uint_eq(expHour, res.hour);                                                                \
+        ck_assert_uint_eq(expMinute, res.minute);                                                            \
+        ck_assert_uint_eq(expSecond, res.second);                                                            \
+        ck_assert_double_eq_tol(expSecondAndFraction, res.secondAndFrac, (double) 0.000000001);              \
+        ck_assert(res.UTC == expUtc);                                                                        \
+        ck_assert_uint_eq(expUtc_neg_off, res.UTC_neg_off);                                                  \
+        ck_assert_uint_eq(expUtc_hour_off, res.UTC_hour_off);                                                \
+        ck_assert_uint_eq(expUtc_min_off, res.UTC_min_off);                                                  \
     }
 
 #define check_ok_string_datetime_no_timezeone(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond, \
@@ -1810,7 +1801,7 @@ END_TEST
 #define check_nok_string_datetime_no_timezeone(datetime, expYear, expMonth, expDay, expHour, expMinute, expSecond, \
                                                expSecondAndFraction)                                               \
     check_string_datetime(datetime, false, expYear, expMonth, expDay, expHour, expMinute, expSecond,               \
-                          expSecondAndFraction, true, false, 0, 0)
+                          expSecondAndFraction, false, false, 0, 0)
 
 START_TEST(test_string_datetime_no_timezone)
 {
@@ -1987,13 +1978,13 @@ START_TEST(test_string_datetime_with_timezone)
                              false, true, 01, 30);
 
     // Invalid separators / format
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999X", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999X", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, false,
                               false, 0, 0);
     check_nok_string_datetime("2021-02-16T18:13:01.168764999:03:45", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
-                              true, false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999-", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
+                              false, false, 0, 0);
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999-", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, false,
                               false, 0, 0);
-    check_nok_string_datetime("2021-02-16T18:13:01.168764999+", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, true,
+    check_nok_string_datetime("2021-02-16T18:13:01.168764999+", 2021, 02, 16, 18, 13, 01, (double) 1.168764999, false,
                               false, 0, 0);
     check_nok_string_datetime("2021-02-16T18:13:01.168764999+01:30+", 2021, 02, 16, 18, 13, 01, (double) 1.168764999,
                               false, false, 01, 30);
@@ -2012,14 +2003,14 @@ START_TEST(test_string_datetime_with_timezone)
 
     // Hour == 14 not allowed if minute != 0
     check_nok_string_datetime("2021-02-16T00:13:01.168764999-14:01", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
-                              true, false, 00, 00);
+                              false, false, 00, 00);
     check_nok_string_datetime("2021-02-16T00:13:01.168764999+14:01", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
-                              true, false, 00, 00);
+                              false, false, 00, 00);
     // Hour > 14 not allowed
     check_nok_string_datetime("2021-02-16T00:13:01.168764999-15:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
-                              true, false, 00, 00);
+                              false, false, 00, 00);
     check_nok_string_datetime("2021-02-16T00:13:01.168764999+15:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
-                              true, false, 00, 00);
+                              false, false, 00, 00);
 
     // First minute
     check_ok_string_datetime("2021-02-16T00:13:01.168764999+12:00", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
@@ -2029,7 +2020,7 @@ START_TEST(test_string_datetime_with_timezone)
                              false, false, 12, 59);
     // Invalid minute (> max)
     check_nok_string_datetime("2021-02-16T00:13:01.168764999+12:60", 2021, 02, 16, 00, 13, 01, (double) 1.168764999,
-                              true, false, 00, 00);
+                              false, false, 00, 00);
 }
 
 // Async queue

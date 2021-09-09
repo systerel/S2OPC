@@ -172,20 +172,4 @@ SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res);
  */
 SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dt, time_t* res);
 
-/**
- * \brief Converts a string using XSD DateTime format (see ::SOPC_stringToDateTime) to a time expressed in 100ns slices
- * since 1601/01/01 00:00:00 UTC.
- *
- * \warning This function uses similar limitation as indicated for encoding for OPC UA binary DateTime (see part 6):
- *  - A date/time value is encoded as 0 if the year is earlier than 1601
- *  - A date/time is encoded as the maximum value for an Int64 if the year is greater than 9999
- *  Since those values cannot be encoded as indicated by OPC UA standard, there is no need to manage converting those.
- *
- * \param dateTime  The string containing a XSD datetime value to parse
- * \param len       The length of the the string (strlen(datetime) if datetime is a C string)
- * \param res       The resulting time
- * \return          \ref SOPC_STATUS_OK on success, an error code on failure
- */
-SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, int64_t* res);
-
 #endif /* SOPC_TIME_H_ */
