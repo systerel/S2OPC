@@ -100,8 +100,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
     remainingLength -= (size_t)(endPointer - currentPointer);
     currentPointer = endPointer;
 
-    tm->year = res.year;
-
     /*
      * Parse Month:
      * (0[1-9]|1[0-2])-
@@ -114,8 +112,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
     remainingLength -= 3;
     currentPointer += 3;
 
-    tm->month = res.month;
-
     /*
      * Parse Day:
      * (0[1-9]|[12][0-9]|3[01])T
@@ -127,8 +123,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
     }
     remainingLength -= 3;
     currentPointer += 3;
-
-    tm->day = res.day;
 
     /*
      *  Check constraint: Day-of-month Values
@@ -163,8 +157,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
     remainingLength -= 3;
     currentPointer += 3;
 
-    tm->hour = res.hour;
-
     /*
      * Parse Minutes:
      * ([0-5][0-9]):
@@ -177,8 +169,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
     }
     remainingLength -= 3;
     currentPointer += 3;
-
-    tm->minute = res.minute;
 
     /*
      * Parse Seconds (whole number part):
@@ -195,28 +185,18 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
         return false;
     }
 
-    tm->second = res.second;
-
     // Initialize seconds without fraction first (in case of no fraction present)
     res.secondAndFrac = (double) res.second;
 
     // Check 24:00:00 special case
     if (24 == res.hour && (0 != res.minute || 0 != res.second))
     {
-        tm->minute = 0;
-
-        tm->second = 0;
-
         return false;
     }
 
     if (2 == remainingLength)
     {
         // Whole datetime string consume without any error
-
-        // Set the seconds with fraction since we will not parse a fraction later
-        tm->secondAndFrac = res.secondAndFrac;
-
         *tm = res;
 
         return true;
@@ -261,8 +241,6 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
         remainingLength -= 2;
         currentPointer += 2;
     }
-
-    tm->secondAndFrac = res.secondAndFrac;
 
     if (0 != remainingLength && 'Z' != *currentPointer)
     {
@@ -320,12 +298,13 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
         currentPointer++;
     }
 
-    tm->UTC = res.UTC;
-    tm->UTC_neg_off = res.UTC_neg_off;
-    tm->UTC_hour_off = res.UTC_hour_off;
-    tm->UTC_min_off = res.UTC_min_off;
+    if (0 != remainingLength)
+    {
+        return false;
+    }
 
-    return 0 == remainingLength;
+    *tm = res;
+    return true;
 }
 
 static int64_t daysSince1601(int16_t year, uint8_t month, uint8_t day)
