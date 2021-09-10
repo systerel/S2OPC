@@ -142,7 +142,7 @@ typedef struct SOPC_tm
  * \param datetime         The string containing a XSD datetime value to parse
  * \param len              The length of the the string (strlen(datetime) if datetime is a C string)
  *
- * \param pTm              Pointer to broken-down time structure used as output parameter.
+ * \param tm              Pointer to broken-down time structure used as output parameter.
  *                         It is filled in case of success.
  *
  * \return                 Returns true if the datetime parsing succeeded and \p len characters parsed, false otherwise
@@ -150,8 +150,8 @@ typedef struct SOPC_tm
 bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm);
 
 /**
- * \brief Converts a string using XSD DateTime format (see ::SOPC_stringToDateTime) to a time expressed in 100ns slices
- * since 1601/01/01 00:00:00 UTC.
+ * \brief Converts a string using XSD DateTime format (see ::SOPC_tm_FromXsdDateTime) to a time expressed in 100ns
+ * slices since 1601/01/01 00:00:00 UTC.
  *
  * \warning This function uses similar limitation as indicated for encoding for OPC UA binary DateTime (see part 6):
  *  - A date/time value is encoded as 0 if the year is earlier than 1601
