@@ -158,6 +158,9 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm);
  *  - A date/time is encoded as the maximum value for an Int64 if the year is greater than 9999
  *  Since those values cannot be encoded as indicated by OPC UA standard, there is no need to manage converting those.
  *
+ *  \warning This function considers leap days but not leap seconds since it is not requested by OPC UA specification
+ * (see part 3 and 6). It means each day is considered to be 86400 seconds without considering any leap seconds.
+ *
  * \param dateTime  The string containing a XSD datetime value to parse
  * \param len       The length of the the string (strlen(datetime) if datetime is a C string)
  * \param res       The resulting time
