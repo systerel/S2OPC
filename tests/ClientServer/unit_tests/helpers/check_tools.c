@@ -1858,8 +1858,6 @@ START_TEST(test_string_datetime_no_timezone)
 
     check_nok_string_datetime("2021-13-16T18:13:01.168764999");
 
-    // Note: parser do not check day/month/year coherency
-
     // First day
     check_ok_string_datetime_no_timezeone("2021-02-01T18:13:01.168764999", 2021, 2, 1, 18, 13, 1, (double) 1.168764999);
     // Last day of each month
@@ -2353,8 +2351,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_basic_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
-                                            // endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -2769,8 +2766,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_other_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
-                                            // endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -3239,8 +3235,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(buffer->data[4] == 0x00);
     ck_assert(buffer->data[5] == 0x01);
 
-    // Four bytes node id (limit of two bytes representation on namespace
-    // value)
+    // Four bytes node id (limit of two bytes representation on namespace value)
     nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
     nodeId.Namespace = 1;
     nodeId.Data.Numeric = 255;
@@ -3373,8 +3368,7 @@ END_TEST
 
 START_TEST(test_ua_decoder_allocation_limit)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize
-                                            // endianness configuration
+    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_String s;
     SOPC_String_Initialize(&s);
@@ -3592,8 +3586,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_Variant_Clear(&v);
 
-    // Set position to write to buffer: position = position - 4 * 4 bytes to
-    // write array dimensions length
+    // Set position to write to buffer: position = position - 4 * 4 bytes to write array dimensions length
     status = SOPC_Buffer_SetPosition(buffer, buffer->position - 4 * 4);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Overwrite with limit+1 length value
@@ -3614,8 +3607,7 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS (TEST NESTED VERSION OF
-     * CODE) */
+    /* LIMIT SIZE + 1 OF A VARIANT ARRAY ELEMENTS (TEST NESTED VERSION OF CODE) */
     v.BuiltInTypeId = SOPC_Variant_Id;
     v.ArrayType = SOPC_VariantArrayType_Array;
     v.Value.Array.Length = 1;
@@ -3648,9 +3640,8 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT OF NESTED VARIANT ELEMENTS */
 
-    // ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL nested
-    // levels Variant/Array nested so limit has to be divided by 2, minus 1
-    // for fields
+    // ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL nested levels
+    // Variant/Array nested so limit has to be divided by 2, minus 1 for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 2; idx++)
     {
@@ -3705,9 +3696,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // ENCODING A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL Variant
-    // nested levels Variant/DataValue nested so limit has to be divided by 2,
-    // minus one for fields
+    // ENCODING A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL Variant nested levels
+    // Variant/DataValue nested so limit has to be divided by 2, minus one for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 2; idx++)
     {
@@ -3741,9 +3731,8 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT + 1 OF NESTED VARIANT ELEMENTS */
 
-    // TEST ENCODER FAILURE OF A VARIANT WITH
-    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL /2 nested levels Nested
-    // Variant/Datavalue, so limit has to be divided by 2 minus 1 for fields
+    // TEST ENCODER FAILURE OF A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL /2 nested levels
+    // Nested Variant/Datavalue, so limit has to be divided by 2 minus 1 for fields
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
     {
@@ -3767,8 +3756,8 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // MANUAL ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL/2
-    // nested levels Nested Variant/Array so limit has to be divided by 2
+    // MANUAL ENCODING A VARIANT WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL/2 nested levels
+    // Nested Variant/Array so limit has to be divided by 2
     encodingByte = 152; // Variant Id + 2^7 bit to indicate an array
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL / 2 - 1; idx++)
@@ -3802,8 +3791,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // TEST ENCODER FAILURE OF A DATAVALUE WITH
-    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
+    // TEST ENCODER FAILURE OF A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
     pvar = &v;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1; idx++)
     {
@@ -3827,8 +3815,7 @@ START_TEST(test_ua_decoder_allocation_limit)
     status = SOPC_Buffer_ResetAfterPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // MANUAL ENCODING OF A DATAVALUE WITH
-    // SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
+    // MANUAL ENCODING OF A DATAVALUE WITH SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1 Variant nested levels
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL + 1; idx++)
     {
@@ -3837,8 +3824,7 @@ START_TEST(test_ua_decoder_allocation_limit)
         status = SOPC_Byte_Write(&encodingByte, buffer, 0);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
         // DataValue
-        encodingByte = SOPC_DataValue_NotNullValue; // It indicates there is a value
-                                                    // and nothing else in DataValue
+        encodingByte = SOPC_DataValue_NotNullValue; // It indicates there is a value and nothing else in DataValue
         // EncodingMask byte
         status = SOPC_Byte_Write(&encodingByte, buffer, 0);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -3868,8 +3854,7 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT OF NESTED DIAG INFO */
 
-    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL
-    // nested levels
+    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL nested levels
     pDiag = &diag;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL; idx++)
     {
@@ -3920,8 +3905,7 @@ START_TEST(test_ua_decoder_allocation_limit)
 
     /* LIMIT+1 OF NESTED DIAG INFO */
 
-    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL+1
-    // nested levels
+    // ENCODING A DIAG INFO WITH SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL+1 nested levels
     encodingByte = SOPC_DiagInfoEncoding_InnerDianosticInfo;
     length = 1;
     for (idx = 1; idx <= SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL + 1; idx++)
@@ -4177,8 +4161,7 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt,
-                                        &comp_res); // same with an LT array
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
@@ -4201,8 +4184,7 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt,
-                                        &comp_res); // same with an LT array
+    status = SOPC_LocalizedText_Compare(&singleLt, &single3Lt, &comp_res); // same with an LT array
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
@@ -4218,8 +4200,7 @@ START_TEST(test_ua_localized_text_type)
     status = SOPC_LocalizedText_AddOrSetLocale(&setOfLt, supportedLocales, &singleLt);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // Keep only en-UK as english preferred locale and do not keep another
-    // exactly valid neither
+    // Keep only en-UK as english preferred locale and do not keep another exactly valid neither
     char* preferredLocales3[] = {"de-DE", "en-UK", "fr-BE", NULL};
 
     // en-US shall be preferred
@@ -4236,8 +4217,7 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    // Keep only 'en' as english preferred locale and do not keep another
-    // exactly valid neither
+    // Keep only 'en' as english preferred locale and do not keep another exactly valid neither
     char* preferredLocales4[] = {"de-DE", "en", "fr-BE", NULL};
     // en-US shall be preferred
     SOPC_LocalizedText_Clear(&single2Lt);
@@ -4248,8 +4228,7 @@ START_TEST(test_ua_localized_text_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, comp_res);
 
-    // Keep only en-UK as english preferred locale but also keep fr-FR exact
-    // and valid locale
+    // Keep only en-UK as english preferred locale but also keep fr-FR exact and valid locale
     char* preferredLocales5[] = {"de-DE", "en-UK", "fr-FR", NULL};
 
     // fr-FR shall be preferred
@@ -4291,8 +4270,7 @@ START_TEST(test_ua_localized_text_type)
     result = SOPC_String_Equal(&setOfLt.defaultText, &single2Lt.defaultText);
     ck_assert_int_eq(true, result);
 
-    // Set the default locale to specialized locale: test specific case of
-    // deletion of the default one
+    // Set the default locale to specialized locale: test specific case of deletion of the default one
     status = SOPC_String_AttachFromCstring(&setOfLt.defaultLocale, "en-UK");
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -4454,8 +4432,7 @@ START_TEST(test_ua_variant_get_range_scalar)
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
 
-    // Except String and ByteString, we shouldn't be able to dereference
-    // scalar types
+    // Except String and ByteString, we shouldn't be able to dereference scalar types
     for (SOPC_BuiltinId type_id = SOPC_Null_Id; type_id < SOPC_DiagnosticInfo_Id; ++type_id)
     {
         if (type_id == SOPC_String_Id || type_id == SOPC_ByteString_Id)
@@ -4682,8 +4659,7 @@ START_TEST(test_ua_variant_set_range_scalar)
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2", &array_single));
     ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("3:5", &array_range));
 
-    // Except String and ByteString, we shouldn't be able to dereference
-    // scalar types
+    // Except String and ByteString, we shouldn't be able to dereference scalar types
     for (SOPC_BuiltinId type_id = SOPC_Null_Id; type_id < SOPC_DiagnosticInfo_Id; ++type_id)
     {
         if (type_id == SOPC_String_Id || type_id == SOPC_ByteString_Id)
