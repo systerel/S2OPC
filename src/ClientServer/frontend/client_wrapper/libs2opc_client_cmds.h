@@ -41,6 +41,9 @@
 /**
   @brief
     Callback type for data change event (related to a subscription)
+  @warning
+    No blocking operation shall be done in callback
+
   @param connectionId
     The connection id on which the datachange happened
   @param nodeId
@@ -54,7 +57,10 @@ typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
 
 /**
  * @brief
- *   Callback type for disconnection
+ *   Callback type for disconnection.
+ * @warning
+ *   No blocking operation shall be done in callback
+ *
  * @param connectionId
  *   The disconnected connection id
  */

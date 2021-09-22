@@ -48,6 +48,8 @@
 /**
  * \brief Type of callback called when server stopped
  *
+ * \warning No blocking operation shall be done in callback
+ *
  * \param status  Indicates the return status of server, SOPC_STATUS_OK if stopped on purpose.
  */
 typedef void SOPC_ServerStopped_Fct(SOPC_ReturnStatus status);
@@ -105,10 +107,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called
  *       and the server shall still running
  *
+ * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
+ *
  * \param request   An instance of on of the following OPC UA request:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
+ *                  - ::OpcUa_TranslateBrowsePathsToNodeIdsRequest
  *                  - ::OpcUa_GetEndpointsRequest
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
@@ -125,17 +130,17 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
 
 /**
  * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) synchronously.
- *        On local service response callback configured through ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
- *        will be called.
  *
  * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called
  *       and the server shall still running
  *
+ * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
  *
  * \param request   An instance of on of the following OPC UA request:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
+ *                  - ::OpcUa_TranslateBrowsePathsToNodeIdsRequest
  *                  - ::OpcUa_GetEndpointsRequest
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
@@ -145,6 +150,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                       - ::OpcUa_ReadResponse
  *                       - ::OpcUa_WriteResponse
  *                       - ::OpcUa_BrowseResponse
+ *                       - ::OpcUa_TranslateBrowsePathsToNodeIdsResponse
  *                       - ::OpcUa_GetEndpointsResponse
  *                       - ::OpcUa_FindServersResponse
  *                       - ::OpcUa_FindServersOnNetworkResponse
