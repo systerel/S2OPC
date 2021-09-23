@@ -25,7 +25,7 @@ import binascii
 import sys
 import uuid
 import os
-from datetime import datetime, timezone, timedelta, MAXYEAR
+from datetime import datetime, timezone, timedelta, MINYEAR, MAXYEAR
 import re
 from xml.etree.ElementTree import iterparse, Element
 from functools import partial
@@ -811,7 +811,7 @@ def generate_argument_ext_obj(obj):
 
 def parse_xml_datetime(val):
     dt = re.match('''^
-      (?P<year>-?[0-9]{4}) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
+      (?P<year>-?([1-9][0-9]{3,}|0[0-9]{3})) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
       T (?P<hour>[0-2][0-9]) : (?P<minute>[0-5][0-9]) : (?P<second>[0-5][0-9])
       (?P<sec_frac>\.[0-9]{1,})?
       (?P<tz>
@@ -856,6 +856,14 @@ def parse_xml_datetime(val):
         except OverflowError:
             # Manage 24:00:00 on 9999-12-31 (no microseconds included)
             final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=values['tzinfo'])
+        except ValueError:
+            print(values)
+            if values['year'] > MAXYEAR:
+                final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=values['tzinfo'])
+            elif values['year'] < MINYEAR:
+                final_dt =  datetime(MINYEAR, 1, 1, 0, 0, 0, tzinfo=values['tzinfo'])
+            else:
+                raise ValueError('Unexpected datetime parameters: {}'.format(values))
         return final_dt, sec_frac
     else:
         raise ValueError('Parsed value {} does not match XML datetime format'.format(val))
@@ -863,6 +871,7 @@ def parse_xml_datetime(val):
 def generate_datetime_str(val):
     # Parse xsd:datetime string to a Python datetime + seconds fraction (might be None)
     dt, sec_frac = parse_xml_datetime(val)
+    print(dt)
     dt_epoch_1601=datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     # Filter min/max values for binary format
     if dt <= dt_epoch_1601:
