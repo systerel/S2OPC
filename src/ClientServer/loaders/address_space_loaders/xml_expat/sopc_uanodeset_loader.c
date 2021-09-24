@@ -35,7 +35,6 @@
 #include "sopc_hash.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
-#include "sopc_helper_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"

@@ -42,7 +42,6 @@
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
-#include "sopc_helper_time.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
