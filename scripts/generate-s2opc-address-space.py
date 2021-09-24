@@ -857,11 +857,28 @@ def parse_xml_datetime(val):
             # Manage 24:00:00 on 9999-12-31 (no microseconds included)
             final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=values['tzinfo'])
         except ValueError:
-            print(values)
             if values['year'] > MAXYEAR:
-                final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=values['tzinfo'])
+                # max datetime with tzinfo
+                final_dt =  datetime(MAXYEAR, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+                if values['year'] == MAXYEAR +1 and values['month'] == 1 and values['day'] == 1:
+                    offset_dt = tzinfo.utcoffset(None)
+                    time_dt = timedelta(hours=values['hour'], minutes=values['minute'], seconds=values['second'])
+                    if offset_dt  > time_dt:
+                        # apply the timezone offset to datetime data to keep year < MAXYEAR
+                        values['year'] -= 1
+                        values['month'] = 12
+                        values['day'] = 31
+                        values['hour'] = (values['hour'] - int(offset_dt.seconds / 3600)) % 24
+                        values['minute'] = (values['minute'] - int(offset_dt.seconds % 3600 / 60)) % 60
+                        values['tzinfo'] = timezone.utc
+                        try:
+                            final_dt = datetime(**values)
+                        except:
+                            # In case of error, keep max datetime
+                            None
             elif values['year'] < MINYEAR:
-                final_dt =  datetime(MINYEAR, 1, 1, 0, 0, 0, tzinfo=values['tzinfo'])
+                # Min datetime with tzinfo
+                final_dt =  datetime(MINYEAR, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
             else:
                 raise ValueError('Unexpected datetime parameters: {}'.format(values))
         return final_dt, sec_frac
@@ -871,7 +888,6 @@ def parse_xml_datetime(val):
 def generate_datetime_str(val):
     # Parse xsd:datetime string to a Python datetime + seconds fraction (might be None)
     dt, sec_frac = parse_xml_datetime(val)
-    print(dt)
     dt_epoch_1601=datetime(1601, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
     # Filter min/max values for binary format
     if dt <= dt_epoch_1601:
