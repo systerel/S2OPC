@@ -20069,6 +20069,13 @@
         <uax:DateTime>2021-03-17T16:57:42+01:00</uax:DateTime>
         <uax:DateTime>2021-03-17T24:00:00</uax:DateTime>
         <uax:DateTime>2021-03-17T24:00:00Z</uax:DateTime>
+        <uax:DateTime>-1000-01-01T00:00:00</uax:DateTime>
+        <uax:DateTime>1600-01-01T00:00:00</uax:DateTime>
+        <uax:DateTime>1600-12-31T23:59:59</uax:DateTime>
+        <uax:DateTime>1600-12-31T23:00:00+02:00</uax:DateTime>
+        <uax:DateTime>1600-12-31T24:00:00</uax:DateTime>
+        <uax:DateTime>1601-01-01T14:00:00+14:00</uax:DateTime>
+        <uax:DateTime>1601-01-01T00:00:00+14:00</uax:DateTime>
         <uax:DateTime>1601-01-01T00:00:00</uax:DateTime>
         <uax:DateTime>1601-01-01T00:00:00.0000000</uax:DateTime>
         <uax:DateTime>1601-01-01T00:00:00.0000001</uax:DateTime>
@@ -20076,6 +20083,12 @@
         <uax:DateTime>9999-12-31T23:59:59.0000001</uax:DateTime>
         <uax:DateTime>9999-12-31T24:00:00</uax:DateTime>
         <uax:DateTime>9999-12-31T23:59:58</uax:DateTime>
+        <uax:DateTime>10000-12-01T00:00:00</uax:DateTime>
+        <uax:DateTime>10000-01-01T00:00:00</uax:DateTime>
+        <uax:DateTime>10000-01-01T13:00:00+14:00</uax:DateTime>
+        <uax:DateTime>9999-12-31T09:00:00-14:00</uax:DateTime>
+        <uax:DateTime>9999-12-31T10:00:00-14:00</uax:DateTime>
+        <uax:DateTime>9999-12-31T11:00:00-14:00</uax:DateTime>
       </uax:ListOfDateTime>
     </Value>
   </UAVariable>
