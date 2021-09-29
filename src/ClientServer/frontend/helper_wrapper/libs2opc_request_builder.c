@@ -492,6 +492,156 @@ SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRe
     return status;
 }
 
+OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Create(size_t nbTranslateBrowsePaths)
+{
+    if (nbTranslateBrowsePaths > INT32_MAX)
+    {
+        return NULL;
+    }
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* req = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_Create(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return NULL;
+    }
+    req->BrowsePaths = SOPC_Calloc(nbTranslateBrowsePaths, sizeof(*req->BrowsePaths));
+    if (NULL != req->BrowsePaths)
+    {
+        req->NoOfBrowsePaths = (int32_t) nbTranslateBrowsePaths;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Initialize elements
+        for (int32_t i = 0; i < req->NoOfBrowsePaths; i++)
+        {
+            OpcUa_BrowsePath_Initialize(&req->BrowsePaths[i]);
+        }
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
+    }
+
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
+    size_t index,
+    const char* startingNodeId,
+    size_t nbPathElements,
+    OpcUa_RelativePathElement* pathElements)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(tbpRequest, NoOfBrowsePaths, index) || NULL == startingNodeId || 0 == nbPathElements ||
+        nbPathElements > INT32_MAX || NULL == pathElements)
+    {
+        return status;
+    }
+    OpcUa_BrowsePath* bp = &tbpRequest->BrowsePaths[index];
+
+    status = SOPC_NodeId_InitializeFromCString(&bp->StartingNode, startingNodeId, (int32_t) strlen(startingNodeId));
+
+    if (SOPC_STATUS_OK == status)
+    {
+        bp->RelativePath.Elements = pathElements;
+        bp->RelativePath.NoOfElements = (int32_t) nbPathElements;
+    }
+    else
+    {
+        OpcUa_BrowsePath_Clear(bp);
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
+                                                          size_t index,
+                                                          SOPC_NodeId* startingNodeId,
+                                                          size_t nbPathElements,
+                                                          OpcUa_RelativePathElement* pathElements)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(tbpRequest, NoOfBrowsePaths, index) || NULL == startingNodeId || 0 == nbPathElements ||
+        nbPathElements > INT32_MAX || NULL == pathElements)
+    {
+        return status;
+    }
+    OpcUa_BrowsePath* bp = &tbpRequest->BrowsePaths[index];
+
+    status = SOPC_NodeId_Copy(&bp->StartingNode, startingNodeId);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        bp->RelativePath.Elements = pathElements;
+        bp->RelativePath.NoOfElements = (int32_t) nbPathElements;
+    }
+    else
+    {
+        OpcUa_BrowsePath_Clear(bp);
+    }
+
+    return status;
+}
+
+OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElements)
+{
+    OpcUa_RelativePathElement* res = NULL;
+    if (nbPathElements > INT32_MAX)
+    {
+        return res;
+    }
+    res = SOPC_Calloc(nbPathElements, sizeof(OpcUa_RelativePathElement));
+
+    return res;
+}
+
+SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathElement* pathElementsArray,
+                                                           size_t index,
+                                                           SOPC_NodeId* referenceTypeId,
+                                                           bool isInverse,
+                                                           bool includeSubtypes,
+                                                           uint16_t targetNsIndex,
+                                                           const char* targetName)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == pathElementsArray || NULL == targetName || index > INT32_MAX)
+    {
+        return status;
+    }
+
+    OpcUa_RelativePathElement* rpe = &pathElementsArray[index];
+
+    status = SOPC_STATUS_OK;
+    if (NULL != referenceTypeId)
+    {
+        status = SOPC_NodeId_Copy(&rpe->ReferenceTypeId, referenceTypeId);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_CopyFromCString(&rpe->TargetName.Name, targetName);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        rpe->TargetName.NamespaceIndex = targetNsIndex;
+        rpe->IsInverse = isInverse;
+        rpe->IncludeSubtypes = includeSubtypes;
+    }
+    else
+    {
+        OpcUa_RelativePathElement_Clear(rpe);
+    }
+
+    return status;
+}
+
 OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointURL)
 {
     OpcUa_GetEndpointsRequest* getEndpointReq = NULL;

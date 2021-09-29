@@ -392,6 +392,127 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
 OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationPoints, size_t nbContinuationPoints);
 
 /**
+ * \brief Create a translate browse paths request
+ *
+ * \param nbTranslateBrowsePaths   Number of nodes to browse with this browse request.
+ *                                 \p nbTranslateBrowsePaths <= INT32_MAX.
+ *                                 ::SOPC_TranslateBrowsePathRequest_SetPathFromString or
+ *                                 ::SOPC_TranslateBrowsePathRequest_SetPath shall be called
+ *                                 for each path description index.
+ *                                 Otherwise empty path description is sent for the index not configured.
+ *
+ * \return allocated translate browse request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Create(size_t nbTranslateBrowsePaths);
+
+/**
+ * \brief Set the browse path to translate at given index in translate browse paths request
+ *        (using C strings for node id)
+ *
+ * \param tbpRequest       The translate browse paths request to configure
+ *
+ * \param index            Index of the browse path description to configure in the translate browse path request.
+ *                         \p index < number of browse paths configured in ::SOPC_TranslateBrowsePathsRequest_Create
+ *
+ * \param startingNodeId   The id of the node from which translate browse path start as a C string.
+ *                         E.g. 'ns=1;s=MyNode'.  \p nodeId shall not be NULL.
+ *                         Format is described in
+ *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                         OPC UA specification</a>.
+ *
+ * \param nbPathElements   The number of elements in the path (>0).
+ *
+ * \param pathElements     The array of path elements of length \p nbPathElements.
+ *                         It might be built using ::SOPC_RelativePathElements_Create and shall not be NULL.
+ *                         The array is assigned in the translate browse path request
+ *                         and its memory managed with request.
+ *                         i.e. \p pathElements shall not be unallocated or used anymore.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or path elements.
+ */
+SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
+    size_t index,
+    const char* startingNodeId,
+    size_t nbPathElements,
+    OpcUa_RelativePathElement* pathElements);
+
+/**
+ * \brief Set the browse path to translate at given index in translate browse paths request
+ *
+ * \param tbpRequest       The translate browse paths request to configure
+ *
+ * \param index            Index of the browse path description to configure in the translate browse path request.
+ *                         \p index < number of browse paths configured in ::SOPC_TranslateBrowsePathsRequest_Create
+ *
+ * \param startingNodeId   The id of the node from which translate browse path start, \p nodeId shall not be NULL.
+ *
+ * \param nbPathElements   The number of elements in the path (>0).
+ *
+ * \param pathElements     The array of path elements of length \p nbPathElements.
+ *                         It might be built using ::SOPC_RelativePathElements_Create and shall not be NULL.
+ *                         The array is assigned in the translate browse path request
+ *                         and its memory managed with request.
+ *                         i.e. \p pathElements shall not be unallocated or used anymore.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or path elements.
+ */
+SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
+                                                          size_t index,
+                                                          SOPC_NodeId* startingNodeId,
+                                                          size_t nbPathElements,
+                                                          OpcUa_RelativePathElement* pathElements);
+
+/**
+ * \brief Create an array of relative path element to be used in translate browse path.
+ *
+ * \param nbPathElements   Number of relative path elements in the array
+ *                                 \p nbPathElements <= INT32_MAX.
+ *                                 ::SOPC_RelativePathElements_SetPathElement shall be called
+ *                                 for each path element description index.
+ *                                 Otherwise empty path element description is sent for the index not configured.
+ *
+ * \return allocated relative path element array in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElements);
+
+/**
+ * \brief Set the path element at given index in relative path element array
+ *
+ * \param pathElementsArray  The array of path elements to initialize
+ *
+ * \param index            Index of the path element description to configure in the array.
+ *                         \p index < number of path elements configured in ::SOPC_RelativePathElements_Create
+ *
+ * \param referenceTypeId  The id of a node defining the kind of reference to follow from the current node
+ *                         or NULL if all References are included (in this case parameter includeSubtypes is ignored).
+ *
+ * \param isInverse        Only inverse references shall be followed if this value is TRUE.
+ *                         Only forward references shall be followed if this value is FALSE.
+ *
+ * \param includeSubtypes  Indicates whether subtypes of \p referenceTypeId shall be followed.
+ *                         Subtypes are included if this value is TRUE.
+ *
+ * \param targetNsIndex    Index of the namespace of the expected target node
+ *
+ * \param targetName       BrowseName of the expected target node
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ */
+SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathElement* pathElementsArray,
+                                                           size_t index,
+                                                           SOPC_NodeId* referenceTypeId,
+                                                           bool isInverse,
+                                                           bool includeSubtypes,
+                                                           uint16_t targetNsIndex,
+                                                           const char* targetName);
+
+/**
  * \brief Set the continuation point to browse at given index in browse next request
  *
  * \param browseNextRequest  The browse next request to configure
