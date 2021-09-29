@@ -171,6 +171,8 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues);
  *                     Format is described in
  *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
  *                     OPC UA specification</a>.
+ *                     If the indexRange parameter is specified then the Value in \p value shall be an array even if
+ *                     only one element is being written.
  *
  * \param value        The value to write for given item (node, attribute, index range).
  *                     \p value shall not be NULL
@@ -208,6 +210,8 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
  *                     Format is described in
  *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
  *                     OPC UA specification</a>.
+ *                     If the indexRange parameter is specified then the Value in \p value shall be an array even if
+ *                     only one element is being written.
  *
  * \param value        The value to write for given item (node, attribute, index range).
  *                     \p value shall not be NULL
