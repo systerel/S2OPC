@@ -530,7 +530,7 @@ OPERATIONS
                 /* Set local treatment since user can be anyone in subscription: avoid user right verification */
                 set_local_service_treatment;
                 l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv
-                <-- read_AddressSpace_Attribute_value(p_user, p_locales, l_node, l_nid, l_aid, l_index_range);
+                <-- read_AddressSpace_Attribute_value(p_user, p_locales, l_node, l_nid, l_aid, c_IndexRange_indet);
                 unset_local_service_treatment;
                 IF l_new_sc = e_sc_ok THEN
                     gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
