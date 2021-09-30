@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 03/01/2022 11:09:02
+ Date                 : 04/01/2022 13:24:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -284,7 +284,7 @@ void session_mgr__server_receive_session_req(
             &session_mgr__l_channel_config_idx);
          channel_mgr__server_get_endpoint_config(session_mgr__channel,
             &session_mgr__l_endpoint_config_idx);
-         user_authentication__has_user_token_policy_available(session_mgr__l_channel_config_idx,
+         session_core__has_user_token_policy_available(session_mgr__l_channel_config_idx,
             session_mgr__l_endpoint_config_idx,
             &session_mgr__l_has_user_token_policy_available);
          if (session_mgr__l_has_user_token_policy_available == true) {
@@ -322,14 +322,10 @@ void session_mgr__server_receive_session_req(
                message_in_bs__read_activate_req_msg_identity_token(session_mgr__req_msg,
                   &session_mgr__l_is_valid_user_token,
                   &session_mgr__l_user_token);
-               channel_mgr__get_channel_info(session_mgr__channel,
-                  &session_mgr__l_channel_config_idx);
-               channel_mgr__server_get_endpoint_config(session_mgr__channel,
-                  &session_mgr__l_endpoint_config_idx);
                if (session_mgr__l_is_valid_user_token == true) {
-                  user_authentication__allocate_valid_and_authenticated_user(session_mgr__l_user_token,
-                     session_mgr__l_channel_config_idx,
-                     session_mgr__l_endpoint_config_idx,
+                  session_core__allocate_authenticated_user(session_mgr__channel,
+                     *session_mgr__session,
+                     session_mgr__l_user_token,
                      session_mgr__service_ret,
                      &session_mgr__l_user);
                   if (*session_mgr__service_ret == constants_statuscodes_bs__e_sc_ok) {
@@ -340,7 +336,7 @@ void session_mgr__server_receive_session_req(
                         session_mgr__resp_msg,
                         session_mgr__service_ret);
                      if (*session_mgr__service_ret != constants_statuscodes_bs__e_sc_ok) {
-                        user_authentication__deallocate_user(session_mgr__l_user);
+                        session_core__deallocate_user(session_mgr__l_user);
                      }
                   }
                }

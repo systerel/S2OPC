@@ -43,9 +43,23 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
     .PolicyId = {8, true, (SOPC_Byte*) "username"},
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
-    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_None_URI) - 1, true,
-                          (SOPC_Byte*) SOPC_SecurityPolicy_None_URI}, /* None security policy shall be used only when
-                         secure channel security policy is non-None since password will be non-encrypted */
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_None_URI) - 1, true, (SOPC_Byte*) SOPC_SecurityPolicy_None_URI},
+    /* None security policy shall be used only when
+   secure channel security policy is non-None and with encryption since password will be non-encrypted */
+};
+
+/** Username security policy is supported and configured with Secure Channel security policy.
+ *  With this security policy, the password will be encrypted with secure channel security policy algorithm
+ *  (None security policy will lead to unencrypted password).
+ */
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {8, true, (SOPC_Byte*) "username"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+    /* Default security policy shall be used only when
+   secure channel security policy is non-None since password will be non-encrypted */
 };
 
 static void SOPC_EndpointConfig_Clear(SOPC_Endpoint_Config* epConfig, bool freeCstringsFlag)

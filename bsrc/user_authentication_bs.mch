@@ -52,7 +52,7 @@ OPERATIONS
     END
     ;
 
-    p_supported_user_token_type <-- is_user_token_supported (p_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx) =
+    p_supported_user_token_type, p_user_security_policy <-- is_user_token_supported (p_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx) =
     PRE
         p_user_token_type : t_user_token_type_i &
         p_user_token : t_user_token_i & /* Necessary to extract the policy URI */
@@ -65,14 +65,37 @@ OPERATIONS
         IF p_user_token_type /= c_userTokenType_indet
         THEN
             /* Check the endpoint has a user token type compatible for the secure channel security policy */
-            p_supported_user_token_type :: BOOL
+            p_supported_user_token_type :: BOOL ||
+            p_user_security_policy :: t_SecurityPolicy
         ELSE
-            p_supported_user_token_type := FALSE
+            p_supported_user_token_type := FALSE ||
+            p_user_security_policy := e_secpol_None
         END
     END
     ;
 
-    p_sc_valid_user <-- is_valid_user_authentication (p_endpoint_config_idx, p_token_type, p_user_token) =
+    p_sc_valid_user_token, p_user_token_decrypted <-- decrypt_user_token (p_endpoint_config_idx, p_server_nonce, p_user_secu_policy, p_token_type, p_user_token) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_server_nonce : t_Nonce_i &
+        p_server_nonce : t_Nonce &
+        p_user_secu_policy : t_SecurityPolicy &
+        p_token_type : t_user_token_type_i &
+        p_token_type = e_userTokenType_userName & /* Only encrypted identity token supported for now */
+        p_user_token : t_user_token_i & /* Necessary to extract the policy URI */
+        p_user_token : t_user_token
+    THEN
+        CHOICE
+            p_sc_valid_user_token := TRUE ||
+            p_user_token_decrypted :(p_user_token_decrypted : t_user_token_i & p_user_token_decrypted : t_user_token)
+        OR
+            p_sc_valid_user_token := FALSE ||
+            p_user_token_decrypted := c_user_token_indet
+        END
+    END;
+
+    p_sc_valid_user <-- is_valid_user_authentication (p_endpoint_config_idx,  p_token_type, p_user_token) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &

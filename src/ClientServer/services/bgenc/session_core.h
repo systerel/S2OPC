@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 06/03/2020 14:49:20
+ Date                 : 17/11/2021 11:10:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,6 +41,7 @@
 #include "session_channel_it.h"
 #include "session_core_1.h"
 #include "session_core_it.h"
+#include "user_authentication.h"
 
 /*--------------
    SEES Clause
@@ -65,7 +66,9 @@ extern void session_core__INITIALISATION(void);
 #define session_core__client_gen_activate_user_session_internal_event session_core_1__client_gen_activate_user_session_internal_event
 #define session_core__client_gen_create_session_internal_event session_core_1__client_gen_create_session_internal_event
 #define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
+#define session_core__deallocate_user user_authentication__deallocate_user
 #define session_core__drop_user_server session_core_1__drop_user_server
+#define session_core__get_local_user user_authentication__get_local_user
 #define session_core__get_server_session_preferred_locales session_core_1__get_server_session_preferred_locales
 #define session_core__get_session_channel session_core_1__get_session_channel
 #define session_core__get_session_user_client session_core_1__get_session_user_client
@@ -73,6 +76,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__getall_orphaned session_core_1__getall_orphaned
 #define session_core__getall_session_channel session_core_1__getall_session_channel
 #define session_core__getall_to_create session_core_1__getall_to_create
+#define session_core__has_user_token_policy_available user_authentication__has_user_token_policy_available
 #define session_core__is_valid_session session_core_1__is_valid_session
 #define session_core__reset_session_to_create session_core_1__reset_session_to_create
 #define session_core__server_get_session_from_token session_core_1__server_get_session_from_token
@@ -109,6 +113,12 @@ extern void session_core__server_internal_activate_req_and_resp(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void session_core__allocate_authenticated_user(
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_session_i session_core__p_session,
+   const constants__t_user_token_i session_core__p_user_token,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_sc_valid_user,
+   constants__t_user_i * const session_core__p_user);
 extern void session_core__client_activate_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,

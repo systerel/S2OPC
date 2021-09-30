@@ -68,6 +68,12 @@ extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
  * shall not be used on unsecured or unencrypted secure channels. */
 extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
 
+/** Default username security policy supported and configured with empty security policy.
+ *  With this security policy, the password will be encrypted if Secure Channel security policy is not None.
+ *  It shall not be used on secure channels using security policy None otherwise no encryption will be done.
+ */
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
+
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
 /**

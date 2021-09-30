@@ -50,6 +50,8 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
 
 bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityPolicy* secpol);
 
+const char* util_channel__SecurityPolicy_B_to_C(constants__t_SecurityPolicy secpol);
+
 constants__t_BrowseDirection_i util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir);
 
 OpcUa_BrowseDirection util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir);

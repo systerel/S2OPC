@@ -309,6 +309,28 @@ OPERATIONS
     END
     ;
 
+    p_sc_valid_user, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected &
+        p_session : t_session_i &
+        p_session : s_session &
+        a_state(p_session) : {e_session_created, e_session_userActivated,
+                              e_session_scOrphaned} &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        p_sc_valid_user,
+        p_user
+        :(p_sc_valid_user : t_StatusCode_i &
+          p_sc_valid_user : t_StatusCode &
+          p_user : t_user_i &
+          (p_sc_valid_user = e_sc_ok => p_user : t_user) &
+          (p_sc_valid_user /= e_sc_ok =>
+              p_user = c_user_indet))
+    END
+    ;
+
     // Server receives a user activate request and sends response
     ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
@@ -835,6 +857,35 @@ OPERATIONS
             bres := TRUE ||
             channel :(channel : t_channel_i & channel : t_channel)
         END
+    END
+    ;
+
+    deallocate_user (p_user) =
+    PRE
+        p_user : t_user_i
+    THEN
+        skip
+    END
+    ;
+
+    p_user <-- get_local_user (endpoint_config_idx) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_user :( p_user : t_user_i &
+                  p_user : t_user )
+    END
+    ;
+
+    p_user_token_policy_available <-- has_user_token_policy_available (p_channel_config_idx, p_endpoint_config_idx) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_user_token_policy_available :: BOOL
     END
 
 END

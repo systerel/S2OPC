@@ -86,18 +86,27 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
-    p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, p_channel_config_idx, p_endpoint_config_idx) =
+    p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, p_server_nonce, p_channel_config_idx, p_endpoint_config_idx) =
     VAR
         l_user_token_type,
         l_is_supported_user_token_type,
-        l_sc_user_authentication
+        l_sc_user_authentication,
+        l_used_security_policy,
+        l_is_valid_user_token,
+        l_decrypted_user_token
     IN
         l_user_token_type <-- get_user_token_type_from_token (p_user_token);
-        l_is_supported_user_token_type <-- is_user_token_supported (l_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx);
+        l_is_supported_user_token_type, l_used_security_policy <-- is_user_token_supported (l_user_token_type, p_user_token, p_channel_config_idx, p_endpoint_config_idx);
         IF l_is_supported_user_token_type = TRUE
         THEN
             IF l_user_token_type /= e_userTokenType_anonymous THEN
-                l_sc_user_authentication <-- is_valid_user_authentication (p_endpoint_config_idx, l_user_token_type, p_user_token)
+                l_is_valid_user_token, l_decrypted_user_token <-- decrypt_user_token(p_endpoint_config_idx, p_server_nonce, l_used_security_policy, l_user_token_type, p_user_token);
+                IF l_is_valid_user_token = TRUE
+                THEN
+                    l_sc_user_authentication <-- is_valid_user_authentication (p_endpoint_config_idx, l_user_token_type, l_decrypted_user_token)
+                ELSE
+                    l_sc_user_authentication := e_sc_bad_identity_token_invalid
+                END
             ELSE
                 /* It is not necessary to authenticate Anonymous user */
                 l_sc_user_authentication := e_sc_ok

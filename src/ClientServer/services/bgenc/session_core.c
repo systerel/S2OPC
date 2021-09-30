@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 13/03/2020 10:56:05
+ Date                 : 17/11/2021 11:10:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -377,6 +377,33 @@ void session_core__client_sc_activate_session_req_sm(
       session_core_1__set_session_state(session_core__session,
          constants__e_session_scActivating,
          true);
+   }
+}
+
+void session_core__allocate_authenticated_user(
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_session_i session_core__p_session,
+   const constants__t_user_token_i session_core__p_user_token,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_sc_valid_user,
+   constants__t_user_i * const session_core__p_user) {
+   {
+      constants__t_channel_config_idx_i session_core__l_channel_config_idx;
+      constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
+      constants__t_Nonce_i session_core__l_server_nonce;
+      
+      channel_mgr__get_channel_info(session_core__p_channel,
+         &session_core__l_channel_config_idx);
+      channel_mgr__server_get_endpoint_config(session_core__p_channel,
+         &session_core__l_endpoint_config_idx);
+      session_core_1__get_NonceServer(session_core__p_session,
+         false,
+         &session_core__l_server_nonce);
+      user_authentication__allocate_valid_and_authenticated_user(session_core__p_user_token,
+         session_core__l_server_nonce,
+         session_core__l_channel_config_idx,
+         session_core__l_endpoint_config_idx,
+         session_core__p_sc_valid_user,
+         session_core__p_user);
    }
 }
 

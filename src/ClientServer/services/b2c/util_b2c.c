@@ -1215,23 +1215,39 @@ bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityP
     if (NULL == uri || NULL == secpol)
         return false;
 
-    if (strncmp(uri, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI)) == 0)
+    if (strncmp(uri, SOPC_SecurityPolicy_None_URI, strlen(uri)) == 0)
     {
         *secpol = constants__e_secpol_None;
         return true;
     }
-    if (strncmp(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI)) == 0)
+    if (strncmp(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(uri)) == 0)
     {
         *secpol = constants__e_secpol_B256;
         return true;
     }
-    if (strncmp(uri, SOPC_SecurityPolicy_Basic256Sha256_URI, strlen(SOPC_SecurityPolicy_Basic256Sha256_URI)) == 0)
+    if (strncmp(uri, SOPC_SecurityPolicy_Basic256Sha256_URI, strlen(uri)) == 0)
     {
         *secpol = constants__e_secpol_B256S256;
         return true;
     }
 
     return false;
+}
+
+const char* util_channel__SecurityPolicy_B_to_C(constants__t_SecurityPolicy secpol)
+{
+    switch (secpol)
+    {
+    case constants__e_secpol_None:
+        return SOPC_SecurityPolicy_None_URI;
+    case constants__e_secpol_B256:
+        return SOPC_SecurityPolicy_Basic256_URI;
+    case constants__e_secpol_B256S256:
+        return SOPC_SecurityPolicy_Basic256Sha256_URI;
+    default:
+        assert(false && "Invalid security policy");
+        return NULL;
+    }
 }
 
 constants__t_BrowseDirection_i util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir)
