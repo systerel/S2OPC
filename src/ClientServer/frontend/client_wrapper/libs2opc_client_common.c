@@ -605,20 +605,22 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
         status = SOPC_StaMac_CreateMonitoredItem(pSM, lszNodeId, lattrId, nElements, &appCtx, lDataId);
     }
 
-    int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
-
-    /* Release the lock so that the event handler can work properly while waiting */
-    mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
-
     /* Wait for the monitored item to be created */
     if (SOPC_STATUS_OK == status)
     {
+        const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
+            /* Release the lock so that the event handler can work properly while waiting */
+            mutStatus = Mutex_Unlock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
+
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+            mutStatus = Mutex_Lock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -634,6 +636,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
         }
     }
 
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -803,20 +807,32 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
         }
     }
 
-    /* Release the lock so that the event handler can work properly while waiting */
-    mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
-
     /* Wait for the connection to be closed */
     if (SOPC_STATUS_OK == status)
     {
         int count = 0;
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM) && count < 100)
         {
+            /* Release the lock so that the event handler can work properly while waiting */
+            mutStatus = Mutex_Unlock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
+
             SOPC_Sleep(10);
+
+            mutStatus = Mutex_Lock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             count += 1;
         }
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, cliId);
+        assert(pSM == removedSM);
+        SOPC_StaMac_Delete(&pSM);
+    }
+
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -853,8 +869,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     }
 
     /* Release the lock so that the event handler can work properly while waiting */
-    mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
 
     /* Wait for the monitored item to be created */
     if (SOPC_STATUS_OK == status)
@@ -864,7 +878,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
+            mutStatus = Mutex_Unlock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+            mutStatus = Mutex_Lock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -879,6 +898,9 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
             SOPC_StaMac_SetError(pSM);
         }
     }
+
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -916,8 +938,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     }
 
     /* Release the lock so that the event handler can work properly while waiting */
-    mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
 
     /* Wait for the subscription to be deleted */
     if (SOPC_STATUS_OK == status)
@@ -927,7 +947,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscription(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
+            mutStatus = Mutex_Unlock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+            mutStatus = Mutex_Lock(&mutex);
+            assert(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -943,6 +968,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
         }
     }
 
+    mutStatus = Mutex_Unlock(&mutex);
+    assert(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -1033,23 +1060,36 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
         while (NULL != pIterCli)
         {
             pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
-            /* No more than one machine shall process the event */
-            if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+            // Note : pSM can be NULL if the StaMac has been closed before the event is processed
+            if (NULL != pSM)
             {
-                assert(!bProcessed);
-                bProcessed = true;
-                /* Post process the event for callbacks. */
-                if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
+                /* No more than one machine shall process the event */
+                if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
                 {
-                    bool inhibitDisconnectCallback = (bool) SOPC_StaMac_GetUserContext(pSM);
-                    /* Check if the disconnection callback shall be inhibited (Connect operation still running) */
-                    if (!inhibitDisconnectCallback && NULL != cbkDisco)
+                    assert(!bProcessed);
+                    bProcessed = true;
+                    /* Post process the event for callbacks. */
+                    if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
                     {
-                        /* The disconnect callback shall be called after the client has been destroyed */
-                        cbkDisco(cliId);
+                        bool inhibitDisconnectCallback = (bool) SOPC_StaMac_GetUserContext(pSM);
+                        /* Check if the disconnection callback shall be inhibited (Connect operation still running) */
+                        if (!inhibitDisconnectCallback && NULL != cbkDisco)
+                        {
+                            /* The disconnect callback shall be called after the client has been destroyed */
+                            cbkDisco(cliId);
+                        }
                     }
                 }
             }
+        }
+        if (false == bProcessed && SE_SND_REQUEST_FAILED == event)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_INFO,
+                        "No machine or generic callback to process the event %d."
+                        "State Machine may have just been closed. Ignore event",
+                        event);
+            bProcessed = true;
+            SOPC_Free((void*) appContext);
         }
     }
 
