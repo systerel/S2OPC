@@ -1089,7 +1089,7 @@ class DataValue:
         """
         if not isinstance(val, Variant):
             val = Variant(val)
-        return DataValue(time.time(), 0, ReturnStatus.OK, val)
+        return DataValue(time.time(), 0, StatusCode.Good, val)
 
     allocator = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=libsub.SOPC_DataValue_Delete, should_clear_after_alloc=True)
 
