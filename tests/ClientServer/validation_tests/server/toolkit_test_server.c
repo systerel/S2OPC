@@ -367,7 +367,8 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+                status =
+                    SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
             }
         }
 
@@ -392,8 +393,8 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                 }
                 if (SOPC_STATUS_OK == status)
                 {
-                    status =
-                        SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+                    status = SOPC_SecurityConfig_AddUserTokenPolicy(
+                        sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
                 }
             }
         }

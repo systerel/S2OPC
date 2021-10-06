@@ -69,7 +69,7 @@
             </SecurityModes>
             <UserPolicies>
               <UserPolicy policyId="anonymous" tokenType="anonymous"/>
-              <UserPolicy policyId="username" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+              <UserPolicy policyId="username" tokenType="username" securityUri=""/>
             </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
@@ -79,7 +79,7 @@
             </SecurityModes>
             <UserPolicies>
               <UserPolicy policyId="anonymous" tokenType="anonymous"/>
-              <UserPolicy policyId="username" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+              <UserPolicy policyId="username" tokenType="username" securityUri=""/>
             </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
