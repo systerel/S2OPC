@@ -665,6 +665,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     bool receiverCertifThumbprintPresence = false;
     SOPC_CertificateList* clientCertificate = NULL;
     int32_t compareRes = -1;
+    bool isCompliantPolicy = false;
     uint32_t idx = 0;
     uint32_t scConfigIdx = 0;
     uint32_t epConfigIdx = 0;
@@ -753,15 +754,16 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             }
             else
             {
+                isCompliantPolicy = 0 == compareRes;
                 validSecuPolicy = clientConfig->reqSecuPolicyUri;
             }
         }
         else
         {
             assert(scConnection->isServerConnection);
-            // SERVER side (shall comply with one server security configuration)
+            // SERVER side (shall comply with one or several server security configuration)
             compareRes = -1;
-            for (idx = 0; idx < serverConfig->nbSecuConfigs && compareRes != 0; idx++)
+            for (idx = 0; idx < serverConfig->nbSecuConfigs; idx++)
             {
                 SOPC_SecurityPolicy* secuPolicy = &(serverConfig->secuConfigurations[idx]);
                 status = SOPC_String_Compare(&securityPolicy, &secuPolicy->securityPolicy, true, &compareRes);
@@ -769,14 +771,17 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
                 {
                     if (compareRes == 0)
                     {
+                        isCompliantPolicy = true;
+                        // It might be true for several endpoint configurations
+                        // (separate endpoints with same security policy and different security mode)
                         validSecuPolicy = SOPC_String_GetRawCString(&secuPolicy->securityPolicy);
-                        validSecuModes = secuPolicy->securityModes;
+                        validSecuModes |= secuPolicy->securityModes;
                     }
                 }
             }
         }
         // Rejected if not compatible with security polic-y/ies expected
-        if (compareRes != 0)
+        if (!isCompliantPolicy)
         {
             result = false;
             *errorStatus = OpcUa_BadSecurityPolicyRejected;

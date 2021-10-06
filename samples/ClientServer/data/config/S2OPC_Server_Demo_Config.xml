@@ -31,6 +31,13 @@
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
             <SecurityModes>
               <SecurityMode mode="Sign"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
               <SecurityMode mode="SignAndEncrypt"/>
             </SecurityModes>
             <UserPolicies>
