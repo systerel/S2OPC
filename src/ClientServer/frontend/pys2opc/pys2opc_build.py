@@ -23,7 +23,7 @@ from cffi import FFI
 import os
 
 ffibuilder = FFI()
-# TODO: generate this file
+# TODO: generate this file instead of concatenating manual copies of selected headers
 header = open('./s2opc_expanded.h').read()
 ffibuilder.cdef(header + r'''
     # 1 "cffi-cdef"
@@ -73,7 +73,7 @@ source = r'''
 # It (is said to) produces faster code with set_source, and checks what it can on the types.
 # However, it requires a gcc.
 # The other way, dlopen, loads the ABI, is less safe, slower, but only requires the .so/.dll
-# TODO: automatize configuration
+# TODO: automatize configuration through cmake
 
 if os.name == 'nt':
 # Windows

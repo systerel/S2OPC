@@ -399,6 +399,7 @@ function(s2opc_expand_header h_input context_targets h_expanded)
   add_custom_command(DEPENDS ${h_input}
                      OUTPUT ${h_expanded}
                      COMMAND ${CMAKE_C_COMPILER} ${_expand_includes} ${_expand_defines}
+                             -DS2OPC_PYEXPANSION
                              -E ${h_input} ${_output_switches}
                      COMMENT "Expending header file to ${h_expanded}"
                      VERBATIM

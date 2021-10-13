@@ -18,19 +18,32 @@
  */
 
 /**
- * This file is an excerpt from stdint.h under Visual Studio.
+ * This file is an excerpt from stdint.h.
+ * It has two objectives: define symbols required by cffi,
+ * provide some types required by Visual Studio.
+ *
  * It should not be included in a generic project.
  * See s2opc_headers.h
- */
-
-/* It is not possible to include stdint with Visual Studio, as it contains some __compiler directives,
+ *
+ * It is not possible to include stdint with Visual Studio, as it contains some __compiler directives,
+ * and it is not possible to include stdint on some gcc versions/architectures, as it contains __extension__ directives,
  * which are not compatible with pycparser, which is used by cffi.
- * Hence we must redefine manually the stdints under Visual Studio.
+ * Hence we must redefine manually the stdints under Visual Studio or gcc that use them.
+ *
+ * Note that part of this code is legacy, as more recent versions of pycffi understand ?intX_t types.
  *
  * The compiler compatibility is arbitrary selective:
  * it is IMPORTANT to double check the defines before adding another compiler/architecture.
  * Otherwise you risk nasty side-effects when calling the S2OPC library with the wrong integers sizes...
  */
+
+/* First, we have to include these information only when preparing the header for cffi,
+ * not when compiling the generated _pys2opc.c module.
+ * To do so, S2OPC_PYEXPANSION will be defined when expanding this header.
+ */
+
+#ifdef S2OPC_PYEXPANSION
+
 #if defined(_M_X64) && defined(_MSC_VER) && _MSC_VER >= 1900 && _MSC_VER < 1920
 
 typedef signed char int8_t;
@@ -159,12 +172,30 @@ typedef uint64_t size_t;
 typedef int64_t ptrdiff_t;
 typedef int64_t intptr_t;
 
-#else
-/* Otherwise we're most likely under gcc or clang */
-#include <stdint.h>
+#else /* Otherwise we're most likely under gcc or clang */
 
-/* The following may crash as they are not standard... But stddef cannot be included... */
-typedef uintptr_t size_t;
-typedef struct _IO_FILE FILE;
+/* Use these defines to prevent re-inclusion of stdint.h which, by cascading effects,
+ * makes cffi think it does not know ?intX_t types anymore under certain architectures */
+/* Another way to support this would be to update _cffi headers and duplicate headers that import stdint,
+ * such as sopc_buffer.h */
+#define _STDINT_H
+#define _BITS_TYPES_H
+
+/* Even though ?intX_t types are defined and understood by pycffi, it lacks the constant definitions.
+ * In particular, INT32_MAX is used to force enum sizes across S2OPC. */
+#define INT8_MIN (-127 - 1)
+#define INT16_MIN (-32767 - 1)
+#define INT32_MIN (-2147483647 - 1)
+#define INT64_MIN (-9223372036854775807LL - 1)
+#define INT8_MAX 127
+#define INT16_MAX 32767
+#define INT32_MAX 2147483647
+#define INT64_MAX 9223372036854775807LL
+#define UINT8_MAX 0xff
+#define UINT16_MAX 0xffff
+#define UINT32_MAX 0xffffffffU
+#define UINT64_MAX 0xffffffffffffffffULL
 
 #endif /* MSVC */
+
+#endif /* S2OPC_PYEXPANSION */
