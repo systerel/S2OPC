@@ -453,7 +453,9 @@ class PyS2OPC_Server(PyS2OPC):
         logConfig = libsub.SOPC_Common_GetDefaultLogConfiguration()
         logConfig.logLevel = logLevel
         # Note: we don't keep a copy of logDirPath as the string content copied internally in SOPC_Log_CreateInstance
-        logConfig.logSysConfig.fileSystemLogConfig.logDirPath = ffi.new('char[]', logPath.encode())
+        #  but we must keep it alive until then
+        logDirPath = ffi.new('char[]', logPath.encode())
+        logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath
         logConfig.logSysConfig.fileSystemLogConfig.logMaxBytes = logFileMaxBytes
         logConfig.logSysConfig.fileSystemLogConfig.logMaxFiles = logMaxFileNumber
 
