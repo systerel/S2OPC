@@ -80,6 +80,7 @@ class StatusCode(NamedMembers):
     """
     # Adds the generic good and bad values, which are only defined as masks in the OPC-UA protocol.
     Good = 0x00000000
+    Uncertain = 0x40000000
     Bad = 0x80000000
     # Obtained with the following code snippet from S2OPC sources:
     # for com, k, v in sorted(re.findall(r'/\*=+\n \* (.*)\n \*.+\n#define OpcUa_(\w+) (\w+)', open('src/Common/opcua_types/opcua_statuscodes.h').read(), re.MULTILINE), key=lambda t:int(t[2], 16)): print('    {} = {}  # {}'.format(k, v, com))
