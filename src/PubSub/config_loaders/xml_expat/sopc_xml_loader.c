@@ -76,7 +76,9 @@
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
 #define ATTR_VARIABLE_DATA_TYPE "dataType"
+#define ATTR_VARIABLE_VALUE_RANK "valueRank"
 
+#define SCALAR_ARRAY_RANK -1
 typedef enum
 {
     PARSE_START,      // Beginning of file
@@ -91,6 +93,7 @@ struct sopc_xml_pubsub_variable_t
     SOPC_NodeId* nodeId;
     SOPC_LocalizedText displayName;
     SOPC_BuiltinId dataType;
+    int16_t valueRank;
 };
 
 struct sopc_xml_pubsub_message_t
@@ -157,6 +160,30 @@ static bool parse(XML_Parser parser, FILE* fd)
 
     // Tell the parser that we are at the end of the file
     if (XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static bool parse_signed64_value(const char* data, int64_t* dest)
+{
+    char buf[21];
+    const size_t len = strlen(data);
+
+    if (dest == NULL)
+    {
+        return false;
+    }
+
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+
+    char* endptr;
+    *dest = strtol(buf, &endptr, 10);
+
+    if (endptr != (buf + len))
     {
         return false;
     }
@@ -478,9 +505,11 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
     bool nodeId = false;
     bool dispName = false;
     bool dataType = false;
+    bool valueRank = false;
 
     memset(var, 0, sizeof *var);
 
+    var->valueRank = SCALAR_ARRAY_RANK;
     for (size_t i = 0; attrs[i]; ++i)
     {
         // Current attribute name
@@ -523,6 +552,39 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
                 return false;
             }
             dispName = true;
+        }
+        else if (strcmp(ATTR_VARIABLE_VALUE_RANK, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+            int64_t rank;
+
+            if (NULL == attr_val)
+            {
+                LOG_XML_ERROR("Missing value for variable " ATTR_VARIABLE_VALUE_RANK " attribute");
+                return false;
+            }
+
+            if (valueRank)
+            {
+                LOG_XML_ERROR("Attribute defined several times :arrayRank");
+                return false;
+            }
+
+            if (NULL == attr_val || !parse_signed64_value(attr_val, &rank) || rank < -3 || rank > 65535)
+            {
+                LOG_XML_ERRORF("Invalid attribute arrayRank value: '%s", attr_val);
+                return false;
+            }
+            if (rank > 0)
+            {
+                var->valueRank = (int16_t) rank;
+            }
+            else
+            {
+                var->valueRank = -1;
+            }
+
+            valueRank = true;
         }
         else if (strcmp(ATTR_VARIABLE_DATA_TYPE, attr) == 0)
         {
@@ -788,7 +850,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     struct sopc_xml_pubsub_variable_t* var = &msg->variableArr[ivar];
                     SOPC_FieldMetaData* fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, ivar);
                     assert(fieldMetaData != NULL);
-                    SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, -1); // Scalar value only for now
+                    SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
                     SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
 
                     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
@@ -841,7 +903,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         assert(fieldMetaData != NULL);
 
                         /* FieldMetaData: type the field */
-                        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, -1);
+                        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
 
                         /* FieldTarget: link to the source/target data */

@@ -14,6 +14,7 @@
                                                                        <xs:attribute name="nodeId" type="xs:string" use="required"/>
                                                                        <xs:attribute name="displayName" type="xs:string" use="required"/>
                                                                        <xs:attribute name="dataType" type="dataType" use="required"/>
+                                                                       <xs:attribute name="valueRank" type="valueRank"  use="optional"/>
                                                                  </xs:complexType>
                                                            </xs:element>
                                                      </xs:sequence>
@@ -37,6 +38,11 @@
          <xs:enumeration value="publisher"/>
          <xs:enumeration value="subscriber"/>
        </xs:restriction>
+     </xs:simpleType>
+     <xs:simpleType name="valueRank">
+       <xs:restriction base="xs:integer">
+           <xs:minInclusive value="-3"/>
+       </xs:restriction> 
      </xs:simpleType>
      <xs:simpleType name="dataType">
        <xs:restriction base="xs:string">

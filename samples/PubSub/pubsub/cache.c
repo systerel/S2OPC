@@ -35,68 +35,81 @@ static void free_datavalue(void* value)
     SOPC_Free(value);
 }
 
-/* Create a new datavalue with a default false/0/now/empty value of given scalar built-in type */
-static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type)
+static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
 {
-    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
-    if (NULL == dv)
+    SOPC_VariantArrayType result;
+    if (valueRank < 0)
     {
-        return NULL;
+        // Use Signle value if possible
+        result = SOPC_VariantArrayType_SingleValue;
     }
+    else if (valueRank < 2)
+    {
+        // Use Array if possible
+        result = SOPC_VariantArrayType_Array;
+    }
+    else if (valueRank == 2)
+    {
+        // Use Array if possible
+        result = SOPC_VariantArrayType_Array;
+    }
+    else
+    {
+        assert(false && "Cannot create variables with dimensions > 2");
+    }
+    return result;
+}
 
-    /* Note: for now, only the Variant part of the DataValue is used by the publisher */
-    SOPC_Variant* var = &dv->Value;
-    var->BuiltInTypeId = type;
-    var->ArrayType = SOPC_VariantArrayType_SingleValue;
-
+static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* variant)
+{
     switch (type)
     {
     case SOPC_Null_Id:
         break;
     case SOPC_Boolean_Id:
-        var->Value.Boolean = false;
+        variant->Boolean = false;
         break;
     case SOPC_SByte_Id:
-        var->Value.Sbyte = 0;
+        variant->Sbyte = 0;
         break;
     case SOPC_Byte_Id:
-        var->Value.Byte = 0;
+        variant->Byte = 0;
         break;
     case SOPC_Int16_Id:
-        var->Value.Int16 = 0;
+        variant->Int16 = 0;
         break;
     case SOPC_UInt16_Id:
-        var->Value.Uint16 = 0;
+        variant->Uint16 = 0;
         break;
     case SOPC_Int32_Id:
-        var->Value.Int32 = 0;
+        variant->Int32 = 0;
         break;
     case SOPC_UInt32_Id:
-        var->Value.Uint32 = 0;
+        variant->Uint32 = 0;
         break;
     case SOPC_Int64_Id:
-        var->Value.Int64 = 0;
+        variant->Int64 = 0;
         break;
     case SOPC_UInt64_Id:
-        var->Value.Uint64 = 0;
+        variant->Uint64 = 0;
         break;
     case SOPC_Float_Id:
-        var->Value.Floatv = 0.f;
+        variant->Floatv = 0.f;
         break;
     case SOPC_Double_Id:
-        var->Value.Doublev = 0.;
+        variant->Doublev = 0.;
         break;
     case SOPC_String_Id:
-        SOPC_String_Initialize(&var->Value.String);
+        SOPC_String_Initialize(&variant->String);
         break;
     case SOPC_DateTime_Id:
-        var->Value.Date = SOPC_Time_GetCurrentTimeUTC();
+        variant->Date = SOPC_Time_GetCurrentTimeUTC();
         break;
     case SOPC_ByteString_Id:
-        SOPC_ByteString_Initialize(&var->Value.Bstring);
+        SOPC_ByteString_Initialize(&variant->Bstring);
         break;
     case SOPC_StatusCode_Id:
-        var->Value.Status = SOPC_GoodGenericStatus;
+        variant->Status = SOPC_GoodGenericStatus;
         break;
     case SOPC_Guid_Id:
     case SOPC_XmlElement_Id:
@@ -110,6 +123,45 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type)
     case SOPC_Variant_Id:
     default:
         assert(false && "Cannot create default empty value for complex types");
+        break;
+    }
+}
+
+/* Create a new datavalue with a default false/0/now/empty value of given scalar built-in type */
+static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArrayType arrayType)
+{
+    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
+    if (NULL == dv)
+    {
+        return NULL;
+    }
+
+    /* Note: for now, only the Variant part of the DataValue is used by the publisher */
+    SOPC_Variant* var = &dv->Value;
+    SOPC_Variant_Initialize(var);
+    var->BuiltInTypeId = type;
+    var->ArrayType = arrayType;
+
+    switch (arrayType)
+    {
+    case SOPC_VariantArrayType_SingleValue:
+        initializeSingleValue(type, &var->Value);
+        break;
+
+    case SOPC_VariantArrayType_Array:
+        // Set "Null array"
+        var->Value.Array.Length = -1;
+        break;
+
+    case SOPC_VariantArrayType_Matrix:
+        var->Value.Matrix.Dimensions = 2;
+        var->Value.Matrix.ArrayDimensions = SOPC_Calloc(2, sizeof(uint32_t));
+        assert(var->Value.Matrix.ArrayDimensions != NULL);
+        var->Value.Matrix.ArrayDimensions[0] = -1;
+        var->Value.Matrix.ArrayDimensions[1] = -1;
+        break;
+    default:
+        assert(false && "Cannot create default empty value for Matrixes with Dimensions > 2");
         break;
     }
 
@@ -156,7 +208,8 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                 for (uint16_t l = 0; res && l < nbFields; ++l)
                 {
                     const SOPC_FieldMetaData* metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, l);
-                    SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+                    const SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+                    const int32_t valueRank = SOPC_FieldMetaData_Get_ValueRank(metadata);
 
                     /* Retrieve and copy the NodeId for insertion in the Cache */
                     const SOPC_PublishedVariable* target = SOPC_FieldMetaData_Get_PublishedVariable(metadata);
@@ -176,7 +229,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                     /* Insert a DataValue initialized to a default value */
                     if (res)
                     {
-                        SOPC_DataValue* dv = new_datavalue(type);
+                        SOPC_DataValue* dv = new_datavalue(type, valueRankToArrayType(valueRank));
                         res &= Cache_Set(nid, dv); /* Both will be freed by the cache */
                     }
 
@@ -207,7 +260,8 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                 for (uint16_t l = 0; res && l < nbFields; ++l)
                 {
                     const SOPC_FieldMetaData* metadata = SOPC_DataSetReader_Get_FieldMetaData_At(dataSetReader, l);
-                    SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+                    const SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+                    const int32_t valueRank = SOPC_FieldMetaData_Get_ValueRank(metadata);
 
                     /* Retrieve and copy the NodeId for insertion in the Cache */
                     const SOPC_FieldTarget* target = SOPC_FieldMetaData_Get_TargetVariable(metadata);
@@ -227,7 +281,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                     /* Insert a DataValue initialized to a default value */
                     if (res)
                     {
-                        SOPC_DataValue* dv = new_datavalue(type);
+                        SOPC_DataValue* dv = new_datavalue(type, valueRankToArrayType(valueRank));
                         res &= Cache_Set(nid, dv); /* Both will be freed by the cache */
                     }
 
