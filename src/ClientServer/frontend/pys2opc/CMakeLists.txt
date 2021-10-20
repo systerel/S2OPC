@@ -100,7 +100,7 @@ if(WITH_PYS2OPC)
   # This is both required to test the installation of the wheel AND to be able to run the other tests AND to generate the doc...
   add_custom_command(OUTPUT ${PYS2OPC_TEST_INSTALL_PATH}/pys2opc
                      DEPENDS ${PYS2OPC_WHEEL_PATH}
-                     COMMAND ${PYTHON_EXECUTABLE} -m pip install -t ${PYS2OPC_TEST_INSTALL_PATH} --upgrade ${PYS2OPC_WHEEL_PATH}
+                     COMMAND ${PYTHON_EXECUTABLE} -m pip install -t ${PYS2OPC_TEST_INSTALL_PATH} --no-deps --no-index ${PYS2OPC_WHEEL_PATH}
                      COMMENT "Install (temporarly) PyS2OPC to ${PYS2OPC_TEST_INSTALL_PATH}"
                      )
   add_custom_target(pys2opc_install ALL
