@@ -759,59 +759,60 @@ class Variant:
             length = sopc_array.Length
             content = sopc_array.Content
             if sopc_type == libsub.SOPC_Null_Id:
-                return [Variant(None, sopc_type) for i in range(length)]
+                # S2OPC should not be able to be in this case
+                return Variant([], sopc_type)
             elif sopc_type == libsub.SOPC_Boolean_Id:
-                return [Variant(content.BooleanArr[i], sopc_type) for i in range(length)]
+                return Variant([content.BooleanArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_SByte_Id:
-                return [Variant(content.SbyteArr[i], sopc_type) for i in range(length)]
+                return Variant([content.SbyteArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Byte_Id:
-                return [Variant(content.ByteArr[i], sopc_type) for i in range(length)]
+                return Variant([content.ByteArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Int16_Id:
-                return [Variant(content.Int16Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Int16Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_UInt16_Id:
-                return [Variant(content.Uint16Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Uint16Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Int32_Id:
-                return [Variant(content.Int32Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Int32Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_UInt32_Id:
-                return [Variant(content.Uint32Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Uint32Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Int64_Id:
-                return [Variant(content.Int64Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Int64Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_UInt64_Id:
-                return [Variant(content.Uint64Arr[i], sopc_type) for i in range(length)]
+                return Variant([content.Uint64Arr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Float_Id:
-                return [Variant(content.FloatvArr[i], sopc_type) for i in range(length)]
+                return Variant([content.FloatvArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Double_Id:
-                return [Variant(content.DoublevArr[i], sopc_type) for i in range(length)]
+                return Variant([content.DoublevArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_String_Id:
-                return [Variant(string_to_str(ffi.addressof(content.StringArr[i])), sopc_type) for i in range(length)]
+                return Variant([string_to_str(ffi.addressof(content.StringArr[i])) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_DateTime_Id:
-                return [Variant(datetime_to_float(content.DateArr[i]), sopc_type) for i in range(length)]  # int64_t
+                return Variant([datetime_to_float(content.DateArr[i]) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_Guid_Id:
-                return [Variant(guid_to_uuid(ffi.addressof(content.GuidArr[i])), sopc_type) for i in range(length)]
+                return Variant([guid_to_uuid(ffi.addressof(content.GuidArr[i])) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_ByteString_Id:
-                return [Variant(bytestring_to_bytes(ffi.addressof(content.BstringArr[i])), sopc_type) for i in range(length)]
+                return Variant([bytestring_to_bytes(ffi.addressof(content.BstringArr[i])) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_XmlElement_Id:
-                return [Variant(bytestring_to_bytes(ffi.addressof(content.XmlEltArr[i])), sopc_type) for i in range(length)]
+                return Variant([bytestring_to_bytes(ffi.addressof(content.XmlEltArr[i])) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_NodeId_Id:
-                return [Variant(nodeid_to_str(ffi.addressof(content.NodeIdArr[i])), sopc_type) for i in range(length)]
+                return Variant([nodeid_to_str(ffi.addressof(content.NodeIdArr[i])) for i in range(length)], sopc_type)
             #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
-            #    return [Variant(content., sopc_type) for i in range(length)]
+            #    return Variant([content. for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_StatusCode_Id:
-                return [Variant(content.StatusArr[i], sopc_type) for i in range(length)]
+                return Variant([content.StatusArr[i] for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_QualifiedName_Id:
                 Qname = content.QnameArr[i]
-                return [Variant((Qname.NamespaceIndex, string_to_str(Qname.Name.Data)), sopc_type) for i in range(length)]
+                return Variant([(Qname.NamespaceIndex, string_to_str(Qname.Name.Data)) for i in range(length)], sopc_type)
             elif sopc_type == libsub.SOPC_LocalizedText_Id:
                 LocalizedText = content.LocalizedTextArr[i]
-                return [Variant((string_to_str(LocalizedText.defaultLocale), string_to_str(LocalizedText.defaultText)), sopc_type) for i in range(length)]
+                return Variant([(string_to_str(LocalizedText.defaultLocale), string_to_str(LocalizedText.defaultText)) for i in range(length)], sopc_type)
             #elif sopc_type == libsub.SOPC_ExtensionObject_Id:
-            #    return [Variant(content., sopc_type) for i in range(length)]
+            #    return Variant([content. for i in range(length)], sopc_type)
             #elif sopc_type == libsub.SOPC_DataValue_Id:
-            #    return [Variant(content., sopc_type) for i in range(length)]
+            #    return Variant([content. for i in range(length)], sopc_type)
             #elif sopc_type == libsub.SOPC_Variant_Id:
-            #    return [Variant(content., sopc_type) for i in range(length)]
+            #    return Variant([content. for i in range(length)], sopc_type)
             #elif sopc_type == libsub.SOPC_DiagnosticInfo_Id:
-            #    return [Variant(content., sopc_type) for i in range(length)]
+            #    return Variant([content. for i in range(length)], sopc_type)
             raise ValueError('SOPC_Variant to Python conversion not supported for built-in type {}.'.format(sopc_type))
         elif variant.ArrayType == libsub.SOPC_VariantArrayType_Matrix:
             raise ValueError('SOPC_Variant matrices are not supported.')
@@ -854,7 +855,12 @@ class Variant:
         else:
             variant = Variant.allocator('SOPC_Variant*')
         variant.BuiltInTypeId = sopc_type
-        if not isinstance(self._value, (list, tuple)):
+        # Testing whether this is an array or not is not straightforward because of qualified names and localized text that are couples
+        if sopc_type in (libsub.SOPC_QualifiedName_Id, libsub.SOPC_LocalizedText_Id):
+            is_array = len(self._value) > 0 and isinstance(self._value[0], (list, tuple))  # If self._value has no length -> malformed value
+        else:
+            is_array = isinstance(self._value, (list, tuple))
+        if not is_array:
             # Single values
             variant.ArrayType = libsub.SOPC_VariantArrayType_SingleValue
             if sopc_type == libsub.SOPC_Null_Id:
