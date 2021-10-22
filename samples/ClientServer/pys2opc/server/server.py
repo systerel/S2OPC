@@ -59,4 +59,5 @@ if __name__ == '__main__':
         PyS2OPC.mark_configured()
         PyS2OPC.serve_forever()  # Should return exit reason
         #with PyS2OPC.serve():
-        #    time.sleep(1.)
+        #    while PyS2OPC.serving():
+        #        time.sleep(1.)

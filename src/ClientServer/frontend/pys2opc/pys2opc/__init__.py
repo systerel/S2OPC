@@ -69,7 +69,7 @@ In the `with` statement, the application code can be started alongside the S2OPC
 >>>     PyS2OPC.mark_configured()
 >>>     with PyS2OPC.serve():
 >>>         # The main loop of the application
->>>         while 'Serving': pass
+>>>         while PyS2OPC.serving(): pass
 
 
 ### NodeId concept

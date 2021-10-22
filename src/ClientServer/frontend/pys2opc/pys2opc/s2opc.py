@@ -422,7 +422,8 @@ class PyS2OPC_Server(PyS2OPC):
     _config = None  # SOPC_S2OPC_Config
     # Stores endpoint indexes and the corresponding configurations {Id: config.serverConfig.endpoint}
     # (note that endpoint.serverConfigPtr points to its parent serverConfig, which is the only field in config yet)
-    _dEpIdx = {}  # {endpoint_index: SOPC_S2OPC_Config}
+    _dEpIdx = {}  # {endpoint_index: SOPC_Endpoint_Config}
+    _dOpenedEp = {}  # Opened endpoint {endpoint_index: True}
     _req_hdler = LocalAsyncRequestHandler()
 
     @staticmethod
@@ -496,6 +497,7 @@ class PyS2OPC_Server(PyS2OPC):
             # id = endpoint configuration index,
             # auxParam = SOPC_ReturnStatus
             print(epIdx, 'closed')
+            PyS2OPC_Server._dOpenedEp[epIdx] = False
         elif event == libsub.SE_LOCAL_SERVICE_RESPONSE:
             # id = endpoint configuration index,
             # param = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
@@ -660,16 +662,28 @@ class PyS2OPC_Server(PyS2OPC):
             raise
 
     @staticmethod
+    def serving(endpointIndexes=None):
+        """
+        Returns true if at least one of the enpoints is opened.
+        Use endpointIndexes to restrict the query to the selected endpoints.
+        """
+        if endpointIndexes is None:
+            return any(PyS2OPC_Server._dOpenedEp.values())
+        return any(opened for epIdx, opened in PyS2OPC_Server._dOpenedEp.items() if epIdx in endpointIndexes)
+
+    @staticmethod
     @contextmanager
     def serve(endpointIndexes=None):
         """
         Open the configured endpoint(s).
         If no endpoints are given, all configured endpoints are opened.
+        Use serving(endpointIndexes) to know if the server is still opened.
 
         Supports the context management facilities to close the endpoint(s):
         >>> with PyS2OPC_Server.serve():
-        ...     # All applicative code may live here
-        ...     pass
+        ...     while PyS2OPC_Server.serving():
+        ...         # All applicative code may live here
+        ...         pass
         ... # Endpoint and server capabilities are cleanly stopped upon context exit
 
         If you don't have applicative application, and callbacks are enough,
@@ -677,12 +691,14 @@ class PyS2OPC_Server(PyS2OPC):
         """
         for epIdx in (endpointIndexes or PyS2OPC_Server._dEpIdx):
             libsub.SOPC_ToolkitServer_AsyncOpenEndpoint(epIdx)
+            PyS2OPC_Server._dOpenedEp[epIdx] = True
         print('Opening server')
         try:
             yield
         finally:
             for epIdx in (endpointIndexes or PyS2OPC_Server._dEpIdx):
-                libsub.SOPC_ToolkitServer_AsyncCloseEndpoint(epIdx)
+                if PyS2OPC_Server._dOpenedEp[epIdx]:
+                    libsub.SOPC_ToolkitServer_AsyncCloseEndpoint(epIdx)
         print('Server stopped')
 
     @staticmethod
@@ -693,8 +709,9 @@ class PyS2OPC_Server(PyS2OPC):
         """
         with PyS2OPC_Server.serve(endpointIndexes=endpointIndexes):
             try:
-                while 'Waiting for an interrupt':
+                while PyS2OPC_Server.serving(endpointIndexes):
                     time.sleep(.1)  # Sleepy wait
+                print('No more opened endpoint -> closing server')
             except KeyboardInterrupt:
                 pass
 
