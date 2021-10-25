@@ -265,3 +265,22 @@ typedef struct _OpcUa_BrowseResponse
     int32_t NoOfDiagnosticInfos;
     SOPC_DiagnosticInfo* DiagnosticInfos;
 } OpcUa_BrowseResponse;
+
+/* Misc */
+extern struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
+typedef struct _OpcUa_Range
+{
+    SOPC_EncodeableType* encodeableType;
+    double Low;
+    double High;
+} OpcUa_Range;
+
+extern struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
+typedef struct _OpcUa_EUInformation
+{
+    SOPC_EncodeableType* encodeableType;
+    SOPC_String NamespaceUri;
+    int32_t UnitId;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+} OpcUa_EUInformation;
