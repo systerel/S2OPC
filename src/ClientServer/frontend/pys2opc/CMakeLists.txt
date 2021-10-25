@@ -11,7 +11,7 @@ endif()
 
 # pip lacks the ability to produce the name of the output library before it is done,
 #  so it is hardcoded.
-set(PYS2OPC_WHEEL_NAME "pys2opc-0.1.0.dev3-cp36-cp36m-linux_x86_64.whl" CACHE STRING
+set(PYS2OPC_WHEEL_NAME "pys2opc-0.1.1-cp36-cp36m-linux_x86_64.whl" CACHE STRING
     "The guessed name of the produced Python 3 Wheel. It must be set to the correct name of the wheel that will be produced in build/lib for tests to run.")
 
 ### Dependencies ###

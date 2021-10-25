@@ -35,7 +35,7 @@ test_script:
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
     - set WITH_PYS2OPC=1
-    - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp36-cp36m-win_amd64.whl
+    - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.1-cp36-cp36m-win_amd64.whl
 
     # download and build libcheck
     - cd %ROOT_DIR%
