@@ -4506,6 +4506,13 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                                                    GetBuiltInTypeClearFunction(src->BuiltInTypeId));
                 }
             }
+            else if (src->Value.Array.Length == -1)
+            {
+                // <null> array
+                status = SOPC_STATUS_OK;
+                dest->Value.Array.Length = -1;
+                // dest->Value.Array.Content is not significant in that case
+            }
             break;
         case SOPC_VariantArrayType_Matrix:
             if (src->Value.Matrix.Dimensions == 0)
