@@ -70,7 +70,7 @@ typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
  * \brief Configure server from XML configuration files for: server endpoints, address space
  *        and users credential and rights.
  *
- *        If not used or used partially, see libs2opc_config_custom.h to manually configure through API.
+ * If not used or used partially, see libs2opc_config_custom.h to manually configure through API.
  *
  * \param serverConfigPath        path to server configuration XML file (s2opc_clientserver_config.xsd schema)
  *                                or NULL for manual configuration.
@@ -95,7 +95,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
 /**
  * \brief Method Call service configuration.
  *
- *        It can be instantiated with ::SOPC_MethodCallManager_Create() or specific code by applicative code.
+ * It can be instantiated with ::SOPC_MethodCallManager_Create() or specific code by applicative code.
  *
  * \param mcm  A manager to implement method behavior for method nodes that can be used by CallMethod.
  *             It shall be compliant with struct ::SOPC_MethodCallManager of sopc_call_method_manager.h,
@@ -131,7 +131,7 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
 /**
  * \brief Define the write notification callback to be used.
  *
- *        This is optional but if used it shall be defined before starting server.
+ * This is optional but if used it shall be defined before starting server.
  *
  * \param writeNotifCb  The write notification callback to be used
  *
@@ -169,8 +169,8 @@ typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* res
 /**
  * \brief Define the local service response callback to be used.
  *
- *        This is optional if not used or only synchronous version used.
- *        This shall be defined before starting the server and using ::SOPC_ServerHelper_LocalServiceAsync.
+ * This is optional if not used or only synchronous version used.
+ * This shall be defined before starting the server and using ::SOPC_ServerHelper_LocalServiceAsync.
  *
  * \param asyncRespCb  The local service asynchronous response callback to be used
  *
@@ -186,8 +186,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
 /**
  * \brief Define duration of the shutdown phase when stopping the server.
  *
- *        According to OPC UA standard the server shall indicate state change and
- *        seconds remaining until shutdown during shutdown phase and before actually stopping.
+ * According to OPC UA standard the server shall indicate state change and
+ * seconds remaining until shutdown during shutdown phase and before actually stopping.
  *
  * \param secondsTillShutdown  The number of seconds of the shutdown phase prior to actually stopping server
  *
@@ -202,9 +202,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
 /**
  * \brief Define a function to be called on client side communication events.
  *
- *        It allows to manage a low-level client in addition to the frontend server use.
- *        It is only possible to have a low-level client with a server,
- *        as the client wrapper and server wrappers cannot be used at same time in this current version.
+ * It allows to manage a low-level client in addition to the frontend server use.
+ * It is only possible to have a low-level client with a server,
+ * as the client wrapper and server wrappers cannot be used at same time in this current version.
  *
  * \param clientComEvtCb  The function callback to re-route all client related events
  *
