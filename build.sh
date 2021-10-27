@@ -84,6 +84,7 @@ else
     append_cmake_option USE_STATIC_EXT_LIBS
     append_cmake_option POSITION_INDEPENDENT_EXECUTABLE
     append_cmake_option SECURITY_HARDENING
+    append_cmake_option PYS2OPC_WHEEL_NAME
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
