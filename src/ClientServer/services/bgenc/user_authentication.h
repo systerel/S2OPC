@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.h
 
- Date                 : 01/10/2021 14:00:01
+ Date                 : 16/11/2021 10:55:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -78,5 +78,12 @@ extern void user_authentication__allocate_valid_and_authenticated_user(
    const constants__t_endpoint_config_idx_i user_authentication__p_endpoint_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication__p_sc_valid_user,
    constants__t_user_i * const user_authentication__p_user);
+extern void user_authentication__may_encrypt_user_token(
+   const constants__t_channel_config_idx_i user_authentication__p_channel_config_idx,
+   const constants__t_Nonce_i user_authentication__p_server_nonce,
+   const constants__t_SecurityPolicy user_authentication__p_user_secu_policy,
+   const constants__t_user_token_i user_authentication__p_user_token,
+   t_bool * const user_authentication__p_valid,
+   constants__t_user_token_i * const user_authentication__p_user_token_encrypted);
 
 #endif

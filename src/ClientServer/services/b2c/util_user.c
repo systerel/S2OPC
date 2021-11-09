@@ -70,10 +70,28 @@ static bool checkEncryptionAlgorithm(constants__t_SecurityPolicy secpol, SOPC_St
     }
 }
 
+const char* util_getEncryptionAlgorithm(constants__t_SecurityPolicy secpol)
+{
+    switch (secpol)
+    {
+    case constants__e_secpol_None:
+        // Part 4: "EncryptionAlgo: This parameter is null if the password is not encrypted"
+        return NULL;
+    case constants__e_secpol_B256:
+        return "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+    case constants__e_secpol_B256S256:
+        return "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+    default:
+        assert(false && "Invalid security policy");
+        return NULL;
+    }
+}
+
 bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* scConfig,
                                              const OpcUa_UserTokenPolicy* userTokenPolicy,
                                              const constants__t_user_token_type_i user_token_type,
                                              const constants__t_user_token_i user_token,
+                                             bool check_encryption_algo,
                                              constants__t_SecurityPolicy* secpol)
 {
     SOPC_String* tokenPolicyId = NULL;
@@ -124,10 +142,13 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
         tokenPolicyId = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->PolicyId;
         // Check Encryption Algo / Security policy
         encryptionAlgo = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->EncryptionAlgorithm;
-        bres = checkEncryptionAlgorithm(*secpol, encryptionAlgo);
-        if (!bres)
+        if (check_encryption_algo)
         {
-            return false;
+            bres = checkEncryptionAlgorithm(*secpol, encryptionAlgo);
+            if (!bres)
+            {
+                return false;
+            }
         }
         break;
     case OpcUa_UserTokenType_Certificate:
@@ -147,10 +168,13 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
         tokenPolicyId = &((OpcUa_IssuedIdentityToken*) user_token->Body.Object.Value)->PolicyId;
         // Check Encryption Algo / Security policy
         encryptionAlgo = &((OpcUa_IssuedIdentityToken*) user_token->Body.Object.Value)->EncryptionAlgorithm;
-        bres = checkEncryptionAlgorithm(*secpol, encryptionAlgo);
-        if (!bres)
+        if (check_encryption_algo)
         {
-            return false;
+            bres = checkEncryptionAlgorithm(*secpol, encryptionAlgo);
+            if (!bres)
+            {
+                return false;
+            }
         }
         break;
     default:

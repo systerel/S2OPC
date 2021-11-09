@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 04/10/2021 08:31:10
+ Date                 : 17/11/2021 14:56:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,6 +66,40 @@ void user_authentication__allocate_user_if_authenticated(
       else {
          *user_authentication__p_sc_allocated_valid_user = user_authentication__p_sc_valid_user;
          *user_authentication__p_user = constants__c_user_indet;
+      }
+   }
+}
+
+void user_authentication__may_encrypt_user_token(
+   const constants__t_channel_config_idx_i user_authentication__p_channel_config_idx,
+   const constants__t_Nonce_i user_authentication__p_server_nonce,
+   const constants__t_SecurityPolicy user_authentication__p_user_secu_policy,
+   const constants__t_user_token_i user_authentication__p_user_token,
+   t_bool * const user_authentication__p_valid,
+   constants__t_user_token_i * const user_authentication__p_user_token_encrypted) {
+   {
+      constants__t_user_token_type_i user_authentication__l_user_token_type;
+      
+      user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
+         &user_authentication__l_user_token_type);
+      if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) {
+         user_authentication_bs__shallow_copy_user_token(user_authentication__l_user_token_type,
+            user_authentication__p_user_token,
+            user_authentication__p_valid,
+            user_authentication__p_user_token_encrypted);
+      }
+      else if (user_authentication__l_user_token_type == constants__e_userTokenType_userName) {
+         user_authentication_bs__encrypt_user_token(user_authentication__p_channel_config_idx,
+            user_authentication__p_server_nonce,
+            user_authentication__p_user_secu_policy,
+            user_authentication__l_user_token_type,
+            user_authentication__p_user_token,
+            user_authentication__p_valid,
+            user_authentication__p_user_token_encrypted);
+      }
+      else {
+         *user_authentication__p_user_token_encrypted = constants__c_user_token_indet;
+         *user_authentication__p_valid = false;
       }
    }
 }

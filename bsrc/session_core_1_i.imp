@@ -79,7 +79,9 @@ PROMOTES
     server_session_timeout_start_timer,
     server_session_timeout_evaluation,
     server_session_timeout_msg_received,
-    get_server_session_preferred_locales
+    get_server_session_preferred_locales,
+    get_session_user_secu_client,
+    client_create_session_set_user_token_security_policy
 
 LOCAL_OPERATIONS
 

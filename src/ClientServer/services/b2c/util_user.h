@@ -25,11 +25,16 @@
 #ifndef UTIL_USER_H_
 #define UTIL_USER_H_
 
+#include <stdbool.h>
+
 #include "constants.h"
 
 /* Retrieve the user token type from user token structure */
 constants__t_user_token_type_i util_get_user_token_type_from_token(
     const constants__t_user_token_i user_authentication_bs__p_user_token);
+
+/* Get the encryption algorithm URI given the security policy */
+const char* util_getEncryptionAlgorithm(constants__t_SecurityPolicy secpol);
 
 /*
  * Check user token compliance with the user token policy. Returns true if it is compliant, false otherwise.
@@ -40,6 +45,7 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
                                              const OpcUa_UserTokenPolicy* userTokenPolicy,
                                              const constants__t_user_token_type_i user_token_type,
                                              const constants__t_user_token_i user_token,
+                                             bool check_encryption_algo,
                                              constants__t_SecurityPolicy* secpol);
 
 #endif /* UTIL_USER_H_ */

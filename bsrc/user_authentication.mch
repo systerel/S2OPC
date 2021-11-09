@@ -26,6 +26,25 @@ SEES
 
 OPERATIONS
 
+    p_valid, p_user_token_encrypted <-- may_encrypt_user_token(p_channel_config_idx, p_server_nonce, p_user_secu_policy, p_user_token) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_server_nonce : t_Nonce_i &
+        p_server_nonce : t_Nonce &
+        p_user_secu_policy : t_SecurityPolicy &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        p_valid,
+        p_user_token_encrypted
+        :(p_valid : BOOL &
+          p_user_token_encrypted : t_user_token_i &
+          (p_valid = TRUE => p_user_token_encrypted : t_user_token) &
+          (p_valid = FALSE => p_user_token_encrypted = c_user_token_indet))
+    END
+    ;
+
     /* TODO: add user token signature for X509 */
     p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, p_server_nonce, p_channel_config_idx, p_endpoint_config_idx) =
     PRE

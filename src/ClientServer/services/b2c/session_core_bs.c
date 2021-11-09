@@ -50,6 +50,7 @@
 #include "channel_mgr_bs.h"
 #include "session_core_1.h"
 #include "util_b2c.h"
+#include "util_user.h"
 
 #define LENGTH_NONCE 32
 
@@ -61,6 +62,7 @@ typedef struct SessionData
     OpcUa_SignatureData signatureData;     /* TODO: remove ? => no need to be stored */
     constants__t_user_i user_server;       /* TODO: remove user management */
     constants__t_user_token_i user_client; /* TODO: remove user management */
+    constants__t_SecurityPolicy user_secu_client;
 } SessionData;
 
 static SessionData serverSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
@@ -94,6 +96,7 @@ void session_core_bs__INITIALISATION(void)
         OpcUa_SignatureData_Initialize(&clientSessionData->signatureData);
         clientSessionData->user_server = constants__c_user_indet;
         clientSessionData->user_client = constants__c_user_token_indet;
+        clientSessionData->user_secu_client = constants__e_secpol_B256S256;
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
@@ -295,6 +298,7 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
     SOPC_ExtensionObject_Clear(sData->user_client);
     SOPC_Free(sData->user_client);
     sData->user_client = NULL;
+    sData->user_secu_client = constants__e_secpol_B256S256;
 }
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
@@ -359,6 +363,19 @@ void session_core_bs__get_session_user_client(const constants__t_session_i sessi
     else
     {
         *session_core_bs__p_user_token = constants__c_user_token_indet;
+    }
+}
+
+void session_core_bs__get_session_user_secu_client(const constants__t_session_i session_core_bs__session,
+                                                   constants__t_SecurityPolicy* const session_core_bs__p_user_secu)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        *session_core_bs__p_user_secu = clientSessionDataArray[session_core_bs__session].user_secu_client;
+    }
+    else
+    {
+        *session_core_bs__p_user_secu = constants__e_secpol_B256S256;
     }
 }
 
@@ -837,6 +854,85 @@ void session_core_bs__client_create_session_req_do_crypto(
 
         /* Success */
         *session_core_bs__valid = true;
+    }
+}
+
+void session_core_bs__client_create_session_set_user_token_security_policy(
+    const constants__t_session_i session_core_bs__p_session,
+    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+    const constants__t_msg_i session_core_bs__p_resp_msg,
+    t_bool* const session_core_bs__p_valid)
+{
+    *session_core_bs__p_valid = false;
+    const OpcUa_CreateSessionResponse* createSessionRespMsg = session_core_bs__p_resp_msg;
+    /* Retrieve the secure channel configuration and provided unencrypted user token */
+    const SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+    constants__t_user_token_i user_token = constants__c_user_token_indet;
+    session_core_bs__get_session_user_client(session_core_bs__p_session, &user_token);
+    if (NULL == scConfig || constants__c_user_token_indet == user_token)
+    {
+        return;
+    }
+    /* Retrieve the requested policyId from user token */
+    constants__t_user_token_type_i user_token_type = util_get_user_token_type_from_token(user_token);
+
+    bool foundUserSecuPolicy = false;
+    constants__t_SecurityPolicy usedSecPol = constants__e_secpol_B256S256;
+
+    /* Find the user token security policy for the requested policyId */
+    for (int32_t epIdx = 0; epIdx < createSessionRespMsg->NoOfServerEndpoints && !foundUserSecuPolicy; epIdx++)
+    {
+        const OpcUa_EndpointDescription* epDesc = &createSessionRespMsg->ServerEndpoints[epIdx];
+        if (0 == strcmp(scConfig->reqSecuPolicyUri, SOPC_String_GetRawCString(&epDesc->SecurityPolicyUri)) &&
+            scConfig->msgSecurityMode == epDesc->SecurityMode)
+        {
+            for (int32_t userPolicyIdx = 0; userPolicyIdx < epDesc->NoOfUserIdentityTokens && !foundUserSecuPolicy;
+                 userPolicyIdx++)
+            {
+                foundUserSecuPolicy =
+                    util_check_user_token_policy_compliance(scConfig, &epDesc->UserIdentityTokens[userPolicyIdx],
+                                                            user_token_type, user_token, false, &usedSecPol);
+            }
+        }
+    }
+
+    if (foundUserSecuPolicy)
+    {
+        // Record the user security policy used for this session (user token security policy or secure channel if empty)
+        clientSessionDataArray[session_core_bs__p_session].user_secu_client = usedSecPol;
+        *session_core_bs__p_valid = true;
+    }
+    else
+    {
+        const char* userPolicyId = NULL;
+        switch (user_token_type)
+        {
+        case constants__e_userTokenType_anonymous:
+            userPolicyId =
+                SOPC_String_GetRawCString(&((OpcUa_AnonymousIdentityToken*) user_token->Body.Object.Value)->PolicyId);
+            break;
+        case constants__e_userTokenType_userName:
+            userPolicyId =
+                SOPC_String_GetRawCString(&((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->PolicyId);
+            break;
+        case constants__e_userTokenType_x509:
+            userPolicyId =
+                SOPC_String_GetRawCString(&((OpcUa_X509IdentityToken*) user_token->Body.Object.Value)->PolicyId);
+            break;
+        case constants__e_userTokenType_issued:
+            userPolicyId =
+                SOPC_String_GetRawCString(&((OpcUa_IssuedIdentityToken*) user_token->Body.Object.Value)->PolicyId);
+            break;
+        default:
+            userPolicyId = "<invalid user token type>";
+            break;
+        }
+
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: session=%" PRIu32
+                               " session activation aborted due to incompatible PolicyId '%s' requested by user",
+                               session_core_bs__p_session, userPolicyId);
     }
 }
 

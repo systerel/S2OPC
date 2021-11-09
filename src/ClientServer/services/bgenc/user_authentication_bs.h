@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 01/10/2021 14:00:25
+ Date                 : 17/11/2021 14:56:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -64,6 +64,14 @@ extern void user_authentication_bs__decrypt_user_token(
    const constants__t_user_token_i user_authentication_bs__p_user_token,
    t_bool * const user_authentication_bs__p_sc_valid_user_token,
    constants__t_user_token_i * const user_authentication_bs__p_user_token_decrypted);
+extern void user_authentication_bs__encrypt_user_token(
+   const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+   const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+   const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+   const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+   const constants__t_user_token_i user_authentication_bs__p_user_token,
+   t_bool * const user_authentication_bs__p_valid,
+   constants__t_user_token_i * const user_authentication_bs__p_user_token_encrypted);
 extern void user_authentication_bs__get_local_user(
    const constants__t_endpoint_config_idx_i user_authentication_bs__endpoint_config_idx,
    constants__t_user_i * const user_authentication_bs__p_user);
@@ -86,5 +94,10 @@ extern void user_authentication_bs__is_valid_user_authentication(
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
+extern void user_authentication_bs__shallow_copy_user_token(
+   const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+   const constants__t_user_token_i user_authentication_bs__p_user_token,
+   t_bool * const user_authentication_bs__p_valid,
+   constants__t_user_token_i * const user_authentication_bs__p_user_token_copy);
 
 #endif

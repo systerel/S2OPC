@@ -40,6 +40,7 @@ DEFINITIONS
     a_server_token,
     a_user_server,
     a_user_client,
+    a_user_secu_client,
     a_NonceServer,
     a_NonceClient,
     a_server_client_locales;
@@ -55,6 +56,7 @@ DEFINITIONS
     a_server_token               : t_session_token +-> t_session         &
     a_user_server                : t_session +-> t_user                  &
     a_user_client                : t_session +-> t_user_token            &
+    a_user_secu_client           : t_session +-> t_SecurityPolicy        &
     a_NonceServer                : t_session +-> t_Nonce                 &
     a_NonceClient                : t_session +-> t_Nonce                 &
     a_server_client_locales      : t_session --> t_LocaleIds
@@ -76,6 +78,7 @@ INITIALISATION
     a_server_token               := {} ||
     a_user_server                := {} ||
     a_user_client                := {} ||
+    a_user_secu_client           := {} ||
     a_NonceServer                := {} ||
     a_NonceClient                := {} ||
     a_server_client_locales := t_session * {c_LocaleIds_empty}
@@ -421,6 +424,16 @@ OPERATIONS
     END
     ;
 
+    p_user_secu <-- get_session_user_secu_client (session) =
+    PRE
+        session : t_session_i &
+        session : t_session   &
+        session : dom(a_user_secu_client)
+    THEN
+        p_user_secu := a_user_secu_client (session)
+    END
+    ;
+
     p_bres <-- is_same_user_server (p_user_left, p_user_right) =
     PRE
         p_user_left : t_user_i &
@@ -534,7 +547,7 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx
     THEN
         IF a_SecurityPolicy(p_channel) = e_secpol_None THEN
-            valid :: BOOL || /* This fails when we cannot retreive the SecurityPolicy  <-- but this should not be possible */
+            valid :: BOOL || /* This fails when we cannot retrieve the SecurityPolicy  <-- but this should not be possible */
             nonce_needed := FALSE
         ELSE
             nonce_needed := TRUE ||
@@ -576,6 +589,36 @@ OPERATIONS
         p_session : dom(a_NonceClient)
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient
+    END
+    ;
+
+    p_valid <-- client_create_session_set_user_token_security_policy (p_session, p_channel_config_idx, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_session : dom(a_user_client) &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        p_valid,
+        a_user_secu_client
+        :(  p_valid : BOOL &
+            a_user_secu_client : t_session +-> t_SecurityPolicy &
+
+            (   p_valid = TRUE
+                =>
+                {p_session} <<| a_user_secu_client = {p_session} <<| a_user_secu_client$0 &
+                p_session : dom(a_user_secu_client)
+            ) &
+            (   p_valid = FALSE
+                =>
+                a_user_secu_client = a_user_secu_client$0
+            )
+        )
     END
     ;
 

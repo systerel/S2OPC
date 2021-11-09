@@ -74,6 +74,45 @@ OPERATIONS
     END
     ;
 
+    p_valid, p_user_token_copy <-- shallow_copy_user_token(p_token_type, p_user_token) =
+    PRE
+        p_token_type : t_user_token_type_i &
+        p_token_type /= c_userTokenType_indet &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        CHOICE
+            p_valid := TRUE ||
+            p_user_token_copy :(p_user_token_copy : t_user_token_i & p_user_token_copy : t_user_token)
+        OR
+            p_valid := FALSE ||
+            p_user_token_copy := c_user_token_indet
+        END
+    END
+    ;
+
+    p_valid, p_user_token_encrypted <-- encrypt_user_token(p_channel_config_idx, p_server_nonce, p_user_secu_policy, p_token_type, p_user_token) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_server_nonce : t_Nonce_i &
+        p_server_nonce : t_Nonce &
+        p_user_secu_policy : t_SecurityPolicy &
+        p_token_type : t_user_token_type_i &
+        p_token_type = e_userTokenType_userName & /* Only encrypted identity token supported for now */
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        CHOICE
+            p_valid := TRUE ||
+            p_user_token_encrypted :(p_user_token_encrypted : t_user_token_i & p_user_token_encrypted : t_user_token)
+        OR
+            p_valid := FALSE ||
+            p_user_token_encrypted := c_user_token_indet
+        END
+    END
+    ;
+
     p_sc_valid_user_token, p_user_token_decrypted <-- decrypt_user_token (p_endpoint_config_idx, p_server_nonce, p_user_secu_policy, p_token_type, p_user_token) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &

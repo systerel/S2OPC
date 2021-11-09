@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 16/12/2021 22:39:26
+ Date                 : 04/01/2022 13:39:31
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,6 +83,11 @@ extern void session_core_bs__client_create_session_req_do_crypto(
    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
    t_bool * const session_core_bs__valid,
    t_bool * const session_core_bs__nonce_needed);
+extern void session_core_bs__client_create_session_set_user_token_security_policy(
+   const constants__t_session_i session_core_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+   const constants__t_msg_i session_core_bs__p_resp_msg,
+   t_bool * const session_core_bs__p_valid);
 extern void session_core_bs__client_gen_activate_orphaned_session_internal_event(
    const constants__t_session_i session_core_bs__session,
    const constants__t_channel_config_idx_i session_core_bs__channel_config_idx);
@@ -117,6 +122,9 @@ extern void session_core_bs__get_NonceServer(
 extern void session_core_bs__get_session_user_client(
    const constants__t_session_i session_core_bs__session,
    constants__t_user_token_i * const session_core_bs__p_user_token);
+extern void session_core_bs__get_session_user_secu_client(
+   const constants__t_session_i session_core_bs__session,
+   constants__t_SecurityPolicy * const session_core_bs__p_user_secu);
 extern void session_core_bs__get_session_user_server(
    const constants__t_session_i session_core_bs__session,
    constants__t_user_i * const session_core_bs__p_user);

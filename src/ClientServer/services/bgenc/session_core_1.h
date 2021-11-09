@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 06/03/2020 14:49:19
+ Date                 : 09/11/2021 16:18:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -67,6 +67,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__client_close_session_resp_msg session_core_bs__client_close_session_resp_msg
 #define session_core_1__client_create_session_check_crypto session_core_bs__client_create_session_check_crypto
 #define session_core_1__client_create_session_req_do_crypto session_core_bs__client_create_session_req_do_crypto
+#define session_core_1__client_create_session_set_user_token_security_policy session_core_bs__client_create_session_set_user_token_security_policy
 #define session_core_1__client_gen_activate_orphaned_session_internal_event session_core_bs__client_gen_activate_orphaned_session_internal_event
 #define session_core_1__client_gen_activate_user_session_internal_event session_core_bs__client_gen_activate_user_session_internal_event
 #define session_core_1__client_gen_create_session_internal_event session_core_bs__client_gen_create_session_internal_event
@@ -81,6 +82,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__get_session_channel session_core_2__get_session_channel
 #define session_core_1__get_session_state session_core_2__get_session_state
 #define session_core_1__get_session_user_client session_core_bs__get_session_user_client
+#define session_core_1__get_session_user_secu_client session_core_bs__get_session_user_secu_client
 #define session_core_1__get_session_user_server session_core_bs__get_session_user_server
 #define session_core_1__getall_orphaned session_core_2__getall_orphaned
 #define session_core_1__getall_session_channel session_core_2__getall_session_channel

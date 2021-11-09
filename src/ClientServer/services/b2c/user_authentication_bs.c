@@ -127,7 +127,7 @@ static bool SOPC_UserTokenPolicyEval_Internal(
                 {
                     compliantPolicyOrAvailable = util_check_user_token_policy_compliance(
                         scConfig, &secPol->userTokenPolicies[i], user_authentication_bs__p_user_token_type,
-                        user_authentication_bs__p_user_token, &userSecurityPolicy);
+                        user_authentication_bs__p_user_token, true, &userSecurityPolicy);
                 }
             }
             else
@@ -247,6 +247,97 @@ void user_authentication_bs__is_valid_user_authentication(
                                      user_authentication_bs__p_endpoint_config_idx);
             break;
         }
+    }
+}
+
+void user_authentication_bs__shallow_copy_user_token(
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    t_bool* const user_authentication_bs__p_sc_valid_user_token,
+    constants__t_user_token_i* const user_authentication_bs__p_user_token_copy)
+{
+    *user_authentication_bs__p_sc_valid_user_token = false;
+    *user_authentication_bs__p_user_token_copy = NULL;
+
+    OpcUa_AnonymousIdentityToken *anonS = NULL, *anonD = NULL;
+    OpcUa_UserNameIdentityToken *usernameS = NULL, *usernameD = NULL;
+    OpcUa_X509IdentityToken *x509S = NULL, *x509D;
+    OpcUa_IssuedIdentityToken *issuedS = NULL, *issuedD = NULL;
+
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+
+    if (NULL == user)
+    {
+        return;
+    }
+
+    void* token = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_CreateExtension(user, user_authentication_bs__p_user_token->Body.Object.ObjType, &token);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        switch (user_authentication_bs__p_token_type)
+        {
+        case constants__e_userTokenType_anonymous:
+            anonS = user_authentication_bs__p_user_token->Body.Object.Value;
+            anonD = token;
+            status = SOPC_String_AttachFrom(&anonD->PolicyId, &anonS->PolicyId);
+            break;
+        case constants__e_userTokenType_userName:
+            usernameS = user_authentication_bs__p_user_token->Body.Object.Value;
+            usernameD = token;
+            status = SOPC_String_AttachFrom(&usernameD->PolicyId, &usernameS->PolicyId);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_AttachFrom(&usernameD->UserName, &usernameS->UserName);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ByteString_Copy(&usernameD->Password, &usernameS->Password);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_AttachFrom(&usernameD->EncryptionAlgorithm, &usernameS->EncryptionAlgorithm);
+            }
+            break;
+        case constants__e_userTokenType_x509:
+            x509S = user_authentication_bs__p_user_token->Body.Object.Value;
+            x509D = token;
+            status = SOPC_String_AttachFrom(&x509D->PolicyId, &x509S->PolicyId);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ByteString_Copy(&x509D->CertificateData, &x509S->CertificateData);
+            }
+            break;
+        case constants__e_userTokenType_issued:
+            issuedS = user_authentication_bs__p_user_token->Body.Object.Value;
+            issuedD = token;
+            status = SOPC_String_AttachFrom(&issuedD->PolicyId, &issuedS->PolicyId);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ByteString_Copy(&issuedD->TokenData, &issuedS->TokenData);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_AttachFrom(&usernameD->EncryptionAlgorithm, &usernameS->EncryptionAlgorithm);
+            }
+            break;
+        default:
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+            break;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *user_authentication_bs__p_user_token_copy = user;
+        *user_authentication_bs__p_sc_valid_user_token = true;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(user);
+        SOPC_Free(user);
     }
 }
 
@@ -517,6 +608,198 @@ void user_authentication_bs__decrypt_user_token(
     SOPC_Buffer_Clear(decryptedBuffer);
     SOPC_Free(decryptedBuffer);
     SOPC_CryptoProvider_Free(cp);
+}
+
+void user_authentication_bs__encrypt_user_token(
+    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    t_bool* const user_authentication_bs__p_valid,
+    constants__t_user_token_i* const user_authentication_bs__p_user_token_encrypted)
+{
+    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
+           "Only encryption of username identity token supported");
+    *user_authentication_bs__p_user_token_encrypted = NULL;
+    *user_authentication_bs__p_valid = false;
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
+    assert(NULL != scConfig);
+    OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
+
+    // Create a copy of user token
+    SOPC_ExtensionObject* encryptedTokenExtObj = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_UserNameIdentityToken* encryptedToken = NULL;
+
+    if (NULL == encryptedTokenExtObj)
+    {
+        return;
+    }
+    status = SOPC_Encodeable_CreateExtension(encryptedTokenExtObj, &OpcUa_UserNameIdentityToken_EncodeableType,
+                                             (void**) &encryptedToken);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&encryptedToken->UserName, &userToken->UserName);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&encryptedToken->PolicyId, &userToken->PolicyId);
+    }
+
+    // No encryption if security policy is None
+    if (SOPC_STATUS_OK == status && constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
+    {
+        status = SOPC_ByteString_Copy(&encryptedToken->Password, &userToken->Password);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
+            SOPC_Free(encryptedTokenExtObj);
+            return;
+        }
+        *user_authentication_bs__p_valid = true;
+        *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
+        return;
+    }
+
+    SOPC_CryptoProvider* cp =
+        SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
+    if (NULL == cp)
+    {
+        SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
+        SOPC_Free(encryptedTokenExtObj);
+        return;
+    }
+
+    SOPC_CertificateList* serverCert = NULL;
+    SOPC_AsymmetricKey* publicKey = NULL;
+    uint32_t lenNonce = 0;
+    uint32_t encryptedLength = 0;
+    uint32_t unencryptedLength = 0;
+    uint32_t pwdLength = 0;
+    SOPC_Buffer* unencryptedBuffer = NULL;
+    SOPC_Buffer* encryptedBuffer = NULL;
+
+    // Get server public key
+    status = SOPC_KeyManager_SerializedCertificate_Deserialize(scConfig->crt_srv, &serverCert);
+    if (SOPC_STATUS_OK == status)
+    {
+        // Retrieve public key from certificate
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(serverCert, &publicKey);
+    }
+
+    // Compute encrypted length
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cp, &lenNonce);
+        if (SOPC_STATUS_OK == status && user_authentication_bs__p_server_nonce->Length != (int32_t) lenNonce)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "User password encryption: expected server Nonce length %" PRIu32
+                                   " found length %" PRIi32,
+                                   lenNonce, user_authentication_bs__p_server_nonce->Length);
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // TODO: forbid empty password ?
+        if (userToken->Password.Length > 0)
+        {
+            pwdLength = (uint32_t) userToken->Password.Length;
+        }
+        // length field + password length + server nonce length
+        unencryptedLength = 4 + pwdLength + lenNonce;
+
+        status = SOPC_CryptoProvider_AsymmetricGetLength_Encryption(cp, publicKey, unencryptedLength, &encryptedLength);
+    }
+
+    // Copy unencrypted data into a buffer
+    if (SOPC_STATUS_OK == status)
+    {
+        unencryptedBuffer = SOPC_Buffer_Create(unencryptedLength);
+        if (NULL != unencryptedBuffer)
+        {
+            const uint32_t length = pwdLength + lenNonce;
+            status = SOPC_UInt32_Write(&length, unencryptedBuffer, 0);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_Write(unencryptedBuffer, userToken->Password.Data,
+                                           (uint32_t) userToken->Password.Length);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_Write(unencryptedBuffer, user_authentication_bs__p_server_nonce->Data,
+                                           (uint32_t) user_authentication_bs__p_server_nonce->Length);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    // Create buffer for encryption
+    if (SOPC_STATUS_OK == status)
+    {
+        encryptedBuffer = SOPC_Buffer_Create(encryptedLength);
+        status = NULL == encryptedBuffer ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    }
+
+    // Encrypt password + server Nonce
+    if (SOPC_STATUS_OK == status)
+    {
+        const char* errorReason;
+        status = SOPC_CryptoProvider_AsymmetricEncrypt(cp, unencryptedBuffer->data, unencryptedLength, publicKey,
+                                                       encryptedBuffer->data, encryptedLength, &errorReason);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "User password encryption: encryption failed with reason: %s", errorReason);
+        }
+    }
+
+    // Copy encrypted buffer into user token
+    if (SOPC_STATUS_OK == status)
+    {
+        encryptedToken->Password.Data = encryptedBuffer->data;
+        encryptedToken->Password.Length = (int32_t) encryptedLength;
+        encryptedBuffer->data = NULL;
+    }
+
+    // Set the encryption algorithm
+    if (SOPC_STATUS_OK == status)
+    {
+        const char* encAlgo = util_getEncryptionAlgorithm(user_authentication_bs__p_user_secu_policy);
+        if (NULL != encAlgo)
+        {
+            status = SOPC_String_CopyFromCString(&encryptedToken->EncryptionAlgorithm, encAlgo);
+        }
+        else
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *user_authentication_bs__p_valid = true;
+        *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
+        SOPC_Free(encryptedTokenExtObj);
+    }
+
+    SOPC_KeyManager_AsymmetricKey_Free(publicKey);
+    SOPC_KeyManager_Certificate_Free(serverCert);
+    SOPC_CryptoProvider_Free(cp);
+    SOPC_Buffer_Delete(unencryptedBuffer);
+    SOPC_Buffer_Delete(encryptedBuffer);
 }
 
 void user_authentication_bs__deallocate_user(const constants__t_user_i session_core_bs__p_user)

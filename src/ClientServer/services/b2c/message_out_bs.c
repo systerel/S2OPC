@@ -456,7 +456,10 @@ void message_out_bs__write_activate_msg_user(const constants__t_msg_i message_ou
 {
     OpcUa_ActivateSessionRequest* req = (OpcUa_ActivateSessionRequest*) message_out_bs__msg;
 
-    SOPC_ReturnStatus status = SOPC_ExtensionObject_Copy(&req->UserIdentityToken, message_out_bs__p_user_token);
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_ReturnStatus status = SOPC_ExtensionObject_Move(&req->UserIdentityToken, message_out_bs__p_user_token);
+    SOPC_Free(message_out_bs__p_user_token);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

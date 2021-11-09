@@ -248,7 +248,10 @@ OPERATIONS
                 a_state(session) := e_session_created       ||
                 a_client_token(session) := session_token    ||
                 bret := TRUE                                ||
-                a_NonceClient := {session} <<| a_NonceClient
+                a_NonceClient := {session} <<| a_NonceClient ||
+                a_NonceServer :(
+                {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                session : dom(a_NonceServer))
             OR
                 // Constraints on message content not verified
                 bret := FALSE
