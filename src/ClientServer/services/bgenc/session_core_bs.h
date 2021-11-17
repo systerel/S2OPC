@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 04/01/2022 13:39:31
+ Date                 : 04/01/2022 13:54:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,7 +83,7 @@ extern void session_core_bs__client_create_session_req_do_crypto(
    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
    t_bool * const session_core_bs__valid,
    t_bool * const session_core_bs__nonce_needed);
-extern void session_core_bs__client_create_session_set_user_token_security_policy(
+extern void session_core_bs__client_create_session_set_user_token_secu_properties(
    const constants__t_session_i session_core_bs__p_session,
    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
    const constants__t_msg_i session_core_bs__p_resp_msg,
@@ -128,6 +128,9 @@ extern void session_core_bs__get_session_user_secu_client(
 extern void session_core_bs__get_session_user_server(
    const constants__t_session_i session_core_bs__session,
    constants__t_user_i * const session_core_bs__p_user);
+extern void session_core_bs__get_session_user_server_certificate(
+   const constants__t_session_i session_core_bs__session,
+   constants__t_byte_buffer_i * const session_core_bs__p_user_server_cert);
 extern void session_core_bs__is_same_user_server(
    const constants__t_user_i session_core_bs__p_user_left,
    const constants__t_user_i session_core_bs__p_user_right,

@@ -36,6 +36,7 @@
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api_internal.h"
@@ -54,19 +55,27 @@
 
 #define LENGTH_NONCE 32
 
-typedef struct SessionData
+typedef struct ServerSessionData
+{
+    SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
+    SOPC_ByteString nonceServer;
+    OpcUa_SignatureData signatureData; /* TODO: remove ? => no need to be stored */
+    constants__t_user_i user_server;   /* TODO: remove user management */
+} ServerSessionData;
+
+typedef struct ClientSessionData
 {
     SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
     SOPC_ByteString nonceServer;
     SOPC_ByteString nonceClient;           /* TODO: remove ? => no need to be store if returned directly */
     OpcUa_SignatureData signatureData;     /* TODO: remove ? => no need to be stored */
-    constants__t_user_i user_server;       /* TODO: remove user management */
     constants__t_user_token_i user_client; /* TODO: remove user management */
     constants__t_SecurityPolicy user_secu_client;
-} SessionData;
+    SOPC_Buffer user_client_server_certificate; // Server certificate for client user encryption
+} ClientSessionData;
 
-static SessionData serverSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
-static SessionData clientSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
+static ServerSessionData serverSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
+static ClientSessionData clientSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
 static constants__t_application_context_i session_client_app_context[SOPC_MAX_SESSIONS + 1];
 
@@ -81,22 +90,21 @@ void session_core_bs__INITIALISATION(void)
 {
     for (int32_t idx = 0; idx <= constants__t_session_i_max; idx++)
     {
-        SessionData* serverSessionData = &(serverSessionDataArray[idx]);
+        ServerSessionData* serverSessionData = &(serverSessionDataArray[idx]);
         SOPC_NodeId_Initialize(&serverSessionData->sessionToken);
-        SOPC_ByteString_Initialize(&serverSessionData->nonceClient);
         SOPC_ByteString_Initialize(&serverSessionData->nonceServer);
         OpcUa_SignatureData_Initialize(&serverSessionData->signatureData);
         serverSessionData->user_server = constants__c_user_indet;
-        serverSessionData->user_client = constants__c_user_token_indet;
 
-        SessionData* clientSessionData = &(clientSessionDataArray[idx]);
+        ClientSessionData* clientSessionData = &(clientSessionDataArray[idx]);
         SOPC_NodeId_Initialize(&clientSessionData->sessionToken);
         SOPC_ByteString_Initialize(&clientSessionData->nonceClient);
         SOPC_ByteString_Initialize(&clientSessionData->nonceServer);
         OpcUa_SignatureData_Initialize(&clientSessionData->signatureData);
-        clientSessionData->user_server = constants__c_user_indet;
         clientSessionData->user_client = constants__c_user_token_indet;
         clientSessionData->user_secu_client = constants__e_secpol_B256S256;
+        memset(&clientSessionData->user_client_server_certificate, 0,
+               sizeof(clientSessionData->user_client_server_certificate));
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
@@ -285,20 +293,21 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,
                                            const t_bool session_core_bs__p_is_client)
 {
-    SessionData* sData = NULL;
     if (session_core_bs__p_is_client)
     {
-        sData = &clientSessionDataArray[session_core_bs__p_session];
+        ClientSessionData* sData = &clientSessionDataArray[session_core_bs__p_session];
+        SOPC_NodeId_Clear(&sData->sessionToken);
+        SOPC_ExtensionObject_Clear(sData->user_client);
+        SOPC_Free(sData->user_client);
+        sData->user_client = NULL;
+        sData->user_secu_client = constants__e_secpol_B256S256;
+        SOPC_Buffer_Clear(&sData->user_client_server_certificate);
     }
     else
     {
-        sData = &serverSessionDataArray[session_core_bs__p_session];
+        ServerSessionData* sData = &serverSessionDataArray[session_core_bs__p_session];
+        SOPC_NodeId_Clear(&sData->sessionToken);
     }
-    SOPC_NodeId_Clear(&sData->sessionToken);
-    SOPC_ExtensionObject_Clear(sData->user_client);
-    SOPC_Free(sData->user_client);
-    sData->user_client = NULL;
-    sData->user_secu_client = constants__e_secpol_B256S256;
 }
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
@@ -341,6 +350,21 @@ void session_core_bs__get_session_user_server(const constants__t_session_i sessi
     else
     {
         *session_core_bs__p_user = constants__c_user_indet;
+    }
+}
+
+void session_core_bs__get_session_user_server_certificate(
+    const constants__t_session_i session_core_bs__session,
+    constants__t_byte_buffer_i* const session_core_bs__p_user_server_cert)
+{
+    if (constants__c_session_indet != session_core_bs__session)
+    {
+        *session_core_bs__p_user_server_cert =
+            &clientSessionDataArray[session_core_bs__session].user_client_server_certificate;
+    }
+    else
+    {
+        *session_core_bs__p_user_server_cert = constants__c_user_indet;
     }
 }
 
@@ -423,7 +447,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     SOPC_CryptoProvider* pProvider = NULL;
     SOPC_Endpoint_Config* pECfg = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    SessionData* pSession = NULL;
+    ServerSessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
     OpcUa_SignatureData* pSign = NULL;
     uint8_t* pToSign = NULL;
@@ -600,18 +624,18 @@ void session_core_bs__clear_Signature(const constants__t_session_i session_core_
                                       const t_bool session_core_bs__p_is_client,
                                       const constants__t_SignatureData_i session_core_bs__p_signature)
 {
-    SessionData* sData = NULL;
+    OpcUa_SignatureData* signature = NULL;
     if (session_core_bs__p_is_client)
     {
-        sData = &clientSessionDataArray[session_core_bs__p_session];
+        signature = &clientSessionDataArray[session_core_bs__p_session].signatureData;
     }
     else
     {
-        sData = &serverSessionDataArray[session_core_bs__p_session];
+        signature = &serverSessionDataArray[session_core_bs__p_session].signatureData;
     }
     // Check same signature since not proved by model
-    assert(session_core_bs__p_signature == &sData->signatureData);
-    OpcUa_SignatureData_Clear(&sData->signatureData);
+    assert(session_core_bs__p_signature == signature);
+    OpcUa_SignatureData_Clear(signature);
 }
 
 void session_core_bs__client_activate_session_req_do_crypto(
@@ -623,7 +647,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
 {
     SOPC_CryptoProvider* pProvider = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    SessionData* pSession = NULL;
+    ClientSessionData* pSession = NULL;
     SOPC_AsymmetricKey* clientKey = NULL;
     SOPC_ByteString* serverNonce = NULL;
     const SOPC_Buffer* serverCert = NULL;
@@ -763,19 +787,16 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
                                       const t_bool session_core_bs__p_is_client,
                                       constants__t_Nonce_i* const session_core_bs__nonce)
 {
-    SessionData* sData = NULL;
-    if (session_core_bs__p_is_client)
-    {
-        sData = &clientSessionDataArray[session_core_bs__p_session];
-    }
-    else
-    {
-        sData = &serverSessionDataArray[session_core_bs__p_session];
-    }
-
     if (constants__c_session_indet != session_core_bs__p_session)
     {
-        *session_core_bs__nonce = &(sData->nonceServer);
+        if (session_core_bs__p_is_client)
+        {
+            *session_core_bs__nonce = &clientSessionDataArray[session_core_bs__p_session].nonceServer;
+        }
+        else
+        {
+            *session_core_bs__nonce = &serverSessionDataArray[session_core_bs__p_session].nonceServer;
+        }
     }
     else
     {
@@ -786,16 +807,17 @@ void session_core_bs__get_NonceServer(const constants__t_session_i session_core_
 void session_core_bs__remove_NonceServer(const constants__t_session_i session_core_bs__p_session,
                                          const t_bool session_core_bs__p_is_client)
 {
-    SessionData* sData = NULL;
+    SOPC_ByteString* nonce = NULL;
     if (session_core_bs__p_is_client)
     {
-        sData = &clientSessionDataArray[session_core_bs__p_session];
+        nonce = &clientSessionDataArray[session_core_bs__p_session].nonceServer;
     }
     else
     {
-        sData = &serverSessionDataArray[session_core_bs__p_session];
+        nonce = &serverSessionDataArray[session_core_bs__p_session].nonceServer;
     }
-    SOPC_ByteString_Clear(&sData->nonceServer);
+
+    SOPC_ByteString_Clear(nonce);
 }
 
 void session_core_bs__client_create_session_req_do_crypto(
@@ -809,7 +831,7 @@ void session_core_bs__client_create_session_req_do_crypto(
     /* Produce the Nonce when SC:Sec_pol is not "None" */
     SOPC_CryptoProvider* pProvider = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    SessionData* pSession = NULL;
+    ClientSessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -857,7 +879,7 @@ void session_core_bs__client_create_session_req_do_crypto(
     }
 }
 
-void session_core_bs__client_create_session_set_user_token_security_policy(
+void session_core_bs__client_create_session_set_user_token_secu_properties(
     const constants__t_session_i session_core_bs__p_session,
     const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
     const constants__t_msg_i session_core_bs__p_resp_msg,
@@ -899,8 +921,31 @@ void session_core_bs__client_create_session_set_user_token_security_policy(
 
     if (foundUserSecuPolicy)
     {
+        if ((NULL == createSessionRespMsg->ServerCertificate.Data ||
+             0 >= createSessionRespMsg->ServerCertificate.Length) &&
+            constants__e_secpol_None != usedSecPol)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Services: session=%" PRIu32
+                " session activation aborted due to missing server certificate in CreateSessionResponse",
+                session_core_bs__p_session);
+            return;
+        }
+
         // Record the user security policy used for this session (user token security policy or secure channel if empty)
         clientSessionDataArray[session_core_bs__p_session].user_secu_client = usedSecPol;
+
+        // Shallow copy of server certificate
+        clientSessionDataArray[session_core_bs__p_session].user_client_server_certificate.data =
+            createSessionRespMsg->ServerCertificate.Data;
+        clientSessionDataArray[session_core_bs__p_session].user_client_server_certificate.length =
+            (uint32_t) createSessionRespMsg->ServerCertificate.Length;
+
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        // Remove certificate content from create session resp message
+        SOPC_ByteString_Initialize((SOPC_ByteString*) &createSessionRespMsg->ServerCertificate);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
         *session_core_bs__p_valid = true;
     }
     else
@@ -1033,7 +1078,7 @@ void session_core_bs__client_create_session_check_crypto(
     t_bool* const session_core_bs__valid)
 {
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
-    SessionData* pSession = NULL;
+    ClientSessionData* pSession = NULL;
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
     const OpcUa_SignatureData* pSignCandid = &pResp->ServerSignature;
     SOPC_CertificateList* pCrtSrv = NULL;
@@ -1099,7 +1144,7 @@ void session_core_bs__server_activate_session_check_crypto(
     (void) session_core_bs__channel;
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
     SOPC_CryptoProvider* provider = NULL;
-    SessionData* pSession = NULL;
+    ServerSessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
     const OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) session_core_bs__activate_req_msg;
     const OpcUa_SignatureData* pSignCandid = &pReq->ClientSignature;

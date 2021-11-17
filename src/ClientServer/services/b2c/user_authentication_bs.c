@@ -611,7 +611,7 @@ void user_authentication_bs__decrypt_user_token(
 }
 
 void user_authentication_bs__encrypt_user_token(
-    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+    const constants__t_byte_buffer_i user_authentication_bs__p_server_cert,
     const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
     const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
     const constants__t_user_token_type_i user_authentication_bs__p_token_type,
@@ -621,14 +621,12 @@ void user_authentication_bs__encrypt_user_token(
 {
     assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
            "Only encryption of username identity token supported");
+    assert(NULL != user_authentication_bs__p_server_cert);
     *user_authentication_bs__p_user_token_encrypted = NULL;
     *user_authentication_bs__p_valid = false;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
-    assert(NULL != scConfig);
     OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
 
     // Create a copy of user token
@@ -684,7 +682,7 @@ void user_authentication_bs__encrypt_user_token(
     SOPC_Buffer* encryptedBuffer = NULL;
 
     // Get server public key
-    status = SOPC_KeyManager_SerializedCertificate_Deserialize(scConfig->crt_srv, &serverCert);
+    status = SOPC_KeyManager_SerializedCertificate_Deserialize(user_authentication_bs__p_server_cert, &serverCert);
     if (SOPC_STATUS_OK == status)
     {
         // Retrieve public key from certificate

@@ -41,6 +41,7 @@ DEFINITIONS
     a_user_server,
     a_user_client,
     a_user_secu_client,
+    a_user_server_cert,
     a_NonceServer,
     a_NonceClient,
     a_server_client_locales;
@@ -57,6 +58,7 @@ DEFINITIONS
     a_user_server                : t_session +-> t_user                  &
     a_user_client                : t_session +-> t_user_token            &
     a_user_secu_client           : t_session +-> t_SecurityPolicy        &
+    a_user_server_cert           : t_session       +-> t_byte_buffer     &
     a_NonceServer                : t_session +-> t_Nonce                 &
     a_NonceClient                : t_session +-> t_Nonce                 &
     a_server_client_locales      : t_session --> t_LocaleIds
@@ -79,6 +81,7 @@ INITIALISATION
     a_user_server                := {} ||
     a_user_client                := {} ||
     a_user_secu_client           := {} ||
+    a_user_server_cert           := {} ||
     a_NonceServer                := {} ||
     a_NonceClient                := {} ||
     a_server_client_locales := t_session * {c_LocaleIds_empty}
@@ -434,6 +437,17 @@ OPERATIONS
     END
     ;
 
+    p_user_server_cert <-- get_session_user_server_certificate(session) =
+    PRE
+        session : t_session_i &
+        session : t_session   &
+        session : dom(a_user_server_cert)
+    THEN
+        p_user_server_cert :(p_user_server_cert : t_byte_buffer_i &
+                             p_user_server_cert = a_user_server_cert (session))
+    END
+    ;
+
     p_bres <-- is_same_user_server (p_user_left, p_user_right) =
     PRE
         p_user_left : t_user_i &
@@ -592,7 +606,7 @@ OPERATIONS
     END
     ;
 
-    p_valid <-- client_create_session_set_user_token_security_policy (p_session, p_channel_config_idx, p_resp_msg) =
+    p_valid <-- client_create_session_set_user_token_secu_properties (p_session, p_channel_config_idx, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
@@ -605,18 +619,22 @@ OPERATIONS
         a_msg_in_type = e_msg_session_create_resp
     THEN
         p_valid,
-        a_user_secu_client
+        a_user_secu_client,
+        a_user_server_cert
         :(  p_valid : BOOL &
             a_user_secu_client : t_session +-> t_SecurityPolicy &
-
+            a_user_server_cert : t_session +-> t_byte_buffer &
             (   p_valid = TRUE
                 =>
                 {p_session} <<| a_user_secu_client = {p_session} <<| a_user_secu_client$0 &
-                p_session : dom(a_user_secu_client)
+                p_session : dom(a_user_secu_client) &
+                {p_session} <<| a_user_server_cert = {p_session} <<| a_user_server_cert$0 &
+                p_session : dom(a_user_server_cert)
             ) &
             (   p_valid = FALSE
                 =>
-                a_user_secu_client = a_user_secu_client$0
+                a_user_secu_client = a_user_secu_client$0 &
+                a_user_server_cert = a_user_server_cert$0
             )
         )
     END

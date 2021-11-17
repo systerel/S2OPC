@@ -423,7 +423,7 @@ OPERATIONS
     VAR
         l_nonce,
         l_valid,
-        l_valid_user_secu_policy,
+        l_valid_user_secu_properties,
         l_channel_config_idx,
         l_secpol
     IN
@@ -433,8 +433,8 @@ OPERATIONS
         bret := TRUE;
         l_secpol <-- get_SecurityPolicy(channel);
         l_channel_config_idx <-- get_channel_info (channel);
-        l_valid_user_secu_policy <-- client_create_session_set_user_token_security_policy(session, l_channel_config_idx, create_resp_msg);
-        IF l_valid_user_secu_policy = TRUE THEN
+        l_valid_user_secu_properties <-- client_create_session_set_user_token_secu_properties(session, l_channel_config_idx, create_resp_msg);
+        IF l_valid_user_secu_properties = TRUE THEN
             /* TODO: retrieve server nonce even when sec pol is none */
             IF l_secpol /= e_secpol_None THEN
                 /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */
@@ -468,6 +468,7 @@ OPERATIONS
         l_signature,
         l_server_nonce,
         l_user_secu_policy,
+        l_user_server_cert,
         l_encrypted_user_token,
         l_valid,
         l_bret
@@ -480,7 +481,8 @@ OPERATIONS
             /* TODO: ensure we retrieve it in case of sec policy none */
             l_server_nonce <-- get_NonceServer(session, TRUE);
             l_user_secu_policy <-- get_session_user_secu_client(session);
-            l_valid, l_encrypted_user_token <-- may_encrypt_user_token(l_channel_config_idx, l_server_nonce, l_user_secu_policy, p_user_token);
+            l_user_server_cert <-- get_session_user_server_certificate(session);
+            l_valid, l_encrypted_user_token <-- may_encrypt_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token);
             /* TODO: populate msg with parameters */
             IF l_valid = TRUE THEN
                 write_activate_msg_user(activate_req_msg, l_encrypted_user_token);

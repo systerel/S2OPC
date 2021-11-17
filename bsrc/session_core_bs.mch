@@ -35,6 +35,7 @@ ABSTRACT_VARIABLES
     a_user_server,
     a_user_client,
     a_user_secu_client,
+    a_user_server_cert,
     a_NonceServer,
     a_NonceClient
 
@@ -45,6 +46,7 @@ INVARIANT
     a_user_server                : t_session       +-> t_user                  &
     a_user_client                : t_session       +-> t_user_token            &
     a_user_secu_client           : t_session       +-> t_SecurityPolicy        &
+    a_user_server_cert           : t_session       +-> t_byte_buffer           &
     a_NonceServer                : t_session       +-> t_Nonce                 &
     a_NonceClient                : t_session       +-> t_Nonce
 
@@ -55,6 +57,7 @@ INITIALISATION
     a_user_server                :: {{}} ||
     a_user_client                :: {{}} ||
     a_user_secu_client           :: {{}} ||
+    a_user_server_cert           :: {{}} ||
     a_NonceServer                :: {{}} ||
     a_NonceClient                :: {{}}
 
@@ -69,6 +72,7 @@ OPERATIONS
         a_user_server := {p_session} <<| a_user_server           || /* If session had a user, remove this relation */
         a_user_client := {p_session} <<| a_user_client           ||
         a_user_secu_client := {p_session} <<| a_user_secu_client ||
+        a_user_server_cert := {p_session} <<| a_user_server_cert ||
         a_server_token := a_server_token |>> {p_session}         || /* If session had token, remove this relation */
         a_client_token := {p_session} <<| a_client_token
     END
@@ -226,6 +230,17 @@ OPERATIONS
         session : dom(a_user_secu_client)
     THEN
         p_user_secu := a_user_secu_client (session)
+    END
+    ;
+
+    p_user_server_cert <-- get_session_user_server_certificate(session) =
+    PRE
+        session : t_session_i &
+        session : t_session   &
+        session : dom(a_user_server_cert)
+    THEN
+        p_user_server_cert :(p_user_server_cert : t_byte_buffer_i &
+                             p_user_server_cert = a_user_server_cert (session))
     END
     ;
 
@@ -399,7 +414,7 @@ OPERATIONS
     END
     ;
 
-    p_valid <-- client_create_session_set_user_token_security_policy (p_session, p_channel_config_idx, p_resp_msg) =
+    p_valid <-- client_create_session_set_user_token_secu_properties (p_session, p_channel_config_idx, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session &
@@ -412,18 +427,22 @@ OPERATIONS
         a_msg_in_type = e_msg_session_create_resp
     THEN
         p_valid,
-        a_user_secu_client
+        a_user_secu_client,
+        a_user_server_cert
         :(  p_valid : BOOL &
             a_user_secu_client : t_session +-> t_SecurityPolicy &
-
+            a_user_server_cert : t_session +-> t_byte_buffer &
             (   p_valid = TRUE
                 =>
                 {p_session} <<| a_user_secu_client = {p_session} <<| a_user_secu_client$0 &
-                p_session : dom(a_user_secu_client)
+                p_session : dom(a_user_secu_client) &
+                {p_session} <<| a_user_server_cert = {p_session} <<| a_user_server_cert$0 &
+                p_session : dom(a_user_server_cert)
             ) &
             (   p_valid = FALSE
                 =>
-                a_user_secu_client = a_user_secu_client$0
+                a_user_secu_client = a_user_secu_client$0 &
+                a_user_server_cert = a_user_server_cert$0
             )
         )
     END

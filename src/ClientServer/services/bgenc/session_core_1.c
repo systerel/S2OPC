@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 06/03/2020 14:49:19
+ Date                 : 18/11/2021 12:13:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -149,7 +149,6 @@ void session_core_1__set_session_state_closed(
       session_core_bs__delete_session_application_context(session_core_1__session);
       session_core_2__reset_session_orphaned(session_core_1__session);
       session_core_1__l_reset_server_session_preferred_locales(session_core_1__session);
-      session_core_bs__drop_NonceClient(session_core_1__session);
       session_core_bs__remove_NonceServer(session_core_1__session,
          session_core_1__is_client);
       session_core_2__remove_session(session_core_1__session);

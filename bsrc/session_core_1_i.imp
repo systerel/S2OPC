@@ -81,7 +81,8 @@ PROMOTES
     server_session_timeout_msg_received,
     get_server_session_preferred_locales,
     get_session_user_secu_client,
-    client_create_session_set_user_token_security_policy
+    client_create_session_set_user_token_secu_properties,
+    get_session_user_server_certificate
 
 LOCAL_OPERATIONS
 
@@ -199,10 +200,11 @@ OPERATIONS
         // a_channel
 
         delete_session_token(session, is_client);
-        // a_user_server
-        // a_user_client
         // a_server_token
         // a_client_token
+        // a_user_client
+        // a_user_secu_client
+        // a_user_server_cert
         reset_session_to_create(session);
         // a_client_to_create
         delete_session_application_context(session);
@@ -211,8 +213,6 @@ OPERATIONS
         // a_client_orphaned
         l_reset_server_session_preferred_locales (session);
         // a_server_client_locales
-        drop_NonceClient(session);
-        // a_NonceClient
         remove_NonceServer(session, is_client);
         // a_NonceServer
         remove_session(session);

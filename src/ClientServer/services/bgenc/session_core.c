@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 18/11/2021 14:55:11
+ Date                 : 18/11/2021 14:59:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -248,7 +248,7 @@ void session_core__client_create_session_resp_sm(
    {
       constants__t_Nonce_i session_core__l_nonce;
       t_bool session_core__l_valid;
-      t_bool session_core__l_valid_user_secu_policy;
+      t_bool session_core__l_valid_user_secu_properties;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       constants__t_SecurityPolicy session_core__l_secpol;
       
@@ -257,11 +257,11 @@ void session_core__client_create_session_resp_sm(
          &session_core__l_secpol);
       channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
-      session_core_1__client_create_session_set_user_token_security_policy(session_core__session,
+      session_core_1__client_create_session_set_user_token_secu_properties(session_core__session,
          session_core__l_channel_config_idx,
          session_core__create_resp_msg,
-         &session_core__l_valid_user_secu_policy);
-      if (session_core__l_valid_user_secu_policy == true) {
+         &session_core__l_valid_user_secu_properties);
+      if (session_core__l_valid_user_secu_properties == true) {
          if (session_core__l_secpol != constants__e_secpol_None) {
             session_core_1__get_NonceClient(session_core__session,
                &session_core__l_nonce);
@@ -310,6 +310,7 @@ void session_core__client_user_activate_session_req_sm(
       constants__t_SignatureData_i session_core__l_signature;
       constants__t_Nonce_i session_core__l_server_nonce;
       constants__t_SecurityPolicy session_core__l_user_secu_policy;
+      constants__t_byte_buffer_i session_core__l_user_server_cert;
       constants__t_user_token_i session_core__l_encrypted_user_token;
       t_bool session_core__l_valid;
       t_bool session_core__l_bret;
@@ -328,7 +329,9 @@ void session_core__client_user_activate_session_req_sm(
             &session_core__l_server_nonce);
          session_core_1__get_session_user_secu_client(session_core__session,
             &session_core__l_user_secu_policy);
-         user_authentication__may_encrypt_user_token(session_core__l_channel_config_idx,
+         session_core_1__get_session_user_server_certificate(session_core__session,
+            &session_core__l_user_server_cert);
+         user_authentication__may_encrypt_user_token(session_core__l_user_server_cert,
             session_core__l_server_nonce,
             session_core__l_user_secu_policy,
             session_core__p_user_token,
