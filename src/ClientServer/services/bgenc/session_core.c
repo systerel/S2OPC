@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 18/11/2021 14:59:54
+ Date                 : 18/11/2021 16:13:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -246,7 +246,6 @@ void session_core__client_create_session_resp_sm(
    const constants__t_msg_i session_core__create_resp_msg,
    t_bool * const session_core__bret) {
    {
-      constants__t_Nonce_i session_core__l_nonce;
       t_bool session_core__l_valid;
       t_bool session_core__l_valid_user_secu_properties;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
@@ -263,8 +262,6 @@ void session_core__client_create_session_resp_sm(
          &session_core__l_valid_user_secu_properties);
       if (session_core__l_valid_user_secu_properties == true) {
          if (session_core__l_secpol != constants__e_secpol_None) {
-            session_core_1__get_NonceClient(session_core__session,
-               &session_core__l_nonce);
             session_core_1__client_create_session_check_crypto(session_core__session,
                session_core__l_channel_config_idx,
                session_core__create_resp_msg,
@@ -282,6 +279,8 @@ void session_core__client_create_session_resp_sm(
             }
          }
          else {
+            session_core_1__client_set_NonceServer(session_core__session,
+               session_core__create_resp_msg);
             session_core_1__set_session_state(session_core__session,
                constants__e_session_created,
                true);

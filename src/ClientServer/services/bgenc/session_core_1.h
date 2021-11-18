@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 18/11/2021 12:13:10
+ Date                 : 18/11/2021 16:13:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -72,6 +72,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__client_gen_activate_user_session_internal_event session_core_bs__client_gen_activate_user_session_internal_event
 #define session_core_1__client_gen_create_session_internal_event session_core_bs__client_gen_create_session_internal_event
 #define session_core_1__client_get_token_from_session session_core_bs__client_get_token_from_session
+#define session_core_1__client_set_NonceServer session_core_bs__client_set_NonceServer
 #define session_core_1__client_set_session_token session_core_bs__client_set_session_token
 #define session_core_1__drop_NonceClient session_core_bs__drop_NonceClient
 #define session_core_1__drop_user_server session_core_bs__drop_user_server

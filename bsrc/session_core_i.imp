@@ -421,7 +421,6 @@ OPERATIONS
 
     bret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     VAR
-        l_nonce,
         l_valid,
         l_valid_user_secu_properties,
         l_channel_config_idx,
@@ -435,11 +434,9 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (channel);
         l_valid_user_secu_properties <-- client_create_session_set_user_token_secu_properties(session, l_channel_config_idx, create_resp_msg);
         IF l_valid_user_secu_properties = TRUE THEN
-            /* TODO: retrieve server nonce even when sec pol is none */
             IF l_secpol /= e_secpol_None THEN
                 /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */
                 /* TODO: at least validate nonce value. In this case it could also be better to have it as parameter of check_crypto ! */
-                l_nonce <-- get_NonceClient(session);
                 l_valid <-- client_create_session_check_crypto(session, l_channel_config_idx, create_resp_msg);
                 IF l_valid = TRUE THEN
                     // channel: only for the precondition
@@ -450,6 +447,8 @@ OPERATIONS
                     bret := FALSE
                 END
             ELSE
+                /* We still might need the server nonce in case the user token security policy != None */
+                client_set_NonceServer(session, create_resp_msg);
                 set_session_state (session, e_session_created, TRUE);
                 client_set_session_token (session, session_token)
             END
@@ -478,7 +477,6 @@ OPERATIONS
         IF l_is_connected_channel = TRUE THEN
             session_token <-- client_get_token_from_session (session);
             l_channel_config_idx <-- get_channel_info (channel);
-            /* TODO: ensure we retrieve it in case of sec policy none */
             l_server_nonce <-- get_NonceServer(session, TRUE);
             l_user_secu_policy <-- get_session_user_secu_client(session);
             l_user_server_cert <-- get_session_user_server_certificate(session);

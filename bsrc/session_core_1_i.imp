@@ -82,7 +82,8 @@ PROMOTES
     get_server_session_preferred_locales,
     get_session_user_secu_client,
     client_create_session_set_user_token_secu_properties,
-    get_session_user_server_certificate
+    get_session_user_server_certificate,
+    client_set_NonceServer
 
 LOCAL_OPERATIONS
 

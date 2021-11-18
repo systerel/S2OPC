@@ -333,6 +333,23 @@ OPERATIONS
     END
     ;
 
+    client_set_NonceServer(p_session, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session   &
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
+    THEN
+        a_NonceServer
+        :(a_NonceServer : t_session +-> t_Nonce &
+            {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+            p_session : dom(a_NonceServer)
+        )
+    END
+    ;
+
     nonce <-- get_NonceServer(p_session, p_is_client) =
     PRE
         p_session : t_session_i &

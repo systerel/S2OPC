@@ -272,6 +272,20 @@ void session_core_bs__server_is_valid_session_token(const constants__t_session_t
     *session_core_bs__ret = session_core_bs__token != constants__c_session_token_indet;
 }
 
+void session_core_bs__client_set_NonceServer(const constants__t_session_i session_core_bs__p_session,
+                                             const constants__t_msg_i session_core_bs__p_resp_msg)
+{
+    assert(constants__c_session_indet != session_core_bs__p_session);
+
+    const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
+    // Shallow copy of server nonce
+    clientSessionDataArray[session_core_bs__p_session].nonceServer = pResp->ServerNonce;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    // Remove nonce content from create session resp message
+    SOPC_ByteString_Initialize((SOPC_ByteString*) &pResp->ServerNonce);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
 void session_core_bs__client_set_session_token(const constants__t_session_i session_core_bs__session,
                                                const constants__t_session_token_i session_core_bs__token)
 {
