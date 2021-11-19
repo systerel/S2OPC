@@ -66,10 +66,10 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
     .path_crl = "./revoked/cacrl.der",
-    .path_cert_srv = "./server_public/server_2k_cert.der",
-    .path_cert_cli = "./client_public/client_2k_cert.der",
-    .path_key_cli = "./client_private/client_2k_key.pem",
-    .policyId = "policyId",
+    .path_cert_srv = "./server_public/server_4k_cert.der",
+    .path_cert_cli = "./client_public/client_4k_cert.der",
+    .path_key_cli = "./client_private/client_4k_key.pem",
+    .policyId = "username",
     .username = "username",
     .password = "password"};
 
