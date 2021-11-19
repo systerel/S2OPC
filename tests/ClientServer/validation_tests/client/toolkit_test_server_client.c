@@ -25,6 +25,7 @@
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
+#include "libs2opc_server_internal.h"
 
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
@@ -657,6 +658,9 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
         authenticationManager->pFunctions = &authentication_uactt_functions;
         SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
     }
+
+    sopc_helper_config.server.configuredSecondsTillShutdown = 0;
+
     return status;
 }
 
