@@ -46,6 +46,7 @@
 
 #define USERNAME "user"
 #define PASSWORD "pass"
+#define INVALID_PASSWORD "nopass"
 
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
@@ -57,7 +58,7 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
 
 static int32_t endpointClosed = false;
 static int32_t sessionClosed = false;
-
+static int32_t sessionFailure = false;
 static uint32_t session = 0;
 
 static const char* node_id_str = "ns=1;i=1012";
@@ -158,6 +159,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     else if (SE_SESSION_ACTIVATION_FAILURE == event)
     {
         printf(">>Client: Activation failure\n");
+        SOPC_Atomic_Int_Set(&sessionFailure, true);
     }
     else if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
     {
@@ -652,6 +654,7 @@ static void tests_server_client_fct(bool username)
 {
     SOPC_Atomic_Int_Set(&endpointClosed, false);
     SOPC_Atomic_Int_Set(&sessionClosed, false);
+    SOPC_Atomic_Int_Set(&sessionFailure, false);
     SOPC_Atomic_Int_Set((int32_t*) &session, 0);
 
     uint32_t client_channel_config_idx = 0;
@@ -739,9 +742,24 @@ static void tests_server_client_fct(bool username)
     {
         if (username)
         {
+            // First attempt with wrong password
+            status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+                client_channel_config_idx, (uintptr_t) NULL, "username", USERNAME, (const uint8_t*) INVALID_PASSWORD,
+                (int32_t) strlen(INVALID_PASSWORD));
+
+            /* verify session activation failure */
+            int32_t count = 0;
+            const int32_t count_limit = 5;
+            while (SOPC_Atomic_Int_Get(&sessionFailure) == 0 && count < count_limit)
+            {
+                SOPC_Sleep(sleepTimeout);
+                count++;
+            }
+
+            // Second attempt with correct password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
                 client_channel_config_idx, (uintptr_t) NULL, "username", USERNAME, (const uint8_t*) PASSWORD,
-                strlen(PASSWORD));
+                (int32_t) strlen(PASSWORD));
         }
         else
         {
