@@ -33,6 +33,7 @@
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_user_manager.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
@@ -43,6 +44,9 @@
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
+#define USERNAME "user"
+#define PASSWORD "pass"
+
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
@@ -52,6 +56,7 @@ static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA 
 static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
 
 static int32_t endpointClosed = false;
+static int32_t sessionClosed = false;
 
 static uint32_t session = 0;
 
@@ -150,9 +155,14 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
         printf(">>Client: ActivatedSession received\n");
         SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
     }
+    else if (SE_SESSION_ACTIVATION_FAILURE == event)
+    {
+        printf(">>Client: Activation failure\n");
+    }
     else if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
     {
-        printf(">>Client: Activation failure or session closed\n");
+        printf(">>Client: Session closed\n");
+        SOPC_Atomic_Int_Set(&sessionClosed, true);
     }
     else
     {
@@ -177,7 +187,17 @@ static SOPC_SecureChannel_Config client_sc_config = {.isClientSc = true,
                                                      .requestedLifetime = 20000,
                                                      .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
 
-static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_config_idx)
+static SOPC_SecureChannel_Config client_user_sc_config = {.isClientSc = true,
+                                                          .url = DEFAULT_ENDPOINT_URL,
+                                                          .crt_cli = NULL,
+                                                          .key_priv_cli = NULL,
+                                                          .crt_srv = NULL,
+                                                          .pki = NULL,
+                                                          .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                                          .requestedLifetime = 20000,
+                                                          .msgSecurityMode = OpcUa_MessageSecurityMode_Sign};
+
+static SOPC_ReturnStatus client_create_configuration(bool username, uint32_t* client_channel_config_idx)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t channel_config_idx = 0;
@@ -187,6 +207,16 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
     SOPC_SerializedAsymmetricKey* key_priv_cli = NULL;
     SOPC_PKIProvider* pki = NULL;
 
+    SOPC_SecureChannel_Config* scConfig = NULL;
+    if (username)
+    {
+        scConfig = &client_user_sc_config;
+    }
+    else
+    {
+        scConfig = &client_sc_config;
+    }
+
     /* load certificates and key */
     if (SOPC_STATUS_OK == status)
     {
@@ -194,7 +224,7 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(client_cert_location, &crt_cli);
         if (SOPC_STATUS_OK == status)
         {
-            client_sc_config.crt_cli = crt_cli;
+            scConfig->crt_cli = crt_cli;
             printf(">>Client: Client certificate loaded\n");
         }
         else
@@ -209,7 +239,7 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
         status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(server_cert_location, &crt_srv);
         if (SOPC_STATUS_OK == status)
         {
-            client_sc_config.crt_srv = crt_srv;
+            scConfig->crt_srv = crt_srv;
             printf(">>Client: Server certificate loaded\n");
         }
         else
@@ -224,7 +254,7 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
         status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(client_key_priv_location, &key_priv_cli);
         if (SOPC_STATUS_OK == status)
         {
-            client_sc_config.key_priv_cli = key_priv_cli;
+            scConfig->key_priv_cli = key_priv_cli;
             printf(">>Client: Client private key loaded\n");
         }
         else
@@ -246,7 +276,7 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
                                                        default_revoked_certs, &pki);
         if (SOPC_STATUS_OK == status)
         {
-            client_sc_config.pki = pki;
+            scConfig->pki = pki;
             clientPki = pki;
             printf(">>Client: PKI created\n");
         }
@@ -259,7 +289,7 @@ static SOPC_ReturnStatus client_create_configuration(uint32_t* client_channel_co
     /* add secure channel config */
     if (SOPC_STATUS_OK == status)
     {
-        channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&client_sc_config);
+        channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(scConfig);
         if (0 != channel_config_idx)
         {
             *client_channel_config_idx = channel_config_idx;
@@ -460,6 +490,44 @@ static SOPC_ReturnStatus client_send_read_req_test(uint32_t session_id)
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
 
+static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* authn,
+                                            const SOPC_ExtensionObject* token,
+                                            SOPC_UserAuthentication_Status* authenticated)
+{
+    /* avoid unused parameter compiler warning */
+    (void) (authn);
+
+    if (NULL == token || NULL == authenticated)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+    if (SOPC_ExtObjBodyEncoding_Object != token->Encoding)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
+        SOPC_String* username = &userToken->UserName;
+        if (strcmp(SOPC_String_GetRawCString(username), USERNAME) == 0)
+        {
+            SOPC_ByteString* pwd = &userToken->Password;
+            if (pwd->Length == strlen(PASSWORD) && memcmp(pwd->Data, PASSWORD, strlen(PASSWORD)) == 0)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+        }
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
+    .pFuncValidateUserIdentity = authentication_fct};
+
 static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 {
     /* Load server endpoints configuration
@@ -475,7 +543,8 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_ReturnStatus status = SOPC_SecurityConfig_SetSecurityModes(sp, SOPC_SecurityModeMask_SignAndEncrypt);
+    SOPC_ReturnStatus status =
+        SOPC_SecurityConfig_SetSecurityModes(sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -483,7 +552,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+        status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
     }
 
     // Server certificates configuration
@@ -555,8 +624,23 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
         status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
     }
 
-    // Note: user manager are AllowAll by default
+    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+    }
+    if (NULL == authenticationManager)
+    {
+        SOPC_UserAuthentication_FreeManager(&authenticationManager);
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Set a user authentication function that complies with UACTT tests expectations */
+        authenticationManager->pFunctions = &authentication_uactt_functions;
+        SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
+    }
     return status;
 }
 
@@ -564,8 +648,12 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
  *                             Server main function
  *---------------------------------------------------------------------------*/
 
-START_TEST(test_server_client)
+static void tests_server_client_fct(bool username)
 {
+    SOPC_Atomic_Int_Set(&endpointClosed, false);
+    SOPC_Atomic_Int_Set(&sessionClosed, false);
+    SOPC_Atomic_Int_Set((int32_t*) &session, 0);
+
     uint32_t client_channel_config_idx = 0;
 
     /* Get the toolkit build information and print it */
@@ -620,7 +708,7 @@ START_TEST(test_server_client)
     /* Create client configuration */
     if (SOPC_STATUS_OK == status)
     {
-        status = client_create_configuration(&client_channel_config_idx);
+        status = client_create_configuration(username, &client_channel_config_idx);
         if (SOPC_STATUS_OK == status)
         {
             printf(">>Client: Successfully created configuration\n");
@@ -649,8 +737,17 @@ START_TEST(test_server_client)
     /* Connect client to server */
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(client_channel_config_idx, (uintptr_t) NULL, "anonymous");
+        if (username)
+        {
+            status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+                client_channel_config_idx, (uintptr_t) NULL, "username", USERNAME, (const uint8_t*) PASSWORD,
+                strlen(PASSWORD));
+        }
+        else
+        {
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(client_channel_config_idx, (uintptr_t) NULL,
+                                                                       "anonymous");
+        }
     }
 
     /* verify session activation */
@@ -692,13 +789,15 @@ START_TEST(test_server_client)
         }
     }
 
+    printf(">>Client: Closing session\n");
     /* client request to close the connection */
-    if (SOPC_STATUS_OK == status)
+    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionClosed) == 0)
     {
         SOPC_ToolkitClient_AsyncCloseSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session));
-        SOPC_Sleep(2000);
+        SOPC_Sleep(sleepTimeout);
     }
 
+    printf(">>Client: Stopping server\n");
     /* Asynchronous request to close the endpoint */
     SOPC_ReturnStatus stopStatus = SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
@@ -726,6 +825,17 @@ START_TEST(test_server_client)
         printf("<Test_Server_Client final result: NOK with status = '%d'\n", status);
     }
 }
+
+START_TEST(test_server_client_anonymous)
+{
+    tests_server_client_fct(false);
+}
+END_TEST
+
+START_TEST(test_server_client_username)
+{
+    tests_server_client_fct(true);
+}
 END_TEST
 
 static Suite* tests_make_suite_server_client(void)
@@ -736,7 +846,8 @@ static Suite* tests_make_suite_server_client(void)
     s = suite_create("Server/Client");
 
     tc_server_client = tcase_create("Main test");
-    tcase_add_test(tc_server_client, test_server_client);
+    tcase_add_test(tc_server_client, test_server_client_anonymous);
+    tcase_add_test(tc_server_client, test_server_client_username);
     tcase_set_timeout(tc_server_client, 0);
     suite_add_tcase(s, tc_server_client);
 
