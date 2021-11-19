@@ -530,6 +530,16 @@ static const SOPC_UserAuthentication_Functions authentication_uactt_functions = 
     .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
     .pFuncValidateUserIdentity = authentication_fct};
 
+static const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_B256 = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {12, true, (SOPC_Byte*) "usernameB256"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SECURITY_POLICY_BASIC256) - 1, true, (SOPC_Byte*) SECURITY_POLICY_BASIC256},
+    /* Default security policy shall be used only when
+   secure channel security policy is non-None since password will be non-encrypted */
+};
+
 static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 {
     /* Load server endpoints configuration
@@ -555,6 +565,10 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_B256);
     }
 
     // Server certificates configuration
@@ -650,12 +664,28 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
  *                             Server main function
  *---------------------------------------------------------------------------*/
 
-static void tests_server_client_fct(bool username)
+static void tests_server_client_fct(bool username, bool user_specific_encrypt)
 {
     SOPC_Atomic_Int_Set(&endpointClosed, false);
     SOPC_Atomic_Int_Set(&sessionClosed, false);
     SOPC_Atomic_Int_Set(&sessionFailure, false);
     SOPC_Atomic_Int_Set((int32_t*) &session, 0);
+    const char* policyId = NULL;
+    if (username)
+    {
+        if (user_specific_encrypt)
+        {
+            policyId = "usernameB256";
+        }
+        else
+        {
+            policyId = "username";
+        }
+    }
+    else
+    {
+        policyId = "anonymous";
+    }
 
     uint32_t client_channel_config_idx = 0;
 
@@ -744,7 +774,7 @@ static void tests_server_client_fct(bool username)
         {
             // First attempt with wrong password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                client_channel_config_idx, (uintptr_t) NULL, "username", USERNAME, (const uint8_t*) INVALID_PASSWORD,
+                client_channel_config_idx, (uintptr_t) NULL, policyId, USERNAME, (const uint8_t*) INVALID_PASSWORD,
                 (int32_t) strlen(INVALID_PASSWORD));
 
             /* verify session activation failure */
@@ -758,13 +788,13 @@ static void tests_server_client_fct(bool username)
 
             // Second attempt with correct password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                client_channel_config_idx, (uintptr_t) NULL, "username", USERNAME, (const uint8_t*) PASSWORD,
+                client_channel_config_idx, (uintptr_t) NULL, policyId, USERNAME, (const uint8_t*) PASSWORD,
                 (int32_t) strlen(PASSWORD));
         }
         else
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(client_channel_config_idx, (uintptr_t) NULL,
-                                                                       "anonymous");
+                                                                       policyId);
         }
     }
 
@@ -846,13 +876,19 @@ static void tests_server_client_fct(bool username)
 
 START_TEST(test_server_client_anonymous)
 {
-    tests_server_client_fct(false);
+    tests_server_client_fct(false, false);
 }
 END_TEST
 
 START_TEST(test_server_client_username)
 {
-    tests_server_client_fct(true);
+    tests_server_client_fct(true, false);
+}
+END_TEST
+
+START_TEST(test_server_client_username_specific_encrypt)
+{
+    tests_server_client_fct(true, true);
 }
 END_TEST
 
@@ -866,6 +902,7 @@ static Suite* tests_make_suite_server_client(void)
     tc_server_client = tcase_create("Main test");
     tcase_add_test(tc_server_client, test_server_client_anonymous);
     tcase_add_test(tc_server_client, test_server_client_username);
+    tcase_add_test(tc_server_client, test_server_client_username_specific_encrypt);
     tcase_set_timeout(tc_server_client, 0);
     suite_add_tcase(s, tc_server_client);
 
