@@ -125,8 +125,13 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
 /**
  * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
  *
- * \warning The method does not support encryption yet. Hence this connection method shall not be used with an
- *       unencrypted endpoint.
+ * \note The password will be encrypted, or not, depending on the user token security policy associated to the policyId
+ *       or if it is empty depending on the SecureChannel security policy.
+ *
+ * \warning The UserNamePassword mode should never be used in the following cases
+ *          since the password will be sent as plain text to the server:
+ *          - SecureChannel security policy is None and user token security policy is None or empty
+ *          - SecureChannel security mode is Sign only and user token security policy is None
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()

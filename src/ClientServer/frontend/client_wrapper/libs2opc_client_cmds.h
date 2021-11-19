@@ -98,6 +98,8 @@ typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
    and the policy id must correspond to an username UserIdentityPolicy.
  @var SOPC_ClientHelper_Security::username
    Zero-terminated username, NULL for anonymous access, see policyId
+   The password will be encrypted, or not, depending on the user token security policy associated to the policyId
+   or if it is empty depending on the SecureChannel security policy.
  @var SOPC_ClientHelper_Security::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
 */
