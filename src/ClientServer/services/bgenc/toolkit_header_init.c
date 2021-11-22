@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 17/11/2021 11:34:10
+ Date                 : 22/11/2021 10:01:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -85,6 +85,7 @@
 #include "msg_register_nodes_bs.h"
 #include "msg_register_server2.h"
 #include "msg_register_server2_bs.h"
+#include "msg_session_bs.h"
 #include "msg_subscription_create_bs.h"
 #include "msg_subscription_create_monitored_item.h"
 #include "msg_subscription_create_monitored_item_bs.h"
@@ -169,6 +170,7 @@ void INITIALISATION(void) {
    session_core_1__INITIALISATION();
    session_core_it__INITIALISATION();
    session_channel_it__INITIALISATION();
+   msg_session_bs__INITIALISATION();
    user_authentication_bs__INITIALISATION();
    user_authentication__INITIALISATION();
    session_core__INITIALISATION();

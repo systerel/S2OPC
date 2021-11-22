@@ -39,6 +39,7 @@ IMPORTS
     session_core_1,
     session_core_it,
     session_channel_it,
+    msg_session_bs,
     user_authentication
 
 PROMOTES

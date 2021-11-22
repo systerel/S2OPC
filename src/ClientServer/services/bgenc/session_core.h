@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 17/11/2021 11:44:16
+ Date                 : 22/11/2021 10:00:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "msg_session_bs.h"
 #include "session_channel_it.h"
 #include "session_core_1.h"
 #include "session_core_it.h"
