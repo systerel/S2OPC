@@ -496,6 +496,21 @@ OPERATIONS
     END
     ;
 
+    valid_cert <-- may_validate_server_certificate(p_session, p_channel_config_idx, p_user_server_cert, p_user_secu_policy) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_user_server_cert : t_byte_buffer_i &
+        p_user_server_cert = a_user_server_cert (p_session) &
+        p_user_secu_policy : t_SecurityPolicy &
+        p_user_secu_policy /= e_secpol_None
+    THEN
+        valid_cert :: BOOL
+    END
+    ;
+
     valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) =
     PRE
         session : t_session_i &

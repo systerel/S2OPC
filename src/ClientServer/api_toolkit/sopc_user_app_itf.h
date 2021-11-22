@@ -46,7 +46,8 @@ typedef struct SOPC_SecureChannel_Config
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;
-    const SOPC_PKIProvider* pki;
+    const SOPC_PKIProvider*
+        pki; /**< PKI shall not be shared between several configurations except if it is thread-safe */
     const char* reqSecuPolicyUri;
     uint32_t requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;

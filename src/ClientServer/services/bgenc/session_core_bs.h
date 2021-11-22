@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 04/01/2022 14:00:11
+ Date                 : 04/01/2022 14:08:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -138,6 +138,12 @@ extern void session_core_bs__is_same_user_server(
    const constants__t_user_i session_core_bs__p_user_left,
    const constants__t_user_i session_core_bs__p_user_right,
    t_bool * const session_core_bs__p_bres);
+extern void session_core_bs__may_validate_server_certificate(
+   const constants__t_session_i session_core_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+   const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
+   const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
+   t_bool * const session_core_bs__valid_cert);
 extern void session_core_bs__notify_set_session_state(
    const constants__t_session_i session_core_bs__session,
    const constants__t_sessionState session_core_bs__prec_state,

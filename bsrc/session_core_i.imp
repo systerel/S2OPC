@@ -424,17 +424,21 @@ OPERATIONS
     VAR
         l_valid,
         l_valid_user_secu_properties,
+        l_valid_server_cert,
         l_channel_config_idx,
         l_secpol
     IN
-        /* TODO: check Request:handle == Response:handle ; Response:Cert_server == Cert_server */
+        /* TODO: check Request:handle == Response:handle */
         /* TODO? check Response:serverEndpoints */
         /* Check server signature */
         bret := TRUE;
         l_secpol <-- get_SecurityPolicy(channel);
         l_channel_config_idx <-- get_channel_info (channel);
+        /* Note: only check the certificate is the same than SC,
+           if certificate validation needed (SC secu = None and User secu != None) it is done during ActivateSession */
+        l_valid_server_cert <-- create_session_resp_check_server_certificate (create_resp_msg, l_channel_config_idx);
         l_valid_user_secu_properties <-- client_create_session_set_user_token_secu_properties(session, l_channel_config_idx, create_resp_msg);
-        IF l_valid_user_secu_properties = TRUE THEN
+        IF l_valid_server_cert = TRUE & l_valid_user_secu_properties = TRUE THEN
             IF l_secpol /= e_secpol_None THEN
                 /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */
                 /* TODO: at least validate nonce value. In this case it could also be better to have it as parameter of check_crypto ! */
@@ -470,6 +474,7 @@ OPERATIONS
         l_user_secu_policy,
         l_user_server_cert,
         l_encrypted_user_token,
+        l_valid_cert,
         l_valid,
         l_bret
     IN
@@ -481,9 +486,23 @@ OPERATIONS
             l_server_nonce <-- get_NonceServer(session, TRUE);
             l_user_secu_policy <-- get_session_user_secu_client(session);
             l_user_server_cert <-- get_session_user_server_certificate(session);
-            l_valid, l_encrypted_user_token <-- may_encrypt_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token);
+            IF l_user_secu_policy = e_secpol_None THEN
+                // No user encryption
+                l_valid_cert := TRUE
+            ELSE
+                // Note: server certificate is validated in case no certificate used by SC and user token needs it for encryption
+                l_valid_cert <-- may_validate_server_certificate(session, l_channel_config_idx, l_user_server_cert, l_user_secu_policy)
+            END
+            ;
+            IF l_valid_cert = TRUE THEN
+                l_valid, l_encrypted_user_token <-- may_encrypt_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token)
+            ELSE
+                l_encrypted_user_token := c_user_token_indet;
+                l_valid := FALSE
+            END
+            ;
             /* TODO: populate msg with parameters */
-            IF l_valid = TRUE THEN
+            IF l_valid_cert = TRUE & l_valid = TRUE THEN
                 write_activate_msg_user(activate_req_msg, l_encrypted_user_token);
                 l_secpol <-- get_SecurityPolicy(channel);
                 IF l_secpol /= e_secpol_None THEN

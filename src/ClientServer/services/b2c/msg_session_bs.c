@@ -22,6 +22,7 @@
   ------------------------*/
 #include <assert.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include "msg_session_bs.h"
 
@@ -30,6 +31,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
+#include "util_b2c.h"
 #include "util_discovery_services.h"
 
 /*------------------------
@@ -317,5 +319,86 @@ void msg_session_bs__minimize_max_message_length_create_session_msg(
         maxResponseMessageSize < (uint32_t) chConfig->internalProtocolData)
     {
         chConfig->internalProtocolData = (uintptr_t) maxResponseMessageSize;
+    }
+}
+
+void msg_session_bs__create_session_resp_check_server_certificate(
+    const constants__t_msg_i msg_session_bs__p_resp_msg,
+    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
+    t_bool* const msg_session_bs__valid)
+{
+    *msg_session_bs__valid = false;
+    SOPC_SecureChannel_Config* pSCCfg = NULL;
+    bool sameCertificate = false;
+
+    constants__t_SecurityPolicy SCsecPol = constants__e_secpol_B256S256;
+
+    OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_resp_msg;
+
+    /* Retrieve the certificate */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
+
+    if (NULL == pSCCfg)
+    {
+        return;
+    }
+
+    bool scHasCertificate = pSCCfg->crt_srv != NULL;
+
+    /* If SC certificate provided, check if the certificate is the same. */
+    if (scHasCertificate && pResp->ServerCertificate.Length > 0)
+    {
+        const SOPC_Buffer* scSrvCert = SOPC_KeyManager_SerializedCertificate_Data(pSCCfg->crt_srv);
+
+        if (scSrvCert->length == (uint32_t) pResp->ServerCertificate.Length)
+        {
+            int comparison = memcmp(scSrvCert->data, pResp->ServerCertificate.Data, (size_t) scSrvCert->length);
+            sameCertificate = (comparison == 0);
+        }
+    }
+
+    if (sameCertificate)
+    {
+        *msg_session_bs__valid = true;
+        return;
+    }
+    else if (scHasCertificate)
+    {
+        /* From OPC UA part 4, CreateSesssion parameters:
+         * The Client shall verify that this Certificate is the same as the one it used to create the SecureChannel.
+         */
+        // The certificate shall be present and the same
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "msg_session_bs__create_session_resp_check_server_certificate: certificate absent "
+                               "whereas SecureChanel uses a certificatein channel config %" PRIu32,
+                               msg_session_bs__p_channel_config_idx);
+        return;
+    }
+
+    /* Certificate is absent, check if it can be ignored (only when SC security policy == NONE) */
+    bool validSecPolicy = util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, &SCsecPol);
+
+    if (!validSecPolicy)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "msg_session_bs__create_session_resp_check_server_certificate: invalid security policy %s in channel "
+            "config %" PRIu32,
+            pSCCfg->reqSecuPolicyUri, msg_session_bs__p_channel_config_idx);
+        return;
+    }
+
+    if (constants__e_secpol_None == SCsecPol) // Check current SC security policy is None
+    {
+        // The certificate will be validated during activate session in case it is necessary for user encryption
+        // otherwise it can be ignored (see From OPC UA part 4, CreateSession Service Parameters table)
+        *msg_session_bs__valid = true;
+    }
+    else
+    {
+        // Unexpected error
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Server certificate missing in SC config %" PRIu32 " whereas policy is not None",
+                               msg_session_bs__p_channel_config_idx);
     }
 }

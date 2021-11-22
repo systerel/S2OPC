@@ -118,6 +118,79 @@ void session_core_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
+void session_core_bs__may_validate_server_certificate(
+    const constants__t_session_i session_core_bs__p_session,
+    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+    const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
+    const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
+    t_bool* const session_core_bs__valid_cert)
+{
+    assert(constants__e_secpol_None != session_core_bs__p_user_secu_policy);
+
+    *session_core_bs__valid_cert = false;
+    SOPC_SecureChannel_Config* pSCCfg = NULL;
+
+    /* Retrieve the certificate */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+
+    if (NULL == pSCCfg)
+    {
+        return;
+    }
+
+    if (NULL == pSCCfg->crt_srv)
+    {
+        if (NULL == pSCCfg->pki)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRIu32
+                                   " user activation impossible because no PKI available to validate server "
+                                   "certificate with channel config %" PRIu32,
+                                   session_core_bs__p_session, session_core_bs__p_channel_config_idx);
+            return;
+        }
+        // CreateSessionResponse certificate not validated with SC establishment
+        SOPC_CryptoProvider* cp =
+            SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(session_core_bs__p_user_secu_policy));
+        if (NULL == cp)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Services: session=%" PRIu32
+                " user activation impossible because user security policy invalid using channel config %" PRIu32,
+                session_core_bs__p_session, session_core_bs__p_channel_config_idx);
+            return;
+        }
+        SOPC_CertificateList* serverCert = NULL;
+        uint32_t errorCode = 0;
+        SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+            session_core_bs__p_user_server_cert->data, session_core_bs__p_user_server_cert->length, &serverCert);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->pki, serverCert, &errorCode);
+            *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
+        }
+        SOPC_KeyManager_Certificate_Free(serverCert);
+        SOPC_CryptoProvider_Free(cp);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Services: session=%" PRIu32
+                " user activation impossible because server certificate validation failed using channel config %" PRIu32
+                " with error code: %" PRIu32,
+                session_core_bs__p_session, session_core_bs__p_channel_config_idx, errorCode);
+        }
+    }
+    else
+    {
+        // SC certificate already validated during SC establishment and
+        // CreateSessionResponse certificate already verified as the same
+        *session_core_bs__valid_cert = true;
+    }
+}
+
 void session_core_bs__notify_set_session_state(
     const constants__t_session_i session_core_bs__session,
     const constants__t_sessionState session_core_bs__prec_state,

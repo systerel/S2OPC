@@ -59,6 +59,7 @@ PROMOTES
     get_session_user_client,
     is_same_user_server,
     server_create_session_req_do_crypto,
+    may_validate_server_certificate,
     client_activate_session_req_do_crypto,
     clear_Signature,
     get_NonceServer,

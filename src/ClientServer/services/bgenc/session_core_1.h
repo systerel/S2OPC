@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 18/11/2021 16:13:08
+ Date                 : 24/11/2021 17:37:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -91,6 +91,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__getall_to_create session_core_2__getall_to_create
 #define session_core_1__is_same_user_server session_core_bs__is_same_user_server
 #define session_core_1__is_valid_session session_core_2__is_valid_session
+#define session_core_1__may_validate_server_certificate session_core_bs__may_validate_server_certificate
 #define session_core_1__reset_session_to_create session_core_2__reset_session_to_create
 #define session_core_1__server_activate_session_check_crypto session_core_bs__server_activate_session_check_crypto
 #define session_core_1__server_close_session_check_req session_core_bs__server_close_session_check_req
