@@ -282,7 +282,7 @@ For more information, or to compile the master branch on its latest commit, plea
 Prerequisites (only for validation based on FreeOpcUa python client):
 - Python 3
 - Python cryptography
-- FreeOpcUa (tested with version 0.90.6)
+- FreeOpcUa (tested with version 0.98.13)
 
 Run all tests:
 - To run the S2OPC OPC UA Toolkit tests: execute the test-all.sh script: `./test-all.sh`
