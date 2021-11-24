@@ -113,7 +113,7 @@ It could be done using the Python C code generator prior to compilation or using
 #### Generation of C structure address space
 The `scripts/generate-s2opc-address-space.py` tool converts a UANodeSet XML file into a
 C file that can be compiled in the binary, and used with the embedded address
-space loader (see the `samples/ClientServer/address_space/s2opc.xml`
+space loader (see the `samples/ClientServer/data/address_space/s2opc.xml`
 file for example). Not all the features of the schema are supported at the
 moment.
 
