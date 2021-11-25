@@ -171,9 +171,13 @@
 
 /* ADDRESS SPACE MANAGEMENT */
 
-/** @brief By default resolution of HasSubtype references used in services uses only the static and limited extraction
- * provided by sopc_embedded_nodeset2.h header. If variable is set to true the references are also searched into
- * instantiated address space when not available in static extraction.*/
+/** @brief By default resolution of HasSubtype references in address space used by services is static and
+ *         based on base namespace 0 (OPC UA) content. The namespace 0 content extraction is provided by
+ *         sopc_embedded_nodeset2.h header. It is particularly suitable for embedded devices since it avoids
+ *         a recursive resolution in address space.
+ *         If variable is set to true the references are also searched into instantiated address space
+ *         when not available in static extraction content, the search is recursive but
+ *         it still limited by SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL levels of recursion.*/
 #ifndef SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
 #define SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION false
 #endif

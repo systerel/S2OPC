@@ -193,4 +193,9 @@ Main interface is defined by sopc_pub_scheduler.h and sopc_sub_scheduler.h.
 
 \note The PubSub library part is only supported for POSIX platform for the moment.
 
+\section config_constants OPC UA stack behavior configuration constants
+
+Two sets of constants are defined to configure the OPC UA stack behavior, one is defined for the OPC UA common encoding layer and another for the OPC UA Client/Server services layer.
+Those variables might be changed for specific needs at library compile time and are defined in respectively in sopc_common_constants.h and sopc_toolkit_config_constants.h.
+
  */
