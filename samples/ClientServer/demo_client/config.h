@@ -48,13 +48,14 @@ extern char* PATH_CLIENT_PRIV;
 extern char* PATH_SERVER_PUBL;
 extern char* PATH_CACERT_PUBL;
 extern char* PATH_CACRL;
+extern char* PATH_ISSUED;
 
 extern char* USER_POLICY_ID;
 extern char* USER_NAME;
 extern char* USER_PWD;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[13];
+extern struct argparse_option CONN_OPTIONS[14];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200

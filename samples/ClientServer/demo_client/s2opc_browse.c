@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
                                         CONN_OPTIONS[10],
                                         CONN_OPTIONS[11],
                                         CONN_OPTIONS[12],
+                                        CONN_OPTIONS[13],
                                         OPT_END()};
     struct argparse argparse;
 

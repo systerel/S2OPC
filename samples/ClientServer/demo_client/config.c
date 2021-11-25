@@ -35,12 +35,13 @@ char* PATH_CLIENT_PRIV = "./client_private/client_4k_key.pem";
 char* PATH_SERVER_PUBL = "./server_public/server_4k_cert.der";
 char* PATH_CACERT_PUBL = "./trusted/cacert.der";
 char* PATH_CACRL = "./revoked/cacrl.der";
+char* PATH_ISSUED = NULL;
 
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 char* USER_PWD = NULL;
 
-struct argparse_option CONN_OPTIONS[13] = {
+struct argparse_option CONN_OPTIONS[14] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -108,6 +109,13 @@ struct argparse_option CONN_OPTIONS[13] = {
                0,
                0),
     OPT_STRING(0,
+               "issued",
+               &PATH_ISSUED,
+               "(default: NULL) path to an issued certificate (e.g.: trusted self-signed server certificate)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
                "user_policy_id",
                &USER_POLICY_ID,
                "(default: 'user') user policy id used to establish session",
@@ -136,7 +144,7 @@ SOPC_SerializedCertificate* pCrtSrv = NULL;
 SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
 SOPC_PKIProvider* pPki = NULL;
 
-SOPC_ReturnStatus Config_LoadCertificates(void);
+SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityMode);
 
 SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcUa_MessageSecurityMode msgSecurityMode)
 {
@@ -157,9 +165,9 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
     }
 
     /* Try to load the certificates before the creation of the config */
-    if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode)
+    if (SOPC_STATUS_OK == status)
     {
-        status = Config_LoadCertificates();
+        status = Config_LoadCertificates(msgSecurityMode);
     }
 
     /* Create the configuration */
@@ -218,35 +226,39 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     }
 }
 
-SOPC_ReturnStatus Config_LoadCertificates(void)
+SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (0 == nCfgCreated)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
-        if (SOPC_STATUS_OK != status)
+        if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
         {
-            printf("# Error: Failed to load client certificate\n");
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_SERVER_PUBL, &pCrtSrv);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
             if (SOPC_STATUS_OK != status)
             {
-                printf("# Error: Failed to load server certificate\n");
+                printf("# Error: Failed to load client certificate\n");
             }
-        }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli);
-            if (SOPC_STATUS_OK != status)
+            if (SOPC_STATUS_OK == status)
             {
-                printf("# Error: Failed to load client private key\n");
+                status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_SERVER_PUBL, &pCrtSrv);
+                if (SOPC_STATUS_OK != status)
+                {
+                    printf("# Error: Failed to load server certificate\n");
+                }
             }
-        }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli);
+                if (SOPC_STATUS_OK != status)
+                {
+                    printf("# Error: Failed to load client private key\n");
+                }
+            }
+        } // else: secu is None => client/server keys not needed but PKI might be necessary
+          //                       to validate server certificate prior to user token encryption using it
 
         if (SOPC_STATUS_OK == status)
         {
@@ -254,7 +266,7 @@ SOPC_ReturnStatus Config_LoadCertificates(void)
             char* lPathsTrustedLinks[] = {NULL};
             char* lPathsUntrustedRoots[] = {NULL};
             char* lPathsUntrustedLinks[] = {NULL};
-            char* lPathsIssuedCerts[] = {NULL};
+            char* lPathsIssuedCerts[] = {PATH_ISSUED, NULL};
             char* lPathsCRL[] = {PATH_CACRL, NULL};
             status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
                                                            lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
