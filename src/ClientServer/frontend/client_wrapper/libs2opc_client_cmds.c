@@ -469,7 +469,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
                                                  const char* endpointUrl,
                                                  SOPC_ClientHelper_Security* security)
 {
-    bool disable_verification = false;
+    bool security_none = false;
     const char* cert_auth = security->path_cert_auth;
     const char* ca_crl = security->path_crl;
     const char* cert_srv = security->path_cert_srv;
@@ -489,12 +489,12 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         {
             return -11;
         }
-        disable_verification = true;
-        cert_auth = NULL;
-        ca_crl = NULL;
-        cert_srv = NULL;
+        security_none = true;
+        // Certificates will not be used for SC (but PKI might be for user encryption)
         cert_cli = NULL;
         key_cli = NULL;
+        // Keep server certificate since it used as issued certificate and might be used for user encryption
+        // cert_srv = NULL;
         break;
     case OpcUa_MessageSecurityMode_Sign:
         break;
@@ -504,21 +504,16 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
         return -12;
     }
 
-    if (!disable_verification && NULL == cert_srv)
+    if (!security_none && NULL == cert_srv)
     {
         return -15;
     }
 
-    if (!disable_verification && (NULL == cert_auth || NULL == ca_crl))
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING,
-                    "No CA (or mandatory CRL) provided, server certificate will be accepted only if it is self-signed");
-    }
-    if (!disable_verification && NULL == cert_cli)
+    if (!security_none && NULL == cert_cli)
     {
         return -16;
     }
-    if (!disable_verification && NULL == key_cli)
+    if (!security_none && NULL == key_cli)
     {
         return -17;
     }
@@ -526,11 +521,16 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     {
         return -18;
     }
+    if (!security_none && (NULL == cert_auth || NULL == ca_crl))
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_WARNING,
+                    "No CA (or mandatory CRL) provided, server certificate will be accepted only if it is self-signed");
+    }
 
     cfg_con->server_url = endpointUrl;
     cfg_con->security_policy = security->security_policy;
     cfg_con->security_mode = security->security_mode;
-    cfg_con->disable_certificate_verification = disable_verification;
+    cfg_con->disable_certificate_verification = false;
     cfg_con->path_cert_auth = cert_auth;
     cfg_con->path_cert_srv = cert_srv;
     cfg_con->path_cert_cli = cert_cli;

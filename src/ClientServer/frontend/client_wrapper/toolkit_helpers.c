@@ -66,25 +66,27 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
     /* Check security policy and parameters consistency */
     /* CRL is always optional */
-    /* If security policy is None, then security mode shall be None, and paths, except CAuth, shall be NULL */
+    /* If security policy is None, then security mode shall be None, and paths,
+     * except CAuth and server cert (as issued), shall be NULL */
     if (strncmp(szSecuPolicy, SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
     {
-        if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathCertServer)
+        if (OpcUa_MessageSecurityMode_None != msgSecurityMode || NULL != szPathCertClient || NULL != szPathKeyClient)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is None, but security mode is not None or paths to "
-                        "certificates are not NULL.");
+                        "client certificate and keys are not NULL.");
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     /* Else, the security mode shall not be None, and all paths shall be non NULL (except CRL) */
     else
     {
-        if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathCertServer)
+        if (OpcUa_MessageSecurityMode_None == msgSecurityMode || NULL == szPathCertClient || NULL == szPathKeyClient ||
+            NULL == szPathCertServer)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR,
                         "Invalid parameters: security policy is not None, but security mode is None or paths to "
-                        "certificates are NULL.");
+                        "certificates and keys are NULL.");
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
