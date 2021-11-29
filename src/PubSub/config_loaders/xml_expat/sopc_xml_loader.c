@@ -63,6 +63,7 @@
 #define ATTR_CONNECTION_MODE "mode"
 #define ATTR_CONNECTION_MODE_VAL_PUB "publisher"
 #define ATTR_CONNECTION_MODE_VAL_SUB "subscriber"
+#define ATTR_CONNECTION_IFNAME "interfaceName"
 
 #define ATTR_MESSAGE_ID "id"
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
@@ -111,6 +112,7 @@ struct sopc_xml_pubsub_connection_t
 {
     char* address;
     bool is_publisher;
+    char* interfaceName;
     uint16_t nb_messages;
     struct sopc_xml_pubsub_message_t* messageArr;
 };
@@ -318,6 +320,25 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
             }
 
             mode = true;
+        }
+        else if (strcmp(ATTR_CONNECTION_IFNAME, attr) == 0)
+        {
+            // Retrieve current attribute value
+            const char* attr_val = attrs[++i];
+
+            if (attr_val == NULL)
+            {
+                LOG_XML_ERROR("Missing value for connection interfaceName attribute");
+                return false;
+            }
+
+            connection->interfaceName = SOPC_Malloc(strlen(attr_val) + 1);
+            if (NULL == connection->interfaceName)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            connection->interfaceName = strcpy(connection->interfaceName, attr_val);
         }
         else
         {
@@ -922,6 +943,10 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
         {
             allocSuccess = SOPC_PubSubConnection_Set_Address(connection, p_connection->address);
         }
+        if (allocSuccess && NULL != p_connection->interfaceName)
+        {
+            allocSuccess = SOPC_PubSubConnection_Set_InterfaceName(connection, p_connection->interfaceName);
+        }
     }
     if (!allocSuccess)
     {
@@ -958,6 +983,8 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
 
         SOPC_Free(p_connection->address);
         p_connection->address = NULL;
+        SOPC_Free(p_connection->interfaceName);
+        p_connection->interfaceName = NULL;
         SOPC_Free(p_connection->messageArr);
         p_connection->messageArr = NULL;
     }

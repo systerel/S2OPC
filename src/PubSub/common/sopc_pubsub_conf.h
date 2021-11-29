@@ -138,6 +138,10 @@ bool SOPC_PubSubConnection_Set_TransportProfileUri(SOPC_PubSubConnection* connec
 const char* SOPC_PubSubConnection_Get_Address(const SOPC_PubSubConnection* connection);
 bool SOPC_PubSubConnection_Set_Address(SOPC_PubSubConnection* connection, const char* address);
 
+// Used for OPC UA Ethernet only, mandatory for Publisher connection
+const char* SOPC_PubSubConnection_Get_InterfaceName(const SOPC_PubSubConnection* connection);
+bool SOPC_PubSubConnection_Set_InterfaceName(SOPC_PubSubConnection* connection, const char* interfaceName);
+
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb);
 uint16_t SOPC_PubSubConnection_Nb_WriterGroup(const SOPC_PubSubConnection* connection);
 SOPC_WriterGroup* SOPC_PubSubConnection_Get_WriterGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);

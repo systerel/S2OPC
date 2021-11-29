@@ -37,7 +37,8 @@
  *
  * \return true in case of success, false otherwise
  */
-bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(const char* address, SOPC_Socket_AddressInfo** multicastAddr);
+bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(const char* address,
+                                                           SOPC_Socket_AddressInfo** multicastAddr);
 
 /*
  * Parse a multicast address and return 2 addresses info, local address to receive data and to be added as member of the
@@ -51,9 +52,9 @@ bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(const char* address, SOP
  *
  * \return true in case of success, false otherwise
  */
-bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddress(const char* address,
-                                                         SOPC_Socket_AddressInfo** multicastAddr,
-                                                         SOPC_Socket_AddressInfo** localAddr);
+bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(const char* address,
+                                                            SOPC_Socket_AddressInfo** multicastAddr,
+                                                            SOPC_Socket_AddressInfo** localAddr);
 
 /**
  * Check if the variant is compatible (value type and value rank) with the field meta data
@@ -73,6 +74,7 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
                                             bool* out_isBad);
 
 // TODO: to be defined in S2OPC
+// Note: only suitable for UDP / MQTT prefixes
 bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
                                          const char* uri,
                                          size_t* hostnameLength,

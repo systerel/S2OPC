@@ -34,7 +34,7 @@
 
 SOPC_Socket_AddressInfo* addressArr[NB_ADDRS];
 Socket socketArr[NB_ADDRS];
-uintptr_t sockIdxArr[NB_ADDRS];
+uint16_t sockIdxArr[NB_ADDRS];
 
 static SOPC_Buffer* buffer = NULL;
 static int32_t stop = 0;
@@ -48,10 +48,10 @@ static void init_mcast_addrs(void)
     SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
     assert(localAddr != NULL);
     char* addr = SOPC_Calloc(1, sizeof(MCAST_ADDR));
-    for (uintptr_t i = 0; i < NB_ADDRS; i++)
+    for (uint16_t i = 0; i < NB_ADDRS; i++)
     {
-        printf("%" PRIxPTR "\n", i);
-        int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03" PRIuPTR, i + 100);
+        printf("%" PRIx16 "\n", i);
+        int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03" PRIu16, i + 100);
         assert(sizeof(MCAST_ADDR) - 1 == res);
         addressArr[i] = SOPC_UDP_SocketAddress_Create(false, addr, MCAST_PORT);
         assert(NULL != addressArr[i]);
@@ -76,6 +76,7 @@ static void uninit_mcast_addrs(void)
 
 static void readyToReceive(void* sockContext, Socket sock)
 {
+    uint16_t* pSockIdx = sockContext;
     if (SOPC_Atomic_Int_Get(&stop))
     {
         return;
@@ -90,7 +91,7 @@ static void readyToReceive(void* sockContext, Socket sock)
         if (SOPC_STATUS_OK == status)
         {
             printf("%u, ", resi);
-            if (resi != (uintptr_t) sockContext)
+            if (resi != *pSockIdx)
             {
                 printf("(error detected), ");
                 retCode = -1;
@@ -131,7 +132,8 @@ int main(void)
 
     if (buffer != NULL)
     {
-        SOPC_Sub_SocketsMgr_Initialize((void**) sockIdxArr, socketArr, NB_ADDRS, readyToReceive, NULL, NULL);
+        SOPC_Sub_SocketsMgr_Initialize(sockIdxArr, sizeof(*sockIdxArr), socketArr, NB_ADDRS, readyToReceive, NULL,
+                                       NULL);
         printf("Received from pub:");
         while (false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
         {

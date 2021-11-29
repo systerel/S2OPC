@@ -65,6 +65,8 @@ struct SOPC_PubSubConnection
     SOPC_Conf_PublisherId publisherId;
     // Give Network and Transport Protocol as URI
     char* transportProfileUri;
+    // Network interface name (Ethernet only): mandatory for Publisher
+    char* interfaceName;
     // NetworkAddressDataType is string
     char* address;
     uint16_t writerGroups_length;
@@ -358,6 +360,7 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
         SOPC_Free(connection->name);
         SOPC_Conf_PublisherId_Clear(&connection->publisherId);
         SOPC_Free(connection->address);
+        SOPC_Free(connection->interfaceName);
         SOPC_Free(connection->transportProfileUri);
         for (int i = 0; i < connection->writerGroups_length; i++)
         {
@@ -454,6 +457,20 @@ bool SOPC_PubSubConnection_Set_Address(SOPC_PubSubConnection* connection, const 
     // free in SOPC_PubSubConnection_Clear
     connection->address = SOPC_PubSub_String_Copy(address);
     return (NULL != connection->address);
+}
+
+const char* SOPC_PubSubConnection_Get_InterfaceName(const SOPC_PubSubConnection* connection)
+{
+    assert(NULL != connection);
+    return connection->interfaceName;
+}
+
+bool SOPC_PubSubConnection_Set_InterfaceName(SOPC_PubSubConnection* connection, const char* interfaceName)
+{
+    assert(NULL != connection);
+    // free in SOPC_PubSubConnection_Clear
+    connection->interfaceName = SOPC_PubSub_String_Copy(interfaceName);
+    return (NULL != connection->interfaceName);
 }
 
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb)

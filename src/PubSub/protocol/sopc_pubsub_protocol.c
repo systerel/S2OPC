@@ -61,6 +61,10 @@ SOPC_PubSubProtocol_Type SOPC_PubSub_Protocol_From_URI(const char* uri)
     {
         return SOPC_PubSubProtocol_MQTT;
     }
+    else if (SOPC_PubSub_Protocol_StartWith(uri, ETH_PREFIX))
+    {
+        return SOPC_PubSubProtocol_ETH;
+    }
     else
     {
         return SOPC_PubSubProtocol_UNKOWN;

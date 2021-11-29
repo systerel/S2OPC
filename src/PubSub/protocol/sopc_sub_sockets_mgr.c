@@ -33,7 +33,8 @@ static struct
     int32_t initDone;
     int32_t stopFlag;
     Thread thread;
-    void** sockContextArray;
+    void* sockContextArray;
+    size_t sizeOfSockContextElt;
     Socket* socketArray;
     uint16_t nbSockets;
     SOPC_ReadyToReceive callback;
@@ -44,6 +45,7 @@ static struct
 } receptionThread = {.initDone = false,
                      .stopFlag = 0,
                      .sockContextArray = NULL,
+                     .sizeOfSockContextElt = 0,
                      .socketArray = NULL,
                      .nbSockets = 0,
                      .callback = NULL,
@@ -107,7 +109,8 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
                         void* sockContext = NULL;
                         if (receptionThread.sockContextArray != NULL)
                         {
-                            sockContext = receptionThread.sockContextArray[i];
+                            sockContext = (void*) ((char*) receptionThread.sockContextArray +
+                                                   i * receptionThread.sizeOfSockContextElt);
                         }
                         receptionThread.callback(sockContext, receptionThread.socketArray[i]);
                     }
@@ -118,7 +121,8 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
     return NULL;
 }
 
-static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void** sockContextArray,
+static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
+                                                size_t sizeOfSockContextElt,
                                                 Socket* socketArray,
                                                 uint16_t nbSockets,
                                                 SOPC_ReadyToReceive callback,
@@ -131,6 +135,7 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void** sockContextArray,
     }
 
     receptionThread.sockContextArray = sockContextArray;
+    receptionThread.sizeOfSockContextElt = sizeOfSockContextElt;
     receptionThread.socketArray = socketArray;
     receptionThread.nbSockets = nbSockets;
     receptionThread.callback = callback;
@@ -168,7 +173,8 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }
 
-void SOPC_Sub_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
+                                    size_t sizeOfSockContextElt,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive callback,
@@ -177,8 +183,8 @@ void SOPC_Sub_SocketsMgr_Initialize(void** sockContextArray,
 {
     assert(NULL != socketArray);
     assert(NULL != callback);
-    bool result =
-        SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, socketArray, nbSockets, callback, tickCb, tickCbCtx);
+    bool result = SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, sizeOfSockContextElt, socketArray, nbSockets,
+                                                      callback, tickCb, tickCbCtx);
     assert(result);
 }
 

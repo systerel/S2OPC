@@ -27,9 +27,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_protocol.h"
 
-static bool SOPC_Internal_PubSubHelpers_ParseAddress(const char* address,
-                                                     SOPC_Socket_AddressInfo** multicastAddr,
-                                                     char** port)
+static bool SOPC_Internal_PubSubHelpers_ParseAddressUDP(const char* address,
+                                                        SOPC_Socket_AddressInfo** multicastAddr,
+                                                        char** port)
 {
     assert(NULL != port);
     assert(NULL != multicastAddr);
@@ -62,22 +62,22 @@ static bool SOPC_Internal_PubSubHelpers_ParseAddress(const char* address,
     return (NULL != *multicastAddr);
 }
 
-bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(const char* address, SOPC_Socket_AddressInfo** multicastAddr)
+bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(const char* address, SOPC_Socket_AddressInfo** multicastAddr)
 {
     char* port = NULL;
-    bool result = SOPC_Internal_PubSubHelpers_ParseAddress(address, multicastAddr, &port);
+    bool result = SOPC_Internal_PubSubHelpers_ParseAddressUDP(address, multicastAddr, &port);
     SOPC_Free(port);
     return result;
 }
 
-bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddress(const char* address,
-                                                         SOPC_Socket_AddressInfo** multicastAddr,
-                                                         SOPC_Socket_AddressInfo** localAddr)
+bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(const char* address,
+                                                            SOPC_Socket_AddressInfo** multicastAddr,
+                                                            SOPC_Socket_AddressInfo** localAddr)
 {
     assert(NULL != localAddr);
 
     char* port = NULL;
-    bool result = SOPC_Internal_PubSubHelpers_ParseAddress(address, multicastAddr, &port);
+    bool result = SOPC_Internal_PubSubHelpers_ParseAddressUDP(address, multicastAddr, &port);
     if (result)
     {
         *localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, port);
@@ -108,6 +108,12 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
     bool startIPv6 = false;
 
     if (NULL == prefix || NULL == uri || NULL == hostnameLength || NULL == portIdx || NULL == portLength)
+    {
+        return false;
+    }
+    // We only accept UADP or MQTT prefix in this function
+    if (0 != strncmp(prefix, UADP_PREFIX, strlen(UADP_PREFIX)) &&
+        0 != strncmp(prefix, MQTT_PREFIX, strlen(MQTT_PREFIX)))
     {
         return false;
     }

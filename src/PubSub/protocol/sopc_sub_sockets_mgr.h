@@ -30,15 +30,18 @@ typedef void (*SOPC_PeriodicTick)(void* ctx);
  * callback (to check keep alive timeout).
  * A dedicated thread is started to check when sockets have data to read and to call the periodic callback.
  *
- * \param sockContextArray  array of context pointers (shall have \p nbSockets elements)
- * \param socketArray       array of sockets defined to receive data as subscriber (shall have \p nbSockets elements)
- * \param nbSockets         the number of sockets (and sockets context)
- * \param callback          the callback called when a socket has data to read available, socket and its associated
- *                           context are provided by caller
- * \param tickCb            the callback called in a periodic way (each 500ms) to could check keep alive timeout
- * \param tickCbCtx         the callback context pointer provided on call to \p tickCb callback
+ * \param sockContextArray      array of context (shall have \p nbSockets elements)
+ * \param sizeOfSockContextElt  size of an element of context in \p sockContextArray
+ * \param socketArray           array of sockets defined to receive data as subscriber
+ *                              (shall have \p nbSockets elements)
+ * \param nbSockets             the number of sockets (and sockets context)
+ * \param callback              the callback called when a socket has data to read available,
+ *                              socket and its associated context are provided by caller
+ * \param tickCb                the callback called in a periodic way (each 500ms) to could check keep alive timeout
+ * \param tickCbCtx             the callback context pointer provided on call to \p tickCb callback
  * */
-void SOPC_Sub_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
+                                    size_t sizeOfSockContextElt,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive callback,

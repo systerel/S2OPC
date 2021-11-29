@@ -22,6 +22,8 @@
 
 #define UADP_PREFIX "opc.udp://"
 #define MQTT_PREFIX "mqtts://"
+#define ETH_PREFIX "opc.eth://"
+#define ETH_ETHERTYPE 0xB62C
 
 #include "sopc_mqtt_transport_layer.h"
 
@@ -29,7 +31,8 @@ typedef enum
 {
     SOPC_PubSubProtocol_UNKOWN = 0,
     SOPC_PubSubProtocol_UDP = 1,
-    SOPC_PubSubProtocol_MQTT = 2
+    SOPC_PubSubProtocol_MQTT = 2,
+    SOPC_PubSubProtocol_ETH = 3
 } SOPC_PubSubProtocol_Type;
 
 /* Returns singleton of mqtt manager. Not thread safe. */

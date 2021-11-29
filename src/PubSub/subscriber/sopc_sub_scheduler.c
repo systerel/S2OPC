@@ -24,6 +24,7 @@
 #include "sopc_array.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_eth_sockets.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
@@ -141,7 +142,7 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 
 // END SUBSCRIBER SECURITY CONTEXT
 
-static bool SOPC_SubScheduler_Start_UDP(void);
+static bool SOPC_SubScheduler_Start_Sockets(void);
 
 /* Transport context. One per connection */
 typedef struct SOPC_SubScheduler_TransportCtx SOPC_SubScheduler_TransportCtx;
@@ -154,6 +155,9 @@ static void SOPC_SubScheduler_CtxUdp_Clear(SOPC_SubScheduler_TransportCtx*);
 /* Callback defined to release mqtt transport sync context */
 static void SOPC_SubScheduler_CtxMqtt_Clear(SOPC_SubScheduler_TransportCtx*);
 
+/* Callback defined to release ethernet transport context */
+static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx*);
+
 struct SOPC_SubScheduler_TransportCtx
 {
     SOPC_PubSubProtocol_Type protocol;
@@ -165,6 +169,9 @@ struct SOPC_SubScheduler_TransportCtx
 
     // specific to SOPC_PubSubProtocol_MQTT
     MqttTransportHandle* mqttHandle;
+
+    // specific to SOPC_PubSubProtocol_ETH
+    SOPC_ETH_Socket_ReceiveAddressInfo* ethAddr;
 };
 
 static struct
@@ -182,8 +189,8 @@ static struct
     /* Internal context */
     SOPC_PubSubState state;
 
-    SOPC_Buffer* receptionBufferUDP;  /*For all UDP connections*/
-    SOPC_Buffer* receptionBufferMQTT; /*For all MQTT connections*/
+    SOPC_Buffer* receptionBufferSockets; /*For all socket connections (UDP / raw Ethernet)*/
+    SOPC_Buffer* receptionBufferMQTT;    /*For all MQTT connections*/
 
     uint32_t nbConnections;
     SOPC_SubScheduler_TransportCtx* transport;
@@ -191,7 +198,6 @@ static struct
     // specific to SOPC_PubSubProtocol_UDP
     uint16_t nbSockets;
     uint16_t nbMqttTransportContext;
-    SOPC_PubSubConnection** connectionArray;
     Socket* sockArray;
 
     /* UADP Security */
@@ -201,14 +207,23 @@ static struct
     SOPC_Array* securityCtx;
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
+
+                  .config = NULL,
+                  .targetConfig = NULL,
                   .stateCallback = NULL,
+
                   .state = SOPC_PubSubState_Disabled,
-                  .nbConnections = 0,
-                  .nbSockets = 0,
-                  .transport = NULL,
-                  .sockArray = NULL,
-                  .receptionBufferUDP = NULL,
+
+                  .receptionBufferSockets = NULL,
                   .receptionBufferMQTT = NULL,
+
+                  .nbConnections = 0,
+                  .transport = NULL,
+
+                  .nbSockets = 0,
+                  .nbMqttTransportContext = 0,
+                  .sockArray = NULL,
+
                   .securityCtx = NULL};
 
 static void set_new_state(SOPC_PubSubState new)
@@ -227,8 +242,8 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
                                              SOPC_Buffer* buffer,
                                              SOPC_SubTargetVariableConfig* config);
 
-/* The callback for received messages specific to the UDP transport */
-static void on_udp_message_received(void* pInputIdentifier, Socket sock);
+/* The callback for received messages specific to sockets (UDP or raw Ethernet) transport */
+static void on_socket_message_received(void* pInputIdentifier, Socket sock);
 
 /** \brief The callback for received messages specific to the MQTT transport
  *
@@ -259,20 +274,40 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, u
     }
 }
 
-static void on_udp_message_received(void* pInputIdentifier, Socket sock)
+static void on_socket_message_received(void* pInputIdentifier, Socket sock)
 {
     assert(NULL != pInputIdentifier);
-
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferUDP, 0);
-    if (SOPC_STATUS_OK == status)
+    SOPC_SubScheduler_TransportCtx* transportCtx = pInputIdentifier;
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferSockets, 0);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferUDP);
+        return;
     }
+
+    switch (transportCtx->protocol)
+    {
+    case SOPC_PubSubProtocol_UDP:
+        status = SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferSockets);
+        break;
+    case SOPC_PubSubProtocol_ETH:
+        status = SOPC_ETH_Socket_ReceiveFrom(sock, transportCtx->ethAddr, true, ETH_ETHERTYPE,
+                                             schedulerCtx.receptionBufferSockets);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Set position after the ethernet header to reach the UADP encoded message
+            status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferSockets, ETHERNET_HEADER_SIZE);
+        }
+        break;
+    default:
+        assert(false && "Unexpected protocol for reception on socket");
+        break;
+    }
+
     // Write input
     if (SOPC_STATUS_OK == status)
     {
-        status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
-                                     schedulerCtx.receptionBufferUDP, schedulerCtx.targetConfig);
+        status = on_message_received(transportCtx->connection, schedulerCtx.state, schedulerCtx.receptionBufferSockets,
+                                     schedulerCtx.targetConfig);
     }
 }
 
@@ -318,7 +353,10 @@ static void uninit_sub_scheduler_ctx(void)
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stop Subscriber thread");
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
     {
-        schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
+        if (schedulerCtx.transport[i].fctClear != NULL)
+        {
+            schedulerCtx.transport[i].fctClear(&schedulerCtx.transport[i]);
+        }
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
                               "Transport context freed for connection #%" PRIu32 " (subscriber)", i);
     }
@@ -329,19 +367,14 @@ static void uninit_sub_scheduler_ctx(void)
         SOPC_Free(schedulerCtx.transport);
         schedulerCtx.transport = NULL;
     }
-    if (schedulerCtx.connectionArray)
-    {
-        SOPC_Free(schedulerCtx.connectionArray);
-        schedulerCtx.connectionArray = NULL;
-    }
     if (NULL != schedulerCtx.sockArray)
     {
         SOPC_Free(schedulerCtx.sockArray);
         schedulerCtx.sockArray = NULL;
     }
-    SOPC_Buffer_Delete(schedulerCtx.receptionBufferUDP);
+    SOPC_Buffer_Delete(schedulerCtx.receptionBufferSockets);
     SOPC_Buffer_Delete(schedulerCtx.receptionBufferMQTT);
-    schedulerCtx.receptionBufferUDP = NULL;
+    schedulerCtx.receptionBufferSockets = NULL;
     schedulerCtx.receptionBufferMQTT = NULL;
 
     size_t size = SOPC_Array_Size(schedulerCtx.securityCtx);
@@ -371,8 +404,8 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     schedulerCtx.targetConfig = targetConfig;
     schedulerCtx.stateCallback = stateChangedCb;
 
-    schedulerCtx.receptionBufferUDP = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
-    result = (NULL != schedulerCtx.receptionBufferUDP);
+    schedulerCtx.receptionBufferSockets = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    result = (NULL != schedulerCtx.receptionBufferSockets);
 
     schedulerCtx.receptionBufferMQTT = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
     result = (NULL != schedulerCtx.receptionBufferMQTT);
@@ -428,26 +461,31 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                     SOPC_Socket_AddressInfo* multicastAddr = NULL;
                     SOPC_Socket_AddressInfo* localAddr = NULL;
+                    MqttManagerHandle* handleMqttMgr = NULL;
+                    size_t hostnameLength = 0;
+                    size_t portIdx = 0;
+                    size_t portLength = 0;
 
                     switch (protocol)
                     {
                     case SOPC_PubSubProtocol_UDP:
                         result =
-                            SOPC_PubSubHelpers_Subscriber_ParseMulticastAddress(address, &multicastAddr, &localAddr);
+                            SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(address, &multicastAddr, &localAddr);
 
                         // Create reception socket
                         if (result)
                         {
-                            Socket* sock = &schedulerCtx.transport[iIter].sock;
                             schedulerCtx.transport[iIter].fctClear = &SOPC_SubScheduler_CtxUdp_Clear;
                             schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_UDP;
 
                             schedulerCtx.nbSockets++;
-                            status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true, sock);
+                            status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true,
+                                                                     &schedulerCtx.transport[iIter].sock);
                             // Add socket to multicast group
                             if (SOPC_STATUS_OK == status)
                             {
-                                status = SOPC_UDP_Socket_AddMembership(*sock, multicastAddr, localAddr);
+                                status = SOPC_UDP_Socket_AddMembership(schedulerCtx.transport[iIter].sock,
+                                                                       multicastAddr, localAddr);
                             }
                             else
                             {
@@ -470,7 +508,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         break;
                     case SOPC_PubSubProtocol_MQTT:
                     {
-                        MqttManagerHandle* handleMqttMgr = SOPC_PubSub_Protocol_GetMqttManagerHandle();
+                        handleMqttMgr = SOPC_PubSub_Protocol_GetMqttManagerHandle();
 
                         if (handleMqttMgr == NULL)
                         {
@@ -478,9 +516,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         }
                         else
                         {
-                            size_t hostnameLength = 0;
-                            size_t portIdx = 0;
-                            size_t portLength = 0;
                             if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
                                                                     &portLength) == false)
                             {
@@ -515,6 +550,33 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         }
                     }
                     break;
+                    case SOPC_PubSubProtocol_ETH:
+                        // Note: configured as multicast and without source address check
+                        status = SOPC_ETH_Socket_CreateReceiveAddressInfo(
+                            SOPC_PubSubConnection_Get_InterfaceName(connection), true, address + strlen(ETH_PREFIX),
+                            NULL, &schedulerCtx.transport[iIter].ethAddr);
+
+                        // Create reception socket
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            status = SOPC_ETH_Socket_CreateToReceive(schedulerCtx.transport[iIter].ethAddr, true,
+                                                                     &schedulerCtx.transport[iIter].sock);
+                        }
+
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            schedulerCtx.transport[iIter].fctClear = &SOPC_SubScheduler_CtxEth_Clear;
+                            schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_ETH;
+                            schedulerCtx.nbSockets++;
+                        }
+                        else
+                        {
+                            /* Call uninit because at least one error */
+                            SOPC_SubScheduler_CtxEth_Clear(&schedulerCtx.transport[iIter]);
+                            result = false;
+                        }
+
+                        break;
                     case SOPC_PubSubProtocol_UNKOWN:
                     default:
                         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -580,7 +642,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
             // Run the socket manager with the context
             if (0 < schedulerCtx.nbSockets)
             {
-                result = SOPC_SubScheduler_Start_UDP();
+                result = SOPC_SubScheduler_Start_Sockets();
             }
         }
         else
@@ -623,20 +685,18 @@ void SOPC_SubScheduler_Stop(void)
   precondition :
    - call init_sub_scheduler_ctx
    - schedulerCtx.nbSockets > 0
-   - schedulerCtx.sockArray and schedulerCtx.connectionArray are NULL
+   - schedulerCtx.sockArray is NULL
 */
-static bool SOPC_SubScheduler_Start_UDP(void)
+static bool SOPC_SubScheduler_Start_Sockets(void)
 {
     assert(0 < schedulerCtx.nbSockets);
-    assert(NULL == schedulerCtx.sockArray && NULL == schedulerCtx.connectionArray);
+    assert(NULL == schedulerCtx.sockArray);
 
     uint16_t nb_socket = schedulerCtx.nbSockets;
     schedulerCtx.sockArray = SOPC_Calloc(nb_socket, sizeof(*schedulerCtx.sockArray));
-    schedulerCtx.connectionArray = SOPC_Calloc(nb_socket, sizeof(SOPC_PubSubConnection*));
-    if (NULL == schedulerCtx.sockArray || NULL == schedulerCtx.connectionArray)
+    if (NULL == schedulerCtx.sockArray)
     {
         SOPC_Free(schedulerCtx.sockArray);
-        SOPC_Free(schedulerCtx.connectionArray);
         return false;
     }
     uint16_t sockIdx = 0;
@@ -644,21 +704,21 @@ static bool SOPC_SubScheduler_Start_UDP(void)
     /* TODO: this is not the socket creation step,
      *  socket are already stored in the transport context,
      *  array length should be size_t,
-     *  -> remove this code, only udp_sockets_mgr use these arrays, and it only borrows them */
+     *  -> remove this code, only sockets_mgr use these arrays, and it only borrows them */
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
     for (uint32_t iIter = 0; iIter < schedulerCtx.nbConnections; iIter++)
     {
-        if (SOPC_PubSubProtocol_UDP == schedulerCtx.transport[iIter].protocol)
+        if (SOPC_PubSubProtocol_UDP == schedulerCtx.transport[iIter].protocol ||
+            SOPC_PubSubProtocol_ETH == schedulerCtx.transport[iIter].protocol)
         {
             schedulerCtx.sockArray[sockIdx] = schedulerCtx.transport[iIter].sock;
-            schedulerCtx.connectionArray[sockIdx] = schedulerCtx.transport[iIter].connection;
             sockIdx++;
         }
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_Sub_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
-                                   on_udp_message_received, NULL, NULL);
+    SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
+                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received, NULL, NULL);
 
     return true;
 }
@@ -675,6 +735,13 @@ static void SOPC_SubScheduler_CtxMqtt_Clear(SOPC_SubScheduler_TransportCtx* ctx)
         SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(&(ctx->mqttHandle));
         ctx->mqttHandle = NULL;
     }
+}
+
+static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)
+{
+    SOPC_ETH_Socket_Close(&(ctx->sock));
+    SOPC_Free(ctx->ethAddr);
+    ctx->ethAddr = NULL;
 }
 
 /********************************************************************************************************

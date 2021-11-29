@@ -25,6 +25,7 @@
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
+#include "sopc_eth_sockets.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -67,10 +68,17 @@ static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx)
 // Send an MQTT message. Implements SOPC_PubScheduler_TransportCtx_Send
 static void SOPC_PubScheduler_CtxMqtt_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
 
+// Clear a Transport Ethernet context. Implements SOPC_PubScheduler_TransportCtx_Clear
+static void SOPC_PubScheduler_CtxEth_Clear(SOPC_PubScheduler_TransportCtx* ctx);
+
+// Send an UADP NetworkMessage in an Ethernet II frame. Implements SOPC_PubScheduler_TransportCtx_Send
+static void SOPC_PubScheduler_CtxEth_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
+
 /* Context of a UDP Multicast Message */
 struct SOPC_PubScheduler_TransportCtx
 {
-    SOPC_Socket_AddressInfo* multicastAddr;
+    SOPC_Socket_AddressInfo* udpAddr;
+    SOPC_ETH_Socket_SendAddressInfo* ethAddr;
     Socket sock;
 
     SOPC_PubScheduler_TransportCtx_Clear fctClear;
@@ -649,25 +657,32 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 {
     const char* address = SOPC_PubSubConnection_Get_Address(connection);
     SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
+    Socket outSock;
+    SOPC_Socket_AddressInfo* outUDPaddr = NULL;
+    bool allocSuccess = false;
+    size_t hostnameLength = 0;
+    size_t portIdx = 0;
+    size_t portLength = 0;
+    MqttManagerHandle* handleMqttManager = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
     switch (protocol)
     {
     case SOPC_PubSubProtocol_UDP:
     {
-        Socket out_sock;
-        SOPC_Socket_AddressInfo* out_multicastAddr;
-        bool allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddress(address, &out_multicastAddr);
+        allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(address, &outUDPaddr);
         if (!allocSuccess)
         {
             return false;
         }
-        pubSchedulerCtx.transport[index].multicastAddr = out_multicastAddr;
-        allocSuccess = (SOPC_STATUS_OK == SOPC_UDP_Socket_CreateToSend(out_multicastAddr, &out_sock));
+        pubSchedulerCtx.transport[index].udpAddr = outUDPaddr;
+        allocSuccess = (SOPC_STATUS_OK == SOPC_UDP_Socket_CreateToSend(outUDPaddr, &outSock));
         if (!allocSuccess)
         {
             *ctx = NULL;
             return false;
         }
-        pubSchedulerCtx.transport[index].sock = out_sock;
+        pubSchedulerCtx.transport[index].sock = outSock;
         pubSchedulerCtx.transport[index].fctClear = &SOPC_PubScheduler_CtxUdp_Clear;
         pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxUdp_Send;
         *ctx = &pubSchedulerCtx.transport[index];
@@ -677,16 +692,13 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
     case SOPC_PubSubProtocol_MQTT:
     {
         {
-            size_t hostnameLength = 0;
-            size_t portIdx = 0;
-            size_t portLength = 0;
             if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx, &portLength) ==
                 false)
             {
                 return false;
             }
         }
-        MqttManagerHandle* handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
+        handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
         pubSchedulerCtx.transport[index].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
             handleMqttManager, &address[strlen(MQTT_PREFIX)], MQTT_LIB_TOPIC_NAME, on_mqtt_message_received, NULL);
 
@@ -697,8 +709,32 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 
         pubSchedulerCtx.transport[index].fctClear = SOPC_PubScheduler_CtxMqtt_Clear;
         pubSchedulerCtx.transport[index].fctSend = SOPC_PubScheduler_CtxMqtt_Send;
-        pubSchedulerCtx.transport[index].multicastAddr = NULL;
+        pubSchedulerCtx.transport[index].udpAddr = NULL;
         pubSchedulerCtx.transport[index].sock = -1;
+        *ctx = &pubSchedulerCtx.transport[index];
+        return true;
+    }
+    break;
+    case SOPC_PubSubProtocol_ETH:
+    {
+        status = SOPC_ETH_Socket_CreateSendAddressInfo(SOPC_PubSubConnection_Get_InterfaceName(connection),
+                                                       address + strlen(ETH_PREFIX),
+                                                       &pubSchedulerCtx.transport[index].ethAddr);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ETH_Socket_CreateToSend(pubSchedulerCtx.transport[index].ethAddr, true, &outSock);
+        }
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_PubScheduler_CtxEth_Clear(&pubSchedulerCtx.transport[index]);
+            return false;
+        }
+
+        pubSchedulerCtx.transport[index].sock = outSock;
+        pubSchedulerCtx.transport[index].fctClear = &SOPC_PubScheduler_CtxEth_Clear;
+        pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxEth_Send;
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }
@@ -714,13 +750,13 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 
 static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx)
 {
-    SOPC_UDP_SocketAddress_Delete(&(ctx->multicastAddr));
+    SOPC_UDP_SocketAddress_Delete(&(ctx->udpAddr));
     SOPC_UDP_Socket_Close(&(ctx->sock));
 }
 
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
 {
-    SOPC_ReturnStatus result = SOPC_UDP_Socket_SendTo(ctx->sock, ctx->multicastAddr, buffer);
+    SOPC_ReturnStatus result = SOPC_UDP_Socket_SendTo(ctx->sock, ctx->udpAddr, buffer);
     if (SOPC_STATUS_OK != result)
     {
         // TODO: Some verifications should maybe added...
@@ -755,5 +791,22 @@ static void SOPC_PubScheduler_CtxMqtt_Send(SOPC_PubScheduler_TransportCtx* ctx, 
     if (ctx != NULL && ctx->mqttHandle != NULL && buffer != NULL && buffer->data != NULL && buffer->length > 0)
     {
         SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(ctx->mqttHandle, buffer->data, (uint16_t) buffer->length, 0);
+    }
+}
+
+static void SOPC_PubScheduler_CtxEth_Clear(SOPC_PubScheduler_TransportCtx* ctx)
+{
+    SOPC_ETH_Socket_Close(&(ctx->sock));
+    SOPC_Free(ctx->ethAddr);
+    ctx->ethAddr = NULL;
+}
+
+static void SOPC_PubScheduler_CtxEth_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
+{
+    SOPC_ReturnStatus result = SOPC_ETH_Socket_SendTo(ctx->sock, ctx->ethAddr, ETH_ETHERTYPE, buffer);
+    if (SOPC_STATUS_OK != result)
+    {
+        // TODO: Some verifications should maybe added...
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_ETH_Socket_SendTo error %s ...", strerror(errno));
     }
 }
