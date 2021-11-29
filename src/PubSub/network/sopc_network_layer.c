@@ -647,6 +647,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     SOPC_Byte msg_count = 0;
     SOPC_PubSub_SecurityType* security = NULL;
     SOPC_Buffer* buffer_payload = NULL;
+    uint32_t payload_position = buffer->position;
 
     uint8_t securitySignedEnabled = false;
     uint8_t securityEncryptedEnabled = false;
@@ -944,7 +945,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         assert(securityTokenId == security->groupKeys->tokenId);
 
         // Check signature before decoding
-        if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer))
+        if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
         {
             SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
             SOPC_Free(uadp_nm);

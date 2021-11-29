@@ -60,6 +60,8 @@ void SOPC_PubSub_Security_Clear(SOPC_PubSub_SecurityType* security);
 /**
  * \brief Encrypt a buffer
  *
+ * \warning the payload position shall be 0 in the buffer
+ *
  * \param security SOPC_PubSub_SecurityType object containing SecurityProfile and Keys. Should not be NULL.
  * \param payload buffer to encrypt. Data starting from position 0 are encrypted. Should not be NULL.
  * \return If succeed, a buffer which receive the encrypted data. Otherwise return NULL.
@@ -90,6 +92,9 @@ SOPC_ReturnStatus SOPC_PubSub_Security_GetSignSize(const SOPC_PubSub_SecurityTyp
 
 /**
  * \brief Sign from 0 to current position and add signature after current position
+ *
+ * \warning the signature is done for buffer position 0 until current position and added at current position
+ *
  * \param security SOPC_PubSub_SecurityType object containing SecurityProfile and Keys. Should not be NULL.
  * \param src buffer to sign.
  */
@@ -103,12 +108,14 @@ SOPC_ReturnStatus SOPC_PubSub_Security_Sign(const SOPC_PubSub_SecurityType* secu
  *
  * \param security SOPC_PubSub_SecurityType object containing SecurityProfile and Keys. Should not be NULL.
  * \param src buffer to verify.
+ * \param payloadPosition position of the UADP payload message in buffer.
+ *        It is necessary since not always 0 (e.g.: Ethernet buffer contains the Ethernet header).
  *
  * \return
  *  - True if the buffer is signed and the signature are equal
  *  - False if security or src are NULL or the signature are not equal
  */
-bool SOPC_PubSub_Security_Verify(const SOPC_PubSub_SecurityType* security, SOPC_Buffer* src);
+bool SOPC_PubSub_Security_Verify(const SOPC_PubSub_SecurityType* security, SOPC_Buffer* src, uint32_t payloadPosition);
 
 SOPC_ExposedBuffer* SOPC_PubSub_Security_Random(const SOPC_CryptoProvider* provider);
 

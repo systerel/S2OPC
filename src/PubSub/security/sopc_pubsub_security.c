@@ -156,7 +156,7 @@ SOPC_ReturnStatus SOPC_PubSub_Security_Sign(const SOPC_PubSub_SecurityType* secu
     return status;
 }
 
-bool SOPC_PubSub_Security_Verify(const SOPC_PubSub_SecurityType* security, SOPC_Buffer* src)
+bool SOPC_PubSub_Security_Verify(const SOPC_PubSub_SecurityType* security, SOPC_Buffer* src, uint32_t payloadPosition)
 {
     if (NULL == security || NULL == security->groupKeys || NULL == src || NULL == src->data)
     {
@@ -170,10 +170,10 @@ bool SOPC_PubSub_Security_Verify(const SOPC_PubSub_SecurityType* security, SOPC_
         return false;
     }
     // Sign from begining of buffer to begining of signature
-    uint32_t lenPayload = src->length - sizeSignature;
-    status =
-        SOPC_CryptoProvider_SymmetricVerify(security->provider, src->data, lenPayload, security->groupKeys->signingKey,
-                                            &src->data[lenPayload], sizeSignature);
+    uint32_t lenPayload = (src->length - payloadPosition) - sizeSignature;
+    status = SOPC_CryptoProvider_SymmetricVerify(security->provider, src->data + payloadPosition, lenPayload,
+                                                 security->groupKeys->signingKey,
+                                                 &src->data[payloadPosition + lenPayload], sizeSignature);
     return (SOPC_STATUS_OK == status);
 }
 
