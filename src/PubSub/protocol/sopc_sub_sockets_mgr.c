@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "sopc_sub_udp_sockets_mgr.h"
+#include "sopc_sub_sockets_mgr.h"
 
 #include "sopc_atomic.h"
 #include "sopc_threads.h"
@@ -36,9 +36,9 @@ static struct
     void** sockContextArray;
     Socket* socketArray;
     uint16_t nbSockets;
-    SOPC_UDP_ReadyToReceive callback;
+    SOPC_ReadyToReceive callback;
     void* callbackCtx;
-    SOPC_UDP_PeriodicTick tickCb;
+    SOPC_PeriodicTick tickCb;
     void* tickCbCtx;
 
 } receptionThread = {.initDone = false,
@@ -51,7 +51,7 @@ static struct
                      .tickCbCtx = NULL,
                      .thread = 0};
 
-static void* SOPC_UDP_SocketsMgr_ThreadLoop(void* nullData)
+static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
     (void) nullData;
     int32_t nbReady = 0;
@@ -118,11 +118,11 @@ static void* SOPC_UDP_SocketsMgr_ThreadLoop(void* nullData)
     return NULL;
 }
 
-static bool SOPC_UDP_SocketsMgr_LoopThreadStart(void** sockContextArray,
+static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void** sockContextArray,
                                                 Socket* socketArray,
                                                 uint16_t nbSockets,
-                                                SOPC_UDP_ReadyToReceive callback,
-                                                SOPC_UDP_PeriodicTick tickCb,
+                                                SOPC_ReadyToReceive callback,
+                                                SOPC_PeriodicTick tickCb,
                                                 void* tickCbCtx)
 {
     if (SOPC_Atomic_Int_Get(&receptionThread.initDone))
@@ -139,7 +139,7 @@ static bool SOPC_UDP_SocketsMgr_LoopThreadStart(void** sockContextArray,
 
     receptionThread.stopFlag = 0;
 
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_UDP_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr") !=
+    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr") !=
         SOPC_STATUS_OK)
     {
         return false;
@@ -168,21 +168,21 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
 }
 
-void SOPC_UDP_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_Sub_SocketsMgr_Initialize(void** sockContextArray,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
-                                    SOPC_UDP_ReadyToReceive callback,
-                                    SOPC_UDP_PeriodicTick tickCb,
+                                    SOPC_ReadyToReceive callback,
+                                    SOPC_PeriodicTick tickCb,
                                     void* tickCbCtx)
 {
     assert(NULL != socketArray);
     assert(NULL != callback);
     bool result =
-        SOPC_UDP_SocketsMgr_LoopThreadStart(sockContextArray, socketArray, nbSockets, callback, tickCb, tickCbCtx);
+        SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, socketArray, nbSockets, callback, tickCb, tickCbCtx);
     assert(result);
 }
 
-void SOPC_UDP_SocketsMgr_Clear(void)
+void SOPC_Sub_SocketsMgr_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_LoopThreadStop();
 }

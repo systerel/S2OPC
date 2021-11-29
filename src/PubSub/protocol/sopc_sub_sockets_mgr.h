@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#ifndef SOPC_SUB_UDP_SOCKETS_MGR_H_
-#define SOPC_SUB_UDP_SOCKETS_MGR_H_
+#ifndef SOPC_SUB_SOCKETS_MGR_H_
+#define SOPC_SUB_SOCKETS_MGR_H_
 
 #include "sopc_raw_sockets.h"
 
-typedef void (*SOPC_UDP_ReadyToReceive)(void* sockContext, Socket sock);
-typedef void (*SOPC_UDP_PeriodicTick)(void* ctx);
+typedef void (*SOPC_ReadyToReceive)(void* sockContext, Socket sock);
+typedef void (*SOPC_PeriodicTick)(void* ctx);
 
 /**
  * Initialize the sockets manager for the given sockets (with custom context), the data received callback and tick
@@ -38,16 +38,16 @@ typedef void (*SOPC_UDP_PeriodicTick)(void* ctx);
  * \param tickCb            the callback called in a periodic way (each 500ms) to could check keep alive timeout
  * \param tickCbCtx         the callback context pointer provided on call to \p tickCb callback
  * */
-void SOPC_UDP_SocketsMgr_Initialize(void** sockContextArray,
+void SOPC_Sub_SocketsMgr_Initialize(void** sockContextArray,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
-                                    SOPC_UDP_ReadyToReceive callback,
-                                    SOPC_UDP_PeriodicTick tickCb,
+                                    SOPC_ReadyToReceive callback,
+                                    SOPC_PeriodicTick tickCb,
                                     void* tickCbCtx);
 
 /**
  * Awaits the dedicated thread to stop, clear the context and return.
  */
-void SOPC_UDP_SocketsMgr_Clear(void);
+void SOPC_Sub_SocketsMgr_Clear(void);
 
-#endif /* SOPC_SUB_UDP_SOCKETS_MGR_H_ */
+#endif /* SOPC_SUB_SOCKETS_MGR_H_ */

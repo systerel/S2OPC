@@ -35,7 +35,7 @@
 #include "sopc_pubsub_protocol.h"
 #include "sopc_reader_layer.h"
 #include "sopc_sub_scheduler.h"
-#include "sopc_sub_udp_sockets_mgr.h"
+#include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
@@ -611,7 +611,7 @@ void SOPC_SubScheduler_Stop(void)
     // true because isStarted is false
     assert(schedulerCtx.nbConnections > 0);
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, true);
-    SOPC_UDP_SocketsMgr_Clear();
+    SOPC_Sub_SocketsMgr_Clear();
     set_new_state(SOPC_PubSubState_Disabled);
     uninit_sub_scheduler_ctx();
 
@@ -657,7 +657,7 @@ static bool SOPC_SubScheduler_Start_UDP(void)
     }
 
     assert(nb_socket == sockIdx);
-    SOPC_UDP_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
+    SOPC_Sub_SocketsMgr_Initialize((void**) schedulerCtx.connectionArray, schedulerCtx.sockArray, nb_socket,
                                    on_udp_message_received, NULL, NULL);
 
     return true;

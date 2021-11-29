@@ -26,7 +26,7 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
 #include "sopc_network_layer.h"
-#include "sopc_sub_udp_sockets_mgr.h"
+#include "sopc_sub_sockets_mgr.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
 
@@ -206,7 +206,7 @@ int main(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_UDP_SocketsMgr_Initialize(NULL, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE);
+        SOPC_Sub_SocketsMgr_Initialize(NULL, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE);
     }
 
     while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
@@ -214,7 +214,7 @@ int main(void)
         SOPC_Sleep(100);
         sleepCount--;
     }
-    SOPC_UDP_SocketsMgr_Clear();
+    SOPC_Sub_SocketsMgr_Clear();
 
     SOPC_Buffer_Delete(buffer);
     SOPC_UDP_Socket_Close(&sock);

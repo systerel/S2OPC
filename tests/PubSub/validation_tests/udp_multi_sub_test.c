@@ -24,7 +24,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_sub_udp_sockets_mgr.h"
+#include "sopc_sub_sockets_mgr.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
 
@@ -131,7 +131,7 @@ int main(void)
 
     if (buffer != NULL)
     {
-        SOPC_UDP_SocketsMgr_Initialize((void**) sockIdxArr, socketArr, NB_ADDRS, readyToReceive, NULL, NULL);
+        SOPC_Sub_SocketsMgr_Initialize((void**) sockIdxArr, socketArr, NB_ADDRS, readyToReceive, NULL, NULL);
         printf("Received from pub:");
         while (false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
         {
@@ -139,7 +139,7 @@ int main(void)
             sleepCount--;
         }
         printf("\n");
-        SOPC_UDP_SocketsMgr_Clear();
+        SOPC_Sub_SocketsMgr_Clear();
     }
     else
     {
