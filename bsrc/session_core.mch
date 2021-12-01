@@ -771,7 +771,7 @@ OPERATIONS
     END
     ;
 
-    server_session_timeout_start_timer (session, resp_msg) =
+    timer_created <-- server_session_timeout_start_timer (session, resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -780,7 +780,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
-        skip
+        timer_created :: BOOL
     END
     ;
 

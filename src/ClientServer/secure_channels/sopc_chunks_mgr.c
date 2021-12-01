@@ -115,7 +115,16 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
     event.eltId = connectionIdx;
     event.params = requestHandle;
     event.auxParam = requestId;
-    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
+    uint32_t timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REQUEST_TIMEOUT_MS);
+
+    if (0 == timerId)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Services: connection=%" PRIu32 " request timeout timer creation failed",
+                                 connectionIdx);
+    }
+
+    return timerId;
 }
 
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)

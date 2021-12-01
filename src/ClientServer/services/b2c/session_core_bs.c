@@ -1159,7 +1159,6 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
             if (elapsedSinceLatestMsg < session_RevisedSessionTimeout[session_core_bs__session])
             {
                 // Session is not expired
-                *session_core_bs__expired = false;
                 // Re-activate timer for next verification
                 event.eltId = session_core_bs__session;
                 event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
@@ -1172,9 +1171,14 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 session_expiration_timer[session_core_bs__session] = timerId;
                 if (0 == timerId)
                 {
-                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                             "Services: session=%" PRIu32 " expiration timer renew failed",
-                                             session_core_bs__session);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Services: session=%" PRIu32 " expiration timer renew failed",
+                                           session_core_bs__session);
+                }
+                else
+                {
+                    /* Mark session as not expired */
+                    *session_core_bs__expired = false;
                 }
             }
         }
@@ -1196,11 +1200,13 @@ void session_core_bs__server_session_timeout_msg_received(const constants__t_ses
 }
 
 void session_core_bs__server_session_timeout_start_timer(const constants__t_session_i session_core_bs__session,
-                                                         const constants__t_msg_i session_core_bs__resp_msg)
+                                                         const constants__t_msg_i session_core_bs__resp_msg,
+                                                         t_bool* const session_core_bs__timer_created)
 {
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__resp_msg;
     uint32_t timerId = 0;
     SOPC_Event event;
+    *session_core_bs__timer_created = false;
     if (constants__c_session_indet != session_core_bs__session)
     {
         if (NULL == pResp || pResp->RevisedSessionTimeout < SOPC_MIN_SESSION_TIMEOUT)
@@ -1221,9 +1227,13 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
         session_expiration_timer[session_core_bs__session] = timerId;
         if (0 == timerId)
         {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "Services: session=%" PRIu32 " expiration timer creation failed",
-                                     session_core_bs__session);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRIu32 " expiration timer creation failed",
+                                   session_core_bs__session);
+        }
+        else
+        {
+            *session_core_bs__timer_created = true;
         }
     }
 }

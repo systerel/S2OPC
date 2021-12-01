@@ -226,28 +226,56 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
     return result;
 }
 
-static uint32_t SC_StartConnectionEstablishTimer(uint32_t connectionIdx)
+static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uint32_t connectionIdx)
 {
     assert(connectionIdx > 0);
     assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CONNECTION_TIMEOUT;
     event.params = (uintptr_t) NULL;
     event.auxParam = 0;
-    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
+    *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
+
+    if (0 == timerId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: connection=%" PRIu32 " connection establishment timer creation failed",
+                               connectionIdx);
+    }
+    else
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    return status;
 }
 
-static uint32_t SC_Client_StartOPNrenewTimer(uint32_t connectionIdx, uint32_t timeoutMs)
+static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_t connectionIdx, uint32_t timeoutMs)
 {
     assert(connectionIdx > 0);
     assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CLIENT_OPN_RENEW;
     event.params = (uintptr_t) NULL;
     event.auxParam = 0;
-    return SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
+
+    *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
+
+    if (0 == timerId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: connection=%" PRIu32 " OPN renew timer creation failed", connectionIdx);
+    }
+    else
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    return status;
 }
 
 static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBuffer,
@@ -1163,8 +1191,13 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
 
         // Add timer to renew the secure channel security token before expiration
         // Part 4 1.03: "Clients should request a new SecurityToken after 75% of its lifetime elapsed"
-        scConnection->secuTokenRenewTimerId =
-            SC_Client_StartOPNrenewTimer(scConnectionIdx, scConnection->currentSecurityToken.revisedLifetime * 3 / 4);
+        status = SC_Client_StartOPNrenewTimer(&(scConnection->secuTokenRenewTimerId), scConnectionIdx,
+                                              scConnection->currentSecurityToken.revisedLifetime * 3 / 4);
+        if (status == SOPC_STATUS_NOK)
+        {
+            result = false;
+            *errorStatus = OpcUa_BadResourceUnavailable;
+        }
     }
 
     SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
@@ -2407,7 +2440,11 @@ static bool initServerSC(uint32_t socketIndex, uint32_t serverEndpointConfigIdx,
     }
 
     // Activate SC connection timeout (server side)
-    scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(*conn_idx);
+    SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), *conn_idx);
+    if (SOPC_STATUS_NOK == status)
+    {
+        return false;
+    }
 
     return true;
 }
@@ -3147,6 +3184,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                               uintptr_t auxParam)
 {
     bool result = false;
+    char* errorMsg = "";
     uint32_t idx = 0;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
@@ -3179,28 +3217,45 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 scConnection->endpointConnectionConfigIdx = eltId;
 
                 result = sc_init_key_and_certs(scConnection);
+                errorMsg = "Failed to initialize keys and certificates for connection";
+            }
+            else
+            {
+                // Error case: notify services that it failed
+                // TODO: add a connection failure ? (with config idx + (optional) connection id)
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
+                                       eltId);
+                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, eltId, (uintptr_t) NULL, 0);
+                return;
+            }
+        }
+
+        if (result)
+        {
+            // Require a socket connection for this secure connection
+
+            // Activate SC connection timeout (client side)
+            SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), idx);
+            if (SOPC_STATUS_OK == status)
+            {
+                // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, idx, (uintptr_t) scConfig->url, 0);
+                SOPC_GCC_DIAGNOSTIC_RESTORE
+            }
+            else
+            {
+                result = false;
+                errorMsg = "Failed to create a timer for connection establishment timeout";
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to activate SC time out",
+                                       eltId);
             }
         }
         if (!result)
         {
-            // Error case: notify services that it failed
-            // TODO: add a connection failure ? (with config idx + (optional) connection id)
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
-                                   eltId);
-            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, eltId, (uintptr_t) NULL, 0);
-        }
-        else
-        {
-            // Require a socket connection for this secure connection
-
-            // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, idx, (uintptr_t) scConfig->url, 0);
-            SOPC_GCC_DIAGNOSTIC_RESTORE
-
-            // Activate SC connection timeout (client side)
-            scConnection->connectionTimeoutTimerId = SC_StartConnectionEstablishTimer(idx);
+            SC_CloseSecureConnection(scConnection, idx, true, true, OpcUa_BadResourceUnavailable, errorMsg);
         }
         break;
     case SC_DISCONNECT:

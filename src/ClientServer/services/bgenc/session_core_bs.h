@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 06/03/2020 14:49:51
+ Date                 : 16/12/2021 22:39:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -166,7 +166,8 @@ extern void session_core_bs__server_session_timeout_msg_received(
    const constants__t_session_i session_core_bs__session);
 extern void session_core_bs__server_session_timeout_start_timer(
    const constants__t_session_i session_core_bs__session,
-   const constants__t_msg_i session_core_bs__resp_msg);
+   const constants__t_msg_i session_core_bs__resp_msg,
+   t_bool * const session_core_bs__timer_created);
 extern void session_core_bs__server_session_timeout_stop_timer(
    const constants__t_session_i session_core_bs__session);
 extern void session_core_bs__session_do_nothing(

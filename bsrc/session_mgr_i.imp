@@ -364,6 +364,7 @@ OPERATIONS
         l_channel_config_idx,
         l_endpoint_config_idx,
         l_has_user_token_policy_available,
+        l_timer_creation_ok,
         l_user
     IN
         session := c_session_indet;
@@ -371,6 +372,8 @@ OPERATIONS
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
+                // If there is no way to activate a session, it means service is not supported for this secure channel
+                // This status code is reported in all error cases
                 l_channel_config_idx <-- get_channel_info (channel);
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                 l_has_user_token_policy_available <-- has_user_token_policy_available (l_channel_config_idx, l_endpoint_config_idx);
@@ -379,10 +382,14 @@ OPERATIONS
                     session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg);
                     IF service_ret = e_sc_ok
                     THEN
-                        server_session_timeout_start_timer (session, resp_msg)
+                        l_timer_creation_ok <-- server_session_timeout_start_timer (session, resp_msg);
+                        IF l_timer_creation_ok = FALSE
+                        THEN
+                            service_ret := e_sc_bad_resource_unavailable;
+                            server_close_session_sm (session, e_sc_bad_resource_unavailable)
+                        END
                     END
                 ELSE
-                    // Since there is no way to activate a session, it means service is not supported for this secure channel
                     service_ret := e_sc_bad_service_unsupported
                 END
             OR e_msg_session_activate_req THEN

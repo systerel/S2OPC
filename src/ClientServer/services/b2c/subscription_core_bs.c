@@ -220,6 +220,12 @@ void subscription_core_bs__create_periodic_publish_timer(
     {
         *subscription_core_bs__bres = true;
     }
+    else
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Services: subscription=%" PRIu32 " periodic publish timer creation failed",
+                                 subscription_core_bs__p_subscription);
+    }
 }
 
 void subscription_core_bs__modify_publish_timer_period(

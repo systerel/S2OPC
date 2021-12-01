@@ -858,6 +858,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_out_of_range:
         *status = OpcUa_BadOutOfRange;
         break;
+    case constants_statuscodes_bs__e_sc_bad_resource_unavailable:
+        *status = OpcUa_BadResourceUnavailable;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1182,6 +1185,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadOutOfRange:
         *bstatus = constants_statuscodes_bs__e_sc_bad_out_of_range;
+        break;
+    case OpcUa_BadResourceUnavailable:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_resource_unavailable;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

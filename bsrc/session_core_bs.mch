@@ -559,7 +559,7 @@ OPERATIONS
     END
     ;
 
-    server_session_timeout_start_timer (session, resp_msg) =
+    timer_created <-- server_session_timeout_start_timer (session, resp_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -570,7 +570,7 @@ OPERATIONS
     THEN
         /* Use resp message to retrieve revised session timeout and activate first timer:
            - trigger TIMER_SE_EVAL_SESSION_TIMEOUT*/
-        skip
+        timer_created :: BOOL
     END
     ;
 

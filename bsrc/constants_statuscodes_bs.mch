@@ -101,6 +101,7 @@ SETS
                       e_sc_bad_not_found,
                       e_sc_bad_security_mode_insufficient,
                       e_sc_bad_no_communication,
+                      e_sc_bad_resource_unavailable,
                       e_sc_bad_out_of_range}
 
 ABSTRACT_CONSTANTS
