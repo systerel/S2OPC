@@ -33,23 +33,80 @@
 
 #include "sopc_enums.h"
 
-// Import Mutex type from platform dependent code
-#include "p_threads.h"
+#include "sopc_threads.h"
 
+/**
+ * \brief Create a Condition variable.
+ * @param cond A non-NULL pointer to a condition to be created
+ * @return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Condition_Init(Condition* cond);
+
+/**
+ * \brief Delete a Condition variable.
+ * \param cond A non-NULL pointer to a condition to be deleted
+ * \note The related MUTEX shall be unlocked and shall be deleted after the condition variable
+ * \return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Condition_Clear(Condition* cond);
 
-// Must be called between lock and unlock of Mutex ued to wait on condition
+/**
+ * \brief Signals the condition variable to all waiting threads.
+ * \param cond A non-NULL pointer to a condition to be signaled
+ * \return SOPC_STATUS_OK in case of success
+ * \note Must be called between lock and unlock of dedicated Mutex
+ */
 SOPC_ReturnStatus Condition_SignalAll(Condition* cond);
 
+/**
+ * \brief Create a Mutex
+ * @param mut A non-NULL pointer to a Mutex to be created
+ * @return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut);
+
+/**
+ * \brief Delete a Mutex.
+ * \param mut A non-NULL pointer to a Mutex to be deleted
+ * \return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Mutex_Clear(Mutex* mut);
+
+/**
+ * \brief Lock a Mutex. The function may be blocking as long as the mutex is already
+ * 			locked by another thread.
+ * \note Mutex shall be recursive. (The same thread can lock several times the same mutex without
+ *			being blocked)
+ * \param mut A non-NULL pointer to a Mutex to be locked
+ * \return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Mutex_Lock(Mutex* mut);
+
+/**
+ * \brief Release a Mutex.
+ * \param mut A non-NULL pointer to a Mutex to be locked
+ * \return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
 
-// Lock on return
+/**
+ * \brief Wait for a condition variable notification.
+ * \param cond A non-NULL pointer to a Condition variable to wait for
+ * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be loacked by caller before call
+ * 			and unlocked after return.
+ * \return SOPC_STATUS_OK in case of success
+ */
 SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
-// Lock on return. Return SOPC_STATUS_TIMEOUT in case of timeout before condition signaled
+
+/**
+ * \brief Timed wait for a condition variable notification.
+ * \param cond A non-NULL pointer to a Condition variable to wait for
+ * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be loacked by caller before call
+ * 			and unlocked after return.
+ * \param milliSecs The maximum amount of wait time.
+ * \return SOPC_STATUS_OK in case of success. SOPC_STATUS_TIMEOUT if the condition is not received within the
+ * 		requested timeout
+ */
 SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs);
 
 #endif /* SOPC_MUTEXES_H_ */

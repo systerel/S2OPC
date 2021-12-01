@@ -31,6 +31,12 @@
 #include "sopc_enums.h"
 
 // Platform dependent types
+/**
+ * The platform-specific implementation of "p_sockets.h" shall provide the actual definition of:
+ * - \ref Socket type (e.g. int for LINUX)
+ * - \ref SOPC_Socket_AddressInfo for Network Address definition structure (e.g. struct addrinfo for LINUX)
+ * - \ref SOPC_SocketSet type for socket sets (e.g. fd_set for LINUX)
+ */
 #include "p_sockets.h"
 
 /**

@@ -74,7 +74,15 @@ SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath);
  */
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath);
 
-/* TODO: implement for other systems than Linux */
+/**
+ * \brief Simulates a file open using an memory buffer rather than an actual file.
+ * refer to "fmemopen" linux manpage for precise specification
+ * \param  buf Non-NULL pointer to the in/out buffer
+ * \param  size The size of the \p buf
+ * \param  opentype The file mode: with the same convention as usual "fopen".
+ * \warning TODO This feature is only available on LINUX implementation. A Rework of the API might be needed
+ *      for full portability.
+ */
 FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype);
 
 #endif // SOPC_FILESYSTEM_H_
