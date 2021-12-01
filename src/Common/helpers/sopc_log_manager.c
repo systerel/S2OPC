@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -66,6 +67,7 @@ struct SOPC_Log_Instance
     SOPC_Log_Level level;
     SOPC_Log_File* file;
     SOPC_Log_UserDoLog* logCallback;
+    uint32_t logPosition; // current position in callbackBuffer
     char* callbackBuffer;
     bool consoleFlag;
     bool started;
@@ -141,9 +143,16 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
         if (NULL != pLogInst->logCallback && NULL != logBuffer)
         {
             // reminder : logBuffer size is (SOPC_LOG_MAX_USER_LINE_LENGTH + 1)
-            vsnprintf(logBuffer, SOPC_LOG_MAX_USER_LINE_LENGTH + 1, format, args);
+            const int newPos = vsnprintf(&logBuffer[pLogInst->logPosition],
+                                         SOPC_LOG_MAX_USER_LINE_LENGTH + 1 - pLogInst->logPosition, format, args);
+            SOPC_ASSERT(newPos > 0);
+            pLogInst->logPosition = (uint32_t) newPos;
             logBuffer[SOPC_LOG_MAX_USER_LINE_LENGTH] = 0;
-            pLogInst->logCallback(pLogInst->category, logBuffer);
+            if (addNewline)
+            {
+                pLogInst->logCallback(pLogInst->category, logBuffer);
+                pLogInst->logPosition = 0;
+            }
         }
         /* Note : "else" increases robustness as va_list "args" cannot be passed twice */
         else if (NULL != pLogInst->file->pFile)
@@ -217,8 +226,9 @@ static void SOPC_Log_TracePrefixNoLock(SOPC_Log_Instance* pLogInst,
             sLevel = SOPC_CSTRING_LEVEL_UNKNOWN;
             break;
         }
-        if (!withCategory)
+        if (NULL != pLogInst->logCallback || !withCategory)
         {
+            // In case of user log, the category is provided in the callback, so it does not need to be printed here
             SOPC_Log_PutLogLine(pLogInst, false, inhibitConsole, "[%s] %s", timestamp, sLevel);
         }
         else
@@ -304,6 +314,7 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_Us
             file->nbRefs = 1;
             result->file = file;
             result->logCallback = logCallback;
+            result->logPosition = 0;
             result->callbackBuffer = SOPC_Malloc(SOPC_LOG_MAX_USER_LINE_LENGTH + 1); // + NULL
             if (NULL != result->callbackBuffer)
             {
@@ -415,6 +426,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
                 result->started = false;
                 // Ensure logCallback and callbackBuffer are initialized to 0 in case of FILE log.
                 result->logCallback = NULL;
+                result->logPosition = 0;
                 result->callbackBuffer = 0;
                 // Starts the log instance
                 started = SOPC_Log_Start(result);
@@ -480,6 +492,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
         result->level = SOPC_LOG_LEVEL_ERROR;
         result->callbackBuffer = pLogInst->callbackBuffer;
         result->logCallback = pLogInst->logCallback;
+        result->logPosition = 0;
 
         // Starts the log instance
         bool started = SOPC_Log_Start(result);

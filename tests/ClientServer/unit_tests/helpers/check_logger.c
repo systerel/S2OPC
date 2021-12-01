@@ -407,11 +407,14 @@ START_TEST(test_logger_circular)
 END_TEST
 
 static char* SOPC_Check_Logger_lastUserCategory = NULL;
+static char* SOPC_Check_Logger_lastUserLog_Dated = NULL;
 static char* SOPC_Check_Logger_lastUserLog = NULL;
 static bool SOPC_Check_Logger_userLogCalled = false;
 static FILE* SOPC_Check_Logger_userFile = NULL;
+static const char* SOPC_Check_Logger_dateSample = "[YYYY/MM/DD HH:MM:SS.mmm] ";
 static void SOPC_Check_Logger_UserDoLog(const char* category, const char* const line)
 {
+    static const char* lineToShort = "Line too short!";
     if (SOPC_Check_Logger_userFile == NULL)
     {
         SOPC_Check_Logger_userFile = fopen("check_logger_user.log", "w");
@@ -419,9 +422,18 @@ static void SOPC_Check_Logger_UserDoLog(const char* category, const char* const 
     fprintf(stderr, "[USER log] [%s] => <<%s>>\n", category, line);
     fprintf(SOPC_Check_Logger_userFile, "[%s] => <<%s>>\n", category, line);
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
+    SOPC_Free(SOPC_Check_Logger_lastUserLog_Dated);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);
     SOPC_Check_Logger_lastUserCategory = SOPC_strdup(category);
-    SOPC_Check_Logger_lastUserLog = SOPC_strdup(line);
+    SOPC_Check_Logger_lastUserLog_Dated = SOPC_strdup(line);
+    if (strlen(line) > strlen(SOPC_Check_Logger_dateSample))
+    {
+        SOPC_Check_Logger_lastUserLog = SOPC_strdup(&line[strlen(SOPC_Check_Logger_dateSample)]);
+    }
+    else
+    {
+        SOPC_Check_Logger_lastUserLog = SOPC_strdup(lineToShort);
+    }
     SOPC_Check_Logger_userLogCalled = true;
 }
 
@@ -433,7 +445,9 @@ START_TEST(test_logger_user)
     static const char* userlogLine2 = "Second user log line - filtered out";
     char* userLongLine3 = NULL;
     static const char* userlogLine4 = "4th line";
+    static const char* userlogLine4b = "(Warning) 4th line";
     static const char* userlogLine5 = "5th line";
+    static const char* userlogLine5b = "(Warning) 5th line";
     static const char* category = "U-LOG";
     static const char* category2 = "CATEGORY2";
     char aChar = 'A';
@@ -494,9 +508,9 @@ START_TEST(test_logger_user)
     SOPC_Log_Trace(userLog, SOPC_LOG_LEVEL_WARNING, userLongLine3);
     SOPC_Free(userLongLine3);
     ck_assert(SOPC_Check_Logger_userLogCalled);
-    ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog) == (size_t) SOPC_LOG_MAX_USER_LINE_LENGTH,
+    ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog_Dated) == (size_t) SOPC_LOG_MAX_USER_LINE_LENGTH,
                   "Was expecting len=%zu, but found %zu", (size_t) SOPC_LOG_MAX_USER_LINE_LENGTH,
-                  strlen(SOPC_Check_Logger_lastUserLog));
+                  strlen(SOPC_Check_Logger_lastUserLog_Dated));
 
     // Check sections
     userLog2 = SOPC_Log_CreateInstanceAssociation(userLog, category2);
@@ -506,8 +520,8 @@ START_TEST(test_logger_user)
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog2, SOPC_LOG_LEVEL_WARNING, userlogLine4);
     ck_assert(SOPC_Check_Logger_userLogCalled);
-    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine4),
-                  "Was expecting LOG LINE %s, but found %s", userlogLine4, SOPC_Check_Logger_lastUserLog);
+    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine4b),
+                  "Was expecting LOG LINE %s, but found %s", userlogLine4b, SOPC_Check_Logger_lastUserLog);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category2),
                   "Was expecting CATEGORY %s, but found %s", category2, SOPC_Check_Logger_lastUserCategory);
 
@@ -517,8 +531,8 @@ START_TEST(test_logger_user)
     SOPC_Log_Trace(userLog2, SOPC_LOG_LEVEL_WARNING, userlogLine5);
     ck_assert(SOPC_Check_Logger_userLogCalled);
     ck_assert(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category2));
-    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5),
-                  "Was expecting LOG LINE %s, but found %s", userlogLine5, SOPC_Check_Logger_lastUserLog);
+    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5b),
+                  "Was expecting LOG LINE %s, but found %s", userlogLine5b, SOPC_Check_Logger_lastUserLog);
 
     // Check unknown level (not taken into account)
     res = SOPC_Log_SetLogLevel(userLog, 4);
@@ -541,8 +555,8 @@ START_TEST(test_logger_user)
     SOPC_Log_Trace(userLog, SOPC_LOG_LEVEL_WARNING, userlogLine5);
     ck_assert(SOPC_Check_Logger_userLogCalled);
     ck_assert(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category));
-    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5),
-                  "Was expecting LOG LINE %s, but found %s", userlogLine5, SOPC_Check_Logger_lastUserLog);
+    ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5b),
+                  "Was expecting LOG LINE %s, but found %s", userlogLine5b, SOPC_Check_Logger_lastUserLog);
 
     SOPC_Log_ClearInstance(&userLog);
 }
@@ -557,6 +571,7 @@ static void clear(void)
 {
     SOPC_Log_Clear();
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
+    SOPC_Free(SOPC_Check_Logger_lastUserLog_Dated);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);
 
     if (SOPC_Check_Logger_userFile != NULL)
