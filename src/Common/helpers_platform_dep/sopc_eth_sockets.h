@@ -55,7 +55,9 @@ typedef struct SOPC_ETH_Socket_ReceiveAddressInfo SOPC_ETH_Socket_ReceiveAddress
  *
  *  \param interfaceName     Name of the network interface to use to send packet (mandatory)
  *  \param destMACaddr       Destination MAC address to send packet as a string representation (mandatory).
- *                           E.g.: "01:00:00:01:04:00"
+ *                           It shall be hexadecimal values separated by character ':' and zero terminated.
+ *
+ *                           E.g.: "01-00-00-01-04-00"
  *  \param[out] sendAddInfo  Value pointed is set with a newly allocated and fulfilled send address information.
  *                           Caller shall call ::SOPC_Free when not used anymore.
  *
@@ -78,7 +80,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateSendAddressInfo(const char* interfaceNam
  *  \param destMACaddr            Destination MAC address of packets accepted as a string representation (optional).
  *                                It shall be hexadecimal values separated by character ':' and zero terminated.
  *                                It shall be set only if \p destMACaddr is set.
- *                                E.g.: "01:00:00:01:04:00"
+ *                                E.g.: "01-00-00-01-04-00"
  *  \param sourceMACaddr          Source MAC address of packets accepted as a string representation (optional).
  *                                It shall be hexadecimal values separated by character ':' and zero terminated.
  *                                E.g.: "0A:00:00:01:04:00"

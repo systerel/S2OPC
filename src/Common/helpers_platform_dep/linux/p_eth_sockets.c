@@ -172,7 +172,7 @@ static bool set_mac_addr_from_string(unsigned char* addr, const char* MACaddress
     {
         uint8_t addressByte = 0;
         // TODO: do not use end character, use SOPC_strtouint instead but we need base 16 instead of 10
-        SOPC_ReturnStatus status = SOPC_strtouint8_t(MACaddress + i * 3, &addressByte, 16, i < 5 ? ':' : '\0');
+        SOPC_ReturnStatus status = SOPC_strtouint8_t(MACaddress + i * 3, &addressByte, 16, i < 5 ? '-' : '\0');
         res = SOPC_STATUS_OK == status;
         if (res)
         {
@@ -228,6 +228,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateSendAddressInfo(const char* interfaceNam
                                                         const char* destMACaddr,
                                                         SOPC_ETH_Socket_SendAddressInfo** sendAddInfo)
 {
+    // TODO: retrieve MAC address already parsed and add optional VLAN parameters
     if (NULL == interfaceName || NULL == destMACaddr || NULL == sendAddInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -276,6 +277,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
                                                            const char* sourceMACaddr,
                                                            SOPC_ETH_Socket_ReceiveAddressInfo** recvAddInfo)
 {
+    // TODO: retrieve MAC addresses already parsed and add optional VLAN parameters
     if (NULL == recvAddInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -511,7 +513,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
         if (checkEtherType)
         {
             // Check EtherType
-            uint16_t* nboEthType = (uint16_t*) (buffer->data + 2 * ETH_ALEN);
+            uint16_t* nboEthType = (uint16_t*) (void*) (buffer->data + 2 * ETH_ALEN);
             tmpRes &= (ntohs(*nboEthType) == etherType);
         }
 
