@@ -728,6 +728,10 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 
         if (SOPC_STATUS_OK != status)
         {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "error configuring the Publisher Ethernet socket: check it is run in SUDO mode, "
+                                   "check interfaceName is defined (mandatory), "
+                                   "check address format is only with hyphens and zero-terminated.");
             SOPC_PubScheduler_CtxEth_Clear(&pubSchedulerCtx.transport[index]);
             return false;
         }

@@ -571,6 +571,10 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         }
                         else
                         {
+                            SOPC_Logger_TraceError(
+                                SOPC_LOG_MODULE_PUBSUB,
+                                "error configuring the Subscriber Ethernet socket: check it is run in SUDO mode, "
+                                "check address format is only with hyphens and zero-terminated.");
                             /* Call uninit because at least one error */
                             SOPC_SubScheduler_CtxEth_Clear(&schedulerCtx.transport[iIter]);
                             result = false;
