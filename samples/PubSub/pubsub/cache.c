@@ -40,7 +40,7 @@ static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
     SOPC_VariantArrayType result;
     if (valueRank < 0)
     {
-        // Use Signle value if possible
+        // Use Single value if possible
         result = SOPC_VariantArrayType_SingleValue;
     }
     else if (valueRank < 2)
@@ -50,8 +50,8 @@ static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
     }
     else if (valueRank == 2)
     {
-        // Use Array if possible
-        result = SOPC_VariantArrayType_Array;
+        // Use Matrix
+        result = SOPC_VariantArrayType_Matrix;
     }
     else
     {
@@ -62,6 +62,7 @@ static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
 
 static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* variant)
 {
+    assert(NULL != variant);
     switch (type)
     {
     case SOPC_Null_Id:
