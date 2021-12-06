@@ -122,16 +122,18 @@ if(ENABLE_TESTING)
   target_compile_definitions(udp_pub_xml_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_pub_xml_test PRIVATE s2opc_pubsub)
 
-  add_executable(udp_pub_scheduler_test "validation_tests/udp_pub_scheduler_test.c")
-  target_compile_options(udp_pub_scheduler_test PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(udp_pub_scheduler_test PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(udp_pub_scheduler_test PRIVATE s2opc_pubsub)
+  add_executable(pub_scheduler_test "validation_tests/pub_scheduler_test.c")
+  target_compile_options(pub_scheduler_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(pub_scheduler_test PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(pub_scheduler_test PRIVATE s2opc_pubsub)
 
   # Copy data
   add_custom_command(
-    TARGET udp_pub_scheduler_test POST_BUILD
+    TARGET pub_scheduler_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     )
 
   add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
@@ -139,10 +141,18 @@ if(ENABLE_TESTING)
   target_compile_definitions(udp_sub_test PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(udp_sub_test PRIVATE s2opc_pubsub)
 
-  add_executable(udp_sub_conf_test "validation_tests/udp_sub_conf_test.c")
-  target_compile_options(udp_sub_conf_test PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(udp_sub_conf_test PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(udp_sub_conf_test PRIVATE s2opc_pubsub)
+  add_executable(sub_scheduler_conf_test "validation_tests/sub_scheduler_conf_test.c")
+  target_compile_options(sub_scheduler_conf_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(sub_scheduler_conf_test PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(sub_scheduler_conf_test PRIVATE s2opc_pubsub)
+
+  # Copy data
+  add_custom_command(
+    TARGET sub_scheduler_conf_test POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth2.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    )
 
   add_executable(udp_multi_pub_test "validation_tests/udp_multi_pub_test.c")
   target_compile_options(udp_multi_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -178,17 +188,54 @@ if(ENABLE_TESTING)
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
            "--publisher-cmd" $<TARGET_FILE:udp_pub_xml_test>
-           $<TARGET_FILE:udp_sub_conf_test>)
+           $<TARGET_FILE:sub_scheduler_conf_test>)
   set_tests_properties("validation::ll_pub_sub_xml_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_xml_test.tap")
 
-  add_test(NAME "validation::publisher_scheduler_test"
+  add_test(NAME "validation::pubsub_scheduler_udp"
            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
            COMMAND
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
            "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-           "--publisher-cmd" $<TARGET_FILE:udp_pub_scheduler_test>
-           $<TARGET_FILE:udp_sub_conf_test>)
-  set_tests_properties("validation::publisher_scheduler_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=publisher_scheduler_test.tap")
+           "--publisher-cmd" $<TARGET_FILE:pub_scheduler_test>
+           $<TARGET_FILE:sub_scheduler_conf_test>)
+  set_tests_properties("validation::pubsub_scheduler_udp" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_scheduler_udp.tap")
+
+  add_test(NAME "validation::pubsub_sched_ethernet_ROOT_required"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+           "--no-wait-pub-message"
+           "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
+           $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth.xml)
+  set_tests_properties("validation::pubsub_sched_ethernet_ROOT_required" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet.tap")
+
+  add_test(NAME "validation::pubsub_sched_ethernet_with_recv_itf"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "--no-wait-pub-message"
+    "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
+    $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth2.xml)
+  set_tests_properties("validation::pubsub_sched_ethernet_with_recv_itf" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet_with_recv_itf.tap")
+
+  add_test(NAME "validation::pubsub_sched_ethernet_pub_config_err"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    $<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth_err.xml)
+  set_tests_properties("validation::pubsub_sched_ethernet_pub_config_err" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet_pub_config_err.tap;CK_EXP_RET_CODE=255")
+
+  add_test(NAME "validation::pubsub_sched_ethernet_sub_config_err"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "--no-wait-pub-message"
+    "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
+    $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth_err.xml)
+  set_tests_properties("validation::pubsub_sched_ethernet_sub_config_err" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet_sub_config_err.tap;CK_EXP_RET_CODE=255")
 
   add_test(NAME "validation::ll_multi_pub_sub_test"
            WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -229,7 +276,7 @@ if(ENABLE_TESTING)
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-      "--publisher-cmd" "$<TARGET_FILE:udp_pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_interop.xml"
+      "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_interop.xml"
       "${CMAKE_CURRENT_SOURCE_DIR}/bin_interop/open62541_sub")
     set_tests_properties("interop::open62541_sub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_sub_test.tap")
 

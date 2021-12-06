@@ -289,6 +289,7 @@ test-check:
   <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/test@sha256:349996835b968631da208389301bbaf76d05cd8237946c739613a6551220c6aa  # digest of test:2.9
   script:
+    - './.set-bin-root.sh'
     - './test-all.sh'
   artifacts:
     name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -304,6 +305,7 @@ test-unit-all-tests:
   variables:
     <<: *all-tests_test_variables
   script:
+    - './.set-bin-root.sh'
     - './test-all.sh'
   rules:
     - if: "$ALL_TESTS != null"

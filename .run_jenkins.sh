@@ -39,7 +39,7 @@ sudo /etc/scripts/run-in-docker "$CHECK_IMAGE" DOCKER_IMAGE="$CHECK_IMAGE" ./.ch
 # Build binaries for Linux target
 ./clean.sh && sudo /etc/scripts/run-in-docker "$BUILD_IMAGE" WITH_NANO_EXTENDED=1 DOCKER_IMAGE="$BUILD_IMAGE" ./build.sh
 # Run tests on Linux target
-sudo /etc/scripts/run-in-docker "$TEST_IMAGE" "mosquitto -d && ./test-all.sh"
+sudo /etc/scripts/run-in-docker "$TEST_IMAGE" "mosquitto -d && ./.set-bin-root.sh && ./test-all.sh"
 # run acceptance tests on Linux target
 pushd tests/ClientServer/acceptance_tools/
 sudo /etc/scripts/run-in-docker "$UACTT_WIN_IMAGE" WITH_NANO_EXTENDED=1 ./launch_acceptance_tests.sh

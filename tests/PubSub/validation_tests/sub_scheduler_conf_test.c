@@ -93,11 +93,21 @@ static void stateChangedCb(SOPC_PubSubState state)
     }
 }
 
-int main(void)
+int main(int argc, char** argv)
 {
     int sleepCount = 20;
 
-    FILE* fd = fopen("./config_sub.xml", "r");
+    char* filename;
+    if (1 < argc)
+    {
+        filename = argv[1];
+    }
+    else
+    {
+        filename = "./config_sub.xml";
+    }
+
+    FILE* fd = fopen(filename, "r");
     assert(NULL != fd);
 
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);

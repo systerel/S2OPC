@@ -129,8 +129,11 @@ int main(int argc, char** argv)
     assert(NULL != sourceConfig);
 
     // Start without priority, as this test is not time-sensitive
-    bool status = SOPC_PubScheduler_Start(config, sourceConfig, 0);
-    assert(status);
+    bool bres = SOPC_PubScheduler_Start(config, sourceConfig, 0);
+    if (!bres)
+    {
+        exit(255);
+    }
 
     // Wait until sending some message
     // SOPC_Sleep(5000);

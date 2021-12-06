@@ -60,7 +60,11 @@ ll_multi_pub_sub_test.tap
 ll_pub_sub_conf_test.tap
 ll_pub_sub_test.tap
 ll_pub_sub_xml_test.tap
-publisher_scheduler_test.tap
+pubsub_scheduler_udp.tap
+pubsub_sched_ethernet.tap
+pubsub_sched_ethernet_with_recv_itf.tap
+pubsub_sched_ethernet_pub_config_err.tap
+pubsub_sched_ethernet_sub_config_err.tap
 pubsub_modules_test.tap
 xml_parser_test.tap'
 

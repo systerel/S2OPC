@@ -22,7 +22,7 @@ import argparse
 import shlex
 import subprocess
 import sys
-import sys
+import time
 
 import wait_publisher
 
@@ -39,6 +39,7 @@ def log(msg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--publisher-cmd', metavar='CMD', help='The command to start the background publisher')
+    parser.add_argument('--no-wait-pub-message', action='store_true', default=False, help='The script does not wait for a publisher message to start subscriber: only sleep(1)')
     parser.add_argument('--wait-publisher', action='store_true', default=False,
                         help='Wait for the publisher to exit instead of killing it when the client is done')
     parser.add_argument('cmd', metavar='CMD', help='The command to run')
@@ -54,7 +55,9 @@ if __name__ == '__main__':
     log('Starting publisher')
     publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
 
-    if not wait_publisher.wait_publisher(wait_publisher.DEFAULT_URL, wait_publisher.TIMEOUT):
+    if args.no_wait_pub_message:
+        time.sleep(1)
+    elif not wait_publisher.wait_publisher(wait_publisher.DEFAULT_URL, wait_publisher.TIMEOUT):
         log('Timeout for starting publisher')
         publisher_process.kill()
         publisher_process.wait()

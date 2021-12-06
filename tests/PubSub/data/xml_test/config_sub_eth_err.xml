@@ -1,0 +1,11 @@
+<PubSub>
+    <!-- Error: ethernet subscriber listens on 'eth0' whereas publisher publishes on 'lo' interface -->
+    <connection address="opc.eth://01-00-00-01-04-00" mode="subscriber" interfaceName="eth0">
+        <message id="14" version="1" publishingInterval="50." publisherId="123" >
+            <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
+        </message>
+        <message id="15" version="1" publishingInterval="100." publisherId="456" securityMode="sign">
+            <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
+        </message>
+    </connection>
+</PubSub>
