@@ -33,7 +33,7 @@
  *      pointer shall be returned.
  * \param size The amount of memory requested.
  * \return a pointer to the new allocated area, which has at least the requested size.
- *      The caller is responsible for calling SOPC_Free when the memory is not more required.
+ *      The caller is responsible for calling SOPC_Free when the memory is no more required.
  *      NULL is returned if the memory cannot be allocated.
  *      The memory pointed to is initialized to '\0'
  */

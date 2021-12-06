@@ -73,7 +73,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut);
 SOPC_ReturnStatus Mutex_Clear(Mutex* mut);
 
 /**
- * \brief Lock a Mutex. The function may be blocking as long as the mutex is already
+ * \brief Lock a Mutex. The function may be blocking as long as the mutex is
  * 			locked by another thread.
  * \note Mutex shall be recursive. (The same thread can lock several times the same mutex without
  *			being blocked)
@@ -84,7 +84,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut);
 
 /**
  * \brief Release a Mutex.
- * \param mut A non-NULL pointer to a Mutex to be locked
+ * \param mut A non-NULL pointer to a Mutex to be unlocked
  * \return SOPC_STATUS_OK in case of success
  */
 SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
@@ -92,7 +92,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
 /**
  * \brief Wait for a condition variable notification.
  * \param cond A non-NULL pointer to a Condition variable to wait for
- * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be loacked by caller before call
+ * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be locked by caller before call
  * 			and unlocked after return.
  * \return SOPC_STATUS_OK in case of success
  */
@@ -101,7 +101,7 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
 /**
  * \brief Timed wait for a condition variable notification.
  * \param cond A non-NULL pointer to a Condition variable to wait for
- * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be loacked by caller before call
+ * \param mut A non-NULL pointer to the related Mutex. This Mutex shall be locked by caller before call
  * 			and unlocked after return.
  * \param milliSecs The maximum amount of wait time.
  * \return SOPC_STATUS_OK in case of success. SOPC_STATUS_TIMEOUT if the condition is not received within the
