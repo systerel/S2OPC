@@ -124,6 +124,7 @@ static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* 
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                const char* interfaceName,
                                                 const SOPC_Socket_AddressInfo* multicast,
                                                 const SOPC_Socket_AddressInfo* local)
 {
@@ -161,6 +162,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
+                                                 const char* interfaceName,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local)
 {
@@ -190,6 +192,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
 }
 
 static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
+                                                   const char* interfaceName,
                                                    bool setReuseAddr,
                                                    bool setNonBlocking,
                                                    Socket* sock)
@@ -225,11 +228,13 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
+                                                  const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
                                                   Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(listenAddress, setReuseAddr, setNonBlocking, sock);
+    SOPC_ReturnStatus status =
+        SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
     if (SOPC_STATUS_OK == status)
     {
         int res = bind(*sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
@@ -242,9 +247,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
     return status;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, bool setNonBlocking, Socket* sock)
+SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
+                                               const char* interfaceName,
+                                               bool setNonBlocking,
+                                               Socket* sock)
 {
-    return SOPC_UDP_Socket_CreateNew(destAddress, false, setNonBlocking, sock);
+    return SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, sock);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)

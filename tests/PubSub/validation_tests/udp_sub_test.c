@@ -190,14 +190,14 @@ int main(void)
 
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, true, true, &sock);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, NULL, true, true, &sock);
     buffer = SOPC_Buffer_Create(4096);
 
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UDP_Socket_AddMembership(sock, listenAddr, localAddr);
+            status = SOPC_UDP_Socket_AddMembership(sock, NULL, listenAddr, localAddr);
             if (SOPC_STATUS_OK != status)
             {
                 printf("SOPC_UDP_Socket_AddMembership failed\n");

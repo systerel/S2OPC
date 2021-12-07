@@ -55,9 +55,9 @@ static void init_mcast_addrs(void)
         assert(sizeof(MCAST_ADDR) - 1 == res);
         addressArr[i] = SOPC_UDP_SocketAddress_Create(false, addr, MCAST_PORT);
         assert(NULL != addressArr[i]);
-        SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addressArr[i], true, true, &socketArr[i]);
+        SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addressArr[i], NULL, true, true, &socketArr[i]);
         assert(SOPC_STATUS_OK == status);
-        status = SOPC_UDP_Socket_AddMembership(socketArr[i], addressArr[i], localAddr);
+        status = SOPC_UDP_Socket_AddMembership(socketArr[i], NULL, addressArr[i], localAddr);
         assert(SOPC_STATUS_OK == status);
         sockIdxArr[i] = i;
     }

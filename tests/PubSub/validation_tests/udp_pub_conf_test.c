@@ -179,7 +179,7 @@ int main(void)
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, true, &sock);
+    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
     SOPC_PubSubConfiguration* config = UDP_Pub_Test_Get_Conf();
     SOPC_PubSubConnection* conf_connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
     if (NULL == conf_connection)

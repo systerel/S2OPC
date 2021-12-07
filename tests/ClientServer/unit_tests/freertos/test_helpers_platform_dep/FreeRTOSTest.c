@@ -997,15 +997,15 @@ static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
     {
         {
             adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "4000");
-            SOPC_UDP_Socket_CreateToSend(adresse, true, &sock);
+            SOPC_UDP_Socket_CreateToSend(adresse, NULL, true, &sock);
             SOPC_UDP_Socket_Set_MulticastTTL(sock, 255);
             SOPC_UDP_Socket_SendTo(sock, adresse, pBuffer);
             SOPC_UDP_Socket_Close(&sock);
             SOPC_UDP_SocketAddress_Delete(&adresse);
 
             adresse = SOPC_UDP_SocketAddress_Create(false, "224.1.2.3", "5000");
-            SOPC_UDP_Socket_CreateToReceive(adresse, true, true, &sock);
-            SOPC_UDP_Socket_AddMembership(sock, adresse, NULL);
+            SOPC_UDP_Socket_CreateToReceive(adresse, NULL, true, true, &sock);
+            SOPC_UDP_Socket_AddMembership(sock, NULL, adresse, NULL);
             SOPC_UDP_Socket_ReceiveFrom(sock, pBuffer);
 
             if (pBuffer->length > 0)
@@ -1045,8 +1045,8 @@ static void* cbS2OPC_Thread_UDP_Socket_API_LB(void* ptr)
     P_ETHERNET_IF_IsReady(UINT32_MAX);
 
     adresseR = SOPC_UDP_SocketAddress_Create(false, "232.1.2.101", "4840");
-    configASSERT(SOPC_UDP_Socket_CreateToReceive(adresseR, true, true, &sockR) == SOPC_STATUS_OK);
-    configASSERT(SOPC_UDP_Socket_AddMembership(sockR, adresseR, NULL) == SOPC_STATUS_OK);
+    configASSERT(SOPC_UDP_Socket_CreateToReceive(adresseR, NULL, true, true, &sockR) == SOPC_STATUS_OK);
+    configASSERT(SOPC_UDP_Socket_AddMembership(sockR, NULL, adresseR, NULL) == SOPC_STATUS_OK);
     SOPC_SocketSet rdset;
     SOPC_SocketSet wrset;
     SOPC_SocketSet exset;

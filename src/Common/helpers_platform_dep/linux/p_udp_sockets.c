@@ -134,79 +134,119 @@ static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInf
     return membership;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+static bool setMembershipOption(Socket sock,
+                                const SOPC_Socket_AddressInfo* multicast,
+                                const SOPC_Socket_AddressInfo* local,
+                                unsigned int ifindex,
+                                int level,
+                                int optname)
 {
+    int setOptStatus = -1;
+    if (IPPROTO_IPV6 == level)
+    {
+        struct ipv6_mreq membershipV6 = SOPC_Internal_Fill_IP6_mreq(multicast, local, ifindex);
+        setOptStatus = setsockopt(sock, level, optname, &membershipV6, sizeof(membershipV6));
+    }
+    else if (IPPROTO_IP == level)
+    {
+        struct ip_mreqn membership = SOPC_Internal_Fill_IP_mreq(multicast, local, ifindex);
+        setOptStatus = setsockopt(sock, level, optname, &membership, sizeof(membership));
+    }
+    else
+    {
+        assert(false);
+    }
+    return (0 == setOptStatus);
+}
+
+static SOPC_ReturnStatus applyMembershipToAllInterfaces(Socket sock,
+                                                        const SOPC_Socket_AddressInfo* multicast,
+                                                        const SOPC_Socket_AddressInfo* local,
+                                                        int optnameIPv4,
+                                                        int optnameIPv6)
+{
+    // Without interfaceName provided: drop on all possible interfaces
+    struct ifaddrs* ifap = NULL;
+    int result = getifaddrs(&ifap);
+
+    if (0 != result)
+    {
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+
     uint32_t counter = 0;
     bool atLeastOneItfSuccess = false;
 
+    for (struct ifaddrs* ifa = ifap; ifa != NULL; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr)
+        {
+            if (AF_INET6 == multicast->ai_family)
+            {
+                if (AF_INET6 == ifa->ifa_addr->sa_family)
+                {
+                    counter++;
+                    atLeastOneItfSuccess |= setMembershipOption(sock, multicast, local, if_nametoindex(ifa->ifa_name),
+                                                                IPPROTO_IPV6, optnameIPv6);
+                }
+            }
+            else
+            {
+                if (AF_INET == ifa->ifa_addr->sa_family)
+                {
+                    counter++;
+                    atLeastOneItfSuccess |= setMembershipOption(sock, multicast, local, if_nametoindex(ifa->ifa_name),
+                                                                IPPROTO_IP, optnameIPv4);
+                }
+            }
+        }
+    }
+    freeifaddrs(ifap);
+
+    if (0 == counter)
+    {
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+    else
+    {
+        if (atLeastOneItfSuccess)
+        {
+            return SOPC_STATUS_OK;
+        }
+        else
+        {
+            return SOPC_STATUS_NOK;
+        }
+    }
+}
+
+SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                const char* interfaceName,
+                                                const SOPC_Socket_AddressInfo* multicast,
+                                                const SOPC_Socket_AddressInfo* local)
+{
     if (NULL == multicast || NULL == local || SOPC_INVALID_SOCKET == sock || multicast->ai_family != local->ai_family)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct ifaddrs* ifap = NULL;
-    int result = getifaddrs(&ifap);
-
-    if (0 != result)
+    // Using interfaceName provided
+    if (NULL != interfaceName)
     {
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
-
-    for (struct ifaddrs* ifa = ifap; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        bool optionSet = false;
-        int setOptStatus = 0;
-        if (ifa->ifa_addr)
+        unsigned int ifindex = if_nametoindex(interfaceName);
+        bool ipv4success = false;
+        bool ipv6success = false;
+        ipv6success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP);
+        ipv4success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_ADD_MEMBERSHIP);
+        if (!ipv6success)
         {
-            if (AF_INET6 == multicast->ai_family)
-            {
-                if (AF_INET6 == ifa->ifa_addr->sa_family)
-                {
-                    struct ipv6_mreq membership =
-                        SOPC_Internal_Fill_IP6_mreq(multicast, local, if_nametoindex(ifa->ifa_name));
-                    setOptStatus = setsockopt(sock, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &membership, sizeof(membership));
-                    counter++;
-                    optionSet = true;
-                }
-            }
-            else
-            {
-                if (AF_INET == ifa->ifa_addr->sa_family)
-                {
-                    struct ip_mreqn membership =
-                        SOPC_Internal_Fill_IP_mreq(multicast, local, if_nametoindex(ifa->ifa_name));
-                    setOptStatus = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &membership, sizeof(membership));
-                    counter++;
-                    optionSet = true;
-                }
-            }
+            printf("AddMembership failure (error='%s') on interface for IPv6: %s\n", strerror(errno), interfaceName);
         }
-
-        if (optionSet)
+        if (!ipv4success)
         {
-            if (setOptStatus < 0)
-            {
-                printf("AddMembership failure (error='%s') on interface %s\n", strerror(errno), ifa->ifa_name);
-            }
-            else
-            {
-                atLeastOneItfSuccess = true;
-                printf("AddMembership success on interface %s\n", ifa->ifa_name);
-            }
+            printf("AddMembership failure (error='%s') on interface for IPv4: %s\n", strerror(errno), interfaceName);
         }
-    }
-
-    freeifaddrs(ifap);
-
-    if (0 == counter)
-    {
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
-    else
-    {
-        if (atLeastOneItfSuccess)
+        if (ipv4success || ipv6success)
         {
             return SOPC_STATUS_OK;
         }
@@ -215,82 +255,29 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
             return SOPC_STATUS_NOK;
         }
     }
+
+    return applyMembershipToAllInterfaces(sock, multicast, local, IP_ADD_MEMBERSHIP, IPV6_ADD_MEMBERSHIP);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
+                                                 const char* interfaceName,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local)
 {
-    uint32_t counter = 0;
-    bool atLeastOneItfSuccess = false;
-
     if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct ifaddrs* ifap = NULL;
-    int result = getifaddrs(&ifap);
-
-    if (0 != result)
+    // Using interfaceName provided
+    if (NULL != interfaceName)
     {
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
+        bool success = false;
+        unsigned int ifindex = if_nametoindex(interfaceName);
+        success |= setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP);
+        success |= setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_DROP_MEMBERSHIP);
 
-    for (struct ifaddrs* ifa = ifap; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        int setOptStatus = 0;
-        bool optionSet = false;
-
-        if (ifa->ifa_addr)
-        {
-            if (AF_INET6 == multicast->ai_family)
-            {
-                if (AF_INET6 == ifa->ifa_addr->sa_family)
-                {
-                    struct ipv6_mreq membership =
-                        SOPC_Internal_Fill_IP6_mreq(multicast, local, if_nametoindex(ifa->ifa_name));
-                    setOptStatus =
-                        setsockopt(sock, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, &membership, sizeof(membership));
-                    counter++;
-                    optionSet = true;
-                }
-            }
-            else
-            {
-                if (AF_INET == ifa->ifa_addr->sa_family)
-                {
-                    struct ip_mreqn membership =
-                        SOPC_Internal_Fill_IP_mreq(multicast, local, if_nametoindex(ifa->ifa_name));
-                    setOptStatus = setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &membership, sizeof(membership));
-                    counter++;
-                    optionSet = true;
-                }
-            }
-        }
-
-        if (optionSet)
-        {
-            if (setOptStatus < 0)
-            {
-                // Failure case on the current itf: check errno for details
-            }
-            else
-            {
-                atLeastOneItfSuccess = true;
-            }
-        }
-    }
-
-    freeifaddrs(ifap);
-
-    if (0 == counter)
-    {
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
-    else
-    {
-        if (atLeastOneItfSuccess)
+        if (success)
         {
             return SOPC_STATUS_OK;
         }
@@ -299,9 +286,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
             return SOPC_STATUS_NOK;
         }
     }
+
+    return applyMembershipToAllInterfaces(sock, multicast, local, IP_DROP_MEMBERSHIP, IPV6_DROP_MEMBERSHIP);
 }
 
 static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
+                                                   const char* interfaceName,
                                                    bool setReuseAddr,
                                                    bool setNonBlocking,
                                                    Socket* sock)
@@ -352,16 +342,28 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
                 status = SOPC_STATUS_NOK;
             }
         }
+
+        if (SOPC_STATUS_OK == status && NULL != interfaceName)
+        {
+            setOptStatus =
+                setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, interfaceName, (socklen_t) strlen(interfaceName));
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
     }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
+                                                  const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
                                                   Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(listenAddress, setReuseAddr, setNonBlocking, sock);
+    SOPC_ReturnStatus status =
+        SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
     if (SOPC_STATUS_OK == status)
     {
         int res = bind(*sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
@@ -374,9 +376,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
     return status;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, bool setNonBlocking, Socket* sock)
+SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
+                                               const char* interfaceName,
+                                               bool setNonBlocking,
+                                               Socket* sock)
 {
-    return SOPC_UDP_Socket_CreateNew(destAddress, false, setNonBlocking, sock);
+    return SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, sock);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)

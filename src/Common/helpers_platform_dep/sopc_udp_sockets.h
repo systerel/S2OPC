@@ -53,6 +53,8 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr);
  *  \brief Create a new UDP socket and bind it
  *
  *  \param listenAddress     Address on which the socket shall listen for input data
+ *  \param interfaceName     The name of the interface to use, or null if unspecified.
+ *                           The name shall be a null-terminated string if defined.
  *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
  *  \param setNonBlocking    If set the socket is non-blocking for reception
  *  \param[out] sock         Value pointed is set with the newly created socket
@@ -60,6 +62,7 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr);
  *  \return                  SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
+                                                  const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
                                                   Socket* sock);
@@ -68,12 +71,17 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
  *  \brief Create a new UDP socket and do not bind it
  *
  *  \param destAddress     Destination IP address, used to determine version of the protocol
+ *  \param interfaceName   The name of the interface to use, or null if unspecified.
+ *                         The name shall be a null-terminated string if defined.
  *  \param setNonBlocking  If set the socket is non-blocking for sending
  *  \param[out] sock       Value pointed is set with the newly created socket
  *
  *  \return                SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, bool setNonBlocking, Socket* sock);
+SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
+                                               const char* interfaceName,
+                                               bool setNonBlocking,
+                                               Socket* sock);
 
 /**
  *  \brief Send data through the UDP socket to given IP address and port
@@ -102,26 +110,32 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer);
 /**
  * \brief Join a multicast group with provided local IP address and multicast addess
  *
- *  \param sock         The socket to configure
- *  \param multicast    The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
- *  \param local        The local IPv4 address joining the group
+ *  \param sock           The socket to configure
+ *  \param interfaceName  The name of the interface to use, or null if unspecified.
+ *                        The name shall be a null-terminated string if defined.
+ *  \param multicast      The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
+ *  \param local          The local IPv4 address joining the group
  *
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise
  */
 SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                const char* interfaceName,
                                                 const SOPC_Socket_AddressInfo* multicast,
                                                 const SOPC_Socket_AddressInfo* local);
 
 /**
  * \brief Quit a multicast group with provided local IP address and multicast addess
  *
- *  \param sock         The socket to configure
- *  \param multicast    The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
- *  \param local        The local IPv4 address leaving the group
+ *  \param sock           The socket to configure
+ *  \param interfaceName  The name of the interface to use, or null if unspecified.
+ *                        The name shall be a null-terminated string if defined.
+ *  \param multicast      The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
+ *  \param local          The local IPv4 address leaving the group
  *
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise
  */
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
+                                                 const char* interfaceName,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local);
 
