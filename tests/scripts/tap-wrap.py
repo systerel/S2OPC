@@ -27,6 +27,7 @@ def usage():
 
 Runs the given command, logging the result to a TAP file. The path to the TAP
 file is specified using the CK_TAP_LOG_FILE_NAME environment variable.
+The expected return code is 0 or defined by the CK_EXP_RET_CODE otherwise.
 ''' % sys.argv[0])
 
 if __name__ == '__main__':
@@ -42,6 +43,12 @@ if __name__ == '__main__':
         usage()
         sys.exit(1)
 
+    exp_ret_code = os.getenv('CK_EXP_RET_CODE')
+    if exp_ret_code is None:
+        exp_ret_code = 0
+    else:
+        exp_ret_code = int(exp_ret_code)
+
     retcode = 0
 
     with open(tap_filename, 'w') as fd:
@@ -51,8 +58,12 @@ if __name__ == '__main__':
             subprocess.check_call(cmd)
             fd.write('ok 1 - %s: Passed\n' % ' '.join(cmd))
         except subprocess.CalledProcessError as e:
-            fd.write('not ok 1 - %s: Exited with code %d\n' % (' '.join(cmd), e.returncode))
             retcode = e.returncode
+            if exp_ret_code != retcode:
+                fd.write('not ok 1 - %s: Exited with code %d\n' % (' '.join(cmd), e.returncode))
+            else:
+                fd.write('ok 1 - %s: Passed with expected code %d\n' % (' '.join(cmd), e.returncode))
+                retcode = 0
 
     sys.exit(retcode)
 
