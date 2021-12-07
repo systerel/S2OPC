@@ -1,10 +1,13 @@
-<PubSub publisherId="123">
-    <!-- Error: interfaceName tag missing for ethernet publisher connection -->
-    <connection address="opc.eth://01-00-00-01-04-00" mode="publisher">
+<PubSub publisherId="123" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.eth://01-00-00-01-04-00" mode="publisher" interfaceName="lo">
+        <!-- one to many -->
         <message id="14" publishingInterval="50." version="1" >
+            <!-- one to many -->
             <variable nodeId="ns=1;i=5" displayName="Toto" dataType="Boolean"/>
         </message>
         <message id="15" publishingInterval="30." version="1">
+            <!-- one to many -->
             <variable nodeId="ns=1;i=2" displayName="Tata" dataType="Int16"/>
         </message>
     </connection>

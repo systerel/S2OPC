@@ -85,8 +85,8 @@ if(ENABLE_TESTING)
   target_compile_definitions(xml_parser_test PRIVATE ${S2OPC_DEFINITIONS})
 
   add_custom_command(TARGET xml_parser_test POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
   s2opc_unit_test(xml_parser_test)
 
@@ -130,10 +130,10 @@ if(ENABLE_TESTING)
   # Copy data
   add_custom_command(
     TARGET pub_scheduler_test POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_pub_scheduler_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     )
 
   add_executable(udp_sub_test "validation_tests/udp_sub_test.c")
@@ -149,9 +149,9 @@ if(ENABLE_TESTING)
   # Copy data
   add_custom_command(
     TARGET sub_scheduler_conf_test POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/xml_test/config_sub_eth2.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth2.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
     )
 
   add_executable(udp_multi_pub_test "validation_tests/udp_multi_pub_test.c")

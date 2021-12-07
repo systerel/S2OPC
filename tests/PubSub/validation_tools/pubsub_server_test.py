@@ -699,7 +699,7 @@ def testPubSubDynamicConf():
         logger.add_test('Not connected to OPCUA Server', not pubsubserver.isConnected())
         logger.finalize_report()
 
-# test with static configuration : data/xml_test/config_pubsub_server.xml
+# test with static configuration : data/config_pubsub_server.xml
 def testPubSubStaticConf():
 
     logger = TapLogger("pubsub_server_test.tap")

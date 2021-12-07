@@ -1,4 +1,4 @@
-<PubSub>
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
     <!-- one to many -->
     <connection address="opc.eth://01-00-00-01-04-00" mode="subscriber" interfaceName="lo">
         <!-- one to many -->
