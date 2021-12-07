@@ -54,23 +54,26 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr);
  *
  *  \param listenAddress     Address on which the socket shall listen for input data
  *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
+ *  \param setNonBlocking    If set the socket is non-blocking for reception
  *  \param[out] sock         Value pointed is set with the newly created socket
  *
  *  \return                  SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
                                                   bool setReuseAddr,
+                                                  bool setNonBlocking,
                                                   Socket* sock);
 
 /**
  *  \brief Create a new UDP socket and do not bind it
  *
- *  \param destAddress  Destination IP address, used to determine version of the protocol
- *  \param[out] sock    Value pointed is set with the newly created socket
+ *  \param destAddress     Destination IP address, used to determine version of the protocol
+ *  \param setNonBlocking  If set the socket is non-blocking for sending
+ *  \param[out] sock       Value pointed is set with the newly created socket
  *
- *  \return                  SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
+ *  \return                SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, Socket* sock);
+SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, bool setNonBlocking, Socket* sock);
 
 /**
  *  \brief Send data through the UDP socket to given IP address and port

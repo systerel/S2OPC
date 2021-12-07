@@ -228,7 +228,7 @@ int main(void)
 
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, true, &sock);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, true, true, &sock);
     buffer = SOPC_Buffer_Create(4096);
 
     if (SOPC_STATUS_OK == status && buffer != NULL)

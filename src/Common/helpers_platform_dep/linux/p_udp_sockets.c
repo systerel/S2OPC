@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
@@ -300,7 +301,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
     }
 }
 
-static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr, bool setReuseAddr, Socket* sock)
+static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
+                                                   bool setReuseAddr,
+                                                   bool setNonBlocking,
+                                                   Socket* sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;
@@ -316,12 +320,15 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
         else
         {
             status = SOPC_STATUS_OK;
-            setOptStatus = 0;
         }
 
-        if (SOPC_STATUS_OK == status && false != setReuseAddr)
+        if (SOPC_STATUS_OK == status && setReuseAddr)
         {
             setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
 
         /*
@@ -330,12 +337,20 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
         {
             const int falseInt = false;
             setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
         */
 
-        if (setOptStatus < 0)
+        if (SOPC_STATUS_OK == status && setNonBlocking)
         {
-            status = SOPC_STATUS_NOK;
+            setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
     return status;
@@ -343,9 +358,10 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
 
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
                                                   bool setReuseAddr,
+                                                  bool setNonBlocking,
                                                   Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(listenAddress, setReuseAddr, sock);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(listenAddress, setReuseAddr, setNonBlocking, sock);
     if (SOPC_STATUS_OK == status)
     {
         int res = bind(*sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
@@ -358,9 +374,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
     return status;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, Socket* sock)
+SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress, bool setNonBlocking, Socket* sock)
 {
-    return SOPC_UDP_Socket_CreateNew(destAddress, false, sock);
+    return SOPC_UDP_Socket_CreateNew(destAddress, false, setNonBlocking, sock);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)

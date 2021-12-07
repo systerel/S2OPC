@@ -139,7 +139,7 @@ int main(void)
 
     SOPC_Helper_EndiannessCfg_Initialize();
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
-    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, &sock);
+    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, true, &sock);
     if (SOPC_STATUS_NOK == status)
     {
         return -1;

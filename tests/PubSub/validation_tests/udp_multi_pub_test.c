@@ -80,7 +80,7 @@ int main(void)
     init_mcast_addrs();
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     Socket sock = SOPC_INVALID_SOCKET;
-    status = SOPC_UDP_Socket_CreateToSend(addressArr[0], &sock);
+    status = SOPC_UDP_Socket_CreateToSend(addressArr[0], true, &sock);
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
     if (SOPC_STATUS_OK == status && buffer != NULL)

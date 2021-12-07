@@ -77,7 +77,7 @@ int main(void)
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, &sock);
+    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, true, &sock);
     FILE* fd = fopen("./config_pub.xml", "r");
     assert(NULL != fd);
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);

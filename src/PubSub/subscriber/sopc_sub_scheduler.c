@@ -479,7 +479,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_UDP;
 
                             schedulerCtx.nbSockets++;
-                            status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true,
+                            status = SOPC_UDP_Socket_CreateToReceive(multicastAddr, true, true,
                                                                      &schedulerCtx.transport[iIter].sock);
                             // Add socket to multicast group
                             if (SOPC_STATUS_OK == status)

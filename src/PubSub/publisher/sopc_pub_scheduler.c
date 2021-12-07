@@ -676,7 +676,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             return false;
         }
         pubSchedulerCtx.transport[index].udpAddr = outUDPaddr;
-        allocSuccess = (SOPC_STATUS_OK == SOPC_UDP_Socket_CreateToSend(outUDPaddr, &outSock));
+        allocSuccess = (SOPC_STATUS_OK == SOPC_UDP_Socket_CreateToSend(outUDPaddr, true, &outSock));
         if (!allocSuccess)
         {
             *ctx = NULL;
