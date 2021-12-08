@@ -28,6 +28,7 @@
                                    </xs:sequence>
                                    <xs:attribute name="address" type="xs:string" use="required"/>
                                    <xs:attribute name="mode" type="modeType" use="required"/>
+                                   <xs:attribute name="interfaceName" type="xs:string"/> <!-- mandatory for publisher with Ethernet protocol, optional otherwise -->
                              </xs:complexType>
                        </xs:element>
                  </xs:sequence>
