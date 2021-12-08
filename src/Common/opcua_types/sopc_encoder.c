@@ -2443,10 +2443,14 @@ static SOPC_ReturnStatus SOPC_Variant_Write_Internal(const SOPC_Variant* variant
             // Note: array length written in WriteVariantArrayBuiltInType
             if (SOPC_STATUS_OK == status)
             {
-                if (arrayLength < -1)
+                if (arrayLength == -1)
+                {
+                    // Encode NULL arrays as empty
+                    arrayLength = 0;
+                }
+                if (arrayLength < 0)
                 {
                     status = SOPC_STATUS_ENCODING_ERROR;
-                    // Note : -1 = NULL array
                 }
                 else
                 {
@@ -3270,7 +3274,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
         return status;
     }
 
-    if (*noOfElts < -1)
+    if (*noOfElts < 0)
     {
         *noOfElts = 0;
     }

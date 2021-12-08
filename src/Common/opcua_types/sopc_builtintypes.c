@@ -4508,9 +4508,9 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
             }
             else if (src->Value.Array.Length == -1)
             {
-                // <null> array
+                // <null> array is equal to empty array. Implement result as empty array
                 status = SOPC_STATUS_OK;
-                dest->Value.Array.Length = -1;
+                dest->Value.Array.Length = 0;
                 // dest->Value.Array.Content is not significant in that case
             }
             break;

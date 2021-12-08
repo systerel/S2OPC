@@ -150,16 +150,16 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArra
         break;
 
     case SOPC_VariantArrayType_Array:
-        // Set "Null array"
-        var->Value.Array.Length = -1;
+        // Set "Empty array"
+        var->Value.Array.Length = 0;
         break;
 
     case SOPC_VariantArrayType_Matrix:
         var->Value.Matrix.Dimensions = 2;
         var->Value.Matrix.ArrayDimensions = SOPC_Calloc(2, sizeof(uint32_t));
         assert(var->Value.Matrix.ArrayDimensions != NULL);
-        var->Value.Matrix.ArrayDimensions[0] = -1;
-        var->Value.Matrix.ArrayDimensions[1] = -1;
+        var->Value.Matrix.ArrayDimensions[0] = 0;
+        var->Value.Matrix.ArrayDimensions[1] = 0;
         break;
     default:
         assert(false && "Cannot create default empty value for Matrixes with Dimensions > 2");

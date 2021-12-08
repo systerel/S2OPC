@@ -570,7 +570,7 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
                 return false;
             }
 
-            if (NULL == attr_val || !parse_signed64_value(attr_val, &rank) || rank < -3 || rank > 65535)
+            if (!parse_signed64_value(attr_val, &rank) || rank < -3 || rank > 65535)
             {
                 LOG_XML_ERRORF("Invalid attribute arrayRank value: '%s", attr_val);
                 return false;
