@@ -84,6 +84,7 @@ generation:
   image: com.systerel.fr:5000/c765/gen-ext@sha256:29c8f93dfce606b86133605ee367c14e3b4b978eebe4181e42e9b826db06b06c # digest of gen-ext:1.3
   script:
     - ./clean.sh all
+    - ./.validates_xml_schemas.sh
     - ./.pre-build-ext.sh
     - ./.check_generated_code.sh
   artifacts:
