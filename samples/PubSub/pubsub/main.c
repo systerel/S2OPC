@@ -70,6 +70,7 @@
 #include "p_time.h" /* SOPC_RealTime API, for now linux only */
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
+#include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
@@ -110,7 +111,7 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
 /* RTT calculations */
 SOPC_RealTime* g_ts_emissions = NULL;
 long* g_rtt = NULL;
-size_t g_n_samples = 0;
+uint32_t g_n_samples = 0;
 static inline long diff_timespec(struct timespec* a, struct timespec* b);
 static void save_rtt_to_csv(void);
 
@@ -137,13 +138,18 @@ int main(int argc, char* const argv[])
         printf("Error while initializing logs\n");
     }
 
-    sscanf(getenv_default("RTT_SAMPLES", RTT_SAMPLES), "%zu", &g_n_samples);
-    printf("RTT_SAMPLES: %zu\n", g_n_samples);
+    status = SOPC_strtouint32_t(getenv_default("RTT_SAMPLES", RTT_SAMPLES), &g_n_samples, 10, '\0');
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("Error while parsing RTT_SAMPLES value\n");
+        exit((int) status);
+    }
+    printf("RTT_SAMPLES: %" PRIu32 "\n", g_n_samples);
     g_ts_emissions = SOPC_Calloc(g_n_samples, sizeof(struct timespec));
     g_rtt = SOPC_Calloc(g_n_samples, sizeof(long));
     if (NULL == g_ts_emissions || NULL == g_rtt)
     {
-        printf("Error while allocating %zd round-trip time measurements\n", g_n_samples);
+        printf("Error while allocating %" PRIu32 " round-trip time measurements\n", g_n_samples);
         status = SOPC_STATUS_NOK;
     }
 
@@ -182,7 +188,7 @@ int main(int argc, char* const argv[])
         }
         if (NULL == sourceConfig)
         {
-            printf("Error while loading PubSub configuration\n");
+            printf("Error while setting Pub source variable\n");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -196,9 +202,9 @@ int main(int argc, char* const argv[])
         {
             targetConfig = SOPC_SubTargetVariableConfig_Create(&set_target_compute_rtt);
         }
-        if (NULL == sourceConfig)
+        if (NULL == targetConfig)
         {
-            printf("Error while loading PubSub configuration\n");
+            printf("Error while setting Sub target variable\n");
             status = SOPC_STATUS_NOK;
         }
     }

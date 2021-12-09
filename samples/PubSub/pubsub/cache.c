@@ -240,6 +240,10 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Cache: inserted %s of type %d", nid_str, type);
                         SOPC_Free(nid_str);
                     }
+                    else
+                    {
+                        SOPC_Free(nid);
+                    }
                 }
             }
         }
@@ -291,6 +295,10 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
                         char* nid_str = SOPC_NodeId_ToCString(nid);
                         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Cache: inserted %s of type %d", nid_str, type);
                         SOPC_Free(nid_str);
+                    }
+                    else
+                    {
+                        SOPC_Free(nid);
                     }
                 }
             }
@@ -388,6 +396,11 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
             SOPC_DataValue_Initialize(dv);
 
             ok = Cache_Set(key, item);
+        }
+        else
+        {
+            SOPC_Free(key);
+            SOPC_Free(item);
         }
 
         /* As we have ownership of the wv, clear it */
