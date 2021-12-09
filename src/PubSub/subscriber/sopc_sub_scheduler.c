@@ -245,11 +245,17 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, u
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
     {
         memcpy(schedulerCtx.receptionBufferMQTT->data, data, size);
-        SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferMQTT, 0);
-        SOPC_Buffer_SetDataLength(schedulerCtx.receptionBufferMQTT, size);
-        SOPC_ReturnStatus status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
-                                                       schedulerCtx.receptionBufferMQTT, schedulerCtx.targetConfig);
-        (void) status;
+        SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferMQTT, 0);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_SetDataLength(schedulerCtx.receptionBufferMQTT, size);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
+                                         schedulerCtx.receptionBufferMQTT, schedulerCtx.targetConfig);
+            (void) status;
+        }
     }
 }
 
@@ -257,9 +263,11 @@ static void on_udp_message_received(void* pInputIdentifier, Socket sock)
 {
     assert(NULL != pInputIdentifier);
 
-    SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferUDP, 0);
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferUDP);
-
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferUDP, 0);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_UDP_Socket_ReceiveFrom(sock, schedulerCtx.receptionBufferUDP);
+    }
     // Write input
     if (SOPC_STATUS_OK == status)
     {
