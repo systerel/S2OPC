@@ -256,7 +256,11 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
 // Fill pLogInst->category with category, aligned and truncated to CATEGORY_MAX_LENGTH
 static void SOPC_Log_AlignCategory(const char* category, SOPC_Log_Instance* pLogInst)
 {
-    if (NULL != category && NULL != pLogInst)
+    if (NULL == pLogInst)
+    {
+        return;
+    }
+    if (NULL != category)
     {
         const size_t category_len = strlen(category);
         if (category_len > 0 && category_len <= CATEGORY_MAX_LENGTH)
