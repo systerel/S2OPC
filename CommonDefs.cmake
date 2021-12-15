@@ -186,6 +186,9 @@ option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
 option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attributes are const" OFF)
+option(WITH_NO_ASSERT "Disable asserts" OFF)
+option(WITH_USER_ASSERT "Enable user-defined failed assertion event" OFF)
+option(WITH_MINIMAL_FOOTPRINT "Limit software footprint" OFF)
 
 # Check project and option(s) are compatible
 
@@ -266,6 +269,22 @@ print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 
 # Check specific options constraints and set necessary compilation flags
+
+# check assertion redirection
+print_if_activated("WITH_NO_ASSERT")
+print_if_activated("WITH_USER_ASSERT")
+print_if_activated("WITH_MINIMAL_FOOTPRINT")
+if(WITH_NO_ASSERT)
+  if (WITH_USER_ASSERT)
+    message(FATAL_ERROR "WITH_USER_ASSERT incompatible option along with WITH_NO_ASSERT")
+  endif() 
+  list(APPEND S2OPC_COMPILER_FLAGS -DWITH_NO_ASSERT)
+elseif(WITH_USER_ASSERT)
+  list(APPEND S2OPC_COMPILER_FLAGS -DWITH_USER_ASSERT)
+endif()
+if(WITH_MINIMAL_FOOTPRINT)
+  list(APPEND S2OPC_COMPILER_FLAGS -DWITH_MINIMAL_FOOTPRINT)
+endif()
 
 # check if compiler support new sanitization options
 include(CheckCCompilerFlag)

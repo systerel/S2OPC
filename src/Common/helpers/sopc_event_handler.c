@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_event_handler.h"
 #include "sopc_mem_alloc.h"
