@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_macros.h"
@@ -427,7 +428,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     pReqCtx->requestType = requestType;
     /* Asserts that there cannot be two requests with the same id when receiving a response */
     void* found = SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid);
-    assert(NULL == found);
+    SOPC_ASSERT(NULL == found);
     if (SOPC_SLinkedList_Append(pSM->pListReqCtx, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
     {
         status = SOPC_STATUS_NOK;

@@ -21,6 +21,7 @@
 
 #include <assert.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
@@ -38,7 +39,7 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
 void SOPC_Sockets_Initialize(void)
 {
     bool init = SOPC_Socket_Network_Initialize();
-    assert(true == init);
+    SOPC_ASSERT(true == init);
     SOPC_SocketsInternalContext_Initialize();
     SOPC_SocketsNetworkEventMgr_Initialize();
 }

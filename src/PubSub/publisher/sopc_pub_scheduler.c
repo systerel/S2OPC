@@ -22,6 +22,7 @@
 #include <inttypes.h>
 
 #include "p_time.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
@@ -396,7 +397,7 @@ static void* thread_start_publish(void* arg)
             const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(context->group);
 
             size_t ndsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
-            assert(1 == ndsm && "Unsupported multi-DSM");
+            SOPC_ASSERT(1 == ndsm && "Unsupported multi-DSM");
 
             SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
             uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
@@ -646,7 +647,7 @@ static const SOPC_DataSetWriter* SOPC_PubScheduler_Group_Get_Unique_Writer(const
 {
     assert(NULL != group);
     uint8_t nb = SOPC_WriterGroup_Nb_DataSetWriter(group);
-    assert(1 == nb);
+    SOPC_ASSERT(1 == nb);
     return SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
 }
 

@@ -28,6 +28,7 @@
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
@@ -339,7 +340,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
 void SOPC_SocketsNetworkEventMgr_Initialize(void)
 {
     bool result = SOPC_SocketsNetworkEventMgr_LoopThreadStart();
-    assert(result);
+    SOPC_ASSERT(result);
 }
 
 void SOPC_SocketsNetworkEventMgr_Clear(void)

@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_macros.h"
@@ -563,7 +564,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     else if (NULL != pSM)
     {
         SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, clientId);
-        assert(pSM == removedSM);
+        SOPC_ASSERT(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
     }
 

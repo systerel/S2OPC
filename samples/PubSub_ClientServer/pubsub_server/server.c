@@ -25,6 +25,7 @@
 
 #include "embedded/sopc_addspace_loader.h"
 #include "sopc_address_space.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
@@ -877,7 +878,7 @@ bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
      * acknowledge before the toolkit answers */
     OpcUa_WriteRequest* request = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (NULL == request)
     {
         return false;
@@ -904,7 +905,7 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
 
     OpcUa_ReadRequest* request = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_PubSheduler_GetVariableRequestContext* requestContext =
         SOPC_Calloc(1, sizeof(SOPC_PubSheduler_GetVariableRequestContext));

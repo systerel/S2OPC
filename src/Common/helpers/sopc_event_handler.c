@@ -94,7 +94,7 @@ static void* looper_loop(void* user_data)
     {
         void* item = NULL;
         SOPC_ReturnStatus status = SOPC_AsyncQueue_BlockingDequeue(queue, (void**) &item);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
 
         if (item == POISON_PILL)
         {

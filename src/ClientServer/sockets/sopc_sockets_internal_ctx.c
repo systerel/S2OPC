@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_buffer.h"
 #include "sopc_mem_alloc.h"
@@ -54,7 +55,7 @@ void SOPC_SocketsInternalContext_Initialize(void)
     }
 
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEventQueue, "SocketsInternalContext");
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     maxBufferSize = SOPC_Internal_Common_GetEncodingConstants()->buffer_size;
 }
 
@@ -157,7 +158,7 @@ void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t
 {
     assert(socketsEventHandler != NULL);
     SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, (int32_t) event, eltId, params, auxParam);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 }
 
 SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketEvent,

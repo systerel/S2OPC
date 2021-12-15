@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
@@ -208,7 +209,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
         timerId = timer->id;
         SOPC_ReturnStatus status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
                                                           timer->event.params, timer->event.auxParam);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         if (timer->isPeriodicTimer)
         {
