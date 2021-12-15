@@ -104,14 +104,25 @@ done
 
 $CHECK_DIRECT_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence of functions or headers: $CHECK_DIRECT_ABSENCE" | tee -a $LOGPATH
 
+#### Additionnal check for function, where we want to ensure that there is no false detection due to common wording.
+CHECK_ABSENCE='(\bassert *[\(])'
+
+echo "Checking specific functions not used in code" | tee -a $LOGPATH
+find $CSRC -name "*.c" -or -name "*.h" | xargs grep -Ec "$CHECK_ABSENCE" | grep -Ec ":[^0]+" | xargs test 0 -eq
+if [[ $? != 0 ]]; then
+    echo "ERROR: checking absence of functions: $CHECK_ABSENCE" | tee -a $LOGPATH
+    find $CSRC -name "*.c" -or -name "*.h" | xargs grep -nE "$CHECK_ABSENCE" | tee -a $LOGPATH
+    EXITCODE=1
+fi
+
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
-EXLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
+EXCLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
 EXCLUDED_DEMO="*\/client_wrapper\/*"
 
-find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of std library use for memory allocation in tookit" | tee -a $LOGPATH
-    find $CSRC -not -path $EXLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
+    find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
 find $TST -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
