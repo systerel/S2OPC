@@ -131,25 +131,26 @@ static bool SOPC_Logger_AuditInitialize(void)
             commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
             if (commonTrace == NULL)
             {
-                printf("WARNING: Common log creation failed, no Common log will be recorded !");
+                SOPC_CONSOLE_PRINTF("WARNING: Common log creation failed, no Common log will be recorded !");
             }
 
             clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
             if (clientServerTrace == NULL)
             {
-                printf("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
+                SOPC_CONSOLE_PRINTF(
+                    "WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
             }
 
             pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
             if (pubSubTrace == NULL)
             {
-                printf("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
+                SOPC_CONSOLE_PRINTF("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
             }
 
             opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
             if (opcUaAudit == NULL)
             {
-                printf("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
+                SOPC_CONSOLE_PRINTF("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
             }
             else
             {
@@ -163,7 +164,7 @@ static bool SOPC_Logger_AuditInitialize(void)
     }
     else
     {
-        printf("WARNING: log creation failed, no log will be recorded !\n");
+        SOPC_CONSOLE_PRINTF("WARNING: log creation failed, no log will be recorded !\n");
     }
     return result;
 }

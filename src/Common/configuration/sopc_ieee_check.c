@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 
+#include "sopc_common_constants.h"
 #include "sopc_ieee_check.h"
 
 bool SOPC_IEEE_Check(void)
@@ -29,14 +30,14 @@ bool SOPC_IEEE_Check(void)
 
     if (false == bStatus)
     {
-        printf("ERROR: Compiler floating point support is not IEEE-754 compliant\n");
+        SOPC_CONSOLE_PRINTF("ERROR: Compiler floating point support is not IEEE-754 compliant\n");
         if (false == bFltRadixStatus)
         {
-            printf("Value for FLT_RADIX is : %d instead of 2\n", FLT_RADIX);
+            SOPC_CONSOLE_PRINTF("Value for FLT_RADIX is : %d instead of 2\n", FLT_RADIX);
         }
         if (false == bFltRounds)
         {
-            printf("Value for FLT_ROUNDS is : %d instead of 1\n", FLT_ROUNDS);
+            SOPC_CONSOLE_PRINTF("Value for FLT_ROUNDS is : %d instead of 1\n", FLT_ROUNDS);
         }
     }
 

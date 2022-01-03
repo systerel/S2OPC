@@ -34,6 +34,7 @@
 #include <time.h>
 
 #include "p_udp_sockets_custom.h"
+#include "sopc_common_constants.h"
 
 #ifndef SO_EE_ORIGIN_TXTIME
 #define SO_EE_ORIGIN_TXTIME 6
@@ -107,7 +108,7 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &nwInterface, sizeof(nwInterface));
     if (setOptStatus < 0)
     {
-        printf("Interface selection failed\n");
+        SOPC_CONSOLE_PRINTF("Interface selection failed\n");
         return SOPC_STATUS_NOK;
     }
 
@@ -207,7 +208,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd)
 
     if (recvmsg(sockFd, &message, MSG_ERRQUEUE) == -1)
     {
-        printf("Receive message failed from error queue\n");
+        SOPC_CONSOLE_PRINTF("Receive message failed from error queue\n");
         return SOPC_STATUS_NOK;
     }
 
@@ -242,7 +243,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd)
         {
             controlMessage = CMSG_NXTHDR(&message, controlMessage);
             status = SOPC_STATUS_NOK;
-            printf("Unknown error\n");
+            SOPC_CONSOLE_PRINTF("Unknown error\n");
         }
     }
 

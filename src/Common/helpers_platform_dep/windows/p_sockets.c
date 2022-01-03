@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_common_constants.h"
 #include "sopc_raw_sockets.h"
 
 #include "sopc_threads.h"
@@ -58,7 +59,7 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
     {
         if (getaddrinfo(hostname, port, &hints, addrs) != 0)
         {
-            printf("ERROR: %d\n", getaddrinfo(hostname, port, &hints, addrs));
+            SOPC_CONSOLE_PRINTF("ERROR: %d\n", getaddrinfo(hostname, port, &hints, addrs));
             status = SOPC_STATUS_NOK;
         }
         else

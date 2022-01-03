@@ -135,7 +135,7 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
             va_end(args_copy);
             if (true == addNewline)
             {
-                printf("\n");
+                SOPC_CONSOLE_PRINTF("\n");
             }
         }
         if (NULL != pLogInst->logCallback && NULL != logBuffer)
@@ -166,7 +166,7 @@ static void SOPC_Log_VPutLogLine(SOPC_Log_Instance* pLogInst,
             }
             else
             {
-                printf("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
+                SOPC_CONSOLE_PRINTF("Log error: impossible to write in log %s\n", pLogInst->file->filePath);
                 SOPC_Log_InstanceFileClose(pLogInst->file);
             }
         }
@@ -246,7 +246,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         }
         else
         {
-            printf("Log error: impossible to write in NULL stream.\n");
+            SOPC_CONSOLE_PRINTF("Log error: impossible to write in NULL stream.\n");
         }
         Mutex_Unlock(&pLogInst->file->fileMutex);
     }

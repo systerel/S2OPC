@@ -207,7 +207,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     if (listeningSock != -1 && acceptedSock != NULL)
     {
         *acceptedSock = accept(listeningSock, &remoteAddr, &addrLen);
-        //        printf("selectserver: new connection from %s on socket %d\n",
+        //        SOPC_CONSOLE_PRINTF("selectserver: new connection from %s on socket %d\n",
         //                inet_ntop(remoteaddr.sa_family,
         //                    get_in_addr((struct sockaddr*)&remoteaddr),
         //                    remoteIP, INET6_ADDRSTRLEN),

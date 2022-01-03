@@ -18,6 +18,7 @@
  */
 
 #include "sopc_mqtt_transport_layer.h"
+#include "sopc_common_constants.h"
 #ifndef USE_MQTT_PAHO
 #define USE_MQTT_PAHO 0
 #endif
@@ -462,7 +463,7 @@ static pFsmCallback tabFsmMqttClient[E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX][E_MQTT
         /*    SENDING,                  */ {NULL,            cbDiscReq,         cbPubBck,       NULL,               NULL,        NULL,            cbConnReq,       cbPubReq,        cbPubReq,        NULL,            NULL,             cbMsgRcv,        cbTick}     //
 };
 
-/*=== Declarations of static functions used by debug printf ===*/
+/*=== Declarations of static functions used by debug SOPC_CONSOLE_PRINTF ===*/
 
 #if DEBUG_SCHEDULER == 1
 static const char* get_event_string(eMqttTransportContextEvent event);
@@ -572,8 +573,8 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbNewHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbNewHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         tMqttGetHandleRequest* pGetHandleRequest = (tMqttGetHandleRequest*) bufferData;
 
@@ -608,7 +609,7 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
             if (true == bFound)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-                printf("\n cbNewHdl entry : slot found = %d\n", idxClient);
+                SOPC_CONSOLE_PRINTF("\n cbNewHdl entry : slot found = %d\n", idxClient);
 #endif
                 //***************CALLBACK GET HANDLE SUCCESS ***********************
 
@@ -629,7 +630,7 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
             else
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-                printf("\n cbNewHdl entry : no slot found\n");
+                SOPC_CONSOLE_PRINTF("\n cbNewHdl entry : no slot found\n");
 #endif
                 //***************CALLBACK GET HANDLE ERROR ***********************
                 if (NULL != pGetHandleRequest->callbacksConf.cbGetHandleFailure)
@@ -663,8 +664,8 @@ static eMqttManagerStatus cbRelHdl(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbRelHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbRelHdl entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Send disconnection request event to transport async handle specified */
         CLT_EvtDiscReq(pWks, cltId);
@@ -693,8 +694,8 @@ static eMqttManagerStatus cbSnd(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbSnd entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbSnd entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Send message to send to transport context async handle */
         CLT_EvtSendMsgReq(pWks, cltId, bufferData, dataSize);
@@ -723,8 +724,8 @@ static eMqttManagerStatus cbRcv(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbRcv entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbRcv entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -760,8 +761,8 @@ static eMqttManagerStatus cbCltRdy(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbCltRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -797,8 +798,8 @@ static eMqttManagerStatus cbCltNotRdy(
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltNotRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbCltNotRdy entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Retrieve transport context workspace from transport context async handle */
         tMqttTransportContext* pCtx = &pWks->slotsTransportContext[cltId];
@@ -833,8 +834,8 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltRmv entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbCltRmv entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         /* Decrement nb transport context. If this counter is set to 0 and mqtt manager
          * status is STOPPING, scheduler thread going to stop. */
@@ -844,7 +845,7 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
         }
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbCltRmv current nb client %d\n", pWks->nbTransportContexts);
+        SOPC_CONSOLE_PRINTF("\n cbCltRmv current nb client %d\n", pWks->nbTransportContexts);
 #endif
         /* No more transport context initialized and status is stopping => go to stopped */
         if (0 == pWks->nbTransportContexts && E_MQTT_MANAGER_STATUS_STOPPING == status)
@@ -890,8 +891,8 @@ static eMqttManagerStatus cbQuit(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cbQuit entry : status = %s - event = %s\n", get_mgr_status_string(status),
-               get_mgr_event_string(event));
+        SOPC_CONSOLE_PRINTF("\n cbQuit entry : status = %s - event = %s\n", get_mgr_status_string(status),
+                            get_mgr_event_string(event));
 #endif
         if (pWks->nbTransportContexts > 0)
         {
@@ -930,8 +931,8 @@ static eMqttManagerStatus cbTmo(MqttManagerHandle* pWks,
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-        printf("\n cbTmo entry : timeout value = %d - current status = %s\n", pWks->cptStatusTimeout,
-               get_mgr_status_string(status));
+        SOPC_CONSOLE_PRINTF("\n cbTmo entry : timeout value = %d - current status = %s\n", pWks->cptStatusTimeout,
+                            get_mgr_status_string(status));
 #endif
         pWks->cptStatusTimeout++;
         switch (status)
@@ -945,7 +946,7 @@ static eMqttManagerStatus cbTmo(MqttManagerHandle* pWks,
             if (MQTT_STATUS_TIMEOUT_NB_PERIODS == pWks->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n cbTmo MQTT_STATUS_TIMEOUT --> status to STOPPED\n");
+                SOPC_CONSOLE_PRINTF("\n cbTmo MQTT_STATUS_TIMEOUT --> status to STOPPED\n");
 #endif
                 pWks->status = E_MQTT_MANAGER_STATUS_STOPPED;
             }
@@ -987,7 +988,7 @@ static eMqttTransportContextStatus cbConnReq(
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_req entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_conn_req entry for client %d\n", pCtx->identification.transportId);
 #endif
 
         /* Set status to CONNECTING */
@@ -1013,8 +1014,8 @@ static eMqttTransportContextStatus cbConnReq(
             MQTTAsyncResult = api_lib_create(pCtx);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-            printf("\n *******************>>>>>>>> %08lX with %s\n", (uint64_t) pCtx->clientHandle,
-                   pCtx->connexionConfig.uri);
+            SOPC_CONSOLE_PRINTF("\n *******************>>>>>>>> %08lX with %s\n", (uint64_t) pCtx->clientHandle,
+                                pCtx->connexionConfig.uri);
 #endif
         }
 
@@ -1060,7 +1061,7 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_conn_clr entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Set transport context status to not initialized, raz try counter, connection configuration and flush pending
          * messages to send.*/
@@ -1073,14 +1074,15 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
         /* Destroy if necessary PAHO LIB client */
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr destroy mqtt lib for client %d\n", pCtx->identification.transportId);
-        printf("\n ********************************** %08lX\n", (uint64_t) pCtx->clientHandle);
+        SOPC_CONSOLE_PRINTF("\n cb_conn_clr destroy mqtt lib for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n ********************************** %08lX\n", (uint64_t) pCtx->clientHandle);
 #endif
 
         api_lib_destroy(pCtx);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr destroy mqtt lib well performed for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_conn_clr destroy mqtt lib well performed for client %d\n",
+                            pCtx->identification.transportId);
 #endif
 
         /* Send an event TRANSPORT_CONTEXT_REMOVED to mqtt manager states machine */
@@ -1088,7 +1090,7 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
         MGR_EvtCltRemoved(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_conn_clr exit for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_conn_clr exit for client %d\n", pCtx->identification.transportId);
 #endif
 
         return pCtx->status;
@@ -1115,7 +1117,7 @@ static eMqttTransportContextStatus cbConnTry(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_retry entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_retry entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Check status of try counter. If > 3, set to not initialized. Else, go to waiting for retry. */
 
@@ -1135,7 +1137,7 @@ static eMqttTransportContextStatus cbConnTry(tMqttTransportContext* pCtx,
         if (E_MQTT_TRANSPORT_CONTEXT_STATUS_NOT_INITIALIZED == pCtx->status)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-            printf("\n **********************************\n");
+            SOPC_CONSOLE_PRINTF("\n **********************************\n");
 #endif
             api_lib_destroy(pCtx);
 
@@ -1170,7 +1172,7 @@ static eMqttTransportContextStatus cbDiscReq(
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_disc_req entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_disc_req entry for client %d\n", pCtx->identification.transportId);
 #endif
         pCtx->status = E_MQTT_TRANSPORT_CONTEXT_STATUS_DISCONNECTING;
 
@@ -1212,7 +1214,7 @@ static eMqttTransportContextStatus cbSubRdy(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_sub_rdy entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_sub_rdy entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Set transport context status to ready state.*/
         pCtx->status = E_MQTT_TRANSPORT_CONTEXT_STATUS_READY;
@@ -1241,7 +1243,7 @@ static eMqttTransportContextStatus cbMsgRcv(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_recv entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_recv entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Status not changed. Send event to mqtt manager with data received.*/
 
@@ -1270,7 +1272,7 @@ static eMqttTransportContextStatus cbSubReq(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_sub_req entry for client %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_sub_req entry for client %d\n", pCtx->identification.transportId);
 #endif
         /* Transport context status is set to subscribing.*/
 
@@ -1295,7 +1297,7 @@ static eMqttTransportContextStatus cbSubReq(tMqttTransportContext* pCtx,
     }
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-    printf("\n cb_sub_req no context\n");
+    SOPC_CONSOLE_PRINTF("\n cb_sub_req no context\n");
 #endif
 
     return E_MQTT_TRANSPORT_CONTEXT_STATUS_NOT_INITIALIZED;
@@ -1320,8 +1322,8 @@ static eMqttTransportContextStatus cbPubReq(
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_pub_req entry for client %d - event =  %s - status = %s\n", pCtx->identification.transportId,
-               get_event_string(event), get_status_string(status));
+        SOPC_CONSOLE_PRINTF("\n cb_pub_req entry for client %d - event =  %s - status = %s\n",
+                            pCtx->identification.transportId, get_event_string(event), get_status_string(status));
 #endif
         uint8_t* pendingMsg = NULL;
         uint16_t sizePendingMsg = 0;
@@ -1350,7 +1352,7 @@ static eMqttTransportContextStatus cbPubReq(
         if (NULL == pendingMsg)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-            printf("\n --- No pending messages -> go to ready state ---\n");
+            SOPC_CONSOLE_PRINTF("\n --- No pending messages -> go to ready state ---\n");
 #endif
             pCtx->status = E_MQTT_TRANSPORT_CONTEXT_STATUS_READY;
 
@@ -1359,7 +1361,7 @@ static eMqttTransportContextStatus cbPubReq(
         else
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-            printf("\n --- Pending messages -> go to sending state ---\n");
+            SOPC_CONSOLE_PRINTF("\n --- Pending messages -> go to sending state ---\n");
 #endif
             pCtx->status = E_MQTT_TRANSPORT_CONTEXT_STATUS_SENDING;
 
@@ -1369,7 +1371,7 @@ static eMqttTransportContextStatus cbPubReq(
             if (E_MQTT_TRANSPORT_CONTEXT_STATUS_SENDING == status)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-                printf(
+                SOPC_CONSOLE_PRINTF(
                     "\n --- Pending messages -> go to sending state and RAZ TMO because already in SENDING status--- "
                     "\n");
 #endif
@@ -1382,7 +1384,7 @@ static eMqttTransportContextStatus cbPubReq(
             if (0 != MQTTAsyncResult)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-                printf("\n --- Free payload because not treated by mqtt lib ---\n");
+                SOPC_CONSOLE_PRINTF("\n --- Free payload because not treated by mqtt lib ---\n");
 #endif
 
                 CLT_EvtMsgSentError(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
@@ -1416,7 +1418,7 @@ static eMqttTransportContextStatus cbPubBck(tMqttTransportContext* pCtx,
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
-        printf("\n cb_pub_bck entry for client - %d\n", pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_pub_bck entry for client - %d\n", pCtx->identification.transportId);
 #endif
         if (NULL != bufferData && dataSize > 0)
         {
@@ -1449,7 +1451,7 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
         /* Increment counter. */
         pCtx->cptStatusTimeout++;
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1 && DEBUG_TMO_TICK == 1
-        printf("\n tick = %d - client %d\n ", pCtx->cptStatusTimeout, pCtx->identification.transportId);
+        SOPC_CONSOLE_PRINTF("\n tick = %d - client %d\n ", pCtx->cptStatusTimeout, pCtx->identification.transportId);
 #endif
         switch (pCtx->status)
         {
@@ -1470,7 +1472,8 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
             if (MQTT_STATUS_TIMEOUT_DISCONNECTING_NB_PERIODS == pCtx->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n TIMEOUT for client %d - DISCONNECTING STATUS\n", pCtx->identification.transportId);
+                SOPC_CONSOLE_PRINTF("\n TIMEOUT for client %d - DISCONNECTING STATUS\n",
+                                    pCtx->identification.transportId);
 #endif
                 CLT_EvtDisc(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
             }
@@ -1483,7 +1486,7 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
             if (MQTT_STATUS_TIMEOUT_CONNECTING_NB_PERIODS == pCtx->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n TIMEOUT for client %d - CONNECTING STATUS\n", pCtx->identification.transportId);
+                SOPC_CONSOLE_PRINTF("\n TIMEOUT for client %d - CONNECTING STATUS\n", pCtx->identification.transportId);
 #endif
 
                 CLT_EvtConnError(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
@@ -1496,7 +1499,8 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
             if (MQTT_RETRY_TIMEOUT_NB_PERIODS == pCtx->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n TIMEOUT for client %d - WAITING_FOR_RETRY STATUS\n", pCtx->identification.transportId);
+                SOPC_CONSOLE_PRINTF("\n TIMEOUT for client %d - WAITING_FOR_RETRY STATUS\n",
+                                    pCtx->identification.transportId);
 #endif
                 CLT_EvtConnReq(pCtx->identification.pMqttMgr, pCtx->identification.transportId, NULL);
             }
@@ -1508,7 +1512,8 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
             if (MQTT_STATUS_TIMEOUT_SUBSCRIBING_NB_PERIODS == pCtx->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n TIMEOUT for client %d - SUBSCRIBING STATUS\n", pCtx->identification.transportId);
+                SOPC_CONSOLE_PRINTF("\n TIMEOUT for client %d - SUBSCRIBING STATUS\n",
+                                    pCtx->identification.transportId);
 #endif
                 CLT_EvtSubFailed(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
             }
@@ -1525,7 +1530,7 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
             if (MQTT_STATUS_TIMEOUT_SENDING_NB_PERIODS == pCtx->cptStatusTimeout)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_CALLBACKS == 1
-                printf("\n TIMEOUT for client %d - SENDING STATUS\n", pCtx->identification.transportId);
+                SOPC_CONSOLE_PRINTF("\n TIMEOUT for client %d - SENDING STATUS\n", pCtx->identification.transportId);
 #endif
 
                 CLT_EvtMsgSentError(pCtx->identification.pMqttMgr, pCtx->identification.transportId);
@@ -1773,7 +1778,7 @@ static SOPC_ReturnStatus MGR_EvtQuitScheduler(MqttManagerHandle* pWks)
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtQuitScheduler critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtQuitScheduler critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -1796,7 +1801,7 @@ static SOPC_ReturnStatus MGR_EvtCltRemoved(MqttManagerHandle* pWks, MqttTranspor
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtCltRemoved critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtCltRemoved critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -1819,7 +1824,7 @@ static SOPC_ReturnStatus MGR_EvtCltRdy(MqttManagerHandle* pWks, MqttTransportAsy
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtCltRdy critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtCltRdy critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -1842,7 +1847,7 @@ static SOPC_ReturnStatus MGR_EvtCltNotReady(MqttManagerHandle* pWks, MqttTranspo
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtCltNotReady critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtCltNotReady critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -1870,7 +1875,7 @@ static SOPC_ReturnStatus MGR_EvtMsgRcv(MqttManagerHandle* pWks,
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n TRS_EvtMsgRcv critical error\n");
+            SOPC_CONSOLE_PRINTF("\n TRS_EvtMsgRcv critical error\n");
 #endif
             EVENT_CHANNEL_flush(&pWks->schedulerChannel);
             result = SOPC_STATUS_NOK;
@@ -1879,7 +1884,7 @@ static SOPC_ReturnStatus MGR_EvtMsgRcv(MqttManagerHandle* pWks,
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtMsgRcv critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtMsgRcv critical error\n");
 #endif
         result = SOPC_STATUS_NOK;
     }
@@ -1908,7 +1913,7 @@ static SOPC_ReturnStatus MGR_EvtSendMsg(MqttManagerHandle* pWks,
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n TRS_EvtSendMsg critical error\n");
+            SOPC_CONSOLE_PRINTF("\n TRS_EvtSendMsg critical error\n");
 #endif
             EVENT_CHANNEL_flush(&pWks->schedulerChannel);
             result = SOPC_STATUS_NOK;
@@ -1917,7 +1922,7 @@ static SOPC_ReturnStatus MGR_EvtSendMsg(MqttManagerHandle* pWks,
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtSendMsg critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtSendMsg critical error\n");
 #endif
         result = SOPC_STATUS_NOK;
     }
@@ -1939,7 +1944,7 @@ static SOPC_ReturnStatus MGR_EvtReleaseHdl(MqttManagerHandle* pWks, MqttTranspor
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n TRS_EvtReleaseHdl critical error\n");
+        SOPC_CONSOLE_PRINTF("\n TRS_EvtReleaseHdl critical error\n");
 #endif
         result = SOPC_STATUS_NOK;
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
@@ -1971,7 +1976,7 @@ SOPC_ReturnStatus CLT_EvtConnReq(MqttManagerHandle* pWks,
             if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-                printf("\n CLT_EvtConnReq critical error\n");
+                SOPC_CONSOLE_PRINTF("\n CLT_EvtConnReq critical error\n");
 #endif
                 EVENT_CHANNEL_flush(&pWks->schedulerChannel);
                 result = SOPC_STATUS_NOK;
@@ -1980,7 +1985,7 @@ SOPC_ReturnStatus CLT_EvtConnReq(MqttManagerHandle* pWks,
         else
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n CLT_EvtConnReq critical error\n");
+            SOPC_CONSOLE_PRINTF("\n CLT_EvtConnReq critical error\n");
 #endif
             result = SOPC_STATUS_NOK;
         }
@@ -1994,7 +1999,7 @@ SOPC_ReturnStatus CLT_EvtConnReq(MqttManagerHandle* pWks,
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n CLT_EvtConnReq critical error\n");
+            SOPC_CONSOLE_PRINTF("\n CLT_EvtConnReq critical error\n");
 #endif
             EVENT_CHANNEL_flush(&pWks->schedulerChannel);
             result = SOPC_STATUS_NOK;
@@ -2025,7 +2030,7 @@ SOPC_ReturnStatus CLT_EvtSendMsgReq(MqttManagerHandle* pWks,
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n CLT_EvtSendMsgReq critical error\n");
+            SOPC_CONSOLE_PRINTF("\n CLT_EvtSendMsgReq critical error\n");
 #endif
             EVENT_CHANNEL_flush(&pWks->schedulerChannel);
             result = SOPC_STATUS_NOK;
@@ -2034,7 +2039,7 @@ SOPC_ReturnStatus CLT_EvtSendMsgReq(MqttManagerHandle* pWks,
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtSendMsgReq critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtSendMsgReq critical error\n");
 #endif
         result = SOPC_STATUS_NOK;
     }
@@ -2056,7 +2061,7 @@ SOPC_ReturnStatus CLT_EvtDiscReq(MqttManagerHandle* pWks, MqttTransportAsyncHand
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtDiscReq critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtDiscReq critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2079,7 +2084,7 @@ SOPC_ReturnStatus CLT_EvtConnLost(MqttManagerHandle* pWks, MqttTransportAsyncHan
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtConnLost critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtConnLost critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2102,7 +2107,7 @@ SOPC_ReturnStatus CLT_EvtDisc(MqttManagerHandle* pWks, MqttTransportAsyncHandle 
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtDisc critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtDisc critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2125,7 +2130,7 @@ SOPC_ReturnStatus CLT_EvtConnError(MqttManagerHandle* pWks, MqttTransportAsyncHa
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtConnError critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtConnError critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2148,7 +2153,7 @@ SOPC_ReturnStatus CLT_EvtConnSuccess(MqttManagerHandle* pWks, MqttTransportAsync
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtConnSuccess critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtConnSuccess critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2172,7 +2177,7 @@ SOPC_ReturnStatus CLT_EvtSubFailed(MqttManagerHandle* pWks, MqttTransportAsyncHa
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtSubFailed critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtSubFailed critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2196,7 +2201,7 @@ SOPC_ReturnStatus CLT_EvtSubSuccess(MqttManagerHandle* pWks, MqttTransportAsyncH
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtSubSuccess critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtSubSuccess critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2219,7 +2224,7 @@ SOPC_ReturnStatus CLT_EvtMsgSent(MqttManagerHandle* pWks, MqttTransportAsyncHand
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtMsgSent critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtMsgSent critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2242,7 +2247,7 @@ SOPC_ReturnStatus CLT_EvtMsgSentError(MqttManagerHandle* pWks, MqttTransportAsyn
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtMsgSentError critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtMsgSentError critical error\n");
 #endif
         EVENT_CHANNEL_flush(&pWks->schedulerChannel);
         result = SOPC_STATUS_NOK;
@@ -2268,7 +2273,7 @@ SOPC_ReturnStatus CLT_EvtMsgRcv(MqttManagerHandle* pWks, MqttTransportAsyncHandl
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n CLT_EvtMsgRcv critical error\n");
+            SOPC_CONSOLE_PRINTF("\n CLT_EvtMsgRcv critical error\n");
 #endif
             EVENT_CHANNEL_flush(&pWks->schedulerChannel);
             result = SOPC_STATUS_NOK;
@@ -2277,7 +2282,7 @@ SOPC_ReturnStatus CLT_EvtMsgRcv(MqttManagerHandle* pWks, MqttTransportAsyncHandl
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-        printf("\n CLT_EvtMsgRcv critical error\n");
+        SOPC_CONSOLE_PRINTF("\n CLT_EvtMsgRcv critical error\n");
 #endif
         result = SOPC_STATUS_NOK;
     }
@@ -2303,7 +2308,7 @@ static void TransportContext_AddPendingMsg(tMqttTransportContext* pClt, char* ms
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pClt->pendingsMessagesToSend, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
-            printf("\n Overflow pendings messages\n");
+            SOPC_CONSOLE_PRINTF("\n Overflow pendings messages\n");
 #endif
             EVENT_CHANNEL_flush(&pClt->pendingsMessagesToSend);
         }
@@ -2325,7 +2330,7 @@ static void TransportContext_GetPendingMsg(tMqttTransportContext* pClt, char** m
     if (SOPC_STATUS_OK == EVENT_CHANNEL_pop(&pClt->pendingsMessagesToSend, &event, 0))
     {
 #if DEBUG_SCHEDULER == 1
-        printf("\n --- TransportContext_GetPendingMsg SOME pending msg ---\n");
+        SOPC_CONSOLE_PRINTF("\n --- TransportContext_GetPendingMsg SOME pending msg ---\n");
 #endif
         *msgData = event.pEventData;
         *msgLen = event.size;
@@ -2333,7 +2338,7 @@ static void TransportContext_GetPendingMsg(tMqttTransportContext* pClt, char** m
     else
     {
 #if DEBUG_SCHEDULER == 1
-        printf("\n --- TransportContext_GetPendingMsg NO pending msg ---\n");
+        SOPC_CONSOLE_PRINTF("\n --- TransportContext_GetPendingMsg NO pending msg ---\n");
 #endif
         *msgData = NULL;
         *msgLen = 0;
@@ -2350,14 +2355,14 @@ static void cb_lib_onConnLost(void* context, char* cause)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnLost\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnLost\n");
 #endif
         CLT_EvtConnLost(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnLost - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnLost - no context\n");
 #endif
     }
 }
@@ -2372,7 +2377,7 @@ static int cb_lib_onMsgRcv(void* context, char* topicName, int topicLen, MQTTAsy
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onMsgRcv\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onMsgRcv\n");
 #endif
         payloadptr = message->payload;
         CLT_EvtMsgRcv(pClientContext->pMqttMgr, pClientContext->transportId, payloadptr,
@@ -2381,7 +2386,7 @@ static int cb_lib_onMsgRcv(void* context, char* topicName, int topicLen, MQTTAsy
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onMsgRcv - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onMsgRcv - no context\n");
 #endif
     }
     MQTTAsync_freeMessage(&message);
@@ -2395,13 +2400,13 @@ static void cb_lib_onDisconnect(void* context, MQTTAsync_successData* response)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onDisconnect\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onDisconnect\n");
 #endif
         CLT_EvtDisc(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
-        printf("\n cb_lib_onDisconnect - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onDisconnect - no context\n");
     }
 }
 
@@ -2412,14 +2417,14 @@ static void cb_lib_onSubscribe(void* context, MQTTAsync_successData* response)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSubscribe\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSubscribe\n");
 #endif
         CLT_EvtSubSuccess(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSubscribe - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSubscribe - no context\n");
 #endif
     }
 }
@@ -2430,14 +2435,14 @@ static void cb_lib_onSubscribeFailure(void* context, MQTTAsync_failureData* resp
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSubscribeFailure\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSubscribeFailure\n");
 #endif
         CLT_EvtSubFailed(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSubscribeFailure - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSubscribeFailure - no context\n");
 #endif
     }
 }
@@ -2450,14 +2455,14 @@ static void cb_lib_onSend(void* context, MQTTAsync_successData* response)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSend - clt = %dt\n", pClientContext->transportId);
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSend - clt = %dt\n", pClientContext->transportId);
 #endif
         CLT_EvtMsgSent(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSend - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSend - no context\n");
 #endif
     }
 }
@@ -2469,14 +2474,14 @@ static void cb_lib_onSendFailure(void* context, MQTTAsync_failureData* response)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSendFailure\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSendFailure\n");
 #endif
         CLT_EvtMsgSentError(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onSendFailure - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onSendFailure - no context\n");
 #endif
     }
 }
@@ -2488,14 +2493,14 @@ static void cb_lib_onConnectFailure(void* context, MQTTAsync_failureData* respon
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnectFailure\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnectFailure\n");
 #endif
         CLT_EvtConnError(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnectFailure - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnectFailure - no context\n");
 #endif
     }
 }
@@ -2506,14 +2511,14 @@ static void cb_lib_onConnect(void* context, MQTTAsync_successData* response)
     if (NULL != pClientContext)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnect\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnect\n");
 #endif
         CLT_EvtConnSuccess(pClientContext->pMqttMgr, pClientContext->transportId);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LIB_CALLBACKS == 1
-        printf("\n cb_lib_onConnect - no context\n");
+        SOPC_CONSOLE_PRINTF("\n cb_lib_onConnect - no context\n");
 #endif
     }
 }
@@ -2845,7 +2850,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
     while (E_MQTT_MANAGER_STATUS_STOPPED != pWks->status && E_MQTT_MANAGER_STATUS_NOT_INITIALIZED != pWks->status)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LOOP_ALIVE == 1
-        printf("\n================================++ IM ALIVE ++===================================\n");
+        SOPC_CONSOLE_PRINTF("\n================================++ IM ALIVE ++===================================\n");
 #endif
 
         /* Get current tick used to calculate timeToWait and eval timeout */
@@ -2857,8 +2862,8 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
         if (SOPC_STATUS_OK == EVENT_CHANNEL_pop(&pWks->schedulerChannel, &currentEvent, timeToWait))
         {
 #if DEBUG_SCHEDULER == 1
-            printf("\n Event received : id=%d ev=%d idx=%d\n", currentEvent.idFsm, currentEvent.event,
-                   currentEvent.idTransportContext);
+            SOPC_CONSOLE_PRINTF("\n Event received : id=%d ev=%d idx=%d\n", currentEvent.idFsm, currentEvent.event,
+                                currentEvent.idTransportContext);
 #endif
             /* Choose of state machine, MQTT manager or MQTT Transport Async Context*/
 
@@ -2872,7 +2877,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 
                 {
 #if DEBUG_SCHEDULER == 1
-                    printf("\nSCH pre-status = %d\n", pWks->status);
+                    SOPC_CONSOLE_PRINTF("\nSCH pre-status = %d\n", pWks->status);
 #endif
                     /* Save current status, used to check status change after event treatment and raz tick counter */
 
@@ -2893,12 +2898,12 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                     {
                         pWks->cptStatusTimeout = 0;
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                        printf("\n RAZ SCHEDULER TMO CPT\n");
+                        SOPC_CONSOLE_PRINTF("\n RAZ SCHEDULER TMO CPT\n");
 #endif
                     }
 
 #if DEBUG_SCHEDULER == 1
-                    printf("\nSCH post-status = %d\n", pWks->status);
+                    SOPC_CONSOLE_PRINTF("\nSCH post-status = %d\n", pWks->status);
 #endif
                 }
             }
@@ -2906,7 +2911,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
             case E_MQTT_ID_FSM_TRANSPORT_CONTEXT:
             {
 #if DEBUG_SCHEDULER == 1
-                printf("\nEVENT = %s\n", get_event_string(currentEvent.event));
+                SOPC_CONSOLE_PRINTF("\nEVENT = %s\n", get_event_string(currentEvent.event));
 #endif
                 /* Systematically check if status, event and async handle are in max range of the table which represents
                  * the state machine */
@@ -2917,8 +2922,9 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                         E_MQTT_TRANSPORT_CONTEXT_STATUS_MAX)
                 {
 #if DEBUG_SCHEDULER == 1
-                    printf("\nCLT %d pre-status = %s\n", currentEvent.idTransportContext,
-                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
+                    SOPC_CONSOLE_PRINTF(
+                        "\nCLT %d pre-status = %s\n", currentEvent.idTransportContext,
+                        get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
 #endif
                     /* Save current status, used to check status change after event treatment and raz tick counter */
 
@@ -2945,12 +2951,13 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                     {
                         pWks->slotsTransportContext[currentEvent.idTransportContext].cptStatusTimeout = 0;
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                        printf("\n RAZ CLT %d TMO CPT\n", currentEvent.idTransportContext);
+                        SOPC_CONSOLE_PRINTF("\n RAZ CLT %d TMO CPT\n", currentEvent.idTransportContext);
 #endif
                     }
 #if DEBUG_SCHEDULER == 1
-                    printf("\nCLT %d post-status = %s\n", currentEvent.idTransportContext,
-                           get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
+                    SOPC_CONSOLE_PRINTF(
+                        "\nCLT %d post-status = %s\n", currentEvent.idTransportContext,
+                        get_status_string(pWks->slotsTransportContext[currentEvent.idTransportContext].status));
 #endif
                 }
             }
@@ -2965,7 +2972,8 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
             if (NULL != currentEvent.clearCallback)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LOOP_ALIVE == 1
-                printf("\n================================++ CLEAR CALLBACK ++===================================\n");
+                SOPC_CONSOLE_PRINTF(
+                    "\n================================++ CLEAR CALLBACK ++===================================\n");
 #endif
                 if (NULL != currentEvent.pEventData)
                 {
@@ -3017,15 +3025,15 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                 if (NULL != tabFsmScheduler[pWks->status][E_MQTT_MANAGER_EVENT_TICK])
                 {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nSCH pre-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
-                           pWks->cptStatusTimeout);
+                    SOPC_CONSOLE_PRINTF("\nSCH pre-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
+                                        pWks->cptStatusTimeout);
 #endif
                     pWks->status = tabFsmScheduler[pWks->status][E_MQTT_MANAGER_EVENT_TICK](
                         pWks, pWks->status, E_MQTT_MANAGER_EVENT_TICK, 0, NULL, 0);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nSCH post-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
-                           pWks->cptStatusTimeout);
+                    SOPC_CONSOLE_PRINTF("\nSCH post-status = %s - tick = %d\n", get_mgr_status_string(pWks->status),
+                                        pWks->cptStatusTimeout);
 #endif
                 }
 
@@ -3036,7 +3044,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                     pWks->cptStatusTimeout = 0;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\n RAZ SCHEDULER TMO CPT\n");
+                    SOPC_CONSOLE_PRINTF("\n RAZ SCHEDULER TMO CPT\n");
 #endif
                 }
             }
@@ -3049,9 +3057,9 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 
                 {
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nCLT %d pre-status = %s - tick = %d\n", i,
-                           get_status_string(pWks->slotsTransportContext[i].status),
-                           pWks->slotsTransportContext[i].cptStatusTimeout);
+                    SOPC_CONSOLE_PRINTF("\nCLT %d pre-status = %s - tick = %d\n", i,
+                                        get_status_string(pWks->slotsTransportContext[i].status),
+                                        pWks->slotsTransportContext[i].cptStatusTimeout);
 #endif
 
                     /* Save current status, used to check status change after event treatment and raz tick counter */
@@ -3073,13 +3081,13 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
                     {
                         pWks->slotsTransportContext[i].cptStatusTimeout = 0;
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                        printf("\n RAZ CLT %d TMO CPT\n", i);
+                        SOPC_CONSOLE_PRINTF("\n RAZ CLT %d TMO CPT\n", i);
 #endif
                     }
 #if DEBUG_SCHEDULER == 1 && DEBUG_TMO_TICK == 1
-                    printf("\nCLT %d post-status = %s - tick = %d\n", i,
-                           get_status_string(pWks->slotsTransportContext[i].status),
-                           pWks->slotsTransportContext[i].cptStatusTimeout);
+                    SOPC_CONSOLE_PRINTF("\nCLT %d post-status = %s - tick = %d\n", i,
+                                        get_status_string(pWks->slotsTransportContext[i].status),
+                                        pWks->slotsTransportContext[i].cptStatusTimeout);
 #endif
                 }
             }
@@ -3133,7 +3141,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Initialize(MqttManagerHandle* pWks)
         result = EVENT_CHANNEL_init(&pWks->slotsTransportContext[index].pendingsMessagesToSend);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-        printf("\nInitialize clt %d\n", index);
+        SOPC_CONSOLE_PRINTF("\nInitialize clt %d\n", index);
 #endif
     }
 
@@ -3175,7 +3183,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
     if (NULL == pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-        printf("\nError context NULL...\n");
+        SOPC_CONSOLE_PRINTF("\nError context NULL...\n");
 #endif
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3189,7 +3197,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
         if (result != SOPC_STATUS_OK)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-            printf("\n Critical error on clear, event channel compromised\n");
+            SOPC_CONSOLE_PRINTF("\n Critical error on clear, event channel compromised\n");
 #endif
             pWks->status = E_MQTT_MANAGER_STATUS_STOPPED;
         }
@@ -3199,7 +3207,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-        printf("\nOups, lib scheduler not started...\n");
+        SOPC_CONSOLE_PRINTF("\nOups, lib scheduler not started...\n");
 #endif
     }
 
@@ -3211,13 +3219,13 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
             EVENT_CHANNEL_deinit(&pWks->slotsTransportContext[i].pendingsMessagesToSend);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-            printf("\n **********************************\n");
+            SOPC_CONSOLE_PRINTF("\n **********************************\n");
 #endif
             api_lib_destroy(&pWks->slotsTransportContext[i]);
 
             memset(&pWks->slotsTransportContext[i], 0, sizeof(tMqttTransportContext));
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-            printf("\n DeInitialization clients %d\n", i);
+            SOPC_CONSOLE_PRINTF("\n DeInitialization clients %d\n", i);
 #endif
         }
 
@@ -3251,7 +3259,7 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_API == 1
-    printf("\nInitialize handle request with connectionConf\n");
+    SOPC_CONSOLE_PRINTF("\nInitialize handle request with connectionConf\n");
 #endif
     pGetHandleRequest->connectionConf.uri[sizeof(pGetHandleRequest->connectionConf.uri) - 1] = 0;
     pGetHandleRequest->connectionConf.topicname[sizeof(pGetHandleRequest->connectionConf.topicname) - 1] = 0;
@@ -3343,7 +3351,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
 #if DEBUG_SCHEDULER == 1
-    printf("\nAsync get handle entry\n");
+    SOPC_CONSOLE_PRINTF("\nAsync get handle entry\n");
 #endif
 
     tMqttEvent event;
@@ -3463,7 +3471,7 @@ static void SYNCH_getHandleCb(MqttTransportAsyncHandle idx, void* pCtx)
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
 #endif
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
         Mutex_Lock(&ctx->lock);
@@ -3472,8 +3480,8 @@ static void SYNCH_getHandleCb(MqttTransportAsyncHandle idx, void* pCtx)
             ctx->transportId = idx;
             ctx->bReady = false;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX ==> HANDLE SUCCESS\n", idx,
-                   (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_getHandleCb - idx = %d - pCtx = %08lX ==> HANDLE SUCCESS\n",
+                                idx, (uint64_t) pCtx);
 #endif
             Condition_SignalAll(&ctx->signalHandleOperation);
         }
@@ -3486,7 +3494,8 @@ static void SYNCH_getHandleFailedCb(MqttTransportAsyncHandle idx, void* pCtx)
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX\n", idx,
+                            (uint64_t) pCtx);
 #endif
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
         Mutex_Lock(&ctx->lock);
@@ -3496,8 +3505,9 @@ static void SYNCH_getHandleFailedCb(MqttTransportAsyncHandle idx, void* pCtx)
             ctx->bReady = false;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX ==> HANDLE FAILURE\n", idx,
-                   (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF(
+                "\n SYNCHRO API : SYNCH_getHandleFailedCb - idx = %d - pCtx = %08lX ==> HANDLE FAILURE\n", idx,
+                (uint64_t) pCtx);
 #endif
             Condition_SignalAll(&ctx->signalHandleOperation);
         }
@@ -3510,14 +3520,15 @@ static void SYNCH_clientReadyCb(MqttTransportAsyncHandle idx, void* pCtx)
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
 #endif
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
         Mutex_Lock(&ctx->lock);
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX ==> READY\n", idx, (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_clientReadyCb - idx = %d - pCtx = %08lX ==> READY\n", idx,
+                                (uint64_t) pCtx);
 #endif
             ctx->bReady = true;
             Condition_SignalAll(&ctx->signalStatusChange);
@@ -3531,15 +3542,15 @@ static void SYNCH_clientNotReady(MqttTransportAsyncHandle idx, void* pCtx)
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
 #endif
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
         Mutex_Lock(&ctx->lock);
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX ==> NOT READY\n", idx,
-                   (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_clientNotReady - idx = %d - pCtx = %08lX ==> NOT READY\n", idx,
+                                (uint64_t) pCtx);
 #endif
             ctx->bReady = false;
             Condition_SignalAll(&ctx->signalStatusChange);
@@ -3553,7 +3564,7 @@ static void SYNCH_handleReleased(MqttTransportAsyncHandle idx, void* pCtx)
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_handleReleased - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_handleReleased - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
 #endif
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
         Mutex_Lock(&ctx->lock);
@@ -3563,8 +3574,8 @@ static void SYNCH_handleReleased(MqttTransportAsyncHandle idx, void* pCtx)
             ctx->transportId = MQTT_INVALID_TRANSPORT_ASYNC_HANDLE;
             ctx->bReady = false;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-            printf("\n SYNCHRO API : SYNCH_handleReleased - idx = %d - pCtx = %08lX ==> HANDLE RELEASED\n", idx,
-                   (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_handleReleased - idx = %d - pCtx = %08lX ==> HANDLE RELEASED\n",
+                                idx, (uint64_t) pCtx);
 #endif
             Condition_SignalAll(&ctx->signalHandleOperation);
         }
@@ -3581,12 +3592,13 @@ static void SYNCH_msgReceived(MqttTransportAsyncHandle idx, uint8_t* bufferData,
     {
         MqttTransportHandle* ctx = (MqttTransportHandle*) pCtx;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX\n", idx, (uint64_t) pCtx);
 #endif
         Mutex_Lock(&ctx->lock);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-        printf("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > CALL CB\n", idx, (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > CALL CB\n", idx,
+                            (uint64_t) pCtx);
 #endif
 
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
@@ -3634,8 +3646,9 @@ static void SYNCH_msgReceived(MqttTransportAsyncHandle idx, uint8_t* bufferData,
                     ctx->nbMessageReceived++;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_CALLBACKS == 1
-                    printf("\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > MSG PUSHED\n", idx,
-                           (uint64_t) pCtx);
+                    SOPC_CONSOLE_PRINTF(
+                        "\n SYNCHRO API : SYNCH_msgReceived - idx = %d - pCtx = %08lX == > MSG PUSHED\n", idx,
+                        (uint64_t) pCtx);
 #endif
 
                     if (1 == ctx->nbMessageReceived)
@@ -3666,7 +3679,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
     MqttManagerHandle* pWks = pCtx->pMgrCtx;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Entry\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Entry\n", (uint64_t) pCtx);
 #endif
 
     Mutex_Lock(&pCtx->lock);
@@ -3674,21 +3687,22 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
     if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != pCtx->transportId)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request\n", (uint64_t) pCtx);
 #endif
         result = SOPC_MQTT_TRANSPORT_ASYNC_ReleaseHandle(pWks, pCtx->transportId);
 
         if (SOPC_STATUS_OK == result)
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-            printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Wait result\n", (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Wait result\n", (uint64_t) pCtx);
 #endif
             Mutex_UnlockAndWaitCond(&pCtx->signalHandleOperation, &pCtx->lock);
         }
         else
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-            printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request FAILED\n", (uint64_t) pCtx);
+            SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Send request FAILED\n",
+                                (uint64_t) pCtx);
 #endif
         }
 
@@ -3697,7 +3711,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(
     Mutex_Unlock(&pCtx->lock);
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Exit\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReleaseHandle [%08lX] : Exit\n", (uint64_t) pCtx);
 #endif
 
     /* Flush messages not read */
@@ -3740,7 +3754,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCt
 {
     SOPC_Buffer* pBuffer = NULL;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Entry\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Entry\n", (uint64_t) pCtx);
 #endif
 
     if (NULL == pCtx || NULL == pCtx->pMgrCtx || NULL == ppBuffer)
@@ -3753,7 +3767,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCt
     if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE == pCtx->transportId)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
 #endif
         Mutex_Unlock(&pCtx->lock);
         return SOPC_STATUS_INVALID_STATE;
@@ -3767,7 +3781,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCt
     if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE == pCtx->transportId)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
 #endif
         Mutex_Unlock(&pCtx->lock);
         return SOPC_STATUS_INVALID_STATE;
@@ -3776,7 +3790,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCt
     if (pCtx->nbMessageReceived > 0)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Message read OK\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Message read OK\n", (uint64_t) pCtx);
 #endif
         pBuffer = pCtx->fifo[pCtx->iRd];
         pCtx->fifo[pCtx->iRd] = NULL;
@@ -3790,7 +3804,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage(MqttTransportHandle* pCt
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Message read TMO\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_ReadMessage [%08lX] : Message read TMO\n", (uint64_t) pCtx);
 #endif
     }
 
@@ -3807,7 +3821,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Entry\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Entry\n", (uint64_t) pCtx);
 #endif
 
     if (NULL == pCtx || NULL == pCtx->pMgrCtx || NULL == bufferData || 0 == dataSize)
@@ -3822,7 +3836,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
     if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE == pCtx->transportId)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
 #endif
         Mutex_Unlock(&pCtx->lock);
         return SOPC_STATUS_INVALID_STATE;
@@ -3831,8 +3845,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
     if (false == pCtx->bReady && timeoutMs > 0)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready, wait for %d ms\n", (uint64_t) pCtx,
-               timeoutMs);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready, wait for %d ms\n",
+                            (uint64_t) pCtx, timeoutMs);
 #endif
         Mutex_UnlockAndTimedWaitCond(&pCtx->signalStatusChange, &pCtx->lock, timeoutMs);
     }
@@ -3840,7 +3854,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
     if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE == pCtx->transportId)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Invalid state\n", (uint64_t) pCtx);
 #endif
         Mutex_Unlock(&pCtx->lock);
         return SOPC_STATUS_INVALID_STATE;
@@ -3849,20 +3863,22 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
     if (true == pCtx->bReady)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Ready state, send message\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Ready state, send message\n",
+                            (uint64_t) pCtx);
 #endif
         result = SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(pWks, pCtx->transportId, bufferData, dataSize);
     }
     else
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready state, message not sent\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Not ready state, message not sent\n",
+                            (uint64_t) pCtx);
 #endif
         result = SOPC_STATUS_NOK;
     }
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Exit\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_SendMessage [%08lX] : Exit\n", (uint64_t) pCtx);
 #endif
 
     Mutex_Unlock(&pCtx->lock);
@@ -3959,7 +3975,7 @@ MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks
     }
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Ready to wait for result\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Ready to wait for result\n", (uint64_t) pCtx);
 #endif
 
     Mutex_UnlockAndWaitCond(&pCtx->signalHandleOperation, &pCtx->lock);
@@ -3974,13 +3990,13 @@ MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks
         SOPC_Free(pCtx);
         pCtx = NULL;
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-        printf("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Failure\n", (uint64_t) pCtx);
+        SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Failure\n", (uint64_t) pCtx);
 #endif
         return pCtx;
     }
 
 #if DEBUG_SCHEDULER == 1 && DEBUG_SYNCHRO_API == 1
-    printf("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Success\n", (uint64_t) pCtx);
+    SOPC_CONSOLE_PRINTF("\n SYNCHRO API : SOPC_MQTT_GetHandle [%08lX] : Success\n", (uint64_t) pCtx);
 #endif
 
     Mutex_Unlock(&pCtx->lock);

@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "sopc_assert.h"
+#include "sopc_common_constants.h"
 #include "sopc_logger.h"
 #include "sopc_time.h"
 
@@ -47,7 +48,7 @@ void SOPC_Assert_Failure(const char* context)
             // an error message is at least displayed somewhere...
             // We can assume that a specific application that uses "SOPC_Assert_Set_UserCallback" will
             // manage the message by its own.
-            printf("Assertion failed. Context = %s\n", context);
+            SOPC_CONSOLE_PRINTF("Assertion failed. Context = %s\n", context);
         }
     }
     REAL_ASSERT(false);

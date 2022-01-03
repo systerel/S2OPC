@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
 #include "sopc_macros.h"
@@ -640,24 +641,25 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk)
 
 void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text)
 {
-    printf("# ");
+    (void) text; // In case SOPC_CONSOLE_PRINTF is not defined
+    SOPC_CONSOLE_PRINTF("# ");
     switch (log_level)
     {
     case SOPC_LOG_LEVEL_ERROR:
-        printf("Error");
+        SOPC_CONSOLE_PRINTF("Error");
         break;
     case SOPC_LOG_LEVEL_WARNING:
-        printf("Warning");
+        SOPC_CONSOLE_PRINTF("Warning");
         break;
     case SOPC_LOG_LEVEL_INFO:
-        printf("Info");
+        SOPC_CONSOLE_PRINTF("Info");
         break;
     case SOPC_LOG_LEVEL_DEBUG:
-        printf("Debug");
+        SOPC_CONSOLE_PRINTF("Debug");
         break;
     default:
         assert(false && "Unkown log level.");
         break;
     }
-    printf(": %s\n", text);
+    SOPC_CONSOLE_PRINTF(": %s\n", text);
 }

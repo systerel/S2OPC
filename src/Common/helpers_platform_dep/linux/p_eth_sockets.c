@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_common_constants.h"
 #include "sopc_eth_sockets.h"
 
 #include "p_sockets.h"
@@ -130,8 +131,8 @@ static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(Socket sock,
             {
                 if (setOptStatus < 0)
                 {
-                    printf("SOPC_ETH_Socket_AddMembership failure (error='%s') on interface %s\n", strerror(errno),
-                           ifa->ifa_name);
+                    SOPC_CONSOLE_PRINTF("SOPC_ETH_Socket_AddMembership failure (error='%s') on interface %s\n",
+                                        strerror(errno), ifa->ifa_name);
                 }
                 else
                 {

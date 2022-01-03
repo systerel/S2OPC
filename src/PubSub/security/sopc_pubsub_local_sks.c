@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_local_sks.h"
@@ -112,22 +113,22 @@ SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tok
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 
-        printf("# Load security signing key from static buffers... slen = %u\n", //
-               pubsub_local_sks_keys_files.uwSigningKeySize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security signing key from static buffers... slen = %u\n", //
+                            pubsub_local_sks_keys_files.uwSigningKeySize);                    //
 
         keys->signingKey =
             SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sSigningKey, //
                                                    pubsub_local_sks_keys_files.uwSigningKeySize);                 //
 
-        printf("# Load security encrypt key from static buffers... slen = %u\n", //
-               pubsub_local_sks_keys_files.uwEncryptKeySize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security encrypt key from static buffers... slen = %u\n", //
+                            pubsub_local_sks_keys_files.uwEncryptKeySize);                    //
 
         keys->encryptKey =
             SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sEncryptKey, //
                                                    pubsub_local_sks_keys_files.uwEncryptKeySize);                 //
 
-        printf("# Load security nonce key from static buffers... slen = %u\n", //
-               pubsub_local_sks_keys_files.uwKeyNonceSize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security nonce key from static buffers... slen = %u\n", //
+                            pubsub_local_sks_keys_files.uwKeyNonceSize);                    //
 
         keys->keyNonce =
             SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sKeyNonce, //

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_common_constants.h"
 #include "sopc_udp_sockets.h"
 
 #include <arpa/inet.h>
@@ -240,11 +241,13 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         ipv4success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_ADD_MEMBERSHIP);
         if (!ipv6success)
         {
-            printf("AddMembership failure (error='%s') on interface for IPv6: %s\n", strerror(errno), interfaceName);
+            SOPC_CONSOLE_PRINTF("AddMembership failure (error='%s') on interface for IPv6: %s\n", strerror(errno),
+                                interfaceName);
         }
         if (!ipv4success)
         {
-            printf("AddMembership failure (error='%s') on interface for IPv4: %s\n", strerror(errno), interfaceName);
+            SOPC_CONSOLE_PRINTF("AddMembership failure (error='%s') on interface for IPv4: %s\n", strerror(errno),
+                                interfaceName);
         }
         if (ipv4success || ipv6success)
         {

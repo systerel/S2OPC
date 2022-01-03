@@ -4849,7 +4849,7 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
 {
     size_t i;
     uint8_t c;
-    printf("Variant @%p", (void*) pvar);
+    SOPC_CONSOLE_PRINTF("Variant @%p", (void*) pvar);
     char* s = NULL;
 
     if (NULL == pvar)
@@ -4871,137 +4871,138 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
         break;
     }
 
-    printf(":\n  TypeId %i [dim=%" PRIi32 "]: ", (int) pvar->BuiltInTypeId, dimensions);
+    SOPC_CONSOLE_PRINTF(":\n  TypeId %i [dim=%" PRIi32 "]: ", (int) pvar->BuiltInTypeId, dimensions);
 
     if (0 != dimensions)
     {
-        printf("[...]\n");
+        SOPC_CONSOLE_PRINTF("[...]\n");
         return;
     }
 
     switch (pvar->BuiltInTypeId)
     {
     case SOPC_Null_Id:
-        printf("Null\n");
+        SOPC_CONSOLE_PRINTF("Null\n");
         break;
     case SOPC_Boolean_Id:
-        printf("Boolean\n  Value: %" PRIu8 "\n", pvar->Value.Boolean);
+        SOPC_CONSOLE_PRINTF("Boolean\n  Value: %" PRIu8 "\n", pvar->Value.Boolean);
         break;
     case SOPC_SByte_Id:
-        printf("SByte\n  Value: %" PRIi8 "\n", pvar->Value.Sbyte);
+        SOPC_CONSOLE_PRINTF("SByte\n  Value: %" PRIi8 "\n", pvar->Value.Sbyte);
         break;
     case SOPC_Byte_Id:
-        printf("Byte\n  Value: %" PRIu8 "\n", pvar->Value.Byte);
+        SOPC_CONSOLE_PRINTF("Byte\n  Value: %" PRIu8 "\n", pvar->Value.Byte);
         break;
     case SOPC_Int16_Id:
-        printf("Int16\n  Value: %" PRIi16 "\n", pvar->Value.Int16);
+        SOPC_CONSOLE_PRINTF("Int16\n  Value: %" PRIi16 "\n", pvar->Value.Int16);
         break;
     case SOPC_UInt16_Id:
-        printf("UInt16\n  Value: %" PRIu16 "\n", pvar->Value.Uint16);
+        SOPC_CONSOLE_PRINTF("UInt16\n  Value: %" PRIu16 "\n", pvar->Value.Uint16);
         break;
     case SOPC_Int32_Id:
-        printf("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
+        SOPC_CONSOLE_PRINTF("Int32\n  Value: %" PRIi32 "\n", pvar->Value.Int32);
         break;
     case SOPC_UInt32_Id:
-        printf("UInt32\n  Value: %" PRIu32 "\n", pvar->Value.Uint32);
+        SOPC_CONSOLE_PRINTF("UInt32\n  Value: %" PRIu32 "\n", pvar->Value.Uint32);
         break;
     case SOPC_Int64_Id:
-        printf("Int64\n  Value: %" PRIi64 "\n", pvar->Value.Int64);
+        SOPC_CONSOLE_PRINTF("Int64\n  Value: %" PRIi64 "\n", pvar->Value.Int64);
         break;
     case SOPC_UInt64_Id:
-        printf("UInt64\n  Value: %" PRIu64 "\n", pvar->Value.Uint64);
+        SOPC_CONSOLE_PRINTF("UInt64\n  Value: %" PRIu64 "\n", pvar->Value.Uint64);
         break;
     case SOPC_Float_Id:
-        printf("Float\n  Value: %g\n", pvar->Value.Floatv);
+        SOPC_CONSOLE_PRINTF("Float\n  Value: %g\n", pvar->Value.Floatv);
         break;
     case SOPC_Double_Id:
-        printf("Double\n  Value: %g\n", pvar->Value.Doublev);
+        SOPC_CONSOLE_PRINTF("Double\n  Value: %g\n", pvar->Value.Doublev);
         break;
     case SOPC_String_Id:
-        printf("String\n  Value: \"%*.*s\"\n", pvar->Value.String.Length, pvar->Value.String.Length,
-               pvar->Value.String.Data);
+        SOPC_CONSOLE_PRINTF("String\n  Value: \"%*.*s\"\n", pvar->Value.String.Length, pvar->Value.String.Length,
+                            pvar->Value.String.Data);
         break;
     case SOPC_ByteString_Id:
-        printf("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);
+        SOPC_CONSOLE_PRINTF("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);
         /* Pretty print */
         for (i = 0; i < (size_t) pvar->Value.Bstring.Length; ++i)
         {
             c = pvar->Value.Bstring.Data[i];
             if (0x20 <= c && c < 0x80)
                 /* Displayable ascii range */
-                printf("%c", c);
+                SOPC_CONSOLE_PRINTF("%c", c);
             else
                 /* Special char */
-                printf("\\x%02" PRIX8, c);
+                SOPC_CONSOLE_PRINTF("\\x%02" PRIX8, c);
         }
-        printf("\"\n");
+        SOPC_CONSOLE_PRINTF("\"\n");
         break;
     case SOPC_XmlElement_Id:
-        printf("XmlElement\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.XmlElt.Length);
+        SOPC_CONSOLE_PRINTF("XmlElement\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.XmlElt.Length);
         /* Pretty print */
         for (i = 0; i < (size_t) pvar->Value.XmlElt.Length; ++i)
         {
             c = pvar->Value.XmlElt.Data[i];
             if (0x20 <= c && c < 0x80)
                 /* Displayable ascii range */
-                printf("%c", c);
+                SOPC_CONSOLE_PRINTF("%c", c);
             else
                 /* Special char */
-                printf("\\x%02" PRIX8, c);
+                SOPC_CONSOLE_PRINTF("\\x%02" PRIX8, c);
         }
-        printf("\"\n");
+        SOPC_CONSOLE_PRINTF("\"\n");
         break;
     case SOPC_NodeId_Id:
         s = SOPC_NodeId_ToCString(pvar->Value.NodeId);
-        printf("NodeId\n  Value: %s\n", s);
+        SOPC_CONSOLE_PRINTF("NodeId\n  Value: %s\n", s);
         SOPC_Free(s);
         s = NULL;
         break;
     case SOPC_StatusCode_Id:
-        printf("StatusCode\n  Value: %" PRIX32 "\n", pvar->Value.Status);
+        SOPC_CONSOLE_PRINTF("StatusCode\n  Value: %" PRIX32 "\n", pvar->Value.Status);
         break;
     case SOPC_DateTime_Id:
         s = SOPC_Time_GetString(pvar->Value.Date, true, false);
-        printf("DateTime = %s\n", s);
+        SOPC_CONSOLE_PRINTF("DateTime = %s\n", s);
         SOPC_Free(s);
         s = NULL;
         break;
     case SOPC_Guid_Id:
         s = SOPC_Guid_ToCString(pvar->Value.Guid);
-        printf("Guid = '%s'\n", s);
+        SOPC_CONSOLE_PRINTF("Guid = '%s'\n", s);
         SOPC_Free(s);
         s = NULL;
         break;
     case SOPC_ExpandedNodeId_Id:
         s = SOPC_NodeId_ToCString(&pvar->Value.ExpNodeId->NodeId);
-        printf("ExpandedNodeId\n  NsURI: %s\n  NodeId: %s\n  ServerIdx: %" PRIu32 "\n",
-               SOPC_String_GetRawCString(&pvar->Value.ExpNodeId->NamespaceUri), s, pvar->Value.ExpNodeId->ServerIndex);
+        SOPC_CONSOLE_PRINTF("ExpandedNodeId\n  NsURI: %s\n  NodeId: %s\n  ServerIdx: %" PRIu32 "\n",
+                            SOPC_String_GetRawCString(&pvar->Value.ExpNodeId->NamespaceUri), s,
+                            pvar->Value.ExpNodeId->ServerIndex);
         SOPC_Free(s);
         s = NULL;
         break;
     case SOPC_QualifiedName_Id:
-        printf("QualifiedName = %" PRIu16 ":%s\n", pvar->Value.Qname->NamespaceIndex,
-               SOPC_String_GetRawCString(&pvar->Value.Qname->Name));
+        SOPC_CONSOLE_PRINTF("QualifiedName = %" PRIu16 ":%s\n", pvar->Value.Qname->NamespaceIndex,
+                            SOPC_String_GetRawCString(&pvar->Value.Qname->Name));
         break;
     case SOPC_LocalizedText_Id:
-        printf("LocalizedText (default only) = [%s] %s\n",
-               SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultLocale),
-               SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultText));
+        SOPC_CONSOLE_PRINTF("LocalizedText (default only) = [%s] %s\n",
+                            SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultLocale),
+                            SOPC_String_GetRawCString(&pvar->Value.LocalizedText->defaultText));
         break;
     case SOPC_ExtensionObject_Id:
-        printf("ExtensionObject: <print not implemented>\n");
+        SOPC_CONSOLE_PRINTF("ExtensionObject: <print not implemented>\n");
         break;
     case SOPC_DataValue_Id:
-        printf("DataValue: <print not implemented>\n");
+        SOPC_CONSOLE_PRINTF("DataValue: <print not implemented>\n");
         break;
     case SOPC_Variant_Id: /* This one does not have an implementation at all */
-        printf("Variant: <print not implemented>\n");
+        SOPC_CONSOLE_PRINTF("Variant: <print not implemented>\n");
         break;
     case SOPC_DiagnosticInfo_Id:
-        printf("DiagnosticInfo: <print not implemented>\n");
+        SOPC_CONSOLE_PRINTF("DiagnosticInfo: <print not implemented>\n");
         break;
     default:
-        printf("<print not implemented>\n");
+        SOPC_CONSOLE_PRINTF("<print not implemented>\n");
         break;
     }
 }
