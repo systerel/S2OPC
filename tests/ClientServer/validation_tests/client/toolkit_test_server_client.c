@@ -42,6 +42,14 @@
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
+// Define number of read values in read request to force multi chunk use
+#define NB_READ_VALUES 4000
+
+// Note: size of 1 encoded OpcUa_ReadValueId: 18 bytes
+#if SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE > NB_READ_VALUES * 18
+#error "NB_READ_VALUES is not large enough to force multi chunk use"
+#endif
+
 static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
                                                NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
@@ -96,20 +104,23 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
                 int32_t test_status = 1;
                 OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
                 // perform verifications
-                if (readResp->NoOfResults != 1)
+                if (readResp->NoOfResults != NB_READ_VALUES)
                 {
                     test_status = -1;
                 }
                 else
                 {
                     /* Verify Read Result */
-                    SOPC_Variant read_value = readResp->Results[0].Value;
-
-                    if (read_value.BuiltInTypeId != SOPC_UInt64_Id ||
-                        read_value.ArrayType != SOPC_VariantArrayType_SingleValue ||
-                        read_value.Value.Uint64 != write_value)
+                    for (size_t i = 0; 1 == test_status && i < NB_READ_VALUES; i++)
                     {
-                        test_status = -1;
+                        SOPC_Variant* read_value = &readResp->Results[i].Value;
+
+                        if (read_value->BuiltInTypeId != SOPC_UInt64_Id ||
+                            read_value->ArrayType != SOPC_VariantArrayType_SingleValue ||
+                            read_value->Value.Uint64 != write_value)
+                        {
+                            test_status = -1;
+                        }
                     }
                 }
                 SOPC_Atomic_Int_Set(&read_test_status, test_status);
@@ -385,36 +396,39 @@ static SOPC_ReturnStatus client_send_read_req_test(uint32_t session_id)
     {
         OpcUa_ReadRequest_Initialize(read_request);
 
-        OpcUa_ReadValueId* node_to_read = NULL;
+        OpcUa_ReadValueId* nodes_to_read = NULL;
 
-        node_to_read = SOPC_Calloc(1, sizeof(OpcUa_ReadValueId));
+        // We make a read of NB_READ_VALUES values to force multi chunks use
+        nodes_to_read = SOPC_Calloc(NB_READ_VALUES, sizeof(OpcUa_ReadValueId));
 
-        if (NULL == node_to_read)
+        if (NULL == nodes_to_read)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
             SOPC_Free(read_request);
         }
         else
         {
-            OpcUa_ReadValueId_Initialize(node_to_read);
-
             SOPC_NodeId* node_id_ptr = SOPC_NodeId_FromCString(node_id_str, (int32_t) strlen(node_id_str));
             if (NULL == node_id_ptr)
             {
                 SOPC_Free(read_request);
-                SOPC_Free(node_to_read);
+                SOPC_Free(nodes_to_read);
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
 
+            for (size_t i = 0; SOPC_STATUS_OK == status && i < NB_READ_VALUES; i++)
+            {
+                OpcUa_ReadValueId* node_to_read = &nodes_to_read[i];
+                OpcUa_ReadValueId_Initialize(node_to_read);
+                node_to_read->AttributeId = 13;
+                status = SOPC_NodeId_Copy(&node_to_read->NodeId, node_id_ptr);
+            }
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_NodeId_Copy(&node_to_read->NodeId, node_id_ptr);
-                SOPC_Free(node_id_ptr);
-                node_to_read->AttributeId = 13;
-
-                read_request->NoOfNodesToRead = 1;
-                read_request->NodesToRead = node_to_read;
+                read_request->NoOfNodesToRead = NB_READ_VALUES;
+                read_request->NodesToRead = nodes_to_read;
             }
+            SOPC_Free(node_id_ptr);
         }
     }
 
