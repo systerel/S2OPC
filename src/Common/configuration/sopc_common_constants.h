@@ -143,6 +143,20 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #define SOPC_HAS_FILESYSTEM true
 #endif /* SOPC_HAS_FILESYSTEM */
 
+/* @brief define host-specific console print function
+ * If no console is provided or log wants to be omitted, the following can be used:
+ * \code{.c}
+ * #define SOPC_CONSOLE_PRINTF(...) do{} while (0)
+ * \endcode
+ * Otherwise something like:
+ * \code{.c}
+ * #define SOPC_CONSOLE_PRINTF printf
+ * \endcode
+ **/
+#ifndef SOPC_CONSOLE_PRINTF
+#define SOPC_CONSOLE_PRINTF printf
+#endif /* SOPC_HAS_FILESYSTEM */
+
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
