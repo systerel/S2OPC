@@ -31,6 +31,7 @@
 
 #include "assert.h"
 #include "sopc_atomic.h"
+#include "sopc_common_constants.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_time.h" /* SOPC_Sleep */
@@ -45,6 +46,10 @@
 static const char* valid_url = "opc.tcp://localhost:4841";
 static const char* invalid_url = "opc.tcp://localhost:5841";
 
+// Define number of read values in read request to force multi chunk use in request and response:
+// use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
+#define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
+
 static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC_SecurityPolicy_None_URI,
                                                          .security_mode = OpcUa_MessageSecurityMode_None,
                                                          .path_cert_auth = "./trusted/cacert.der",
@@ -56,14 +61,14 @@ static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC
                                                          .username = NULL,
                                                          .password = NULL};
 
-static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256 = {
-    .security_policy = SOPC_SecurityPolicy_Basic256_URI,
+static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
+    .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
     .path_crl = "./revoked/cacrl.der",
-    .path_cert_srv = "path_cert_srv",
-    .path_cert_cli = "path_cert_cli",
-    .path_key_cli = "path_key_cli",
+    .path_cert_srv = "./server_public/server_2k_cert.der",
+    .path_cert_cli = "./client_public/client_2k_cert.der",
+    .path_key_cli = "./client_private/client_2k_key.pem",
     .policyId = "policyId",
     .username = "username",
     .password = "password"};
@@ -226,25 +231,25 @@ START_TEST(test_wrapper_config_invalid_arguments)
         ck_assert_int_eq(-12, invalid_conf_id);
     }
     {
-        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_srv = NULL;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
         ck_assert_int_eq(-15, invalid_conf_id);
     }
     {
-        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_cli = NULL;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
         ck_assert_int_eq(-16, invalid_conf_id);
     }
     {
-        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_key_cli = NULL;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
         ck_assert_int_eq(-17, invalid_conf_id);
     }
     {
-        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.policyId = NULL;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
         ck_assert_int_eq(-18, invalid_conf_id);
@@ -563,7 +568,7 @@ START_TEST(test_wrapper_read)
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_signAndEncrypt_b256sha256);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -607,25 +612,32 @@ START_TEST(test_wrapper_read)
     }
     /* read multiple nodes */
     {
-        SOPC_ClientHelper_ReadValue readValue2[2] = {
+        SOPC_ClientHelper_ReadValue readValueMultiple[NB_READ_VALUES];
+        /* = {
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
             {.nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL}};
-        SOPC_DataValue readResults2[2];
-        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue2, 2, readResults2));
-        /* check first datavalue */
-        ck_assert_ptr_ne(NULL, readResults2);
-        ck_assert_int_eq(SOPC_STATUS_OK, readResults2[0].Status);
-        ck_assert_int_eq(SOPC_UInt64_Id, readResults2[0].Value.BuiltInTypeId);
-        ck_assert_uint_ne(0, readResults2[0].Value.Value.Uint64);
+            */
+        for (size_t i = 0; i < NB_READ_VALUES; i++)
+        {
+            readValueMultiple[i].nodeId = "ns=0;s=Counter";
+            readValueMultiple[i].attributeId = 13;
+            readValueMultiple[i].indexRange = NULL;
+        }
+        SOPC_DataValue readResultsMultiple[NB_READ_VALUES];
+        ck_assert_int_eq(0,
+                         SOPC_ClientHelper_Read(valid_con_id, readValueMultiple, NB_READ_VALUES, readResultsMultiple));
 
-        /* check second datavalue */
-        ck_assert_ptr_ne(NULL, readResults2);
-        ck_assert_int_eq(SOPC_STATUS_OK, readResults2[1].Status);
-        ck_assert_int_eq(SOPC_Int64_Id, readResults2[1].Value.BuiltInTypeId);
-        ck_assert_int_ne(0, readResults2[1].Value.Value.Int64);
+        for (size_t i = 0; i < NB_READ_VALUES; i++)
+        {
+            /* check datavalue */
+            ck_assert_ptr_ne(NULL, readResultsMultiple);
+            ck_assert_int_eq(SOPC_STATUS_OK, readResultsMultiple[i].Status);
+            ck_assert_int_eq(SOPC_UInt64_Id, readResultsMultiple[i].Value.BuiltInTypeId);
+            ck_assert_uint_ne(0, readResultsMultiple[i].Value.Value.Uint64);
+        }
 
         /* free results */
-        SOPC_ClientHelper_ReadResults_Free(2, readResults2);
+        SOPC_ClientHelper_ReadResults_Free(NB_READ_VALUES, readResultsMultiple);
     }
     /* read invalid node */
     {
