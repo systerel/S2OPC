@@ -186,9 +186,13 @@ option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
 option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attributes are const" OFF)
+
 option(WITH_NO_ASSERT "Disable asserts" OFF)
 option(WITH_USER_ASSERT "Enable user-defined failed assertion event" OFF)
 option(WITH_MINIMAL_FOOTPRINT "Limit software footprint" OFF)
+
+# option to enable GCC static analyser
+option(WITH_GCC_STATIC_ANALYSIS "activate GCC static analysis during compilation" OFF)
 
 # Check project and option(s) are compatible
 
@@ -259,6 +263,7 @@ if(NOT UNIX)
   check_not_activated_option("WITH_COVERITY" "not a unix system")
   check_not_activated_option("WITH_GPERF_PROFILER" "not a unix system")
   check_not_activated_option("WITH_CLANG_SOURCE_COVERAGE" "not a unix system")
+  check_not_activated_option("WITH_GCC_STATIC_ANALYSIS" "not a unix system")
 endif()
 check_debug_build_type("WITH_ASAN" "to set compilation flag '-fno-omit-frame-pointer'")
 check_debug_build_type("WITH_TSAN" "to set compilation flag '-fno-omit-frame-pointer'")
@@ -340,6 +345,15 @@ if(WITH_CLANG_SOURCE_COVERAGE)
 
   list(APPEND S2OPC_COMPILER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
   list(APPEND S2OPC_LINKER_FLAGS -fprofile-instr-generate -fcoverage-mapping)
+endif()
+
+if(WITH_GCC_STATIC_ANALYSIS)
+  if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    message(FATAL_ERROR "GCC compiler is required to enable GCC Static Analysis")
+  endif()  
+  
+  message("-- GCC Static Analysis activated")
+  list(APPEND S2OPC_COMPILER_FLAGS -fanalyzer)
 endif()
 
 # Add WITH_NANO_EXTENDED to compilation definition if option activated
