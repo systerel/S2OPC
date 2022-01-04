@@ -238,7 +238,7 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
     event.auxParam = 0;
     *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_SC_CONNECTION_TIMEOUT_MS);
 
-    if (0 == timerId)
+    if (0 == *timerId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "Services: connection=%" PRIu32 " connection establishment timer creation failed",
@@ -265,7 +265,7 @@ static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_
 
     *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
 
-    if (0 == timerId)
+    if (0 == *timerId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "Services: connection=%" PRIu32 " OPN renew timer creation failed", connectionIdx);
