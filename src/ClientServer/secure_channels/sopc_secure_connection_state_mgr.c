@@ -228,6 +228,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
 
 static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uint32_t connectionIdx)
 {
+    assert(NULL != timerId);
     assert(connectionIdx > 0);
     assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
@@ -254,6 +255,7 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
 
 static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_t connectionIdx, uint32_t timeoutMs)
 {
+    assert(NULL != timerId);
     assert(connectionIdx > 0);
     assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
