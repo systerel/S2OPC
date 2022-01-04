@@ -58,16 +58,50 @@ done
 IFS=$ifs_save
 
 #### Check absence of functions / includes ####
-
-CHECK_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit)"
-
 echo "Checking specific functions or headers not used in code" | tee -a $LOGPATH
-find $CSRC -name "*.c" -or -name "*.h" | xargs grep -wiEc $CHECK_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
-if [[ $? != 0 ]]; then
-    echo "ERROR: checking absence of functions or headers: $CHECK_ABSENCE" | tee -a $LOGPATH
-    find $CSRC -name "*.c" -or -name "*.h" | xargs grep -nwiE $CHECK_ABSENCE | tee -a $LOGPATH
-    EXITCODE=1
-fi
+CHECK_CERT_RULE_ABSENCE_FAILED=false
+
+CHECK_CERT_RULE_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit)"
+for FILE in $(find $CSRC -name "*.c" -or -name "*.h") ; 
+do
+	# We choose to remove:
+	# - (L1) comments inside /* .. */ 
+	# - (L2) comments after //
+	# - (L3) : - remove sequence \" to avoid interpreting that as a string ending
+	#          - replace all string content by "..." to avoid false detection in strings
+	RESULT=$(sed 's/\/\/.*$//g'  ${FILE} | \
+		sed 's/\/\*.*\*\///g'  | \
+		sed 's/\\"//g' | sed 's/"[^"]*"/"..."/g'  | \
+		grep -nwiE $CHECK_CERT_RULE_ABSENCE)
+	if ! [[ -z ${RESULT} ]] ; then
+		echo "${FILE}:${RESULT}" | tee -a $LOGPATH
+		CHECK_CERT_RULE_ABSENCE_FAILED=true
+	fi
+done
+$CHECK_CERT_RULE_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence of functions or headers: $CHECK_CERT_RULE_ABSENCE" | tee -a $LOGPATH
+
+CHECK_DIRECT_ABSENCE_FAILED=false
+CHECK_DIRECT_ABSENCE="(printf)"
+for FILE in $(find $CSRC -name "*.c" -or -name "*.h") ; 
+do
+	# We choose to remove:
+	# - (L1) comments inside /* .. */ 
+	# - (L2) comments after //
+	# - (L3) : - remove sequence \" to avoid interpreting that as a string ending
+	#          - replace all string content by "..." to avoid false detection in strings
+	# - (L4) preprocessor lines (this allow explicit overrides)
+	RESULT=$(sed 's/\/\/.*$//g'  ${FILE} | \
+		sed 's/\/\*.*\*\///g'  | \
+		sed 's/\\"//g' | sed 's/"[^"]*"/"..."/g'  | \
+		sed 's/^ *#.*$//g'  | \
+		grep -nwiE $CHECK_DIRECT_ABSENCE )
+	if ! [[ -z "${RESULT}" ]] ; then
+		echo "${FILE}:${RESULT}" | tee -a $LOGPATH
+		CHECK_DIRECT_ABSENCE_FAILED=true
+	fi
+done
+
+$CHECK_DIRECT_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence of functions or headers: $CHECK_DIRECT_ABSENCE" | tee -a $LOGPATH
 
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
 EXLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"

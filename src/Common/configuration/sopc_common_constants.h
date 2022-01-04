@@ -138,19 +138,15 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #define SOPC_LOG_MAX_USER_LINE_LENGTH 512
 #endif /* SOPC_LOG_MAX_USER_LINE_LENGTH */
 
-/* @brief Indicates whether the host has a file system */
+/** @brief Indicates whether the host has a file system */
 #ifndef SOPC_HAS_FILESYSTEM
 #define SOPC_HAS_FILESYSTEM true
 #endif /* SOPC_HAS_FILESYSTEM */
 
-/* @brief define host-specific console print function
+/** @brief define host-specific console print function
  * If no console is provided or log wants to be omitted, the following can be used:
  * \code{.c}
  * #define SOPC_CONSOLE_PRINTF(...) do{} while (0)
- * \endcode
- * Otherwise something like:
- * \code{.c}
- * #define SOPC_CONSOLE_PRINTF printf
  * \endcode
  **/
 #ifndef SOPC_CONSOLE_PRINTF
