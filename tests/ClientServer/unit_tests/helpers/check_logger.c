@@ -495,7 +495,7 @@ START_TEST(test_logger_user)
     SOPC_Free(userLongLine3);
     ck_assert(SOPC_Check_Logger_userLogCalled);
     ck_assert_msg(strlen(SOPC_Check_Logger_lastUserLog) == SOPC_LOG_MAX_USER_LINE_LENGTH,
-                  "Was expecting len=%z, but found %z", SOPC_LOG_MAX_USER_LINE_LENGTH,
+                  "Was expecting len=%zu, but found %zu", SOPC_LOG_MAX_USER_LINE_LENGTH,
                   strlen(SOPC_Check_Logger_lastUserLog));
 
     // Check sections
