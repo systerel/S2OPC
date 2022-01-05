@@ -243,6 +243,7 @@ static void* getGetEndpoints_message(void)
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .clientConfigPtr = NULL,
                                       .expectedEndpoints = NULL,
+                                      .serverUri = NULL,
                                       .url = DEFAULT_ENDPOINT_URL,
                                       .crt_cli = NULL,
                                       .key_priv_cli = NULL,

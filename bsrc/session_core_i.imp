@@ -345,7 +345,7 @@ OPERATIONS
         valid, l_nonce_needed <-- client_create_session_req_do_crypto(session, channel, l_channel_config_idx);
         IF valid = TRUE THEN
             write_create_session_req_msg_clientDescription (create_req_msg, l_channel_config_idx);
-            // TODO: add serverURI management
+            write_create_session_req_msg_serverUri (create_req_msg, l_channel_config_idx);
             write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx);
             // TODO: provide a session name in entrypoint client_activate_new_session
             //write_create_session_req_msg_sessionName (create_req_msg, session, l_channel_config_idx);

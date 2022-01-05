@@ -38,6 +38,19 @@ OPERATIONS
     END
     ;
 
+    write_create_session_req_msg_serverUri (msg, channel_config_idx) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_req &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+
     write_create_session_req_msg_endpointUrl (msg, channel_config_idx) =
     PRE
         msg : t_msg_i &
@@ -47,7 +60,6 @@ OPERATIONS
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
     THEN
-        /* TODO: add relation on session token ? => need to retrieve after write ? */
         skip
     END
     ;

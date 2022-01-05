@@ -42,8 +42,9 @@ typedef struct SOPC_SecureChannel_Config
     const OpcUa_GetEndpointsResponse* expectedEndpoints; /**< Response returned by prior call to GetEndpoints service
                                                              and checked to be the same during session establishment,
                                                              NULL otherwise (no verification will be done).*/
-
-    const char* url;
+    const char* serverUri; /**< This value shall only be specified if the server is accessed through a gateway server.
+                                In this case this value is the applicationUri for the underlying Server. */
+    const char* url;       /**< The endpoint URL used for connection. */
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;

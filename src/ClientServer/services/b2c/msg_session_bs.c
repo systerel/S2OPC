@@ -75,6 +75,19 @@ void msg_session_bs__write_create_session_req_msg_endpointUrl(
     assert(SOPC_STATUS_OK == status);
 }
 
+void msg_session_bs__write_create_session_req_msg_serverUri(
+    const constants__t_msg_i msg_session_bs__msg,
+    const constants__t_channel_config_idx_i msg_session_bs__channel_config_idx)
+{
+    OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) msg_session_bs__msg;
+    SOPC_SecureChannel_Config* chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(msg_session_bs__channel_config_idx);
+    if (NULL != chConfig && NULL != chConfig->serverUri)
+    {
+        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&createSessionReq->ServerUri, chConfig->serverUri);
+        assert(SOPC_STATUS_OK == status);
+    }
+}
+
 void msg_session_bs__write_create_session_req_msg_sessionTimeout(
     const constants__t_msg_i msg_session_bs__create_req_msg)
 {
