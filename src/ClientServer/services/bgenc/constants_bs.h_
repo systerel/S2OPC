@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 06/03/2020 14:49:32
+ Date                 : 05/01/2022 17:34:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -96,6 +96,7 @@
 #define constants_bs__t_publishReqQueue_i t_entier4
 #define constants_bs__t_request_context_i t_entier4
 #define constants_bs__t_server_request_handle_i t_entier4
+#define constants_bs__t_session_application_context_i t_entier4
 #define constants_bs__t_session_i t_entier4
 #define constants_bs__t_session_token_i t_entier4
 #define constants_bs__t_sub_seq_num_i t_entier4
@@ -166,6 +167,7 @@
 #define constants_bs__t_publishReqQueue_i_max (-1)
 #define constants_bs__t_request_context_i_max (-1)
 #define constants_bs__t_server_request_handle_i_max (-1)
+#define constants_bs__t_session_application_context_i_max (-1)
 #define constants_bs__t_session_i_max (-1)
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_sub_seq_num_i_max (-1)

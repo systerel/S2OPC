@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 27/04/2021 13:57:18
+ Date                 : 05/01/2022 17:33:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -83,7 +83,7 @@ extern void io_dispatch_mgr__UNINITIALISATION(void);
 extern void io_dispatch_mgr__client_activate_new_session(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_user_token_i io_dispatch_mgr__p_user_token,
-   const constants__t_application_context_i io_dispatch_mgr__app_context,
+   const constants__t_session_application_context_i io_dispatch_mgr__app_context,
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__client_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,

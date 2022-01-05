@@ -25,6 +25,7 @@
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
+#include "sopc_services_api_internal.h"
 #include "sopc_types.h"
 
 void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx)
@@ -46,15 +47,38 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                requestContext);
 }
 
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+                                             const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken)
 {
+    SOPC_Internal_SessionAppContext* sessionAppContext = SOPC_Calloc(1, sizeof(*sessionAppContext));
+    if (NULL == sessionAppContext)
+    {
+        return false;
+    }
+    if (NULL != sessionName)
+    {
+        size_t len = strlen(sessionName);
+        sessionAppContext->sessionName = SOPC_Calloc(len, sizeof(*sessionAppContext->sessionName));
+        if (NULL != sessionAppContext->sessionName)
+        {
+            sessionAppContext->sessionName = strncpy(sessionAppContext->sessionName, sessionName, len - 1);
+        }
+        else
+        {
+            SOPC_Free(sessionAppContext);
+            return false;
+        }
+    }
+    sessionAppContext->userSessionContext = sessionContext;
     SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, (uintptr_t) userToken,
-                               sessionContext);
+                               (uintptr_t) sessionAppContext);
+    return true;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
+                                                                    const char* sessionName,
                                                                     uintptr_t sessionContext,
                                                                     const char* policyId)
 {
@@ -80,9 +104,10 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionContext, user);
+        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create anonymous UserIdentityToken.");
         SOPC_ExtensionObject_Clear(user);
@@ -93,6 +118,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
+                                                                           const char* sessionName,
                                                                            uintptr_t sessionContext,
                                                                            const char* policyId,
                                                                            const char* username,
@@ -132,9 +158,10 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionContext, user);
+        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create username UserIdentityToken.");
         SOPC_ExtensionObject_Clear(user);

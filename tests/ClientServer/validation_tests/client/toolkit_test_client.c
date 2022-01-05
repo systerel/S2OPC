@@ -468,9 +468,9 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // Use 1, 2, 3 as session contexts
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, sessionContext[0], "anonymous");
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, sessionContext[1], "anonymous");
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx2, sessionContext[2], "anonymous");
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, NULL, sessionContext[0], "anonymous");
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, NULL, sessionContext[1], "anonymous");
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx2, NULL, sessionContext[2], "anonymous");
         printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
     }
 

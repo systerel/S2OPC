@@ -345,13 +345,13 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
             (uintptr_t) nSentReqs; /* Record the session context, must be reset when connection is closed. */
         if (NULL == pSM->szUsername)
         {
-            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->iSessionCtx,
-                                                                       pSM->szPolicyId);
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, NULL,
+                                                                       (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
         }
         else
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                pSM->iscConfig, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
+                pSM->iscConfig, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
                 (const uint8_t*) pSM->szPassword, pSM->szPassword != NULL ? (int32_t) strlen(pSM->szPassword) : 0);
         }
     }

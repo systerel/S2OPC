@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 24/11/2021 17:37:37
+ Date                 : 05/01/2022 17:34:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -80,6 +80,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__get_NonceServer session_core_bs__get_NonceServer
 #define session_core_1__get_channel_session session_core_2__get_channel_session
 #define session_core_1__get_server_session_preferred_locales session_core_2__get_server_session_preferred_locales
+#define session_core_1__get_session_app_context session_core_bs__get_session_app_context
 #define session_core_1__get_session_channel session_core_2__get_session_channel
 #define session_core_1__get_session_state session_core_2__get_session_state
 #define session_core_1__get_session_user_client session_core_bs__get_session_user_client

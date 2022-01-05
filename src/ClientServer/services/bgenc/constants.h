@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 05/01/2022 10:42:57
+ Date                 : 05/01/2022 17:33:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -100,6 +100,7 @@
 #define constants__t_publishReqQueue_i constants_bs__t_publishReqQueue_i
 #define constants__t_request_context_i constants_bs__t_request_context_i
 #define constants__t_server_request_handle_i constants_bs__t_server_request_handle_i
+#define constants__t_session_application_context_i constants_bs__t_session_application_context_i
 #define constants__t_session_i constants_bs__t_session_i
 #define constants__t_session_token_i constants_bs__t_session_token_i
 #define constants__t_sub_seq_num_i constants_bs__t_sub_seq_num_i
@@ -368,6 +369,7 @@ typedef enum {
 #define constants__t_publishReqQueue_i_max constants_bs__t_publishReqQueue_i_max
 #define constants__t_request_context_i_max constants_bs__t_request_context_i_max
 #define constants__t_server_request_handle_i_max constants_bs__t_server_request_handle_i_max
+#define constants__t_session_application_context_i_max constants_bs__t_session_application_context_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
 #define constants__t_session_token_i_max constants_bs__t_session_token_i_max
 #define constants__t_sub_seq_num_i_max constants_bs__t_sub_seq_num_i_max

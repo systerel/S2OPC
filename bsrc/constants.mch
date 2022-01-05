@@ -281,6 +281,7 @@ SETS
 
     /* Context provided by application on request and to provide with notifications */
     t_application_context_i; /* uintptr_t */
+    t_session_application_context_i; /* (SOPC_Internal_SessionAppContext*) */
     t_timer_id_i; /* uint32_t */
     t_IndexRange_i;
 

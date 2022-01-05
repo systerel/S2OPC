@@ -51,7 +51,7 @@ DEFINITIONS
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
     a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-    a_client_app_context         : t_session +-> t_application_context_i &
+    a_client_app_context         : t_session +-> t_session_application_context_i &
     a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
     a_client_token               : t_session +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session         &
@@ -353,9 +353,18 @@ OPERATIONS
     PRE
         p_session : t_session_i       &
         p_session : t_session         &
-        p_app_context : t_application_context_i
+        p_app_context : t_session_application_context_i
     THEN
         a_client_app_context(p_session) := p_app_context
+    END
+    ;
+
+    p_app_context <-- get_session_app_context(p_session) =
+    PRE
+        p_session     : t_session_i &
+        p_session     : t_session
+    THEN
+        p_app_context :(p_app_context : t_session_application_context_i & p_app_context = a_client_app_context(p_session))
     END
     ;
 

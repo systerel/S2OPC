@@ -784,8 +784,8 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
         {
             // First attempt with wrong password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                client_channel_config_idx, (uintptr_t) NULL, policyId, USERNAME, (const uint8_t*) INVALID_PASSWORD,
-                (int32_t) strlen(INVALID_PASSWORD));
+                client_channel_config_idx, NULL, (uintptr_t) NULL, policyId, USERNAME,
+                (const uint8_t*) INVALID_PASSWORD, (int32_t) strlen(INVALID_PASSWORD));
 
             /* verify session activation failure */
             int32_t count = 0;
@@ -799,13 +799,13 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
 
             // Second attempt with correct password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                client_channel_config_idx, (uintptr_t) NULL, policyId, USERNAME, (const uint8_t*) PASSWORD,
+                client_channel_config_idx, NULL, (uintptr_t) NULL, policyId, USERNAME, (const uint8_t*) PASSWORD,
                 (int32_t) strlen(PASSWORD));
         }
         else
         {
-            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(client_channel_config_idx, (uintptr_t) NULL,
-                                                                       policyId);
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(client_channel_config_idx, NULL,
+                                                                       (uintptr_t) NULL, policyId);
         }
     }
 

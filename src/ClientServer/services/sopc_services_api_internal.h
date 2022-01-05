@@ -35,4 +35,10 @@ typedef struct SOPC_Internal_AsyncSendMsgData
     void* msgToSend;        // OpcUa_<Msg> *
 } SOPC_Internal_AsyncSendMsgData;
 
+typedef struct SOPC_Internal_SessionAppContext
+{
+    char* sessionName;
+    uintptr_t userSessionContext;
+} SOPC_Internal_SessionAppContext;
+
 #endif /* SOPC_SERVICES_API_INTERNAL_H */

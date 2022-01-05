@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 07/02/2022 11:45:00
+ Date                 : 07/02/2022 12:26:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -111,6 +111,7 @@ void session_core__client_create_session_req_sm(
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       t_bool session_core__l_nonce_needed;
       constants__t_Nonce_i session_core__l_nonce;
+      constants__t_session_application_context_i session_core__l_app_context;
       
       session_core_1__create_session(session_core__session,
          session_core__channel,
@@ -130,6 +131,10 @@ void session_core__client_create_session_req_sm(
             session_core__l_channel_config_idx);
          msg_session_bs__write_create_session_req_msg_endpointUrl(session_core__create_req_msg,
             session_core__l_channel_config_idx);
+         session_core_1__get_session_app_context(session_core__session,
+            &session_core__l_app_context);
+         msg_session_bs__write_create_session_req_msg_sessionName(session_core__create_req_msg,
+            session_core__l_app_context);
          if (session_core__l_nonce_needed == true) {
             session_core_1__get_NonceClient(session_core__session,
                &session_core__l_nonce);

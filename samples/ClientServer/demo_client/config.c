@@ -46,7 +46,9 @@ char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 char* USER_PWD = NULL;
 
-struct argparse_option CONN_OPTIONS[14] = {
+char* SESSION_NAME = "S2OPC_client_session";
+
+struct argparse_option CONN_OPTIONS[15] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -138,6 +140,13 @@ struct argparse_option CONN_OPTIONS[14] = {
                "password",
                &USER_PWD,
                "(if not set anonymous mode is active) the username of the user used to establish session",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "sessionName",
+               &SESSION_NAME,
+               "(default: 'S2OPC_client_session') the session name indicated server on session creation",
                NULL,
                0,
                0)};

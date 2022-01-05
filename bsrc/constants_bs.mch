@@ -60,6 +60,7 @@ SETS
     t_Reference_i;
     t_LocalizedText_i;
     t_QualifiedName_i;
+    t_session_application_context_i;
     t_application_context_i;
     t_subscription_i;
     t_notif_msg_i;

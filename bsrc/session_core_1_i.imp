@@ -74,6 +74,7 @@ PROMOTES
     server_close_session_check_req,
     session_do_nothing,
     set_session_app_context,
+    get_session_app_context,
     client_gen_create_session_internal_event,
     client_gen_activate_orphaned_session_internal_event,
     client_gen_activate_user_session_internal_event,

@@ -83,7 +83,7 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
                                       /* id = endpoint connection config index,
                                        * params = (user token structure)
-                                         auxParam = user application session context
+                                         auxParam = (SOPC_Internal_SessionAppContext*)
                                        */
     APP_TO_SE_SEND_SESSION_REQUEST,   /* id = session id,
                                          params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header

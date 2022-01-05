@@ -422,7 +422,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         assert(id <= constants__t_channel_config_idx_i_max);
         assert((void*) params != NULL);
 
-        io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params, auxParam, &bres);
+        io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params,
+                                                     (SOPC_Internal_SessionAppContext*) auxParam, &bres);
 
         if (bres == false)
         {

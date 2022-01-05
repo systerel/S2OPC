@@ -96,14 +96,19 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
+ *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param userToken              An extension object, containing either an OpcUa_AnonymousIdentityToken, a
  *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
  *
+ * \return                       true in case of success, false in case of memory allocation issue
+ *
  */
-void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+                                             const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken);
 
@@ -112,13 +117,16 @@ void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
+ *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param policyId               The policy id to use for the identity token.
  *
- * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
+ * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
+                                                                    const char* sessionName,
                                                                     uintptr_t sessionContext,
                                                                     const char* policyId);
 
@@ -135,6 +143,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
+ *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param policyId               The policy id to use for the identity token, must not be NULL
@@ -142,9 +152,10 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
  * \param password               The bytestring containing the password, may be NULL
  * \param length_password        The password length, ignored when password is NULL
  *
- * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called.
+ * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
+                                                                           const char* sessionName,
                                                                            uintptr_t sessionContext,
                                                                            const char* policyId,
                                                                            const char* username,

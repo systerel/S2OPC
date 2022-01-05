@@ -39,6 +39,7 @@
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
+#include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config_constants.h"
@@ -91,6 +92,7 @@ typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
+typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
 typedef uint32_t constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;

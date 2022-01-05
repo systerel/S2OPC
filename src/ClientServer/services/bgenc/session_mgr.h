@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 17/11/2021 11:33:35
+ Date                 : 05/01/2022 17:34:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -93,12 +93,12 @@ extern void session_mgr__client_async_activate_new_session_with_channel(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
    const constants__t_channel_i session_mgr__channel,
    const constants__t_user_token_i session_mgr__p_user_token,
-   const constants__t_application_context_i session_mgr__app_context,
+   const constants__t_session_application_context_i session_mgr__app_context,
    t_bool * const session_mgr__bres);
 extern void session_mgr__client_async_activate_new_session_without_channel(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
    const constants__t_user_token_i session_mgr__p_user_token,
-   const constants__t_application_context_i session_mgr__app_context,
+   const constants__t_session_application_context_i session_mgr__app_context,
    t_bool * const session_mgr__bres);
 extern void session_mgr__client_channel_connected_event_session(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx,

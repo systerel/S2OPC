@@ -210,22 +210,17 @@ OPERATIONS
     END
     ;
 
-    /*
-    write_create_session_req_msg_sessionName (p_req_msg, p_session, p_channel_config_idx) =
+    write_create_session_req_msg_sessionName (p_req_msg, p_app_context) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg = c_msg_out &
         c_msg_out : t_msg &
-        p_session : t_session_i &
-        p_session : t_session &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx &
+        p_app_context : t_session_application_context_i &
         a_msg_out_type = e_msg_session_create_req
     THEN
         skip
     END
     ;
-    */
 
     write_create_session_req_msg_maxResponseMessageSize (p_req_msg) =
     PRE

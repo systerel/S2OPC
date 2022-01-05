@@ -77,7 +77,7 @@ typedef struct ClientSessionData
 static ServerSessionData serverSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 static ClientSessionData clientSessionDataArray[constants__t_session_i_max + 1]; // index 0 is indet session
 
-static constants__t_application_context_i session_client_app_context[SOPC_MAX_SESSIONS + 1];
+static constants__t_session_application_context_i session_client_app_context[SOPC_MAX_SESSIONS + 1];
 
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
 static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
@@ -108,7 +108,8 @@ void session_core_bs__INITIALISATION(void)
     }
 
     assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
-    memset(session_client_app_context, (int) 0, sizeof(constants__t_application_context_i) * (SOPC_MAX_SESSIONS + 1));
+    memset(session_client_app_context, (int) 0,
+           sizeof(constants__t_session_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
     memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
     memset(server_session_latest_msg_receveived, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
@@ -205,7 +206,7 @@ void session_core_bs__notify_set_session_state(
         if (session_core_bs__state == constants__e_session_userActivated)
         {
             SOPC_App_EnqueueComEvent(SE_ACTIVATED_SESSION, (uint32_t) session_core_bs__session, (uintptr_t) NULL,
-                                     session_client_app_context[session_core_bs__session]);
+                                     session_client_app_context[session_core_bs__session]->userSessionContext);
         }
         else if (session_core_bs__state == constants__e_session_scOrphaned ||
                  ((session_core_bs__state == constants__e_session_userActivating ||
@@ -218,7 +219,7 @@ void session_core_bs__notify_set_session_state(
             // if orphaned will be reactivated or closed => notify as reactivating to avoid use of session by
             // application
             SOPC_App_EnqueueComEvent(SE_SESSION_REACTIVATING, session_core_bs__session, (uintptr_t) NULL,
-                                     session_client_app_context[session_core_bs__session]);
+                                     session_client_app_context[session_core_bs__session]->userSessionContext);
         }
         else if (session_core_bs__state == constants__e_session_closed)
         {
@@ -229,16 +230,16 @@ void session_core_bs__notify_set_session_state(
             {
                 // If session not in closing state or already activated, it is in activation state regarding user app
                 // => notify activation failed
-                SOPC_App_EnqueueComEvent(
-                    SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (uintptr_t) scReason,
-                    session_client_app_context[session_core_bs__session]); // user application session context
+                SOPC_App_EnqueueComEvent(SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (uintptr_t) scReason,
+                                         session_client_app_context[session_core_bs__session]
+                                             ->userSessionContext); // user application session context
             }
             else
             {
                 // Activated session closing
-                SOPC_App_EnqueueComEvent(
-                    SE_CLOSED_SESSION, session_core_bs__session, (uintptr_t) scReason,
-                    session_client_app_context[session_core_bs__session]); // user application session context
+                SOPC_App_EnqueueComEvent(SE_CLOSED_SESSION, session_core_bs__session, (uintptr_t) scReason,
+                                         session_client_app_context[session_core_bs__session]
+                                             ->userSessionContext); // user application session context
             }
         }
     }
@@ -401,7 +402,13 @@ void session_core_bs__delete_session_token(const constants__t_session_i session_
 
 void session_core_bs__delete_session_application_context(const constants__t_session_i session_core_bs__p_session)
 {
-    session_client_app_context[session_core_bs__p_session] = 0;
+    SOPC_Internal_SessionAppContext* sessionAppCtx = session_client_app_context[session_core_bs__p_session];
+    if (NULL != sessionAppCtx)
+    {
+        SOPC_Free(sessionAppCtx->sessionName);
+        SOPC_Free(sessionAppCtx);
+    }
+    session_client_app_context[session_core_bs__p_session] = NULL;
 }
 
 void session_core_bs__drop_user_server(const constants__t_session_i session_core_bs__p_session)
@@ -1336,10 +1343,19 @@ void session_core_bs__session_do_nothing(const constants__t_session_i session_co
     (void) session_core_bs__session;
 }
 
-void session_core_bs__set_session_app_context(const constants__t_session_i session_core_bs__p_session,
-                                              const constants__t_application_context_i session_core_bs__p_app_context)
+void session_core_bs__set_session_app_context(
+    const constants__t_session_i session_core_bs__p_session,
+    const constants__t_session_application_context_i session_core_bs__p_app_context)
 {
     session_client_app_context[session_core_bs__p_session] = session_core_bs__p_app_context;
+}
+
+void session_core_bs__get_session_app_context(
+    const constants__t_session_i session_core_bs__p_session,
+    constants__t_session_application_context_i* const session_core_bs__p_app_context)
+{
+    assert(constants__c_session_indet != session_core_bs__p_session);
+    *session_core_bs__p_app_context = session_client_app_context[session_core_bs__p_session];
 }
 
 void session_core_bs__client_gen_activate_orphaned_session_internal_event(

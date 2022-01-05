@@ -88,6 +88,20 @@ void msg_session_bs__write_create_session_req_msg_serverUri(
     }
 }
 
+void msg_session_bs__write_create_session_req_msg_sessionName(
+    const constants__t_msg_i msg_session_bs__p_req_msg,
+    const constants__t_session_application_context_i msg_session_bs__p_app_context)
+{
+    SOPC_Internal_SessionAppContext* sessionAppCtx = (SOPC_Internal_SessionAppContext*) msg_session_bs__p_app_context;
+    OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg;
+    if (NULL == sessionAppCtx || NULL == sessionAppCtx->sessionName)
+    {
+        return;
+    }
+
+    (void) SOPC_String_AttachFromCstring(&createSessionReq->SessionName, sessionAppCtx->sessionName);
+}
+
 void msg_session_bs__write_create_session_req_msg_sessionTimeout(
     const constants__t_msg_i msg_session_bs__create_req_msg)
 {

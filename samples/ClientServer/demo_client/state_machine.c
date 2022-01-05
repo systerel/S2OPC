@@ -161,13 +161,13 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
 
     if (activation_parameters.anonymous)
     {
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, (uintptr_t) pSM->pCtxSession,
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, SESSION_NAME, (uintptr_t) pSM->pCtxSession,
                                                           activation_parameters.policyId);
     }
     else
     {
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            pSM->iscConfig, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
+            pSM->iscConfig, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
             activation_parameters.username, activation_parameters.password, activation_parameters.length);
     }
 

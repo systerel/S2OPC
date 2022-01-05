@@ -139,7 +139,7 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_app_context         : t_session +-> t_application_context_i &
+            a_client_app_context         : t_session +-> t_session_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
@@ -232,7 +232,7 @@ LOCAL_OPERATIONS
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
-            a_client_app_context         : t_session +-> t_application_context_i &
+            a_client_app_context         : t_session +-> t_session_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
             a_client_token               : t_session +-> t_session_token         &
             a_server_token               : t_session_token +-> t_session         &
@@ -338,7 +338,8 @@ OPERATIONS
     VAR
         l_channel_config_idx,
         l_nonce_needed,
-        l_nonce
+        l_nonce,
+        l_app_context
     IN
         create_session (session, channel, e_session_creating, TRUE);
         l_channel_config_idx <-- get_channel_info (channel);
@@ -347,8 +348,8 @@ OPERATIONS
             write_create_session_req_msg_clientDescription (create_req_msg, l_channel_config_idx);
             write_create_session_req_msg_serverUri (create_req_msg, l_channel_config_idx);
             write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx);
-            // TODO: provide a session name in entrypoint client_activate_new_session
-            //write_create_session_req_msg_sessionName (create_req_msg, session, l_channel_config_idx);
+            l_app_context <-- get_session_app_context(session);
+            write_create_session_req_msg_sessionName (create_req_msg, l_app_context);
             IF l_nonce_needed = TRUE THEN
                 l_nonce <-- get_NonceClient(session);
 

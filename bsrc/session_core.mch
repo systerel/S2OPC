@@ -47,7 +47,7 @@ DEFINITIONS
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
-    a_client_app_context : s_session +-> t_application_context_i & // a client session has an application context associated
+    a_client_app_context : s_session +-> t_session_application_context_i & // a client session has an application context associated
     a_client_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
@@ -706,7 +706,7 @@ OPERATIONS
     PRE
         p_session     : t_session_i    &
         p_session     : s_session      &
-        p_app_context : t_application_context_i
+        p_app_context : t_session_application_context_i
     THEN
         a_client_app_context(p_session) := p_app_context
     END

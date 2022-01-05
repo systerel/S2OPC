@@ -57,8 +57,10 @@ extern char* USER_POLICY_ID;
 extern char* USER_NAME;
 extern char* USER_PWD;
 
+extern char* SESSION_NAME;
+
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[14];
+extern struct argparse_option CONN_OPTIONS[15];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200

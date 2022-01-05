@@ -540,7 +540,7 @@ OPERATIONS
         channel_config_idx : t_channel_config_idx &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
-        app_context : t_application_context_i &
+        app_context : t_session_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
@@ -559,7 +559,7 @@ OPERATIONS
         channel : s_channel_connected &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
-        app_context : t_application_context_i &
+        app_context : t_session_application_context_i &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
