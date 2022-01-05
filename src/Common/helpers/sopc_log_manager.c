@@ -350,6 +350,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
     SOPC_Log_File* file = NULL;
     char* filePath = NULL;
     int res = 0;
+    FILE* hFile = NULL;
 
     // Check parameters valid
     if (logDirPath != NULL && logFileName != NULL && strlen(logFileName) > 0 &&
@@ -362,7 +363,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
     {
         file = SOPC_Malloc(sizeof(SOPC_Log_File));
         // Define file path and try to open it
-        if (file != NULL)
+        if (NULL != file)
         {
             file->pFile = NULL;
             file->nbFiles = 0;
@@ -377,9 +378,9 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
                 res = sprintf(filePath, "%s%s_%s_%05u.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName,
                               file->nbFiles);
                 assert(res > 0);
-                file->pFile = SOPC_Log_InstanceFileOpen(filePath);
+                hFile = SOPC_Log_InstanceFileOpen(filePath);
             }
-            if (NULL == file->pFile)
+            if (NULL == hFile)
             {
                 if (filePath != NULL)
                 {
@@ -390,17 +391,51 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             }
             else
             {
-                setvbuf(file->pFile, NULL, _IOLBF, BUFSIZ);
+                setvbuf(hFile, NULL, _IOLBF, BUFSIZ);
             }
         }
-        if (NULL != file && NULL != file->pFile)
+        if (NULL != file)
         {
             file->filePath = filePath;
             file->maxBytes = maxBytes - RESERVED_BYTES_PRINT_FILE_CHANGE; // Keep characters to display file change
             file->maxFiles = maxFiles;
             file->nbBytes = 0;
             file->nbRefs = 1;
-            result->file = file;
+            file->pFile = hFile;
+
+            bool started = false;
+            SOPC_ReturnStatus mutex_res = Mutex_Initialization(&file->fileMutex);
+            if (mutex_res == SOPC_STATUS_OK)
+            {
+                result->file = file;
+                // Fill fields
+                SOPC_Log_AlignCategory(category, result);
+                result->consoleFlag = false;
+                result->level = SOPC_LOG_LEVEL_ERROR;
+                result->started = false;
+                // Ensure logCallback and callbackBuffer are initialized to 0 in case of FILE log.
+                result->logCallback = NULL;
+                result->callbackBuffer = 0;
+                // Starts the log instance
+                started = SOPC_Log_Start(result);
+            }
+
+            if (!started)
+            {
+                fclose(hFile);
+                if (mutex_res == SOPC_STATUS_OK)
+                {
+                    Mutex_Clear(&result->file->fileMutex);
+                }
+
+                SOPC_Free(result->file->filePath);
+                SOPC_Free(result->callbackBuffer);
+                result->callbackBuffer = NULL;
+
+                SOPC_Free(result->file);
+                SOPC_Free(result);
+                result = NULL;
+            }
         }
         else
         {
@@ -409,25 +444,6 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
         }
     }
 
-    if (result != NULL)
-    {
-        Mutex_Initialization(&result->file->fileMutex);
-        // Fill fields
-        SOPC_Log_AlignCategory(category, result);
-        result->consoleFlag = false;
-        result->level = SOPC_LOG_LEVEL_ERROR;
-        result->started = false;
-        // Ensure logCallback and callbackBuffer are initialized to 0 in case of FILE log.
-        result->logCallback = NULL;
-        result->callbackBuffer = 0;
-        // Starts the log instance
-        bool started = SOPC_Log_Start(result);
-
-        if (!started)
-        {
-            SOPC_Log_ClearInstance(&result);
-        }
-    }
     return result;
 }
 

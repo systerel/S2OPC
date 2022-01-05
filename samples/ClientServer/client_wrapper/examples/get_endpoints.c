@@ -70,19 +70,21 @@ static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
         {
             for (int32_t i = 0; i < result->nbOfEndpoints; i++)
             {
-                free(result->endpoints[i].endpointUrl);
-                free(result->endpoints[i].security_policyUri);
-                free(result->endpoints[i].transportProfileUri);
-                if (NULL != result->endpoints[i].userIdentityTokens)
+                const SOPC_ClientHelper_EndpointDescription* ep = &result->endpoints[i];
+                free(ep->endpointUrl);
+                free(ep->security_policyUri);
+                free(ep->transportProfileUri);
+                if (NULL != ep->userIdentityTokens)
                 {
-                    for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+                    for (int32_t j = 0; j < ep->nbOfUserIdentityTokens; j++)
                     {
-                        free(result->endpoints[i].userIdentityTokens[j].policyId);
-                        free(result->endpoints[i].userIdentityTokens[j].issuedTokenType);
-                        free(result->endpoints[i].userIdentityTokens[j].issuerEndpointUrl);
-                        free(result->endpoints[i].userIdentityTokens[j].securityPolicyUri);
+                        const SOPC_ClientHelper_UserIdentityToken* token = &ep->userIdentityTokens[j];
+                        free(token->policyId);
+                        free(token->issuedTokenType);
+                        free(token->issuerEndpointUrl);
+                        free(token->securityPolicyUri);
                     }
-                    free(result->endpoints[i].userIdentityTokens);
+                    free(ep->userIdentityTokens);
                 }
             }
             free(result->endpoints);

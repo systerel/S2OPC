@@ -99,14 +99,15 @@ int main(int argc, char* const argv[])
             printf("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
             for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
             {
+                const SOPC_ClientHelper_BrowseResultReference* ref = &browseResult.references[i];
                 printf("Item #%d\n", i);
-                printf("- nodeId: %s\n", browseResult.references[i].nodeId);
-                printf("- displayName: %s\n", browseResult.references[i].displayName);
+                printf("- nodeId: %s\n", ref->nodeId);
+                printf("- displayName: %s\n", ref->displayName);
 
-                free(browseResult.references[i].nodeId);
-                free(browseResult.references[i].displayName);
-                free(browseResult.references[i].browseName);
-                free(browseResult.references[i].referenceTypeId);
+                free(ref->nodeId);
+                free(ref->displayName);
+                free(ref->browseName);
+                free(ref->referenceTypeId);
             }
             free(browseResult.references);
         }

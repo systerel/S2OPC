@@ -810,23 +810,27 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
             mbedtls_x509_crt_free(crt);
 
             /* Set new next certificate (if possible) */
-            if (NULL == prev && NULL == next)
+            if (NULL == prev)
             {
-                /*
-                 * The list would be empty, but we cannot do it here.
-                 * We have no choice but failing with current design.
-                 */
-                crt = NULL; // make iteration stop
-                status = SOPC_STATUS_NOK;
-            }
-            else if (NULL == prev && NULL != next)
-            {
-                /* Head of the chain is a special case */
-                pCert->crt = *next;
-                /* We have to free the new next certificate (copied as first one) */
-                SOPC_Free(next);
+                if (NULL == next)
 
-                /* Do not iterate: current certificate has changed */
+                {
+                    /*
+                     * The list would be empty, but we cannot do it here.
+                     * We have no choice but failing with current design.
+                     */
+                    crt = NULL; // make iteration stop
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    /* Head of the chain is a special case */
+                    pCert->crt = *next;
+                    /* We have to free the new next certificate (copied as first one) */
+                    SOPC_Free(next);
+
+                    /* Do not iterate: current certificate has changed */
+                }
             }
             else
             {

@@ -1167,6 +1167,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
 
     bool bProcess = true;
     SOPC_SLinkedListIterator pListIter = NULL;
+    SOPC_StaMac_ReqCtx* reqCtx = NULL;
 
     if (NULL == pSM)
     {
@@ -1187,26 +1188,26 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     case SE_SND_REQUEST_FAILED:
         bProcess = false;
         pListIter = SOPC_SLinkedList_GetIterator(pSM->pListReqCtx);
-        while (!bProcess && NULL != pListIter)
+        reqCtx = (SOPC_StaMac_ReqCtx*) appCtx;
+        while (!bProcess && NULL != pListIter && NULL != reqCtx)
         {
-            if ((uintptr_t) SOPC_SLinkedList_Next(&pListIter) == appCtx)
+            if ((SOPC_StaMac_ReqCtx*) SOPC_SLinkedList_Next(&pListIter) == reqCtx)
             {
                 bProcess = true;
                 /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
                 if (NULL != pAppCtx)
                 {
-                    *pAppCtx = ((SOPC_StaMac_ReqCtx*) appCtx)->appCtx;
+                    *pAppCtx = reqCtx->appCtx;
                 }
                 if (NULL != pRequestScope)
                 {
-                    *pRequestScope = ((SOPC_StaMac_ReqCtx*) appCtx)->requestScope;
+                    *pRequestScope = reqCtx->requestScope;
                 }
-                if (NULL == SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, ((SOPC_StaMac_ReqCtx*) appCtx)->uid))
+                if (NULL == SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, reqCtx->uid))
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
                 }
-                SOPC_Free((void*) appCtx);
-                appCtx = 0;
+                SOPC_Free(reqCtx);
             }
         }
         break;

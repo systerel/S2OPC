@@ -306,6 +306,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     case val:                                        \
         free(o->field);                              \
         o->field = calloc(strlen(optarg) + 1, 1);    \
+        assert(NULL != o->field);                    \
         strcpy(o->field, optarg);                    \
         break;
 
@@ -362,11 +363,13 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     if (NULL == o->endpoint_url)
     {
         o->endpoint_url = malloc(strlen(DEFAULT_ENDPOINT_URL) + 1);
+        assert(NULL != o->endpoint_url);
         strcpy(o->endpoint_url, DEFAULT_ENDPOINT_URL);
     }
     if (NULL == o->policyId)
     {
         o->policyId = malloc(strlen(POLICY_ID) + 1);
+        assert(NULL != o->policyId);
         strcpy(o->policyId, POLICY_ID);
     }
     CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
@@ -391,6 +394,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     for (int i = 0; i < o->node_ids_size; ++i)
     {
         o->node_ids[i] = malloc(strlen(argv[optind + i]) + 1);
+        assert(NULL != o->node_ids[i]);
         strcpy(o->node_ids[i], argv[optind + i]);
     }
 
