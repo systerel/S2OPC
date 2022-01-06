@@ -191,7 +191,7 @@ option(WITH_NO_ASSERT "Disable asserts" OFF)
 option(WITH_USER_ASSERT "Enable user-defined failed assertion event" OFF)
 option(WITH_MINIMAL_FOOTPRINT "Limit software footprint" OFF)
 
-# option to enable GCC static analyser
+# option to enable GCC static analyser. The value from 1 to 5 corresponds to the verbosity level.
 option(WITH_GCC_STATIC_ANALYSIS "activate GCC static analysis during compilation" OFF)
 
 # Check project and option(s) are compatible
@@ -353,7 +353,7 @@ if(WITH_GCC_STATIC_ANALYSIS)
   endif()  
   
   message("-- GCC Static Analysis activated")
-  list(APPEND S2OPC_COMPILER_FLAGS -fanalyzer)
+  list(APPEND S2OPC_COMPILER_FLAGS -fanalyzer -fanalyzer-verbosity=${WITH_GCC_STATIC_ANALYSIS})
 endif()
 
 # Add WITH_NANO_EXTENDED to compilation definition if option activated
