@@ -31,6 +31,7 @@
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -137,7 +138,11 @@ int main(int argc, char* argv[])
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_local_service_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    status = SOPC_Helper_Initialize(&logConfiguration);
+    status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_Initialize();
+    }
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Local_Service: Failed initializing\n");
@@ -456,7 +461,8 @@ int main(int argc, char* argv[])
     }
 
     // Clear the toolkit configuration and stop toolkit threads
-    SOPC_Helper_Clear();
+    SOPC_HelperConfigServer_Clear();
+    SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK == status && SOPC_STATUS_OK == stopStatus)
     {

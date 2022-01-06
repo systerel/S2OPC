@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 
+#include "libs2opc_common_internal.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
 
@@ -143,7 +144,7 @@ static bool SOPC_HelperInternal_LoadAddressSpaceConfigFromFile(const char* filen
         return false;
     }
     // Keep address space instance reference for deallocation
-    sopc_helper_config.server.addressSpace = space;
+    sopc_server_helper_config.addressSpace = space;
 
     return true;
 }
@@ -155,8 +156,8 @@ static bool SOPC_HelperInternal_LoadUsersConfigFromFile(const char* filename)
     {
         return false;
     }
-    bool res = SOPC_UsersConfig_Parse(fd, &sopc_helper_config.server.authenticationManager,
-                                      &sopc_helper_config.server.authorizationManager);
+    bool res = SOPC_UsersConfig_Parse(fd, &sopc_server_helper_config.authenticationManager,
+                                      &sopc_server_helper_config.authorizationManager);
     fclose(fd);
 
     if (!res)
@@ -195,11 +196,11 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
         for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
         {
             SOPC_Endpoint_Config* ep = &sopc_helper_config.config.serverConfig.endpoints[i];
-            sopc_helper_config.server.endpoints[i] = SOPC_Calloc(1, sizeof(SOPC_Endpoint_Config));
-            if (NULL != sopc_helper_config.server.endpoints[i])
+            sopc_server_helper_config.endpoints[i] = SOPC_Calloc(1, sizeof(SOPC_Endpoint_Config));
+            if (NULL != sopc_server_helper_config.endpoints[i])
             {
-                *sopc_helper_config.server.endpoints[i] = *ep;
-                sopc_helper_config.server.nbEndpoints++;
+                *sopc_server_helper_config.endpoints[i] = *ep;
+                sopc_server_helper_config.nbEndpoints++;
             }
             else
             {

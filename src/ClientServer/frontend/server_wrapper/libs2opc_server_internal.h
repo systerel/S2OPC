@@ -60,82 +60,68 @@ typedef enum
     SOPC_SERVER_STATE_STOPPED = 6,
 } SOPC_HelperServer_State;
 
-// The global helper config variable (singleton), it shall not be accessed outside of wrapper code
-typedef struct SOPC_Helper_Config
+// The server helper dedicated configuration in addition to configuration ::SOPC_S2OPC_Config
+typedef struct SOPC_ServerHelper_Config
 {
-    // Flag atomically set when the structure is initialized during call to SOPC_Helper_Initialize
+    // Flag atomically set when the structure is initialized during call to SOPC_HelperConfigServer_Initialize
     // and singleton config is initialized
     int32_t initialized;
+    // Server state
+    Mutex stateMutex;
+    SOPC_HelperServer_State state;
 
-    // Toolkit configuration structure
-    SOPC_S2OPC_Config config;
+    // Address space instance
+    SOPC_AddressSpace* addressSpace;
+
+    // Application write notification callback record
+    SOPC_WriteNotif_Fct* writeNotifCb;
+    // Application asynchronous local service response callback record
+    SOPC_LocalServiceAsyncResp_Fct* asyncRespCb;
+
+    // Synchronous local service response management
+    Condition syncLocalServiceCond;
+    Mutex syncLocalServiceMutex;
+    uint32_t syncLocalServiceId;
+    void* syncResp;
+
+    // Stop server management:
+
+    // Manage server stopping when server is running synchronously using SOPC_ServerHelper_Serve.
     struct
     {
-        // Server state
-        Mutex stateMutex;
-        SOPC_HelperServer_State state;
+        Condition serverStoppedCond;
+        Mutex serverStoppedMutex;
+        int32_t serverRequestedToStop;
+        bool serverAllEndpointsClosed;
+    } syncServeStopData;
 
-        // Address space instance
-        SOPC_AddressSpace* addressSpace;
+    // Server stopped notification callback record
+    SOPC_ServerStopped_Fct* stoppedCb;
+    // Server stopped notification callback data
+    SOPC_ReturnStatus serverStoppedStatus;
 
-        // Application write notification callback record
-        SOPC_WriteNotif_Fct* writeNotifCb;
-        // Application asynchronous local service response callback record
-        SOPC_LocalServiceAsyncResp_Fct* asyncRespCb;
+    // Server shutdown phase duration configuration
+    uint16_t configuredSecondsTillShutdown;
 
-        // Synchronous local service response management
-        Condition syncLocalServiceCond;
-        Mutex syncLocalServiceMutex;
-        uint32_t syncLocalServiceId;
-        void* syncResp;
+    // User authentication and authorization managers
+    // Note: temporarily duplicated with SOPC_S2OPC_Config endpoints
+    // until moved from SOPC_Endpoint_Config to SOPC_Server_Config
+    SOPC_UserAuthentication_Manager* authenticationManager;
+    SOPC_UserAuthorization_Manager* authorizationManager;
 
-        // Stop server management:
+    // Server build info
+    OpcUa_BuildInfo* buildInfo;
 
-        // Manage server stopping when server is running synchronously using SOPC_ServerHelper_Serve.
-        struct
-        {
-            Condition serverStoppedCond;
-            Mutex serverStoppedMutex;
-            int32_t serverRequestedToStop;
-            bool serverAllEndpointsClosed;
-        } syncServeStopData;
+    // Configured endpoint indexes and opened state arrays
+    uint8_t nbEndpoints;
+    SOPC_Endpoint_Config* endpoints[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]; // we do not use config.endpoints to
+                                                                                   // avoid pre-allocating structure
+    uint32_t* endpointIndexes; // array of endpoint indexes provided by toolkit
+    bool* endpointClosed;      // array of closed endpoint to keep track of endpoints notified closed by toolkit
 
-        // Server stopped notification callback record
-        SOPC_ServerStopped_Fct* stoppedCb;
-        // Server stopped notification callback data
-        SOPC_ReturnStatus serverStoppedStatus;
-
-        // Server shutdown phase duration configuration
-        uint16_t configuredSecondsTillShutdown;
-
-        // User authentication and authorization managers
-        // Note: temporarily duplicated with SOPC_S2OPC_Config endpoints
-        // until moved from SOPC_Endpoint_Config to SOPC_Server_Config
-        SOPC_UserAuthentication_Manager* authenticationManager;
-        SOPC_UserAuthorization_Manager* authorizationManager;
-
-        // Server build info
-        OpcUa_BuildInfo* buildInfo;
-
-        // Configured endpoint indexes and opened state arrays
-        uint8_t nbEndpoints;
-        SOPC_Endpoint_Config*
-            endpoints[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]; // we do not use config.endpoints to avoid
-                                                                     // pre-allocating structure
-        uint32_t* endpointIndexes;                                   // array of endpoint indexes provided by toolkit
-        bool* endpointClosed; // array of closed endpoint to keep track of endpoints notified closed by toolkit
-
-        // Runtime variables
-        SOPC_Server_RuntimeVariables runtimeVariables;
-
-    } server; // additional configuration to config.serverConfig
-    struct
-    {
-        // Communication events callback for client
-        // Note: until client wrapper and server are merged this is a workaround to dispatch events to a raw client
-        SOPC_ComEvent_Fct* clientComEventCb;
-    } client;
-} SOPC_Helper_Config;
+    // Runtime variables
+    SOPC_Server_RuntimeVariables runtimeVariables;
+} SOPC_ServerHelper_Config;
 
 // Define the structure used as context for asynchronous calls
 typedef struct SOPC_HelperConfigInternal_Ctx
@@ -159,10 +145,11 @@ typedef struct SOPC_HelperConfigInternal_Ctx
     } eventCtx;
 } SOPC_HelperConfigInternal_Ctx;
 
-// The singleton configuration structure
-extern SOPC_Helper_Config sopc_helper_config;
 // The default value of the configuration structure
-extern const SOPC_Helper_Config sopc_helper_config_default;
+extern const SOPC_ServerHelper_Config sopc_server_helper_config_default;
+
+// The singleton configuration structure
+extern SOPC_ServerHelper_Config sopc_server_helper_config;
 
 // Returns true if the server is in configuring state, false otherwise
 bool SOPC_ServerInternal_IsConfiguring(void);

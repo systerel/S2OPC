@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "libs2opc_common_internal.h"
 #include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_internal.h"
 
@@ -290,13 +291,13 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
 SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery)
 {
     if (NULL == url || !SOPC_ServerInternal_IsConfiguring() ||
-        sopc_helper_config.server.nbEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+        sopc_server_helper_config.nbEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         return NULL;
     }
-    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
+    for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
-        SOPC_Endpoint_Config* ep = sopc_helper_config.server.endpoints[i];
+        SOPC_Endpoint_Config* ep = sopc_server_helper_config.endpoints[i];
         int res = SOPC_strcmp_ignore_case(ep->endpointURL, url);
         if (0 == res)
         {
@@ -322,8 +323,8 @@ SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bo
 
     newEp->hasDiscoveryEndpoint = hasDiscovery;
     newEp->serverConfigPtr = &sopc_helper_config.config.serverConfig;
-    sopc_helper_config.server.endpoints[sopc_helper_config.server.nbEndpoints] = newEp;
-    sopc_helper_config.server.nbEndpoints++;
+    sopc_server_helper_config.endpoints[sopc_server_helper_config.nbEndpoints] = newEp;
+    sopc_server_helper_config.nbEndpoints++;
 
     return newEp;
 }
@@ -432,7 +433,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
     if (SOPC_STATUS_OK == status)
     {
         // Keep address space instance reference for deallocation
-        sopc_helper_config.server.addressSpace = addressSpaceConfig;
+        sopc_server_helper_config.addressSpace = addressSpaceConfig;
     }
     return status;
 }
@@ -440,7 +441,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.server.authenticationManager)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.authenticationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -449,14 +450,14 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    sopc_helper_config.server.authenticationManager = authenticationMgr;
+    sopc_server_helper_config.authenticationManager = authenticationMgr;
 
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.server.authorizationManager)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.authorizationManager)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -465,14 +466,14 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    sopc_helper_config.server.authorizationManager = authorizationMgr;
+    sopc_server_helper_config.authorizationManager = authorizationMgr;
 
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config_default.server.buildInfo)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.buildInfo)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -482,40 +483,40 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
     }
 
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_Create(&OpcUa_BuildInfo_EncodeableType, (void**) &sopc_helper_config.server.buildInfo);
+        SOPC_Encodeable_Create(&OpcUa_BuildInfo_EncodeableType, (void**) &sopc_server_helper_config.buildInfo);
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ProductUri, &buildInfo->ProductUri);
+        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ProductUri, &buildInfo->ProductUri);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ManufacturerName, &buildInfo->ManufacturerName);
+        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ManufacturerName, &buildInfo->ManufacturerName);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->ProductName, &buildInfo->ProductName);
+        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ProductName, &buildInfo->ProductName);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->SoftwareVersion, &buildInfo->SoftwareVersion);
+        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->SoftwareVersion, &buildInfo->SoftwareVersion);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_helper_config.server.buildInfo->BuildNumber, &buildInfo->BuildNumber);
+        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->BuildNumber, &buildInfo->BuildNumber);
     }
 
-    sopc_helper_config.server.buildInfo->BuildDate = buildInfo->BuildDate;
+    sopc_server_helper_config.buildInfo->BuildDate = buildInfo->BuildDate;
 
     if (SOPC_STATUS_OK != status)
     {
-        OpcUa_BuildInfo_Clear(sopc_helper_config.server.buildInfo);
-        SOPC_Free(sopc_helper_config.server.buildInfo);
-        sopc_helper_config.server.buildInfo = NULL;
+        OpcUa_BuildInfo_Clear(sopc_server_helper_config.buildInfo);
+        SOPC_Free(sopc_server_helper_config.buildInfo);
+        sopc_server_helper_config.buildInfo = NULL;
     }
 
     return status;

@@ -62,6 +62,7 @@ typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStat
  @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
+    It shall be done after a call to ::SOPC_CommonHelper_Initialize
  @warning
     This function is not threadsafe.
  @param pCfg
@@ -76,7 +77,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
 /**
  @brief
-    Clears the connections, configurations, and clears the Toolkit.
+    Clears the connections and configurations.
+    It shall be done before a call to ::SOPC_CommonHelper_Clear
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientCommon_Clear(void);

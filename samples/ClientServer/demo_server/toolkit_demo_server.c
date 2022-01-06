@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 
@@ -245,7 +246,7 @@ int main(int argc, char* argv[])
     (void) argc;
 
     /* Get the toolkit build information and print it */
-    SOPC_Toolkit_Build_Info build_info = SOPC_Helper_GetBuildInfo();
+    SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
     printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
            build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
@@ -261,8 +262,11 @@ int main(int argc, char* argv[])
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
     /* Initialize the server library (start library threads) */
-    SOPC_ReturnStatus status = SOPC_Helper_Initialize(&logConfig);
-
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_Initialize();
+    }
     /* Configuration of:
      * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
          - Enpoint URL,
@@ -328,7 +332,8 @@ int main(int argc, char* argv[])
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
-    SOPC_Helper_Clear();
+    SOPC_HelperConfigServer_Clear();
+    SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK != status)
     {

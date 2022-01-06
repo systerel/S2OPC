@@ -115,7 +115,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
  * \brief Define the PKI provider that will be in charge of validating certificates received by server.
  *
  * \param pki  The PKI provider to be used.
- *             It will be automatically deallocated using ::SOPC_PKIProvider_Free on call to ::SOPC_Helper_Clear.
+ *             It will be automatically deallocated using ::SOPC_PKIProvider_Free on call to
+ *             ::SOPC_HelperConfigServer_Clear.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p pki is invalid
@@ -268,7 +269,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
  * \brief Configure the server with the given address space
  *
  * \param addressSpaceConfig  the address space definition, in case of successful operation
- *                            it is then deallocated on call to ::SOPC_Helper_Clear
+ *                            it is then deallocated on call to ::SOPC_HelperConfigServer_Clear
  *
  *  \return SOPC_STATUS_OK if configuration succeeded,
  *          SOPC_STATUS_INVALID_STATE if the configuration is not possible

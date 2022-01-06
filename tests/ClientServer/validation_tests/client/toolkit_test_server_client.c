@@ -22,6 +22,7 @@
 #include <string.h>
 
 // Server wrapper
+#include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -748,7 +749,7 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
     uint32_t client_channel_config_idx = 0;
 
     /* Get the toolkit build information and print it */
-    SOPC_Toolkit_Build_Info build_info = SOPC_Helper_GetBuildInfo();
+    SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
     printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
            build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
@@ -763,8 +764,11 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
     log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs/";
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_Helper_Initialize(&log_config);
-
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_Initialize();
+    }
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed initializing\n");
@@ -793,7 +797,7 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
      */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetRawClientComEvent(Test_ComEvent_FctClient);
+        status = SOPC_CommonHelper_SetClientComEvent(Test_ComEvent_FctClient);
     }
 
     /* Start server / Finalize configuration */
@@ -920,7 +924,8 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
     }
 
     /* Clear the server library (stop all library threads) */
-    SOPC_Helper_Clear();
+    SOPC_HelperConfigServer_Clear();
+    SOPC_CommonHelper_Clear();
     SOPC_PKIProvider_Free(&clientPki);
 
     if (SOPC_STATUS_OK == status)

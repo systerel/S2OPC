@@ -289,10 +289,9 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
 /* Functions */
 
 // Return 0 if succeeded
-int32_t SOPC_ClientHelper_Initialize(const char* log_path,
-                                     SOPC_Log_Level log_level,
-                                     const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
+int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
+    /*
     SOPC_Log_Level level = SOPC_LOG_LEVEL_DEBUG;
     bool log_level_set = true;
     bool log_path_set = true;
@@ -315,14 +314,15 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
         log_path_set = false;
         log_path = "./logs/";
     }
-
+    */
     SOPC_LibSub_StaticCfg cfg_cli = {
         .host_log_callback = Helpers_LoggerStdout,
         .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
-        .toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}};
+        /*.toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}*/};
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli, GenericCallback_GetEndpoints);
 
+    /*
     if (!log_level_set)
     {
         Helpers_Log(SOPC_LOG_LEVEL_WARNING,
@@ -333,6 +333,7 @@ int32_t SOPC_ClientHelper_Initialize(const char* log_path,
     {
         Helpers_Log(SOPC_LOG_LEVEL_WARNING, "No log path provided, set to './logs/' by default.");
     }
+    */
 
     if (SOPC_STATUS_OK != status)
     {

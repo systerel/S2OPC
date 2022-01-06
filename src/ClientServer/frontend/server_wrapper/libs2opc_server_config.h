@@ -34,30 +34,19 @@
 #include "sopc_user_app_itf.h"
 
 /**
- * \brief Initialize the S2OPC library (start threads, initialize configuration, etc.) and define a custom log
- * configuration.
- *
- * Call to ::SOPC_Helper_Initialize is required before any other operation.
- *
- * \param optLogConfig the custom log configuration or NULL to keep default configuration
+ * \brief Initialize the S2OPC Server frontend configuration
+ *        Call to ::SOPC_HelperConfigServer_Initialize is required before any other operation
+ *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
  */
-SOPC_ReturnStatus SOPC_Helper_Initialize(SOPC_Log_Configuration* optLogConfig);
+SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void);
 
 /**
- * \brief Clear the S2OPC library (stop threads, clear configuration, etc.)
+ * \brief Clear the S2OPC Server frontend configuration
+ *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  */
-void SOPC_Helper_Clear(void);
-
-/**
- * \brief Retrieve the toolkit build info (version, date, etc.).
- * Shortcut to ::SOPC_ToolkitConfig_GetBuildInfo.
- *
- * \return Toolkit build information
- *
- */
-SOPC_Toolkit_Build_Info SOPC_Helper_GetBuildInfo(void);
+void SOPC_HelperConfigServer_Clear(void);
 
 /**
  * \brief
@@ -198,24 +187,5 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
  *       Value 0 should not be used for OPC UA certification compliance.
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown);
-
-/**
- * \brief Define a function to be called on client side communication events.
- *
- * It allows to manage a low-level client in addition to the frontend server use.
- * It is only possible to have a low-level client with a server,
- * as the client wrapper and server wrappers cannot be used at same time in this current version.
- *
- * \param clientComEvtCb  The function callback to re-route all client related events
- *
- * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
- *         if the configuration is not possible (toolkit not initialized, server already started).
- *
- * \warning low-level client should only define its secure channel configuration
- *          between call to ::SOPC_Helper_Initialize and call to start the server.
- * \warning The callback function shall not do anything blocking or long treatment since it will block any other
- *          callback call (other instance of write notification, local service sync/async response, etc.).
- */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetRawClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb);
 
 #endif

@@ -32,6 +32,8 @@
 #include <stdio.h>
 
 #include "libs2opc_client_cmds.h"
+#include "libs2opc_common_config.h"
+
 #include "sopc_time.h"
 
 static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
@@ -70,8 +72,27 @@ int main(int argc, char* const argv[])
 
     int res = 0;
 
-    /* Initialize the toolkit */
-    SOPC_ClientHelper_Initialize("./s2opc_wrapper_subscribe_logs/", SOPC_LOG_LEVEL_DEBUG, disconnect_callback);
+    /* Initialize client/server toolkit and client wrapper */
+
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./s2opc_wrapper_subscribe_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    if (SOPC_STATUS_OK != status)
+    {
+        res = -1;
+    }
+
+    if (0 == res)
+    {
+        int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
+        if (init <= 0)
+        {
+            res = -1;
+        }
+    }
 
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,
@@ -90,10 +111,14 @@ int main(int argc, char* const argv[])
     char* node_id = "ns=1;i=1012";
 
     /* connect to the endpoint */
-    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
-    if (configurationId <= 0)
+    int32_t configurationId = 0;
+    if (0 == res)
     {
-        res = -1;
+        configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
+        if (configurationId <= 0)
+        {
+            res = -1;
+        }
     }
 
     int32_t connectionId = 0;
@@ -132,6 +157,7 @@ int main(int argc, char* const argv[])
 
     /* Close the toolkit */
     SOPC_ClientHelper_Finalize();
+    SOPC_CommonHelper_Clear();
 
     return res;
 }

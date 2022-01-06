@@ -391,35 +391,19 @@ typedef struct
  @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
- @param log_path
-    Absolute or relative path of the directory to be used for logs. It will contain all created log files.
-    Shall be terminated by a directory separator.
-    If given directory does not exist, it will be created by S2OP_ClientHelper
-    If log_path is NULL, './logs/' is used by default.
-    Value shall be NULL or zero-terminated string.
-    The content of this String is copied the object pointed by /p log_path can be freed by the caller
- @param log_level
-    Minimum level of log traces to be printed in the log files
-    The list of accepted values is:
-    - SOPC_LOG_LEVEL_ERROR,
-    - SOPC_LOG_LEVEL_WARNING,
-    - SOPC_LOG_LEVEL_INFO,
-    - SOPC_LOG_LEVEL_DEBUG.
-    This list is decreasing. It means ERROR level is the maximum value and DEBUG level is the minimum value.
-    If level is not an accepted value, DEBUG is used by default.
+    It shall be done after a call to ::SOPC_CommonHelper_Initialize
  @param disconnect_callback
     Optional, can be NULL. Callback called when a connection is disconnected.
  @return
    '0' if operation succeed
    '-2' if toolkit not initialized
  */
-int32_t SOPC_ClientHelper_Initialize(const char* log_path,
-                                     SOPC_Log_Level log_level,
-                                     const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
+int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 
 /**
  @brief
-    Clears the connections, configurations, and clears the Toolkit.
+    Clears the connections and configurations.
+    It shall be done before a call to ::SOPC_CommonHelper_Clear
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientHelper_Finalize(void);

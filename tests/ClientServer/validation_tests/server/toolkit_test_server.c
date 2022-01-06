@@ -29,6 +29,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
@@ -219,7 +220,11 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     }
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_Helper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_Initialize();
+    }
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Toolkit: Failed initializing\n");
@@ -704,7 +709,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Get the toolkit build information and print it */
-    SOPC_Toolkit_Build_Info build_info = SOPC_Helper_GetBuildInfo();
+    SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
     printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
            build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
@@ -774,7 +779,8 @@ int main(int argc, char* argv[])
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
-    SOPC_Helper_Clear();
+    SOPC_HelperConfigServer_Clear();
+    SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK != status)
     {

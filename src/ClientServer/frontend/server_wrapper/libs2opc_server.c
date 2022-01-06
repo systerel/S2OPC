@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#include "libs2opc_common_internal.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_internal.h"
 
@@ -68,9 +69,9 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     struct LocalServiceCtx* ls = &(helperCtx->eventCtx.localService);
     // Helper internal call to internal services are always using asynchronous way
     assert(!ls->isHelperInternal);
-    Mutex_Lock(&sopc_helper_config.server.syncLocalServiceMutex);
+    Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
     // Chech synchronous response id is the one expected
-    if (ls->syncId != sopc_helper_config.server.syncLocalServiceId)
+    if (ls->syncId != sopc_server_helper_config.syncLocalServiceId)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                  "Received unexpected synchronous local service response: %s\n",
@@ -79,10 +80,10 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     else
     {
         // Move content of response into synchronous response to avoid deallocation on return by toolkit
-        SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &sopc_helper_config.server.syncResp);
+        SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &sopc_server_helper_config.syncResp);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Encodeable_Move(sopc_helper_config.server.syncResp, response);
+            status = SOPC_Encodeable_Move(sopc_server_helper_config.syncResp, response);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -92,10 +93,10 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
         }
         else
         {
-            Condition_SignalAll(&sopc_helper_config.server.syncLocalServiceCond);
+            Condition_SignalAll(&sopc_server_helper_config.syncLocalServiceCond);
         }
     }
-    Mutex_Unlock(&sopc_helper_config.server.syncLocalServiceMutex);
+    Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
 }
 
 // Callback dedicated to runtime variable update treatment: check received response is correct or trace error
@@ -131,9 +132,9 @@ void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
     {
         SOPC_HelperInternal_RuntimeVariableSetResponseCb(encType, response, (uintptr_t) helperCtx);
     }
-    else if (NULL != sopc_helper_config.server.asyncRespCb)
+    else if (NULL != sopc_server_helper_config.asyncRespCb)
     {
-        sopc_helper_config.server.asyncRespCb(encType, response, helperCtx->userContext);
+        sopc_server_helper_config.asyncRespCb(encType, response, helperCtx->userContext);
     }
     else
     {
@@ -163,7 +164,7 @@ static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintpt
 static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    const uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
+    const uint8_t nbEndpoints = sopc_server_helper_config.nbEndpoints;
 
     // Lock the helper state (verification and finalization of configuration)
     if (SOPC_STATUS_OK == status)
@@ -183,7 +184,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 
     for (uint8_t i = 0; SOPC_STATUS_OK == status && i < nbEndpoints; i++)
     {
-        uint32_t epIdx = SOPC_ToolkitServer_AddEndpointConfig(sopc_helper_config.server.endpoints[i]);
+        uint32_t epIdx = SOPC_ToolkitServer_AddEndpointConfig(sopc_server_helper_config.endpoints[i]);
         if (epIdx > 0)
         {
             endpointIndexes[i] = epIdx;
@@ -194,7 +195,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
                                    "Error configuring endpoint %" PRIu8
                                    ": %s."
                                    " Please check associated configuration data is coherent and complete.\n",
-                                   i, sopc_helper_config.server.endpoints[i]->endpointURL);
+                                   i, sopc_server_helper_config.endpoints[i]->endpointURL);
             status = SOPC_STATUS_NOK;
         }
     }
@@ -206,9 +207,9 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        sopc_helper_config.server.nbEndpoints = nbEndpoints;
-        sopc_helper_config.server.endpointIndexes = endpointIndexes;
-        sopc_helper_config.server.endpointClosed = endpointClosed;
+        sopc_server_helper_config.nbEndpoints = nbEndpoints;
+        sopc_server_helper_config.endpointIndexes = endpointIndexes;
+        sopc_server_helper_config.endpointClosed = endpointClosed;
     }
     else
     {
@@ -222,20 +223,20 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 // Build and update server runtime variables (Server node info) and request to open all endpoints of the server
 static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 {
-    if (0 == sopc_helper_config.server.nbEndpoints)
+    if (0 == sopc_server_helper_config.nbEndpoints)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
     // Set runtime variable
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == sopc_helper_config.server.buildInfo)
+    if (NULL == sopc_server_helper_config.buildInfo)
     {
-        sopc_helper_config.server.runtimeVariables = SOPC_RuntimeVariables_BuildDefault(
+        sopc_server_helper_config.runtimeVariables = SOPC_RuntimeVariables_BuildDefault(
             SOPC_ToolkitConfig_GetBuildInfo(), &sopc_helper_config.config.serverConfig);
     }
     else
     {
-        SOPC_RuntimeVariables_Build(sopc_helper_config.server.buildInfo, &sopc_helper_config.config.serverConfig);
+        SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &sopc_helper_config.config.serverConfig);
     }
     SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
     if (NULL != ctx)
@@ -244,8 +245,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
         ctx->eventCtx.localService.internalErrorMsg =
             "Setting runtime variables of server build information nodes failed."
             " Please check address space content includes necessary base information nodes.";
-        bool res = SOPC_RuntimeVariables_Set(sopc_helper_config.server.endpointIndexes[0],
-                                             &sopc_helper_config.server.runtimeVariables, (uintptr_t) ctx);
+        bool res = SOPC_RuntimeVariables_Set(sopc_server_helper_config.endpointIndexes[0],
+                                             &sopc_server_helper_config.runtimeVariables, (uintptr_t) ctx);
         status = (res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
     }
     else
@@ -256,9 +257,9 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     // Open the endpoints
     if (SOPC_STATUS_OK == status)
     {
-        for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
+        for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
         {
-            SOPC_ToolkitServer_AsyncOpenEndpoint(sopc_helper_config.server.endpointIndexes[i]);
+            SOPC_ToolkitServer_AsyncOpenEndpoint(sopc_server_helper_config.endpointIndexes[i]);
         }
     }
 
@@ -271,7 +272,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
 
-    SOPC_Server_RuntimeVariables* runtime_vars = &sopc_helper_config.server.runtimeVariables;
+    SOPC_Server_RuntimeVariables* runtime_vars = &sopc_server_helper_config.runtimeVariables;
     // From part 5: "The server has shut down or is in the process of shutting down."
     runtime_vars->server_state = OpcUa_ServerState_Shutdown;
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&runtime_vars->shutdownReason.defaultLocale, "");
@@ -285,9 +286,9 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
     }
 
     SOPC_TimeReference targetTime = SOPC_TimeReference_GetCurrent() +
-                                    (SOPC_TimeReference) sopc_helper_config.server.configuredSecondsTillShutdown * 1000;
+                                    (SOPC_TimeReference) sopc_server_helper_config.configuredSecondsTillShutdown * 1000;
     bool targetTimeReached = false;
-    uint32_t remainingSecondsTillShutdown = sopc_helper_config.server.configuredSecondsTillShutdown;
+    uint32_t remainingSecondsTillShutdown = sopc_server_helper_config.configuredSecondsTillShutdown;
 
     do
     {
@@ -304,7 +305,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
             ctx->eventCtx.localService.isHelperInternal = true;
             ctx->eventCtx.localService.internalErrorMsg =
                 "Updating runtime variables of server build information nodes failed";
-            if (!SOPC_RuntimeVariables_UpdateServerStatus(sopc_helper_config.server.endpointIndexes[0], runtime_vars,
+            if (!SOPC_RuntimeVariables_UpdateServerStatus(sopc_server_helper_config.endpointIndexes[0], runtime_vars,
                                                           (uintptr_t) ctx))
             {
                 status = SOPC_STATUS_NOK;
@@ -328,9 +329,9 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 // Request to close all endpoints of the server
 static void SOPC_HelperInternal_ActualShutdownServer(void)
 {
-    for (uint8_t i = 0; i < sopc_helper_config.server.nbEndpoints; i++)
+    for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
-        SOPC_ToolkitServer_AsyncCloseEndpoint(sopc_helper_config.server.endpointIndexes[i]);
+        SOPC_ToolkitServer_AsyncCloseEndpoint(sopc_server_helper_config.endpointIndexes[i]);
     }
 }
 
@@ -340,48 +341,50 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    sopc_helper_config.server.stoppedCb = stoppedCb;
+    sopc_server_helper_config.stoppedCb = stoppedCb;
     SOPC_ReturnStatus status = SOPC_HelperInternal_FinalizeToolkitConfiguration();
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperInternal_OpenEndpoints();
-    }
+    // Set started stated prior to call OpenEndpoints to ensure event callback is already active
     if (SOPC_STATUS_OK == status && !SOPC_ServerInternal_SetStartedState())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperInternal_OpenEndpoints();
+    }
+
     return status;
 }
 
 void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus status)
 {
-    uint8_t nbEndpoints = sopc_helper_config.server.nbEndpoints;
+    uint8_t nbEndpoints = sopc_server_helper_config.nbEndpoints;
     bool allEndpointsClosed = true;
-    if (SOPC_STATUS_OK != status && SOPC_STATUS_OK == sopc_helper_config.server.serverStoppedStatus)
+    if (SOPC_STATUS_OK != status && SOPC_STATUS_OK == sopc_server_helper_config.serverStoppedStatus)
     {
         // Only keep the fist error status notified, but all errors are logged below.
-        sopc_helper_config.server.serverStoppedStatus = status;
+        sopc_server_helper_config.serverStoppedStatus = status;
     }
     for (uint8_t i = 0; i < nbEndpoints; i++)
     {
-        if (epConfigIdx == sopc_helper_config.server.endpointIndexes[i])
+        if (epConfigIdx == sopc_server_helper_config.endpointIndexes[i])
         {
-            if (SOPC_STATUS_OK != status && !sopc_helper_config.server.endpointClosed[i])
+            if (SOPC_STATUS_OK != status && !sopc_server_helper_config.endpointClosed[i])
             {
                 // Log an error on first endpoint close event if it is an error status
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "Endpoint number %" PRIu8 " closed with error status: %d", i, status);
             }
 
-            sopc_helper_config.server.endpointClosed[i] = true;
+            sopc_server_helper_config.endpointClosed[i] = true;
         }
-        allEndpointsClosed &= sopc_helper_config.server.endpointClosed[i];
+        allEndpointsClosed &= sopc_server_helper_config.endpointClosed[i];
     }
     if (allEndpointsClosed)
     {
         // Server is considered stopped when no client connection possible anymore
         (void) SOPC_ServerInternal_SetStoppedState();
-        sopc_helper_config.server.stoppedCb(sopc_helper_config.server.serverStoppedStatus);
+        sopc_server_helper_config.stoppedCb(sopc_server_helper_config.serverStoppedStatus);
     }
 }
 
@@ -389,17 +392,17 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
 static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClosed)
 {
     // use condition variable and let ::SOPC_ServerHelper_Serve manage shutdown
-    SOPC_ReturnStatus status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+    SOPC_ReturnStatus status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     assert(SOPC_STATUS_OK == status);
     if (allEndpointsAlreadyClosed)
     {
         // Case in which server is stopping because all endpoints were closed before server requested to stop
-        sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed = true;
+        sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed = true;
     }
-    SOPC_Atomic_Int_Set(&sopc_helper_config.server.syncServeStopData.serverRequestedToStop, true);
-    status = Condition_SignalAll(&sopc_helper_config.server.syncServeStopData.serverStoppedCond);
+    SOPC_Atomic_Int_Set(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop, true);
+    status = Condition_SignalAll(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
     assert(SOPC_STATUS_OK == status);
-    status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+    status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     assert(SOPC_STATUS_OK == status);
 }
 
@@ -420,7 +423,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
         return SOPC_STATUS_INVALID_STATE;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (SOPC_HelperInternal_SyncServerStoppedCb == sopc_helper_config.server.stoppedCb)
+    if (SOPC_HelperInternal_SyncServerStoppedCb == sopc_server_helper_config.stoppedCb)
     {
         // Since server is running synchronously with ::SOPC_ServerHelper_Serve, stop request is asynchronous
         SOPC_HelperInternal_SyncServerAsyncStop(false);
@@ -457,24 +460,24 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
     {
         // If we catch sig stop we have to check if the signal occurred regularly or if server is requested to stop
         // Note: we avoid recurrent use of mutex by accessing serverRequestedToStop in an atomic way
-        while (!SOPC_Atomic_Int_Get(&sopc_helper_config.server.syncServeStopData.serverRequestedToStop) && !stopServer)
+        while (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop) && !stopServer)
         {
             SOPC_Sleep(UPDATE_TIMEOUT_MS);
         }
     }
     else
     {
-        status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
 
         // If we don't catch sig stop we only have to wait for signal on condition variable (no timeout)
         // Note: we do not need to access serverRequestedToStop in an atomic way since assignment is protected by mutex
-        while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverRequestedToStop)
+        while (SOPC_STATUS_OK == status && !sopc_server_helper_config.syncServeStopData.serverRequestedToStop)
         {
-            status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
-                                             &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+            status = Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
+                                             &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
         }
 
-        status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -497,13 +500,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
         SOPC_HelperInternal_ActualShutdownServer();
 
         // Wait for all endpoints to close
-        status = Mutex_Lock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
-        while (SOPC_STATUS_OK == status && !sopc_helper_config.server.syncServeStopData.serverAllEndpointsClosed)
+        status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        while (SOPC_STATUS_OK == status && !sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed)
         {
-            status = Mutex_UnlockAndWaitCond(&sopc_helper_config.server.syncServeStopData.serverStoppedCond,
-                                             &sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+            status = Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
+                                             &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
         }
-        status = Mutex_Unlock(&sopc_helper_config.server.syncServeStopData.serverStoppedMutex);
+        status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     }
 
     return status;
@@ -528,47 +531,47 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    Mutex_Lock(&sopc_helper_config.server.syncLocalServiceMutex);
-    assert(NULL == sopc_helper_config.server.syncResp);
+    Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
+    assert(NULL == sopc_server_helper_config.syncResp);
     // Set helper local service context
     ctx->eventCtx.localService.isSyncCall = true;
-    ctx->eventCtx.localService.syncId = sopc_helper_config.server.syncLocalServiceId;
+    ctx->eventCtx.localService.syncId = sopc_server_helper_config.syncLocalServiceId;
 
     // Send request
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_helper_config.server.endpointIndexes[0], request, (uintptr_t) ctx);
+    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request, (uintptr_t) ctx);
 
     // Wait until response received or error status (timeout)
-    while (SOPC_STATUS_OK == status && NULL == sopc_helper_config.server.syncResp)
+    while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
     {
-        status = Mutex_UnlockAndTimedWaitCond(&sopc_helper_config.server.syncLocalServiceCond,
-                                              &sopc_helper_config.server.syncLocalServiceMutex,
+        status = Mutex_UnlockAndTimedWaitCond(&sopc_server_helper_config.syncLocalServiceCond,
+                                              &sopc_server_helper_config.syncLocalServiceMutex,
                                               SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS);
     }
     if (SOPC_STATUS_OK == status)
     {
-        assert(NULL != sopc_helper_config.server.syncResp);
+        assert(NULL != sopc_server_helper_config.syncResp);
         // Set response output
-        *response = sopc_helper_config.server.syncResp;
+        *response = sopc_server_helper_config.syncResp;
     }
-    else if (NULL != sopc_helper_config.server.syncResp)
+    else if (NULL != sopc_server_helper_config.syncResp)
     {
         // This is possible timeout occurred during response reception, in this case we might ignore timeout
         if (SOPC_STATUS_TIMEOUT == status)
         {
             // Set response output
-            *response = sopc_helper_config.server.syncResp;
+            *response = sopc_server_helper_config.syncResp;
             status = SOPC_STATUS_OK;
         }
         else
         {
             // Clear response since result incorrect
-            SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_helper_config.server.syncResp,
-                                        sopc_helper_config.server.syncResp);
+            SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_server_helper_config.syncResp,
+                                        sopc_server_helper_config.syncResp);
         }
     }
-    sopc_helper_config.server.syncResp = NULL;
-    sopc_helper_config.server.syncLocalServiceId++;
-    Mutex_Unlock(&sopc_helper_config.server.syncLocalServiceMutex);
+    sopc_server_helper_config.syncResp = NULL;
+    sopc_server_helper_config.syncLocalServiceId++;
+    Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
     return status;
 }
 
@@ -583,7 +586,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_helper_config.server.endpointIndexes[0], request, (uintptr_t) ctx);
+    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request, (uintptr_t) ctx);
 
     return SOPC_STATUS_OK;
 }

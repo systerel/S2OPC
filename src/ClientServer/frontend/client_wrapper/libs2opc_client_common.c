@@ -49,6 +49,8 @@
 #include "sopc_types.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client_common.h"
+#include "libs2opc_common_config.h"
+#include "libs2opc_common_internal.h"
 
 #include "state_machine.h"
 #include "toolkit_helpers.h"
@@ -89,7 +91,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_Atomic_Int_Get(&libInitialized) != 0 || SOPC_Atomic_Int_Get(&libConfigured) != 0)
+    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) || SOPC_Atomic_Int_Get(&libInitialized) != 0 ||
+        SOPC_Atomic_Int_Get(&libConfigured) != 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -112,33 +115,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     }
 
     /* Initialize SOPC_Common */
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-        logConfiguration.logLevel = pCfg->toolkit_logger.level;
-        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes = pCfg->toolkit_logger.maxBytes;
-        logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
-        if (NULL == pCfg->toolkit_logger.log_path)
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Log Path is set to null.");
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        else
-        {
-            logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = pCfg->toolkit_logger.log_path;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_Common_Initialize(logConfiguration);
-        }
-    }
 
     if (SOPC_STATUS_OK == status)
     {
         Helpers_SetLogger(pCfg->host_log_callback);
         cbkDisco = pCfg->disconnect_callback;
-        status = SOPC_Toolkit_Initialize(ToolkitEventCallback);
+        status = SOPC_CommonHelper_SetClientComEvent(ToolkitEventCallback);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -171,7 +153,7 @@ void SOPC_ClientCommon_Clear(void)
         return;
     }
 
-    SOPC_Toolkit_Clear();
+    SOPC_CommonHelper_SetClientComEvent(NULL);
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);

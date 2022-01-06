@@ -35,8 +35,8 @@
 #include "toolkit_helpers.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
-
 #include "libs2opc_client_common.h"
+#include "libs2opc_common_config.h"
 
 /* ==================
  * API implementation
@@ -50,12 +50,28 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
 
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(pCfg, NULL);
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = pCfg->toolkit_logger.log_path;
+    logConfiguration.logLevel = pCfg->toolkit_logger.level;
+    logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes = pCfg->toolkit_logger.maxBytes;
+    logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientCommon_Initialize(pCfg, NULL);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_CommonHelper_Clear();
+    }
     return status;
 }
 
 void SOPC_LibSub_Clear(void)
 {
+    SOPC_CommonHelper_Clear();
     SOPC_ClientCommon_Clear();
 }
 
