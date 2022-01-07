@@ -185,7 +185,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
-    socklen_t addrLen = 0;
+    socklen_t addrLen = sizeof(remoteAddr);
     if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
         *acceptedSock = accept(listeningSock, &remoteAddr, &addrLen);
