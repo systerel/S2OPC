@@ -108,11 +108,6 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintpt
 void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener);
 
 /**
- *  \brief Notify the toolkit configuration is complete to initialize the services B model
- */
-void SOPC_Services_ToolkitConfigured(void);
-
-/**
  *  \brief Notify that the clear function will be called to finish
  *         operations using secure channels and sockets services.
  */

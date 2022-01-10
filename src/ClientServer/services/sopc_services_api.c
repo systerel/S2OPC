@@ -546,10 +546,7 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
     assert(status == SOPC_STATUS_OK);
 
     setSecureChannelsListener(secureChannelsEventHandler);
-}
 
-void SOPC_Services_ToolkitConfigured(void)
-{
     /* Init B model */
     INITIALISATION();
 }

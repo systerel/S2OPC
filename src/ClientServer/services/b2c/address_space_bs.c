@@ -50,16 +50,18 @@ SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
 static bool is_inputArgument(const OpcUa_VariableNode* node);
 
-/*------------------------
-   INITIALISATION Clause
-  ------------------------*/
-void address_space_bs__INITIALISATION(void)
+void SOPC_AddressSpace_Check_Configured(void)
 {
     if (sopc_addressSpace_configured)
     {
         assert(NULL != address_space_bs__nodes);
     }
 }
+
+/*------------------------
+   INITIALISATION Clause
+  ------------------------*/
+void address_space_bs__INITIALISATION(void) {}
 
 /*--------------------
    OPERATIONS Clause

@@ -37,4 +37,6 @@ extern SOPC_AddressSpace* address_space_bs__nodes;
 /* Address space configured */
 extern bool sopc_addressSpace_configured;
 
+void SOPC_AddressSpace_Check_Configured(void);
+
 #endif /* ADDRESS_SPACE_IMPL_H_ */

@@ -52,7 +52,7 @@
 static struct
 {
     uint8_t initDone;
-    uint8_t locked;
+    uint8_t serverConfigLocked;
     Mutex mut;
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
@@ -61,7 +61,11 @@ static struct
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
-tConfig = {.initDone = false, .locked = false, .scConfigIdxMax = 0, .serverScLastConfigIdx = 0, .epConfigIdxMax = 0};
+tConfig = {.initDone = false,
+           .serverConfigLocked = false,
+           .scConfigIdxMax = 0,
+           .serverScLastConfigIdx = 0,
+           .epConfigIdxMax = 0};
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -117,43 +121,45 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
         }
 
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+
+            /* set log level to INFO for version logging, then restore it */
+            SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
+            SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+            SOPC_Logger_TraceInfo(
+                SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
+                toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                  "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                                  toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
+                                  toolkitBuildInfo.clientServerBuildInfo.buildVersion,
+                                  toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
+                                  toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
+            SOPC_Logger_SetTraceLogLevel(level);
+        }
+
         Mutex_Unlock(&tConfig.mut);
     }
 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Toolkit_Configured(void)
+SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    SOPC_Toolkit_Build_Info toolkitBuildInfo;
     if (tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.locked)
+        if (false == tConfig.serverConfigLocked)
         {
             // Check an address space is defined in case a endpoint configuration exists
             if (tConfig.epConfigIdxMax == 0 || (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured != false))
             {
-                tConfig.locked = true;
-                SOPC_Services_ToolkitConfigured();
-
-                toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
-
-                /* set log level to INFO for version logging, then restore it */
-                SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
-                SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                SOPC_Logger_TraceInfo(
-                    SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                    toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
-                    toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
-                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                                      "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                                      toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildVersion,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
-                SOPC_Logger_SetTraceLogLevel(level);
+                tConfig.serverConfigLocked = true;
+                SOPC_AddressSpace_Check_Configured();
                 status = SOPC_STATUS_OK;
             }
             else
@@ -217,7 +223,7 @@ void SOPC_Toolkit_Clear(void)
         sopc_addressSpace_configured = false;
         // Reset values to init value
         tConfig.initDone = false;
-        tConfig.locked = false;
+        tConfig.serverConfigLocked = false;
         tConfig.scConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
@@ -256,10 +262,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (tConfig.locked != false)
-            {
-                res = tConfig.scConfigs[scConfigIdx];
-            }
+            res = tConfig.scConfigs[scConfigIdx];
             Mutex_Unlock(&tConfig.mut);
         }
     }
@@ -320,7 +323,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
     if (idxWithoutOffset != 0 && tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
+        if (tConfig.serverConfigLocked != false)
         {
             res = tConfig.serverScConfigs[idxWithoutOffset];
         }
@@ -336,7 +339,7 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
     if (idxWithoutOffset != 0 && tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
+        if (tConfig.serverConfigLocked != false)
         {
             if (tConfig.serverScConfigs[idxWithoutOffset] != NULL)
             {
@@ -404,7 +407,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
     if (tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.locked)
+        if (false == tConfig.serverConfigLocked)
         {
             if (tConfig.epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
             {
@@ -425,7 +428,7 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     if (tConfig.initDone != false)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.locked != false)
+        if (tConfig.serverConfigLocked != false)
         {
             res = tConfig.epConfigs[epConfigIdx];
         }
@@ -450,7 +453,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.locked && sopc_addressSpace_configured == false)
+            if (false == tConfig.serverConfigLocked && sopc_addressSpace_configured == false)
             {
                 status = SOPC_STATUS_OK;
                 SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
@@ -470,7 +473,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.locked && appAddressSpaceNotificationCallback == NULL)
+            if (false == tConfig.serverConfigLocked && appAddressSpaceNotificationCallback == NULL)
             {
                 status = SOPC_STATUS_OK;
                 appAddressSpaceNotificationCallback = pAddSpaceNotifFct;

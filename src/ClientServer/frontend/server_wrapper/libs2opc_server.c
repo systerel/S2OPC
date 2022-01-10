@@ -202,7 +202,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Toolkit_Configured();
+        status = SOPC_ToolkitServer_Configured();
     }
 
     if (SOPC_STATUS_OK == status)

@@ -30,7 +30,7 @@
 //#include "sopc_types.h"
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
-SOPC_ReturnStatus SOPC_Toolkit_Configured(void);
+SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void);
 void SOPC_Toolkit_Clear(void);
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);

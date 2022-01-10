@@ -54,12 +54,15 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
 /**
  *  \brief  Define toolkit configuration as configured and lock its state until toolkit clear operation
  *
+ *  \warning it is only necessary for the server configuration finalization
+ *           and should not be set before server configuration ended.
+ *
  *  \return SOPC_STATUS_OK if initialization succeeded,
  *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
  *  configured,
  *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set
  */
-SOPC_ReturnStatus SOPC_Toolkit_Configured(void);
+SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void);
 
 /**
  *  \brief  Clear the stack configuration

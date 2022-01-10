@@ -457,7 +457,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Configured(void)
     }
     else if (SOPC_Atomic_Int_Get(&libConfigured) != 1)
     {
-        status = SOPC_Toolkit_Configured();
+        // status = SOPC_Toolkit_Configured();
         if (SOPC_STATUS_OK == status)
         {
             SOPC_Atomic_Int_Set(&libConfigured, 1);

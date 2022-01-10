@@ -98,7 +98,6 @@ The functions with `SOPC_ToolkitServer_` prefix shall be ignored.
 - ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
 - ::SOPC_ToolkitClient_AddSecureChannelConfig adds a new secure channel configuration (::SOPC_SecureChannel_Config).
   In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certficates shall be loaded (sopc_key_manager.h).
-- ::SOPC_Toolkit_Configured shall be called once the configuration steps are terminated.
 - ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore.
 
 Once configuration is done, the client is able to establish connection:
@@ -128,7 +127,7 @@ The functions with `SOPC_ToolkitClient_` prefix shall be ignored.
 Some are shared with \ref lclient configuration:
 - (Optional) log configuration with ::SOPC_Common_Initialize
 - ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
-- ::SOPC_Toolkit_Configured shall be called once all the configuration steps are terminated.
+- ::SOPC_ToolkitServer_Configured shall be called once all the configuration steps are terminated.
 - ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore.
 
 For main server configuration there are 2 possible options. The first is to use the XML configuration parser:
