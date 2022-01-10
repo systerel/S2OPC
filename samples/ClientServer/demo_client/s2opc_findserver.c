@@ -89,20 +89,6 @@ int main(int argc, char* argv[])
         status = StateMachine_ConfigureMachine(g_pSM, !NONE, ENCRYPT);
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            printf("# Info: Toolkit configuration done.\n");
-            printf("# Info: Sending FindServers.\n");
-        }
-        else
-        {
-            printf("# Error: Toolkit configuration failed.\n");
-        }
-    }
-
     /* Starts Discovery */
     if (SOPC_STATUS_OK == status)
     {

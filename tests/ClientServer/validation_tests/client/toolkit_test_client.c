@@ -419,18 +419,11 @@ int main(void)
         channel_config_idx3 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         if (channel_config_idx != 0 && channel_config_idx2 != 0 && channel_config_idx3 != 0)
         {
-            status = SOPC_Toolkit_Configured();
+            printf(">>Test_Client_Toolkit: Client configured\n");
         }
         else
         {
             status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            printf(">>Test_Client_Toolkit: Failed to configure the secure channel connections\n");
-        }
-        else
-        {
             printf(">>Test_Client_Toolkit: Client configured\n");
         }
     }

@@ -109,7 +109,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Toolkit_Configured(void)
+SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (tConfig.initDone != false)
@@ -206,10 +206,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
         if (tConfig.initDone != false)
         {
             Mutex_Lock(&tConfig.mut);
-            if (tConfig.locked != false)
-            {
-                res = tConfig.scConfigs[scConfigIdx];
-            }
+            res = tConfig.scConfigs[scConfigIdx];
             Mutex_Unlock(&tConfig.mut);
         }
     }

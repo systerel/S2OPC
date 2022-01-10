@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
 
         assert(epConfigIdx != 0);
 
-        status = SOPC_Toolkit_Configured();
+        status = SOPC_ToolkitServer_Configured();
         assert(status == SOPC_STATUS_OK);
 
         SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, (uintptr_t) NULL, 0);

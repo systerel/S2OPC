@@ -192,20 +192,6 @@ int main(int argc, char* argv[])
         status = StateMachine_ConfigureMachine(g_pSM, !NONE, ENCRYPT);
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            printf("# Info: Toolkit configuration done.\n");
-            printf("# Info: Opening Session.\n");
-        }
-        else
-        {
-            printf("# Error: Toolkit configuration failed.\n");
-        }
-    }
-
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {

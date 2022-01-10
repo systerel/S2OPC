@@ -96,20 +96,6 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            printf("# Info: Toolkit configuration done.\n");
-            printf("# Info: Sending serverRegister.\n");
-        }
-        else
-        {
-            printf("# Error: Toolkit configuration failed.\n");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
         printf("# Info: Sending RegisterServerRequest.\n");
         StateMachine_StartRegisterServer(g_pSM);
 

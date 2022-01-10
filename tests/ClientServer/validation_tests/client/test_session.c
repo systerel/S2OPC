@@ -51,7 +51,6 @@ START_TEST(test_username_password)
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, true, false) == SOPC_STATUS_OK);
-    ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "username", "user", "password") == SOPC_STATUS_OK);
     wait_for_machine(&atomicValidatingResult, g_pSM);

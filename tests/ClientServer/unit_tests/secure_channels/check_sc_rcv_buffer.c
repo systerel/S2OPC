@@ -131,8 +131,6 @@ static void establishSC(void)
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     ck_assert(scConfigIdx != 0);
 
-    ck_assert(SOPC_STATUS_OK == SOPC_Toolkit_Configured());
-
     printf("SC_Rcv_Buffer Init: request connection to SC layer\n");
     SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, (uintptr_t) NULL, 0);
 

@@ -48,7 +48,6 @@ START_TEST(test_getEndpoints)
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
-    ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
     wait_for_machine(&atomicValidatingResult, g_pSM);
@@ -177,7 +176,7 @@ START_TEST(test_registerServer)
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
-    ck_assert(SOPC_Toolkit_Configured() == SOPC_STATUS_OK);
+    ck_assert(SOPC_ToolkitServer_Configured() == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartRegisterServer(g_pSM) == SOPC_STATUS_OK);
     wait_for_machine(&atomicValidatingResult, g_pSM);

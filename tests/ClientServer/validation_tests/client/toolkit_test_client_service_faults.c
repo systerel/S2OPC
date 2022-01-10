@@ -232,19 +232,12 @@ int main(void)
 
         if (channel_config_idx != 0)
         {
-            status = SOPC_Toolkit_Configured();
+            printf(">>Test_Client_Toolkit: Client configured\n");
         }
         else
         {
             status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK != status)
-        {
             printf(">>Test_Client_Toolkit: Failed to configure the secure channel connections\n");
-        }
-        else
-        {
-            printf(">>Test_Client_Toolkit: Client configured\n");
         }
     }
 

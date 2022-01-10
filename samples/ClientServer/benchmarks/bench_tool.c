@@ -614,9 +614,6 @@ int main(int argc, char** argv)
     status = SOPC_Toolkit_Initialize(event_handler);
     assert(status == SOPC_STATUS_OK);
 
-    status = SOPC_Toolkit_Configured();
-    assert(status == SOPC_STATUS_OK);
-
     SOPC_SecureChannel_Config scConfig;
     memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
 

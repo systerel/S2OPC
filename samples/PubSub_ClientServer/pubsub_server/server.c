@@ -362,7 +362,7 @@ SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
     epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(pEpConfig);
     if (epConfigIdx != 0)
     {
-        status = SOPC_Toolkit_Configured();
+        status = SOPC_ToolkitServer_Configured();
     }
     else
     {
