@@ -132,14 +132,14 @@ The S2OPC demo server uses the custom XML configuration file path set `TEST_USER
 
 ## S2OPC PubSub Toolkit features
 
-S2OPC PubSub implements the OPC UA publish subscribe parttern (OPC UA standard Part 14) which complements the Client/Server pattern defined by the Services (OPC UA standard Part 4).
+S2OPC PubSub implements the OPC UA publish subscribe pattern (OPC UA standard Part 14) which complements the Client/Server pattern defined by the Services (OPC UA standard Part 4).
 
 Note: PubSub is only available on S2OPC Toolkit version > 0.11.0
 
 ### PubSub implemented features
 
 The S2OPC PubSub implementation properties are the following:
-- the communication layer is UDP or MQTT (Paho library required),
+- the communication layer is Ethernet only, UDP or MQTT (Paho library required),
 - the encoding type is UADP,
 - security is available (with a local SKS implementation),
 - no override management (cf §6.2.10). That means LastUsableValue is used in any cases,
