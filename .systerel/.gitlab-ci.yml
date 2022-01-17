@@ -258,6 +258,8 @@ test-check:
       - 'build/bin/**/*.tap'
       - 'build/bin/**/*.log'
       - 'build/tests/**/Testing'
+      - 'build/**/*.*.gcda' # coverage analysis
+      - 'build/**/*.*.gcno' # coverage analysis
     when: always
     expire_in: '1 week'
 # Common rules defined by test-unit job below
@@ -294,6 +296,8 @@ test-unit:
       - 'build/bin/**/*.tap'
       - 'build/bin/**/*.log'
       - 'tests/ClientServer/acceptance_tools/*.log'
+      - '**/*.*.gcda' # coverage analysis
+      - '**/*.*.gcno' # coverage analysis
     when: always
     expire_in: '1 week'
 
