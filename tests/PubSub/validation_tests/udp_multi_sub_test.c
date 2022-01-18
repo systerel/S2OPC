@@ -132,8 +132,8 @@ int main(void)
 
     if (buffer != NULL)
     {
-        SOPC_Sub_SocketsMgr_Initialize(sockIdxArr, sizeof(*sockIdxArr), socketArr, NB_ADDRS, readyToReceive, NULL,
-                                       NULL);
+        SOPC_Sub_SocketsMgr_Initialize(sockIdxArr, sizeof(*sockIdxArr), socketArr, NB_ADDRS, readyToReceive, NULL, NULL,
+                                       0);
         printf("Received from pub:");
         while (false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
         {

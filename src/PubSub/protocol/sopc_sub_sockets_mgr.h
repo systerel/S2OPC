@@ -39,14 +39,17 @@ typedef void (*SOPC_PeriodicTick)(void* ctx);
  *                              socket and its associated context are provided by caller
  * \param tickCb                the callback called in a periodic way (each 500ms) to could check keep alive timeout
  * \param tickCbCtx             the callback context pointer provided on call to \p tickCb callback
- * */
+ * \param threadPriority        This value must be 0 (thread created with usual priority) or 1 to 99
+ *                              (thread created with FIFO scheduling policy requiring administrative rights)
+ */
 void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     size_t sizeOfSockContextElt,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive callback,
                                     SOPC_PeriodicTick tickCb,
-                                    void* tickCbCtx);
+                                    void* tickCbCtx,
+                                    int threadPriority);
 
 /**
  * Awaits the dedicated thread to stop, clear the context and return.

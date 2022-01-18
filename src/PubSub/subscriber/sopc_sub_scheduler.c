@@ -142,7 +142,7 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 
 // END SUBSCRIBER SECURITY CONTEXT
 
-static bool SOPC_SubScheduler_Start_Sockets(void);
+static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
 
 /* Transport context. One per connection */
 typedef struct SOPC_SubScheduler_TransportCtx SOPC_SubScheduler_TransportCtx;
@@ -615,7 +615,8 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
-                             SOPC_SubscriberStateChanged_Func stateChangedCb)
+                             SOPC_SubscriberStateChanged_Func stateChangedCb,
+                             int threadPriority)
 {
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
 
@@ -648,7 +649,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
             // Run the socket manager with the context
             if (0 < schedulerCtx.nbSockets)
             {
-                result = SOPC_SubScheduler_Start_Sockets();
+                result = SOPC_SubScheduler_Start_Sockets(threadPriority);
             }
         }
         else
@@ -693,7 +694,7 @@ void SOPC_SubScheduler_Stop(void)
    - schedulerCtx.nbSockets > 0
    - schedulerCtx.sockArray is NULL
 */
-static bool SOPC_SubScheduler_Start_Sockets(void)
+static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
 {
     assert(0 < schedulerCtx.nbSockets);
     assert(NULL == schedulerCtx.sockArray);
@@ -724,7 +725,8 @@ static bool SOPC_SubScheduler_Start_Sockets(void)
 
     assert(nb_socket == sockIdx);
     SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
-                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received, NULL, NULL);
+                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received, NULL, NULL,
+                                   threadPriority);
 
     return true;
 }

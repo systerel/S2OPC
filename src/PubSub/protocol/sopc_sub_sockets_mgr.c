@@ -127,7 +127,8 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
                                                 uint16_t nbSockets,
                                                 SOPC_ReadyToReceive callback,
                                                 SOPC_PeriodicTick tickCb,
-                                                void* tickCbCtx)
+                                                void* tickCbCtx,
+                                                int threadPriority)
 {
     if (SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
@@ -144,8 +145,18 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
 
     receptionThread.stopFlag = 0;
 
-    if (SOPC_Thread_Create(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr") !=
-        SOPC_STATUS_OK)
+    SOPC_ReturnStatus threadReturnStatus = SOPC_STATUS_OK;
+    if (0 == threadPriority)
+    {
+        threadReturnStatus =
+            SOPC_Thread_Create(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr");
+    }
+    else
+    {
+        threadReturnStatus = SOPC_Thread_CreatePrioritized(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop,
+                                                           NULL, threadPriority, "SubSocketMgr");
+    }
+    if (threadReturnStatus != SOPC_STATUS_OK)
     {
         return false;
     }
@@ -179,12 +190,13 @@ void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive callback,
                                     SOPC_PeriodicTick tickCb,
-                                    void* tickCbCtx)
+                                    void* tickCbCtx,
+                                    int threadPriority)
 {
     assert(NULL != socketArray);
     assert(NULL != callback);
     bool result = SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, sizeOfSockContextElt, socketArray, nbSockets,
-                                                      callback, tickCb, tickCbCtx);
+                                                      callback, tickCb, tickCbCtx, threadPriority);
     SOPC_ASSERT(result);
 }
 

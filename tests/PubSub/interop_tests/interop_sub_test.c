@@ -244,7 +244,7 @@ int main(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Sub_SocketsMgr_Initialize(NULL, 0, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE);
+        SOPC_Sub_SocketsMgr_Initialize(NULL, 0, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE, 0);
     }
 
     while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)

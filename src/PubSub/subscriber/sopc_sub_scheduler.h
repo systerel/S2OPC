@@ -38,7 +38,9 @@ typedef void (*SOPC_SubscriberStateChanged_Func)(SOPC_PubSubState state);
 /* Only state changed callback can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
-                             SOPC_SubscriberStateChanged_Func stateChangedCb);
+                             SOPC_SubscriberStateChanged_Func stateChangedCb,
+                             int threadPriority);
+
 void SOPC_SubScheduler_Stop(void);
 
 #endif /* SOPC_SUB_SCHEDULER_H_ */

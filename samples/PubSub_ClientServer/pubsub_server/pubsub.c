@@ -194,7 +194,7 @@ bool PubSub_Start(void)
 #endif
     if (sub_nb_connections > 0)
     {
-        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus);
+        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus, 0);
     }
     if (pub_nb_connections > 0)
     {

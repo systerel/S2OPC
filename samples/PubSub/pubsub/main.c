@@ -264,7 +264,7 @@ int main(int argc, char* const argv[])
         else
         {
             /* Note: a state changed callback can be made to handle PubSub state changes (unused here) */
-            bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL);
+            bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL, 99);
             if (res)
             {
                 printf("# Info: Subscriber started\n");
