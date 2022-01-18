@@ -20,8 +20,6 @@
 /** \file
  *
  * Gathers the definitions of the lib-specific and crypto-related functions.
- * Sources for these functions should be split in the future to provide
- * finer grained linking options (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
  */
 
 #ifndef SOPC_CRYPTO_FUNCTIONS_LIB_H_
