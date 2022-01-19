@@ -71,8 +71,8 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 
 void SOPC_LibSub_Clear(void)
 {
-    SOPC_CommonHelper_Clear();
     SOPC_ClientCommon_Clear();
+    SOPC_CommonHelper_Clear();
 }
 
 SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,

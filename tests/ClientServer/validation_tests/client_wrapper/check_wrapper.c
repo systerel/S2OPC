@@ -121,7 +121,6 @@ START_TEST(test_wrapper_initialize_finalize)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
     ck_assert_int_eq(-2, SOPC_ClientHelper_Initialize(NULL));
 
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 }
 END_TEST
@@ -147,7 +146,6 @@ START_TEST(test_wrapper_create_configuration)
     conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
 
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* configure a connection without wrapper being initialized */
@@ -203,7 +201,6 @@ START_TEST(test_wrapper_create_connection)
     int32_t invalid_con_id_3 = SOPC_ClientHelper_CreateConnection(-1);
     ck_assert_int_eq(invalid_con_id_3, -1);
 
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* connect without wrapper being initialized */
@@ -262,7 +259,6 @@ START_TEST(test_wrapper_config_invalid_arguments)
     }
     /* cannot test username and password */
 
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 }
 END_TEST
@@ -292,7 +288,6 @@ START_TEST(test_wrapper_disconnect)
     /* disconnect a non existing connection */
     ck_assert_int_eq(-3, SOPC_ClientHelper_Disconnect(31));
 
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* disconnect after wrapper has been closed */
@@ -338,7 +333,6 @@ START_TEST(test_wrapper_create_subscription)
     ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* create a subscription after wrapper has been closed */
@@ -364,7 +358,6 @@ START_TEST(test_wrapper_create_subscription_after_disconnect)
     ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 }
 END_TEST
@@ -429,7 +422,6 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* add monitored items after toolkit being closed */
@@ -498,7 +490,6 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* clear mutex and condition */
@@ -551,7 +542,6 @@ START_TEST(test_wrapper_unsubscribe)
     ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* delete subscription after toolkit is closed*/
@@ -697,7 +687,6 @@ START_TEST(test_wrapper_read)
     }
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* read after toolkit is closed */
@@ -833,7 +822,6 @@ START_TEST(test_wrapper_write)
     }
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* write a node after toolkit is closed */
@@ -1044,7 +1032,6 @@ START_TEST(test_wrapper_browse)
     }
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* browse after toolkit is closed */
@@ -1094,7 +1081,6 @@ START_TEST(test_wrapper_get_endpoints)
     }
 
     /* close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 
     /* get endpoints after toolkit is closed */
@@ -1131,7 +1117,6 @@ START_TEST(test_wrapper_disconnect_callback)
     ck_assert(SOPC_Atomic_Int_Get(&disconnected) == 1);
 
     /* Close wrapper */
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
 }
 END_TEST
@@ -1149,8 +1134,8 @@ static void setup(void)
 
 static void teardown(void)
 {
-    SOPC_CommonHelper_Clear();
     SOPC_ClientHelper_Finalize();
+    SOPC_CommonHelper_Clear();
 }
 
 static Suite* tests_make_suite_wrapper(void)

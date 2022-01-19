@@ -151,10 +151,16 @@ void SOPC_ClientCommon_Clear(void)
         return;
     }
 
+    // Inhibit reception of event on callback out of mutex
+    // => ensures no call to event callback can be done after Lock acquired
     SOPC_CommonHelper_SetClientComEvent(NULL);
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
+
+    // Close all secure channels that might be opened synchonously
+    // and clear all toolkit client SC configurations
+    SOPC_ToolkitClient_ClearAllSCs();
 
     SOPC_SLinkedListIterator pIter = NULL;
     SOPC_StaMac_Machine* pSM = NULL;
