@@ -126,4 +126,18 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
  */
 SOPC_Toolkit_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void);
 
+/**
+ *  \brief  Close all Secure Channels established as client
+ *          and clear associated configurations added by ::SOPC_ToolkitClient_AddSecureChannelConfig.
+ *          All previous index returned by ::SOPC_ToolkitClient_AddSecureChannelConfig
+ *          are invalid after calling this function.
+ *
+ *  \note Any client active session should be closed prior to calling this function.
+ *
+ *  \note It should be used to ensure configuration previously added with
+ *        ::SOPC_ToolkitClient_AddSecureChannelConfig are not used anymore by toolkit.
+ *        Other alternative to ensure that is call to ::SOPC_Toolkit_Clear.
+ */
+void SOPC_ToolkitClient_ClearAllSCs(void);
+
 #endif /* SOPC_TOOLKIT_CONFIG_H_ */

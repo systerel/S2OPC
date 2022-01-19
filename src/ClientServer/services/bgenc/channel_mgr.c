@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 06/03/2020 14:49:09
+ Date                 : 19/01/2022 11:18:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -36,12 +36,14 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 t_bool channel_mgr__all_channel_closing;
+t_bool channel_mgr__all_client_channel_closing;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void channel_mgr__INITIALISATION(void) {
    channel_mgr__all_channel_closing = false;
+   channel_mgr__all_client_channel_closing = false;
 }
 
 /*--------------------
@@ -70,22 +72,32 @@ void channel_mgr__l_close_secure_channel(
 
 void channel_mgr__l_check_all_channel_lost(void) {
    {
+      t_bool channel_mgr__l_cli_con;
       t_bool channel_mgr__l_con;
       t_bool channel_mgr__l_continue;
       constants__t_channel_i channel_mgr__l_channel;
       
-      if (channel_mgr__all_channel_closing == true) {
+      if ((channel_mgr__all_channel_closing == true) ||
+         (channel_mgr__all_client_channel_closing == true)) {
          channel_mgr__l_con = false;
          channel_mgr_it__init_iter_channel(&channel_mgr__l_continue);
          while ((channel_mgr__l_continue == true) &&
             (channel_mgr__l_con == false)) {
             channel_mgr_it__continue_iter_channel(&channel_mgr__l_continue,
                &channel_mgr__l_channel);
-            channel_mgr_1__is_channel_connected(channel_mgr__l_channel,
-               &channel_mgr__l_con);
+            channel_mgr_1__is_client_channel(channel_mgr__l_channel,
+               &channel_mgr__l_cli_con);
+            if ((channel_mgr__all_channel_closing == true) ||
+               ((channel_mgr__all_client_channel_closing == true) &&
+               (channel_mgr__l_cli_con == true))) {
+               channel_mgr_1__is_channel_connected(channel_mgr__l_channel,
+                  &channel_mgr__l_con);
+            }
          }
          if (channel_mgr__l_con == false) {
-            channel_mgr_bs__last_connected_channel_lost();
+            channel_mgr_bs__last_connected_channel_lost(channel_mgr__all_client_channel_closing);
+            channel_mgr__all_channel_closing = false;
+            channel_mgr__all_client_channel_closing = false;
          }
       }
    }
@@ -193,25 +205,37 @@ void channel_mgr__close_secure_channel(
 }
 
 void channel_mgr__close_all_channel(
+   const t_bool channel_mgr__p_clientOnly,
    t_bool * const channel_mgr__bres) {
    {
       t_bool channel_mgr__l_continue;
       constants__t_channel_i channel_mgr__l_channel;
       t_bool channel_mgr__l_con;
+      t_bool channel_mgr__l_cli_con;
+      t_bool channel_mgr__l_any_channel_closing;
       
-      channel_mgr__all_channel_closing = false;
+      channel_mgr__l_any_channel_closing = false;
       channel_mgr_it__init_iter_channel(&channel_mgr__l_continue);
       while (channel_mgr__l_continue == true) {
          channel_mgr_it__continue_iter_channel(&channel_mgr__l_continue,
             &channel_mgr__l_channel);
          channel_mgr_1__is_channel_connected(channel_mgr__l_channel,
             &channel_mgr__l_con);
-         if (channel_mgr__l_con == true) {
-            channel_mgr__all_channel_closing = true;
+         channel_mgr_1__is_client_channel(channel_mgr__l_channel,
+            &channel_mgr__l_cli_con);
+         if ((channel_mgr__l_con == true) &&
+            ((channel_mgr__p_clientOnly == false) ||
+            ((channel_mgr__p_clientOnly == true) &&
+            (channel_mgr__l_cli_con == true)))) {
+            channel_mgr__l_any_channel_closing = true;
             channel_mgr__l_close_secure_channel(channel_mgr__l_channel);
          }
       }
-      *channel_mgr__bres = channel_mgr__all_channel_closing;
+      channel_mgr__all_channel_closing = ((channel_mgr__p_clientOnly == false) &&
+         (channel_mgr__l_any_channel_closing == true));
+      channel_mgr__all_client_channel_closing = ((channel_mgr__p_clientOnly == true) &&
+         (channel_mgr__l_any_channel_closing == true));
+      *channel_mgr__bres = channel_mgr__l_any_channel_closing;
    }
 }
 

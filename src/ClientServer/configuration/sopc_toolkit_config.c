@@ -206,7 +206,7 @@ void SOPC_Toolkit_Clear(void)
     {
         // Services are in charge to gracefully close all connections.
         // It must be done before stopping the services
-        SOPC_Services_PreClear();
+        SOPC_Services_CloseAllSCs(false);
 
         SOPC_Sockets_Clear();
         SOPC_EventTimer_Clear();
@@ -487,4 +487,17 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
 SOPC_Toolkit_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void)
 {
     return (SOPC_Toolkit_Build_Info){SOPC_Common_GetBuildInfo(), SOPC_ClientServer_GetBuildInfo()};
+}
+
+void SOPC_ToolkitClient_ClearAllSCs(void)
+{
+    if (!tConfig.initDone)
+    {
+        return;
+    }
+    SOPC_Services_CloseAllSCs(true);
+    Mutex_Lock(&tConfig.mut);
+    memset(tConfig.scConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
+    tConfig.scConfigIdxMax = 0;
+    Mutex_Unlock(&tConfig.mut);
 }

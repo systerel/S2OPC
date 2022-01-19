@@ -35,19 +35,25 @@
 typedef enum SOPC_Services_Event
 {
     /* Services to services events */
-    SE_TO_SE_SC_ALL_DISCONNECTED = 0x600, // special event sent by services mgr itself (no parameters)
-    SE_TO_SE_ACTIVATE_ORPHANED_SESSION,   /* Client side only:
-                                             id = session id
-                                             auxParam = (uint32_t) endpoint connection config index
-                                          */
-    SE_TO_SE_CREATE_SESSION,              /* Client side only:
-                                             id = session id
-                                             auxParam = (uint32_t) endpoint connection config index
-                                          */
-    SE_TO_SE_ACTIVATE_SESSION,            /* Client side only:
-                                           * id = session id
-                                           * params = (user token structure)
-                                           */
+    SE_TO_SE_SC_ALL_DISCONNECTED = 0x600,   /* Special event sent by B code to indicate all SC are closed.
+                                               It might concerns only SC established as client or both client/server.
+  
+                                               params = true if for SCs as client only, 0 if both client and server SCs.
+                                             */
+    SE_TO_SE_CLIENT_SC_ALL_SC_DISCONNECTED, /* Special event sent by B code to indicate
+                                                all SC established as client are closed */
+    SE_TO_SE_ACTIVATE_ORPHANED_SESSION,     /* Client side only:
+                                               id = session id
+                                               auxParam = (uint32_t) endpoint connection config index
+                                            */
+    SE_TO_SE_CREATE_SESSION,                /* Client side only:
+                                               id = session id
+                                               auxParam = (uint32_t) endpoint connection config index
+                                            */
+    SE_TO_SE_ACTIVATE_SESSION,              /* Client side only:
+                                             * id = session id
+                                             * params = (user token structure)
+                                             */
 
     SE_TO_SE_SERVER_DATA_CHANGED, /* Server side only:
                                     id = session id
@@ -96,7 +102,12 @@ typedef enum SOPC_Services_Event
                                          auxParam = user application request context
                                        */
     APP_TO_SE_CLOSE_SESSION,          // id = session id
-    APP_TO_SE_CLOSE_ALL_CONNECTIONS,  // Automatically called by toolkit clear (no params)
+    APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /* Request to close all established SC connections.
+                                         It might be used to close only SC established as client or both client/server.
+                                         Automatically called by ::SOPC_Toolkit_Clear for both client and server.
+ 
+                                         params = true if for SCs as client only, 0 if both client and server SCs.
+                                       */
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */
@@ -108,10 +119,14 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintpt
 void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener);
 
 /**
- *  \brief Notify that the clear function will be called to finish
- *         operations using secure channels and sockets services.
+ *  \brief Close all SecureChannels (established as client or both) in a synchronous way.
+ *
+ *  \param clientOnly  If flag is set, only the Secure Channels established as a client are closed.
+ *                     Otherwise both Secure Channels established as a server and as client are closed.
+ *
+ *  \warning   It is a pre-requisite to call SOPC_Services_CloseAllSCs(false) prior to ::SOPC_Services_Clear
  */
-void SOPC_Services_PreClear(void);
+void SOPC_Services_CloseAllSCs(bool clientOnly);
 
 /**
  *  \brief Stop and clear the services and application event dispatcher threads

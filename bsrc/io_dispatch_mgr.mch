@@ -360,8 +360,10 @@ OPERATIONS
 
     // TODO: add close all sessions / subscriptions
 
-    bres <-- close_all_active_connections =
-    BEGIN
+    bres <-- close_all_active_connections (p_clientOnly) =
+    PRE
+        p_clientOnly : BOOL
+    THEN
         bres :: BOOL // indicates if active connection will be closed
     END
     ;

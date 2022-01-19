@@ -97,8 +97,10 @@ OPERATIONS
     END
     ;
 
-    last_connected_channel_lost =
-    BEGIN
+    last_connected_channel_lost(p_clientOnly) =
+    PRE
+        p_clientOnly : BOOL
+    THEN
         skip
     END
     ;

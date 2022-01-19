@@ -40,3 +40,5 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 SOPC_Toolkit_Build_Info SOPC_ToolkitConfig_GetBuildInfo(void);
+
+void SOPC_ToolkitClient_ClearAllSCs(void);

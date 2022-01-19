@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 13/03/2020 10:52:36
+ Date                 : 19/01/2022 11:18:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -53,6 +53,7 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern t_bool channel_mgr__all_channel_closing;
+extern t_bool channel_mgr__all_client_channel_closing;
 
 /*------------------------
    INITIALISATION Clause
@@ -103,6 +104,7 @@ extern void channel_mgr__cli_set_connection_timeout_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_all_channel(
+   const t_bool channel_mgr__p_clientOnly,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_secure_channel(
    const constants__t_channel_i channel_mgr__channel);

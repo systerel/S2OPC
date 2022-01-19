@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 05/01/2022 17:33:50
+ Date                 : 15/03/2022 14:54:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -1021,8 +1021,10 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
 }
 
 void io_dispatch_mgr__close_all_active_connections(
+   const t_bool io_dispatch_mgr__p_clientOnly,
    t_bool * const io_dispatch_mgr__bres) {
-   channel_mgr__close_all_channel(io_dispatch_mgr__bres);
+   channel_mgr__close_all_channel(io_dispatch_mgr__p_clientOnly,
+      io_dispatch_mgr__bres);
 }
 
 void io_dispatch_mgr__UNINITIALISATION(void) {

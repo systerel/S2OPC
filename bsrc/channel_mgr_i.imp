@@ -34,13 +34,16 @@ IMPORTS
     channel_mgr_bs
 
 CONCRETE_VARIABLES
-    all_channel_closing
+    all_channel_closing,
+    all_client_channel_closing
 
 INVARIANT
-    all_channel_closing : BOOL
+    all_channel_closing : BOOL &
+    all_client_channel_closing : BOOL
 
 INITIALISATION
-    all_channel_closing := FALSE
+    all_channel_closing := FALSE;
+    all_client_channel_closing := FALSE
 
 PROMOTES
     is_valid_channel_config_idx,
@@ -75,10 +78,14 @@ LOCAL_OPERATIONS
     l_check_all_channel_lost =
     BEGIN
         channels_to_iterate,
-        channels_iterated
+        channels_iterated,
+        all_channel_closing,
+        all_client_channel_closing
         :(  channels_to_iterate <: t_channel &
             channels_iterated   <: t_channel &
-            channels_to_iterate /\ channels_iterated = {}
+            channels_to_iterate /\ channels_iterated = {} &
+            all_channel_closing : BOOL &
+            all_client_channel_closing : BOOL
          )
      END
      ;
@@ -118,11 +125,12 @@ OPERATIONS
 
     l_check_all_channel_lost =
     VAR
+        l_cli_con,
         l_con,
         l_continue,
         l_channel
     IN
-        IF  all_channel_closing = TRUE THEN
+        IF  all_channel_closing = TRUE or all_client_channel_closing = TRUE THEN
             l_con := FALSE;
             l_continue <-- init_iter_channel;
             WHILE
@@ -130,7 +138,11 @@ OPERATIONS
                 l_con      = FALSE
             DO
                 l_continue, l_channel <-- continue_iter_channel;
-                l_con <-- is_channel_connected(l_channel)
+                l_cli_con <-- is_client_channel (l_channel);
+                IF all_channel_closing = TRUE or (all_client_channel_closing = TRUE & l_cli_con = TRUE)
+                THEN
+                    l_con <-- is_channel_connected(l_channel)
+                END
             INVARIANT
                channels_to_iterate <: t_channel &
                channels_iterated   <: t_channel &
@@ -140,7 +152,9 @@ OPERATIONS
                card(channels_to_iterate)
             END;
             IF  l_con = FALSE THEN
-                last_connected_channel_lost
+                last_connected_channel_lost(all_client_channel_closing);
+                all_channel_closing := FALSE;
+                all_client_channel_closing := FALSE
             END
         END
     END
@@ -232,19 +246,25 @@ OPERATIONS
     END
     ;
 
-    bres <-- close_all_channel =
+    bres <-- close_all_channel (p_clientOnly) =
     VAR
         l_continue,
         l_channel,
-        l_con
+        l_con,
+        l_cli_con,
+        l_any_channel_closing
     IN
-        all_channel_closing := FALSE;
+        l_any_channel_closing := FALSE;
         l_continue <-- init_iter_channel;
         WHILE l_continue = TRUE DO
             l_continue, l_channel <-- continue_iter_channel;
             l_con <-- is_channel_connected(l_channel);
-            IF  l_con = TRUE THEN
-                all_channel_closing := TRUE;
+            l_cli_con <-- is_client_channel (l_channel);
+            IF l_con = TRUE &
+                (p_clientOnly = FALSE or
+                    (p_clientOnly = TRUE & l_cli_con = TRUE))
+            THEN
+                l_any_channel_closing := TRUE;
                 l_close_secure_channel(l_channel)
             END
         INVARIANT
@@ -255,7 +275,9 @@ OPERATIONS
         VARIANT
             card(channels_to_iterate)
         END;
-        bres := all_channel_closing
+        all_channel_closing := bool(p_clientOnly = FALSE & l_any_channel_closing = TRUE);
+        all_client_channel_closing := bool(p_clientOnly = TRUE & l_any_channel_closing = TRUE);
+        bres := l_any_channel_closing
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 05/01/2022 17:33:50
+ Date                 : 15/03/2022 14:54:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -110,6 +110,7 @@ extern void io_dispatch_mgr__client_send_service_request(
    const constants__t_application_context_i io_dispatch_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__close_all_active_connections(
+   const t_bool io_dispatch_mgr__p_clientOnly,
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_client_activate_orphaned_session(
    const constants__t_session_i io_dispatch_mgr__session,

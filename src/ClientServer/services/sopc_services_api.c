@@ -52,17 +52,19 @@ static struct
     Condition cond;
     bool allDisconnectedFlag;
     bool requestedFlag;
-} closeAllConnectionsSync = {.requestedFlag = false, .allDisconnectedFlag = false};
+    bool clientOnlyFlag;
+} closeAllConnectionsSync = {.allDisconnectedFlag = false, .requestedFlag = false, .clientOnlyFlag = false};
 
 SOPC_EventHandler* SOPC_Services_GetEventHandler(void)
 {
     return servicesEventHandler;
 }
 
-static void SOPC_Internal_AllClientSecureChannelsDisconnected(void)
+static void SOPC_Internal_AllClientSecureChannelsDisconnected(bool clientOnly)
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);
-    if (closeAllConnectionsSync.requestedFlag != false)
+    assert(closeAllConnectionsSync.clientOnlyFlag == clientOnly);
+    if (closeAllConnectionsSync.requestedFlag)
     {
         closeAllConnectionsSync.allDisconnectedFlag = true;
         Condition_SignalAll(&closeAllConnectionsSync.cond);
@@ -211,9 +213,10 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     switch (event)
     {
     case SE_TO_SE_SC_ALL_DISCONNECTED:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SE_TO_SE_SC_ALL_DISCONNECTED");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SE_TO_SE_SC_ALL_DISCONNECTED clientOnly=%" PRIuPTR, params);
         // Call directly toolkit configuration callback
-        SOPC_Internal_AllClientSecureChannelsDisconnected();
+        SOPC_Internal_AllClientSecureChannelsDisconnected((bool) params);
         break;
 
     case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
@@ -505,12 +508,13 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_CLOSE_ALL_CONNECTIONS");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_CLOSE_ALL_CONNECTIONS clientOnly=%" PRIuPTR, params);
 
-        io_dispatch_mgr__close_all_active_connections(&bres);
-        if (bres == false)
+        io_dispatch_mgr__close_all_active_connections((bool) params, &bres);
+        if (!bres)
         {
-            // All connections considered closed: simulate new service event
+            // All connections already closed: simulate new service event
             onServiceEvent(handler, SE_TO_SE_SC_ALL_DISCONNECTED, id, params, auxParam);
         }
         break;
@@ -551,19 +555,21 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
     INITIALISATION();
 }
 
-void SOPC_Services_PreClear(void)
+void SOPC_Services_CloseAllSCs(bool clientOnly)
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);
     closeAllConnectionsSync.requestedFlag = true;
+    closeAllConnectionsSync.clientOnlyFlag = clientOnly;
     // Do a synchronous connections closed (effective on client only)
-    SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_CLOSE_ALL_CONNECTIONS, 0, (uintptr_t) NULL, 0);
-    while (closeAllConnectionsSync.allDisconnectedFlag == false)
+    SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_CLOSE_ALL_CONNECTIONS, 0, (uintptr_t) clientOnly, 0);
+    while (!closeAllConnectionsSync.allDisconnectedFlag)
     {
         Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
     }
+    closeAllConnectionsSync.allDisconnectedFlag = false;
+    closeAllConnectionsSync.clientOnlyFlag = false;
+    closeAllConnectionsSync.requestedFlag = false;
     Mutex_Unlock(&closeAllConnectionsSync.mutex);
-    Mutex_Clear(&closeAllConnectionsSync.mutex);
-    Condition_Clear(&closeAllConnectionsSync.cond);
 }
 
 void SOPC_Services_Clear(void)
@@ -573,5 +579,8 @@ void SOPC_Services_Clear(void)
     SOPC_Looper_Delete(servicesLooper);
 
     closeAllConnectionsSync.allDisconnectedFlag = false;
+    closeAllConnectionsSync.clientOnlyFlag = false;
     closeAllConnectionsSync.requestedFlag = false;
+    Mutex_Clear(&closeAllConnectionsSync.mutex);
+    Condition_Clear(&closeAllConnectionsSync.cond);
 }

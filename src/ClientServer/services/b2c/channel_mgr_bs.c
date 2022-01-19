@@ -114,9 +114,10 @@ void channel_mgr_bs__finalize_close_secure_channel(const constants__t_channel_i 
     SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, channel_mgr_bs__channel, (uintptr_t) NULL, 0);
 }
 
-void channel_mgr_bs__last_connected_channel_lost(void)
+void channel_mgr_bs__last_connected_channel_lost(const t_bool channel_mgr_bs__p_clientOnly)
 {
-    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0, (uintptr_t) NULL, 0);
+    SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0,
+                           (uintptr_t) channel_mgr_bs__p_clientOnly, 0);
 }
 
 void channel_mgr_bs__send_channel_error_msg(const constants__t_channel_i channel_mgr_bs__channel,

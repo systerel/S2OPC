@@ -109,8 +109,10 @@ OPERATIONS
          )
     END;
 
-    bres <-- close_all_channel =
-    BEGIN
+    bres <-- close_all_channel (p_clientOnly) =
+    PRE
+        p_clientOnly : BOOL
+    THEN
         s_cli_channel_disconnecting,
         bres
         :(  s_cli_channel_disconnecting <: t_channel_config_idx &

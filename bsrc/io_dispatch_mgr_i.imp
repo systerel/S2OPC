@@ -913,9 +913,9 @@ OPERATIONS
     END
     ;
 
-    bres <-- close_all_active_connections =
+    bres <-- close_all_active_connections(p_clientOnly) =
     BEGIN
-        bres <-- close_all_channel
+        bres <-- close_all_channel(p_clientOnly)
     END
     ;
 
