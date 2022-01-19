@@ -194,8 +194,8 @@ Tested under Debian 9.
 Prerequisites:
 - Make (tested with GNU Make version 4.2.1)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
-- GCC (tested with GCC version 10.2.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.10)
+- GCC (tested with GCC version 11.2.0)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.12)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(require libexpat version >= 2.2.10 compiled with CMake)
 - Python3 (tested with version 3.6.3)
@@ -233,7 +233,7 @@ Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.11.1)
 - Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.10)
+- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.12)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 
 To build the Toolkit library and tests with default configuration on current stable release, you can adapt the bat script below:
