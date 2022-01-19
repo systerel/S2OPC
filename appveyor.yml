@@ -64,7 +64,7 @@ test_script:
         cmake --build . --target ALL_BUILD --config %CONFIG%
     # download and build expat
     - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/R_2_2_10.zip -FileName %EXPAT_DIR_NAME%.zip"
+    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_3.zip -FileName %EXPAT_DIR_NAME%.zip"
     - "unzip %EXPAT_DIR_NAME%.zip"
     - |-
         cd %EXPAT_DIR%
