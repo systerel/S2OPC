@@ -432,7 +432,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
                 SOPC_Free(result->callbackBuffer);
                 result->callbackBuffer = NULL;
 
-                SOPC_Free(result->file);
+                SOPC_Free(file);
                 SOPC_Free(result);
                 result = NULL;
             }
