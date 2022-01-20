@@ -97,8 +97,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_SetClientApplicationConfiguration(SOPC_Clien
 
 /**
  @brief
-    Configure a future connection. This function shall be called once per connection before
-    a call to SOPC_ClientCommon_Configured(). The given /p pCfgId is later used to create connections.
+    Configure a future connection. The given /p pCfgId is later used to create connections.
  @param pCfg
     Non null pointer to the connection configuration. The content of the configuration is copied
     and the object pointed by /p pCfg can be freed by the caller.
@@ -108,17 +107,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_SetClientApplicationConfiguration(SOPC_Clien
     The operation status */
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
                                                         SOPC_LibSub_ConfigurationId* pCfgId);
-
-/**
- @brief
-    Mark the library as configured. All calls to SOPC_ClientCommon_ConfigureConnection() shall
-    be done prior to calling this function. All calls to SOPC_ClientCommon_Connect() shall be done
-    after calling this function.
- @warning
-    As this function should be called only once, it is not threadsafe.
- @return
-    The operation status */
-SOPC_ReturnStatus SOPC_ClientCommon_Configured(void);
 
 /**
  @brief

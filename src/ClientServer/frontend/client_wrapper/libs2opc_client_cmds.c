@@ -291,49 +291,12 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
 // Return 0 if succeeded
 int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
-    /*
-    SOPC_Log_Level level = SOPC_LOG_LEVEL_DEBUG;
-    bool log_level_set = true;
-    bool log_path_set = true;
-
-    switch (log_level)
-    {
-    case SOPC_LOG_LEVEL_ERROR:
-    case SOPC_LOG_LEVEL_WARNING:
-    case SOPC_LOG_LEVEL_INFO:
-    case SOPC_LOG_LEVEL_DEBUG:
-        level = log_level;
-        break;
-    default:
-        log_level_set = false;
-        break; // Keep DEBUG level
-    }
-
-    if (log_path == NULL)
-    {
-        log_path_set = false;
-        log_path = "./logs/";
-    }
-    */
     SOPC_LibSub_StaticCfg cfg_cli = {
         .host_log_callback = Helpers_LoggerStdout,
         .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
-        /*.toolkit_logger = {.level = level, .log_path = log_path, .maxBytes = 1048576, .maxFiles = 50}*/};
+    };
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli, GenericCallback_GetEndpoints);
-
-    /*
-    if (!log_level_set)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING,
-                    "Invalid log level provided, set to level SOPC_LOG_LEVEL_DEBUG by default.");
-    }
-
-    if (!log_path_set)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "No log path provided, set to './logs/' by default.");
-    }
-    */
 
     if (SOPC_STATUS_OK != status)
     {
@@ -365,13 +328,6 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     else if (NULL == result)
     {
         return -2;
-    }
-
-    status = SOPC_ClientCommon_Configured();
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit");
-        res = -100;
     }
 
     /* allocate context */
@@ -587,19 +543,6 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Configure connection to \"%s\"", cfg_con.server_url);
 
     status = SOPC_ClientCommon_ConfigureConnection(&cfg_con, &cfg_id);
-    if (SOPC_STATUS_OK != status)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ClientCommon_Configured();
-        if (SOPC_STATUS_OK != status)
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure the toolkit.");
-        }
-    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -607,6 +550,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
     }
     else
     {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
         return -100;
     }
 

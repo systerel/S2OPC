@@ -66,8 +66,7 @@
 
 /* Global library variables */
 static int32_t libInitialized = 0;
-static int32_t libConfigured = 0;
-static Mutex mutex; /* Mutex which protects global variables except libInitialized and libConfigured */
+static Mutex mutex; /* Mutex which protects global variables except libInitialized */
 static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
 static SOPC_ClientCommon_DiscoveryCbk getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
@@ -91,8 +90,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) || SOPC_Atomic_Int_Get(&libInitialized) != 0 ||
-        SOPC_Atomic_Int_Get(&libConfigured) != 0)
+    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) || SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -140,7 +138,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     }
     else
     {
-        SOPC_Atomic_Int_Set(&libInitialized, 1);
+        SOPC_Atomic_Int_Set(&libInitialized, true);
     }
 
     return status;
@@ -148,7 +146,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
 void SOPC_ClientCommon_Clear(void)
 {
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return;
     }
@@ -162,8 +160,7 @@ void SOPC_ClientCommon_Clear(void)
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_LibSub_ConnectionCfg* pCfg = NULL;
 
-    SOPC_Atomic_Int_Set(&libInitialized, 0);
-    SOPC_Atomic_Int_Set(&libConfigured, 0);
+    SOPC_Atomic_Int_Set(&libInitialized, false);
 
     pIter = SOPC_SLinkedList_GetIterator(pListClient);
     while (NULL != pIter)
@@ -235,7 +232,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     uint32_t cfgId = 0;
     SOPC_LibSub_ConnectionCfg* pCfgCpy = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -447,26 +444,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_Configured(void)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
-    {
-        status = SOPC_STATUS_INVALID_STATE;
-    }
-    else if (SOPC_Atomic_Int_Get(&libConfigured) != 1)
-    {
-        // status = SOPC_Toolkit_Configured();
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_Atomic_Int_Set(&libConfigured, 1);
-        }
-    }
-
-    return status;
-}
-
 SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -475,7 +452,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     SOPC_LibSub_ConnectionId clientId = 0;
     bool inhibitDisconnectCallback = true;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -593,7 +570,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     SOPC_StaMac_Machine* pSM = NULL;
     uintptr_t appCtx = 0;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -657,7 +634,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -699,7 +676,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     uint32_t iscConfig = 0;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -790,7 +767,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -853,7 +830,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -920,7 +897,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -1037,7 +1014,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     SOPC_StaMac_Machine* pSM = NULL;
     bool bProcessed = false;
 
-    if (SOPC_Atomic_Int_Get(&libInitialized) == 0 || SOPC_Atomic_Int_Get(&libConfigured) == 0)
+    if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
         return;
     }

@@ -84,8 +84,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 
 SOPC_ReturnStatus SOPC_LibSub_Configured(void)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_Configured();
-    return status;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId)
