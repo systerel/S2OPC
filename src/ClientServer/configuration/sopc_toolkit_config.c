@@ -83,65 +83,67 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         status = SOPC_Common_Initialize(defaultLogConfiguration);
     }
 
-    if (SOPC_STATUS_OK == status && false != tConfig.initDone)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_INVALID_STATE;
-    }
-
-    if (SOPC_STATUS_OK == status && false == tConfig.initDone)
-    {
-        Mutex_Initialization(&tConfig.mut);
-        Mutex_Lock(&tConfig.mut);
-        tConfig.initDone = true;
-
-        appEventCallback = pAppFct;
-
-        // Ensure constants cannot be modified later
-        SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
-        SOPC_Helper_EndiannessCfg_Initialize();
-
-        if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||
-            SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
+        if (tConfig.initDone)
         {
-            status = SOPC_STATUS_NOK;
+            status = SOPC_STATUS_INVALID_STATE;
         }
-
-        if (SOPC_STATUS_OK == status)
+        else
         {
-            memset(tConfig.scConfigs, 0,
-                   (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.serverScConfigs, 0,
-                   (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
-            memset(tConfig.epConfigs, 0,
-                   (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
-            SOPC_App_Initialize();
-            SOPC_EventTimer_Initialize();
-            SOPC_Sockets_Initialize();
-            SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
-            SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
+            Mutex_Initialization(&tConfig.mut);
+            Mutex_Lock(&tConfig.mut);
+            tConfig.initDone = true;
+
+            appEventCallback = pAppFct;
+
+            // Ensure constants cannot be modified later
+            SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
+            SOPC_Helper_EndiannessCfg_Initialize();
+
+            if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||
+                SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                memset(tConfig.scConfigs, 0,
+                       (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
+                memset(tConfig.serverScConfigs, 0,
+                       (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
+                memset(tConfig.epConfigs, 0,
+                       (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
+                SOPC_App_Initialize();
+                SOPC_EventTimer_Initialize();
+                SOPC_Sockets_Initialize();
+                SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
+                SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+
+                /* set log level to INFO for version logging, then restore it */
+                SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
+                SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+                SOPC_Logger_TraceInfo(
+                    SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                    toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
+                    toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                      "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                                      toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
+                                      toolkitBuildInfo.clientServerBuildInfo.buildVersion,
+                                      toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
+                                      toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
+                SOPC_Logger_SetTraceLogLevel(level);
+            }
+
+            Mutex_Unlock(&tConfig.mut);
         }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
-
-            /* set log level to INFO for version logging, then restore it */
-            SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
-            SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-            SOPC_Logger_TraceInfo(
-                SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
-                toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
-            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                                  "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                                  toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
-                                  toolkitBuildInfo.clientServerBuildInfo.buildVersion,
-                                  toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
-                                  toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
-            SOPC_Logger_SetTraceLogLevel(level);
-        }
-
-        Mutex_Unlock(&tConfig.mut);
     }
 
     return status;
@@ -150,13 +152,13 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.serverConfigLocked)
+        if (!tConfig.serverConfigLocked)
         {
             // Check an address space is defined in case a endpoint configuration exists
-            if (tConfig.epConfigIdxMax == 0 || (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured != false))
+            if (tConfig.epConfigIdxMax == 0 || (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured))
             {
                 tConfig.serverConfigLocked = true;
                 SOPC_AddressSpace_Check_Configured();
@@ -178,7 +180,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
     SOPC_SecureChannel_Config* scConfig = tConfig.serverScConfigs[serverScConfigIdxWithoutOffset];
     if (scConfig != NULL)
     {
-        assert(false == scConfig->isClientSc);
+        assert(!scConfig->isClientSc);
         // In case of server it is an internally created config
         // => only client certificate was specifically allocated
         // Exceptional case: configuration added internally and shall be freed on clear call
@@ -202,7 +204,7 @@ static void SOPC_Toolkit_ClearServerScConfigs_WithoutLock(void)
 
 void SOPC_Toolkit_Clear(void)
 {
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         // Services are in charge to gracefully close all connections.
         // It must be done before stopping the services
@@ -239,7 +241,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
     uint32_t result = 0;
 
     // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
         if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
@@ -259,7 +261,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
     SOPC_SecureChannel_Config* res = NULL;
     if (scConfigIdx > 0 && scConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
     {
-        if (tConfig.initDone != false)
+        if (tConfig.initDone)
         {
             Mutex_Lock(&tConfig.mut);
             res = tConfig.scConfigs[scConfigIdx];
@@ -277,7 +279,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
     uint32_t idxWithServerOffset = 0;
 
     // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
         lastScIdx = tConfig.serverScLastConfigIdx;
@@ -320,10 +322,10 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
 {
     SOPC_SecureChannel_Config* res = NULL;
     uint32_t idxWithoutOffset = SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(serverScConfigIdx);
-    if (idxWithoutOffset != 0 && tConfig.initDone != false)
+    if (idxWithoutOffset != 0 && tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.serverConfigLocked != false)
+        if (tConfig.serverConfigLocked)
         {
             res = tConfig.serverScConfigs[idxWithoutOffset];
         }
@@ -336,10 +338,10 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
 {
     bool res = false;
     uint32_t idxWithoutOffset = SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(serverScConfigIdx);
-    if (idxWithoutOffset != 0 && tConfig.initDone != false)
+    if (idxWithoutOffset != 0 && tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.serverConfigLocked != false)
+        if (tConfig.serverConfigLocked)
         {
             if (tConfig.serverScConfigs[idxWithoutOffset] != NULL)
             {
@@ -404,10 +406,10 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 
     // TODO: check all parameters of epConfig: certificate presence w.r.t. secu policy, app desc (Uris are valid
     // w.r.t. part 6), etc.
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
-        if (false == tConfig.serverConfigLocked)
+        if (!tConfig.serverConfigLocked)
         {
             if (tConfig.epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
             {
@@ -425,10 +427,10 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 {
     SOPC_Endpoint_Config* res = NULL;
-    if (tConfig.initDone != false)
+    if (tConfig.initDone)
     {
         Mutex_Lock(&tConfig.mut);
-        if (tConfig.serverConfigLocked != false)
+        if (tConfig.serverConfigLocked)
         {
             res = tConfig.epConfigs[epConfigIdx];
         }
@@ -450,10 +452,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
     if (addressSpace != NULL)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        if (tConfig.initDone != false)
+        if (tConfig.initDone)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.serverConfigLocked && sopc_addressSpace_configured == false)
+            if (!tConfig.serverConfigLocked && !sopc_addressSpace_configured)
             {
                 status = SOPC_STATUS_OK;
                 SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
@@ -470,10 +472,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
     if (pAddSpaceNotifFct != NULL)
     {
         status = SOPC_STATUS_INVALID_STATE;
-        if (tConfig.initDone != false)
+        if (tConfig.initDone)
         {
             Mutex_Lock(&tConfig.mut);
-            if (false == tConfig.serverConfigLocked && appAddressSpaceNotificationCallback == NULL)
+            if (!tConfig.serverConfigLocked && appAddressSpaceNotificationCallback == NULL)
             {
                 status = SOPC_STATUS_OK;
                 appAddressSpaceNotificationCallback = pAddSpaceNotifFct;
