@@ -903,7 +903,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Int16>-1</uax:Int16>
+      <uax:Int64>-1</uax:Int64>
     </Value>
   </UAVariable>
   <UAVariable AccessLevel="3" BrowseName="1:varUInt" DataType="UInt64" NodeId="ns=1;s=SubUInt" ParentNodeId="ns=1;s=SubVars">
