@@ -70,7 +70,7 @@ struct parse_complex_value_tag_t
     bool set;
     char* single_value;       // shall remain NULL if is_array == true
     SOPC_Array* array_values; // shall remain null if is_array == false
-    void* user_data;          // Only used to store EncodeableType pointer for Extension object for now
+    const void* user_data;    // Only used to store EncodeableType pointer for Extension object for now
 };
 
 /* Context used to parse 1 complex value (sub-tags to manage) */
@@ -237,10 +237,10 @@ static parse_complex_value_tag_t complex_value_ext_obj_argument_tags[] = {
  * In case of success the EncodeableType pointer is returned and shall be used to create the extension object.
  * In case of failure, NULL is returned.
  */
-static void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_complex_value_tag_array_t* body_tags)
+static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_complex_value_tag_array_t* body_tags)
 {
     assert(NULL != body_tags);
-    void* encType = NULL;
+    const void* encType = NULL;
 
     switch (nid_in_NS0)
     {
@@ -1941,7 +1941,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
                 complex_value_tag_from_tag_name_no_namespace("Body", ctx->complex_value_ctx.tags, &bodyTagCtx);
             assert(body_tag_ok);
             // Fill the Body tag children context and retrieve encodeableType
-            void* encType = ext_obj_body_from_its_type_id(nodeId->Data.Numeric, &bodyTagCtx->childs);
+            const void* encType = ext_obj_body_from_its_type_id(nodeId->Data.Numeric, &bodyTagCtx->childs);
             if (NULL != encType)
             {
                 currentTagCtx->user_data = encType;

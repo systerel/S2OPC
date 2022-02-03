@@ -41,7 +41,7 @@
 /*============================================================================
  * The ReferenceNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
 
 typedef struct _OpcUa_ReferenceNode
 {
@@ -68,7 +68,7 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The Node structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_Node_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_Node_EncodeableType;
 
 typedef struct _OpcUa_Node
 {
@@ -101,7 +101,7 @@ SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nes
 /*============================================================================
  * The InstanceNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
 
 typedef struct _OpcUa_InstanceNode
 {
@@ -134,7 +134,7 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The TypeNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
 
 typedef struct _OpcUa_TypeNode
 {
@@ -167,7 +167,7 @@ SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The ObjectNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
 
 typedef struct _OpcUa_ObjectNode
 {
@@ -201,7 +201,7 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The ObjectTypeNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
 
 typedef struct _OpcUa_ObjectTypeNode
 {
@@ -235,7 +235,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The VariableNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
 
 typedef struct _OpcUa_VariableNode
 {
@@ -277,7 +277,7 @@ SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The VariableTypeNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
 
 typedef struct _OpcUa_VariableTypeNode
 {
@@ -316,7 +316,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ReferenceTypeNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
 
 typedef struct _OpcUa_ReferenceTypeNode
 {
@@ -352,7 +352,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The MethodNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
 
 typedef struct _OpcUa_MethodNode
 {
@@ -387,7 +387,7 @@ SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The ViewNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
 
 typedef struct _OpcUa_ViewNode
 {
@@ -422,7 +422,7 @@ SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The DataTypeNode structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
 
 typedef struct _OpcUa_DataTypeNode
 {
@@ -456,7 +456,7 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The Argument structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_Argument_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_Argument_EncodeableType;
 
 typedef struct _OpcUa_Argument
 {
@@ -486,7 +486,7 @@ SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The EnumValueType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
 
 typedef struct _OpcUa_EnumValueType
 {
@@ -513,7 +513,7 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The EnumField structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
 
 typedef struct _OpcUa_EnumField
 {
@@ -541,7 +541,7 @@ SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The OptionSet structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
 
 typedef struct _OpcUa_OptionSet
 {
@@ -567,7 +567,7 @@ SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The TimeZoneDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
 
 typedef struct _OpcUa_TimeZoneDataType
 {
@@ -593,7 +593,7 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ApplicationDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
 
 typedef struct _OpcUa_ApplicationDescription
 {
@@ -625,7 +625,7 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The RequestHeader structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
 
 typedef struct _OpcUa_RequestHeader
 {
@@ -656,7 +656,7 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ResponseHeader structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 
 typedef struct _OpcUa_ResponseHeader
 {
@@ -687,7 +687,7 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The ServiceFault structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
 
 typedef struct _OpcUa_ServiceFault
 {
@@ -713,7 +713,7 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The FindServersRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
 
 typedef struct _OpcUa_FindServersRequest
 {
@@ -742,7 +742,7 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The FindServersResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
 
 typedef struct _OpcUa_FindServersResponse
 {
@@ -770,7 +770,7 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ServerOnNetwork structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
 
 typedef struct _OpcUa_ServerOnNetwork
 {
@@ -800,7 +800,7 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The FindServersOnNetworkRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
 
 typedef struct _OpcUa_FindServersOnNetworkRequest
 {
@@ -830,7 +830,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The FindServersOnNetworkResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
 
 typedef struct _OpcUa_FindServersOnNetworkResponse
 {
@@ -861,7 +861,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The UserTokenPolicy structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
 
 typedef struct _OpcUa_UserTokenPolicy
 {
@@ -890,7 +890,7 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The EndpointDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
 
 typedef struct _OpcUa_EndpointDescription
 {
@@ -924,7 +924,7 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The GetEndpointsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
 
 typedef struct _OpcUa_GetEndpointsRequest
 {
@@ -953,7 +953,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The GetEndpointsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
 
 typedef struct _OpcUa_GetEndpointsResponse
 {
@@ -981,7 +981,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RegisteredServer structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
 
 typedef struct _OpcUa_RegisteredServer
 {
@@ -1016,7 +1016,7 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The RegisterServerRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
 
 typedef struct _OpcUa_RegisterServerRequest
 {
@@ -1041,7 +1041,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The RegisterServerResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
 
 typedef struct _OpcUa_RegisterServerResponse
 {
@@ -1067,7 +1067,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The MdnsDiscoveryConfiguration structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
 
 typedef struct _OpcUa_MdnsDiscoveryConfiguration
 {
@@ -1097,7 +1097,7 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The RegisterServer2Request structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
 
 typedef struct _OpcUa_RegisterServer2Request
 {
@@ -1124,7 +1124,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The RegisterServer2Response structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
 
 typedef struct _OpcUa_RegisterServer2Response
 {
@@ -1156,7 +1156,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The ChannelSecurityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
 
 typedef struct _OpcUa_ChannelSecurityToken
 {
@@ -1185,7 +1185,7 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The OpenSecureChannelRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
 
 typedef struct _OpcUa_OpenSecureChannelRequest
 {
@@ -1216,7 +1216,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The OpenSecureChannelResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
 
 typedef struct _OpcUa_OpenSecureChannelResponse
 {
@@ -1248,7 +1248,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CloseSecureChannelRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
 
 typedef struct _OpcUa_CloseSecureChannelRequest
 {
@@ -1274,7 +1274,7 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CloseSecureChannelResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
 
 typedef struct _OpcUa_CloseSecureChannelResponse
 {
@@ -1302,7 +1302,7 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SignedSoftwareCertificate structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
 
 typedef struct _OpcUa_SignedSoftwareCertificate
 {
@@ -1330,7 +1330,7 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The SignatureData structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
 
 typedef struct _OpcUa_SignatureData
 {
@@ -1357,7 +1357,7 @@ SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The CreateSessionRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateSessionRequest
 {
@@ -1389,7 +1389,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The CreateSessionResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateSessionResponse
 {
@@ -1426,7 +1426,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The UserIdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_UserIdentityToken
 {
@@ -1451,7 +1451,7 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AnonymousIdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_AnonymousIdentityToken
 {
@@ -1476,7 +1476,7 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The UserNameIdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_UserNameIdentityToken
 {
@@ -1504,7 +1504,7 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The X509IdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
 
 typedef struct _OpcUa_X509IdentityToken
 {
@@ -1530,7 +1530,7 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The KerberosIdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_KerberosIdentityToken
 {
@@ -1556,7 +1556,7 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The IssuedIdentityToken structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_IssuedIdentityToken
 {
@@ -1584,7 +1584,7 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ActivateSessionRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_ActivateSessionRequest
 {
@@ -1615,7 +1615,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ActivateSessionResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_ActivateSessionResponse
 {
@@ -1649,7 +1649,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CloseSessionRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_CloseSessionRequest
 {
@@ -1674,7 +1674,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The CloseSessionResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_CloseSessionResponse
 {
@@ -1701,7 +1701,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The CancelRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
 
 typedef struct _OpcUa_CancelRequest
 {
@@ -1726,7 +1726,7 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The CancelResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
 
 typedef struct _OpcUa_CancelResponse
 {
@@ -1753,7 +1753,7 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The NodeAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
 
 typedef struct _OpcUa_NodeAttributes
 {
@@ -1782,7 +1782,7 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The ObjectAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
 
 typedef struct _OpcUa_ObjectAttributes
 {
@@ -1812,7 +1812,7 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The VariableAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
 
 typedef struct _OpcUa_VariableAttributes
 {
@@ -1850,7 +1850,7 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The MethodAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
 
 typedef struct _OpcUa_MethodAttributes
 {
@@ -1881,7 +1881,7 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ObjectTypeAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_ObjectTypeAttributes
 {
@@ -1911,7 +1911,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The VariableTypeAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_VariableTypeAttributes
 {
@@ -1946,7 +1946,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ReferenceTypeAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_ReferenceTypeAttributes
 {
@@ -1980,7 +1980,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The DataTypeAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_DataTypeAttributes
 {
@@ -2010,7 +2010,7 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The ViewAttributes structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
 
 typedef struct _OpcUa_ViewAttributes
 {
@@ -2041,7 +2041,7 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AddNodesItem structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
 
 typedef struct _OpcUa_AddNodesItem
 {
@@ -2072,7 +2072,7 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The AddNodesResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
 
 typedef struct _OpcUa_AddNodesResult
 {
@@ -2099,7 +2099,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AddNodesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_AddNodesRequest
 {
@@ -2125,7 +2125,7 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The AddNodesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_AddNodesResponse
 {
@@ -2155,7 +2155,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The AddReferencesItem structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesItem
 {
@@ -2186,7 +2186,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AddReferencesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesRequest
 {
@@ -2212,7 +2212,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The AddReferencesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesResponse
 {
@@ -2242,7 +2242,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DeleteNodesItem structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesItem
 {
@@ -2269,7 +2269,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The DeleteNodesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesRequest
 {
@@ -2295,7 +2295,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The DeleteNodesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesResponse
 {
@@ -2325,7 +2325,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteReferencesItem structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesItem
 {
@@ -2355,7 +2355,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The DeleteReferencesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesRequest
 {
@@ -2383,7 +2383,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The DeleteReferencesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesResponse
 {
@@ -2415,7 +2415,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The ViewDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
 
 typedef struct _OpcUa_ViewDescription
 {
@@ -2442,7 +2442,7 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The BrowseDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
 
 typedef struct _OpcUa_BrowseDescription
 {
@@ -2472,7 +2472,7 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The ReferenceDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
 
 typedef struct _OpcUa_ReferenceDescription
 {
@@ -2503,7 +2503,7 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The BrowseResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
 
 typedef struct _OpcUa_BrowseResult
 {
@@ -2532,7 +2532,7 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The BrowseRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
 
 typedef struct _OpcUa_BrowseRequest
 {
@@ -2560,7 +2560,7 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The BrowseResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
 
 typedef struct _OpcUa_BrowseResponse
 {
@@ -2591,7 +2591,7 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The BrowseNextRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
 
 typedef struct _OpcUa_BrowseNextRequest
 {
@@ -2618,7 +2618,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The BrowseNextResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
 
 typedef struct _OpcUa_BrowseNextResponse
 {
@@ -2648,7 +2648,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The RelativePathElement structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
 
 typedef struct _OpcUa_RelativePathElement
 {
@@ -2676,7 +2676,7 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The RelativePath structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
 
 typedef struct _OpcUa_RelativePath
 {
@@ -2702,7 +2702,7 @@ SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The BrowsePath structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
 
 typedef struct _OpcUa_BrowsePath
 {
@@ -2728,7 +2728,7 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The BrowsePathTarget structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
 
 typedef struct _OpcUa_BrowsePathTarget
 {
@@ -2754,7 +2754,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The BrowsePathResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
 
 typedef struct _OpcUa_BrowsePathResult
 {
@@ -2782,7 +2782,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
 
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsRequest
 {
@@ -2812,7 +2812,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
 
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsResponse
 {
@@ -2847,7 +2847,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValu
 /*============================================================================
  * The RegisterNodesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_RegisterNodesRequest
 {
@@ -2873,7 +2873,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RegisterNodesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_RegisterNodesResponse
 {
@@ -2902,7 +2902,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The UnregisterNodesRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_UnregisterNodesRequest
 {
@@ -2928,7 +2928,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The UnregisterNodesResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_UnregisterNodesResponse
 {
@@ -2956,7 +2956,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The EndpointConfiguration structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
 
 typedef struct _OpcUa_EndpointConfiguration
 {
@@ -2989,7 +2989,7 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The SupportedProfile structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
 
 typedef struct _OpcUa_SupportedProfile
 {
@@ -3020,7 +3020,7 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The SoftwareCertificate structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
 
 typedef struct _OpcUa_SoftwareCertificate
 {
@@ -3055,7 +3055,7 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The QueryDataDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
 
 typedef struct _OpcUa_QueryDataDescription
 {
@@ -3082,7 +3082,7 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The NodeTypeDescription structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
 
 typedef struct _OpcUa_NodeTypeDescription
 {
@@ -3110,7 +3110,7 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The QueryDataSet structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
 
 typedef struct _OpcUa_QueryDataSet
 {
@@ -3138,7 +3138,7 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The NodeReference structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
 
 typedef struct _OpcUa_NodeReference
 {
@@ -3167,7 +3167,7 @@ SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ContentFilterElement structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterElement
 {
@@ -3194,7 +3194,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ContentFilter structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
 
 typedef struct _OpcUa_ContentFilter
 {
@@ -3220,7 +3220,7 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ElementOperand structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
 
 typedef struct _OpcUa_ElementOperand
 {
@@ -3245,7 +3245,7 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The LiteralOperand structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
 
 typedef struct _OpcUa_LiteralOperand
 {
@@ -3270,7 +3270,7 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AttributeOperand structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
 
 typedef struct _OpcUa_AttributeOperand
 {
@@ -3299,7 +3299,7 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The SimpleAttributeOperand structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
 
 typedef struct _OpcUa_SimpleAttributeOperand
 {
@@ -3328,7 +3328,7 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ContentFilterElementResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterElementResult
 {
@@ -3359,7 +3359,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The ContentFilterResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterResult
 {
@@ -3387,7 +3387,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ParsingResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
 
 typedef struct _OpcUa_ParsingResult
 {
@@ -3417,7 +3417,7 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The QueryFirstRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
 
 typedef struct _OpcUa_QueryFirstRequest
 {
@@ -3447,7 +3447,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The QueryFirstResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
 
 typedef struct _OpcUa_QueryFirstResponse
 {
@@ -3482,7 +3482,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The QueryNextRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
 
 typedef struct _OpcUa_QueryNextRequest
 {
@@ -3508,7 +3508,7 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The QueryNextResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
 
 typedef struct _OpcUa_QueryNextResponse
 {
@@ -3537,7 +3537,7 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The ReadValueId structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
 
 typedef struct _OpcUa_ReadValueId
 {
@@ -3566,7 +3566,7 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
 
 typedef struct _OpcUa_ReadRequest
 {
@@ -3594,7 +3594,7 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
 
 typedef struct _OpcUa_ReadResponse
 {
@@ -3624,7 +3624,7 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The HistoryReadValueId structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadValueId
 {
@@ -3652,7 +3652,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryReadResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadResult
 {
@@ -3679,7 +3679,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The EventFilter structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
 
 typedef struct _OpcUa_EventFilter
 {
@@ -3706,7 +3706,7 @@ SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadEventDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadEventDetails
 {
@@ -3734,7 +3734,7 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ReadRawModifiedDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadRawModifiedDetails
 {
@@ -3763,7 +3763,7 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The AggregateConfiguration structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
 
 typedef struct _OpcUa_AggregateConfiguration
 {
@@ -3792,7 +3792,7 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ReadProcessedDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadProcessedDetails
 {
@@ -3822,7 +3822,7 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ReadAtTimeDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadAtTimeDetails
 {
@@ -3849,7 +3849,7 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The HistoryData structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
 
 typedef struct _OpcUa_HistoryData
 {
@@ -3875,7 +3875,7 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ModificationInfo structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
 
 typedef struct _OpcUa_ModificationInfo
 {
@@ -3902,7 +3902,7 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The HistoryModifiedData structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
 
 typedef struct _OpcUa_HistoryModifiedData
 {
@@ -3930,7 +3930,7 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The HistoryEventFieldList structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
 
 typedef struct _OpcUa_HistoryEventFieldList
 {
@@ -3956,7 +3956,7 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The HistoryEvent structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
 
 typedef struct _OpcUa_HistoryEvent
 {
@@ -3983,7 +3983,7 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The HistoryReadRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadRequest
 {
@@ -4012,7 +4012,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryReadResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadResponse
 {
@@ -4042,7 +4042,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The WriteValue structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
 
 typedef struct _OpcUa_WriteValue
 {
@@ -4071,7 +4071,7 @@ SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The WriteRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
 
 typedef struct _OpcUa_WriteRequest
 {
@@ -4097,7 +4097,7 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The WriteResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
 
 typedef struct _OpcUa_WriteResponse
 {
@@ -4127,7 +4127,7 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The HistoryUpdateDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateDetails
 {
@@ -4152,7 +4152,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The UpdateDataDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateDataDetails
 {
@@ -4180,7 +4180,7 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The UpdateStructureDataDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateStructureDataDetails
 {
@@ -4210,7 +4210,7 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The UpdateEventDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateEventDetails
 {
@@ -4239,7 +4239,7 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The DeleteRawModifiedDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteRawModifiedDetails
 {
@@ -4269,7 +4269,7 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The DeleteAtTimeDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteAtTimeDetails
 {
@@ -4296,7 +4296,7 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteEventDetails structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteEventDetails
 {
@@ -4323,7 +4323,7 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryUpdateResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateResult
 {
@@ -4353,7 +4353,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The HistoryUpdateRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateRequest
 {
@@ -4379,7 +4379,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The HistoryUpdateResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateResponse
 {
@@ -4409,7 +4409,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The CallMethodRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
 
 typedef struct _OpcUa_CallMethodRequest
 {
@@ -4437,7 +4437,7 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The CallMethodResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
 
 typedef struct _OpcUa_CallMethodResult
 {
@@ -4469,7 +4469,7 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The CallRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
 
 typedef struct _OpcUa_CallRequest
 {
@@ -4495,7 +4495,7 @@ SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The CallResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
 
 typedef struct _OpcUa_CallResponse
 {
@@ -4525,7 +4525,7 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The DataChangeFilter structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
 
 typedef struct _OpcUa_DataChangeFilter
 {
@@ -4552,7 +4552,7 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The AggregateFilter structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
 
 typedef struct _OpcUa_AggregateFilter
 {
@@ -4580,7 +4580,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The EventFilterResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
 
 typedef struct _OpcUa_EventFilterResult
 {
@@ -4609,7 +4609,7 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AggregateFilterResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
 
 typedef struct _OpcUa_AggregateFilterResult
 {
@@ -4636,7 +4636,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The MonitoringParameters structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
 
 typedef struct _OpcUa_MonitoringParameters
 {
@@ -4665,7 +4665,7 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The MonitoredItemCreateRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemCreateRequest
 {
@@ -4694,7 +4694,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MonitoredItemCreateResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemCreateResult
 {
@@ -4726,7 +4726,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CreateMonitoredItemsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateMonitoredItemsRequest
 {
@@ -4756,7 +4756,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The CreateMonitoredItemsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateMonitoredItemsResponse
 {
@@ -4788,7 +4788,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The MonitoredItemModifyRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemModifyRequest
 {
@@ -4816,7 +4816,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MonitoredItemModifyResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemModifyResult
 {
@@ -4847,7 +4847,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The ModifyMonitoredItemsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_ModifyMonitoredItemsRequest
 {
@@ -4877,7 +4877,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The ModifyMonitoredItemsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_ModifyMonitoredItemsResponse
 {
@@ -4910,7 +4910,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The SetMonitoringModeRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
 
 typedef struct _OpcUa_SetMonitoringModeRequest
 {
@@ -4940,7 +4940,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SetMonitoringModeResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
 
 typedef struct _OpcUa_SetMonitoringModeResponse
 {
@@ -4973,7 +4973,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The SetTriggeringRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
 
 typedef struct _OpcUa_SetTriggeringRequest
 {
@@ -5003,7 +5003,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The SetTriggeringResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
 
 typedef struct _OpcUa_SetTriggeringResponse
 {
@@ -5038,7 +5038,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DeleteMonitoredItemsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteMonitoredItemsRequest
 {
@@ -5067,7 +5067,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The DeleteMonitoredItemsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteMonitoredItemsResponse
 {
@@ -5100,7 +5100,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The CreateSubscriptionRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateSubscriptionRequest
 {
@@ -5132,7 +5132,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CreateSubscriptionResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateSubscriptionResponse
 {
@@ -5165,7 +5165,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The ModifySubscriptionRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
 
 typedef struct _OpcUa_ModifySubscriptionRequest
 {
@@ -5197,7 +5197,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The ModifySubscriptionResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
 
 typedef struct _OpcUa_ModifySubscriptionResponse
 {
@@ -5229,7 +5229,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SetPublishingModeRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
 
 typedef struct _OpcUa_SetPublishingModeRequest
 {
@@ -5258,7 +5258,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SetPublishingModeResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
 
 typedef struct _OpcUa_SetPublishingModeResponse
 {
@@ -5290,7 +5290,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The NotificationMessage structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
 
 typedef struct _OpcUa_NotificationMessage
 {
@@ -5318,7 +5318,7 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The MonitoredItemNotification structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemNotification
 {
@@ -5346,7 +5346,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The DataChangeNotification structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
 
 typedef struct _OpcUa_DataChangeNotification
 {
@@ -5374,7 +5374,7 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The EventFieldList structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
 
 typedef struct _OpcUa_EventFieldList
 {
@@ -5401,7 +5401,7 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The EventNotificationList structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
 
 typedef struct _OpcUa_EventNotificationList
 {
@@ -5427,7 +5427,7 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The StatusChangeNotification structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
 
 typedef struct _OpcUa_StatusChangeNotification
 {
@@ -5455,7 +5455,7 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SubscriptionAcknowledgement structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
 
 typedef struct _OpcUa_SubscriptionAcknowledgement
 {
@@ -5484,7 +5484,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The PublishRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
 
 typedef struct _OpcUa_PublishRequest
 {
@@ -5510,7 +5510,7 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The PublishResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
 
 typedef struct _OpcUa_PublishResponse
 {
@@ -5546,7 +5546,7 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The RepublishRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
 
 typedef struct _OpcUa_RepublishRequest
 {
@@ -5572,7 +5572,7 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The RepublishResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
 
 typedef struct _OpcUa_RepublishResponse
 {
@@ -5599,7 +5599,7 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The TransferResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
 
 typedef struct _OpcUa_TransferResult
 {
@@ -5627,7 +5627,7 @@ SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The TransferSubscriptionsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
 
 typedef struct _OpcUa_TransferSubscriptionsRequest
 {
@@ -5656,7 +5656,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The TransferSubscriptionsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
 
 typedef struct _OpcUa_TransferSubscriptionsResponse
 {
@@ -5691,7 +5691,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue,
 /*============================================================================
  * The DeleteSubscriptionsRequest structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteSubscriptionsRequest
 {
@@ -5719,7 +5719,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The DeleteSubscriptionsResponse structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteSubscriptionsResponse
 {
@@ -5751,7 +5751,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The BuildInfo structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
 
 typedef struct _OpcUa_BuildInfo
 {
@@ -5781,7 +5781,7 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The RedundantServerDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
 
 typedef struct _OpcUa_RedundantServerDataType
 {
@@ -5810,7 +5810,7 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The EndpointUrlListDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
 
 typedef struct _OpcUa_EndpointUrlListDataType
 {
@@ -5838,7 +5838,7 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The NetworkGroupDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
 
 typedef struct _OpcUa_NetworkGroupDataType
 {
@@ -5865,7 +5865,7 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The SamplingIntervalDiagnosticsDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SamplingIntervalDiagnosticsDataType
 {
@@ -5897,7 +5897,7 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The ServerDiagnosticsSummaryDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
 
 typedef struct _OpcUa_ServerDiagnosticsSummaryDataType
 {
@@ -5937,7 +5937,7 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue,
 /*============================================================================
  * The ServerStatusDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
 
 typedef struct _OpcUa_ServerStatusDataType
 {
@@ -5967,7 +5967,7 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ServiceCounterDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
 
 typedef struct _OpcUa_ServiceCounterDataType
 {
@@ -5993,7 +5993,7 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The SessionDiagnosticsDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SessionDiagnosticsDataType
 {
@@ -6063,7 +6063,7 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SessionSecurityDiagnosticsDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SessionSecurityDiagnosticsDataType
 {
@@ -6101,7 +6101,7 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The StatusResult structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
 
 typedef struct _OpcUa_StatusResult
 {
@@ -6127,7 +6127,7 @@ SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The SubscriptionDiagnosticsDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SubscriptionDiagnosticsDataType
 {
@@ -6186,7 +6186,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The ModelChangeStructureDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
 
 typedef struct _OpcUa_ModelChangeStructureDataType
 {
@@ -6215,7 +6215,7 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The SemanticChangeStructureDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
 
 typedef struct _OpcUa_SemanticChangeStructureDataType
 {
@@ -6245,7 +6245,7 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue,
 /*============================================================================
  * The Range structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
 
 typedef struct _OpcUa_Range
 {
@@ -6271,7 +6271,7 @@ SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf, uint32_t ne
 /*============================================================================
  * The EUInformation structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
 
 typedef struct _OpcUa_EUInformation
 {
@@ -6299,7 +6299,7 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ComplexNumberType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
 
 typedef struct _OpcUa_ComplexNumberType
 {
@@ -6325,7 +6325,7 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The DoubleComplexNumberType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
 
 typedef struct _OpcUa_DoubleComplexNumberType
 {
@@ -6353,7 +6353,7 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The AxisInformation structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
 
 typedef struct _OpcUa_AxisInformation
 {
@@ -6383,7 +6383,7 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The XVType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_XVType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_XVType_EncodeableType;
 
 typedef struct _OpcUa_XVType
 {
@@ -6409,7 +6409,7 @@ SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t n
 /*============================================================================
  * The ProgramDiagnosticDataType structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
 
 typedef struct _OpcUa_ProgramDiagnosticDataType
 {
@@ -6447,7 +6447,7 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The Annotation structure.
  *===========================================================================*/
-extern struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
+extern const struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
 
 typedef struct _OpcUa_Annotation
 {
@@ -7219,7 +7219,7 @@ typedef enum SOPC_TypeInternalIndex
 /*============================================================================
  * Table of known types.
  *===========================================================================*/
-extern struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
+extern const struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
 
 #endif
 /* This is the last line of an autogenerated file. */

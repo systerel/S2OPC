@@ -94,7 +94,7 @@ typedef struct SOPC_EncodeableType_FieldDescriptor
  *  \brief Encodeable object type structure definition. It provides all the services
  *  functions associated with the encodeable object for encoding needs.
  */
-typedef struct SOPC_EncodeableType
+typedef const struct SOPC_EncodeableType
 {
     char* TypeName;
     uint32_t TypeId;
