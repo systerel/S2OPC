@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "embedded/sopc_addspace_loader.h"
@@ -29,6 +30,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
@@ -427,6 +429,15 @@ bool Server_PubSubStart_Requested(void)
     return requested;
 }
 
+static const char* getenv_default(const char* name, const char* default_value)
+{
+    const char* val = getenv(name);
+
+    return (val != NULL) ? val : default_value;
+}
+
+const char* PUBSUB_CONFIG_PATH = DEFAULT_PUBSUB_CONFIG_PATH;
+
 SOPC_ReturnStatus Server_WritePubSubNodes(void)
 {
     SOPC_NodeId* nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
@@ -456,6 +467,9 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 #ifndef PUBSUB_STATIC_CONFIG
     // Load XML file
+    PUBSUB_CONFIG_PATH = getenv_default("PUBSUB_CONFIG_PATH", DEFAULT_PUBSUB_CONFIG_PATH);
+    printf("PUBSUB_CONFIG_PATH: %s\n", PUBSUB_CONFIG_PATH);
+
     FILE* fd = fopen(PUBSUB_CONFIG_PATH, "r");
     if (NULL == fd)
     {

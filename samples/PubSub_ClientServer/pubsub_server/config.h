@@ -49,6 +49,7 @@
 extern char* ENDPOINT_URL;
 
 /* Sub Configuration */
-#define PUBSUB_CONFIG_PATH "./config_pubsub_server.xml"
+#define DEFAULT_PUBSUB_CONFIG_PATH "./config_pubsub_server.xml"
+extern const char* PUBSUB_CONFIG_PATH;
 
 #endif /* CONFIG_H_ */
