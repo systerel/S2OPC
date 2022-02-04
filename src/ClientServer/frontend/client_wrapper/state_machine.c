@@ -1467,7 +1467,7 @@ static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
     }
     else
     {
-        const SOPC_EncodeableType* pEncType = (SOPC_EncodeableType*) pParam;
+        SOPC_EncodeableType* pEncType = (SOPC_EncodeableType*) pParam;
 
         /* We only process PublishRequest send failed for timeout reason
          * (checked in StaMac_GiveAuthorization_SendRequestFailed) */

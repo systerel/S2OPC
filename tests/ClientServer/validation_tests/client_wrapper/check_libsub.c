@@ -120,7 +120,7 @@ static void generic_event_callback(SOPC_LibSub_ConnectionId c_id,
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(42 == responseContext);
 
-    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
+    SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
     ck_assert(&OpcUa_ReadResponse_EncodeableType == pEncType);
 
     ck_assert(SOPC_Atomic_Int_Get(&responseReceived) == 0);

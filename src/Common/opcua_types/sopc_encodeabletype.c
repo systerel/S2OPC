@@ -380,7 +380,7 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
     }
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Encode(const SOPC_EncodeableType* type,
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
                                                const void* pValue,
                                                SOPC_Buffer* buf,
                                                uint32_t nestedStructLevel)

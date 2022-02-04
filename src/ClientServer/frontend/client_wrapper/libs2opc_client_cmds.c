@@ -1041,7 +1041,7 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         return;
     }
 
-    const SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
+    SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
 
     if (pEncType == &OpcUa_ReadResponse_EncodeableType)
     {
