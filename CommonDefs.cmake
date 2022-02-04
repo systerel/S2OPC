@@ -190,6 +190,7 @@ option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attrib
 option(WITH_NO_ASSERT "Disable asserts" OFF)
 option(WITH_USER_ASSERT "Enable user-defined failed assertion event" OFF)
 option(WITH_MINIMAL_FOOTPRINT "Limit software footprint" OFF)
+option(WITH_XDP_ETH_SOCKET "Use XDP sockets instead of Ethernet sockets" OFF)
 
 # option to enable GCC static analyser. The value from 1 to 5 corresponds to the verbosity level.
 option(WITH_GCC_STATIC_ANALYSIS "activate GCC static analysis during compilation" OFF)
@@ -272,6 +273,7 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 print_if_activated("WITH_NANO_EXTENDED")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
+print_if_activated("WITH_XDP_ETH_SOCKET")
 
 # Check specific options constraints and set necessary compilation flags
 

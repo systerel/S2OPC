@@ -14,6 +14,11 @@ include (CheckTypeSize)
 
 find_package(MBEDTLS REQUIRED)
 
+if (WITH_XDP_ETH_SOCKET)
+  find_package(BPF REQUIRED)
+  find_package(XDP REQUIRED)
+endif()
+
 ### Compilation of S2OPC common library source files ###
 
 ## Build info source file generation (version, commit checksum, docker id, date) ##
@@ -29,6 +34,7 @@ if(UNIX)
   set(PLATFORM_DIR linux)
   set(THREAD_LIB pthread rt)
   set(MATH_LIB m)
+  set(XDP_LIB $<$<BOOL:${WITH_XDP_ETH_SOCKET}>:xdp>)
 elseif(WIN32)
   set(PLATFORM_DIR windows)
   set(SOCK_LIB ws2_32)
@@ -38,7 +44,7 @@ endif()
 
 # Update variable containing S2OPC library dependencies
 list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES mbedtls mbedx509 mbedcrypto)
-list(APPEND S2OPC_COMMON_PUBLIC_LINK_LIBRARIES ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
+list(APPEND S2OPC_COMMON_PUBLIC_LINK_LIBRARIES ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB} ${XDP_LIB})
 
 file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 

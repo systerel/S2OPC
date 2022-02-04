@@ -40,8 +40,53 @@
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
+#ifdef WITH_XDP_ETH_SOCKET
+// Use XDP socket instead of ethernet socket to manage ethernet frames
+// See https://www.kernel.org/doc/html/latest/networking/af_xdp.html
+
+#include <linux/if_link.h>
+#include <stdlib.h>
+#include <sys/resource.h>
+#include <sys/socket.h>
+#include <xdp/xsk.h>
+
+struct xsk_umem_info
+{
+    struct xsk_ring_prod fq;
+    struct xsk_ring_cons cq;
+    struct xsk_umem* umem;
+    void* buffer;
+};
+
+struct xsk_socket_info
+{
+    struct xsk_ring_cons rx;
+    struct xsk_ring_prod tx;
+    struct xsk_umem_info* umem;
+    struct xsk_socket* xsk;
+    uint32_t outstanding_tx;
+};
+
+static uint32_t opt_queue = 0; // Queue number
+static const uint32_t opt_xsk_frame_size = XSK_UMEM__DEFAULT_FRAME_SIZE;
+static uint32_t opt_umem_flags = 0;
+// XDP_FLAGS_SKB_MODE // force SKB mode (not native: generic XDP support and copies out the data to user space).
+//                       A fallback mode that works for any network device.
+// XDP_FLAGS_DRV_MODE // force DRV mode (native: need compatible NIC driver)
+// XDP_FLAGS_HW_MODE  // force HW mode (offload on HW: need NIC driver)
+static uint32_t opt_xdp_flags = XDP_FLAGS_UPDATE_IF_NOEXIST;
+static uint16_t opt_xdp_bind_flags = XDP_USE_NEED_WAKEUP;
+#define NUM_FRAMES (4 * 1024)
+
+static void* packet_buffer = NULL;
+static uint64_t packet_buffer_size = 0;
+static Socket* recvSock = NULL;
+struct xsk_socket_info* xsk_info = NULL;
+#endif
+
 struct SOPC_ETH_Socket_ReceiveAddressInfo
 {
+    const char* ifname;
     struct sockaddr_ll addr;
     bool recvMulticast;
     bool recvForDest;
@@ -56,6 +101,7 @@ struct SOPC_ETH_Socket_SendAddressInfo
     struct ifreq sendSrcMACaddr;
 };
 
+#ifndef WITH_XDP_ETH_SOCKET
 static bool SOPC_ETH_Socket_AddMembership(Socket sock, struct packet_mreq* mreq)
 {
     int res = setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP, mreq, sizeof(*mreq));
@@ -160,6 +206,7 @@ static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(Socket sock,
         }
     }
 }
+#endif
 
 static bool set_mac_addr_from_string(unsigned char* addr, const char* MACaddress)
 {
@@ -302,7 +349,11 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
     bool res = true;
     if (NULL != interfaceName)
     {
+#ifdef WITH_XDP_ETH_SOCKET
+        addrInfo->ifname = interfaceName;
+#else
         res = set_itfindex_from_string(&addrInfo->addr, interfaceName);
+#endif
     }
 
     if (res && NULL != destMACaddr)
@@ -333,9 +384,140 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
-                                                  bool setNonBlocking,
-                                                  Socket* sock)
+#ifdef WITH_XDP_ETH_SOCKET
+static void __exit_with_error(int error, const char* file, const char* func, int line)
+{
+    SOPC_CONSOLE_PRINTF("%s:%s:%i: errno: %d/\"%s\"\n", file, func, line, error, strerror(error));
+
+    exit(EXIT_FAILURE);
+}
+
+#define exit_with_error(error) __exit_with_error(error, __FILE__, __func__, __LINE__)
+
+static struct xsk_umem_info* xsk_configure_umem(void* buffer, uint64_t size)
+{
+    struct xsk_umem_info* umem;
+    struct xsk_umem_config cfg = {/* We recommend that you set the fill ring size >= HW RX ring size +
+                                   * AF_XDP RX ring size. Make sure you fill up the fill ring
+                                   * with buffers at regular intervals, and you will with this setting
+                                   * avoid allocation failures in the driver. These are usually quite
+                                   * expensive since drivers have not been written to assume that
+                                   * allocation failures are common. For regular sockets, kernel
+                                   * allocated memory is used that only runs out in OOM situations
+                                   * that should be rare.
+                                   */
+                                  .fill_size = XSK_RING_PROD__DEFAULT_NUM_DESCS * 2,
+                                  .comp_size = XSK_RING_CONS__DEFAULT_NUM_DESCS,
+                                  .frame_size = opt_xsk_frame_size,
+                                  .frame_headroom = XSK_UMEM__DEFAULT_FRAME_HEADROOM,
+                                  .flags = opt_umem_flags};
+    int ret;
+
+    umem = SOPC_Calloc(1, sizeof(*umem));
+    if (!umem)
+        exit_with_error(errno);
+
+    ret = xsk_umem__create(&umem->umem, buffer, size, &umem->fq, &umem->cq, &cfg);
+    if (ret)
+        exit_with_error(-ret);
+
+    umem->buffer = buffer;
+    return umem;
+}
+
+static void xsk_populate_fill_ring(struct xsk_umem_info* umem)
+{
+    uint32_t ret, i, idx;
+
+    ret = xsk_ring_prod__reserve(&umem->fq, XSK_RING_PROD__DEFAULT_NUM_DESCS * 2, &idx);
+    if (ret != XSK_RING_PROD__DEFAULT_NUM_DESCS * 2)
+        exit_with_error((int) (ret + 1));
+    for (i = 0; i < XSK_RING_PROD__DEFAULT_NUM_DESCS * 2; i++)
+        *xsk_ring_prod__fill_addr(&umem->fq, idx++) = i * opt_xsk_frame_size;
+    xsk_ring_prod__submit(&umem->fq, XSK_RING_PROD__DEFAULT_NUM_DESCS * 2);
+}
+
+static struct xsk_socket_info* xsk_configure_socket(const char* ifname, struct xsk_umem_info* umem, bool rx, bool tx)
+{
+    struct xsk_socket_config cfg;
+    struct xsk_socket_info* nxsk;
+    struct xsk_ring_cons* rxr;
+    struct xsk_ring_prod* txr;
+    int ret;
+
+    nxsk = SOPC_Calloc(1, sizeof(*nxsk));
+    if (!nxsk)
+        exit_with_error(errno);
+
+    nxsk->umem = umem;
+    cfg.rx_size = XSK_RING_CONS__DEFAULT_NUM_DESCS;
+    cfg.tx_size = XSK_RING_PROD__DEFAULT_NUM_DESCS;
+    cfg.libbpf_flags = 0;
+    cfg.xdp_flags = opt_xdp_flags;
+    cfg.bind_flags = opt_xdp_bind_flags;
+
+    rxr = rx ? &nxsk->rx : NULL;
+    txr = tx ? &nxsk->tx : NULL;
+    // AF_XDP sockets can be created to have exclusive ownership of the umem through xsk_socket__create()
+    ret = xsk_socket__create(&nxsk->xsk, ifname, opt_queue, umem->umem, rxr, txr, &cfg);
+    if (ret)
+        exit_with_error(-ret);
+
+    return nxsk;
+}
+
+static SOPC_ReturnStatus XDP_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                                        bool setNonBlocking,
+                                                        Socket* sock)
+{
+    (void) setNonBlocking;
+    if (NULL == sock || NULL == receiveAddrInfo)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Code to init XDP UMEM, only 1 socket supported for now */
+    assert(NULL == recvSock);
+    assert(0 == packet_buffer_size);
+    assert(NULL == packet_buffer);
+    struct rlimit r = {RLIM_INFINITY, RLIM_INFINITY};
+    struct xsk_umem_info* umem;
+
+    /* Allow unlimited locking of memory, so all memory needed for packet
+     * buffers can be locked.
+     */
+    if (setrlimit(RLIMIT_MEMLOCK, &r))
+    {
+        exit_with_error(errno);
+    }
+
+    /* Allocate memory for NUM_FRAMES of the default XDP frame size */
+    packet_buffer_size = NUM_FRAMES * opt_xsk_frame_size;
+    if (posix_memalign(&packet_buffer, (size_t) getpagesize(), /* PAGE_SIZE aligned */
+                       packet_buffer_size))
+    {
+        exit_with_error(errno);
+    }
+
+    /* Create UMEM */
+    umem = xsk_configure_umem(packet_buffer, NUM_FRAMES * opt_xsk_frame_size);
+    /* Populate FILL ring with UMEM */
+    xsk_populate_fill_ring(umem);
+
+    /* Create socket */
+    xsk_info = xsk_configure_socket(receiveAddrInfo->ifname, umem, true, false);
+
+    *sock = xsk_socket__fd(xsk_info->xsk);
+    recvSock = sock;
+
+    return SOPC_STATUS_OK;
+}
+
+#else // WITH_XDP_ETH_SOCKET not defined
+
+static SOPC_ReturnStatus ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                                    bool setNonBlocking,
+                                                    Socket* sock)
 {
     if (NULL == sock || NULL == receiveAddrInfo)
     {
@@ -374,6 +556,18 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
     }
 
     return SOPC_STATUS_OK;
+}
+#endif
+
+SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                                  bool setNonBlocking,
+                                                  Socket* sock)
+{
+#ifdef WITH_XDP_ETH_SOCKET
+    return XDP_ETH_Socket_CreateToReceive(receiveAddrInfo, setNonBlocking, sock);
+#else
+    return ETH_Socket_CreateToReceive(receiveAddrInfo, setNonBlocking, sock);
+#endif
 }
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
@@ -464,11 +658,138 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
-                                              const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
-                                              bool checkEtherType,
-                                              uint16_t etherType,
-                                              SOPC_Buffer* buffer)
+#ifdef WITH_XDP_ETH_SOCKET
+static SOPC_ReturnStatus XDP_ETH_Socket_ReceiveFrom(Socket sock,
+                                                    const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                                    bool checkEtherType,
+                                                    uint16_t etherType,
+                                                    SOPC_Buffer* buffer)
+{
+    if (SOPC_INVALID_SOCKET == sock || NULL == receiveAddrInfo || NULL == buffer ||
+        buffer->current_size < sizeof(struct ethhdr))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t rcvd = 0, ret = 0;
+    uint32_t idx_rx = 0, idx_fq = 0;
+    bool bres = false;
+
+    // Treat available packets until an expected one is received or none available
+    while (!bres)
+    {
+        // Peek if there are any new packets in the RX ring and if so we can read them from the RX ring.
+        rcvd = xsk_ring_cons__peek(&xsk_info->rx, 1, &idx_rx);
+        if (!rcvd)
+        {
+            // If the need wakeup flag is set on the FILL ring, the application needs to call poll()/recv
+            // to be able to continue to receive packets on the RX ring.
+            if (xsk_ring_prod__needs_wakeup(&xsk_info->umem->fq))
+            {
+                recvfrom(sock, NULL, 0, MSG_DONTWAIT, NULL, NULL);
+            }
+            return SOPC_STATUS_WOULD_BLOCK;
+        }
+
+        // Reserve as many packets as received for the FILL ring
+        ret = xsk_ring_prod__reserve(&xsk_info->umem->fq, 1, &idx_fq);
+        while (ret != rcvd)
+        {
+            if (xsk_ring_prod__needs_wakeup(&xsk_info->umem->fq))
+            {
+                recvfrom(sock, NULL, 0, MSG_DONTWAIT, NULL, NULL);
+            }
+            ret = xsk_ring_prod__reserve(&xsk_info->umem->fq, 1, &idx_fq);
+        }
+
+        // Handle 1 received packet
+        // Read received packet descriptors
+        uint64_t addr = xsk_ring_cons__rx_desc(&xsk_info->rx, idx_rx)->addr; // index in umem
+        uint32_t len = xsk_ring_cons__rx_desc(&xsk_info->rx, idx_rx)->len;
+
+        // Only needed in unaligned mode to retrieve offset:
+        // (offset used is carried in the upper 16 bits of the addr)
+        uint64_t orig = xsk_umem__extract_addr(addr);
+        addr = xsk_umem__add_offset_to_addr(addr);
+
+        //  Get a pointer to the packet data itself inside the umem
+        char* pkt = xsk_umem__get_data(xsk_info->umem->buffer, addr);
+
+        assert(buffer->current_size >= len);
+
+        // Reset buffer content since it is reused for reception
+        buffer->position = 0;
+        buffer->length = 0;
+        // Note: it might be possible to attach the data to buffer and then release it after decoding
+        status = SOPC_Buffer_Write(buffer, (uint8_t*) pkt, len);
+        buffer->position = 0;
+
+        // Push back the umem frame read into the FILL ring
+        *xsk_ring_prod__fill_addr(&xsk_info->umem->fq, idx_fq) = orig;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            if (buffer->length < sizeof(struct ethhdr))
+            {
+                // Ethernet header incomplet
+                return SOPC_STATUS_OUT_OF_MEMORY;
+            }
+
+            // Check Ethernet header
+            bool tmpRes = true;
+
+            if (receiveAddrInfo->recvForDest)
+            {
+                // Check dest MAC
+                int res = memcmp(receiveAddrInfo->recvDestAddr, buffer->data, ETH_ALEN * sizeof(char));
+                tmpRes &= (0 == res);
+            }
+
+            if (receiveAddrInfo->recvFromSource)
+            {
+                // Check source MAC
+                int res = memcmp(receiveAddrInfo->recvSourceAddr, buffer->data + ETH_ALEN, ETH_ALEN * sizeof(char));
+                tmpRes &= (0 == res);
+            }
+
+            // note: No VLAN management for now, check it by using EtherType 0x801 (or 0x88A8 for double-tag)
+            if (checkEtherType)
+            {
+                // Check EtherType
+                uint16_t* nboEthType = (uint16_t*) (void*) (buffer->data + 2 * ETH_ALEN);
+                tmpRes &= (ntohs(*nboEthType) == etherType);
+            }
+
+            if (tmpRes && buffer->length == buffer->current_size)
+            {
+                // The message could be incomplete
+                return SOPC_STATUS_OUT_OF_MEMORY;
+            }
+
+            bres = tmpRes;
+        }
+
+        // Submit reserved packets for FILL ring
+        xsk_ring_prod__submit(&xsk_info->umem->fq, 1);
+        // Release the RX ring packet descriptor
+        xsk_ring_cons__release(&xsk_info->rx, 1);
+    }
+
+    if (!bres)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    return status;
+}
+#else // WITH_XDP_ETH_SOCKET not defined
+
+static SOPC_ReturnStatus ETH_Socket_ReceiveFrom(Socket sock,
+                                                const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                                bool checkEtherType,
+                                                uint16_t etherType,
+                                                SOPC_Buffer* buffer)
 {
     if (SOPC_INVALID_SOCKET == sock || NULL == receiveAddrInfo || NULL == buffer ||
         buffer->current_size < sizeof(struct ethhdr))
@@ -529,12 +850,44 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
 
     return SOPC_STATUS_OK;
 }
+#endif
+
+SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
+                                              const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
+                                              bool checkEtherType,
+                                              uint16_t etherType,
+                                              SOPC_Buffer* buffer)
+{
+#ifdef WITH_XDP_ETH_SOCKET
+    return XDP_ETH_Socket_ReceiveFrom(sock, receiveAddrInfo, checkEtherType, etherType, buffer);
+#else
+    return ETH_Socket_ReceiveFrom(sock, receiveAddrInfo, checkEtherType, etherType, buffer);
+#endif
+}
+
+#ifdef WITH_XDP_ETH_SOCKET
+static void xdpsock_cleanup(void)
+{
+    struct xsk_umem* umem = xsk_info->umem->umem;
+    xsk_socket__delete(xsk_info->xsk);
+    (void) xsk_umem__delete(umem);
+}
+#endif
 
 void SOPC_ETH_Socket_Close(Socket* sock)
 {
     if (NULL != sock)
     {
-        close(*sock);
+#ifdef WITH_XDP_ETH_SOCKET
+        if (sock == recvSock)
+        {
+            xdpsock_cleanup();
+        }
+        else
+#endif
+        {
+            close(*sock);
+        }
         *sock = SOPC_INVALID_SOCKET;
     }
 }
