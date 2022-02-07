@@ -148,13 +148,13 @@ fi
 
 CERT_RULES=cert-flp30-c,cert-fio38-c,cert-env33-c,cert-err34-c,cert-msc30-c
 # Define include directories
-SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -type d`)
+SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -type d`)
 SRC_INCL=${SRC_DIRS[@]/#/-I}
 # includes the generated export file
 SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
-find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
+find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
 # Check if resulting log contains error or warnings
 grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
 if [[ $? != 0 ]]; then
