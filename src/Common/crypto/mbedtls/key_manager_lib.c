@@ -104,8 +104,6 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                char* password,
                                                                uint32_t lenPassword)
 {
-    SOPC_AsymmetricKey* key = NULL;
-
     if (NULL == szPath || NULL == ppKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
@@ -114,6 +112,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
         return SOPC_STATUS_INVALID_PARAMETERS;
+#if defined(MBEDTLS_FS_IO)
+    SOPC_AsymmetricKey* key = NULL;
 
     key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == key)
@@ -130,6 +130,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     *ppKey = key;
 
     return SOPC_STATUS_OK;
+#else
+    return SOPC_STATUS_NOK;
+#endif
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
@@ -294,6 +297,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+#if defined(MBEDTLS_FS_IO)
     SOPC_ReturnStatus status = certificate_maybe_create(ppCert);
     SOPC_CertificateList* pCert = NULL;
 
@@ -325,6 +329,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
     }
 
     return status;
+#else
+    return SOPC_STATUS_NOK;
+#endif
 }
 
 void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
@@ -963,6 +970,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+#if defined(MBEDTLS_FS_IO)
     SOPC_ReturnStatus status = crl_maybe_create(ppCRL);
     SOPC_CRLList* pCRL = *ppCRL;
 
@@ -984,6 +992,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
     }
 
     return status;
+#else
+    return SOPC_STATUS_NOK;
+#endif
 }
 
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)

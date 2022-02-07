@@ -151,7 +151,7 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
  **/
 #ifndef SOPC_CONSOLE_PRINTF
 #define SOPC_CONSOLE_PRINTF printf
-#endif /* SOPC_HAS_FILESYSTEM */
+#endif /* SOPC_CONSOLE_PRINTF */
 
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
