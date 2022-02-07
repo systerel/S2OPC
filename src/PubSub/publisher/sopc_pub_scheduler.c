@@ -343,28 +343,11 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
-static void display_sched_attr(int policy, struct sched_param* param)
-{
-    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Publisher thread current scheduling policy=%s with priority=%d\n",
-                          (policy == SCHED_FIFO)
-                              ? "SCHED_FIFO"
-                              : (policy == SCHED_RR) ? "SCHED_RR" : (policy == SCHED_OTHER) ? "SCHED_OTHER" : "???",
-                          param->sched_priority);
-}
-
 static void* thread_start_publish(void* arg)
 {
     (void) arg;
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
-
-    { /* TODO: remove me/refactor me */
-        int policy = -1;
-        pthread_t tid = pthread_self();
-        struct sched_param sp;
-        assert(pthread_getschedparam(tid, &policy, &sp) == 0);
-        display_sched_attr(policy, &sp);
-    }
 
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
     assert(NULL != now);
