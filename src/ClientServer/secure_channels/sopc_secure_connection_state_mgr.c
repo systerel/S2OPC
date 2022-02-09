@@ -959,7 +959,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
             }
         }
 
-        if (config->requestedLifetime > SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME)
+        if (config->requestedLifetime >= SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME)
         {
             opnReq.RequestedLifetime = config->requestedLifetime;
         }

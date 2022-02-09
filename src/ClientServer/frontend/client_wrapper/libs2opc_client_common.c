@@ -37,6 +37,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_version.h"
 
 #include "sopc_encodeable.h"
@@ -700,7 +701,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     const int32_t security_mode = OpcUa_MessageSecurityMode_None;
 
     status = Helpers_NewSCConfigFromLibSubCfg(endpointUrl, security_policy, security_mode, false, NULL, NULL, NULL,
-                                              NULL, NULL, 0, &pscConfig);
+                                              NULL, NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, &pscConfig);
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
     if (SOPC_STATUS_OK == status)
