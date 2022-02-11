@@ -36,6 +36,8 @@
 #include "util_b2c.h"
 #include "util_user.h"
 
+#define ENCRYPTED_USER_IDENTITY_TOKEN_LENGTH_FIELD_SIZE 4
+
 /* The local user. This implementation avoids user creation,
  * but its authorization manager is changed according to the endpoint configuration */
 static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationManager = NULL};
@@ -248,90 +250,56 @@ void user_authentication_bs__is_valid_user_authentication(
     }
 }
 
-void user_authentication_bs__decrypt_user_token(
-    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
-    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
-    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
-    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
-    const constants__t_user_token_i user_authentication_bs__p_user_token,
-    t_bool* const user_authentication_bs__p_sc_valid_user_token,
-    constants__t_user_token_i* const user_authentication_bs__p_user_token_decrypted)
+static bool internal_user_token_copy(OpcUa_UserNameIdentityToken* source, SOPC_ExtensionObject** dest)
 {
-    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
-           "Only encrypted username identity token supported");
-    *user_authentication_bs__p_user_token_decrypted = NULL;
-    *user_authentication_bs__p_sc_valid_user_token = false;
+    assert(NULL != source);
+    assert(NULL != dest);
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_UserNameIdentityToken* token = NULL;
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
-
-    if (constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
+    if (NULL == user)
     {
-        // Create a copy of user token
-        SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
-        OpcUa_UserNameIdentityToken* token = NULL;
-
-        if (NULL == user)
-        {
-            return;
-        }
-
-        status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_String_Copy(&token->UserName, &userToken->UserName);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_String_Copy(&token->PolicyId, &userToken->PolicyId);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ByteString_Copy(&token->Password, &userToken->Password);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            *user_authentication_bs__p_sc_valid_user_token = true;
-            *user_authentication_bs__p_user_token_decrypted = user;
-        }
-        else
-        {
-            SOPC_ExtensionObject_Clear(user);
-            SOPC_Free(user);
-        }
-        return;
+        return false;
     }
 
-    if (userToken->Password.Length <= 0)
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+    if (SOPC_STATUS_OK == status)
     {
-        // TODO: define minimal size regarding encoding blocks
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Client user decryption: encrypted password length invalid");
-        return;
+        status = SOPC_String_Copy(&token->UserName, &source->UserName);
     }
-
-    SOPC_Endpoint_Config* epConfig =
-        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-
-    SOPC_CryptoProvider* cp =
-        SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
-    if (NULL == cp)
+    if (SOPC_STATUS_OK == status)
     {
-        return;
+        status = SOPC_String_Copy(&token->PolicyId, &source->PolicyId);
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ByteString_Copy(&token->Password, &source->Password);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *dest = user;
+        return true;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(user);
+        SOPC_Free(user);
+        return false;
+    }
+}
 
+static SOPC_ReturnStatus internal_decrypt_user_password(OpcUa_UserNameIdentityToken* userToken,
+                                                        SOPC_CryptoProvider* cp,
+                                                        SOPC_SerializedAsymmetricKey* serverKey,
+                                                        SOPC_Buffer** decryptedBuffer)
+{
+    assert(NULL != decryptedBuffer);
     SOPC_AsymmetricKey* key = NULL;
     uint32_t decryptedLength = 0;
     SOPC_Buffer* buffer = NULL;
-    uint32_t lenNonce = 0;
-    uint32_t totalLength = 0;
-    uint32_t pwdLength = 0;
-    SOPC_ExtensionObject* user = NULL;
-    OpcUa_UserNameIdentityToken* token = NULL;
 
-    status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(epConfig->serverConfigPtr->serverKey, false, &key);
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serverKey, false, &key);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_CryptoProvider_AsymmetricGetLength_Decryption(cp, key, (uint32_t) userToken->Password.Length,
@@ -363,28 +331,54 @@ void user_authentication_bs__decrypt_user_token(
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    if (SOPC_STATUS_OK == status)
+
+    if (status == SOPC_STATUS_OK)
     {
-        status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cp, &lenNonce);
+        *decryptedBuffer = buffer;
     }
+    else
+    {
+        SOPC_Buffer_Clear(buffer);
+        SOPC_Free(buffer);
+        *decryptedBuffer = NULL;
+    }
+    SOPC_KeyManager_AsymmetricKey_Free(key);
+    return status;
+}
+
+static SOPC_ReturnStatus internal_compare_user_decrypted_password_nonce(SOPC_ByteString* serverNonce,
+                                                                        SOPC_CryptoProvider* cp,
+                                                                        SOPC_Buffer* decryptedBuffer,
+                                                                        uint32_t* passwordLength)
+{
+    assert(NULL != serverNonce);
+    assert(NULL != decryptedBuffer);
+    assert(NULL != passwordLength);
+
+    uint32_t lenNonce = 0;
+    uint32_t totalLength = 0;
+    uint32_t pwdLength = 0;
+    uint32_t decryptedLength = decryptedBuffer->length;
+
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cp, &lenNonce);
     if (SOPC_STATUS_OK == status)
     {
-        if (lenNonce != (uint32_t) user_authentication_bs__p_server_nonce->Length)
+        if (lenNonce != (uint32_t) serverNonce->Length)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Client user decryption: incompatible server Nonce length: expected %" PRIu32
                                    " actual length %" PRIi32,
-                                   lenNonce, user_authentication_bs__p_server_nonce->Length);
+                                   lenNonce, serverNonce->Length);
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_UInt32_Read(&totalLength, buffer, 0);
+        status = SOPC_UInt32_Read(&totalLength, decryptedBuffer, 0);
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (decryptedLength - 4 != totalLength)
+        if (decryptedLength - ENCRYPTED_USER_IDENTITY_TOKEN_LENGTH_FIELD_SIZE != totalLength)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Client user decryption: encoded length (%" PRIu32
@@ -397,21 +391,93 @@ void user_authentication_bs__decrypt_user_token(
     if (SOPC_STATUS_OK == status)
     {
         pwdLength = totalLength - lenNonce;
-        int cmp = memcmp(user_authentication_bs__p_server_nonce->Data, &buffer->data[4 + pwdLength], (size_t) lenNonce);
+        int cmp = memcmp(serverNonce->Data,
+                         &decryptedBuffer->data[ENCRYPTED_USER_IDENTITY_TOKEN_LENGTH_FIELD_SIZE + pwdLength],
+                         (size_t) lenNonce);
         if (cmp != 0)
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "Client used unexpected server nonce into encrypted user token");
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
+        else
+        {
+            *passwordLength = pwdLength;
+        }
+    }
+
+    return status;
+}
+
+void user_authentication_bs__decrypt_user_token(
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    t_bool* const user_authentication_bs__p_sc_valid_user_token,
+    constants__t_user_token_i* const user_authentication_bs__p_user_token_decrypted)
+{
+    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
+           "Only encrypted username identity token supported");
+    *user_authentication_bs__p_user_token_decrypted = NULL;
+    *user_authentication_bs__p_sc_valid_user_token = false;
+
+    OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
+
+    if (constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
+    {
+        // No encryption: create a copy of user token
+        *user_authentication_bs__p_sc_valid_user_token =
+            internal_user_token_copy(userToken, user_authentication_bs__p_user_token_decrypted);
+        return;
+    }
+
+    if (userToken->Password.Length <= 0)
+    {
+        // TODO: define minimal size regarding encoding blocks
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Client user decryption: encrypted password length invalid");
+        return;
+    }
+
+    SOPC_Endpoint_Config* epConfig =
+        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
+    assert(NULL != epConfig);
+
+    SOPC_CryptoProvider* cp =
+        SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
+    if (NULL == cp)
+    {
+        return;
+    }
+
+    // Decrypt password and nonce
+    SOPC_Buffer* decryptedBuffer = NULL;
+    SOPC_ReturnStatus status =
+        internal_decrypt_user_password(userToken, cp, epConfig->serverConfigPtr->serverKey, &decryptedBuffer);
+
+    // Compare nonces and retrieve password length (depends on nonce length)
+    uint32_t passwordLength = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = internal_compare_user_decrypted_password_nonce(user_authentication_bs__p_server_nonce, cp,
+                                                                decryptedBuffer, &passwordLength);
     }
 
     // Create decrypted user token
+    SOPC_ExtensionObject* user = NULL;
+    OpcUa_UserNameIdentityToken* token = NULL;
     if (SOPC_STATUS_OK == status)
     {
         user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+        status = NULL != user ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     }
+    // Copy user name and policy
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_Copy(&token->UserName, &userToken->UserName);
@@ -420,16 +486,17 @@ void user_authentication_bs__decrypt_user_token(
     {
         status = SOPC_String_Copy(&token->PolicyId, &userToken->PolicyId);
     }
-
+    // Copy decrypted password
     if (SOPC_STATUS_OK == status)
     {
-        // UserIdentityToken encrypted format length (4 bytes) + token + server nonce
-        token->Password.Data = SOPC_Calloc((size_t) pwdLength, sizeof(*token->Password.Data));
+        token->Password.Data = SOPC_Calloc((size_t) passwordLength, sizeof(*token->Password.Data));
         if (NULL != token->Password.Data)
         {
-            memcpy(token->Password.Data, buffer->data + 4, (size_t) pwdLength);
+            // UserIdentityToken encrypted format length (4 bytes) + token + server nonce
+            memcpy(token->Password.Data, decryptedBuffer->data + ENCRYPTED_USER_IDENTITY_TOKEN_LENGTH_FIELD_SIZE,
+                   (size_t) passwordLength);
 
-            token->Password.Length = (int32_t) pwdLength;
+            token->Password.Length = (int32_t) passwordLength;
         }
         else
         {
@@ -447,9 +514,8 @@ void user_authentication_bs__decrypt_user_token(
         SOPC_ExtensionObject_Clear(user);
         SOPC_Free(user);
     }
-    SOPC_Buffer_Clear(buffer);
-    SOPC_Free(buffer);
-    SOPC_KeyManager_AsymmetricKey_Free(key);
+    SOPC_Buffer_Clear(decryptedBuffer);
+    SOPC_Free(decryptedBuffer);
     SOPC_CryptoProvider_Free(cp);
 }
 

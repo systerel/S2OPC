@@ -29,6 +29,7 @@
 constants__t_user_token_type_i util_get_user_token_type_from_token(
     const constants__t_user_token_i user_authentication_bs__p_user_token)
 {
+    assert(NULL != user_authentication_bs__p_user_token);
     SOPC_EncodeableType* tokenType = user_authentication_bs__p_user_token->Body.Object.ObjType;
     if (&OpcUa_AnonymousIdentityToken_EncodeableType == tokenType)
     {
@@ -63,7 +64,6 @@ static bool checkEncryptionAlgorithm(constants__t_SecurityPolicy secpol, SOPC_St
         return 0 == strcmp("http://www.w3.org/2001/04/xmlenc#rsa-oaep", SOPC_String_GetRawCString(encryptionAlgo));
     case constants__e_secpol_B256S256:
         return 0 == strcmp("http://www.w3.org/2001/04/xmlenc#rsa-oaep", SOPC_String_GetRawCString(encryptionAlgo));
-        ;
     default:
         assert(false && "Invalid security policy");
         return false;
@@ -78,14 +78,13 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
 {
     SOPC_String* tokenPolicyId = NULL;
     assert(secpol != NULL);
-    *secpol = constants__e_secpol_B256S256;
     SOPC_String* encryptionAlgo = NULL;
     bool bres = false;
 
     // Retrieve security policy:
     if (userTokenPolicy->SecurityPolicyUri.Length <= 0)
     {
-        // User token secuiryt policy empty, use the secure channel security policy
+        // User token security policy empty, use the secure channel security policy
         bres = util_channel__SecurityPolicy_C_to_B(scConfig->reqSecuPolicyUri, secpol);
         if (!bres)
         {
