@@ -261,7 +261,7 @@ void user_authentication_bs__shallow_copy_user_token(
 
     OpcUa_AnonymousIdentityToken *anonS = NULL, *anonD = NULL;
     OpcUa_UserNameIdentityToken *usernameS = NULL, *usernameD = NULL;
-    OpcUa_X509IdentityToken *x509S = NULL, *x509D;
+    OpcUa_X509IdentityToken *x509S = NULL, *x509D = NULL;
     OpcUa_IssuedIdentityToken *issuedS = NULL, *issuedD = NULL;
 
     SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
@@ -622,6 +622,7 @@ void user_authentication_bs__encrypt_user_token(
     assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
            "Only encryption of username identity token supported");
     assert(NULL != user_authentication_bs__p_server_cert);
+    assert(constants__c_user_token_indet != user_authentication_bs__p_user_token);
     *user_authentication_bs__p_user_token_encrypted = NULL;
     *user_authentication_bs__p_valid = false;
 

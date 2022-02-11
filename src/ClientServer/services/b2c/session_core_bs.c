@@ -307,6 +307,7 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,
                                            const t_bool session_core_bs__p_is_client)
 {
+    assert(constants__c_session_indet != session_core_bs__p_session);
     if (session_core_bs__p_is_client)
     {
         ClientSessionData* sData = &clientSessionDataArray[session_core_bs__p_session];

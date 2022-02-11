@@ -789,6 +789,7 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
                 SOPC_Sleep(sleepTimeout);
                 count++;
             }
+            ck_assert_int_lt(count, count_limit);
 
             // Second attempt with correct password
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
