@@ -349,7 +349,6 @@ OPERATIONS
                 valid <-- write_create_session_req_msg_crypto(create_req_msg, l_channel_config_idx, l_nonce)
             END
             /* TODO: Fill remaining parameters: sessionName, maxResponseSize (keep 0 => unused ?)*/
-            /*write_create_session_req_msg_fill(create_req_msg, l_channel_config_idx) */
         END
     END
     ;

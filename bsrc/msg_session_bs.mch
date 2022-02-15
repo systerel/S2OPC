@@ -170,17 +170,6 @@ OPERATIONS
     END
     ;
 
-    /*write_create_session_req_msg_fill(p_req_msg, p_channel_config_idx) =
-    PRE
-        p_req_msg : t_msg_i &
-        p_req_msg = c_msg_out &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx
-    THEN
-        skip
-    END
-    ;*/
-
     write_activate_msg_user (msg, p_user_token) =
     PRE
         msg : t_msg_i &

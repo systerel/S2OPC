@@ -490,11 +490,11 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
             return -11;
         }
         security_none = true;
-        // Certificates will not be used for SC (but PKI might be for user encryption)
+        // Certificates will not be used for SC (but PKI might be used for user encryption)
         cert_cli = NULL;
         key_cli = NULL;
-        // Keep server certificate since it used as issued certificate and might be used for user encryption
-        // cert_srv = NULL;
+        // Keep server certificate cert_srv since for user encryption need
+        // it might be used as trusted issued certificate in PKI and for the encryption
         break;
     case OpcUa_MessageSecurityMode_Sign:
         break;

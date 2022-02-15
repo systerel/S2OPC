@@ -185,8 +185,9 @@ void session_core_bs__may_validate_server_certificate(
     }
     else
     {
-        // SC certificate already validated during SC establishment and
-        // CreateSessionResponse certificate already verified as the same
+        // If SC certificate is not NULL, it is already validated during SC establishment and
+        // CreateSessionResponse certificate 'p_user_server_cert' is already verified to be the same
+        // (see 'create_session_resp_check_server_certificate')
         *session_core_bs__valid_cert = true;
     }
 }

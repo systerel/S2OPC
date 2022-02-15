@@ -369,8 +369,8 @@ void msg_session_bs__create_session_resp_check_server_certificate(
          */
         // The certificate shall be present and the same
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "msg_session_bs__create_session_resp_check_server_certificate: certificate absent "
-                               "whereas SecureChanel uses a certificatein channel config %" PRIu32,
+                               "msg_session_bs__create_session_resp_check_server_certificate: certificate not the same "
+                               "as the one provided for SecureChanel establishement in channel config %" PRIu32,
                                msg_session_bs__p_channel_config_idx);
         return;
     }
