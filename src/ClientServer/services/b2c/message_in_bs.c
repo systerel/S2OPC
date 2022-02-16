@@ -37,10 +37,23 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
+static SOPC_ExtensionObject nullAnonymousIdentityToken;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void message_in_bs__INITIALISATION(void) {}
+void message_in_bs__INITIALISATION(void)
+{
+    // Note: it cannot be declared statically due to use of OpcUa_AnonymousIdentityToken_EncodeableType
+    //       which is imported global data when using a shared DLL for Windows.
+    nullAnonymousIdentityToken = (SOPC_ExtensionObject){
+        .Encoding = SOPC_ExtObjBodyEncoding_Object,
+        .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
+        .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
+        .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
+        /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
+        .Body.Object.Value = NULL};
+}
 
 /*--------------------
    OPERATIONS Clause
@@ -240,14 +253,6 @@ void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__
         }
     }
 }
-
-static SOPC_ExtensionObject nullAnonymousIdentityToken = {
-    .Encoding = SOPC_ExtObjBodyEncoding_Object,
-    .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
-    .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
-    .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
-    /* When there is no default policyId for the AnonymousIdentityToken, it is unnecessary to even malloc it */
-    .Body.Object.Value = NULL};
 
 void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_i message_in_bs__p_msg,
                                                          t_bool* const message_in_bs__p_valid_user_token,
