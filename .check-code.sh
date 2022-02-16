@@ -129,13 +129,11 @@ fi
 #### Clang static analyzer ####
 echo "Compilation with Clang static analyzer" | tee -a $LOGPATH
 rm -fr build-analyzer && ./.run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
-if [[ ${PIPESTATUS[0]} != 0 ]]; then
-    EXITCODE=1
-else
-    rm -fr build-analyzer
-fi
 
-#### Analyze C sources with clang-tidy ####
+# Keep result
+STATIC_ANALYSIS_STATUS=${PIPESTATUS[0]}
+
+## Analyze C sources with clang-tidy ####
 
 echo "Checking specific CERT rules using clang-tidy tool" | tee -a $LOGPATH
 # CERT rules to verify
@@ -152,6 +150,8 @@ CERT_RULES=cert-flp30-c,cert-fio38-c,cert-env33-c,cert-err34-c,cert-msc30-c
 # Define include directories
 SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -type d`)
 SRC_INCL=${SRC_DIRS[@]/#/-I}
+# includes the generated export file
+SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
 find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
@@ -164,6 +164,14 @@ if [[ $? != 0 ]]; then
     EXITCODE=1
 else
     \rm $CLANG_TIDY_LOG
+fi
+
+# Remove static analysis build since it is not necessary anymore
+if [[ $STATIC_ANALYSIS_STATUS != 0 ]]; then
+    # Do not remove in case of analysis failure
+    EXITCODE=1
+else
+    rm -fr build-analyzer
 fi
 
 #### Format C sources with clang-format ####
