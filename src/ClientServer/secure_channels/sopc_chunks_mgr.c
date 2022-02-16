@@ -2388,8 +2388,22 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
         // Note: part 6 v1.03 table 27: This field shall be null if the Message is not signed
         if (toSign)
         {
-            assert(bsSenderCert.Length > 0);
-            status = SOPC_ByteString_Write(&bsSenderCert, buffer, 0);
+            if (bsSenderCert.Length > 0)
+            {
+                status = SOPC_STATUS_OK;
+            }
+            else
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ChunksMgr: SC_Chunks_EncodeAsymSecurityHeader: sender certificate "
+                                       "missing in Sign mode (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                                       scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ByteString_Write(&bsSenderCert, buffer, 0);
+            }
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
