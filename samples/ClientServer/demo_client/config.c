@@ -138,7 +138,9 @@ struct argparse_option CONN_OPTIONS[14] = {
                0)};
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
-int nCfgCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
+int nCfgWithSecuCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
+int nCfgCreated = 0;         /* Number of created configs with PKI created (might be necessary for user encryption)  */
+
 SOPC_SerializedCertificate* pCrtCli = NULL;
 SOPC_SerializedCertificate* pCrtSrv = NULL;
 SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
@@ -204,24 +206,28 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     if (NULL == ppscConfig || NULL == *ppscConfig)
         return;
 
-    if (NULL != (*ppscConfig)->crt_cli)
+    if (OpcUa_MessageSecurityMode_None != (*ppscConfig)->msgSecurityMode)
     {
-        nCfgCreated -= 1;
+        nCfgWithSecuCreated -= 1;
     }
+    nCfgCreated -= 1;
 
     SOPC_Free(*ppscConfig);
     *ppscConfig = NULL;
 
     /* Garbage collect, if needed */
-    if (0 == nCfgCreated)
+    if (0 == nCfgWithSecuCreated)
     {
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
-        SOPC_PKIProvider_Free(&pPki);
         pCrtCli = NULL;
         pCrtSrv = NULL;
         pKeyCli = NULL;
+    }
+    if (0 == nCfgCreated)
+    {
+        SOPC_PKIProvider_Free(&pPki);
         pPki = NULL;
     }
 }
@@ -230,9 +236,9 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    if (0 == nCfgCreated)
+    if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
     {
-        if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
+        if (0 == nCfgWithSecuCreated)
         {
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
             if (SOPC_STATUS_OK != status)
@@ -257,23 +263,26 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
                     printf("# Error: Failed to load client private key\n");
                 }
             }
-        } // else: secu is None => client/server keys not needed but PKI might be necessary
-          //                       to validate server certificate prior to user token encryption using it
+        } // else configuration with client/server certificates already created and shared
 
-        if (SOPC_STATUS_OK == status)
+        nCfgWithSecuCreated += 1; /* If it failed once, do not try again */
+
+    } // else: secu is None => client/server keys not needed but PKI might be necessary
+      //                       to validate server certificate prior to user token encryption using it
+
+    if (0 == nCfgCreated && SOPC_STATUS_OK == status)
+    {
+        char* lPathsTrustedRoots[] = {PATH_CACERT_PUBL, NULL};
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
+        char* lPathsIssuedCerts[] = {PATH_ISSUED, NULL};
+        char* lPathsCRL[] = {PATH_CACRL, NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
+        if (SOPC_STATUS_OK != status)
         {
-            char* lPathsTrustedRoots[] = {PATH_CACERT_PUBL, NULL};
-            char* lPathsTrustedLinks[] = {NULL};
-            char* lPathsUntrustedRoots[] = {NULL};
-            char* lPathsUntrustedLinks[] = {NULL};
-            char* lPathsIssuedCerts[] = {PATH_ISSUED, NULL};
-            char* lPathsCRL[] = {PATH_CACRL, NULL};
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                           lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("# Error: Failed to create PKI\n");
-            }
+            printf("# Error: Failed to create PKI\n");
         }
     }
 
