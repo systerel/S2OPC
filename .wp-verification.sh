@@ -43,7 +43,7 @@ WPARGS='-wp -wp-rte -wp-timeout=10 -wp-prover alt-ergo,CVC4 -cpp-command'
 
 WPFUNC='-wp-fct'
 
-FILESWITHCONTRACTS=$(grep -I -r -ls -e "/\*@" -e "//@" csrc/ | sort | sed '/^.*\.h/d')
+FILESWITHCONTRACTS=$(grep -I -r -ls -e "/\*@" -e "//@" src/ | sort | sed '/^.*\.h/d')
 
 if [[ -n $SOURCEFILE ]]
 then
