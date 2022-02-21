@@ -60,7 +60,7 @@ test_script:
         cd %MBEDTLS_DIR%
         mkdir build
         cd build
-        cmake .. -G "Visual Studio 15 2017 Win64"
+        cmake -DENABLE_PROGRAMS=Off -DENABLE_TESTING=Off .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --target ALL_BUILD --config %CONFIG%
     # download and build expat
     - cd %ROOT_DIR%
@@ -70,7 +70,7 @@ test_script:
         cd %EXPAT_DIR%
         mkdir build
         cd build
-        cmake -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% .. -G "Visual Studio 15 2017 Win64"
+        cmake -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% -DEXPAT_BUILD_TOOLS=Off -DEXPAT_BUILD_EXAMPLES=Off -DEXPAT_BUILD_TESTS=Off .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --target install --config %CONFIG%
 
     # configure, build and test S2OPC project
