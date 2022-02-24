@@ -415,6 +415,10 @@ static inline long diff_timespec(struct timespec* a, struct timespec* b)
     {
         ret = LONG_MAX;
     }
+    else
+    {
+        ret += 1000000000 * sec;
+    }
 
     if (invert)
     {
