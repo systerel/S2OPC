@@ -25,15 +25,14 @@
 #define IS_LOOPBACK "0"
 
 /* Default paths */
-#define PUBSUB_XML_CONFIG_EMIT "./config_rtt_emitter.xml"
-#define PUBSUB_XML_CONFIG_LOOP "./config_rtt_loopback.xml"
+#define PUBSUB_XML_CONFIG_ZEPHYR_PERF "./config_zephyr_perf.xml"
 #define LOG_PATH "./logs/"
 #define SKS_SIGNING_KEY "./signingKey.key"
 #define SKS_ENCRYPTION_KEY "./encryptKey.key"
 #define SKS_KEY_NONCE "./keyNonce.key"
 
 /* Sleep period of the main loop */
-#define SLEEP_TIMEOUT (100)
+#define SLEEP_TIMEOUT (1000)
 
 /* NodeIds of the counter, shall match the configuration */
 #define NODEID_COUNTER_SEND                                                              \

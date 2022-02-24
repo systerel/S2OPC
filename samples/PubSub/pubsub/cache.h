@@ -63,6 +63,9 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
 /** The SOPC_SetTargetVariables_Func-compatible implementation that copies the values to the cache */
 bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
+typedef void (Cache_TargetVarListener)(const SOPC_NodeId* nid, SOPC_DataValue* pDv);
+void Cache_SetTargetVarListener(Cache_TargetVarListener* listener);
+
 /** The Cache shall be locked before accessing data (and its content, to prevent it from being freed) */
 void Cache_Lock(void);
 void Cache_Unlock(void);

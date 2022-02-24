@@ -29,6 +29,8 @@
 SOPC_Dict* g_cache = NULL;
 Mutex g_lock;
 
+static Cache_TargetVarListener* gListenerNid = NULL;
+
 static void free_datavalue(void* value)
 {
     SOPC_DataValue_Clear(value);
@@ -186,6 +188,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
     SOPC_ReturnStatus status = Mutex_Initialization(&g_lock);
     g_cache = SOPC_NodeId_Dict_Create(true, free_datavalue);
     bool res = SOPC_STATUS_OK == status && NULL != g_cache;
+    gListenerNid = NULL;
 
     /* Parse configuration and fill the cache with default values */
     /* NodeId is in the field metadata (target variable for subscriber and published variable for publisher)
@@ -365,6 +368,12 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
     return dvs;
 }
 
+void Cache_SetTargetVarListener(Cache_TargetVarListener* listener)
+{
+    gListenerNid = listener;
+}
+
+
 /* nodesToWrite shall be freed by the callee */
 bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
@@ -396,6 +405,9 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
             SOPC_DataValue_Initialize(dv);
 
             ok = Cache_Set(key, item);
+            if (gListenerNid != NULL){
+                gListenerNid(key, item);
+            }
         }
         else
         {
@@ -428,4 +440,5 @@ void Cache_Clear(void)
 {
     SOPC_Dict_Delete(g_cache);
     g_cache = NULL;
+    gListenerNid = NULL;
 }

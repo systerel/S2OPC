@@ -61,6 +61,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +72,7 @@
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
 #include "sopc_helper_string.h"
+#include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
@@ -82,7 +84,40 @@
 #include "cache.h"
 #include "config.h"
 
+#define SERVER_CMD_PUBSUB_PERIOD_MS     "ns=1;s=PubPeriodMs"
+#define SERVER_STATUS_SUB_PERIOD_MS     "ns=1;s=SubPeriodMs"
+#define SERVER_CMD_PUBSUB_SIGN_ENCRYPT  "ns=1;s=PubSignAndEncypt"
+#define SERVER_STATUS_PUB_VAR_RESULT    "ns=1;s=PubVarResult"
+#define SERVER_STATUS_SUB_VAR_LOOP      "ns=1;s=SubVarLoops"
+#define SERVER_STATUS_PUB_VAR_LOOP      "ns=1;s=PubVarLoops"
+#define SERVER_STATUS_PUB_VAR_INFO      "ns=1;s=PubVarInfo"
+#define SERVER_STATUS_PUB_VAR_UPTIME    "ns=1;s=PubVarUpTime"
+
+
 volatile sig_atomic_t stopSignal = 0;
+
+static void doPubSubTest(void);
+static void onSubVarLoopRcv(const SOPC_NodeId* nid, SOPC_DataValue* pDv);
+
+static SOPC_NodeId* pNidSubVarPeriod = NULL;
+static SOPC_NodeId* pNidPubVarPeriod = NULL;
+static SOPC_NodeId* pNidSubVarLoop = NULL;
+static SOPC_NodeId* pNidPubVarLoop = NULL;
+static SOPC_NodeId* pNidPubVarInfo = NULL;
+static SOPC_NodeId* pNidPubVarResult = NULL;
+static uint32_t     gTestPeriod  = 0;
+static char         gTestStatus [256];
+
+typedef struct
+{
+    uint64_t sumUs;
+    uint64_t sumDiffSquare;
+    uint64_t maxDiff;
+    uint32_t nbSamples;
+} PubStats;
+static PubStats gPubStats;
+
+
 static void signal_stop_server(int sig)
 {
     (void) sig;
@@ -97,6 +132,20 @@ static void signal_stop_server(int sig)
     }
 }
 
+static void setTestStatus(const char* format, ...)
+{
+    if (format == NULL)
+    {
+        return;
+    }
+    memset(gTestStatus,0, sizeof(gTestStatus));
+    va_list argptr;
+    va_start(argptr, format);
+    vsnprintf(gTestStatus, sizeof(gTestStatus) - 1, format, argptr);
+    va_end(argptr);
+    printf(" ** NEW STATUS : %s\n", gTestStatus);
+}
+
 static const char* getenv_default(const char* name, const char* default_value)
 {
     const char* val = getenv(name);
@@ -104,16 +153,10 @@ static const char* getenv_default(const char* name, const char* default_value)
     return (val != NULL) ? val : default_value;
 }
 
-/* PubSub callbacks (for the emitter) */
-static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
-static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
-
-/* RTT calculations */
-SOPC_RealTime* g_ts_emissions = NULL;
-long* g_rtt = NULL;
-uint32_t g_n_samples = 0;
-static inline long diff_timespec(struct timespec* a, struct timespec* b);
-static void save_rtt_to_csv(void);
+static void userDoLog(const char* category, const char* const line)
+{
+    printf("%s : %s\n", category, line);
+}
 
 int main(int argc, char* const argv[])
 {
@@ -124,12 +167,21 @@ int main(int argc, char* const argv[])
     /* Parse command line arguments ? */
     (void) argc;
     (void) argv;
+    setTestStatus("Starting...");
+
+    pNidSubVarLoop = SOPC_NodeId_FromCString(SERVER_STATUS_SUB_VAR_LOOP,strlen(SERVER_STATUS_SUB_VAR_LOOP));
+    pNidSubVarPeriod = SOPC_NodeId_FromCString(SERVER_STATUS_SUB_PERIOD_MS,strlen(SERVER_STATUS_SUB_PERIOD_MS));
+    pNidPubVarPeriod = SOPC_NodeId_FromCString(SERVER_CMD_PUBSUB_PERIOD_MS,strlen(SERVER_CMD_PUBSUB_PERIOD_MS));
+    pNidPubVarLoop = SOPC_NodeId_FromCString(SERVER_STATUS_PUB_VAR_LOOP,strlen(SERVER_STATUS_PUB_VAR_LOOP));
+    pNidPubVarInfo = SOPC_NodeId_FromCString(SERVER_STATUS_PUB_VAR_INFO,strlen(SERVER_STATUS_PUB_VAR_INFO));
+    pNidPubVarResult = SOPC_NodeId_FromCString(SERVER_STATUS_PUB_VAR_RESULT,strlen(SERVER_STATUS_PUB_VAR_RESULT));
 
     /* General initializations */
     const char* log_path = getenv_default("LOG_PATH", LOG_PATH);
     printf("LOG_PATH: %s\n", log_path);
-    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = log_path;
+    SOPC_Log_Configuration logConfiguration ;
+    logConfiguration.logSystem = SOPC_LOG_SYSTEM_USER;
+    logConfiguration.logSysConfig.userSystemLogConfig.doLog = userDoLog;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_INFO;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
@@ -138,29 +190,11 @@ int main(int argc, char* const argv[])
         printf("Error while initializing logs\n");
     }
 
-    status = SOPC_strtouint32_t(getenv_default("RTT_SAMPLES", RTT_SAMPLES), &g_n_samples, 10, '\0');
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("Error while parsing RTT_SAMPLES value\n");
-        exit((int) status);
-    }
-    printf("RTT_SAMPLES: %" PRIu32 "\n", g_n_samples);
-    g_ts_emissions = SOPC_Calloc(g_n_samples, sizeof(struct timespec));
-    g_rtt = SOPC_Calloc(g_n_samples, sizeof(long));
-    if (NULL == g_ts_emissions || NULL == g_rtt)
-    {
-        printf("Error while allocating %" PRIu32 " round-trip time measurements\n", g_n_samples);
-        status = SOPC_STATUS_NOK;
-    }
-
     /* Configuration of the PubSub */
-    const bool is_loopback = atoi(getenv_default("IS_LOOPBACK", IS_LOOPBACK)) != 0;
-    printf("IS_LOOPBACK: %d\n", is_loopback);
     SOPC_PubSubConfiguration* config = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        const char* config_path =
-            getenv_default("PUBSUB_XML_CONFIG", is_loopback ? PUBSUB_XML_CONFIG_LOOP : PUBSUB_XML_CONFIG_EMIT);
+        const char* config_path = PUBSUB_XML_CONFIG_ZEPHYR_PERF;
         printf("PUBSUB_XML_CONFIG: %s\n", config_path);
 
         FILE* fd = fopen(config_path, "r");
@@ -178,14 +212,7 @@ int main(int argc, char* const argv[])
     SOPC_SubTargetVariableConfig* targetConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        if (is_loopback)
-        {
-            sourceConfig = SOPC_PubSourceVariableConfig_Create(&Cache_GetSourceVariables);
-        }
-        else
-        {
-            sourceConfig = SOPC_PubSourceVariableConfig_Create(&get_source_increment);
-        }
+        sourceConfig = SOPC_PubSourceVariableConfig_Create(&Cache_GetSourceVariables);
         if (NULL == sourceConfig)
         {
             printf("Error while setting Pub source variable\n");
@@ -194,23 +221,13 @@ int main(int argc, char* const argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (is_loopback)
-        {
-            targetConfig = SOPC_SubTargetVariableConfig_Create(&Cache_SetTargetVariables);
-        }
-        else
-        {
-            targetConfig = SOPC_SubTargetVariableConfig_Create(&set_target_compute_rtt);
-        }
+        targetConfig = SOPC_SubTargetVariableConfig_Create(&Cache_SetTargetVariables);
         if (NULL == targetConfig)
         {
             printf("Error while setting Sub target variable\n");
             status = SOPC_STATUS_NOK;
         }
     }
-    /* Also print the save-file prefix */
-    printf("CSV_PREFIX: %s\n", getenv_default("CSV_PREFIX", CSV_PREFIX));
-
     /* Don't forget the SKS */
     const char* signing_key = getenv_default("SKS_SIGNING_KEY", SKS_SIGNING_KEY);
     const char* encryption_key = getenv_default("SKS_ENCRYPTION_KEY", SKS_ENCRYPTION_KEY);
@@ -228,6 +245,10 @@ int main(int argc, char* const argv[])
         {
             printf("Error while initializing the cache, refer to log files\n");
             status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            Cache_SetTargetVarListener(onSubVarLoopRcv);
         }
     }
 
@@ -281,9 +302,17 @@ int main(int argc, char* const argv[])
     while (SOPC_STATUS_OK == status && 0 == stopSignal)
     {
         SOPC_Sleep(SLEEP_TIMEOUT);
+        doPubSubTest();
+
     }
 
     /* Clean and quit */
+    SOPC_NodeId_Clear(pNidSubVarLoop);
+    SOPC_NodeId_Clear(pNidPubVarLoop);
+    SOPC_NodeId_Clear(pNidPubVarInfo);
+    SOPC_NodeId_Clear(pNidPubVarResult);
+    SOPC_NodeId_Clear(pNidPubVarPeriod);
+    SOPC_NodeId_Clear(pNidSubVarPeriod);
     SOPC_PubScheduler_Stop();
     SOPC_SubScheduler_Stop();
     Cache_Clear();
@@ -292,99 +321,6 @@ int main(int argc, char* const argv[])
     SOPC_PubSubConfiguration_Delete(config);
     printf("# Info: PubSub stopped\n");
 
-    /* Print or save the non-empty RTT */
-    if (sizeof(CSV_PREFIX) == 0)
-    {
-        for (size_t idx = 0; idx < g_n_samples; ++idx)
-        {
-            if (0 != g_rtt[idx])
-            {
-                printf("% 9zd: round-trip time: % 12ld ns\n", idx, g_rtt[idx]);
-            }
-        }
-    }
-    else if (!is_loopback)
-    {
-        save_rtt_to_csv();
-    }
-    SOPC_Free(g_ts_emissions);
-    SOPC_Free(g_rtt);
-}
-
-static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
-{
-    /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_SEND,
-     * increments its value */
-    static SOPC_NodeId nid_counter = NODEID_COUNTER_SEND;
-
-    Cache_Lock();
-    for (int32_t i = 0; i < nbValues; ++i)
-    {
-        int32_t cmp = 0;
-        SOPC_ReturnStatus status = SOPC_NodeId_Compare(&nid_counter, &nodesToRead[i].NodeId, &cmp);
-        if (SOPC_STATUS_OK == status && 0 == cmp)
-        {
-            /* Get the value and modify it in place */
-            SOPC_DataValue* dv_counter = Cache_Get(&nid_counter);
-            assert(NULL != dv_counter);
-            SOPC_Variant* var = &dv_counter->Value;
-            assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-            assert(SOPC_UInt32_Id == var->BuiltInTypeId);
-            ++var->Value.Uint32;
-
-            /* Record the current time */
-            size_t idx = var->Value.Uint32;
-            if (idx < g_n_samples)
-            {
-                bool ok = SOPC_RealTime_GetTime(&g_ts_emissions[idx]);
-                (void) ok;
-            }
-        }
-    }
-
-    /* Let the cache handle the memory and treatment of this request */
-    SOPC_DataValue* dvs = Cache_GetSourceVariables(nodesToRead, nbValues);
-    Cache_Unlock();
-    return dvs;
-}
-
-static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
-{
-    /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_RECV,
-     * use the new counter value to compute the round trip time */
-    static SOPC_NodeId nid_counter = NODEID_COUNTER_RECV;
-
-    Cache_Lock();
-    for (int32_t i = 0; i < nbValues; ++i)
-    {
-        int32_t cmp = 0;
-        SOPC_ReturnStatus status = SOPC_NodeId_Compare(&nid_counter, &nodesToWrite[i].NodeId, &cmp);
-        if (SOPC_STATUS_OK == status && 0 == cmp)
-        {
-            /* Compute the round-trip time */
-            static SOPC_RealTime now = {0}; /* Requires a static initializer to be abstracted in p_time interface */
-            bool ok = SOPC_RealTime_GetTime(&now);
-            if (ok)
-            {
-                SOPC_Variant* var = &nodesToWrite[i].Value.Value;
-                size_t idx = var->Value.Uint32;
-                if (idx < g_n_samples)
-                {
-                    ok &= SOPC_VariantArrayType_SingleValue == var->ArrayType;
-                    ok &= SOPC_UInt32_Id == var->BuiltInTypeId;
-                    if (ok)
-                    {
-                        g_rtt[idx] = diff_timespec(&now, &g_ts_emissions[idx]);
-                    }
-                }
-            }
-        }
-    }
-
-    /* Let the cache handle the memory and treatment of this request */
-    bool processed = Cache_SetTargetVariables(nodesToWrite, nbValues);
-    Cache_Unlock();
-    return processed;
 }
 
 /* TODO: implement this in a platform independent fashion */
@@ -415,6 +351,10 @@ static inline long diff_timespec(struct timespec* a, struct timespec* b)
     {
         ret = LONG_MAX;
     }
+    else
+    {
+        ret += 1000000000 *sec;
+    }
 
     if (invert)
     {
@@ -431,53 +371,114 @@ static inline long diff_timespec(struct timespec* a, struct timespec* b)
     return ret;
 }
 
-static void save_rtt_to_csv(void)
+
+static void doPubSubTest(void)
 {
-    /* Format a filename with CSV_PREFIX and current date */
-    time_t now = time(NULL);
-    struct tm* tm_now = localtime(&now);
-    char time_fmt[16] = {0};
-    size_t n = strftime(time_fmt, sizeof(time_fmt), "%Y%m%d-%H%M%S", tm_now);
-    if (0 == n)
+    static bool testRunning = true;
+    if (gPubStats.nbSamples > 0)
     {
-        printf("# Error in strftime\n");
+        testRunning = true;
+        const double sumSquare = (double)gPubStats.sumDiffSquare;
+        const int32_t meanPubUs = (int32_t) (gPubStats.sumUs / gPubStats.nbSamples);
+        const int32_t deviationPubUs = (int32_t) sqrt(sumSquare / gPubStats.nbSamples);
+
+        //setTestStatus
+        setTestStatus("Pub:%d smpls, Per.: mean %d us, stand. dev. = %d us, max. dev. =%llu us ",
+                gPubStats.nbSamples, meanPubUs, deviationPubUs, gPubStats.maxDiff);
+    }
+    else
+    {
+        if (testRunning)
+        {
+            setTestStatus("No test running");
+            testRunning = false;
+        }
+    }
+}
+
+static void onSubVarLoopRcv(const SOPC_NodeId* nid, SOPC_DataValue* pDv)
+{
+    if (pDv == NULL || pDv->Status != 0)
+    {
+        return;
+    }
+    static bool skipFirst = true;
+    static uint32_t lastLoopNum = 0;
+
+    int32_t result = -1;
+    // Check listener
+    SOPC_NodeId_Compare(pNidSubVarPeriod, nid, &result);
+    if (result == 0)
+    {
+        // received New test period
+        assert(pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+                pDv->Value.BuiltInTypeId == SOPC_UInt32_Id);
+        const uint32_t newValue = pDv->Value.Value.Uint32;
+        if (newValue > 0 && newValue != gTestPeriod)
+        {
+            gTestPeriod = newValue;
+            gPubStats.sumUs = 0;
+            gPubStats.sumDiffSquare = 0;
+            gPubStats.nbSamples = 0;
+            lastLoopNum = 0;
+            skipFirst = true;
+            setTestStatus("Test period changed to %u", newValue);
+        }
         return;
     }
 
-    char csv_path[128] = {0};
-    int n_path = snprintf(csv_path, sizeof(csv_path), "%s-%s.csv", getenv_default("CSV_PREFIX", CSV_PREFIX), time_fmt);
-    if (n_path < 0 || n_path >= (int) (sizeof(csv_path)))
+    SOPC_NodeId_Compare(pNidSubVarLoop, nid, &result);
+    if (result == 0)
     {
-        printf("# Error while formatting CSV path name\n");
+        assert(pDv->Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+                pDv->Value.BuiltInTypeId == SOPC_UInt32_Id);
+        const uint32_t newValue = pDv->Value.Value.Uint32;
+        if (newValue == 0 )
+        {
+            gPubStats.sumUs = 0;
+            gPubStats.sumDiffSquare = 0;
+            gPubStats.nbSamples = 0;
+            lastLoopNum = 0;
+            skipFirst = true;
+        }
+        else if (newValue != lastLoopNum)
+        {
+            static SOPC_RealTime lastReception;
+            SOPC_RealTime now;
+            SOPC_RealTime_GetTime(&now);
+            if (! skipFirst)
+            {
+                uint64_t diffUs = (uint64_t)abs(diff_timespec(&now, &lastReception)/1000);
+
+                gPubStats.nbSamples ++;
+                gPubStats.sumUs += (diffUs);
+
+                uint64_t rateDiffUs;
+                if (diffUs > gTestPeriod*1000)
+                {
+                    rateDiffUs = diffUs - gTestPeriod*1000;
+                }
+                else
+                {
+                    rateDiffUs = gTestPeriod*1000 - diffUs;
+                }
+                gPubStats.sumDiffSquare += (uint64_t) (rateDiffUs * rateDiffUs);
+                if (rateDiffUs > gPubStats.maxDiff)
+                {
+                    gPubStats.maxDiff = rateDiffUs;
+                }
+            }
+
+            skipFirst = false;
+
+            lastReception = now;
+            lastLoopNum = newValue;
+        }
         return;
     }
-
-    FILE* csv = fopen(csv_path, "w");
-    if (NULL == csv)
-    {
-        printf("# Error opening the CSV file \"%s\" for writing: %s\n", csv_path, strerror(errno));
-        return;
-    }
-
-    /* First record version information */
-    SOPC_Build_Info binfo_common = SOPC_Common_GetBuildInfo();
-    int res = fprintf(csv, "S2OPC_Common Version;SrcCommit;DockerId;BuildDate\n");
-    if (res > 0)
-    {
-        res = fprintf(csv, "%s;%s;%s;%s\n", binfo_common.buildVersion, binfo_common.buildSrcCommit,
-                      binfo_common.buildDockerId, binfo_common.buildBuildDate);
-    }
-
-    /* Write records */
-    if (res > 0)
-    {
-        res = fprintf(csv, "\nGetSourceTime (ns since app start);Round-trip time (ns)\n");
-    }
-    for (size_t idx = 0; res > 0 && idx < g_n_samples; ++idx)
-    {
-        int64_t ts = g_ts_emissions[idx].tv_sec * (int64_t)(1000000000) + g_ts_emissions[idx].tv_nsec;
-        res = fprintf(csv, "%" PRIi64 ";%ld\n", ts, g_rtt[idx]);
-    }
-
-    fclose(csv);
+    /*
+    char* nidStr = SOPC_NodeId_ToCString(nid);
+    printf("Unhandled noded Id : %s\n", nidStr);
+    SOPC_Free(nidStr);
+    */
 }
