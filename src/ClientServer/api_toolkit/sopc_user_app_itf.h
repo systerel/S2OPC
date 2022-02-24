@@ -74,20 +74,6 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
-/** Default anonymous user security policy supported configuration */
-extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
-
-/** Default username security policy supported and configured with security policy None.
- * With this security policy, the password will never be encrypted and this policy
- * shall not be used on unsecured or unencrypted secure channels. */
-extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
-
-/** Default username security policy supported and configured with empty security policy.
- *  With this security policy, the password will be encrypted if Secure Channel security policy is not None.
- *  It shall not be used on secure channels using security policy None otherwise no encryption will be done.
- */
-extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
-
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
 /**
@@ -100,9 +86,10 @@ typedef struct SOPC_SecurityPolicy
     uint8_t nbOfUserTokenPolicies; /**< The number elements in the user security policies supported array (<= 10) */
     OpcUa_UserTokenPolicy
         userTokenPolicies[SOPC_MAX_SECU_POLICIES_CFG]; /**< The array of user security policies supported,
-                                                        * use the constant predefined policies provided
-                                                        * (password encryption is not provided and shall be implemented
-                                                        *  by authorization manager if applicable)
+                                                        * it is possible to use the predefined policies provided:
+                                                        * ::SOPC_UserTokenPolicy_Anonymous,
+                                                        * ::SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy or
+                                                        * ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy supported
                                                         */
 } SOPC_SecurityPolicy;
 

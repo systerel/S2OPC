@@ -282,6 +282,7 @@ def gen_header_types(out, out_enum, schema):
 
 def gen_implem_types(out, schema):
     schema.gen_encodeable_type_descs(out)
+    schema.gen_user_token_policies_constants(out)
     schema.gen_encodeable_type_table(out)
 
 
@@ -452,6 +453,12 @@ class BinarySchema:
         else:
             template = 'SOPC_TypeInternalIndex_{name}'
         return is_built_in, template.format(name=barename)
+
+    def gen_user_token_policies_constants(self, out):
+        """
+        Generates example constants for UserTokenPolicies
+        """
+        out.write(CSTS_USER_TOKEN_POLICIES)
 
     def gen_encodeable_type_table(self, out):
         """
@@ -708,6 +715,32 @@ const int32_t* enumerationValue, uint32_t nestedStructLevel);
 
 H_FILE_END = """
 /*============================================================================
+ * UserTokenPolicies example constant values
+ *===========================================================================*/
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
+/** Default anonymous user security policy supported configuration */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
+
+/** Default username security policy supported and configured with security policy None.
+ * With this security policy, the password will never be encrypted and this policy
+ * shall not be used on unsecured and unencrypted secure channels.
+ *
+ */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
+
+/** Default username security policy supported and configured with empty security policy.
+ *  With this security policy, the password will be encrypted if Secure Channel security policy is not None.
+ *  It shall not be used on secure channels using security policy None otherwise no encryption will be done.
+ */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
+
+/** Default username security policy supported and configured with empty security policy.
+ *  With this security policy, the password will be encrypted if Secure Channel security policy is not None.
+ *  It shall not be used on secure channels using security policy None otherwise no encryption will be done.
+ */
+#endif
+
+/*============================================================================
  * Table of known types.
  *===========================================================================*/
 extern const struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
@@ -921,6 +954,7 @@ C_FILE_START = """
 
 #include "opcua_identifiers.h"
 #include "sopc_types.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 
 """[1:]
@@ -1008,6 +1042,49 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     {nof_fields},
     {field_desc}
 }};
+#endif
+"""
+
+CSTS_USER_TOKEN_POLICIES = """
+/*============================================================================
+ * UserTokenPolicies example constant values
+ *===========================================================================*/
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
+/** Anonymous user security policy supported configuration */
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous = {
+    .TokenType = OpcUa_UserTokenType_Anonymous,
+    .PolicyId = {9, true, (SOPC_Byte*) "anonymous"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+};
+
+/** Username security policy is supported and configured with security policy None.
+ * With this security policy, the password will never be encrypted and this policy
+ * shall not be used on unsecured and unencrypted secure channels. */
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {8, true, (SOPC_Byte*) "username_None"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_None_URI) - 1, true, (SOPC_Byte*) SOPC_SecurityPolicy_None_URI},
+    /* None security policy shall be used only when
+   secure channel security policy is non-None and with encryption since password will be non-encrypted */
+};
+
+/** Username security policy is supported and configured with Secure Channel security policy.
+ *  With this security policy, the password will be encrypted with secure channel security policy algorithm
+ *  (None security policy will lead to unencrypted password).
+ */
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {8, true, (SOPC_Byte*) "username"},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+    /* Default security policy shall be used only when
+   secure channel security policy is non-None since password will be non-encrypted */
+};
 #endif
 """
 

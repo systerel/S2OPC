@@ -244,25 +244,11 @@ SOPC_ReturnStatus SOPC_SecurityConfig_SetSecurityModes(SOPC_SecurityConfig* dest
 typedef OpcUa_UserTokenPolicy SOPC_UserTokenPolicy;
 
 /**
- * \brief Predefined user token policy for anonymous users
- */
-extern const SOPC_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
-
-/**
- * \brief Predefined user token policy for users with username and password credentials.
- *        It uses None security policy which means only the security policy
- *        of the endpoint will ensure confidentiality of credentials.
- *        Thus endpoint security policy shall not allow None security mode when using it.
- *
- */
-extern const SOPC_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
-
-/**
  * \brief Add a user token policy to the security policy
  *
  * \param destSecuConfig   Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityConfig
  * \param userTokenPolicy  User token policy to use for this security policy.
- *                         By default, only ::SOPC_UserTokenPolicy_Anonymous and
+ *                         ::SOPC_UserTokenPolicy_Anonymous, ::SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy or
  *                         ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy supported
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
@@ -271,7 +257,7 @@ extern const SOPC_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPoli
  *         user token policies defined in this security policy
  *
  * \note ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy shall never be used
- *       in conjunction with None security mode to avoid possible user credential leaks.
+ *       in conjunction with None or Sign only security mode to avoid possible user credential leaks.
  */
 SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* destSecuConfig,
                                                          const SOPC_UserTokenPolicy* userTokenPolicy);

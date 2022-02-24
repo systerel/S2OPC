@@ -313,3 +313,9 @@ typedef struct _OpcUa_EUInformation
     SOPC_LocalizedText DisplayName;
     SOPC_LocalizedText Description;
 } OpcUa_EUInformation;
+
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
+
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
+
+extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
