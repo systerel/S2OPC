@@ -22,6 +22,7 @@
 #include <string.h>
 
 // Server wrapper
+#include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
@@ -206,6 +207,10 @@ static SOPC_SecureChannel_Config client_user_sc_config = {.isClientSc = true,
                                                           .requestedLifetime = 20000,
                                                           .msgSecurityMode = OpcUa_MessageSecurityMode_Sign};
 
+static SOPC_Client_Config clientConfig = {.freeCstringsFlag = false, .clientLocaleIds = (char*[]){"fr-FR", NULL}};
+
+static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
+
 static SOPC_ReturnStatus client_create_configuration(bool username, uint32_t* client_channel_config_idx)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -224,6 +229,49 @@ static SOPC_ReturnStatus client_create_configuration(bool username, uint32_t* cl
     else
     {
         scConfig = &client_sc_config;
+    }
+
+    // Set client description
+    OpcUa_ApplicationDescription_Initialize(&clientConfig.clientDescription);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&clientConfig.clientDescription.ApplicationName.defaultText,
+                                               "S2OPC toolkit client example");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&clientConfig.clientDescription.ProductUri, DEFAULT_PRODUCT_URI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&clientConfig.clientDescription.ApplicationUri, DEFAULT_APPLICATION_URI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        clientConfig.clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        scConfig->clientConfigPtr = &clientConfig;
+    }
+
+    // Set expected endpoints
+    if (NULL == expectedEndpoints)
+    {
+        // Retrieve endpoints from server
+        OpcUa_GetEndpointsRequest* request = SOPC_GetEndpointsRequest_Create(DEFAULT_ENDPOINT_URL);
+        if (NULL != request)
+        {
+            status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &expectedEndpoints);
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            scConfig->expectedEndpoints = expectedEndpoints;
+        }
     }
 
     /* load certificates and key */
@@ -748,20 +796,6 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
         status = SOPC_HelperConfigClient_SetRawClientComEvent(Test_ComEvent_FctClient);
     }
 
-    /* Create client configuration */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = client_create_configuration(username, &client_channel_config_idx);
-        if (SOPC_STATUS_OK == status)
-        {
-            printf(">>Client: Successfully created configuration\n");
-        }
-        else
-        {
-            printf(">>Client: Failed to create configuration\n");
-        }
-    }
-
     /* Start server / Finalize configuration */
     if (SOPC_STATUS_OK == status)
     {
@@ -774,6 +808,20 @@ static void tests_server_client_fct(bool username, bool user_specific_encrypt)
         else
         {
             printf("<Test_Server_Client: Endpoint configured\n");
+        }
+    }
+
+    /* Create client configuration */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = client_create_configuration(username, &client_channel_config_idx);
+        if (SOPC_STATUS_OK == status)
+        {
+            printf(">>Client: Successfully created configuration\n");
+        }
+        else
+        {
+            printf(">>Client: Failed to create configuration\n");
         }
     }
 
@@ -914,6 +962,8 @@ static Suite* tests_make_suite_server_client(void)
     tcase_add_test(tc_server_client, test_server_client_anonymous);
     tcase_add_test(tc_server_client, test_server_client_username);
     tcase_add_test(tc_server_client, test_server_client_username_specific_encrypt);
+    OpcUa_GetEndpointsResponse_Clear(expectedEndpoints);
+    SOPC_Free(expectedEndpoints);
     tcase_set_timeout(tc_server_client, 0);
     suite_add_tcase(s, tc_server_client);
 
