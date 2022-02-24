@@ -73,7 +73,15 @@ test_script:
         cmake -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% -DEXPAT_BUILD_TOOLS=Off -DEXPAT_BUILD_EXAMPLES=Off -DEXPAT_BUILD_TESTS=Off .. -G "Visual Studio 15 2017 Win64"
         cmake --build . --target install --config %CONFIG%
 
-    # configure, build and test S2OPC project
+    # configure, build and test S2OPC project as shared DLL in dedicated build directory
+    - |-
+        cd %ROOT_DIR%
+        mkdir build_dll
+        cd build_dll
+        cmake -DENABLE_TESTING=off -DBUILD_SHARED_LIBS=on -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=on -DWITH_NANO_EXTENDED=on -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
+        cmake --build . --config %CONFIG%
+
+    # configure, build S2OPC project as static library for tests and for building PyS2OPC
     - |-
         cd %ROOT_DIR%
         mkdir build
@@ -140,6 +148,9 @@ artifacts:
     type: zip
   - path: build\lib
     name: Libraries
+    type: zip
+  - path: build_dll
+    name: DLL_build
     type: zip
 
 on_failure:
