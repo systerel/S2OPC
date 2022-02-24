@@ -145,7 +145,7 @@ OPERATIONS
 
     write_activate_req_msg_locales(p_req_msg, p_channel_config_idx) =
     PRE
-    p_req_msg : t_msg_i &
+        p_req_msg : t_msg_i &
         p_req_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_req &

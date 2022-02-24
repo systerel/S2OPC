@@ -99,7 +99,9 @@ void msg_session_bs__write_create_session_req_msg_sessionName(
         return;
     }
 
-    (void) SOPC_String_AttachFromCstring(&createSessionReq->SessionName, sessionAppCtx->sessionName);
+    SOPC_ReturnStatus status =
+        SOPC_String_AttachFromCstring(&createSessionReq->SessionName, sessionAppCtx->sessionName);
+    assert(SOPC_STATUS_OK == status);
 }
 
 void msg_session_bs__write_create_session_req_msg_sessionTimeout(
@@ -329,7 +331,7 @@ void msg_session_bs__write_activate_req_msg_locales(
     const SOPC_Client_Config* clientAppCfg = pSCCfg->clientConfigPtr;
     int32_t n_locale_ids = 0;
 
-    for (size_t j = 0; clientAppCfg->clientLocaleIds[j] != NULL; j++)
+    for (i = 0; clientAppCfg->clientLocaleIds[i] != NULL; i++)
     {
         n_locale_ids++;
     }
@@ -338,7 +340,7 @@ void msg_session_bs__write_activate_req_msg_locales(
 
     if (pReq->LocaleIds != NULL)
     {
-        for (i = 0; status == SOPC_STATUS_OK && i < pReq->NoOfLocaleIds; i++)
+        for (i = 0; status == SOPC_STATUS_OK && i < n_locale_ids; i++)
         {
             status = SOPC_String_CopyFromCString(&pReq->LocaleIds[i], clientAppCfg->clientLocaleIds[i]);
         }
@@ -650,7 +652,7 @@ void msg_session_bs__create_session_resp_check_server_endpoints(
         sameEndpoints = sameEndpoints && SOPC_String_Equal(&left->EndpointUrl, &right->EndpointUrl);
 
         // SecurityMode
-        sameEndpoints = sameEndpoints && (left->SecurityMode != right->SecurityMode);
+        sameEndpoints = sameEndpoints && (left->SecurityMode == right->SecurityMode);
 
         // SecurityPolicyUri
         sameEndpoints = sameEndpoints && SOPC_String_Equal(&left->SecurityPolicyUri, &right->SecurityPolicyUri);
@@ -675,7 +677,7 @@ void msg_session_bs__create_session_resp_check_server_endpoints(
         sameEndpoints = sameEndpoints && SOPC_String_Equal(&left->TransportProfileUri, &right->TransportProfileUri);
 
         // SecurityLevel
-        sameEndpoints = sameEndpoints && (left->SecurityLevel != right->SecurityLevel);
+        sameEndpoints = sameEndpoints && (left->SecurityLevel == right->SecurityLevel);
     }
 
     if (!sameEndpoints)
