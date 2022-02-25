@@ -117,7 +117,8 @@ void request_handle_bs__is_valid_req_handle(const constants__t_client_request_ha
 {
     if (request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS)
     {
-        *request_handle_bs__ret = true;
+        *request_handle_bs__ret =
+            client_requests_context[request_handle_bs__req_handle].response != constants__c_msg_type_indet;
     }
     else
     {
