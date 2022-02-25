@@ -112,6 +112,35 @@ typedef struct _OpcUa_ApplicationDescription
     SOPC_String* DiscoveryUrls;
 } OpcUa_ApplicationDescription;
 
+/* GetEndpoitns response */
+typedef struct _OpcUa_EndpointDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String EndpointUrl;
+    OpcUa_ApplicationDescription Server;
+    SOPC_ByteString ServerCertificate;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityPolicyUri;
+    int32_t NoOfUserIdentityTokens;
+    OpcUa_UserTokenPolicy* UserIdentityTokens;
+    SOPC_String TransportProfileUri;
+    SOPC_Byte SecurityLevel;
+} OpcUa_EndpointDescription;
+
+typedef struct _OpcUa_GetEndpointsResponse
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t NoOfEndpoints;
+    OpcUa_EndpointDescription* Endpoints;
+} OpcUa_GetEndpointsResponse;
+
 /* Read structures */
 
 extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
