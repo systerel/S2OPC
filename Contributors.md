@@ -25,3 +25,4 @@ the legal rights to contribute.
 * Kevin P <kevin.phouratsamay-stg@systerel.fr>
 * Adrien COURNAND <adrien@systerel.fr>
 * Jeremie Chabod <jeremie.chabod@systerel.fr>
+* sauvegrain <sauvegrain@systerel.fr>
