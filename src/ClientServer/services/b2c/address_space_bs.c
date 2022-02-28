@@ -807,12 +807,18 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
 
     if (!result)
     {
-        char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "SourceTimestamp write on NodeId=%s failed due to constant metadata in address space. "
-                                 "It should be forbidden by AccessLevel.",
-                                 nodeId);
-        SOPC_Free(nodeId);
+        static bool warned = false;
+        if (!warned)
+        {
+            char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SourceTimestamp write on NodeId=%s failed due to constant metadata in address space. "
+                "It should be forbidden by AccessLevel.",
+                nodeId);
+            SOPC_Free(nodeId);
+            warned = true;
+        }
     }
 }
 
@@ -827,12 +833,17 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
 
     if (!result)
     {
-        char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "StatusCode write on NodeId=%s failed due to constant metadata in address space."
-                                 "It should be forbidden by AccessLevel.",
-                                 nodeId);
-        SOPC_Free(nodeId);
+        static bool warned = false;
+        if (!warned)
+        {
+            char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "StatusCode write on NodeId=%s failed due to constant metadata in address space."
+                                     "It should be forbidden by AccessLevel.",
+                                     nodeId);
+            SOPC_Free(nodeId);
+            warned = true;
+        }
     }
 }
 
