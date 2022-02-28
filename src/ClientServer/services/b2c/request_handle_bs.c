@@ -56,6 +56,21 @@ void request_handle_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
+/*@ requires \valid(request_handle_bs__ret);
+  @ requires 0 < request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS;
+  @ requires \valid(client_requests_context+(request_handle_bs__req_handle));
+  @ requires \valid(client_requests_channel+(request_handle_bs__req_handle));
+  @ requires request_handle_bs__resp_typ != constants__c_msg_type_indet;
+  @ assigns *request_handle_bs__ret;
+  @ ensures *request_handle_bs__ret <==>
+  ((request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS &&
+    client_requests_context[request_handle_bs__req_handle].response != constants__c_msg_type_indet)
+    ==>
+    *request_handle_bs__ret ==
+    ((client_requests_context[request_handle_bs__req_handle].response == request_handle_bs__resp_typ ||
+    constants__e_msg_service_fault_resp == request_handle_bs__resp_typ) &&
+    client_requests_channel[request_handle_bs__req_handle] == request_handle_bs__channel));
+ */
 void request_handle_bs__client_validate_response_request_handle(
     const constants__t_channel_i request_handle_bs__channel,
     const constants__t_client_request_handle_i request_handle_bs__req_handle,
@@ -77,6 +92,25 @@ void request_handle_bs__client_validate_response_request_handle(
     }
 }
 
+/*@ requires 0 <= cpt <= SOPC_MAX_PENDING_REQUESTS;
+  @ requires request_handle_bs__req_typ != constants__c_msg_type_indet;
+  @ requires request_handle_bs__resp_typ != constants__c_msg_type_indet;
+  @ requires \valid(request_handle_bs__request_handle);
+  @ requires \valid(client_requests_context+(0 .. SOPC_MAX_PENDING_REQUESTS));
+  @ requires \separated(request_handle_bs__request_handle, client_requests_context+(0 .. SOPC_MAX_PENDING_REQUESTS));
+  @ assigns *request_handle_bs__request_handle;
+  @ assigns client_requests_context[0 .. SOPC_MAX_PENDING_REQUESTS];
+  @ assigns cpt;
+  @ ensures \forall integer n; 0 <= n <= SOPC_MAX_PENDING_REQUESTS && n != *request_handle_bs__request_handle ==>
+  client_requests_context[n] == \at(client_requests_context[n], Pre);
+  @ ensures *request_handle_bs__request_handle != constants__c_client_request_handle_indet ==>
+  \at(client_requests_context[\at(*request_handle_bs__request_handle, Here)].response, Pre) ==
+  constants__c_msg_type_indet
+  && (client_requests_context[*request_handle_bs__request_handle].request == request_handle_bs__req_typ &&
+   client_requests_context[*request_handle_bs__request_handle].response == request_handle_bs__resp_typ &&
+   client_requests_context[*request_handle_bs__request_handle].hasAppContext == request_handle_bs__is_applicative &&
+   client_requests_context[*request_handle_bs__request_handle].appContext == request_handle_bs__app_context);
+ */
 void request_handle_bs__client_fresh_req_handle(
     const constants__t_msg_type_i request_handle_bs__req_typ,
     const constants__t_msg_type_i request_handle_bs__resp_typ,
@@ -113,6 +147,12 @@ void request_handle_bs__client_fresh_req_handle(
     }
 }
 
+/*@ requires \valid(request_handle_bs__ret);
+  @ assigns *request_handle_bs__ret;
+  @ ensures *request_handle_bs__ret <==>
+  (request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS &&
+  client_requests_context[request_handle_bs__req_handle].response != constants__c_msg_type_indet);
+ */
 void request_handle_bs__is_valid_req_handle(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                             t_bool* const request_handle_bs__ret)
 {
@@ -134,7 +174,6 @@ void request_handle_bs__is_valid_req_handle(const constants__t_client_request_ha
   @ assigns *request_handle_bs__resp_typ;
   @ ensures *request_handle_bs__resp_typ == client_requests_context[request_handle_bs__req_handle].response;
  */
-
 void request_handle_bs__get_req_handle_resp_typ(
     const constants__t_client_request_handle_i request_handle_bs__req_handle,
     constants__t_msg_type_i* const request_handle_bs__resp_typ)
@@ -149,7 +188,6 @@ void request_handle_bs__get_req_handle_resp_typ(
   @ assigns *request_handle_bs__req_typ;
   @ ensures *request_handle_bs__req_typ == client_requests_context[request_handle_bs__req_handle].request;
  */
-
 void request_handle_bs__get_req_handle_req_typ(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                                constants__t_msg_type_i* const request_handle_bs__req_typ)
 {
@@ -167,7 +205,6 @@ void request_handle_bs__get_req_handle_req_typ(const constants__t_client_request
   @ ensures *request_handle_bs__is_applicative == client_requests_context[request_handle_bs__req_handle].hasAppContext;
   @ ensures *request_handle_bs__app_context == client_requests_context[request_handle_bs__req_handle].appContext;
  */
-
 void request_handle_bs__get_req_handle_app_context(
     const constants__t_client_request_handle_i request_handle_bs__req_handle,
     t_bool* const request_handle_bs__is_applicative,
@@ -177,6 +214,14 @@ void request_handle_bs__get_req_handle_app_context(
     *request_handle_bs__app_context = client_requests_context[request_handle_bs__req_handle].appContext;
 }
 
+/*@ requires \valid(request_handle_bs__channel);
+  @ requires 0 < request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS;
+  @ requires \valid(client_requests_context+(request_handle_bs__req_handle));
+  @ ensures ((request_handle_bs__req_handle > 0 && request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS &&
+                client_requests_context[request_handle_bs__req_handle].response != constants__c_msg_type_indet)
+            ==>
+            *request_handle_bs__channel == client_requests_channel[request_handle_bs__req_handle]);
+ */
 void request_handle_bs__get_req_handle_channel(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                                constants__t_channel_i* const request_handle_bs__channel)
 {
@@ -189,6 +234,34 @@ void request_handle_bs__get_req_handle_channel(const constants__t_client_request
     }
 }
 
+/*@ requires \valid(req);
+  @ assigns *req;
+  @ ensures req->request == 0 && req->response == 0 && req->appContext == 0 &&
+  req->hasAppContext == 0;
+  */
+static void requestcontext_memset(SOPC_Internal_RequestContext* req, int val, size_t size, size_t n);
+
+#ifndef __FRAMAC__
+static void requestcontext_memset(SOPC_Internal_RequestContext* req, int val, size_t size, size_t n)
+{
+    memset(req, val, size * n);
+}
+#endif
+
+/*@ requires 0 < request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS;
+  @ requires \valid(client_requests_context+(request_handle_bs__req_handle));
+  @ requires \valid(client_requests_channel+(request_handle_bs__req_handle));
+  @ requires client_requests_context[request_handle_bs__req_handle].response != constants__c_msg_type_indet;
+  @ requires \separated(client_requests_context+(request_handle_bs__req_handle),
+  client_requests_channel+(request_handle_bs__req_handle));
+  @ assigns client_requests_context[request_handle_bs__req_handle];
+  @ assigns client_requests_channel[request_handle_bs__req_handle];
+  @ ensures client_requests_channel[request_handle_bs__req_handle] == constants__c_channel_indet;
+  @ ensures client_requests_context[request_handle_bs__req_handle].request == 0 &&
+  client_requests_context[request_handle_bs__req_handle].response == 0 &&
+  client_requests_context[request_handle_bs__req_handle].appContext == 0 &&
+  client_requests_context[request_handle_bs__req_handle].hasAppContext == 0;
+ */
 void request_handle_bs__client_remove_req_handle(
     const constants__t_client_request_handle_i request_handle_bs__req_handle)
 {
@@ -200,7 +273,6 @@ void request_handle_bs__client_remove_req_handle(
   @ assigns *request_handle_bs__request_id;
   @ ensures *request_handle_bs__request_id == request_handle_bs__req_handle;
  */
-
 void request_handle_bs__client_req_handle_to_request_id(
     const constants__t_client_request_handle_i request_handle_bs__req_handle,
     constants__t_request_context_i* const request_handle_bs__request_id)
@@ -212,7 +284,6 @@ void request_handle_bs__client_req_handle_to_request_id(
   @ assigns *request_handle_bs__request_handle;
   @ ensures *request_handle_bs__request_handle == request_handle_bs__request_id;
  */
-
 void request_handle_bs__client_request_id_to_req_handle(
     const constants__t_request_context_i request_handle_bs__request_id,
     constants__t_client_request_handle_i* const request_handle_bs__request_handle)
@@ -228,7 +299,6 @@ void request_handle_bs__client_request_id_to_req_handle(
   @ assigns client_requests_channel[request_handle_bs__req_handle];
   @ ensures client_requests_channel[request_handle_bs__req_handle] == request_handle_bs__channel;
  */
-
 void request_handle_bs__set_req_handle_channel(const constants__t_client_request_handle_i request_handle_bs__req_handle,
                                                const constants__t_channel_i request_handle_bs__channel)
 {
