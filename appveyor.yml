@@ -34,53 +34,39 @@ test_script:
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
     - set EXPAT_DIR_NAME=expat-2.4.3
     - set EXPAT_DIR=%ROOT_DIR%\libexpat-R_2_4_3\expat
-    - set EXPAT_BUILD_DIR=%EXPAT_DIR%\build
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
     - set S2OPC_CLIENTSERVER_ONLY=1
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
-    - set WITH_PYS2OPC=1
     - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.1-cp36-cp36m-win_amd64.whl
+    - set VS_VERSION="Visual Studio 15 2017 Win64"
+    - set ENABLE_SAMPLES=on
 
-    # download and build libcheck
+    # download and extract libcheck
     - cd %ROOT_DIR%
     - "appveyor.exe DownloadFile https://github.com/libcheck/check/archive/0.14.0.zip -FileName %CHECK_DIR_NAME%.zip"
     - "unzip %CHECK_DIR_NAME%.zip"
-    - cmd: |-
-        cd %CHECK_DIR%
-        mkdir build
-        cd build
-        cmake .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --target ALL_BUILD --config %CONFIG%
-    # download and build mbedtls
+
+    # download and extract mbedtls
     - cd %ROOT_DIR%
     - "appveyor.exe DownloadFile https://github.com/ARMmbed/mbedtls/archive/v%MBEDTLS_VERSION%.tar.gz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
     - tar xvf "%MBEDTLS_DIR_NAME%-apache.tgz"
-    - |-
-        cd %MBEDTLS_DIR%
-        mkdir build
-        cd build
-        cmake -DENABLE_PROGRAMS=Off -DENABLE_TESTING=Off .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --target ALL_BUILD --config %CONFIG%
-    # download and build expat
+
+    # download and extractbuild expat
     - cd %ROOT_DIR%
     - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_3.zip -FileName %EXPAT_DIR_NAME%.zip"
     - "unzip %EXPAT_DIR_NAME%.zip"
-    - |-
-        cd %EXPAT_DIR%
-        mkdir build
-        cd build
-        cmake -DEXPAT_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% -DEXPAT_BUILD_TOOLS=Off -DEXPAT_BUILD_EXAMPLES=Off -DEXPAT_BUILD_TESTS=Off .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --target install --config %CONFIG%
 
-    # configure, build and test S2OPC project as shared DLL in dedicated build directory
-    - |-
-        cd %ROOT_DIR%
-        mkdir build_dll
-        cd build_dll
-        cmake -DENABLE_TESTING=off -DBUILD_SHARED_LIBS=on -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=on -DWITH_NANO_EXTENDED=on -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --config %CONFIG%
+    # configure, build dependencies and build S2OPC project as shared DLL
+    - cd %ROOT_DIR%
+    - .\build_s2opc.bat
+    - cd %ROOT_DIR%
+    - move build build_dll
 
+    # Builds with PyS2OPC and tests:
+    - set WITH_PYS2OPC=1
+    - set BUILD_SHARED_LIBS=off
+    - set ENABLE_TESTING=on
     # configure, build S2OPC project as static library for tests and for building PyS2OPC
     - |-
         cd %ROOT_DIR%
@@ -91,8 +77,8 @@ test_script:
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedx509.lib lib
         copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedcrypto.lib lib
         copy %EXPAT_INSTALL_DIR%\lib\libexpatMD.lib lib\libexpat.lib
-        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
-        cmake --build . --config %CONFIG%
+        cd %ROOT_DIR%
+        .\build_s2opc.bat
     - cd %ROOT_DIR%\build\tests\ClientServer
     - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc*"
 
@@ -105,7 +91,7 @@ test_script:
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
         rm CMakeCache.txt
-        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
         cmake --build . --target pys2opc --config %CONFIG%
     - |-
         set PYTHON="C:\\Python37-x64"
@@ -115,7 +101,7 @@ test_script:
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
         rm CMakeCache.txt
-        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
         cmake --build . --target pys2opc --config %CONFIG%
     - |-
         set PYTHON="C:\\Python35-x64"
@@ -125,7 +111,7 @@ test_script:
         pip install --upgrade wheel setuptools
         cd %ROOT_DIR%\build
         rm CMakeCache.txt
-        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
         cmake --build . --target pys2opc --config %CONFIG%
     # Failed with Py3.4, seems like cffi is not correctly found for this version
     #- |-
@@ -136,7 +122,7 @@ test_script:
     #    pip install --upgrade wheel setuptools
     #    cd %ROOT_DIR%\build
     #    rm CMakeCache.txt
-    #    cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G "Visual Studio 15 2017 Win64"
+    #    cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
     #    cmake --build . --target pys2opc --config %CONFIG%
 
 
@@ -157,5 +143,7 @@ on_failure:
   - ps: |-
       Compress-Archive -DestinationPath "build.zip" -Path $Env:APPVEYOR_BUILD_FOLDER\build
       Push-AppveyorArtifact "build.zip" -FileName "build.zip" -DeploymentName to-publish
+
+# Note: uncomment for CI debug with RDP
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
