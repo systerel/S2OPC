@@ -184,7 +184,6 @@ build-win64: &build_win64
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
     DOCKER_IMAGE: 'sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5'
-    BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
   artifacts:

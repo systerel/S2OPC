@@ -24,4 +24,4 @@ set -e
 
 source "$(dirname "$0")/".docker-images.sh
 
-"$(dirname "$0")/".run-in-docker.sh "$MINGW_IMAGE" CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake BUILD_SHARED_LIBS=true DOCKER_IMAGE="$MINGW_IMAGE" "$@"
+"$(dirname "$0")/".run-in-docker.sh "$MINGW_IMAGE" CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake DOCKER_IMAGE="$MINGW_IMAGE" "$@"
