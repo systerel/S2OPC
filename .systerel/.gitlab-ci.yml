@@ -225,6 +225,20 @@ build-rpi:
    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
 
+build-zephyr:
+  stage: build-others
+  image: docker.aix.systerel.fr/c838/zephyr_build@sha256:9808bec78b1f86bf747734b9f6893643a4090dcb92a005680884ee836c94f4ff # digest of zephyr_build :v1
+  script:
+    - 'zephyr/build-zephyr-samples-docker.sh || exit $?'
+  variables:
+  artifacts:
+    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build_zephyr/'
+    expire_in: '1 month'
+  rules: 
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+      when: always
 ###
 # Test jobs
 ###
