@@ -32,6 +32,8 @@ add_definitions (-DWITH_MINIMAL_FOOTPRINT=0)
 add_definitions (-DSOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE=16)
 add_definitions (-DUSE_MQTT_PAHO=0)
 add_definitions (-Werror)
+# UNDEBUG prevents "assert" to be removed (this generates warnings on unused variables)
+add_definitions (-UNDEBUG)
 
 set(S2OPC_SRC ${ZEPHYR_CURRENT_MODULE_DIR}/src)
 

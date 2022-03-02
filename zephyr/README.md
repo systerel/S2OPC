@@ -1,4 +1,4 @@
-# HowTo : Develop a  ZEPHYR S2OPC application (PubSub + Server)
+/../zephyr_common_src# HowTo : Develop a  ZEPHYR S2OPC application (PubSub + Server)
 
 An example of a such application is provided in `samples/PubSub_ClientServer/zephyr/pubsub_server`
 
@@ -14,6 +14,39 @@ Note: This configuration is based on a Hardware design with a single Ethernet in
 
 ### S2OPC configuration
 The configuration is provided in `s2opc/zephyr/CMakelist.txt`. The default configuration is provided for a PubSub + OPC UA server application with constant address space (RAM–optimized). Note that when using the constant Address Space, only the DataValue of the nodes can be modified (not the META DATA like status or timestamps)
+
+## Examples
+
+Several examples are provided. 
+Common files to several examples are locarted in subfolder `zephyr_common_src`
+
+- `static_security_data` provides a hard-coded example of Pubsub symmetric keys
+- `pubsub_config_static` provides a hard-coded example of PubSub configuration
+- `network_init` provides a example of network configuration (tested on STM32H7)
+- `cache` provides a basic cache for PubSub communication
+- `tls_config` provides the MdebTLS required parameters for its integration into S2OPC
+
+Note: a 'cache' can be simply seen as a basic dictionnary containing both variables to be read by "Pub" and writton to by "Sub".
+
+### Building
+Enter the chosen test folder.
+Edit the `Makefile` to set-up local parameters and constants (BOARD, ZEPHYR_BASE)
+Simply type `make` in current folder
+
+### ZEPHYR S2OPC PubSub demo
+
+`zephyr_pubsub` provides an example of S2OPC PubSub demo over Zephyr.
+
+The demo runs a cache-based S2OPC PubSub (Not based on an OPC addresse space).
+
+### ZEPHYR S2OPC Client demo
+
+`zephyr_client` provides an example of S2OPC Client demo over Zephyr.
+
+The demo runs a cache-based S2OPC Client (Not based on an OPC addresse space).
+
+
+
 
 ## Main design
 ### Project

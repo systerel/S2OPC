@@ -3,6 +3,7 @@
 .*.sw?
 *~
 build/
+build_zephyr/
 install/
 out/
 apidoc/
