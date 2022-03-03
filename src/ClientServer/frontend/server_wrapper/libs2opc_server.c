@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_internal.h"
@@ -229,14 +230,16 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     }
     // Set runtime variable
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+
     if (NULL == sopc_server_helper_config.buildInfo)
     {
-        sopc_server_helper_config.runtimeVariables = SOPC_RuntimeVariables_BuildDefault(
-            SOPC_ToolkitConfig_GetBuildInfo(), &sopc_helper_config.config.serverConfig);
+        sopc_server_helper_config.runtimeVariables =
+            SOPC_RuntimeVariables_BuildDefault(SOPC_ToolkitConfig_GetBuildInfo(), &pConfig->serverConfig);
     }
     else
     {
-        SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &sopc_helper_config.config.serverConfig);
+        SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
     }
     SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
     if (NULL != ctx)

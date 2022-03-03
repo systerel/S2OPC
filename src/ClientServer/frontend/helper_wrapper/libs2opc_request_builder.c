@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_request_builder.h"
 
@@ -736,7 +737,9 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequ
 
 OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfiguration(void)
 {
-    OpcUa_ApplicationDescription* srcDesc = &sopc_helper_config.config.serverConfig.serverDescription;
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    OpcUa_ApplicationDescription* srcDesc = &pConfig->serverConfig.serverDescription;
     OpcUa_MdnsDiscoveryConfiguration* mdnsObj = NULL;
     OpcUa_RegisterServer2Request* request = SOPC_Calloc(1, sizeof(OpcUa_RegisterServer2Request));
     OpcUa_RegisterServer2Request_Initialize(request);

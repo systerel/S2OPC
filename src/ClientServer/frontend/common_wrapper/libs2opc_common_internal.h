@@ -37,29 +37,6 @@
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_user_app_itf.h"
 
-// The global helper config variable (singleton), it shall not be accessed outside of wrapper code
-typedef struct SOPC_Helper_Config
-{
-    // Flag atomically set when the structure is initialized during call to SOPC_Helper_Initialize
-    // and singleton config is initialized
-    int32_t initialized;
-
-    // Toolkit configuration structure
-    SOPC_S2OPC_Config config;
-
-    // Guarantee no parallel use/def of callbacks
-    Mutex callbacksMutex;
-
-    // The client communication events handler
-    SOPC_ComEvent_Fct* clientComEventCb;
-    // The server communication events handler
-    SOPC_ComEvent_Fct* serverComEventCb;
-
-} SOPC_Helper_Config;
-
-// The singleton configuration structure
-extern SOPC_Helper_Config sopc_helper_config;
-
 /**
  * \brief Define a function to be called for client side communication events.
  *        It should be called by a client wrapper to be record/unrecord its events callback

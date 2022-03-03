@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
@@ -49,7 +50,7 @@ static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 
 static bool SOPC_HelperInternal_CreatePKIfromPaths(void)
 {
-    SOPC_Server_Config* serverConfig = &sopc_helper_config.config.serverConfig;
+    SOPC_Server_Config* serverConfig = &SOPC_CommonHelper_GetConfiguration()->serverConfig;
     /* Create the PKI (Public Key Infrastructure) provider */
     SOPC_ReturnStatus status = SOPC_PKIProviderStack_CreateFromPaths(
         serverConfig->trustedRootIssuersList, serverConfig->trustedIntermediateIssuersList,
@@ -68,7 +69,7 @@ static bool SOPC_HelperInternal_CreatePKIfromPaths(void)
 
 static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
 {
-    SOPC_Server_Config* serverConfig = &sopc_helper_config.config.serverConfig;
+    SOPC_Server_Config* serverConfig = &SOPC_CommonHelper_GetConfiguration()->serverConfig;
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
                                                                                     &serverConfig->serverCertificate);
     bool res = true;
@@ -100,7 +101,7 @@ static bool SOPC_HelperInternal_LoadServerConfigFromFile(const char* filename)
     {
         return false;
     }
-    bool res = SOPC_Config_Parse(fd, &sopc_helper_config.config);
+    bool res = SOPC_Config_Parse(fd, SOPC_CommonHelper_GetConfiguration());
     fclose(fd);
 
     if (!res)
@@ -187,15 +188,17 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
     }
 
     bool res = true;
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+
     /* Server XML config */
     if (NULL != serverConfigPath)
     {
         res &= SOPC_HelperInternal_LoadServerConfigFromFile(serverConfigPath);
         // "Transfer" endpoints from low level S2OPC server config to high level one
         // Note: in the future we should modify low level representation instead
-        for (uint8_t i = 0; i < sopc_helper_config.config.serverConfig.nbEndpoints; i++)
+        for (uint8_t i = 0; i < pConfig->serverConfig.nbEndpoints; i++)
         {
-            SOPC_Endpoint_Config* ep = &sopc_helper_config.config.serverConfig.endpoints[i];
+            SOPC_Endpoint_Config* ep = &pConfig->serverConfig.endpoints[i];
             sopc_server_helper_config.endpoints[i] = SOPC_Calloc(1, sizeof(SOPC_Endpoint_Config));
             if (NULL != sopc_server_helper_config.endpoints[i])
             {
@@ -209,9 +212,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
                 res = false;
             }
         }
-        SOPC_Free(sopc_helper_config.config.serverConfig.endpoints);
-        sopc_helper_config.config.serverConfig.endpoints = NULL;
-        sopc_helper_config.config.serverConfig.nbEndpoints = 0;
+        SOPC_Free(pConfig->serverConfig.endpoints);
+        pConfig->serverConfig.endpoints = NULL;
+        pConfig->serverConfig.nbEndpoints = 0;
     }
     /* AddressSpace XML config */
     if (NULL != addressSpaceConfigPath)

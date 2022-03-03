@@ -110,6 +110,8 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     }
     bool hasUserName = false;
     bool hasSecurity = false;
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
     for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
         SOPC_Endpoint_Config* ep = sopc_server_helper_config.endpoints[i];
@@ -139,8 +141,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     // Check that the server defines certificates and PKI provider if endpoint uses security
     if (hasSecurity)
     {
-        if (NULL == sopc_helper_config.config.serverConfig.serverCertificate ||
-            NULL == sopc_helper_config.config.serverConfig.serverKey)
+        if (NULL == pConfig->serverConfig.serverCertificate || NULL == pConfig->serverConfig.serverKey)
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
@@ -148,7 +149,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
             res = false;
         }
 
-        if (NULL == sopc_helper_config.config.serverConfig.pki)
+        if (NULL == pConfig->serverConfig.pki)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "No server PKI provider defined whereas some endpoint(s) are defined as secured.");
@@ -164,20 +165,20 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                                  " Default will be permissive whereas UserName policy is used in endpoint(s).");
     }
 
-    if (NULL == sopc_helper_config.config.serverConfig.namespaces)
+    if (NULL == pConfig->serverConfig.namespaces)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "No namespace defined for the server, 1 server namespace shall be defined");
         res = false;
     }
 
-    if (NULL == sopc_helper_config.config.serverConfig.localeIds)
+    if (NULL == pConfig->serverConfig.localeIds)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
         // Create empty locale array
-        sopc_helper_config.config.serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
-        assert(NULL != sopc_helper_config.config.serverConfig.localeIds);
-        sopc_helper_config.config.serverConfig.localeIds[0] = NULL;
+        pConfig->serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
+        assert(NULL != pConfig->serverConfig.localeIds);
+        pConfig->serverConfig.localeIds[0] = NULL;
     }
 
     // TODO: checks on application description content ?
@@ -215,24 +216,26 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
         SOPC_ServerInternal_SetEndpointsUserMgr();
     }
 
-    if (NULL == sopc_helper_config.config.serverConfig.namespaces)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+
+    if (NULL == pConfig->serverConfig.namespaces)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "No namespace defined for the server, 1 server namespace shall be defined");
         res = false;
     }
 
-    if (NULL == sopc_helper_config.config.serverConfig.localeIds)
+    if (NULL == pConfig->serverConfig.localeIds)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
         // Create empty locale array
-        sopc_helper_config.config.serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
-        assert(NULL != sopc_helper_config.config.serverConfig.localeIds);
-        sopc_helper_config.config.serverConfig.localeIds[0] = NULL;
+        pConfig->serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
+        assert(NULL != pConfig->serverConfig.localeIds);
+        pConfig->serverConfig.localeIds[0] = NULL;
     }
 
     // If none discovery is described in application description
-    if (res && 0 == sopc_helper_config.config.serverConfig.serverDescription.NoOfDiscoveryUrls)
+    if (res && 0 == pConfig->serverConfig.serverDescription.NoOfDiscoveryUrls)
     {
         // And some discovery endpoints are present, add them into it
         uint8_t nbDiscovery = 0;
@@ -248,7 +251,7 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
 
         if (nbDiscovery > 0)
         {
-            OpcUa_ApplicationDescription* appDesc = &sopc_helper_config.config.serverConfig.serverDescription;
+            OpcUa_ApplicationDescription* appDesc = &pConfig->serverConfig.serverDescription;
             appDesc->DiscoveryUrls = SOPC_Calloc((size_t) nbDiscovery, sizeof(SOPC_String));
             if (NULL != appDesc->DiscoveryUrls)
             {
@@ -420,8 +423,7 @@ static void SOPC_ServerHelper_AdressSpaceNotifCb(const SOPC_CallContext* callCtx
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
 {
-    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) ||
-        SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
+    if (!SOPC_CommonHelper_GetInitialized() || SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
         // Common wrapper not initialized or server wrapper already initialized
         return SOPC_STATUS_INVALID_STATE;
@@ -434,10 +436,12 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
         return status;
     }
 
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
     sopc_server_helper_config = sopc_server_helper_config_default;
 
     // We only do copies in helper config
-    sopc_helper_config.config.serverConfig.freeCstringsFlag = true;
+    pConfig->serverConfig.freeCstringsFlag = true;
 
     // Server state initialization
     Mutex_Initialization(&sopc_server_helper_config.stateMutex);
@@ -520,7 +524,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    sopc_helper_config.config.serverConfig.mcm = mcm;
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    pConfig->serverConfig.mcm = mcm;
     return SOPC_STATUS_OK;
 }
 

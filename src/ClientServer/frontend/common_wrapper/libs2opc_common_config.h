@@ -59,4 +59,19 @@ void SOPC_CommonHelper_Clear(void);
  */
 SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
 
+/**
+ * \brief Retrieve the S2OPC Client/Server configuration.
+ *
+ * \return The returned value is ensured to be a non-NULL pointer to Helper configuration
+ *
+ */
+SOPC_S2OPC_Config* SOPC_CommonHelper_GetConfiguration(void);
+
+/**
+ * \brief Retrieve the S2OPC Client/Server "initialized" state
+ *
+ * \return True if the Helper is initialized (when ::SOPC_Helper_Initialize is called)
+ *
+ */
+bool SOPC_CommonHelper_GetInitialized(void);
 #endif

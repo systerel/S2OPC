@@ -90,7 +90,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized) || SOPC_Atomic_Int_Get(&libInitialized))
+    if (!SOPC_CommonHelper_GetInitialized() || SOPC_Atomic_Int_Get(&libInitialized))
     {
         return SOPC_STATUS_INVALID_STATE;
     }

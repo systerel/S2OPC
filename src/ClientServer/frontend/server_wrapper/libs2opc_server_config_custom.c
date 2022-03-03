@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_internal.h"
@@ -61,7 +62,9 @@ static char** copy_char_array_into_new_NULL_terminated_array(size_t nbElts, char
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.namespaces)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.namespaces)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -70,10 +73,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    sopc_helper_config.config.serverConfig.namespaces =
-        copy_char_array_into_new_NULL_terminated_array(nbNamespaces, namespaces);
+    pConfig->serverConfig.namespaces = copy_char_array_into_new_NULL_terminated_array(nbNamespaces, namespaces);
 
-    if (NULL == sopc_helper_config.config.serverConfig.namespaces)
+    if (NULL == pConfig->serverConfig.namespaces)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -83,7 +85,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.localeIds)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.localeIds)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -91,10 +95,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    sopc_helper_config.config.serverConfig.localeIds =
-        copy_char_array_into_new_NULL_terminated_array(nbLocales, localeIds);
+    pConfig->serverConfig.localeIds = copy_char_array_into_new_NULL_terminated_array(nbLocales, localeIds);
 
-    if (NULL == sopc_helper_config.config.serverConfig.localeIds)
+    if (NULL == pConfig->serverConfig.localeIds)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -106,6 +109,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
 static SOPC_ReturnStatus SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(const char* appName,
                                                                               const char* appNameLocale)
 {
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
     SOPC_LocalizedText addAppName;
     SOPC_LocalizedText_Initialize(&addAppName);
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&addAppName.defaultText, appName);
@@ -117,17 +122,17 @@ static SOPC_ReturnStatus SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(co
     {
         char* emptyLocales[1] = {NULL};
         char** locales = NULL;
-        if (NULL == sopc_helper_config.config.serverConfig.localeIds)
+        if (NULL == pConfig->serverConfig.localeIds)
         {
             // Ensure we consider at least no locales are defined instead of invalid parameters
             locales = emptyLocales;
         }
         else
         {
-            locales = sopc_helper_config.config.serverConfig.localeIds;
+            locales = pConfig->serverConfig.localeIds;
         }
-        status = SOPC_LocalizedText_AddOrSetLocale(
-            &sopc_helper_config.config.serverConfig.serverDescription.ApplicationName, locales, &addAppName);
+        status = SOPC_LocalizedText_AddOrSetLocale(&pConfig->serverConfig.serverDescription.ApplicationName, locales,
+                                                   &addAppName);
     }
     SOPC_LocalizedText_Clear(&addAppName);
 
@@ -140,10 +145,11 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
                                                                     const char* defaultAppNameLocale,
                                                                     OpcUa_ApplicationType applicationType)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() ||
-        sopc_helper_config.config.serverConfig.serverDescription.ApplicationUri.Length > 0 ||
-        sopc_helper_config.config.serverConfig.serverDescription.ProductUri.Length > 0 ||
-        sopc_helper_config.config.serverConfig.serverDescription.ApplicationName.defaultText.Length > 0)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || pConfig->serverConfig.serverDescription.ApplicationUri.Length > 0 ||
+        pConfig->serverConfig.serverDescription.ProductUri.Length > 0 ||
+        pConfig->serverConfig.serverDescription.ApplicationName.defaultText.Length > 0)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -151,7 +157,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    OpcUa_ApplicationDescription* appDesc = &sopc_helper_config.config.serverConfig.serverDescription;
+    OpcUa_ApplicationDescription* appDesc = &pConfig->serverConfig.serverDescription;
     appDesc->ApplicationType = applicationType;
 
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&appDesc->ApplicationUri, applicationUri);
@@ -185,7 +191,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.pki)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.pki)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -193,14 +201,16 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    sopc_helper_config.config.serverConfig.pki = pki;
+    pConfig->serverConfig.pki = pki;
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath, const char* serverKeyPath)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
-        NULL != sopc_helper_config.config.serverConfig.serverKey)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
+        NULL != pConfig->serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -234,8 +244,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
         serverKey = NULL;
     }
 
-    sopc_helper_config.config.serverConfig.serverCertificate = serverCert;
-    sopc_helper_config.config.serverConfig.serverKey = serverKey;
+    pConfig->serverConfig.serverCertificate = serverCert;
+    pConfig->serverConfig.serverKey = serverKey;
 
     return status;
 }
@@ -245,8 +255,10 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
 {
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_helper_config.config.serverConfig.serverCertificate ||
-        NULL != sopc_helper_config.config.serverConfig.serverKey)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
+        NULL != pConfig->serverConfig.serverKey)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -282,8 +294,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
         serverKey = NULL;
     }
 
-    sopc_helper_config.config.serverConfig.serverCertificate = serverCert;
-    sopc_helper_config.config.serverConfig.serverKey = serverKey;
+    pConfig->serverConfig.serverCertificate = serverCert;
+    pConfig->serverConfig.serverKey = serverKey;
 
     return status;
 }
@@ -321,8 +333,11 @@ SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bo
         return NULL;
     }
 
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+
     newEp->hasDiscoveryEndpoint = hasDiscovery;
-    newEp->serverConfigPtr = &sopc_helper_config.config.serverConfig;
+    newEp->serverConfigPtr = &pConfig->serverConfig;
     sopc_server_helper_config.endpoints[sopc_server_helper_config.nbEndpoints] = newEp;
     sopc_server_helper_config.nbEndpoints++;
 
