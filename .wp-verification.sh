@@ -39,7 +39,7 @@ fi
 SOURCEFILE=$1
 FUNC=$2
 
-WPARGS='-wp -wp-rte -wp-timeout=10 -wp-prover alt-ergo,CVC4 -cpp-command'
+WPARGS="-wp -wp-rte -wp-timeout=10 -wp-prover alt-ergo,z3,cvc4 -cpp-command"
 
 WPFUNC='-wp-fct'
 
