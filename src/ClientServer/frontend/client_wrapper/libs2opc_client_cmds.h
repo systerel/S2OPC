@@ -134,8 +134,8 @@ typedef struct
 */
 typedef struct
 {
-    char* nodeId;
-    char* indexRange;
+    const char* nodeId;
+    const char* indexRange;
     SOPC_DataValue* value;
 } SOPC_ClientHelper_WriteValue;
 
@@ -155,9 +155,9 @@ typedef struct
 */
 typedef struct
 {
-    char* nodeId;
+    const char* nodeId;
     uint32_t attributeId;
-    char* indexRange;
+    const char* indexRange;
 } SOPC_ClientHelper_ReadValue;
 
 /**
@@ -179,9 +179,9 @@ typedef struct
 */
 typedef struct
 {
-    char* nodeId;
+    const char* nodeId;
     OpcUa_BrowseDirection direction;
-    char* referenceTypeId;
+    const char* referenceTypeId;
     bool includeSubtypes;
 } SOPC_ClientHelper_BrowseRequest;
 
