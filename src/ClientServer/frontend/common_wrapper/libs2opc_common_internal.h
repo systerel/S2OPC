@@ -22,12 +22,12 @@
  * \privatesection
  *
  * \brief Internal module used to manage the wrapper for client and/or server config.
- * It should not be used outside of the client/server wraper implementation.
+ * It should not be used outside of the client/server wrapper implementation.
  *
  */
 
-#ifndef LIBS2OPC_COMMON_CONFIG_INTERNAL_H_
-#define LIBS2OPC_COMMON_CONFIG_INTERNAL_H_
+#ifndef LIBS2OPC_COMMON_INTERNAL_H_
+#define LIBS2OPC_COMMON_INTERNAL_H_
 
 #include <inttypes.h>
 #include <stdbool.h>

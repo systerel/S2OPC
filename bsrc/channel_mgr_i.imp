@@ -261,8 +261,7 @@ OPERATIONS
             l_con <-- is_channel_connected(l_channel);
             l_cli_con <-- is_client_channel (l_channel);
             IF l_con = TRUE &
-                (p_clientOnly = FALSE or
-                    (p_clientOnly = TRUE & l_cli_con = TRUE))
+                (p_clientOnly = FALSE or l_cli_con = TRUE)
             THEN
                 l_any_channel_closing := TRUE;
                 l_close_secure_channel(l_channel)

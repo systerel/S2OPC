@@ -101,29 +101,17 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
             SOPC_Helper_EndiannessCfg_Initialize();
 
-            if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||
-                SIZE_MAX / (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) < sizeof(SOPC_Endpoint_Config*))
-            {
-                status = SOPC_STATUS_NOK;
-            }
-
             if (SOPC_STATUS_OK == status)
             {
-                memset(tConfig.scConfigs, 0,
-                       (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
-                memset(tConfig.serverScConfigs, 0,
-                       (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
-                memset(tConfig.epConfigs, 0,
-                       (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1) * sizeof(SOPC_Endpoint_Config*));
+                memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
+                memset(tConfig.serverScConfigs, 0, sizeof(tConfig.serverScConfigs));
+                memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
                 SOPC_App_Initialize();
                 SOPC_EventTimer_Initialize();
                 SOPC_Sockets_Initialize();
                 SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
                 SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
-            }
 
-            if (SOPC_STATUS_OK == status)
-            {
                 SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
 
                 /* set log level to INFO for version logging, then restore it */
@@ -158,7 +146,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
         if (!tConfig.serverConfigLocked)
         {
             // Check an address space is defined in case a endpoint configuration exists
-            if (tConfig.epConfigIdxMax == 0 || (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured))
+            if (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured)
             {
                 tConfig.serverConfigLocked = true;
                 SOPC_AddressSpace_Check_Configured();

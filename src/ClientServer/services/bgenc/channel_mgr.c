@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 19/01/2022 11:18:11
+ Date                 : 11/03/2022 14:10:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -225,8 +225,7 @@ void channel_mgr__close_all_channel(
             &channel_mgr__l_cli_con);
          if ((channel_mgr__l_con == true) &&
             ((channel_mgr__p_clientOnly == false) ||
-            ((channel_mgr__p_clientOnly == true) &&
-            (channel_mgr__l_cli_con == true)))) {
+            (channel_mgr__l_cli_con == true))) {
             channel_mgr__l_any_channel_closing = true;
             channel_mgr__l_close_secure_channel(channel_mgr__l_channel);
          }

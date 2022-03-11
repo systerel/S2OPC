@@ -51,11 +51,14 @@ SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
 {
     // Get default log config and set the custom path
-    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = pCfg->toolkit_logger.log_path;
-    logConfiguration.logLevel = pCfg->toolkit_logger.level;
-    logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes = pCfg->toolkit_logger.maxBytes;
-    logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles = pCfg->toolkit_logger.maxFiles;
+    SOPC_Log_Configuration logConfiguration = {.logLevel = pCfg->toolkit_logger.level,
+                                               .logSystem = SOPC_LOG_SYSTEM_FILE,
+                                               .logSysConfig.fileSystemLogConfig = {
+                                                   .logDirPath = pCfg->toolkit_logger.log_path,
+                                                   .logMaxBytes = pCfg->toolkit_logger.maxBytes,
+                                                   .logMaxFiles = pCfg->toolkit_logger.maxFiles,
+                                               }};
+
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     if (SOPC_STATUS_OK == status)

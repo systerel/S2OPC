@@ -166,9 +166,6 @@ else()
 endif()
 
 ## Common wrapper library ##
-### TODO: delete
-set(SERVERWRAPPER_PATH "frontend/server_wrapper")
-
 set(COMMONWRAPPER_PATH "frontend/common_wrapper")
 set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
 # Set empty implementation and dependency if Expat not available
@@ -180,7 +177,7 @@ target_link_libraries(s2opc_commonwrapper PUBLIC s2opc_clientserver)
 target_compile_options(s2opc_commonwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_commonwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_commonwrapper
-  PUBLIC # TODO: separate PUBLIC / PRIVATE
+  PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
@@ -217,7 +214,7 @@ target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_commonwrapper)
 target_compile_options(s2opc_clientwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_clientwrapper
-  PUBLIC # TODO: separate PUBLIC / PRIVATE
+  PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LIBSUBSCRIBE_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
@@ -243,8 +240,7 @@ export(EXPORT s2opc_clientserver-clientwrapper-export
        FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
 
 ## Server wrapper library ##
-### TODO: restore
-#set(SERVERWRAPPER_PATH "frontend/server_wrapper")
+set(SERVERWRAPPER_PATH "frontend/server_wrapper")
 # Set empty implementation and dependency if Expat not available
 set(SERVERWRAPPER_XML_CONFIG "")
 set(SERVERWRAPPER_XML_DEP "")
@@ -263,7 +259,7 @@ target_link_libraries(s2opc_serverwrapper PUBLIC s2opc_commonwrapper ${SERVERWRA
 target_compile_options(s2opc_serverwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_serverwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_serverwrapper
-  PUBLIC # TODO: separate PUBLIC / PRIVATE
+  PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )

@@ -294,7 +294,11 @@ int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disco
     SOPC_LibSub_StaticCfg cfg_cli = {
         .host_log_callback = Helpers_LoggerStdout,
         .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
-    };
+        .toolkit_logger = {
+            .level = 0,
+            .log_path = NULL,
+            .maxBytes = 0,
+            .maxFiles = 0}}; // .toolkit_logger only used by LibSub code (libs2opc_client.c), initialize to 0 values.
 
     SOPC_ReturnStatus status = SOPC_ClientCommon_Initialize(&cfg_cli, GenericCallback_GetEndpoints);
 

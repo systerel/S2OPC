@@ -129,6 +129,7 @@ int main(int argc, char* const argv[])
 
     /* Close the toolkit */
     SOPC_ClientHelper_Finalize();
+    SOPC_CommonHelper_Clear();
 
     return res;
 }

@@ -68,6 +68,11 @@ bool SOPC_CommonHelper_GetInitialized(void)
 
 void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t helperContext)
 {
+    if (!SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
+    {
+        return;
+    }
+
     Mutex_Lock(&sopc_helper_config.callbacksMutex);
     switch (event)
     {
@@ -124,8 +129,6 @@ SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogCon
         status = SOPC_Toolkit_Initialize(SOPC_Helper_ComEventCb);
     }
 
-    sopc_helper_config.initialized = (int32_t) false;
-
     SOPC_S2OPC_Config_Initialize(&sopc_helper_config.config);
 
     if (SOPC_STATUS_OK != status)
@@ -153,10 +156,10 @@ void SOPC_CommonHelper_Clear(void)
     sopc_helper_config.clientComEventCb = NULL;
     sopc_helper_config.serverComEventCb = NULL;
     Mutex_Unlock(&sopc_helper_config.callbacksMutex);
-    Mutex_Clear(&sopc_helper_config.callbacksMutex);
     SOPC_S2OPC_Config_Clear(&sopc_helper_config.config);
 
     SOPC_Toolkit_Clear();
+    Mutex_Clear(&sopc_helper_config.callbacksMutex);
 }
 
 SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void)

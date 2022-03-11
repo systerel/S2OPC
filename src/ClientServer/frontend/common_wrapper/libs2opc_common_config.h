@@ -68,10 +68,11 @@ SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
 SOPC_S2OPC_Config* SOPC_CommonHelper_GetConfiguration(void);
 
 /**
- * \brief Retrieve the S2OPC Client/Server "initialized" state
+ * \brief Retrieve the S2OPC Client/Server frontend "initialized" state
  *
- * \return True if the Helper is initialized (when ::SOPC_Helper_Initialize is called)
+ * \return True if the Helper is initialized (when ::SOPC_CommonHelper_Initialize is called)
  *
  */
 bool SOPC_CommonHelper_GetInitialized(void);
+
 #endif
