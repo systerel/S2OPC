@@ -127,26 +127,26 @@ START_TEST(test_wrapper_create_configuration)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* configuration of a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
 
     /* check multiple configurations */
     int32_t conf_ids;
-    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
 
     SOPC_ClientHelper_Finalize();
 
     /* configure a connection without wrapper being initialized */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL));
 }
 END_TEST
 
@@ -155,11 +155,11 @@ START_TEST(test_wrapper_create_connection)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* configuration of a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
 
     /* configuration of an invalid url */
-    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(invalid_url, &valid_security_none);
+    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(invalid_url, &valid_security_none, NULL);
     ck_assert_int_gt(invalid_conf_id, 0);
 
     /* connect using a valid configuration */
@@ -209,49 +209,49 @@ START_TEST(test_wrapper_config_invalid_arguments)
 {
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
-    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(NULL, &valid_security_none);
+    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(NULL, &valid_security_none, NULL);
     ck_assert_int_eq(-1, invalid_conf_id);
 
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_none;
         invalid_security.security_policy = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-11, invalid_conf_id);
         invalid_security.security_policy = "InvalidSecurityPolicy";
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-11, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_none;
         invalid_security.security_mode = 0;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-12, invalid_conf_id);
         invalid_security.security_mode = 4;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-12, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_srv = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-15, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_cli = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-16, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_key_cli = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-17, invalid_conf_id);
     }
     {
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.policyId = NULL;
-        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &invalid_security, NULL);
         ck_assert_int_eq(-18, invalid_conf_id);
     }
     /* cannot test username and password */
@@ -268,7 +268,7 @@ START_TEST(test_wrapper_disconnect)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* connection to a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -301,7 +301,7 @@ START_TEST(test_wrapper_create_subscription)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* connection to a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -343,7 +343,7 @@ START_TEST(test_wrapper_create_subscription_after_disconnect)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -378,7 +378,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -434,7 +434,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, NULL));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -507,7 +507,7 @@ START_TEST(test_wrapper_unsubscribe)
     ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -568,7 +568,8 @@ START_TEST(test_wrapper_read)
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_signAndEncrypt_b256sha256);
+    int32_t valid_conf_id =
+        SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_signAndEncrypt_b256sha256, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -731,7 +732,7 @@ START_TEST(test_wrapper_write)
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -867,7 +868,7 @@ START_TEST(test_wrapper_browse)
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
@@ -1093,7 +1094,7 @@ START_TEST(test_wrapper_disconnect_callback)
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize("./check_wrapper_logs/", 0, disconnect_callback));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);

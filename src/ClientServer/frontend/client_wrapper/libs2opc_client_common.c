@@ -71,6 +71,7 @@ static SOPC_ClientCommon_DiscoveryCbk getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
+static SOPC_Client_Config gClientConfig;
 static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to be freed them in SOPC_LibSub_Clear() */
 
 /* Event callback */
@@ -99,6 +100,9 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     {
         pListConfig = SOPC_SLinkedList_Create(0);
         pListClient = SOPC_SLinkedList_Create(0);
+        SOPC_ClientConfig_Initialize(&gClientConfig);
+        gClientConfig.clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+
         pArrScConfig = SOPC_Array_Create(sizeof(SOPC_SecureChannel_Config*), 0,
                                          (SOPC_Array_Free_Func) Helpers_SecureChannel_Config_Free);
         if (NULL == pListConfig || NULL == pListClient || NULL == pArrScConfig)
@@ -205,6 +209,8 @@ void SOPC_ClientCommon_Clear(void)
             SOPC_Free((void*) pCfg->policyId);
             SOPC_Free((void*) pCfg->username);
             SOPC_Free((void*) pCfg->password);
+            OpcUa_GetEndpointsResponse_Clear((void*) pCfg->expected_endpoints);
+            SOPC_Free((void*) pCfg->expected_endpoints);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             SOPC_Free(pCfg);
         }
@@ -212,12 +218,31 @@ void SOPC_ClientCommon_Clear(void)
     SOPC_SLinkedList_Delete(pListConfig);
     pListConfig = NULL;
 
+    SOPC_ClientConfig_Clear(&gClientConfig);
+
     SOPC_Array_Delete(pArrScConfig);
     pArrScConfig = NULL;
 
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
     Mutex_Clear(&mutex);
+}
+
+SOPC_ReturnStatus SOPC_ClientCommon_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig)
+{
+    if (SOPC_Atomic_Int_Get(&libInitialized) == 0)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    if (NULL == clientConfig)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    gClientConfig = *clientConfig;
+
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
@@ -250,10 +275,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     /* Create the new configuration */
     if (SOPC_STATUS_OK == status)
     {
-        status = Helpers_NewSCConfigFromLibSubCfg(pCfg->server_url, pCfg->security_policy, pCfg->security_mode,
-                                                  pCfg->disable_certificate_verification, pCfg->path_cert_auth,
-                                                  pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli,
-                                                  pCfg->path_crl, pCfg->sc_lifetime, &pscConfig);
+        status = Helpers_NewSCConfigFromLibSubCfg(
+            pCfg->server_url, pCfg->security_policy, pCfg->security_mode, pCfg->disable_certificate_verification,
+            pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli, pCfg->path_crl,
+            pCfg->sc_lifetime, (const OpcUa_GetEndpointsResponse*) pCfg->expected_endpoints, &gClientConfig,
+            &pscConfig);
     }
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
@@ -701,7 +727,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     const int32_t security_mode = OpcUa_MessageSecurityMode_None;
 
     status = Helpers_NewSCConfigFromLibSubCfg(endpointUrl, security_policy, security_mode, false, NULL, NULL, NULL,
-                                              NULL, NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, &pscConfig);
+                                              NULL, NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, NULL, &gClientConfig,
+                                              &pscConfig);
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
     if (SOPC_STATUS_OK == status)

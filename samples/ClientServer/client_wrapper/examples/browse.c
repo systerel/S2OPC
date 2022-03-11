@@ -63,7 +63,7 @@ int main(int argc, char* const argv[])
     const char* endpoint_url = "opc.tcp://localhost:4841";
 
     /* connect to the endpoint */
-    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security);
+    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
     if (configurationId <= 0)
     {
         res = -1;

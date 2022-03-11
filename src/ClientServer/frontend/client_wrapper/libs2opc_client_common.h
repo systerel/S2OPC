@@ -83,6 +83,18 @@ void SOPC_ClientCommon_Clear(void);
 
 /**
  @brief
+    Set the client application configuration (optional).
+    It provides information sent during session establishment to the server
+    (preferred locales, application description).
+ @param clientConfig
+    Non null pointer to the client application configuration. The content of the configuration is copied
+    and the object pointed by /p clientConfig can be freed by the caller.
+ @return
+    The operation status */
+SOPC_ReturnStatus SOPC_ClientCommon_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig);
+
+/**
+ @brief
     Configure a future connection. This function shall be called once per connection before
     a call to SOPC_ClientCommon_Configured(). The given /p pCfgId is later used to create connections.
  @param pCfg

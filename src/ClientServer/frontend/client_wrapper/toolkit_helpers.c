@@ -50,17 +50,19 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szPathKeyClient,
                                                    const char* szPathCrl,
                                                    uint32_t iScRequestedLifetime,
+                                                   const OpcUa_GetEndpointsResponse* expectedEndpoints,
+                                                   SOPC_Client_Config* clientAppCfg,
                                                    SOPC_SecureChannel_Config** ppNewCfg)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    SOPC_Client_Config* clientAppCfg = NULL;
     SOPC_SerializedCertificate* pCrtSrv = NULL;
     SOPC_SerializedCertificate* pCrtCli = NULL;
     SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
     SOPC_PKIProvider* pPki = NULL;
 
-    if (NULL == szServerUrl || NULL == szSecuPolicy || OpcUa_MessageSecurityMode_Invalid == msgSecurityMode)
+    if (NULL == szServerUrl || NULL == szSecuPolicy || OpcUa_MessageSecurityMode_Invalid == msgSecurityMode ||
+        NULL == clientAppCfg)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -163,9 +165,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     if (SOPC_STATUS_OK == status)
     {
         pscConfig = SOPC_Calloc(1, sizeof(SOPC_SecureChannel_Config));
-        clientAppCfg = SOPC_Calloc(1, sizeof(*clientAppCfg));
 
-        if (NULL != pscConfig && NULL != clientAppCfg)
+        if (NULL != pscConfig)
         {
             pscConfig->isClientSc = true;
             pscConfig->crt_cli = pCrtCli;
@@ -174,9 +175,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->pki = pPki;
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->msgSecurityMode = msgSecurityMode;
-
-            OpcUa_ApplicationDescription_Initialize(&clientAppCfg->clientDescription);
-            clientAppCfg->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+            pscConfig->expectedEndpoints = expectedEndpoints;
             pscConfig->clientConfigPtr = clientAppCfg;
 
             /* These input strings are verified non NULL */
@@ -211,7 +210,6 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
         SOPC_Free(pscConfig);
-        SOPC_Free(clientAppCfg);
     }
 
     return status;
@@ -233,8 +231,7 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
     SOPC_Free((void*) pscConfig->url);
     SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
-    OpcUa_ApplicationDescription_Clear((OpcUa_ApplicationDescription*) &pscConfig->clientConfigPtr->clientDescription);
-    SOPC_Free((void*) pscConfig->clientConfigPtr);
+    pscConfig->clientConfigPtr = NULL;
     SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_Free(pscConfig);
 

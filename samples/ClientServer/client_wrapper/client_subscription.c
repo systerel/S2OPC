@@ -143,7 +143,8 @@ int main(int argc, char* const argv[])
                                          .timeout_ms = TIMEOUT_MS,
                                          .sc_lifetime = SC_LIFETIME_MS,
                                          .token_target = options.token_target,
-                                         .generic_response_callback = NULL};
+                                         .generic_response_callback = NULL,
+                                         .expected_endpoints = NULL};
     SOPC_LibSub_ConfigurationId cfg_id = 0;
     SOPC_LibSub_ConnectionId con_id = 0;
 

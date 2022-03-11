@@ -198,7 +198,7 @@ struct SOPC_Server_Config
 };
 
 /**
- * \brief S2OPC server configuration
+ * \brief S2OPC configuration
  */
 typedef struct SOPC_S2OPC_Config
 {
@@ -304,7 +304,8 @@ typedef struct
 } SOPC_Toolkit_Build_Info;
 
 /**
- * \brief Initialize the content of the SOPC_S2OPC_Config
+ * \brief Initialize the content of the SOPC_S2OPC_Config.
+ *        Calls both ::SOPC_ServerConfig_Initialize and ::SOPC_ClientConfig_Initialize
  *
  * \param config  The s2opc client/server configuration to initialize
  */
@@ -312,9 +313,38 @@ void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 
 /**
  * \brief Clear the content of the SOPC_S2OPC_Config
+ *        Calls both ::SOPC_ServerConfig_Clear and ::SOPC_ClientConfig_Clear
  *
  * \param config  The s2opc client/server configuration to clear
  */
 void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config);
+
+/**
+ * \brief Initialize the content of the SOPC_Server_Config
+ *
+ * \param config  The s2opc client/server configuration to initialize
+ */
+void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config);
+
+/**
+ * \brief Clear the content of the SOPC_Server_Config
+ *
+ * \param config  The s2opc client/server configuration to clear
+ */
+void SOPC_ServerConfig_Clear(SOPC_Server_Config* config);
+
+/**
+ * \brief Initialize the content of the SOPC_Client_Config
+ *
+ * \param config  The s2opc client/server configuration to initialize
+ */
+void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config);
+
+/**
+ * \brief Clear the content of the SOPC_Client_Config
+ *
+ * \param config  The s2opc client/server configuration to clear
+ */
+void SOPC_ClientConfig_Clear(SOPC_Client_Config* config);
 
 #endif // SOPC_USER_APP_ITF_H_

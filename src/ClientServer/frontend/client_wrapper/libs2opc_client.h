@@ -338,6 +338,11 @@ typedef struct
  @var SOPC_LibSub_ConnectionCfg::generic_response_callback
    The callback used to transmit generic responses to request passed
    through SOPC_LibSub_AsyncSendRequestOnSession.
+ @var SOPC_LibSub_ConnectionCfg::expected_endpoints
+      Response returned by prior call to GetEndpoints service
+      and checked to be the same during session establishment,
+      NULL otherwise (no verification will be done).
+      Its type shall be a pointer of ::OpcUa_GetEndpointsResponse.
  */
 typedef struct
 {
@@ -361,6 +366,7 @@ typedef struct
     uint32_t sc_lifetime;
     uint16_t token_target;
     SOPC_LibSub_EventCbk generic_response_callback;
+    const void* expected_endpoints;
 } SOPC_LibSub_ConnectionCfg;
 
 /*

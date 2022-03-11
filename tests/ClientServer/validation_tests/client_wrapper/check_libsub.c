@@ -154,7 +154,8 @@ START_TEST(test_subscription)
                                          .timeout_ms = CONNECTION_TIMEOUT,
                                          .sc_lifetime = 60000,
                                          .token_target = 3,
-                                         .generic_response_callback = generic_event_callback};
+                                         .generic_response_callback = generic_event_callback,
+                                         .expected_endpoints = NULL};
     OpcUa_ReadValueId* lrv = NULL;
     OpcUa_ReadRequest* read_req = NULL;
 
@@ -267,7 +268,9 @@ START_TEST(test_half_broken_subscriptions)
          .data_change_callback = datachange_callback_do_nothing,
          .timeout_ms = CONNECTION_TIMEOUT,
          .sc_lifetime = 3600000,
-         .token_target = 3},
+         .token_target = 3,
+         .generic_response_callback = NULL,
+         .expected_endpoints = NULL},
         {.server_url = "opc.tcp://localhost:4842", /* Do not connect this one */
          .security_policy = SOPC_SecurityPolicy_None_URI,
          .security_mode = OpcUa_MessageSecurityMode_None,
@@ -286,7 +289,9 @@ START_TEST(test_half_broken_subscriptions)
          .data_change_callback = datachange_callback_do_nothing,
          .timeout_ms = CONNECTION_TIMEOUT,
          .sc_lifetime = 3600000,
-         .token_target = 3},
+         .token_target = 3,
+         .generic_response_callback = NULL,
+         .expected_endpoints = NULL},
         {.server_url = "opc.tcp://localhost:4843", /* Do not connect this one */
          .security_policy = SOPC_SecurityPolicy_None_URI,
          .security_mode = OpcUa_MessageSecurityMode_None,
@@ -305,7 +310,9 @@ START_TEST(test_half_broken_subscriptions)
          .data_change_callback = datachange_callback_do_nothing,
          .timeout_ms = CONNECTION_TIMEOUT,
          .sc_lifetime = 3600000,
-         .token_target = 3}};
+         .token_target = 3,
+         .generic_response_callback = NULL,
+         .expected_endpoints = NULL}};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
     for (int i = 0; i < N_CONNECTIONS; ++i)

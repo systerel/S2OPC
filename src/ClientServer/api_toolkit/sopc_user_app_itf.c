@@ -47,13 +47,13 @@ static void SOPC_EndpointConfig_Clear(SOPC_Endpoint_Config* epConfig, bool freeC
     SOPC_UserAuthorization_FreeManager(&epConfig->authorizationManager);
 }
 
-static void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config)
+void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config)
 {
     memset(config, 0, sizeof(*config));
     OpcUa_ApplicationDescription_Initialize(&config->serverDescription);
 }
 
-static void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config)
+void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config)
 {
     memset(config, 0, sizeof(*config));
     OpcUa_ApplicationDescription_Initialize(&config->clientDescription);
@@ -65,7 +65,7 @@ void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config)
     SOPC_ClientConfig_Initialize(&config->clientConfig);
 }
 
-static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
+void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
 {
     assert(NULL != config);
     if (config->freeCstringsFlag)
@@ -143,7 +143,7 @@ static void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     memset(config, 0, sizeof(*config));
 }
 
-static void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
+void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
 {
     assert(NULL != config);
     OpcUa_ApplicationDescription_Clear(&config->clientDescription);

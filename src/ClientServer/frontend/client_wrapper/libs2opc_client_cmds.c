@@ -250,7 +250,8 @@ static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
-                                                 SOPC_ClientHelper_Security* security);
+                                                 SOPC_ClientHelper_Security* security,
+                                                 OpcUa_GetEndpointsResponse* expectedEndpoints);
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
@@ -469,7 +470,8 @@ void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsRes
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
                                                  const char* endpointUrl,
-                                                 SOPC_ClientHelper_Security* security)
+                                                 SOPC_ClientHelper_Security* security,
+                                                 OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
     bool security_none = false;
     const char* cert_auth = security->path_cert_auth;
@@ -549,13 +551,16 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->sc_lifetime = SC_LIFETIME_MS;
     cfg_con->token_target = PUBLISH_N_TOKEN;
     cfg_con->generic_response_callback = SOPC_ClientHelper_GenericCallback;
+    cfg_con->expected_endpoints = expectedEndpoints;
 
     return 0;
 }
 
 // Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
 // detected or '-100' if configuration failed
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security)
+int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
+                                              SOPC_ClientHelper_Security* security,
+                                              OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == endpointUrl)
@@ -569,7 +574,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
     }
 
     SOPC_LibSub_ConnectionCfg cfg_con;
-    int32_t res = ConnectHelper_CreateConfiguration(&cfg_con, endpointUrl, security);
+    int32_t res = ConnectHelper_CreateConfiguration(&cfg_con, endpointUrl, security, expectedEndpoints);
 
     if (0 != res)
     {
@@ -607,6 +612,20 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_Clie
     assert(cfg_id > 0);
     assert(cfg_id <= INT32_MAX);
     return (int32_t) cfg_id;
+}
+
+int32_t SOPC_ClientHelper_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig)
+{
+    if (NULL == clientConfig)
+    {
+        return -1;
+    }
+    SOPC_ReturnStatus status = SOPC_ClientCommon_SetClientApplicationConfiguration(clientConfig);
+    if (SOPC_STATUS_OK != status)
+    {
+        return -100;
+    }
+    return 0;
 }
 
 // Return connection Id > 0 if succeeded

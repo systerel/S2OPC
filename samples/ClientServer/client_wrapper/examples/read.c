@@ -65,7 +65,7 @@ int main(int argc, char* const argv[])
     char* node_id = "ns=1;i=1012";
 
     /* connect to the endpoint */
-    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security);
+    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
     if (configurationId <= 0)
     {
         res = -1;

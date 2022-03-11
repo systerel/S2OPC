@@ -460,13 +460,34 @@ void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsRes
    Zero-terminated path to server URL
  @param security
     security configuration to use (policy, mode, certificates, ...)
+ @param expectedEndpoints
+    Response returned by prior call to GetEndpoints service
+    and checked to be the same during session establishment,
+    NULL otherwise (no verification will be done)
  @return
     If this operation succeeded, return a configuration id \verbatim>\endverbatim 0.
     If invalid endpointUrl detected, return -1.
     If invalid security detected, return \verbatim-<10+n>\endverbatim with \verbatim<n>\endverbatim field number
     (starting from 1). If configuration failed, return '-100'.
  */
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl, SOPC_ClientHelper_Security* security);
+int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
+                                              SOPC_ClientHelper_Security* security,
+                                              OpcUa_GetEndpointsResponse* expectedEndpoints);
+
+/**
+ @brief
+    Set the client application configuration (optional).
+    It provides information sent during session establishment to the server
+    (preferred locales, application description).
+ @param clientConfig
+    Non null pointer to the client application configuration. The content of the configuration is copied
+    and the object pointed by /p clientConfig can be freed by the caller.
+ @return
+    If this operation succeeded, return 0.
+    If invalid clientConfig detected, return -1.
+    If configuration failed, return '-100'.
+*/
+int32_t SOPC_ClientHelper_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig);
 
 /**
  @brief

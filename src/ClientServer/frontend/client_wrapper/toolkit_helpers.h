@@ -58,6 +58,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szPathKeyClient,
                                                    const char* szPathCrl,
                                                    uint32_t iScRequestedLifetime,
+                                                   const OpcUa_GetEndpointsResponse* expectedEndpoints,
+                                                   SOPC_Client_Config* clientAppCfg,
                                                    SOPC_SecureChannel_Config** ppNewCfg);
 
 /**
