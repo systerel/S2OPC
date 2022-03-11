@@ -4,10 +4,15 @@
 @REM set CONFIG="Release"
 @
 REM Build MbedTLS
-@cd %MBEDTLS_DIR%
-@rmdir /S /Q build
+@pushd .
+@cd /D %MBEDTLS_DIR%
+@IF not %ERRORLEVEL% == 0 exit /B
 @mkdir build
-@cd build
+@cd /D build
+@IF not %ERRORLEVEL% == 0 exit /B
 @REM Building the shared with export all is not functional for now see (https://github.com/ARMmbed/mbedtls/issues/470)
 cmake -DUSE_STATIC_MBEDTLS_LIBRARY=On -DENABLE_PROGRAMS=Off -DENABLE_TESTING=Off -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=Off -DUSE_SHARED_MBEDTLS_LIBRARY=Off .. -G %VS_VERSION%
+@IF not %ERRORLEVEL% == 0 exit /B
 cmake --build . --target ALL_BUILD --config %CONFIG%
+@IF not %ERRORLEVEL% == 0 exit /B
+@popd

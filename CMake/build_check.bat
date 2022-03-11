@@ -4,12 +4,18 @@
 @REM set VS_VERSION="Visual Studio 15 2017 Win64"
 @REM set CONFIG="Release"
 @
+REM Build CHECK
+@pushd .
 @set CHECK_BUILD_DIR="%CHECK_DIR%\build"
 @
-REM Build CHECK
-@cd %CHECK_DIR%
+@cd /D %CHECK_DIR%
+@IF not %ERRORLEVEL% == 0 exit /B
 @mkdir %CHECK_BUILD_DIR%
-@cd %CHECK_BUILD_DIR%
+@cd /D %CHECK_BUILD_DIR%
+@IF not %ERRORLEVEL% == 0 exit /B
 @REM Change DCHECK_SHARED_LIBS to ON in order to use DLL instead of static library
 cmake -DCHECK_SHARED_LIBS=Off -DCHECK_BUILD_TOOLS=Off -DCHECK_BUILD_EXAMPLES=Off -DCHECK_BUILD_TESTS=Off -DCMAKE_INSTALL_PREFIX=%CHECK_INSTALL_DIR% .. -G %VS_VERSION%
+@IF not %ERRORLEVEL% == 0 exit /B
 cmake --build . --target install --config %CONFIG%
+@IF not %ERRORLEVEL% == 0 exit /B
+@popd

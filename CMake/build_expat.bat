@@ -4,13 +4,19 @@
 @REM set VS_VERSION="Visual Studio 15 2017 Win64"
 @REM set CONFIG="Release"
 @
-@set EXPAT_BUILD_DIR="%EXPAT_DIR%\build"
-@
 REM Build Expat
-@cd %EXPAT_DIR%
-@rmdir /S /Q %EXPAT_BUILD_DIR%
+@pushd .
+@set EXPAT_BUILD_DIR="%EXPAT_DIR%\build"
+@IF not %ERRORLEVEL% == 0 exit /B
+@
+@cd /D %EXPAT_DIR%
+@IF not %ERRORLEVEL% == 0 exit /B
 @mkdir %EXPAT_BUILD_DIR%
-@cd %EXPAT_BUILD_DIR%
+@cd /D %EXPAT_BUILD_DIR%
+@IF not %ERRORLEVEL% == 0 exit /B
 @REM Change DEXPAT_SHARED_LIBS to ON in order to use DLL instead of static library
 cmake -DEXPAT_SHARED_LIBS=Off -DEXPAT_BUILD_TOOLS=Off -DEXPAT_BUILD_EXAMPLES=Off -DEXPAT_BUILD_TESTS=Off -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DIR% .. -G %VS_VERSION%
+@IF not %ERRORLEVEL% == 0 exit /B
 cmake --build . --target install --config %CONFIG%
+@IF not %ERRORLEVEL% == 0 exit /B
+@popd

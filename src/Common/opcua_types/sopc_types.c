@@ -20124,11 +20124,11 @@ SOPC_EncodeableType OpcUa_Annotation_EncodeableType = {
     Annotation_Fields};
 #endif
 
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
 /*============================================================================
  * UserTokenPolicies example constant values
  *===========================================================================*/
-#ifndef OPCUA_EXCLUDE_UserTokenPolicy
-/** Anonymous user security policy supported configuration */
+
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous = {
     .TokenType = OpcUa_UserTokenType_Anonymous,
     .PolicyId = {9, true, (SOPC_Byte*) "anonymous"},
@@ -20137,9 +20137,6 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous = {
     .SecurityPolicyUri = {0, true, NULL},
 };
 
-/** Username security policy is supported and configured with security policy None.
- * With this security policy, the password will never be encrypted and this policy
- * shall not be used on unsecured and unencrypted secure channels. */
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
     .TokenType = OpcUa_UserTokenType_UserName,
     .PolicyId = {8, true, (SOPC_Byte*) "username_None"},
@@ -20150,10 +20147,6 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
    secure channel security policy is non-None and with encryption since password will be non-encrypted */
 };
 
-/** Username security policy is supported and configured with Secure Channel security policy.
- *  With this security policy, the password will be encrypted with secure channel security policy algorithm
- *  (None security policy will lead to unencrypted password).
- */
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy = {
     .TokenType = OpcUa_UserTokenType_UserName,
     .PolicyId = {8, true, (SOPC_Byte*) "username"},
