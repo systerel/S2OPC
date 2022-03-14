@@ -32,29 +32,36 @@
 @
 @REM Comment if ENABLED_TESTING=off or if already built
 @REM Build Check
-@IF NOT "%ENABLE_TESTING%" == "off" (@call CMake\build_check)
+@IF NOT "%ENABLE_TESTING%" == "off" (@call CMake\build_check.bat)
 @
 @REM Comment if XML parsing is not needed or if already built
 @REM Build Expat
-@call CMake\build_expat
+@call CMake\build_expat.bat
 @
 @REM Comment if already built
 @REM Build MbedTLS
-@call CMake\build_mbedtls
+@call CMake\build_mbedtls.bat
 @
 REM Configure S2OPC Project
 @cd /D %S2OPC_DIR%
-@IF not %ERRORLEVEL% == 0 exit /B
+@IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 @REM Uncomment to clear build dir at each build
 @REM rmdir /S /Q build
 @mkdir build
 @cd /D build
-@IF not %ERRORLEVEL% == 0 exit /B
+@IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 @
 cmake -DBUILD_SHARED_LIBS=%BUILD_SHARED_LIBS% -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=%BUILD_SHARED_LIBS% -DS2OPC_CLIENTSERVER_ONLY=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DWITH_NANO_EXTENDED=1 -DCMAKE_PREFIX_PATH=%CMAKE_LIBS_DIRS% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DENABLE_TESTING=%ENABLE_TESTING% -DENABLE_SAMPLES=%ENABLE_SAMPLES% .. -G %VS_VERSION%
 @
-@IF not %ERRORLEVEL% == 0 exit /B
+@IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 REM Build S2OPC Project
 cmake --build . --config %CONFIG%
-@IF not %ERRORLEVEL% == 0 exit /B
+@IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
+:EXIT_OK
+@echo S2OPC build successful
 @popd
+@exit /B 0
+:EXIT_FAIL
+@echo S2OPC build failed
+@popd
+@exit /B 1

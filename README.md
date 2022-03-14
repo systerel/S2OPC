@@ -245,7 +245,7 @@ To build S2OPC libraries and tests with default configuration on current stable 
 By setting environment variables BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
-- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo serveur, command line client tools, etc.)
+- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools, etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
