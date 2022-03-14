@@ -487,7 +487,7 @@ void SOPC_ToolkitClient_ClearAllSCs(void)
     }
     SOPC_Services_CloseAllSCs(true);
     Mutex_Lock(&tConfig.mut);
-    memset(tConfig.scConfigs, 0, (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) * sizeof(SOPC_SecureChannel_Config*));
+    memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
     tConfig.scConfigIdxMax = 0;
     Mutex_Unlock(&tConfig.mut);
 }
