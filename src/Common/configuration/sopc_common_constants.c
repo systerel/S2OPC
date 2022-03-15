@@ -23,6 +23,13 @@
 
 #include <assert.h>
 
+bool SOPC_Internal_Common_Constants_RuntimeCheck(void)
+{
+    bool res = (sizeof(uintptr_t) == sizeof(void*));
+    assert(res && "uintptr_t has not same size as void* which is expected for other language bindings");
+    return res;
+}
+
 static SOPC_Common_EncodingConstants globalEncodingConfig = {
     .buffer_size = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE,
     .receive_max_msg_size = SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH,

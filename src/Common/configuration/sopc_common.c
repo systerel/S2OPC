@@ -19,6 +19,7 @@
 
 #include "sopc_common.h"
 
+#include "sopc_common_constants.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_ieee_check.h"
 #include "sopc_logger.h"
@@ -42,6 +43,12 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     if (bCommon_IsInitialized)
     {
         return SOPC_STATUS_INVALID_STATE;
+    }
+
+    /* Check constants properties at runtime */
+    if (!SOPC_Internal_Common_Constants_RuntimeCheck())
+    {
+        return SOPC_STATUS_NOK;
     }
 
     /* Check IEEE-754 compliance */
