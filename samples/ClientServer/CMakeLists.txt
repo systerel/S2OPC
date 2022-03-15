@@ -35,9 +35,11 @@ if(ENABLE_SAMPLES)
 
   # Define a demo XML address space configuration
   if (WITH_NANO_EXTENDED)
-    set(DEMO_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+    set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+    set(DEMO_ADDRESS_SPACE_XML_FILE "S2OPC_Demo_NodeSet.xml")
   else()
-    set(DEMO_ADDRESS_SPACE_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_nano.xml")
+    set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_nano.xml")
+    set(DEMO_ADDRESS_SPACE_XML_FILE "S2OPC_Demo_Nano_NodeSet.xml")
   endif()
 
   # Manage the Nano profiles extended mode
@@ -61,6 +63,7 @@ if(ENABLE_SAMPLES)
       TARGET ${TOOLKIT_DEMO_SERVER} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${SERVER_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND ${CMAKE_COMMAND} -E copy ${USERS_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND ${CMAKE_COMMAND} -E copy ${DEMO_ADDRESS_SPACE_XML_ORIGIN} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${DEMO_ADDRESS_SPACE_XML_FILE}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted

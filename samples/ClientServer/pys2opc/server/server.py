@@ -43,7 +43,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Configurable OPC UA server')
     parser.add_argument('--config-path', default='S2OPC_Server_Demo_Config.xml',
                         help='The path to the XML configuration of the server endpoints')
-    parser.add_argument('--addspace-path', default='s2opc.xml',
+    parser.add_argument('--addspace-path', default='S2OPC_Demo_NodeSet.xml',
                         help='The path to the XML configuration of the server address space')
     parser.add_argument('--log-path', default='/tmp/pys2opc_logs',)
     args = parser.parse_args()

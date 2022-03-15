@@ -52,7 +52,7 @@
   WITH_PYS2OPC: 1
 
 .variables: &all-tests_test_variables
-  TEST_SERVER_XML_ADDRESS_SPACE: s2opc.xml
+  TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
 

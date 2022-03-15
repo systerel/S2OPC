@@ -82,10 +82,11 @@ if(ENABLE_TESTING)
   set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/tests/ClientServer/data/address_space/s2opc_no_base_info.xml")
 
   if (WITH_NANO_EXTENDED)
-    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
+    set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
   else()
-    set(TEST_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
+    set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
   endif()
+  set(TEST_ADDRESS_SPACE_XML_FILE "S2OPC_Test_NodeSet.xml")
 
   set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
   set(TEST_LIGHT_ADDRESS_SPACE_C "s2opc_no_base_info_address_space.c")
@@ -93,7 +94,7 @@ if(ENABLE_TESTING)
   s2opc_embed_address_space(${TEST_LIGHT_ADDRESS_SPACE_C} ${TEST_LIGHT_ADDRESS_SPACE_XML})
   add_custom_target(make-light-address-space DEPENDS ${TEST_LIGHT_ADDRESS_SPACE_C})
 
-  s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML})
+  s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML_ORIGIN})
   add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
 
 ## S2OPC unit tests ##
@@ -129,7 +130,7 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_USERS_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_USERS_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML_ORIGIN} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_ADDRESS_SPACE_XML_FILE})
 
   # Sockets layer tests
 

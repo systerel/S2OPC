@@ -95,10 +95,11 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
 
         printf(
             "Error: an XML server configuration file path shall be provided, e.g.: "
-            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml TEST_SERVER_XML_ADDRESS_SPACE=./s2opc%s.xml "
+            "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml "
+            "TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo%s_NodeSet.xml "
             "TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml "
-            "./%s\nThe following environment variables are missing: %s%s%s\n",
-            NULL == strstr(argv0, "nano") ? "" : "_nano", argv0, server_config_missing, addspace_config_missing,
+            "%s\nThe following environment variables are missing: %s%s%s\n",
+            NULL == strstr(argv0, "nano") ? "" : "_Nano", argv0, server_config_missing, addspace_config_missing,
             users_config_missing);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

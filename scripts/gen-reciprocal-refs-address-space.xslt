@@ -23,7 +23,7 @@ Forward references are generated for available Backward references and reciproca
 Both backward and forward references shall be defined in address space used with S2OPC toolkit.
 
 Script use example:
-saxonb-xslt -s:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc_origin.xml -xsl:$S2OPC_REPO/scripts/gen-reciprocal-refs-address-space.xslt -o:$S2OPC_REPO/tests/ClientServer/data/address_space/s2opc.xml -->
+saxonb-xslt -s:$S2OPC_REPO/samples/ClientServer/data/address_space/s2opc_no_reciprocal_refs.xml -xsl:$S2OPC_REPO/scripts/gen-reciprocal-refs-address-space.xslt -o:$S2OPC_REPO/samples/ClientServer/data/address_space/s2opc.xml -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xpath-default-namespace="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" version="2.0"  >
     <xsl:output method="xml"  encoding="UTF-8" indent="yes"/>
 

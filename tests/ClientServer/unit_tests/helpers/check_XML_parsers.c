@@ -43,12 +43,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_user_app_itf.h"
 
-#if 0 == WITH_NANO_EXTENDED
-#define XML_UA_NODESET_NAME "s2opc_nano.xml"
-#else
-#define XML_UA_NODESET_NAME "s2opc.xml"
-#endif
-
+#define XML_UA_NODESET_NAME "S2OPC_Test_NodeSet.xml"
 #define XML_SRV_CONFIG_NAME "S2OPC_Test_XML_Config.xml"
 #define XML_USERS_CONFIG_NAME "S2OPC_Test_Users.xml"
 
