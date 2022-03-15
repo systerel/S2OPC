@@ -414,11 +414,19 @@ void msg_session_bs__write_activate_session_resp_msg_crypto(const constants__t_m
 }
 
 static void minimize_max_message_length_create_session_msg(
+    bool isClient,
     const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
     uint32_t maxSendBodyMessageSize)
 {
-    SOPC_SecureChannel_Config* chConfig =
-        SOPC_ToolkitServer_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
+    SOPC_SecureChannel_Config* chConfig = NULL;
+    if (isClient)
+    {
+        chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
+    }
+    else
+    {
+        chConfig = SOPC_ToolkitServer_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
+    }
 
     /* Update maximum OPC UA message body encodeable if new value is more restrictive */
     if (NULL != chConfig && maxSendBodyMessageSize != 0 &&
@@ -695,7 +703,7 @@ void msg_session_bs__create_session_resp_export_maxRequestMessageSize(
     const constants__t_msg_i msg_session_bs__p_resp_msg)
 {
     minimize_max_message_length_create_session_msg(
-        msg_session_bs__p_channel_config_idx,
+        true, msg_session_bs__p_channel_config_idx,
         ((OpcUa_CreateSessionResponse*) msg_session_bs__p_resp_msg)->MaxRequestMessageSize);
 }
 
@@ -704,6 +712,6 @@ void msg_session_bs__create_session_req_export_maxResponseMessageSize(
     const constants__t_msg_i msg_session_bs__p_req_msg)
 {
     minimize_max_message_length_create_session_msg(
-        msg_session_bs__p_channel_config_idx,
+        false, msg_session_bs__p_channel_config_idx,
         ((OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg)->MaxResponseMessageSize);
 }
