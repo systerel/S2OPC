@@ -363,7 +363,7 @@ test-uactt:
       when: on_success
 
 test-framac:
-  image: registry.gitlab.com/systerel/s2opc/framac@sha256:27f3555e25ebccc7f0e902f3797d7ac796f424cd108379026a80ff2fe050ddb2 # framac 1.1
+  image: registry.gitlab.com/systerel/s2opc/framac@sha256:4438eb9af4011b343f04f29e0635a67fc842d359081d9157f7928a410f4088b6 # framac 1.2
   stage: test
   script:
     - './.wp-verification.sh'
