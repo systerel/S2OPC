@@ -401,10 +401,19 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
-        status = ctx->status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx->status;
+        }
 
         /* Free the context */
         statusMutex = Mutex_Unlock(&ctx->mutex);
@@ -1194,14 +1203,30 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
 
+        if (SOPC_STATUS_OK == status)
+        {
+            // Memory now managed by toolkit
+            nodesToRead = NULL;
+            request = NULL;
+        }
+
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
-        status = ctx->status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx->status;
+        }
 
         /* Free the context */
         statusMutex = Mutex_Unlock(&ctx->mutex);
@@ -1508,14 +1533,30 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
 
+        if (SOPC_STATUS_OK == status)
+        {
+            // Memory now managed by toolkit
+            nodesToWrite = NULL;
+            request = NULL;
+        }
+
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex);
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
-        status = ctx->status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx->status;
+        }
 
         /* fill write results */
         for (int i = 0; i < ctx->nbElements; i++)
@@ -1811,14 +1852,30 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
 
+        if (SOPC_STATUS_OK == status)
+        {
+            // Memory now managed by toolkit
+            nodesToBrowse = NULL;
+            request = NULL;
+        }
+
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex);
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
-        status = ctx->status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx->status;
+        }
 
         /* Free the context */
         statusMutex = Mutex_Unlock(&ctx->mutex);
@@ -1982,14 +2039,30 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
                                                              (uintptr_t) ctx);
 
+        if (SOPC_STATUS_OK == status)
+        {
+            // Memory now managed by toolkit
+            nextContinuationPoints = NULL;
+            request = NULL;
+        }
+
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex);
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
-        status = ctx->status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx->status;
+        }
 
         /* Free the context */
         statusMutex = Mutex_Unlock(&ctx->mutex);
@@ -2129,15 +2202,30 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, (void*) callReqs,
                                                              (uintptr_t) &ctx);
 
+        if (SOPC_STATUS_OK == status)
+        {
+            // Memory now managed by toolkit
+            callReqs = NULL;
+        }
+
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx.finish)
         {
             statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            assert(SOPC_STATUS_TIMEOUT != statusMutex); /* TODO return error */
-            assert(SOPC_STATUS_OK == statusMutex);
+            if (SOPC_STATUS_TIMEOUT == statusMutex)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else
+            {
+                assert(SOPC_STATUS_OK == statusMutex);
+            }
         }
         // Note: ctx.status and generical callback signature should be a ReturnStatus and not a StatusCode
-        status = ctx.status;
+        if (SOPC_STATUS_OK == status)
+        {
+            status = ctx.status;
+        }
 
         /* Clear the context */
         statusMutex = Mutex_Unlock(&ctx.mutex);
