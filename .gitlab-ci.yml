@@ -288,7 +288,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:0899d5947da677570fd32811ccdd1a8aa27c549dfe6e3ba2277cc16f4b767860  # digest of test:2.11
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:c8dc587888ca258206baaca8eed113b65e47560ed9aa808a8002931cd0f58293  # digest of test:2.12
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
