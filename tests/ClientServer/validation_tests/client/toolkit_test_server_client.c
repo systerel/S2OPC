@@ -45,6 +45,7 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
@@ -88,8 +89,6 @@ static void disconnect_callback(const uint32_t c_id)
  *                          Client initialization
  *---------------------------------------------------------------------------*/
 
-static SOPC_Client_Config clientConfig = {.freeCstringsFlag = false, .clientLocaleIds = (char*[]){"fr-FR", NULL}};
-
 static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
 
 static int32_t client_create_configuration(void)
@@ -100,31 +99,13 @@ static int32_t client_create_configuration(void)
         return res;
     }
 
-    // Set client description
-    OpcUa_ApplicationDescription_Initialize(&clientConfig.clientDescription);
-    SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(
-        &clientConfig.clientDescription.ApplicationName.defaultText, "S2OPC toolkit client example");
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_AttachFromCstring(&clientConfig.clientDescription.ProductUri, DEFAULT_PRODUCT_URI);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_AttachFromCstring(&clientConfig.clientDescription.ApplicationUri, DEFAULT_APPLICATION_URI);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        clientConfig.clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
-    }
+    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (char*[]){"fr-FR", "en-US"});
 
-    // Set application configuration
     if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_ClientHelper_SetClientApplicationConfiguration(&clientConfig);
-        if (0 != res)
-        {
-            return res;
-        }
+        status = SOPC_ClientHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+                                                             DEFAULT_APPLICATION_NAME, "fr-FR",
+                                                             OpcUa_ApplicationType_Client);
     }
 
     // Retrieve endpoints from server

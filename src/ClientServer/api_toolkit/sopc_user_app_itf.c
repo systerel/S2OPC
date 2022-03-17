@@ -57,6 +57,7 @@ void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config)
 {
     memset(config, 0, sizeof(*config));
     OpcUa_ApplicationDescription_Initialize(&config->clientDescription);
+    config->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
 }
 
 void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config)

@@ -35,6 +35,7 @@
 #include "sopc_address_space.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config_constants.h"
+#include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
 /**
@@ -70,5 +71,15 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetClientComEvent(SOPC_ComEvent_Fct* clientC
  *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
 SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverComEvtCb);
+
+/**
+ * \brief Copy the provided C string array of known size into a new NULL terminated C string array
+ *
+ *  \param nbElts Number of element in the provided C string array
+ *  \param src    Array of C string to copy
+ *
+ *  \return A new NULL terminated C string array containing a copy of C strings from the source array.
+ */
+char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, char** src);
 
 #endif

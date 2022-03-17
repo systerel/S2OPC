@@ -563,20 +563,6 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
     return (int32_t) cfg_id;
 }
 
-int32_t SOPC_ClientHelper_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig)
-{
-    if (NULL == clientConfig)
-    {
-        return -1;
-    }
-    SOPC_ReturnStatus status = SOPC_ClientCommon_SetClientApplicationConfiguration(clientConfig);
-    if (SOPC_STATUS_OK != status)
-    {
-        return -100;
-    }
-    return 0;
-}
-
 // Return connection Id > 0 if succeeded
 // or '0' if connection failed
 int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id)
@@ -2186,4 +2172,19 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
         SOPC_Free(results[i].outputParams);
         memset(&results[i], 0, sizeof(SOPC_ClientHelper_CallMethodResult));
     }
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, char** localeIds)
+{
+    return SOPC_ClientCommon_SetLocaleIds(nbLocales, localeIds);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_SetApplicationDescription(const char* applicationUri,
+                                                              const char* productUri,
+                                                              const char* defaultAppName,
+                                                              const char* defaultAppNameLocale,
+                                                              OpcUa_ApplicationType applicationType)
+{
+    return SOPC_ClientCommon_SetApplicationDescription(applicationUri, productUri, defaultAppName, defaultAppNameLocale,
+                                                       applicationType);
 }

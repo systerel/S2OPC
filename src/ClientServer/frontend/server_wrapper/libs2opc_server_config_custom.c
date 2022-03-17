@@ -32,34 +32,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
 
-// Utility function to create a NULL terminated string array from content copied of an array with known size
-static char** copy_char_array_into_new_NULL_terminated_array(size_t nbElts, char** src)
-{
-    // Array length + NULL terminator
-    char** sArray = SOPC_Calloc(nbElts + 1, sizeof(char*));
-    if (NULL == sArray)
-    {
-        return NULL;
-    }
-    bool ok = true;
-    for (size_t i = 0; ok && i < nbElts; i++)
-    {
-        sArray[i] = SOPC_strdup(src[i]);
-        ok &= NULL != sArray[i];
-    }
-    if (!ok)
-    {
-        for (size_t i = 0; i < nbElts; i++)
-        {
-            SOPC_Free(sArray[i]);
-        }
-        SOPC_Free(sArray);
-        sArray = NULL;
-    }
-
-    return sArray;
-}
-
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -73,7 +45,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pConfig->serverConfig.namespaces = copy_char_array_into_new_NULL_terminated_array(nbNamespaces, namespaces);
+    pConfig->serverConfig.namespaces = SOPC_CommonHelper_Copy_Char_Array(nbNamespaces, namespaces);
 
     if (NULL == pConfig->serverConfig.namespaces)
     {
@@ -95,7 +67,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    pConfig->serverConfig.localeIds = copy_char_array_into_new_NULL_terminated_array(nbLocales, localeIds);
+    pConfig->serverConfig.localeIds = SOPC_CommonHelper_Copy_Char_Array(nbLocales, localeIds);
 
     if (NULL == pConfig->serverConfig.localeIds)
     {
@@ -105,12 +77,27 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** 
     return SOPC_STATUS_OK;
 }
 
-// Add an application name into server description with given locale or no locale
-static SOPC_ReturnStatus SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(const char* appName,
-                                                                              const char* appNameLocale)
+/**
+ * \brief Define an application name into application description with given locale or no locale.
+ *        The locales supported by the application shall be provided and application name is checked to be compliant.
+ *
+ *  \param appDesc        The Server application description
+ *  \param appLocaleIds   The Server application Locales supported (checked regarding application locales)
+ *  \param appName        The Server application name to define
+ *  \param appNameLocale  (optional) The locale of the Server application name provided
+ *
+ * \return SOPC_STATUS_OK in case of success
+ */
+static SOPC_ReturnStatus SOPC_Internal_AddApplicationNameLocale(OpcUa_ApplicationDescription* appDesc,
+                                                                char** appLocaleIds,
+                                                                const char* appName,
+                                                                const char* appNameLocale)
 {
-    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    if (NULL == appDesc || NULL == appName)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_LocalizedText addAppName;
     SOPC_LocalizedText_Initialize(&addAppName);
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&addAppName.defaultText, appName);
@@ -122,17 +109,16 @@ static SOPC_ReturnStatus SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(co
     {
         char* emptyLocales[1] = {NULL};
         char** locales = NULL;
-        if (NULL == pConfig->serverConfig.localeIds)
+        if (NULL == appLocaleIds)
         {
             // Ensure we consider at least no locales are defined instead of invalid parameters
             locales = emptyLocales;
         }
         else
         {
-            locales = pConfig->serverConfig.localeIds;
+            locales = appLocaleIds;
         }
-        status = SOPC_LocalizedText_AddOrSetLocale(&pConfig->serverConfig.serverDescription.ApplicationName, locales,
-                                                   &addAppName);
+        status = SOPC_LocalizedText_AddOrSetLocale(&appDesc->ApplicationName, locales, &addAppName);
     }
     SOPC_LocalizedText_Clear(&addAppName);
 
@@ -167,7 +153,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(defaultAppName, defaultAppNameLocale);
+        status = SOPC_Internal_AddApplicationNameLocale(&pConfig->serverConfig.serverDescription,
+                                                        pConfig->serverConfig.localeIds, defaultAppName,
+                                                        defaultAppNameLocale);
     }
 
     return status;
@@ -186,7 +174,12 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return SOPC_HelperInternal_AddApplicationNameLocale_NoCheck(additionalAppName, additionalAppNameLocale);
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+
+    return SOPC_Internal_AddApplicationNameLocale(&pConfig->serverConfig.serverDescription,
+                                                  pConfig->serverConfig.localeIds, additionalAppName,
+                                                  additionalAppNameLocale);
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)

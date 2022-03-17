@@ -85,18 +85,6 @@ void SOPC_ClientCommon_Clear(void);
 
 /**
  @brief
-    Set the client application configuration (optional).
-    It provides information sent during session establishment to the server
-    (preferred locales, application description).
- @param clientConfig
-    Non null pointer to the client application configuration. The content of the configuration is copied
-    and the object pointed by /p clientConfig can be freed by the caller.
- @return
-    The operation status */
-SOPC_ReturnStatus SOPC_ClientCommon_SetClientApplicationConfiguration(SOPC_Client_Config* clientConfig);
-
-/**
- @brief
     Configure a future connection. The given /p pCfgId is later used to create connections.
  @param pCfg
     Non null pointer to the connection configuration. The content of the configuration is copied
@@ -227,5 +215,42 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     - inexisting connection (SOPC_STATUS_INVALID_PARAMETERS),
     - already closed connection (SOPC_STATUS_NOK). */
 SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cliId);
+
+/**
+ * \brief Define client preferred locales ids from an array of locale strings.
+ *
+ * \param nbLocales  The number of locales defined in the array. It might be 0 if no locale defined (only default exist)
+ * \param localeIds  The array of locales in priority order for localized strings to be returned by server.
+ *                   Array and its content is copied by function.
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ *         if \p localeIds is invalid when \p nbLocales \> 0
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible.
+ *
+ * \warning It shall not be called once a connection is established
+ */
+SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, char** localeIds);
+
+/**
+ * \brief Define client application description
+ *
+ * \param applicationUri        The globally unique identifier for the application instance.
+ * \param productUri            The globally unique identifier for the product.
+ * \param defaultAppName        The name of the application using the default locale language.
+ * \param defaultAppNameLocale  The default locale if any. If defined it shall exists in preferred locales.
+ * \param applicationType       The type of application, it shall be one of the OpcUa_ApplicationType_Client* types
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ *         if \p applicationUri, \p productUri or \p defaultAppName are invalid
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible.
+ *
+ * \warning It shall not be called once a connection is established
+ *
+ */
+SOPC_ReturnStatus SOPC_ClientCommon_SetApplicationDescription(const char* applicationUri,
+                                                              const char* productUri,
+                                                              const char* defaultAppName,
+                                                              const char* defaultAppNameLocale,
+                                                              OpcUa_ApplicationType applicationType);
 
 #endif /* LIBS2OPC_CLIENT_COMMON_H_ */

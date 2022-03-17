@@ -24,6 +24,7 @@
 
 #include "libs2opc_common_internal.h"
 #include "sopc_atomic.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -192,4 +193,31 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverC
     Mutex_Unlock(&sopc_helper_config.callbacksMutex);
 
     return SOPC_STATUS_OK;
+}
+
+char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, char** src)
+{
+    // Array length + NULL terminator
+    char** sArray = SOPC_Calloc(nbElts + 1, sizeof(char*));
+    if (NULL == sArray)
+    {
+        return NULL;
+    }
+    bool ok = true;
+    for (size_t i = 0; ok && i < nbElts; i++)
+    {
+        sArray[i] = SOPC_strdup(src[i]);
+        ok &= NULL != sArray[i];
+    }
+    if (!ok)
+    {
+        for (size_t i = 0; i < nbElts; i++)
+        {
+            SOPC_Free(sArray[i]);
+        }
+        SOPC_Free(sArray);
+        sArray = NULL;
+    }
+
+    return sArray;
 }
