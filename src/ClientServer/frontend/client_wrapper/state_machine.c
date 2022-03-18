@@ -1271,6 +1271,13 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
 
     /* There should be an EncodeableType pointer in the first field of the message struct */
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "PublishResponse received.");
+
+    if (0 == pSM->iSubscriptionID)
+    {
+        // Ignore PublishResponse since subscription is not valid anymore
+        return;
+    }
+
     pPubResp = (OpcUa_PublishResponse*) pParam;
     /* Take note to acknowledge later. There is no ack with KeepAlive. */
     /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
@@ -1367,6 +1374,10 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     SOPC_SLinkedList_Clear(pSM->pListMonIt);
     SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
+    // Reset values that will not be used anymore since no more subscription available
+    pSM->nTokenUsable = 0;
+    pSM->bAckSubscr = false;
+    pSM->iAckSeqNum = 0;
 
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription deleted.");
     pSM->state = stActivated;
