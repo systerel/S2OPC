@@ -400,15 +400,8 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -1213,15 +1206,8 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -1543,15 +1529,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -1862,15 +1841,8 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -2049,15 +2021,8 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx->finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx->condition, &ctx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -2211,15 +2176,8 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
         /* Wait for the response */
         while (SOPC_STATUS_OK == status && !ctx.finish)
         {
-            statusMutex = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
-            if (SOPC_STATUS_TIMEOUT == statusMutex)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
-            else
-            {
-                assert(SOPC_STATUS_OK == statusMutex);
-            }
+            status = Mutex_UnlockAndTimedWaitCond(&ctx.condition, &ctx.mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+            assert(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
         }
         // Note: ctx.status and generical callback signature should be a ReturnStatus and not a StatusCode
         if (SOPC_STATUS_OK == status)
