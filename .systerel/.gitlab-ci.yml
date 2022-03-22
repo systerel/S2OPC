@@ -46,7 +46,7 @@
   WITH_PYS2OPC: 1
 
 .variables: &all-tests_test_variables
-  TEST_SERVER_XML_ADDRESS_SPACE: s2opc.xml
+  TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
 
@@ -167,7 +167,6 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
     DOCKER_IMAGE: 'sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5'
-    BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
   artifacts:
@@ -248,7 +247,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/test@sha256:0899d5947da677570fd32811ccdd1a8aa27c549dfe6e3ba2277cc16f4b767860  # digest of test:2.11
+  image: docker.aix.systerel.fr/c838/test@sha256:c8dc587888ca258206baaca8eed113b65e47560ed9aa808a8002931cd0f58293  # digest of test:2.12
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
