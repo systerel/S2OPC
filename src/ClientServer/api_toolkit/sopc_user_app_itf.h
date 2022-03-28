@@ -322,28 +322,28 @@ void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config);
 /**
  * \brief Initialize the content of the SOPC_Server_Config
  *
- * \param config  The s2opc client/server configuration to initialize
+ * \param config  The s2opc server configuration to initialize
  */
 void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config);
 
 /**
  * \brief Clear the content of the SOPC_Server_Config
  *
- * \param config  The s2opc client/server configuration to clear
+ * \param config  The s2opc server configuration to clear
  */
 void SOPC_ServerConfig_Clear(SOPC_Server_Config* config);
 
 /**
  * \brief Initialize the content of the SOPC_Client_Config
  *
- * \param config  The s2opc client/server configuration to initialize
+ * \param config  The s2opc client configuration to initialize
  */
 void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config);
 
 /**
  * \brief Clear the content of the SOPC_Client_Config
  *
- * \param config  The s2opc client/server configuration to clear
+ * \param config  The s2opc client configuration to clear
  */
 void SOPC_ClientConfig_Clear(SOPC_Client_Config* config);
 
