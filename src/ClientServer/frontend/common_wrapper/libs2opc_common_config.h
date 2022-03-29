@@ -61,6 +61,7 @@ SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
 
 /**
  * \brief Retrieve the S2OPC Client/Server configuration.
+ *        It should be called after call to ::SOPC_CommonHelper_Initialize and before call to ::SOPC_CommonHelper_Clear
  *
  * \return The returned value is ensured to be a non-NULL pointer to Helper configuration
  *

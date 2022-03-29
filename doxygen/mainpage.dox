@@ -35,19 +35,21 @@ The following sections only concern the C source documentation.
 You will find documentation on the Python binding for S2OPC on following page:
 <a href="pys2opc/index.html">Go to PyS2OPC documentation</a>
 
-\section server High-level Server API
+\section common High-level Common API
 
-The high-level common API shall be used to initialize (or clear) the S2OPC client/server toolkit prior to use (or after using) the high-level server API.
-Those functions are shared between high-level server and simplified client API:
+The high-level common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API.
+Those functions are shared between high-level server/client API:
 - ::SOPC_CommonHelper_Initialize shall be called before any other high-level API function to initialize S2OPC client/server tooklit.
 - ::SOPC_CommonHelper_Clear shall be called after any other high-level API function to clear S2OPC client/server tooklit.
 - ::SOPC_CommonHelper_GetBuildInfo provides S2OPC client/server toolkit build info.
 
+\section server High-level Server API
+
 The high-level server API provides functions for configuration (endpoints and security, address space content, user management, etc.) and functions to manage server execution (start/stop, local service execution, etc.).
 
 The main configuration functions are defined by libs2opc_server_config.h:
-- ::SOPC_HelperConfigServer_Initialize shall be called before any other function of the server wrapper module.
-- ::SOPC_HelperConfigServer_Clear shall be called when module is not used anymore.
+- ::SOPC_HelperConfigServer_Initialize shall be called before any other function of the server wrapper module (and after ::SOPC_CommonHelper_Initialize).
+- ::SOPC_HelperConfigServer_Clear shall be called when server wrapper module is not used anymore.
 - ::SOPC_HelperConfigServer_ConfigureFromXML loads configuration from XML configuration files (server endpoints and security, address space, users). See \ref xml_config "XML file examples".
 - ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is compiled with WITH_NANO_EXTENDED=1).
 - ::SOPC_HelperConfigServer_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients.
@@ -76,16 +78,11 @@ See XML configuration schemas and examples:
 
 \section sclient Simplified Client API
 
-The high-level common API shall be used to initialize (or clear) the S2OPC client/server toolkit prior to use (or after using) the simplified client API.
-Those functions are shared between high-level server and simplified client API:
-- ::SOPC_CommonHelper_Initialize shall be called before any other high-level API function to initialize S2OPC client/server tooklit.
-- ::SOPC_CommonHelper_Clear shall be called after any other high-level API function to clear S2OPC client/server tooklit.
-- ::SOPC_CommonHelper_GetBuildInfo provides S2OPC client/server toolkit build info.
-
 The simplified client interface consists of functions to configure the connection, to establish the connection, to call GetEndpoint, Write, Read and Browse services, and to create a Subscription and add MonitoredItems to it.
 
 The simplified interface functions and types are defined by libs2opc_client_cmds.h.
-- ::SOPC_ClientHelper_Initialize / ::SOPC_ClientHelper_Finalize shall be called before any other function of the module / shall be called when module not used anymore.
+- ::SOPC_ClientHelper_Initialize shall be called before any other function of the module (and after ::SOPC_CommonHelper_Initialize).
+- ::SOPC_ClientHelper_Finalize shall be called when module not used anymore.
 - ::SOPC_ClientHelper_GetEndpoints: calls GetEndpoints service of a server and returns when server response received or error occurred (connection failure, response timeout).
 - ::SOPC_ClientHelper_CreateConfiguration: creates a connection configuration (security properties, session user, etc.) to be used for non-discovery services.
 - ::SOPC_ClientHelper_CreateConnection: creates a connection (secure channel + session) to the server given the connection configuration identifier created previously.

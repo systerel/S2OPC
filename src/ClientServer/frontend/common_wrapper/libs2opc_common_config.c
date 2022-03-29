@@ -207,7 +207,7 @@ char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, char** src)
     for (size_t i = 0; ok && i < nbElts; i++)
     {
         sArray[i] = SOPC_strdup(src[i]);
-        ok &= NULL != sArray[i];
+        ok = (NULL != sArray[i]);
     }
     if (!ok)
     {

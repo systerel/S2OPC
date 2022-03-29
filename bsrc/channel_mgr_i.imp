@@ -34,8 +34,8 @@ IMPORTS
     channel_mgr_bs
 
 CONCRETE_VARIABLES
-    all_channel_closing,
-    all_client_channel_closing
+    all_channel_closing, /* Indicates all secure channels are in closing state (S2OPC toolkit clear case) */
+    all_client_channel_closing /* Indicates all secure channels as a client are in closing state (S2OPC client activity clear) */
 
 INVARIANT
     all_channel_closing : BOOL &
