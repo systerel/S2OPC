@@ -89,8 +89,6 @@ typedef struct T_THREAD_WKS
  */
 typedef struct sopcThreadConfig
 {
-    // If nameFilter is Non-NULL, then a thread created with that name will use this stack parameters
-    // Otherwise (no matching nameFilter), it will be started using any free Thread with
     const char* nameFilter;
     size_t stackSize;
     void* stackBase;

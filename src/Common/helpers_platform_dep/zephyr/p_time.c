@@ -69,6 +69,90 @@ typedef enum P_TIME_STATUS
 static ePTimeStatus gTimeStatus = P_TIME_STATUS_NOT_INITIALIZED;
 static uint64_t gUptimeDate_s = 0;
 
+static uint64_t P_TIME_GetBuildDateTime(void)
+{
+    // Get today date numerics values
+    struct tm buildDate = {};
+    static char buffer[12] = {0};
+
+    // Initial date set to build value, always "MMM DD YYYY",
+    // DD is left padded with a space if it is less than 10.
+    sprintf(buffer, "%s", __DATE__);
+    buffer[3] = '\0';
+    buffer[6] = '\0';
+    char* ptrMonth = buffer;
+    char* ptrDay = &buffer[4];
+    char* ptrYear = &buffer[7];
+
+    if (strcmp(ptrMonth, "Jan") == 0)
+    {
+        buildDate.tm_mon = 0; /* Month starts from 0 in C99 */
+    }
+    else if (strcmp(ptrMonth, "Feb") == 0)
+    {
+        buildDate.tm_mon = 1;
+    }
+    else if (strcmp(ptrMonth, "Mar") == 0)
+    {
+        buildDate.tm_mon = 2;
+    }
+    else if (strcmp(ptrMonth, "Apr") == 0)
+    {
+        buildDate.tm_mon = 3;
+    }
+    else if (strcmp(ptrMonth, "May") == 0)
+    {
+        buildDate.tm_mon = 4;
+    }
+    else if (strcmp(ptrMonth, "Jun") == 0)
+    {
+        buildDate.tm_mon = 5;
+    }
+    else if (strcmp(ptrMonth, "Jul") == 0)
+    {
+        buildDate.tm_mon = 6;
+    }
+    else if (strcmp(ptrMonth, "Aug") == 0)
+    {
+        buildDate.tm_mon = 7;
+    }
+    else if (strcmp(ptrMonth, "Sep") == 0)
+    {
+        buildDate.tm_mon = 8;
+    }
+    else if (strcmp(ptrMonth, "Oct") == 0)
+    {
+        buildDate.tm_mon = 9;
+    }
+    else if (strcmp(ptrMonth, "Nov") == 0)
+    {
+        buildDate.tm_mon = 10;
+    }
+    else if (strcmp(ptrMonth, "Dec") == 0)
+    {
+        buildDate.tm_mon = 11;
+    }
+    else
+    {
+        assert(false); /* Could not parse compilation date */
+    }
+
+    buildDate.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
+    buildDate.tm_mday = atoi(ptrDay);
+
+    // Initial time set to build value, always "HH:MM:SS",
+    sprintf(buffer, "%s", __TIME__);
+    char* ptrH = strtok(buffer, ":");
+    char* ptrM = strtok(NULL, ":");
+    char* ptrS = strtok(NULL, ":");
+
+    buildDate.tm_hour = (atoi(ptrH));
+    buildDate.tm_min = (atoi(ptrM));
+    buildDate.tm_sec = (atoi(ptrS));
+
+    return mktime(&buildDate);
+}
+
 static uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 {
     ePTimeStatus expectedStatus = P_TIME_STATUS_NOT_INITIALIZED;
@@ -91,86 +175,7 @@ static uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
         SOPC_ASSERT((sys_clock_hw_cycles_per_sec() % tick_reduce_factor) == 0);
         SOPC_ASSERT(0 < tick_to_100ns_n);
 
-        // Get today date numerics values
-        struct tm today = {};
-        static char buffer[12] = {0};
-
-        // Initial date set to build value, always "MMM DD YYYY",
-        // DD is left padded with a space if it is less than 10.
-        sprintf(buffer, "%s", __DATE__);
-        buffer[3] = '\0';
-        buffer[6] = '\0';
-        char* ptrMonth = buffer;
-        char* ptrDay = &buffer[4];
-        char* ptrYear = &buffer[7];
-
-        if (strcmp(ptrMonth, "Jan") == 0)
-        {
-            today.tm_mon = 0; /* Month starts from 0 in C99 */
-        }
-        else if (strcmp(ptrMonth, "Feb") == 0)
-        {
-            today.tm_mon = 1;
-        }
-        else if (strcmp(ptrMonth, "Mar") == 0)
-        {
-            today.tm_mon = 2;
-        }
-        else if (strcmp(ptrMonth, "Apr") == 0)
-        {
-            today.tm_mon = 3;
-        }
-        else if (strcmp(ptrMonth, "May") == 0)
-        {
-            today.tm_mon = 4;
-        }
-        else if (strcmp(ptrMonth, "Jun") == 0)
-        {
-            today.tm_mon = 5;
-        }
-        else if (strcmp(ptrMonth, "Jul") == 0)
-        {
-            today.tm_mon = 6;
-        }
-        else if (strcmp(ptrMonth, "Aug") == 0)
-        {
-            today.tm_mon = 7;
-        }
-        else if (strcmp(ptrMonth, "Sep") == 0)
-        {
-            today.tm_mon = 8;
-        }
-        else if (strcmp(ptrMonth, "Oct") == 0)
-        {
-            today.tm_mon = 9;
-        }
-        else if (strcmp(ptrMonth, "Nov") == 0)
-        {
-            today.tm_mon = 10;
-        }
-        else if (strcmp(ptrMonth, "Dec") == 0)
-        {
-            today.tm_mon = 11;
-        }
-        else
-        {
-            assert(false); /* Could not parse compilation date */
-        }
-
-        today.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
-        today.tm_mday = atoi(ptrDay);
-
-        // Initial time set to build value, always "HH:MM:SS",
-        sprintf(buffer, "%s", __TIME__);
-        char* ptrH = strtok(buffer, ":");
-        char* ptrM = strtok(NULL, ":");
-        char* ptrS = strtok(NULL, ":");
-
-        today.tm_hour = (atoi(ptrH));
-        today.tm_min = (atoi(ptrM));
-        today.tm_sec = (atoi(ptrS));
-
-        gUptimeDate_s = mktime(&today);
+        gUptimeDate_s = P_TIME_GetBuildDateTime();
 
         k_mutex_init(&monotonicMutex);
 
@@ -292,13 +297,9 @@ int64_t SOPC_Time_GetCurrentTimeUTC()
 // Return current ms since last power on
 SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
-    SOPC_TimeReference currentTimeInMs = 0;
-
     uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
 
-    currentTimeInMs = (SOPC_TimeReference)(value / MS_TO_100NS);
-
-    return currentTimeInMs;
+    return (SOPC_TimeReference)(value / MS_TO_100NS);
 }
 
 SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
@@ -386,7 +387,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
     }
 
     /* t <= t1 */
-    return ok && ((*t) < t1);
+    return ok && ((*t) <= t1);
 }
 
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)

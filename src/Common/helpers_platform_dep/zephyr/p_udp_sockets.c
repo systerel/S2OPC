@@ -95,7 +95,6 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
 SOPC_Socket_AddressInfo* SOPC_UDP_SocketAddress_Create(bool IPv6, const char* node, const char* service)
 {
     SOPC_Socket_AddressInfo* pRetAddrInfo = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
     hints.ai_family = (IPv6 ? AF_INET6 : AF_INET);
@@ -110,18 +109,6 @@ SOPC_Socket_AddressInfo* SOPC_UDP_SocketAddress_Create(bool IPv6, const char* no
         if (ret < 0)
         {
             pRetAddrInfo = NULL;
-            status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            if (!pRetAddrInfo)
-            {
-                status = SOPC_STATUS_OK;
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
         }
     }
 
@@ -142,10 +129,11 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                       const char* interfaceName,
+                                                       const SOPC_Socket_AddressInfo* multicast,
+                                                       const SOPC_Socket_AddressInfo* local,
+                                                       const bool isJoinRequest)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
@@ -171,7 +159,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
 
         if (SOPC_STATUS_OK == status)
         {
-            status = P_MULTICAST_join_or_leave_mcast_group(sock, multiAddr, true);
+            status = P_MULTICAST_join_or_leave_mcast_group(sock, multiAddr, isJoinRequest);
         }
     }
     break;
@@ -183,45 +171,20 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                const char* interfaceName,
+                                                const SOPC_Socket_AddressInfo* multicast,
+                                                const SOPC_Socket_AddressInfo* local)
+{
+    return SOPC_UDP_Socket_AddMembership(sock, interfaceName, multicast, local, true);
+}
+
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
                                                  const char* interfaceName,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (NULL != interfaceName)
-    {
-        // Not supported in ZEPHYR
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
-
-    switch (multicast->ai_family)
-    {
-    case AF_INET:
-    {
-        struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
-
-        if (!net_ipv4_is_addr_mcast(multiAddr))
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = P_MULTICAST_join_or_leave_mcast_group(sock, multiAddr, false);
-        }
-    }
-    break;
-    default:
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-        break;
-    }
-
-    return status;
+    return SOPC_UDP_Socket_AddMembership(sock, interfaceName, multicast, local, false);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
@@ -284,13 +247,13 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    ssize_t send_length = zsock_sendto(sock, buffer->data,    //
+    ssize_t sent_lenght = zsock_sendto(sock, buffer->data,    //
                                        buffer->length,        //
                                        0,                     //
                                        &destAddr->_ai_addr,   //
                                        destAddr->ai_addrlen); //
 
-    if (send_length < 0 || (uint32_t) send_length != buffer->length)
+    if (sent_lenght < 0 || (uint32_t) sent_lenght != buffer->length)
     {
         status = SOPC_STATUS_NOK;
     }

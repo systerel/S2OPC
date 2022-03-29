@@ -37,7 +37,16 @@
 #include "sopc_raw_sockets.h"
 
 // #define SOCKETS_DEBUG printk
-#define SOCKETS_DEBUG(...) (void) 0
+#define SOCKETS_DEBUG(...) \
+    do                     \
+    {                      \
+    } while (0)
+
+#if EWOULDBLOCK != EAGAIN
+#error "Expecting 'EWOULDBLOCK == EAGAIN' in socket implementation"
+#endif
+
+#define ZSOCK_ERROR -1
 
 /* Max pending connection based on max pending connections allowed by zephyr */
 
@@ -203,7 +212,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
         }
     }
 
-    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+    // From IPV6 sockets, allow IPV4 and IPV6 exchanges
     if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
     {
         const int falseInt = false;
@@ -225,17 +234,17 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int bindListenStatus = -1;
+    int bindListenStatus = ZSOCK_ERROR;
     if (NULL != addr)
     {
         bindListenStatus = zsock_bind(sock, addr->ai_addr, addr->ai_addrlen);
-        if (-1 != bindListenStatus)
+        if (ZSOCK_ERROR != bindListenStatus)
         {
             bindListenStatus = zsock_listen(sock, MAX_PENDING_CONNECTION);
             SOCKETS_DEBUG(" ** SOPC_Socket_Listen %d => status = %d\n", sock, bindListenStatus);
         }
     }
-    if (-1 != bindListenStatus)
+    if (ZSOCK_ERROR != bindListenStatus)
     {
         status = SOPC_STATUS_OK;
     }
@@ -454,12 +463,6 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     {
         result = SOPC_STATUS_WOULD_BLOCK;
     }
-#if EWOULDBLOCK != EAGAIN
-    else if (EAGAIN == errno)
-    {
-        result = SOPC_STATUS_WOULD_BLOCK;
-    }
-#endif
     return result;
 }
 
@@ -506,6 +509,7 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 {
     (void) sock;
     (void) bytesToRead;
+    // Function not available on Zephyr
     return SOPC_STATUS_NOK;
 }
 

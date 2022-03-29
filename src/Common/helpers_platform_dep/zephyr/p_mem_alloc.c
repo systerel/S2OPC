@@ -24,10 +24,6 @@
 
 #include "kernel.h"
 
-#ifndef __INT32_MAX__
-#include "toolchain/xcc_missing_defs.h"
-#endif
-
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 

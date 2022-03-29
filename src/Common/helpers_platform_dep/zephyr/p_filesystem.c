@@ -21,10 +21,10 @@
 
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 {
-    return SOPC_FileSystem_Creation_OK;
+    return SOPC_FileSystem_Creation_Error_UnknownIssue;
 }
 
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
 {
-    return SOPC_FileSystem_Creation_OK;
+    return SOPC_FileSystem_Creation_Error_UnknownIssue;
 }

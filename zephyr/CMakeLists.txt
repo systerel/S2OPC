@@ -1,10 +1,7 @@
 if (CONFIG_S2OPC)
 
-#TODO make this a wrapper around the main CMakeLists.txt
-
 zephyr_interface_library_named(S2OPC)
 
-add_definitions (-DS2OPC_CLIENTSERVER_ONLY=1)
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1)
 add_definitions (-DPUBSUB_STATIC_CONFIG=1)
 add_definitions (-DWITH_NANO_EXTENDED=1)
