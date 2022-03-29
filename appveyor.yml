@@ -17,9 +17,10 @@ install:
     - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
     - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
     - "unzip %FREEOPCUA_DIR_NAME%.zip"
-    - cmd: |-
-        cd %FREEOPCUA_DIR_NAME%
-        python setup.py install
+    # Patch free opcua server
+    - cd %FREEOPCUA_DIR_NAME%
+    - ps: (get-content opcua/server/internal_server.py) | %{$_ -replace "result.MaxRequestMessageSize =.*","result.MaxRequestMessageSize = 65536 * 10"}  | set-content opcua/server/internal_server.py
+    - python setup.py install
 
 test_script:
     - echo %APPVEYOR_BUILD_FOLDER%
