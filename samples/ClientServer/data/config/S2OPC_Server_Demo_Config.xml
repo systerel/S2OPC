@@ -12,9 +12,11 @@
       <ServerCertificate path="server_public/server_4k_cert.der"/>
       <ServerKey path="server_private/server_4k_key.pem"/>
       <TrustedIssuers>
-        <!-- List of CAs or trusted certicates -->
+        <!-- List of trusted CAs for which issued certificates are trusted -->
         <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
       </TrustedIssuers>
+      <!-- or/and <IssuedCertificates> if trusted issued certificates (self-signed or from known untrusted issuer) -->
+      <!-- with <UntrustedIssuers> for untrusted issuers -->
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
