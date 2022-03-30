@@ -28,7 +28,6 @@
 #include "sopc_udp_sockets.h"
 
 #include "p_multicast.h"
-
 #include "p_sockets.h"
 
 static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo* pAddrInfo,
@@ -124,59 +123,23 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** pptrAddrInfo)
     }
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope)
+SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                const char* interfaceName,
+                                                const SOPC_Socket_AddressInfo* multicast,
+                                                const SOPC_Socket_AddressInfo* local)
 {
-    return SOPC_STATUS_OK;
-}
-
-static SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                       const char* interfaceName,
-                                                       const SOPC_Socket_AddressInfo* multicast,
-                                                       const SOPC_Socket_AddressInfo* local,
-                                                       const bool isJoinRequest)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
     if (NULL != interfaceName)
     {
         // Not supported in ZEPHYR
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    switch (multicast->ai_family)
+    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
     {
-    case AF_INET:
-    {
-        struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
-
-        if (!net_ipv4_is_addr_mcast(multiAddr))
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = P_MULTICAST_join_or_leave_mcast_group(sock, multiAddr, isJoinRequest);
-        }
-    }
-    break;
-    default:
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-        break;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return status;
-}
-
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
-{
-    return SOPC_UDP_Socket_AddMembership(sock, interfaceName, multicast, local, true);
+    return P_MULTICAST_AddIpV4Membership(sock, multicast);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
@@ -184,7 +147,18 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local)
 {
-    return SOPC_UDP_Socket_AddMembership(sock, interfaceName, multicast, local, false);
+    if (NULL != interfaceName)
+    {
+        // Not supported in ZEPHYR
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+
+    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return P_MULTICAST_DropIpV4Membership(sock, multicast);
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
@@ -206,14 +180,13 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
         if (listenAddress->ai_family == AF_INET)
         {
             // add mcast for bind
-            status = P_MULTICAST_join_or_leave_mcast_group(
-                sock, &((struct sockaddr_in*) &listenAddress->_ai_addr)->sin_addr, true);
+            status = P_MULTICAST_AddIpV4Membership(sock, listenAddress);
             if (SOPC_STATUS_OK == status)
             {
                 int res = zsock_bind(sock, &listenAddress->_ai_addr, listenAddress->ai_addrlen);
                 if (res < 0)
                 {
-                    P_MULTICAST_remove_sock_from_mcast(sock);
+                    P_MULTICAST_DropIpV4Membership(sock, listenAddress);
                     SOPC_UDP_Socket_Close(&sock);
                     status = SOPC_STATUS_NOK;
                 }
@@ -309,7 +282,7 @@ void SOPC_UDP_Socket_Close(Socket* pSock)
         zsock_shutdown(sock, ZSOCK_SHUT_RDWR);
         if (zsock_close(sock) == 0)
         {
-            P_MULTICAST_remove_sock_from_mcast(sock);
+            P_MULTICAST_DropIpV4Membership(sock, NULL);
             *pSock = SOPC_INVALID_SOCKET;
         }
     }

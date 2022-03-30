@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "kernel.h"
@@ -27,356 +28,168 @@
 #include "net/socket.h"
 
 #include "sopc_assert.h"
-#include "sopc_mutexes.h"
-#include "sopc_raw_sockets.h"
-#include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_dict.h"
 
 #include "p_multicast.h"
 
 #include "p_sockets.h"
 
-// Uncomment one of the following section to allow/disable debug logs
-#if 1
-// NO DEBUG
-#define P_MULTICAST_DEBUG(text, ...) ((void) text)
-#define P_MULTICAST_DEBUG_ADDR_PRINT(text, pAddr, sock) ((void) text)
-
-#else
-// USE DEBUG
-#define P_MULTICAST_DEBUG printk
-#define P_MULTICAST_DEBUG_ADDR_PRINT(text, pAddr, sock)                   \
-    do                                                                    \
-    {                                                                     \
-        char addr_str[32];                                                \
-        inet_ntop(AF_INET, pAddr, addr_str, sizeof(addr_str));            \
-        printk("\r\n" text ", Addr = %s, sock = %d\r\n", addr_str, sock); \
-    } while (0)
-
-#endif
-
 /* Max socket based on max connections allowed by zephyr */
 
-#ifdef CONFIG_NET_MAX_CONN
-#define MAX_ZEPHYR_SOCKET (CONFIG_NET_MAX_CONN - 2)
-#else
-#define MAX_ZEPHYR_SOCKET 4
+#ifndef CONFIG_NET_L2_ETHERNET
+#error "CONFIG_NET_L2_ETHERNET is required for S2OPC"
 #endif
 
-/* Constant definitions MAX_MCAST, based on value allowed by zephyr configuration */
-#ifdef CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
-#define MAX_MCAST CONFIG_NET_IF_MCAST_IPV4_ADDR_COUNT
-#else
-#define MAX_MCAST 16
-#endif
+/***************************************************
+ * DECLARATION OF LOCAL VARIABLES
+ **************************************************/
+/** A dictionary {Socket : struct net_if_mcast_addr*} */
+static SOPC_Dict* dictMCast = NULL;
 
-static Mutex priv_Mutex;
+/***************************************************
+ * DECLARATION OF LOCAL FUNCTIONS
+ **************************************************/
+/** Hash for key of type 'int' */
+static uint64_t socketKeyHash(const void* data);
+/** Equality for key of type 'int' */
+static bool socketKeyEqual(const void* a, const void* b);
+static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress);
+static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock);
 
-// *** Multicast variable definitions ***
-typedef struct mCastRegistered
+#define SOCKET_TO_KEY(s) ((void*) (uintptr_t)(s))
+#define KEY_TO_SOCKET(k) ((Socket)(uintptr_t)(k))
+
+static void* NO_KEY = SOCKET_TO_KEY(SOPC_INVALID_SOCKET);
+static void* EMPTY_KEY = SOCKET_TO_KEY(-2);
+
+/***************************************************
+ * IMPLEMENTATION OF LOCAL FUNCTIONS
+ **************************************************/
+static uint64_t socketKeyHash(const void* data)
 {
-    int sock[MAX_ZEPHYR_SOCKET]; // Socket associated to mcast addr
-    struct in_addr addr;         // Mcast addr
-    bool bIsJoined;              // Mcast in use
-} mCastRegistered;
-
-static mCastRegistered tabMCast[MAX_MCAST];
-
-// *** multicast private functions ***
-
-static inline void P_MULTICAST_register_MCast(const struct in_addr* pAddr);
-static inline void P_MULTICAST_unregister_MCast(const struct in_addr* pAddr);
-
-void initialize(void)
-{
-    static bool priv_MulticastInitialized = false;
-
-    P_MULTICAST_DEBUG("\r\nP_MCAST initialize called\r\n");
-    if (priv_MulticastInitialized)
-    {
-        return;
-    }
-
-    for (uint32_t iIter = 0; iIter < MAX_MCAST; iIter++)
-    {
-        tabMCast[iIter].bIsJoined = false;
-        tabMCast[iIter].addr.s_addr = 0;
-        for (uint32_t iIterSock = 0; iIterSock < MAX_ZEPHYR_SOCKET; iIterSock++)
-        {
-            tabMCast[iIter].sock[iIterSock] = SOPC_INVALID_SOCKET;
-        }
-    }
-
-    Mutex_Initialization(&priv_Mutex);
-    priv_MulticastInitialized = true;
+    return (uint64_t) KEY_TO_SOCKET(data);
 }
 
-// *** Multicast private function definitions
-
-// Register multicast address to L1 and associate socket to this one.
-// Multicast address is added, if not already added, to ethernet interface (L2)
-SOPC_ReturnStatus P_MULTICAST_join_or_leave_mcast_group(int32_t sock, const struct in_addr* pAddr, bool bJoin)
+/***************************************************/
+static bool socketKeyEqual(const void* a, const void* b)
 {
-    mCastRegistered* mcastAddr = NULL;
-    int* mcSock = NULL;
+    return KEY_TO_SOCKET(a) == KEY_TO_SOCKET(b);
+}
 
-    initialize();
-
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Enter join_mcast_group\r\n");
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (SOPC_INVALID_SOCKET == sock || NULL == pAddr)
+/***************************************************/
+static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress)
+{
+    void* key = SOCKET_TO_KEY(sock);
+    if (NULL == dictMCast)
     {
-        P_MULTICAST_DEBUG("\r\nP_MULTICAST: Enter join_mcast_group invalid socket\r\n");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        dictMCast = SOPC_Dict_Create(NO_KEY, &socketKeyHash, &socketKeyEqual, NULL, NULL);
+        SOPC_ASSERT(NULL != dictMCast);
+        SOPC_Dict_SetTombstoneKey(dictMCast, EMPTY_KEY);
     }
+    bool res = SOPC_Dict_Insert(dictMCast, key, mcAddress);
+    SOPC_ASSERT(res);
+}
 
-    if (!net_ipv4_is_addr_mcast(pAddr))
+/***************************************************/
+static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock)
+{
+    if (NULL == dictMCast)
     {
-        P_MULTICAST_DEBUG("\r\nP_MULTICAST: Enter join_mcast_group not mcast addr\r\n");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return 0;
     }
+    void* key = SOCKET_TO_KEY(sock);
 
-    Mutex_Lock(&priv_Mutex);
-    // Search for already registered mcast
-    for (uint32_t i = 0; i < MAX_MCAST && (NULL == mcastAddr); i++)
+    struct net_if_mcast_addr* result = SOPC_Dict_Get(dictMCast, key, NULL);
+    SOPC_Dict_Remove(dictMCast, key);
+    if (SOPC_Dict_Size(dictMCast) == 0)
     {
-        if ((tabMCast[i].addr.s_addr == pAddr->s_addr) && (tabMCast[i].addr.s_addr != 0))
+        SOPC_Dict_Delete(dictMCast);
+        dictMCast = NULL;
+    }
+    return result;
+}
+
+/***************************************************
+ * IMPLEMENTATION OF EXTERN FUNCTIONS
+ **************************************************/
+SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOT_SUPPORTED;
+    struct net_if* ptrNetIf = NULL;
+    if (AF_INET == multicast->ai_family)
+    {
+        // Retreive IPV4 address
+        struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
+        // Check that this is a multicast address
+        if (!net_ipv4_is_addr_mcast(multiAddr))
         {
-            mcastAddr = &tabMCast[i];
-        }
-    }
-
-    // If not registered mcast, add it if join request
-    if (mcastAddr == NULL && bJoin)
-    {
-        for (uint32_t i = 0; i < MAX_MCAST && (NULL == mcastAddr); i++)
-        {
-            if (tabMCast[i].addr.s_addr == 0)
-            {
-                P_MULTICAST_DEBUG_ADDR_PRINT("P_SOCKET_UDP: add new mcast ip (L2) to allow bind socket", pAddr, sock);
-
-                // Register L2 multicast to allow bind
-                struct net_if* ptrNetIf = NULL;
-
-#if defined(CONFIG_NET_L2_ETHERNET)
-                ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
-                if (ptrNetIf != NULL)
-                {
-                    net_if_ipv4_maddr_add(ptrNetIf, pAddr);
-                }
-#endif
-
-                tabMCast[i].addr.s_addr = pAddr->s_addr;
-                tabMCast[i].bIsJoined = false;
-
-                for (int j = 0; j < MAX_ZEPHYR_SOCKET; j++)
-                {
-                    tabMCast[i].sock[j] = SOPC_INVALID_SOCKET;
-                }
-
-                mcastAddr = &tabMCast[i];
-            }
-        }
-    }
-
-    // Search for already registered socket
-    if (NULL != mcastAddr)
-    {
-        for (uint32_t j = 0; (j < MAX_ZEPHYR_SOCKET) && (mcSock == NULL); j++)
-        {
-            if ((mcastAddr->sock[j] == sock) && (mcastAddr->sock[j] != SOPC_INVALID_SOCKET))
-            {
-                mcSock = &mcastAddr->sock[j];
-            }
-        }
-    }
-
-    // If socket not found, add it
-    if (mcSock == NULL && bJoin)
-    {
-        for (uint32_t j = 0; (j < MAX_ZEPHYR_SOCKET) && (mcSock == NULL); j++)
-        {
-            if (SOPC_INVALID_SOCKET == mcastAddr->sock[j])
-            {
-                mcastAddr->sock[j] = sock;
-                mcSock = &mcastAddr->sock[j];
-
-                P_MULTICAST_DEBUG_ADDR_PRINT("P_MULTICAST: register socket for mcast ip", pAddr, sock);
-            }
-        }
-    }
-
-    // Verify mcast is already registered by L1
-    if ((NULL != mcastAddr) && (NULL != mcSock))
-    {
-        P_MULTICAST_DEBUG_ADDR_PRINT("P_MULTICAST: verify if mcast ip is already joined or not", pAddr, sock);
-
-        // Join mcast not already joined by other socket and join request
-        if (!mcastAddr->bIsJoined && bJoin)
-        {
-            P_MULTICAST_DEBUG_ADDR_PRINT("P_MULTICAST: register mcast ip to L1 (first register)", pAddr, sock);
-
-            // Register L1 multicast
-            P_MULTICAST_register_MCast(pAddr);
-            mcastAddr->bIsJoined = true;
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
         else
         {
-            // Leave request, verify if at least one sock is joining this mcast.
-            // If not, remove from L1 and L2
-            if (!bJoin)
+            // Ensure we can find the Ethernet device
+            ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+            if (ptrNetIf != NULL)
             {
-                *mcSock = SOPC_INVALID_SOCKET;
-                mcSock = NULL;
+                status = SOPC_STATUS_OK;
+            }
+        }
 
-                for (uint32_t j = 0; (j < MAX_ZEPHYR_SOCKET) && (NULL == mcSock); j++)
-                {
-                    if (mcastAddr->sock[j] != SOPC_INVALID_SOCKET)
-                    {
-                        mcSock = &mcastAddr->sock[j];
-                    }
-                }
-                P_MULTICAST_DEBUG_ADDR_PRINT("P_MULTICAST: remove socket for mcast ip", pAddr, sock);
-
-                if (NULL == mcSock)
-                {
-                    P_MULTICAST_DEBUG_ADDR_PRINT("P_MULTICAST: remove mcast ip (L1 and L2) because no more joined",
-                                                 pAddr, sock);
-
-                    // Unregister L1 and L2 multicast
-                    P_MULTICAST_unregister_MCast(pAddr);
-
-                    mcastAddr->bIsJoined = false;
-                    mcastAddr->addr.s_addr = 0;
-                }
+        if (SOPC_STATUS_OK == status)
+        {
+            // Join a membership
+            struct net_if_mcast_addr* mcAddr = net_if_ipv4_maddr_add(ptrNetIf, multiAddr);
+            if (NULL == mcAddr)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            else
+            {
+                net_if_ipv4_maddr_join(mcAddr);
+                // The link between "sock" and "mcAddr" must be stored to allow further Droping membership
+                linkSockToMCast(sock, mcAddr);
             }
         }
     }
-    else
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    Mutex_Unlock(&priv_Mutex);
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Exit join_mcast_group\r\n");
-
     return status;
 }
 
-// Check if address is a known multicast address registered with socket in parameter
-bool P_MULTICAST_soft_filter(int32_t sock, const struct in_addr* pAddr)
+/***************************************************/
+SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
-    uint32_t indexMacast = 0;
-    bool bIsFound = false;
-    bool bSockIsFound = false;
-    bool bResult = false;
+    // Leave a membership
+    struct net_if_mcast_addr* mcAddr = getAndUnlinkSockFromMCast(sock);
+    struct net_if* ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
 
-    initialize();
-
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Enter verify mcast group\r\n");
-
-    if (SOPC_INVALID_SOCKET == sock || NULL == pAddr)
+    if (NULL == mcAddr || NULL == ptrNetIf)
     {
-        return false;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    struct in_addr* multiAddr = NULL;
+    if (NULL != multicast)
+    {
+        multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
+    }
+    else
+    {
+        multiAddr = &mcAddr->address.in_addr;
     }
 
-    if (!net_ipv4_is_addr_mcast(pAddr))
-    {
-        return false;
-    }
-
-    Mutex_Lock(&priv_Mutex);
-
-    // Search mcast
-    for (uint32_t i = 0; (i < MAX_MCAST) && (!bIsFound); i++)
-    {
-        if ((tabMCast[i].addr.s_addr == pAddr->s_addr) && (tabMCast[i].addr.s_addr != 0))
-        {
-            bIsFound = true;
-            indexMacast = i;
-        }
-    }
-
-    // Search sock
-    if (bIsFound)
-    {
-        for (uint32_t j = 0; (j < MAX_ZEPHYR_SOCKET) && (!bSockIsFound); j++)
-        {
-            if ((tabMCast[indexMacast].sock[j] == sock) && (tabMCast[indexMacast].sock[j] != SOPC_INVALID_SOCKET))
-            {
-                bSockIsFound = true;
-            }
-        }
-    }
-
-    Mutex_Unlock(&priv_Mutex);
-    bResult = (bIsFound && bSockIsFound);
-
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Exit verify mcast group\r\n");
-    return bResult;
+    net_if_ipv4_maddr_leave(mcAddr);
+    bool ret = net_if_ipv4_maddr_rm(ptrNetIf, multiAddr);
+    return (ret ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 }
 
-// Remove socket from all mcast.
-void P_MULTICAST_remove_sock_from_mcast(int32_t sock)
+/***************************************************/
+SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope)
 {
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Enter remove_sock_from_mcast\r\n");
-    if (SOPC_INVALID_SOCKET == sock)
+    (void) sock;
+    // In zephyr the TTL is common to interface
+    struct net_if* ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
+    if (NULL == ptrNetIf)
     {
-        return;
+        return SOPC_STATUS_NOK;
     }
-    struct in_addr addr;
-    addr.s_addr = 0;
-
-    Mutex_Lock(&priv_Mutex);
-    // Remove socket from mcast and remove mcast if necessary
-    for (uint32_t i = 0; i < MAX_MCAST; i++)
-    {
-        for (uint32_t j = 0; j < MAX_ZEPHYR_SOCKET; j++)
-        {
-            if (tabMCast[i].addr.s_addr != 0)
-            {
-                (void) P_MULTICAST_join_or_leave_mcast_group(sock, &addr, false);
-            }
-        }
-    }
-    Mutex_Unlock(&priv_Mutex);
-    P_MULTICAST_DEBUG("\r\nP_MULTICAST: Exit remove_sock_from_mcast\r\n");
-}
-
-static inline void P_MULTICAST_register_MCast(const struct in_addr* pAddr)
-{
-    (void) pAddr;
-
-#if defined(CONFIG_NET_L2_ETHERNET)
-
-    struct net_if* ptrNetIf = NULL;
-    ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
-    if (ptrNetIf != NULL)
-    {
-        struct net_if_mcast_addr* mcAddr = net_if_ipv4_maddr_add(ptrNetIf, pAddr);
-        net_if_ipv4_maddr_join(mcAddr);
-        SOPC_ASSERT(NULL != mcAddr);
-        P_MULTICAST_DEBUG("\r\nP_MULTICAST: Call ethernet mcast\r\n");
-    }
-
-#endif
-}
-
-static inline void P_MULTICAST_unregister_MCast(const struct in_addr* pAddr)
-{
-    (void) pAddr;
-
-#if defined(CONFIG_NET_L2_ETHERNET)
-
-    struct net_if* ptrNetIf = NULL;
-    ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
-    if (ptrNetIf != NULL)
-    {
-        bool ret = net_if_ipv4_maddr_rm(ptrNetIf, pAddr);
-        SOPC_ASSERT(ret);
-    }
-
-#endif
+    net_if_ipv4_set_ttl(ptrNetIf, TTL_scope);
+    return SOPC_STATUS_OK;
 }

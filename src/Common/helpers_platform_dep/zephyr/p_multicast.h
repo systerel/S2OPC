@@ -24,10 +24,26 @@
 
 #include "sopc_enums.h"
 
+#include "p_sockets.h"
+
 /* Multicast platform dep functions used by platform dep pub sub UDP */
 
-SOPC_ReturnStatus P_MULTICAST_join_or_leave_mcast_group(int32_t sock, const struct in_addr* add, bool bJoinRequest);
-bool P_MULTICAST_soft_filter(int32_t sock, const struct in_addr* add);
-void P_MULTICAST_remove_sock_from_mcast(int32_t sock);
+/**
+ * @brief
+ *      Create a multicast group and sets sock in that group
+ * @param sock The socket to register in multicast group
+ * @param multicast The Multicast IPV4 address
+ * @return SOPC_STATUS_OK in case of success
+ */
+SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast);
+
+/**
+ * @brief
+ *      Removes a multicast group
+ * @param sock The socket to remove from a multicast group
+ * @param multicast The Multicast IPV4 address, or NULL if unknown
+ * @return SOPC_STATUS_OK in case of success
+ */
+SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast);
 
 #endif /* P_MCAST_H_ */

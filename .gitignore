@@ -13,3 +13,4 @@ deleted/
 __pycache__/
 genc/
 *.log
+build_zephyr/
