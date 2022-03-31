@@ -13,6 +13,8 @@ else()
   if(@expat_FOUND@)
     include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-xml-loaders-expat-export.cmake")
   endif()
+  # Common wrapper
+  include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-commonwrapper-export.cmake")
   # Client wrapper
   include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
   # Server wrapper
