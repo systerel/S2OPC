@@ -253,6 +253,30 @@ build-linux64-coverity:
 # Test jobs
 ###
 
+test-build-from-export:
+  <<: *build_linux
+  stage: test
+  script:
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
+    - 'cmake --build .'
+  artifacts:
+  rules:
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
+           $ALL_BUILDS == null && $ALL_TESTS == null"
+      when: on_success
+
 .test-linux: &test_linux
   <<: *docker_job
   stage: test
