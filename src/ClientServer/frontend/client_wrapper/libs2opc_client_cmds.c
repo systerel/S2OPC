@@ -2163,9 +2163,7 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
     }
     for (size_t i = 0; i < nbElements; i++)
     {
-        assert(NULL != results[i].outputParams);
-
-        for (int32_t j = 0; j < results[i].nbOfOutputParams; j++)
+        for (int32_t j = 0; j < results[i].nbOfOutputParams && NULL != results[i].outputParams; j++)
         {
             SOPC_Variant_Clear(&results[i].outputParams[j]);
         }
