@@ -18,9 +18,11 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 
 #include "app_cb_call_context_internal.h"
 #include "call_method_bs.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
@@ -95,6 +97,17 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     *call_method_bs__rawStatusCode = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
                                                            &call_method_bs__execResults.variants, method_c->pParam);
     SOPC_CallContext_Free(cc);
+    if (0 != noOfOutput && NULL == call_method_bs__execResults.variants)
+    {
+        char* mNodeId = SOPC_NodeId_ToCString(methodId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "MethodCall %s unexpected failure: application variant array result is NULL which is "
+                               "not expected when noOfOutputs (%" PRIu32 ") > 0",
+                               mNodeId, noOfOutput);
+        SOPC_Free(mNodeId);
+        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
+        return;
+    }
     if (noOfOutput <= INT32_MAX)
     {
         call_method_bs__execResults.nb = (int32_t) noOfOutput;
