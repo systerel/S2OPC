@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 18/05/2021 13:55:31
+ Date                 : 31/03/2022 07:53:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -144,6 +144,7 @@ void call_method_mgr__check_method_call_inputs(
       constants__t_NodeId_i call_method_mgr__l_objectid;
       constants__t_Node_i call_method_mgr__l_method;
       constants__t_NodeId_i call_method_mgr__l_methodid;
+      constants__t_NodeClass_i call_method_mgr__l_nodeClass;
       constants__t_user_i call_method_mgr__l_user;
       t_bool call_method_mgr__l_valid_executable;
       t_bool call_method_mgr__l_valid_user_executable;
@@ -163,33 +164,40 @@ void call_method_mgr__check_method_call_inputs(
             call_method_mgr__StatusCode,
             &call_method_mgr__l_method);
          if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-            session_mgr__get_session_user_server(call_method_mgr__p_session,
-               &call_method_mgr__l_user);
-            address_space__get_Executable(call_method_mgr__l_method,
-               &call_method_mgr__l_valid_executable);
-            address_space__get_user_authorization(constants__e_operation_type_executable,
-               call_method_mgr__l_methodid,
-               constants__e_aid_UserExecutable,
-               call_method_mgr__l_user,
-               &call_method_mgr__l_valid_user_executable);
-            if ((call_method_mgr__l_valid_executable == true) &&
-               (call_method_mgr__l_valid_user_executable == true)) {
-               address_space__check_object_has_method(call_method_mgr__l_objectid,
+            address_space__get_NodeClass(call_method_mgr__l_method,
+               &call_method_mgr__l_nodeClass);
+            if (call_method_mgr__l_nodeClass == constants__e_ncl_Method) {
+               session_mgr__get_session_user_server(call_method_mgr__p_session,
+                  &call_method_mgr__l_user);
+               address_space__get_Executable(call_method_mgr__l_method,
+                  &call_method_mgr__l_valid_executable);
+               address_space__get_user_authorization(constants__e_operation_type_executable,
                   call_method_mgr__l_methodid,
-                  &call_method_mgr__l_object_has_method);
-               if (call_method_mgr__l_object_has_method == true) {
-                  call_method_mgr__check_method_call_arguments(call_method_mgr__p_req_msg,
-                     call_method_mgr__p_callMethod,
-                     call_method_mgr__l_method,
-                     call_method_mgr__p_res_msg,
-                     call_method_mgr__StatusCode);
+                  constants__e_aid_UserExecutable,
+                  call_method_mgr__l_user,
+                  &call_method_mgr__l_valid_user_executable);
+               if ((call_method_mgr__l_valid_executable == true) &&
+                  (call_method_mgr__l_valid_user_executable == true)) {
+                  address_space__check_object_has_method(call_method_mgr__l_objectid,
+                     call_method_mgr__l_methodid,
+                     &call_method_mgr__l_object_has_method);
+                  if (call_method_mgr__l_object_has_method == true) {
+                     call_method_mgr__check_method_call_arguments(call_method_mgr__p_req_msg,
+                        call_method_mgr__p_callMethod,
+                        call_method_mgr__l_method,
+                        call_method_mgr__p_res_msg,
+                        call_method_mgr__StatusCode);
+                  }
+                  else {
+                     *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_method_invalid;
+                  }
                }
                else {
-                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_method_invalid;
+                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
                }
             }
             else {
-               *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
+               *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_method_invalid;
             }
          }
          else {

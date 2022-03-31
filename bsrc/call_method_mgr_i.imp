@@ -153,11 +153,13 @@ LOCAL_OPERATIONS
 
             ( StatusCode /= e_sc_bad_invalid_argument
                 =>
+                /* StatusCode is good or another error occurred prior to input arguments check */
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = 0 &
                 size(CallMethodRes_InputArgumentResult(p_callMethod)) = 0
             ) &
             ( StatusCode = e_sc_bad_invalid_argument
                 =>
+                /* Error occurred during input arguments check, fill the input arguments status codes result array */
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
                 size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod))
             )
@@ -344,6 +346,7 @@ OPERATIONS
         l_objectid,
         l_method,
         l_methodid,
+        l_nodeClass,
         l_user,
         l_valid_executable,
         l_valid_user_executable,
@@ -356,29 +359,34 @@ OPERATIONS
             l_methodid <-- read_CallMethod_MethodId (p_req_msg, p_callMethod);
             StatusCode, l_method <-- check_nodeId_isValid(l_methodid);
             IF StatusCode = e_sc_ok THEN
-                /* method is executable by user */
-                l_user <-- get_session_user_server(p_session);
-                l_valid_executable <-- get_Executable(l_method);  /* TODO change by e_sc_bad_not_executable when update to Spec 1.04 */
-                l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
-                IF l_valid_executable = TRUE &
-                    l_valid_user_executable = TRUE
-                THEN
-                    /* method belongs to object */
-                    l_object_has_method <-- check_object_has_method(l_objectid, l_methodid);
-                    IF l_object_has_method = TRUE THEN
-                        StatusCode <-- check_method_call_arguments(p_req_msg, p_callMethod, l_method, p_res_msg)
+                l_nodeClass <-- get_NodeClass(l_method);
+                IF l_nodeClass = e_ncl_Method THEN
+                    /* method is executable by user */
+                    l_user <-- get_session_user_server(p_session);
+                    l_valid_executable <-- get_Executable(l_method);  /* TODO change by e_sc_bad_not_executable when update to Spec 1.04 */
+                    l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
+                    IF l_valid_executable = TRUE &
+                        l_valid_user_executable = TRUE
+                    THEN
+                        /* method belongs to object */
+                        l_object_has_method <-- check_object_has_method(l_objectid, l_methodid);
+                        IF l_object_has_method = TRUE THEN
+                            StatusCode <-- check_method_call_arguments(p_req_msg, p_callMethod, l_method, p_res_msg)
+                        ELSE
+                            StatusCode := e_sc_bad_method_invalid
+                        END
                     ELSE
-                        StatusCode := e_sc_bad_method_invalid
+                        StatusCode := e_sc_bad_user_access_denied
                     END
                 ELSE
-                    StatusCode := e_sc_bad_user_access_denied
+                    /* Node has not method class */
+                    StatusCode := e_sc_bad_method_invalid
                 END
             ELSE
                 /* Since invalid and unknown are reserved for objectId, use method invalid */
                 StatusCode := e_sc_bad_method_invalid
             END
         END
-
     END
     ;
 
