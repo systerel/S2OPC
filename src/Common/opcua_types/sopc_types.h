@@ -7224,17 +7224,22 @@ typedef enum SOPC_TypeInternalIndex
  * UserTokenPolicies example constant values
  *===========================================================================*/
 #ifndef OPCUA_EXCLUDE_UserTokenPolicy
-/** Default anonymous user security policy supported configuration */
+// UserTokenPolicyId for anonymous token type example
+#define SOPC_UserTokenPolicy_Anonymous_ID "anonymous"
+/** Example of anonymous user security policy supported configuration */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous;
 
-/** Default username security policy supported and configured with security policy None.
+// UserTokenPolicyId for username token type with None SecurityPolicy example
+#define SOPC_UserTokenPolicy_UserNameNone_ID "username_None"
+/** Example username security policy supported and configured with security policy None.
  * With this security policy, the password will never be encrypted and this policy
  * shall not be used on unsecured and unencrypted secure channels.
- *
  */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
 
-/** Default username security policy supported and configured with empty security policy.
+// UserTokenPolicyId for username token type with default SecurityPolicy example
+#define SOPC_UserTokenPolicy_UserName_ID "username"
+/** Example username security policy supported and configured with empty security policy.
  *  With this security policy, the password will be encrypted if Secure Channel security policy is not None.
  *  It shall not be used on secure channels using security policy None otherwise no encryption will be done.
  */
