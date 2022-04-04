@@ -101,15 +101,18 @@ void request_handle_bs__client_validate_response_request_handle(
   @ assigns *request_handle_bs__request_handle;
   @ assigns client_requests_context[0 .. SOPC_MAX_PENDING_REQUESTS];
   @ assigns cpt;
-  @ ensures \forall integer n; 0 <= n <= SOPC_MAX_PENDING_REQUESTS && n != *request_handle_bs__request_handle ==>
-  client_requests_context[n] == \at(client_requests_context[n], Pre);
-  @ ensures *request_handle_bs__request_handle != constants__c_client_request_handle_indet ==>
-  \at(client_requests_context[\at(*request_handle_bs__request_handle, Here)].response, Pre) ==
-  constants__c_msg_type_indet
-  && (client_requests_context[*request_handle_bs__request_handle].request == request_handle_bs__req_typ &&
-   client_requests_context[*request_handle_bs__request_handle].response == request_handle_bs__resp_typ &&
-   client_requests_context[*request_handle_bs__request_handle].hasAppContext == request_handle_bs__is_applicative &&
-   client_requests_context[*request_handle_bs__request_handle].appContext == request_handle_bs__app_context);
+  @ ensures request_handle_bs__resp_typ == constants__c_msg_type_indet ==>
+    *request_handle_bs__request_handle == constants__c_client_request_handle_indet;
+  @ ensures request_handle_bs__resp_typ != constants__c_msg_type_indet ==>
+    (\forall integer n; 0 <= n <= SOPC_MAX_PENDING_REQUESTS && n != *request_handle_bs__request_handle ==>
+    client_requests_context[n] == \at(client_requests_context[n], Pre));
+  @ ensures request_handle_bs__resp_typ != constants__c_msg_type_indet ==>
+    (*request_handle_bs__request_handle != constants__c_client_request_handle_indet ==>
+    (\at(client_requests_context[\at(*request_handle_bs__request_handle, Here)].response, Pre) == constants__c_msg_type_indet
+    && (client_requests_context[*request_handle_bs__request_handle].request == request_handle_bs__req_typ &&
+        client_requests_context[*request_handle_bs__request_handle].response == request_handle_bs__resp_typ &&
+        client_requests_context[*request_handle_bs__request_handle].hasAppContext == request_handle_bs__is_applicative &&
+        client_requests_context[*request_handle_bs__request_handle].appContext == request_handle_bs__app_context)));
  */
 void request_handle_bs__client_fresh_req_handle(
     const constants__t_msg_type_i request_handle_bs__req_typ,
@@ -119,20 +122,36 @@ void request_handle_bs__client_fresh_req_handle(
     constants__t_client_request_handle_i* const request_handle_bs__request_handle)
 {
     uint32_t startedIdx = cpt;
-    uint8_t noHandleAvailable = false;
     *request_handle_bs__request_handle = constants__c_client_request_handle_indet;
     if (request_handle_bs__resp_typ != constants__c_msg_type_indet)
     {
-        while (false == noHandleAvailable &&
+    
+    cpt = (uint16_t)((cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1));
+    
+    /*@ loop invariant 0 <= cpt <= SOPC_MAX_PENDING_REQUESTS;
+      @ loop invariant \forall integer n; 0 <= n <= SOPC_MAX_PENDING_REQUESTS && *request_handle_bs__request_handle ==
+   constants__c_client_request_handle_indet ==> client_requests_context[n] == \at(client_requests_context[n], Pre);
+      @ loop invariant *request_handle_bs__request_handle == cpt && cpt != constants__c_client_request_handle_indet ==>
+        (\at(client_requests_context[\at(*request_handle_bs__request_handle, Here)].response, Pre) == constants__c_msg_type_indet
+        && (client_requests_context[*request_handle_bs__request_handle].request == request_handle_bs__req_typ
+        && client_requests_context[*request_handle_bs__request_handle].response == request_handle_bs__resp_typ
+        && client_requests_context[*request_handle_bs__request_handle].hasAppContext == request_handle_bs__is_applicative
+        && client_requests_context[*request_handle_bs__request_handle].appContext == request_handle_bs__app_context));
+      @ loop invariant cpt > startedIdx ==> \forall integer n; startedIdx < n < cpt ==>
+        client_requests_context[n] == \at(client_requests_context[n], Pre)
+        && client_requests_context[n].response != constants__c_msg_type_indet;
+      @ loop invariant cpt <= startedIdx ==> \forall integer n; (startedIdx < n <= SOPC_MAX_PENDING_REQUESTS || 0 <= n < cpt) ==>
+        client_requests_context[n].response == \at(client_requests_context[n].response, Pre)
+        && client_requests_context[n].response != constants__c_msg_type_indet;
+      @ loop assigns cpt;
+      @ loop assigns *request_handle_bs__request_handle;
+      @ loop assigns client_requests_context[1 .. SOPC_MAX_PENDING_REQUESTS];
+      */
+    /* loop variant SOPC_MAX_PENDING_REQUESTS - ((cpt - startedIdx) % (SOPC_MAX_PENDING_REQUESTS + 1)); */
+        while (cpt == startedIdx &&
                *request_handle_bs__request_handle == constants__c_client_request_handle_indet)
         {
-            cpt = (uint16_t)((cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1));
-            if (cpt == startedIdx)
-            {
-                // Note: startedIdx content is never tested (simplest implem)
-                noHandleAvailable = true;
-            }
-            else if (cpt != constants__c_client_request_handle_indet) // avoid 0 which is undetermined in B model
+            if (cpt != constants__c_client_request_handle_indet) // avoid 0 which is undetermined in B model
             {
                 if (client_requests_context[cpt].response == constants__c_msg_type_indet)
                 {
@@ -142,10 +161,19 @@ void request_handle_bs__client_fresh_req_handle(
                     client_requests_context[cpt].appContext = request_handle_bs__app_context;
                     *request_handle_bs__request_handle = cpt;
                 }
+                else
+                {
+                    cpt = (uint16_t)((cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1));
+                }
+            }
+            else
+            {
+                cpt = (uint16_t)((cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1));
             }
         }
     }
 }
+
 
 /*@ requires \valid(request_handle_bs__ret);
   @ assigns *request_handle_bs__ret;
@@ -234,19 +262,6 @@ void request_handle_bs__get_req_handle_channel(const constants__t_client_request
     }
 }
 
-/*@ requires \valid(req);
-  @ assigns *req;
-  @ ensures req->request == 0 && req->response == 0 && req->appContext == 0 &&
-  req->hasAppContext == 0;
-  */
-static void requestcontext_memset(SOPC_Internal_RequestContext* req, int val, size_t size, size_t n);
-
-#ifndef __FRAMAC__
-static void requestcontext_memset(SOPC_Internal_RequestContext* req, int val, size_t size, size_t n)
-{
-    memset(req, val, size * n);
-}
-#endif
 
 /*@ requires 0 < request_handle_bs__req_handle <= SOPC_MAX_PENDING_REQUESTS;
   @ requires \valid(client_requests_context+(request_handle_bs__req_handle));
