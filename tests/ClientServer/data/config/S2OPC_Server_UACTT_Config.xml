@@ -89,7 +89,7 @@
             <UserPolicies>
               <UserPolicy policyId="anonymous" tokenType="anonymous"/>
               <!-- For tests only, otherwise users on unsecure channel without security shall be forbidden -->
-              <UserPolicy policyId="username" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+              <UserPolicy policyId="username_None" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
             </UserPolicies>
           </SecurityPolicy>
         </SecurityPolicies>
