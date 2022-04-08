@@ -22,7 +22,7 @@
 
 #include "sopc_array.h"
 #include "sopc_builtintypes.h"
-#include "sopc_log_manager.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
@@ -288,11 +288,32 @@ static void GenericCallbackHelper_CallMethod(SOPC_StatusCode status, const void*
 
 /* Functions */
 
+static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text)
+{
+    switch (log_level)
+    {
+    case SOPC_LOG_LEVEL_ERROR:
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_WARNING:
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_INFO:
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_DEBUG:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    default:
+        assert(false);
+    }
+}
+
 // Return 0 if succeeded
 int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
 {
     SOPC_LibSub_StaticCfg cfg_cli = {
-        .host_log_callback = Helpers_LoggerStdout,
+        .host_log_callback = SOPC_ClientHelper_Logger,
         .disconnect_callback = disconnect_callback != NULL ? disconnect_callback : default_disconnect_callback,
         .toolkit_logger = {
             .level = 0,
