@@ -93,7 +93,6 @@ typedef enum
 
 typedef struct
 {
-    uint32_t uid;                          /* Unique request identifier */
     uintptr_t appCtx;                      /* Application context, chosen outside of the state machine */
     SOPC_StaMac_RequestScope requestScope; /* Whether the request is started by the state machine or the applicative */
     SOPC_StaMac_RequestType requestType;   /* the type of request */

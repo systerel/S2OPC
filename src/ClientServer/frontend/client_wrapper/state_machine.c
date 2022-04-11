@@ -85,10 +85,6 @@ struct SOPC_StaMac_Machine
     uintptr_t userContext;                /* A state machine user defined context */
 };
 
-/* Global variables */
-static int32_t nSentReqs = 0;      /* Number of sent requests, used to uniquely associate a response to its request. */
-static uintptr_t nPublishReqs = 0; /* Number of sent publish requests */
-
 /* Internal functions */
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
@@ -325,11 +321,6 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (INT32_MAX == nSentReqs)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
@@ -344,9 +335,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     /* Sends the request */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Atomic_Int_Add(&nSentReqs, 1);
-        pSM->iSessionCtx =
-            (uintptr_t) nSentReqs; /* Record the session context, must be reset when connection is closed. */
+        pSM->iSessionCtx = (uintptr_t) &pSM->iSessionCtx; // Use own address as unique identifier
         if (NULL == pSM->szUsername)
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, NULL,
@@ -408,7 +397,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
-    if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM) || INT32_MAX == nSentReqs)
+    if (NULL == pSM || !SOPC_StaMac_IsConnected(pSM))
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -425,15 +414,10 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     assert(SOPC_STATUS_OK == mutStatus);
 
     /* Adds it to the list of yet-to-be-answered requests */
-    SOPC_Atomic_Int_Add(&nSentReqs, 1);
-    pReqCtx->uid = (uint32_t) nSentReqs;
     pReqCtx->appCtx = appCtx;
     pReqCtx->requestScope = requestScope;
     pReqCtx->requestType = requestType;
-    /* Asserts that there cannot be two requests with the same id when receiving a response */
-    void* found = SOPC_SLinkedList_FindFromId(pSM->pListReqCtx, pReqCtx->uid);
-    SOPC_ASSERT(NULL == found);
-    if (SOPC_SLinkedList_Append(pSM->pListReqCtx, pReqCtx->uid, (void*) pReqCtx) != pReqCtx)
+    if (SOPC_SLinkedList_Append(pSM->pListReqCtx, 0, (void*) pReqCtx) != pReqCtx)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -1161,7 +1145,6 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     (void) pParam;
 
     bool bProcess = true;
-    SOPC_SLinkedListIterator pListIter = NULL;
     SOPC_StaMac_ReqCtx* reqCtx = NULL;
 
     if (NULL == pSM)
@@ -1170,7 +1153,6 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     }
 
     /* As long as the appCtx is not surely a SOPC_StaMac_ReqCtx*, it is not possible to dereference it.
-     * But it contains the uid of the request, which is the id of the pListReqCtx.
      * The appCtx is a uintptr_t, so it cannot be set as the id of the SOPC_SLinkedList,
      * and searched for easily. */
 
@@ -1182,28 +1164,24 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     case SE_RCV_DISCOVERY_RESPONSE:
     case SE_SND_REQUEST_FAILED:
         bProcess = false;
-        pListIter = SOPC_SLinkedList_GetIterator(pSM->pListReqCtx);
-        reqCtx = (SOPC_StaMac_ReqCtx*) appCtx;
-        while (!bProcess && NULL != pListIter && NULL != reqCtx)
+        reqCtx = SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, (void*) appCtx);
+        if (NULL != reqCtx)
         {
-            if ((SOPC_StaMac_ReqCtx*) SOPC_SLinkedList_Next(&pListIter) == reqCtx)
+            bProcess = true;
+            /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
+            if (NULL != pAppCtx)
             {
-                bProcess = true;
-                /* A response with a known pReqCtx shall free it, and return the appCtx to the caller */
-                if (NULL != pAppCtx)
-                {
-                    *pAppCtx = reqCtx->appCtx;
-                }
-                if (NULL != pRequestScope)
-                {
-                    *pRequestScope = reqCtx->requestScope;
-                }
-                if (NULL == SOPC_SLinkedList_RemoveFromId(pSM->pListReqCtx, reqCtx->uid))
-                {
-                    Helpers_Log(SOPC_LOG_LEVEL_WARNING, "failed to pop the request from the pListReqCtx.");
-                }
-                SOPC_Free(reqCtx);
+                *pAppCtx = reqCtx->appCtx;
             }
+            if (NULL != pRequestScope)
+            {
+                *pRequestScope = reqCtx->requestScope;
+            }
+            SOPC_Free(reqCtx);
+        }
+        else
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to pop the request from the pListReqCtx.");
         }
         break;
     /* appCtx is session context */
@@ -1551,18 +1529,8 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                 status = Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                 if (SOPC_STATUS_OK == status)
                 {
-                    if (nPublishReqs < UINTPTR_MAX)
-                    {
-                        /* TODO: This addition is not atomic */
-                        uintptr_t new_val = (uintptr_t)(SOPC_Atomic_Ptr_Get((void**) &nPublishReqs)) + 1;
-                        SOPC_Atomic_Ptr_Set((void**) &nPublishReqs, (void*) new_val);
-                        status = SOPC_StaMac_SendRequest(pSM, pRequest, nPublishReqs, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                                         SOPC_REQUEST_TYPE_PUBLISH);
-                    }
-                    else
-                    {
-                        status = SOPC_STATUS_INVALID_STATE;
-                    }
+                    status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                                     SOPC_REQUEST_TYPE_PUBLISH);
                 }
                 if (SOPC_STATUS_OK == status)
                 {

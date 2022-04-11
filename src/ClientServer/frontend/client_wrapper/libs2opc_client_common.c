@@ -743,7 +743,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     /* wrap the application context */
     if (SOPC_STATUS_OK == status)
     {
-        pReqCtx->uid = 0;
         pReqCtx->appCtx = requestContext;
         pReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
         pReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
