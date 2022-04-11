@@ -68,18 +68,19 @@ struct SOPC_StaMac_Machine
     uint32_t iCntMaxKeepAlive;            /* Number of skipped response before sending an empty KeepAlive */
     uint32_t iCntLifetime;                /* Number of deprived publish cycles before subscription deletion */
     uint32_t iSubscriptionID;             /* OPC UA subscription ID, non 0 when subscription is created */
-    SOPC_SLinkedList* pListMonIt;         /* List of monitored items, where the appCtx is the list value,
-                                           * and the id is the uint32_t OPC UA monitored item ID */
-    uint32_t nTokenTarget;                /* Target number of available tokens */
-    uint32_t nTokenUsable;                /* Tokens available to the server
-                                           * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;                      /* Indicates whether an acknowledgement should be sent
-                                           * in the next PublishRequest */
-    uint32_t iAckSeqNum;                  /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId;               /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername;               /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword;               /* See SOPC_LibSub_ConnectionCfg */
-    int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    uint32_t nMonItClientHandle;  /* Number of client handle generated for monitored items, used as unique identifier */
+    SOPC_SLinkedList* pListMonIt; /* List of monitored items, where the appCtx is the list value,
+                                   * and the id is the uint32_t OPC UA monitored item ID (client handle) */
+    uint32_t nTokenTarget;        /* Target number of available tokens */
+    uint32_t nTokenUsable;        /* Tokens available to the server
+                                   * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;              /* Indicates whether an acknowledgement should be sent
+                                   * in the next PublishRequest */
+    uint32_t iAckSeqNum;          /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId;       /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername;       /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword;       /* See SOPC_LibSub_ConnectionCfg */
+    int64_t iTimeoutMs;           /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
     uintptr_t userContext;                /* A state machine user defined context */
 };
@@ -192,6 +193,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iCntMaxKeepAlive = iCntMaxKeepAlive;
         pSM->iCntLifetime = iCntLifetime;
         pSM->iSubscriptionID = 0;
+        pSM->nMonItClientHandle = 0;
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
         pSM->nTokenTarget = iTokenTarget;
         pSM->nTokenUsable = 0;
@@ -541,11 +543,6 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
         Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (INT32_MAX == nSentReqs)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, too much sent requests.");
-        return SOPC_STATUS_INVALID_STATE;
-    }
 
     /* Create the NodeIds from the strings */
     SOPC_NodeId** lpNid = SOPC_Calloc((size_t) nElems, sizeof(SOPC_NodeId*));
@@ -587,22 +584,21 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     {
         for (int i = 0; i < nElems; ++i)
         {
-            SOPC_Atomic_Int_Add(&nSentReqs, 1);
-            lCliHndl[i] = (uint32_t) nSentReqs;
             void* nodeId = SOPC_Calloc(1, sizeof(char) * (strlen(lszNodeId[i]) + 1));
             if (NULL == nodeId)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
-            else if (0 >= nSentReqs)
-            {
-                status = SOPC_STATUS_NOK;
-                SOPC_Free(nodeId);
-            }
             else
             {
-                strcpy(nodeId, lszNodeId[i]);
-                void* result = SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, (uint32_t) nSentReqs, nodeId);
+                void* result = NULL;
+                if (pSM->nMonItClientHandle < UINT32_MAX)
+                {
+                    pSM->nMonItClientHandle++;
+                    lCliHndl[i] = pSM->nMonItClientHandle;
+                    strcpy(nodeId, lszNodeId[i]);
+                    result = SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, pSM->nMonItClientHandle, nodeId);
+                }
                 if (NULL == result)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1370,6 +1366,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
         pSM->state = stError;
     }
     pSM->iSubscriptionID = 0;
+    pSM->nMonItClientHandle = 0;
     SOPC_SLinkedList_Clear(pSM->pListMonIt);
     SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
