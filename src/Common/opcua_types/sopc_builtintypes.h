@@ -47,6 +47,14 @@ typedef uint32_t SOPC_StatusCode;
 #define SOPC_GoodStatusOppositeMask 0xC0000000
 
 /**
+ * \brief Evaluates if the provided status is Good.
+ *
+ * \param status  The status to evaluate
+ * \return        True if the provided status is Good, false otherwise
+ */
+bool SOPC_IsGoodStatus(SOPC_StatusCode status);
+
+/**
  * \brief Masks to check status for Uncertain/Bad/Reserved status code: X status <=> (status & SOPC_<X>StatusMask) != 0
  */
 #define SOPC_UncertainStatusMask 0x40000000
