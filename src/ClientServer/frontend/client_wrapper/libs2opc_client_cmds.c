@@ -1257,8 +1257,14 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
     return res;
 }
 
-int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds)
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
+                                            char** nodeIds,
+                                            size_t nbNodeIds,
+                                            SOPC_StatusCode* results)
 {
+    int32_t result = 0;
+    OpcUa_CreateMonitoredItemsResponse response;
+    SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, &response);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (connectionId <= 0)
     {
@@ -1302,18 +1308,34 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
     {
         status =
             SOPC_ClientCommon_AddToSubscription((SOPC_LibSub_ConnectionId) connectionId, (const char* const*) nodeIds,
-                                                lAttrIds, (int32_t) nbNodeIds, lDataId);
+                                                lAttrIds, (int32_t) nbNodeIds, lDataId, &response);
     }
-
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && response.NoOfResults != (int32_t) nbNodeIds)
     {
-        for (size_t i = 0; i < nbNodeIds; ++i)
+        status = SOPC_STATUS_NOK;
+    }
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < nbNodeIds && ((int32_t) i) < response.NoOfResults; ++i)
+    {
+        SOPC_StatusCode ResultStatus = response.Results[i].StatusCode;
+        if (NULL != results)
+        {
+            results[i] = ResultStatus;
+        }
+        if (SOPC_IsGoodStatus(ResultStatus))
         {
             Helpers_Log(SOPC_LOG_LEVEL_INFO, "Created MonIt for \"%s\" with data_id %" PRIu32 ".", nodeIds[i],
                         lDataId[i]);
         }
+        else
+        {
+            // Set result to 1 if one or several MI creation failed
+            result = 1;
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Failed to create MonIt for \"%s\" with data_id %" PRIu32 ".",
+                        nodeIds[i], lDataId[i]);
+        }
     }
 
+    SOPC_EncodeableObject_Clear(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, &response);
     SOPC_Free(lAttrIds);
     SOPC_Free(lDataId);
 
@@ -1323,7 +1345,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds
         return -100;
     }
 
-    return 0;
+    return result;
 }
 
 int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId)

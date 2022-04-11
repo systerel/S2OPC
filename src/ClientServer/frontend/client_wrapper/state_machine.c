@@ -525,7 +525,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
                                                   int32_t nElems,
-                                                  uintptr_t* pAppCtx,
+                                                  SOPC_CreateMonitoredItem_Ctx* pAppCtx,
                                                   uint32_t* lCliHndl)
 {
     void* pReq = NULL;
@@ -619,7 +619,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     /* Send it */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_SendRequest(pSM, pReq, lCliHndl[0], SOPC_REQUEST_SCOPE_STATE_MACHINE,
+        status = SOPC_StaMac_SendRequest(pSM, pReq, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
                                          SOPC_REQUEST_TYPE_CREATE_MONITORED_ITEMS);
     }
 
@@ -627,10 +627,6 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     if (SOPC_STATUS_OK == status)
     {
         pSM->state = stCreatingMonIt;
-        if (NULL != pAppCtx)
-        {
-            *pAppCtx = lCliHndl[0];
-        }
     }
     else
     {
@@ -1400,11 +1396,10 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
     assert(NULL != pMonItResp);
     for (i = 0; SOPC_STATUS_OK == status && i < pMonItResp->NoOfResults; ++i)
     {
-        /* TODO: verify revised values?? */
-        if (0 != pMonItResp->Results[i].StatusCode) /* OpcUa_Good does not exist... */
+        if (!SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
         {
-            status = SOPC_STATUS_NOK;
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Server could not create monitored item, sc = 0x%08" PRIX32 ".",
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING,
+                        "Server could not create monitored item with index '%" PRIi32 "', sc = 0x%08" PRIX32 ".", i,
                         pMonItResp->Results[i].StatusCode);
         }
         else
@@ -1414,11 +1409,23 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
             {
                 status = SOPC_STATUS_NOK;
             }
+            if (SOPC_STATUS_OK == status)
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem with index '%" PRIi32 "' created.", i);
+            }
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem created.");
-        }
+    }
+
+    OpcUa_CreateMonitoredItemsResponse* resp = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        resp = ((SOPC_CreateMonitoredItem_Ctx*) appCtx)->Results;
+    }
+    if (SOPC_STATUS_OK == status && NULL != resp)
+    {
+        // Transfer response data into app context
+        *resp = *pMonItResp;
+        SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pMonItResp);
     }
     if (SOPC_STATUS_OK == status)
     {

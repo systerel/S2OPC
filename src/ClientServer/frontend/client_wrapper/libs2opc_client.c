@@ -106,7 +106,7 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
                                                 int32_t nElements,
                                                 SOPC_LibSub_DataId* lDataId)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(cliId, lszNodeId, lattrId, nElements, lDataId);
+    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(cliId, lszNodeId, lattrId, nElements, lDataId, NULL);
     return status;
 }
 

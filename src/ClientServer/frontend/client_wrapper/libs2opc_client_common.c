@@ -550,11 +550,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
                                                       const SOPC_LibSub_CstString* lszNodeId,
                                                       const SOPC_LibSub_AttributeId* lattrId,
                                                       int32_t nElements,
-                                                      SOPC_LibSub_DataId* lDataId)
+                                                      SOPC_LibSub_DataId* lDataId,
+                                                      OpcUa_CreateMonitoredItemsResponse* results)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
-    uintptr_t appCtx = 0;
+    SOPC_CreateMonitoredItem_Ctx* appCtx = NULL;
 
     if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
@@ -571,10 +572,23 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        appCtx = SOPC_Calloc(1, sizeof(*appCtx));
+        if (NULL != appCtx)
+        {
+            appCtx->Results = results;
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     /* Create the monitored item and wait for its creation */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_StaMac_CreateMonitoredItem(pSM, lszNodeId, lattrId, nElements, &appCtx, lDataId);
+        status = SOPC_StaMac_CreateMonitoredItem(pSM, lszNodeId, lattrId, nElements, appCtx, lDataId);
     }
 
     /* Wait for the monitored item to be created */
@@ -582,7 +596,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     {
         const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx) &&
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, (uintptr_t) appCtx) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             /* Release the lock so that the event handler can work properly while waiting */
@@ -607,6 +621,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
             SOPC_StaMac_SetError(pSM);
         }
     }
+    SOPC_Free(appCtx);
 
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);

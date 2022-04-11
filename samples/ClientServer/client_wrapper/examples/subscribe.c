@@ -140,7 +140,12 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        res = SOPC_ClientHelper_AddMonitoredItems(connectionId, &node_id, 1);
+        SOPC_StatusCode result = SOPC_UncertainStatusMask;
+        res = SOPC_ClientHelper_AddMonitoredItems(connectionId, &node_id, 1, &result);
+        if (res > 0)
+        {
+            printf("Error in add operation for the monitored item: 0x%08" PRIX32 "\n", result);
+        }
     }
 
     if (res == 0)

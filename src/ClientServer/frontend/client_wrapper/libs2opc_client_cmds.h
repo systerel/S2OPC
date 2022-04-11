@@ -515,14 +515,21 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
     See OPC Unified Architecture, Part 3 for NodeId description.
  @param nbNodeIds
     Number of elements to subscribes. It should be between 1 and INT32_MAX
+ @param[out] results
+    Pre-allocated array of status codes indicating the add MonitoredItem operation result.
+    It shall have the same size and order than in \p nodeIds array.
  @return
    '0' if operation succeed
+   '1' if some MonitoredItems failed to be created in server (see results)
    '-1' if connectionId not valid
    '-2' if nodeIds or nbNodeIds not valid
    '-<3+index>' if nodeIds[index] is not valid
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId, char** nodeIds, size_t nbNodeIds);
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
+                                            char** nodeIds,
+                                            size_t nbNodeIds,
+                                            SOPC_StatusCode* results);
 
 /**
  @brief

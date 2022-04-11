@@ -368,17 +368,22 @@ START_TEST(test_wrapper_add_monitored_items)
     char* nodeIds1[1] = {"ns=0;s=Counter"}; // value increments itself
     char* nodeIds2[1] = {"ns=0;i=1013"};
     char* nodeIds3[3] = {"ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001"};
+    char* nodeIds3_plus_unknown[4] = {"ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001", "ns=1;s=Invalid_NodeId"};
+
     char* invalidNodeIds[1] = {NULL};
     char* invalidNodeIds2[2] = {"ns=0;s=Counter", NULL};
 
+    SOPC_StatusCode results[4] = {SOPC_UncertainStatusMask, SOPC_UncertainStatusMask, SOPC_UncertainStatusMask,
+                                  SOPC_UncertainStatusMask};
+
     /* add monitored items before toolkit being initialized */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1, NULL));
 
     /* initialize wrapper */
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* add monitored items before being connected */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1, NULL));
 
     /* create a connection */
     int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(valid_url, &valid_security_none, NULL);
@@ -387,45 +392,57 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_int_gt(valid_con_id, 0);
 
     /* add monitored items before subscription being created */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* create a subscription */
     ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* invalid argument: connection id*/
-    ck_assert_int_eq(-1, SOPC_ClientHelper_AddMonitoredItems(-1, nodeIds1, 1));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_AddMonitoredItems(-1, nodeIds1, 1, NULL));
     /* invalid argument: nodeIds */
-    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, NULL, 1));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, NULL, 1, NULL));
     /* invalid argument: nodeIds content */
-    ck_assert_int_eq(-3, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds, 1));
-    ck_assert_int_eq(-4, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds2, 2));
+    ck_assert_int_eq(-3, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds, 1, NULL));
+    ck_assert_int_eq(-4, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds2, 2, NULL));
     /* invalid argument: nbNodeIds */
-    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 0));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 0, NULL));
 
     /* add one monitored item */
-    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, results));
+    ck_assert(SOPC_IsGoodStatus(results[0]));
     /* add one more monitored item */
-    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2, 1));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2, 1, results));
+    ck_assert(SOPC_IsGoodStatus(results[0]));
     /* add multiple monitored items */
-    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3, 3));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3, 3, results));
+    ck_assert(SOPC_IsGoodStatus(results[0]));
+    ck_assert(SOPC_IsGoodStatus(results[1]));
+    ck_assert(SOPC_IsGoodStatus(results[2]));
+
+    /* add multiple monitored items with 1 unkown node id*/
+    ck_assert_int_eq(1, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3_plus_unknown, 4, results));
+    ck_assert(SOPC_IsGoodStatus(results[0]));
+    ck_assert(SOPC_IsGoodStatus(results[1]));
+    ck_assert(SOPC_IsGoodStatus(results[2]));
+    ck_assert(!SOPC_IsGoodStatus(results[3]));
 
     /* delete subscription */
     ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* add monitored items after subscription being deleted */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* disconnect */
     ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* add monitored items after being disconnected */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* close wrapper */
     SOPC_ClientHelper_Finalize();
 
     /* add monitored items after toolkit being closed */
-    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 }
 END_TEST
 
@@ -452,7 +469,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&check_counter_mutex));
 
     /* add one monitored item */
-    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds, 1));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds, 1, NULL));
 
     /* verify that callback is called correctly */
     /* use a mutex and a condition to wait until datachange has been received (use a 1.2 sec timeout)*/

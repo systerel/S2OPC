@@ -156,6 +156,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     A pre-allocated array to the output unique variable data identifiers.
     It should be at least \p nElements long.
     The values will be used in call to SOPC_LibSub_DataChangeCbk data_change_callback.
+ @param[out] results
+    A pre-allocated response structure that contains the detailed result for each element added.
+    It should be used to check if some elements failed to be added to the subscription in the server
+    or to be aware of revised values provided by the server.
+    It is only filled if not NULL.
  @return
     The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK.
     SOPC_STATUS_TIMEOUT is returned when the timeout expires before receiving a response. */
@@ -163,7 +168,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Configur
                                                       const SOPC_LibSub_CstString* lszNodeId,
                                                       const SOPC_LibSub_AttributeId* lattrId,
                                                       int32_t nElements,
-                                                      SOPC_LibSub_DataId* lDataId);
+                                                      SOPC_LibSub_DataId* lDataId,
+                                                      OpcUa_CreateMonitoredItemsResponse* results);
 
 /**
  * @brief

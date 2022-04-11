@@ -202,6 +202,16 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
+ * \brief Context structure to be provided when using ::SOPC_StaMac_CreateMonitoredItem
+ *  CtxId is used by
+ *  Results might be NULL if not necessary for application.
+ */
+typedef struct SOPC_CreateMonitoredItem_Ctx
+{
+    OpcUa_CreateMonitoredItemsResponse* Results;
+} SOPC_CreateMonitoredItem_Ctx;
+
+/**
  * \brief Creates a MonitoredItem asynchronously.
  *
  * The optional \p pAppCtx may be used to test the effective creation of the MonitoredItem with
@@ -223,7 +233,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
                                                   int32_t nElems,
-                                                  uintptr_t* pAppCtx,
+                                                  SOPC_CreateMonitoredItem_Ctx* pAppCtx,
                                                   uint32_t* lCliHndl);
 
 /**
