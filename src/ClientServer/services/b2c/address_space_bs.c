@@ -65,6 +65,15 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
+/*@ requires \valid(address_space_bs__nid_valid);
+  @ requires \valid(address_space_bs__node);
+  @ requires \valid(address_space_bs__nodes);
+  @ requires \separated(address_space_bs__nid_valid, address_space_bs__node, address_space_bs__nodes);
+  @ assigns *address_space_bs__nid_valid;
+  @ assigns *address_space_bs__node;
+  @ ensures \null == address_space_bs__nid ==>
+    *address_space_bs__nid_valid == false && *address_space_bs__node == \old(*address_space_bs__node);
+ */
 /* This is a_NodeId~ */
 void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i address_space_bs__nid,
                                                  t_bool* const address_space_bs__nid_valid,
@@ -90,6 +99,15 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_AccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -108,6 +126,15 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -146,6 +173,15 @@ void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     *address_space_bs__variant = variant;
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_BrowseName_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -160,6 +196,15 @@ void address_space_bs__read_AddressSpace_BrowseName_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -175,6 +220,15 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_DataType_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -191,6 +245,17 @@ void address_space_bs__read_AddressSpace_DataType_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_locales);
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_locales,
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_DisplayName_value(
     const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
@@ -211,6 +276,15 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_EventNotifier_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -227,6 +301,15 @@ void address_space_bs__read_AddressSpace_EventNotifier_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_Executable_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -243,6 +326,15 @@ void address_space_bs__read_AddressSpace_Executable_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_Historizing_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -258,6 +350,15 @@ void address_space_bs__read_AddressSpace_Historizing_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_IsAbstract_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -276,6 +377,16 @@ void address_space_bs__read_AddressSpace_IsAbstract_value(
     }
 }
 
+/*
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+@ assigns *address_space_bs__sc;
+@ assigns *address_space_bs__variant;
+*/
 void address_space_bs__read_AddressSpace_NodeClass_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -289,6 +400,15 @@ void address_space_bs__read_AddressSpace_NodeClass_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_NodeId_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -301,6 +421,16 @@ void address_space_bs__read_AddressSpace_NodeId_value(
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     }
 }
+
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_Symmetric_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -316,6 +446,19 @@ void address_space_bs__read_AddressSpace_Symmetric_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(address_space_bs__p_is_user_read_auth);
+@ requires \valid(address_space_bs__p_is_user_write_auth);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    address_space_bs__p_is_user_read_auth,
+    address_space_bs__p_is_user_write_auth,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
     const t_bool address_space_bs__p_is_user_read_auth,
@@ -348,6 +491,17 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(address_space_bs__p_is_user_executable_auth);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(
+    address_space_bs__p_node,
+    address_space_bs__p_is_user_executable_auth,
+    *address_space_bs__sc,
+    *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_UserExecutable_value(
     const constants__t_Node_i address_space_bs__p_node,
     const t_bool address_space_bs__p_is_user_executable_auth,
@@ -365,6 +519,12 @@ void address_space_bs__read_AddressSpace_UserExecutable_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__sc, *address_space_bs__variant);
+*/
 void address_space_bs__read_AddressSpace_ValueRank_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -381,6 +541,25 @@ void address_space_bs__read_AddressSpace_ValueRank_value(
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_locales);
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(address_space_bs__index_range);
+@ requires \valid(*address_space_bs__sc);
+@ requires \valid(*address_space_bs__variant);
+@ requires \valid(*address_space_bs__val_sc);
+@ requires \valid(*address_space_bs__val_ts_src);
+
+@ requires \separated(
+    address_space_bs__p_locales,
+    address_space_bs__p_node,
+    address_space_bs__index_range,
+    *address_space_bs__sc,
+    *address_space_bs__variant,
+    *address_space_bs__val_sc,
+    *address_space_bs__val_ts_src
+);
+*/
 void address_space_bs__read_AddressSpace_Value_value(
     const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
@@ -459,6 +638,13 @@ void address_space_bs__read_AddressSpace_Value_value(
     }
 }
 
+/*
+@ requires \valid(**supportedLocales);
+@ requires \valid(*node_value);
+@ requires \valid(*new_value);
+@ requires \valid(*previous_value);
+@ requires \separated(**supportedLocales, *node_value, *new_value, *previous_value);
+*/
 static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
                                                SOPC_Variant* node_value,
                                                const SOPC_Variant* new_value,
@@ -535,6 +721,11 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     return status;
 }
 
+/*
+@ requires \valid(*node_value);
+@ requires \valid(*new_value);
+@ requires \separated(*node_value, *new_value);
+*/
 static bool is_localized_text_and_modifiable(SOPC_Variant* node_value, const SOPC_Variant* new_value)
 {
     bool modifyLocalizedText = false;
@@ -579,6 +770,13 @@ static bool is_localized_text_and_modifiable(SOPC_Variant* node_value, const SOP
     return modifyLocalizedText;
 }
 
+/*
+@ requires \valid(**supportedLocales);
+@ requires \valid(*node_value);
+@ requires \valid(*new_value);
+@ requires \valid(*previous_value);
+@ requires \separated(**supportedLocales, *node_value, *new_value, *previous_value);
+*/
 static constants_statuscodes_bs__t_StatusCode_i set_value_full(char** supportedLocales,
                                                                SOPC_Variant* node_value,
                                                                const SOPC_Variant* new_value,
@@ -612,6 +810,13 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_full(char** supportedL
     }
 }
 
+/*
+@ requires \valid(*node_value);
+@ requires \valid(*new_value);
+@ requires \valid(*range);
+@ requires \valid(*previous_value);
+@ requires \separated(*node_value, *new_value, *range, *previous_value);
+*/
 static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Variant* node_value,
                                                                          const SOPC_Variant* new_value,
                                                                          const SOPC_NumericRange* range,
@@ -654,6 +859,13 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Va
     return constants_statuscodes_bs__e_sc_ok;
 }
 
+/*
+@ requires \valid(*node_value);
+@ requires \valid(*new_value);
+@ requires \valid(*range_str);
+@ requires \valid(*previous_value);
+@ requires \separated(*node_value, *new_value, *range_str, *previous_value);
+*/
 static constants_statuscodes_bs__t_StatusCode_i set_value_indexed(SOPC_Variant* node_value,
                                                                   const SOPC_Variant* new_value,
                                                                   const SOPC_String* range_str,
@@ -675,6 +887,9 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed(SOPC_Variant* 
     return ret;
 }
 
+/*
+@ requires \valid(*toConvert);
+*/
 static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConvert)
 {
     SOPC_Variant* result = SOPC_Variant_Create();
@@ -720,6 +935,26 @@ static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConv
     return result;
 }
 
+/*
+@ requires \valid(address_space_bs__p_user);
+@ requires \valid(address_space_bs__p_locales);
+@ requires \valid(address_space_bs__node);
+@ requires \valid(address_space_bs__variant);
+@ requires \valid(address_space_bs__toConvert);
+@ requires \valid(address_space_bs__index_range);
+@ requires \valid(*address_space_bs__serviceStatusCode);
+@ requires \valid(*address_space_bs__prev_dataValue);
+@ requires \separated(
+    address_space_bs__p_user,
+    address_space_bs__p_locales,
+    address_space_bs__node,
+    address_space_bs__variant,
+    address_space_bs__toConvert,
+    address_space_bs__index_range,
+    *address_space_bs__serviceStatusCode,
+    *address_space_bs__prev_dataValue
+);
+*/
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
                                  const constants__t_LocaleIds_i address_space_bs__p_locales,
                                  const constants__t_Node_i address_space_bs__node,
@@ -784,6 +1019,12 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_user);
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_ts);
+@ requires \separated(address_space_bs__p_user, address_space_bs__p_node, *address_space_bs__p_ts);
+*/
 void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i address_space_bs__p_user,
                                                  const constants__t_Node_i address_space_bs__p_node,
                                                  const constants__t_Timestamp address_space_bs__p_ts)
@@ -816,6 +1057,12 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_user);
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_sc);
+@ requires \separated(address_space_bs__p_user, address_space_bs__p_node, *address_space_bs__p_sc);
+*/
 void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
                                             const constants__t_Node_i address_space_bs__p_node,
                                             const constants__t_RawStatusCode address_space_bs__p_sc)
@@ -836,6 +1083,12 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_user);
+@ requires \valid(address_space_bs__node);
+@ requires \valid(*address_space_bs__sc);
+@ requires \separated(address_space_bs__p_user, address_space_bs__node, *address_space_bs__sc);
+*/
 void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_space_bs__p_user,
                                             const constants__t_Node_i address_space_bs__node,
                                             constants__t_RawStatusCode* const address_space_bs__sc)
@@ -844,6 +1097,11 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
     *address_space_bs__sc = SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_index_range);
+@ requires \valid(*address_space_bs__bres);
+@ requires \separated(address_space_bs__p_index_range, *address_space_bs__bres)
+*/
 void address_space_bs__is_IndexRangeDefined(const constants__t_IndexRange_i address_space_bs__p_index_range,
                                             t_bool* const address_space_bs__bres)
 {
@@ -854,6 +1112,12 @@ void address_space_bs__is_IndexRangeDefined(const constants__t_IndexRange_i addr
     }
 }
 
+/*
+@ requires \valid(address_space_bs__nid1);
+@ requires \valid(address_space_bs__nid2);
+@ requires \valid(*address_space_bs__bres);
+@ requires \separated(address_space_bs__nid1, address_space_bs__nid2, *address_space_bs__bres);
+*/
 void address_space_bs__is_NodeId_equal(const constants__t_NodeId_i address_space_bs__nid1,
                                        const constants__t_NodeId_i address_space_bs__nid2,
                                        t_bool* const address_space_bs__bres)
@@ -861,22 +1125,36 @@ void address_space_bs__is_NodeId_equal(const constants__t_NodeId_i address_space
     *address_space_bs__bres = SOPC_NodeId_Equal(address_space_bs__nid1, address_space_bs__nid2);
 }
 
+/*
+@ requires \valid(address_space_bs__val);
+*/
 void address_space_bs__read_AddressSpace_clear_value(const constants__t_Variant_i address_space_bs__val)
 {
     SOPC_Variant_Clear(address_space_bs__val);
 }
 
+/*
+@ requires \valid(address_space_bs__val);
+*/
 void address_space_bs__read_AddressSpace_free_variant(const constants__t_Variant_i address_space_bs__val)
 {
     SOPC_Variant_Delete(address_space_bs__val);
 }
 
+/*
+@ requires \valid(address_space_bs__data);
+*/
 void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_DataValue_i address_space_bs__data)
 {
     SOPC_DataValue_Clear(address_space_bs__data);
     SOPC_Free(address_space_bs__data);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_access_level);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_access_level)
+*/
 void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_bs__p_node,
                                        constants__t_access_level* const address_space_bs__p_access_level)
 {
@@ -884,6 +1162,11 @@ void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_b
     *address_space_bs__p_access_level = SOPC_AddressSpace_Get_AccessLevel(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_browse_name);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_browse_name)
+*/
 void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs__p_node,
                                       constants__t_QualifiedName_i* const address_space_bs__p_browse_name)
 {
@@ -891,6 +1174,11 @@ void address_space_bs__get_BrowseName(const constants__t_Node_i address_space_bs
     *address_space_bs__p_browse_name = SOPC_AddressSpace_Get_BrowseName(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_display_name);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_display_name)
+*/
 void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_bs__p_node,
                                        constants__t_LocalizedText_i* const address_space_bs__p_display_name)
 {
@@ -898,6 +1186,11 @@ void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_b
     *address_space_bs__p_display_name = SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_bool);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_bool)
+*/
 void address_space_bs__get_Executable(const constants__t_Node_i address_space_bs__p_node,
                                       t_bool* const address_space_bs__p_bool)
 {
@@ -905,6 +1198,11 @@ void address_space_bs__get_Executable(const constants__t_Node_i address_space_bs
     *address_space_bs__p_bool = SOPC_AddressSpace_Get_Executable(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_node_class);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_node_class)
+*/
 void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs__p_node,
                                      constants__t_NodeClass_i* const address_space_bs__p_node_class)
 {
@@ -918,6 +1216,11 @@ void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs_
     }
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_data_type);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_data_type)
+*/
 void address_space_bs__get_DataType(const constants__t_Node_i address_space_bs__p_node,
                                     constants__t_NodeId_i* const address_space_bs__p_data_type)
 {
@@ -926,6 +1229,11 @@ void address_space_bs__get_DataType(const constants__t_Node_i address_space_bs__
     *address_space_bs__p_data_type = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_value_rank);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_value_rank)
+*/
 void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs__p_node,
                                      t_entier4* const address_space_bs__p_value_rank)
 {
@@ -934,6 +1242,9 @@ void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs_
     *address_space_bs__p_value_rank = *SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, node);
 }
 
+/*
+@ requires \valid(*node);
+*/
 static bool is_inputArgument(const OpcUa_VariableNode* node)
 {
     if (NULL == node || &OpcUa_VariableNode_EncodeableType != node->encodeableType)
@@ -952,12 +1263,24 @@ static bool is_inputArgument(const OpcUa_VariableNode* node)
                    sopc_address_space_bs__InputArguments_BrowseName) == 0);
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_type_def);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_type_def)
+*/
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
     util_addspace__get_TypeDefinition(address_space_bs__p_node, address_space_bs__p_type_def);
 }
 
+/*
+@ requires \valid(address_space_bs__p_ref);
+@ requires \valid(*address_space_bs__p_RefType);
+@ requires \separated(address_space_bs__p_ref, *address_space_bs__p_RefType)
+@ ensures *address_space_bs__p_RefType == (&address_space_bs__p_ref)->ReferenceTypeId;
+@ assigns *address_space_bs__p_RefType;
+*/
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
                                                    constants__t_NodeId_i* const address_space_bs__p_RefType)
 {
@@ -965,6 +1288,13 @@ void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_
     *address_space_bs__p_RefType = &ref->ReferenceTypeId;
 }
 
+/*
+@ requires \valid(address_space_bs__p_ref);
+@ requires \valid(*address_space_bs__p_TargetNode);
+@ requires \separated(address_space_bs__p_ref, *address_space_bs__p_TargetNode)
+@ ensures *address_space_bs__p_TargetNode == (&address_space_bs__p_ref)->TargetId;
+@ assigns *address_space_bs__p_TargetNode;
+*/
 void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i address_space_bs__p_ref,
                                                 constants__t_ExpandedNodeId_i* const address_space_bs__p_TargetNode)
 {
@@ -972,6 +1302,13 @@ void address_space_bs__get_Reference_TargetNode(const constants__t_Reference_i a
     *address_space_bs__p_TargetNode = &ref->TargetId;
 }
 
+/*
+@ requires \valid(address_space_bs__p_ref);
+@ requires \valid(*address_space_bs__p_IsForward);
+@ requires \separated(address_space_bs__p_ref, *address_space_bs__p_IsForward)
+@ ensures *address_space_bs__p_IsForward == !(address_space_bs__p_ref->IsInverse);
+@ assigns *address_space_bs__p_IsForward;
+*/
 void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i address_space_bs__p_ref,
                                                t_bool* const address_space_bs__p_IsForward)
 {
@@ -979,6 +1316,14 @@ void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i ad
     *address_space_bs__p_IsForward = !ref->IsInverse;
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_ref_index);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_ref_index);
+@ ensures *address_space_bs__p_ref_index ==
+    SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, address_space_bs__p_node);
+@ assigns *address_space_bs__p_ref;
+*/
 void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_space_bs__p_node,
                                             t_entier4* const address_space_bs__p_ref_index)
 {
@@ -988,6 +1333,14 @@ void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_sp
     *address_space_bs__p_ref_index = *n_refs;
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(address_space_bs__p_ref_index);
+@ requires \valid(*address_space_bs__p_ref);
+@ requires \separated(address_space_bs__p_node, address_space_bs__p_ref_index, *address_space_bs__p_ref);
+@ ensures *address_space_bs__p_ref == &(*refs)[address_space_bs__p_ref_index - 1];
+@ assigns *address_space_bs__p_ref;
+*/
 void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_space_bs__p_node,
                                               const t_entier4 address_space_bs__p_ref_index,
                                               constants__t_Reference_i* const address_space_bs__p_ref)
@@ -1002,6 +1355,11 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
     *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index - 1];
 }
 
+/*
+@ requires \valid(address_space_bs__p_node);
+@ requires \valid(*address_space_bs__p_input_arg);
+@ requires \separated(address_space_bs__p_node, *address_space_bs__p_input_arg);
+*/
 void address_space_bs__get_InputArguments(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_Variant_i* const address_space_bs__p_input_arg)
 {
@@ -1035,6 +1393,13 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
     *address_space_bs__p_input_arg = result;
 }
 
+/*
+@ requires \valid(address_space_bs__p_variant);
+@ requires \valid(*address_space_bs__p_type);
+@ requires \separated(address_space_bs__p_variant, *address_space_bs__p_type);
+@ ensures *address_space_bs__p_type == (SOPC_NodeId*) SOPC_Variant_Get_DataType(address_space_bs__p_variant);
+@ assigns *address_space_bs__p_type;
+*/
 void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i address_space_bs__p_variant,
                                              constants__t_NodeId_i* const address_space_bs__p_type)
 {
@@ -1045,6 +1410,13 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
+/*
+@ requires \valid(address_space_bs__p_variant);
+@ requires \valid(*address_space_bs__p_valueRank);
+@ requires \separated(address_space_bs__p_variant, *address_space_bs__p_valueRank);
+@ ensures *address_space_bs__p_valueRank == SOPC_Variant_Get_ValueRank(*address_space_bs__p_variant);
+@ assigns *address_space_bs__p_valueRank;
+*/
 void address_space_bs__get_conv_Variant_ValueRank(const constants__t_Variant_i address_space_bs__p_variant,
                                                   t_entier4* const address_space_bs__p_valueRank)
 {
