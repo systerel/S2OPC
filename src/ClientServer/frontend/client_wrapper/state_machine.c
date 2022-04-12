@@ -931,23 +931,23 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  SOPC_App_Com_Event event,
                                  uint32_t arg,
                                  void* pParam,
-                                 uintptr_t appCtx)
+                                 uintptr_t toolkitCtx)
 {
     bool bProcess = false;
-    uintptr_t intAppCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
+    uintptr_t appCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
     SOPC_StaMac_State oldState = stError;
     SOPC_StaMac_RequestScope requestScope = SOPC_REQUEST_SCOPE_STATE_MACHINE;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
-    bProcess = StaMac_IsEventTargeted(pSM, &intAppCtx, &requestScope, event, arg, pParam, appCtx);
+    bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, event, arg, pParam, toolkitCtx);
 
     if (bProcess)
     {
         oldState = pSM->state;
         if (NULL != pAppCtx)
         {
-            *pAppCtx = intAppCtx;
+            *pAppCtx = appCtx;
         }
 
         /* Treat an event depending on the state of the machine */
@@ -1002,7 +1002,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 break;
             /* Invalid states */
             case stError:
-                StaMac_ProcessEvent_stError(pSM, event, arg, pParam, intAppCtx);
+                StaMac_ProcessEvent_stError(pSM, event, arg, pParam, appCtx);
                 processingAuthorization = false;
                 break;
             case stInit:
@@ -1032,34 +1032,34 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             {
                 if (SE_ACTIVATED_SESSION == event)
                 {
-                    StaMac_ProcessMsg_ActivateSessionResponse(pSM, arg, pParam, intAppCtx);
+                    StaMac_ProcessMsg_ActivateSessionResponse(pSM, arg, pParam, appCtx);
                 }
                 else if (SE_CLOSED_SESSION == event)
                 {
-                    StaMac_ProcessMsg_CloseSessionResponse(pSM, arg, pParam, intAppCtx);
+                    StaMac_ProcessMsg_CloseSessionResponse(pSM, arg, pParam, appCtx);
                 }
                 else if (SE_RCV_SESSION_RESPONSE == event)
                 {
                     if (&OpcUa_PublishResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_PublishResponse(pSM, arg, pParam, intAppCtx);
+                        StaMac_ProcessMsg_PublishResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_CreateMonitoredItemsResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, intAppCtx);
+                        StaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_CreateSubscriptionResponse(pSM, arg, pParam, intAppCtx);
+                        StaMac_ProcessMsg_CreateSubscriptionResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_DeleteSubscriptionsResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_DeleteSubscriptionResponse(pSM, arg, pParam, intAppCtx);
+                        StaMac_ProcessMsg_DeleteSubscriptionResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_ServiceFault_EncodeableType == pEncType)
                     {
                         /* give appCtx, and not internal app context, to know more about the service fault */
-                        StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, appCtx);
+                        StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, toolkitCtx);
                     }
                     else
                     {
@@ -1070,7 +1070,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 else if (SE_SND_REQUEST_FAILED == event)
                 {
                     // Use same processing as service fault: it concerns only publish request
-                    StaMac_ProcessEvent_SendRequestFailed(pSM, arg, pParam, intAppCtx);
+                    StaMac_ProcessEvent_SendRequestFailed(pSM, arg, pParam, appCtx);
                 }
                 else
                 {
@@ -1096,7 +1096,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Applicative message could not be sent, closing the connection.");
                 if (NULL != pSM->cbkGenericEvent)
                 {
-                    pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, intAppCtx);
+                    pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, appCtx);
                 }
             }
             else
@@ -1104,7 +1104,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 if (NULL != pSM->cbkGenericEvent)
                 {
                     pSM->cbkGenericEvent(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
-                                         intAppCtx);
+                                         appCtx);
                 }
             }
         }
@@ -1138,7 +1138,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    SOPC_App_Com_Event event,
                                    uint32_t arg,
                                    void* pParam,
-                                   uintptr_t appCtx)
+                                   uintptr_t toolkitCtx)
 {
     /* avoid unused parameter compiler warning */
     (void) arg;
@@ -1164,7 +1164,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     case SE_RCV_DISCOVERY_RESPONSE:
     case SE_SND_REQUEST_FAILED:
         bProcess = false;
-        reqCtx = SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, (void*) appCtx);
+        reqCtx = SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, (void*) toolkitCtx);
         if (NULL != reqCtx)
         {
             bProcess = true;
@@ -1189,7 +1189,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     case SE_ACTIVATED_SESSION:
     case SE_SESSION_REACTIVATING:
     case SE_CLOSED_SESSION:
-        if (pSM->iSessionCtx != appCtx)
+        if (pSM->iSessionCtx != toolkitCtx)
         {
             bProcess = false;
         }
