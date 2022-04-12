@@ -25,7 +25,7 @@ then
     ENV=$(pwd)
 fi
 
-HEADERDIR=$(find $ENV -type f -name '*.h' | sed -r 's|/[^/]+$||' | sort -u | sed -r "s|^|-I|" | tr '\n' ' ')
+HEADERDIR=$(find $ENV/src/ -type f -name '*.h' | sed -r 's|/[^/]+$||' | sort -u | sed -r "s|^|-I|" | tr '\n' ' ')
 
 CPPCOMMAND="gcc -C -E $HEADERDIR"
 
@@ -39,7 +39,7 @@ fi
 SOURCEFILE=$1
 FUNC=$2
 
-WPARGS="-wp -wp-rte -wp-timeout=10 -wp-prover alt-ergo,z3,cvc4 -cpp-command"
+WPARGS="-wp-rte -instantiate -wp-timeout=10 -wp-prover alt-ergo,z3,cvc4 -cpp-command"
 
 WPFUNC='-wp-fct'
 
@@ -63,10 +63,12 @@ else
     echo "WP verification for all annotated files."
 fi
 FRAMACLOG="wp_log"
+FRAMACREPORT="wp_report"
 EXITCODE=0
 
 rm -f "wp-verification.tap"
 mkdir -p $FRAMACLOG
+mkdir -p $FRAMACREPORT
 
 NUM=0
 for f in $FILESTOPROVE
@@ -74,7 +76,7 @@ do
     let NUM=$NUM+1
     NAME=$(basename $f)
     START=$SECONDS
-    $FRAMAC $WPARGS "$CPPCOMMAND" $f -then -report > "$FRAMACLOG/$NAME.log"
+    $FRAMAC -wp -wp-report-json $FRAMACREPORT/$NAME.json $WPARGS "$CPPCOMMAND" $f -then -report > "$FRAMACLOG/$NAME.log"
     END=$SECONDS
     if [[ -z $(grep "Status Report Summary" "$FRAMACLOG/$NAME.log") ]]
     then
