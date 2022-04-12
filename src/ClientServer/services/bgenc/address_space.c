@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 04/08/2022 14:52:58
+ Date                 : 05/08/2022 08:40:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,7 +41,7 @@ void address_space__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void address_space__is_mandatory_attribute(
+void address_space__local_is_mandatory_attribute(
    const constants__t_NodeClass_i address_space__p_ncl,
    const constants__t_AttributeId_i address_space__p_aid,
    t_bool * const address_space__bres) {
@@ -91,6 +91,15 @@ void address_space__is_mandatory_attribute(
          break;
       }
    }
+}
+
+void address_space__is_mandatory_attribute(
+   const constants__t_NodeClass_i address_space__p_ncl,
+   const constants__t_AttributeId_i address_space__p_aid,
+   t_bool * const address_space__bres) {
+   address_space__local_is_mandatory_attribute(address_space__p_ncl,
+      address_space__p_aid,
+      address_space__bres);
 }
 
 void address_space__treat_write_request_WriteValue(
@@ -608,7 +617,7 @@ void address_space__read_Node_Attribute(
       *address_space__val_ts_srv = constants__c_Timestamp_null;
       address_space_bs__get_NodeClass(address_space__p_node,
          &address_space__l_ncl);
-      address_space__is_mandatory_attribute(address_space__l_ncl,
+      address_space__local_is_mandatory_attribute(address_space__l_ncl,
          address_space__p_aid,
          &address_space__l_is_mandatory_attribute);
       if (address_space__l_is_mandatory_attribute == true) {

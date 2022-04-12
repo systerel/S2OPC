@@ -40,6 +40,7 @@ IMPORTS
    but it would trigger a bug in the project check. */
 
 PROMOTES
+    is_mandatory_attribute,
     read_Node_Attribute,
     readall_AddressSpace_Node,
     get_NodeClass,
@@ -67,6 +68,7 @@ PROMOTES
     read_variable_compat_type,
     check_object_has_method,
     check_nodeId_isValid,
+    is_IndexRangeDefined,
 
     write_WriteResponse_msg_out
 

@@ -19,6 +19,40 @@
 
 DEFINITIONS
 
+    d_Mandatory_Attribute(dvNcl, dvAid) ==
+    /* COMMON MANDATORY ATTRIBUTES: all node classes have it */
+    (dvAid = e_aid_BrowseName or dvAid = e_aid_DisplayName or
+        dvAid = e_aid_NodeClass or dvAid = e_aid_NodeId) or
+
+    (dvNcl = e_ncl_Variable & /* VARIABLE */
+        (dvAid = e_aid_AccessLevel or dvAid = e_aid_DataType or
+            dvAid = e_aid_Historizing or dvAid = e_aid_UserAccessLevel or
+            dvAid = e_aid_Value or dvAid = e_aid_ValueRank or
+            dvAid = e_aid_ArrayDimensions)
+    ) or
+    (dvNcl = e_ncl_VariableType & /* VARIABLE TYPE */
+        (dvAid = e_aid_DataType or dvAid = e_aid_IsAbstract or
+         dvAid = e_aid_ValueRank or dvAid = e_aid_ArrayDimensions)
+    ) or
+    (dvNcl = e_ncl_Object & /* OBJECT */
+        dvAid = e_aid_EventNotifier
+    ) or
+    (dvNcl = e_ncl_ObjectType & /* OBJECT TYPE */
+        dvAid = e_aid_IsAbstract
+    ) or
+    (dvNcl = e_ncl_ReferenceType & /* REFERENCE TYPE */
+        (dvAid = e_aid_IsAbstract or dvAid = e_aid_Symmetric)
+    ) or
+    (dvNcl = e_ncl_DataType & /* DATA TYPE */
+        dvAid = e_aid_IsAbstract
+    ) or
+    (dvNcl = e_ncl_Method & /* METHOD */
+        (dvAid = e_aid_UserExecutable or dvAid = e_aid_Executable)
+    ) or
+    (dvNcl = e_ncl_View & /* VIEW */
+        (dvAid = e_aid_EventNotifier or dvAid = e_aid_ContainsNoLoops))
+    ;
+
     d_adsp_variables ==
         /* Attributes (mandatory) */
         a_NodeId,
@@ -154,6 +188,17 @@ DEFINITIONS
     );
 
     d_adsp_operations ==
+    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    PRE
+        p_ncl : t_NodeClass_i &
+        p_ncl : t_NodeClass &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId
+    THEN
+        bres := bool(d_Mandatory_Attribute(p_ncl, p_aid))
+    END
+    ;
+
     /* a_NodeClass(node) and any_attribute(node) */
     sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     PRE
@@ -790,4 +835,12 @@ DEFINITIONS
             statusCode := e_sc_ok ||
             node := a_NodeId~(nodeid)
         END
+    END
+    ;
+
+    bres <-- is_IndexRangeDefined(p_index_range) =
+    PRE
+        p_index_range : t_IndexRange_i
+    THEN
+        bres :: BOOL
     END

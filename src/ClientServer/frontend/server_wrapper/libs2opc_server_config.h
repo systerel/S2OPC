@@ -134,6 +134,51 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
 
 /**
+ * \brief Type of the callback called by CreateMonitoredItem service when a NodeId is not already part of server
+ *        address space, the callback result indicates if it shall be considered known by server
+ *        (and might exist later using AddNode service).
+ *
+ *        It returns true when CreateMonitoredItem for this \p nodeId shall succeed,
+ *        in this case \p outNodeClass shall be set to the expected NodeClass
+ *        and \p outBadStatus shall be set with an appropriate Bad StatusCode
+ *        returned in the Publish response as first value notification.
+ *        It returns false otherwise, in this case server will return Bad_NodeIdUnknown
+ *        in the CreateMonitoredItem response.
+ *
+ * \warning This callback shall not block the thread that calls it, and shall return immediately.
+ *
+ *
+ * \param      nodeId       NodeId that is not part of the server address space yet
+ *                          and which is requested in a MonitoredItemCreateRequest.
+ *                          It might be added by AddNode service later.
+ * \param[out] outNodeClass The NodeClass of the known node when it will be available.
+ *                          It shall always be the same for the same NodeId.
+ * \param[out] outBadStatus The appropriate Bad StatusCode to return in the Publish response.
+ *                          ::OpcUa_BadDataUnavailable or ::OpcUa_BadWouldBlock are recommended.
+ *
+ * \return                  true when CreateMonitoredItem for this \p nodeId shall succeed, false otherwise.
+ */
+typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
+                                         OpcUa_NodeClass* outNodeClass,
+                                         SOPC_StatusCode* outUnavailabilityStatus);
+
+/**
+ * \brief Define the callback called by CreateMonitoredItem service when a NodeId is not already part of server.
+ *        The callback result indicates if it shall be considered known by server (see ::SOPC_CreateMI_NodeAvail_Fct).
+ *
+ * This is optional but if used it shall be defined before starting server.
+ *
+ * \param nodeAvailCb  The MonitoredItem node availability callback to be used by server
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p nodeAvailCb is invalid
+ *             or SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *             (toolkit not initialized, server already started).
+ *
+ * \warning This callback shall not block the thread that calls it, and shall return immediately.
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb);
+
+/**
  * \brief Type of callback to provide to receive asynchronous local service response
  *
  * \param response     An asynchronous response to a local service request sent using

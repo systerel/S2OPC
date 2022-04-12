@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.h
 
- Date                 : 04/08/2022 14:53:15
+ Date                 : 05/08/2022 08:40:42
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -82,8 +82,10 @@ extern void service_write_1__INITIALISATION(void);
 #define service_write_1__get_conv_Variant_Type address_space__get_conv_Variant_Type
 #define service_write_1__get_conv_Variant_ValueRank address_space__get_conv_Variant_ValueRank
 #define service_write_1__get_user_authorization address_space__get_user_authorization
+#define service_write_1__is_IndexRangeDefined address_space__is_IndexRangeDefined
 #define service_write_1__is_NodeId_equal address_space__is_NodeId_equal
 #define service_write_1__is_local_service_treatment address_space__is_local_service_treatment
+#define service_write_1__is_mandatory_attribute address_space__is_mandatory_attribute
 #define service_write_1__is_transitive_subtype address_space__is_transitive_subtype
 #define service_write_1__is_valid_ReferenceTypeId address_space__is_valid_ReferenceTypeId
 #define service_write_1__read_AddressSpace_clear_value address_space__read_AddressSpace_clear_value

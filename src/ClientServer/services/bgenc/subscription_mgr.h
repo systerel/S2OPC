@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 04/08/2022 14:53:22
+ Date                 : 05/08/2022 08:40:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,6 +43,7 @@
 #include "msg_subscription_delete_bs.h"
 #include "msg_subscription_publish_ack_bs.h"
 #include "msg_subscription_set_publishing_mode_bs.h"
+#include "subscription_absent_node.h"
 #include "subscription_core.h"
 #include "subscription_create_monitored_item_it.h"
 
@@ -95,6 +96,7 @@ extern void subscription_mgr__fill_publish_response_msg_available_seq_nums(
    const constants__t_notifRepublishQueue_i subscription_mgr__republishQueue,
    const t_entier4 subscription_mgr__nb_seq_nums);
 extern void subscription_mgr__fill_response_subscription_create_monitored_items(
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_user_i subscription_mgr__p_user,

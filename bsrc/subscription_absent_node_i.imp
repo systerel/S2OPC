@@ -1,0 +1,67 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    subscription_absent_node_i
+REFINES
+    subscription_absent_node
+SEES
+    constants,
+    constants_statuscodes_bs,
+    address_space_itf
+IMPORTS
+    subscription_absent_node_bs
+
+OPERATIONS
+
+    bres_absent_knownNode, knownNodeClass, valueSc <-- if_not_present_is_Node_known(p_node_is_present, p_endpoint_config_idx, p_nid) =
+    BEGIN
+        IF p_node_is_present = TRUE THEN
+            bres_absent_knownNode := FALSE;
+            knownNodeClass := c_NodeClass_indet;
+            valueSc <-- get_const_RawStatusCode_Good
+        ELSE
+            bres_absent_knownNode, knownNodeClass, valueSc <-- absent_Node_is_known(p_endpoint_config_idx, p_nid)
+        END
+    END
+    ;
+
+    sc, value, val_ts_src, val_ts_srv <-- eval_knownNode_requested_properties(p_nid, p_knownNodeClass, p_aid, p_indexRange) =
+    VAR
+        l_is_supported_attribute,
+        l_is_index_range_defined
+        /* TODO: validity of index range (syntax) ? */
+    IN
+        nodeId_do_nothing(p_nid); /* avoid unused variable in generated code */
+        sc := e_sc_bad_attribute_id_invalid;
+        value := c_Variant_indet;
+        val_ts_src := c_Timestamp_null;
+        val_ts_srv := c_Timestamp_null;
+        l_is_supported_attribute <-- is_mandatory_attribute(p_knownNodeClass, p_aid);
+        IF l_is_supported_attribute = TRUE THEN
+           l_is_index_range_defined <-- is_IndexRangeDefined(p_indexRange);
+            IF p_aid /= e_aid_Value & l_is_index_range_defined = TRUE THEN
+                sc := e_sc_bad_index_range_no_data
+            ELSE
+                sc := e_sc_ok
+            END
+        END
+    END
+
+END

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 04/08/2022 14:53:52
+ Date                 : 05/08/2022 08:41:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -132,6 +132,8 @@
 #include "session_mgr.h"
 #include "session_mgr_it.h"
 #include "session_request_handle_bs.h"
+#include "subscription_absent_node.h"
+#include "subscription_absent_node_bs.h"
 #include "subscription_core.h"
 #include "subscription_core_1.h"
 #include "subscription_core_bs.h"
@@ -246,6 +248,8 @@ void INITIALISATION(void) {
    msg_subscription_create_monitored_item_bs__INITIALISATION();
    msg_subscription_create_monitored_item__INITIALISATION();
    subscription_create_monitored_item_it__INITIALISATION();
+   subscription_absent_node_bs__INITIALISATION();
+   subscription_absent_node__INITIALISATION();
    subscription_mgr__INITIALISATION();
    msg_register_server2_bs__INITIALISATION();
    msg_register_server2__INITIALISATION();

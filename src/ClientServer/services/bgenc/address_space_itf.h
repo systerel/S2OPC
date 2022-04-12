@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 04/08/2022 14:52:59
+ Date                 : 05/08/2022 08:40:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -73,8 +73,10 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__get_conv_Variant_Type service_write__get_conv_Variant_Type
 #define address_space_itf__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
 #define address_space_itf__get_user_authorization service_write__get_user_authorization
+#define address_space_itf__is_IndexRangeDefined service_write__is_IndexRangeDefined
 #define address_space_itf__is_NodeId_equal service_write__is_NodeId_equal
 #define address_space_itf__is_local_service_treatment service_write__is_local_service_treatment
+#define address_space_itf__is_mandatory_attribute service_write__is_mandatory_attribute
 #define address_space_itf__is_transitive_subtype service_write__is_transitive_subtype
 #define address_space_itf__is_valid_ReferenceTypeId service_write__is_valid_ReferenceTypeId
 #define address_space_itf__read_AddressSpace_clear_value service_write__read_AddressSpace_clear_value

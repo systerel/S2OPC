@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 04/08/2022 14:53:22
+ Date                 : 05/08/2022 08:40:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -152,6 +152,7 @@ void subscription_mgr__fill_publish_response_msg_available_seq_nums(
 }
 
 void subscription_mgr__fill_response_subscription_create_monitored_items(
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_user_i subscription_mgr__p_user,
@@ -160,9 +161,13 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items) {
    {
+      constants__t_endpoint_config_idx_i subscription_mgr__l_endpoint_config_idx;
       t_bool subscription_mgr__l_continue;
       t_entier4 subscription_mgr__l_index;
       t_bool subscription_mgr__l_bres;
+      t_bool subscription_mgr__l_bres_presentNode;
+      t_bool subscription_mgr__l_bres_absent_knownNode;
+      constants__t_NodeClass_i subscription_mgr__l_knownNodeClass;
       constants__t_NodeId_i subscription_mgr__l_nid;
       constants__t_AttributeId_i subscription_mgr__l_aid;
       constants__t_monitoringMode_i subscription_mgr__l_monitMode;
@@ -181,6 +186,8 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
       t_entier4 subscription_mgr__l_revQueueSize;
       constants__t_IndexRange_i subscription_mgr__l_indexRange;
       
+      session_mgr__session_get_endpoint_config(subscription_mgr__p_session,
+         &subscription_mgr__l_endpoint_config_idx);
       subscription_create_monitored_item_it__init_iter_monitored_item_request(subscription_mgr__p_nb_monitored_items,
          &subscription_mgr__l_continue);
       while (subscription_mgr__l_continue == true) {
@@ -205,23 +212,42 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             &subscription_mgr__l_indexRange);
          if (subscription_mgr__l_bres == true) {
             address_space_itf__readall_AddressSpace_Node(subscription_mgr__l_nid,
-               &subscription_mgr__l_bres,
+               &subscription_mgr__l_bres_presentNode,
                &subscription_mgr__l_node);
-            if (subscription_mgr__l_bres == false) {
+            subscription_absent_node__if_not_present_is_Node_known(subscription_mgr__l_bres_presentNode,
+               subscription_mgr__l_endpoint_config_idx,
+               subscription_mgr__l_nid,
+               &subscription_mgr__l_bres_absent_knownNode,
+               &subscription_mgr__l_knownNodeClass,
+               &subscription_mgr__l_valueSc);
+            if ((subscription_mgr__l_bres_presentNode == false) &&
+               (subscription_mgr__l_bres_absent_knownNode == false)) {
                subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
             }
             else {
-               address_space_itf__read_Node_Attribute(subscription_mgr__p_user,
-                  subscription_mgr__p_locales,
-                  subscription_mgr__l_node,
-                  subscription_mgr__l_nid,
-                  subscription_mgr__l_aid,
-                  subscription_mgr__l_indexRange,
-                  &subscription_mgr__l_sc,
-                  &subscription_mgr__l_value,
-                  &subscription_mgr__l_valueSc,
-                  &subscription_mgr__l_val_ts_src,
-                  &subscription_mgr__l_val_ts_srv);
+               if (subscription_mgr__l_bres_presentNode == true) {
+                  address_space_itf__read_Node_Attribute(subscription_mgr__p_user,
+                     subscription_mgr__p_locales,
+                     subscription_mgr__l_node,
+                     subscription_mgr__l_nid,
+                     subscription_mgr__l_aid,
+                     subscription_mgr__l_indexRange,
+                     &subscription_mgr__l_sc,
+                     &subscription_mgr__l_value,
+                     &subscription_mgr__l_valueSc,
+                     &subscription_mgr__l_val_ts_src,
+                     &subscription_mgr__l_val_ts_srv);
+               }
+               else {
+                  subscription_absent_node__eval_knownNode_requested_properties(subscription_mgr__l_nid,
+                     subscription_mgr__l_knownNodeClass,
+                     subscription_mgr__l_aid,
+                     subscription_mgr__l_indexRange,
+                     &subscription_mgr__l_sc,
+                     &subscription_mgr__l_value,
+                     &subscription_mgr__l_val_ts_src,
+                     &subscription_mgr__l_val_ts_srv);
+               }
                if ((subscription_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) &&
                   (((subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_not_readable) ||
                   (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_user_access_denied)) ||
@@ -760,7 +786,8 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
             if (subscription_mgr__l_bres == true) {
                session_mgr__get_server_session_preferred_locales(subscription_mgr__p_session,
                   &subscription_mgr__l_locales);
-               subscription_mgr__fill_response_subscription_create_monitored_items(subscription_mgr__l_subscription,
+               subscription_mgr__fill_response_subscription_create_monitored_items(subscription_mgr__p_session,
+                  subscription_mgr__l_subscription,
                   subscription_mgr__l_timestampToRet,
                   subscription_mgr__p_user,
                   subscription_mgr__l_locales,

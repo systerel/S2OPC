@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 04/08/2022 14:52:58
+ Date                 : 05/08/2022 08:40:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -78,6 +78,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_conv_Variant_Type address_space_bs__get_conv_Variant_Type
 #define address_space__get_conv_Variant_ValueRank address_space_bs__get_conv_Variant_ValueRank
 #define address_space__get_user_authorization user_authorization_bs__get_user_authorization
+#define address_space__is_IndexRangeDefined address_space_bs__is_IndexRangeDefined
 #define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
 #define address_space__is_local_service_treatment address_space_local__is_local_service_treatment
 #define address_space__is_transitive_subtype address_space_typing__is_transitive_subtype
@@ -90,10 +91,6 @@ extern void address_space__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
-extern void address_space__is_mandatory_attribute(
-   const constants__t_NodeClass_i address_space__p_ncl,
-   const constants__t_AttributeId_i address_space__p_aid,
-   t_bool * const address_space__bres);
 extern void address_space__is_variable_compat_type(
    const constants__t_NodeId_i address_space__p_dv_typ_nid,
    const t_entier4 address_space__p_dv_vr,
@@ -101,6 +98,10 @@ extern void address_space__is_variable_compat_type(
    const t_entier4 address_space__p_var_vr,
    t_bool * const address_space__btyp_ok,
    t_bool * const address_space__btyp_need_conv);
+extern void address_space__local_is_mandatory_attribute(
+   const constants__t_NodeClass_i address_space__p_ncl,
+   const constants__t_AttributeId_i address_space__p_aid,
+   t_bool * const address_space__bres);
 extern void address_space__read_AddressSpace_Attribute_value(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
@@ -133,6 +134,10 @@ extern void address_space__check_nodeId_isValid(
    const constants__t_NodeId_i address_space__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
    constants__t_Node_i * const address_space__node);
+extern void address_space__is_mandatory_attribute(
+   const constants__t_NodeClass_i address_space__p_ncl,
+   const constants__t_AttributeId_i address_space__p_aid,
+   t_bool * const address_space__bres);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,

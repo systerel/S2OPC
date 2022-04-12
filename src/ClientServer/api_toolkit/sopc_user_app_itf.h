@@ -171,6 +171,35 @@ struct SOPC_Client_Config
 };
 
 /**
+ * \brief Type of the callback called by CreateMonitoredItem service when a NodeId is not already part of server
+ *        address space, the callback result indicates if it shall be considered known by server
+ *        (and might exist later using AddNode service).
+ *
+ *        It returns true when CreateMonitoredItem for this \p nodeId shall succeed,
+ *        in this case \p outNodeClass shall be set to the expected NodeClass
+ *        and \p outBadStatus shall be set with an appropriate Bad StatusCode
+ *        returned in the Publish response as first value notification.
+ *        It returns false otherwise, in this case server will return Bad_NodeIdUnknown
+ *        in the CreateMonitoredItem response.
+ *
+ * \warning This callback shall not block the thread that calls it, and shall return immediately.
+ *
+ *
+ * \param      nodeId                   NodeId that is not part of the server address space yet
+ *                                      and which is requested in a MonitoredItemCreateRequest.
+ *                                      It might be added by AddNode service later.
+ * \param[out] outNodeClass             The NodeClass of the known node when it will be available.
+ *                                      It shall always be the same for the same NodeId.
+ * \param[out] outUnavailabilityStatus  The appropriate Bad StatusCode to return in the Publish response.
+ *                                      ::OpcUa_BadDataUnavailable or ::OpcUa_BadWouldBlock are recommended.
+ *
+ * \return                              true when CreateMonitoredItem for this \p nodeId shall succeed, false otherwise.
+ */
+typedef bool SOPC_CreateMI_NodeAvailFunc(const SOPC_NodeId* nodeId,
+                                         OpcUa_NodeClass* outNodeClass,
+                                         SOPC_StatusCode* outUnavailabilityStatus);
+
+/**
  * \brief OPC UA server configuration structure
  */
 struct SOPC_Server_Config
@@ -219,10 +248,15 @@ struct SOPC_Server_Config
     SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
     SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
                               or ::SOPC_PKIProviderStack_Create. */
-    SOPC_MethodCallManager* mcm; /**< Method Call service configuration.
-                                      Can be instantiated with SOPC_MethodCallManager_Create()
-                                      or specific code by applicative code.
-                                      Can be NULL if Method Call service is not used. */
+    SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
+                                                     Can be instantiated with SOPC_MethodCallManager_Create()
+                                                     or specific code by applicative code.
+                                                     Can be NULL if Method Call service is not used. */
+    SOPC_CreateMI_NodeAvailFunc* nodeAvailFunc; /**< If defined, the callback is called by CreateMonitoredItem service
+                                                     when NodeId is not already part of server AddressSpace.
+                                                     The callback indicates if it should be considered known by server
+                                                     (and might exist later).
+                                                     See ::SOPC_CreateMI_NodeAvailFunc for details. */
 };
 
 /**

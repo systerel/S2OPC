@@ -544,6 +544,22 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb)
+{
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == nodeAvailCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != pConfig);
+    pConfig->serverConfig.nodeAvailFunc = nodeAvailCb;
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
 {
     if (!SOPC_ServerInternal_IsConfiguring())

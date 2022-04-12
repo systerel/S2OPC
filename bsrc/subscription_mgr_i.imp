@@ -42,7 +42,8 @@ IMPORTS
     msg_subscription_publish_ack_bs,
     msg_subscription_set_publishing_mode_bs,
     msg_subscription_create_monitored_item,
-    subscription_create_monitored_item_it
+    subscription_create_monitored_item_it,
+    subscription_absent_node
 
 PROMOTES
     is_valid_subscription
@@ -141,8 +142,10 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
+        p_session : t_session_i & p_session : t_session &
+        p_session : ran(a_subscription_session) &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_tsToReturn : t_TimestampsToReturn_i &
@@ -186,8 +189,11 @@ LOCAL_OPERATIONS
                                                                                         t_monitoredItemId = s_monitoredItemId))
                                                                         }(bool(MonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
                                                            }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
-                                                             dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index)))))
-                                                }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~)))
+                                                                   dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index))) or
+                                                                  MonitoredItemReq_AttributeId(mi_index) |-> a_Node_availableInFuture(MonitoredItemReq_NodeId(mi_index))
+                                                                   /: a_NodeClass_HasAttribute))
+                                                }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
+                                                       MonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
                                      }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
                             }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
                 }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))
@@ -533,11 +539,15 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
+        l_endpoint_config_idx,
         l_continue,
         l_index,
         l_bres,
+        l_bres_presentNode,
+        l_bres_absent_knownNode,
+        l_knownNodeClass,
         l_nid,
         l_aid,
         l_monitMode,
@@ -556,6 +566,7 @@ OPERATIONS
         l_revQueueSize,
         l_indexRange
     IN
+        l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_node := c_Node_indet;
@@ -570,13 +581,21 @@ OPERATIONS
             /* Check validity of NodeId */
             IF l_bres = TRUE
             THEN
-                l_bres, l_node <-- readall_AddressSpace_Node (l_nid);
-                IF l_bres = FALSE
+                l_bres_presentNode, l_node <-- readall_AddressSpace_Node (l_nid);
+                l_bres_absent_knownNode, l_knownNodeClass, l_valueSc <-- if_not_present_is_Node_known(l_bres_presentNode, l_endpoint_config_idx, l_nid);
+                IF l_bres_presentNode = FALSE & l_bres_absent_knownNode = FALSE
                 THEN
                     l_sc := e_sc_bad_node_id_unknown
                 ELSE
-                    /* Read monitored item value */
-                    l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, p_locales, l_node, l_nid, l_aid, l_indexRange);
+                    IF l_bres_presentNode = TRUE
+                    THEN
+                        /* Read monitored item value */
+                        l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, p_locales, l_node, l_nid, l_aid, l_indexRange)
+                    ELSE
+                        /* Known node but not yet available: evaluate attribute based on NodeClass and check if index range is not invalid */
+                        /* TODO: implement TODO in create_notification_on_monitored_items_if_data_changed to manage correctly user access notif ... */
+                        l_sc, l_value, l_val_ts_src, l_val_ts_srv <-- eval_knownNode_requested_properties(l_nid, l_knownNodeClass, l_aid, l_indexRange)
+                    END;
                     /* Create monitored item */
                     /* From part 4:
                        When a user adds a monitored item that the user is denied read access to, the add operation for
@@ -1024,7 +1043,7 @@ OPERATIONS
                 THEN
                     l_locales <-- get_server_session_preferred_locales(p_session);
                     fill_response_subscription_create_monitored_items
-                      (l_subscription, l_timestampToRet, p_user, l_locales, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (p_session, l_subscription, l_timestampToRet, p_user, l_locales, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

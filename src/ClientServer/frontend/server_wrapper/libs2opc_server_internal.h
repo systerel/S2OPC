@@ -75,6 +75,8 @@ typedef struct SOPC_ServerHelper_Config
 
     // Application write notification callback record
     SOPC_WriteNotif_Fct* writeNotifCb;
+    // Application node availability for CreateMonitoreItem callback
+    SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb;
     // Application asynchronous local service response callback record
     SOPC_LocalServiceAsyncResp_Fct* asyncRespCb;
 

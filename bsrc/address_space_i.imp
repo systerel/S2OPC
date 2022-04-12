@@ -62,10 +62,12 @@ PROMOTES
     get_InputArguments,
     get_conv_Variant_ValueRank,
     get_conv_Variant_Type,
-    check_object_has_method
+    check_object_has_method,
+    is_IndexRangeDefined
 
 DEFINITIONS
     "definitions.def";
+    "address_space.def";
 
     d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
     /* A scalar ByteString is compatible with a 1 dimension Byte array */
@@ -80,40 +82,6 @@ DEFINITIONS
         dvConcValueRank |-> varValueRank : Type_IsIncludedValueRank)
     /* + Management of exceptional cases when typing a variable */
     or d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank);
-
-    d_Mandatory_Attribute(dvNcl, dvAid) ==
-    /* COMMON MANDATORY ATTRIBUTES: all node classes have it */
-    (dvAid = e_aid_BrowseName or dvAid = e_aid_DisplayName or
-        dvAid = e_aid_NodeClass or dvAid = e_aid_NodeId) or
-
-    (dvNcl = e_ncl_Variable & /* VARIABLE */
-        (dvAid = e_aid_AccessLevel or dvAid = e_aid_DataType or
-            dvAid = e_aid_Historizing or dvAid = e_aid_UserAccessLevel or
-            dvAid = e_aid_Value or dvAid = e_aid_ValueRank or
-            dvAid = e_aid_ArrayDimensions)
-    ) or
-    (dvNcl = e_ncl_VariableType & /* VARIABLE TYPE */
-        (dvAid = e_aid_DataType or dvAid = e_aid_IsAbstract or
-         dvAid = e_aid_ValueRank or dvAid = e_aid_ArrayDimensions)
-    ) or
-    (dvNcl = e_ncl_Object & /* OBJECT */
-        dvAid = e_aid_EventNotifier
-    ) or
-    (dvNcl = e_ncl_ObjectType & /* OBJECT TYPE */
-        dvAid = e_aid_IsAbstract
-    ) or
-    (dvNcl = e_ncl_ReferenceType & /* REFERENCE TYPE */
-        (dvAid = e_aid_IsAbstract or dvAid = e_aid_Symmetric)
-    ) or
-    (dvNcl = e_ncl_DataType & /* DATA TYPE */
-        dvAid = e_aid_IsAbstract
-    ) or
-    (dvNcl = e_ncl_Method & /* METHOD */
-        (dvAid = e_aid_UserExecutable or dvAid = e_aid_Executable)
-    ) or
-    (dvNcl = e_ncl_View & /* VIEW */
-        (dvAid = e_aid_EventNotifier or dvAid = e_aid_ContainsNoLoops))
-    ;
 
     d_VariantIndex_HasRange_Valid(dVal, idxRange, locale) ==
        ({FALSE |-> e_sc_bad_index_range_invalid,
@@ -145,7 +113,7 @@ DEFINITIONS
 
 
 LOCAL_OPERATIONS
-    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    bres <-- local_is_mandatory_attribute(p_ncl, p_aid) =
     PRE
         p_ncl : t_NodeClass_i &
         p_ncl : t_NodeClass &
@@ -417,7 +385,7 @@ OPERATIONS
     /* LOCAL_OPERATIONS */
 
     /* We only manage mandatory attributes */
-    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    bres <-- local_is_mandatory_attribute(p_ncl, p_aid) =
     BEGIN
         /* Check attributes present in all node clasess */
         bres := bool(p_aid = e_aid_BrowseName or p_aid = e_aid_DisplayName or
@@ -447,6 +415,12 @@ OPERATIONS
                 END
            END
         END
+    END
+    ;
+
+    bres <-- is_mandatory_attribute(p_ncl, p_aid) =
+    BEGIN
+        bres <-- local_is_mandatory_attribute(p_ncl, p_aid)
     END
     ;
 
@@ -755,7 +729,7 @@ OPERATIONS
         val_ts_src := c_Timestamp_null;
         val_ts_srv := c_Timestamp_null;
         l_ncl <-- get_NodeClass(p_node);
-        l_is_mandatory_attribute <-- is_mandatory_attribute(l_ncl, p_aid);
+        l_is_mandatory_attribute <-- local_is_mandatory_attribute(l_ncl, p_aid);
         IF l_is_mandatory_attribute = TRUE THEN
             IF l_ncl = e_ncl_Variable & p_aid = e_aid_Value THEN
                 l_is_local_read <-- is_local_service_treatment;
