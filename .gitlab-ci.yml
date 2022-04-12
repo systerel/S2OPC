@@ -363,6 +363,7 @@ test-uactt:
       when: on_success
 
 test-framac:
+  <<: *docker_job
   image: registry.gitlab.com/systerel/s2opc/framac@sha256:e08df77a482d07c61c59cde8f212c46c3bff8ed8c1987977dd6a42794509dcb0 # framac 1.2
   stage: gen
   script:
