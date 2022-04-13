@@ -70,6 +70,8 @@ rm -f "wp-verification.tap"
 mkdir -p $FRAMACLOG
 mkdir -p $FRAMACREPORT
 
+SCRIPT_VERDICT="$ENV/scripts/wp-verdict.py"
+
 NUM=0
 for f in $FILESTOPROVE
 do
@@ -84,9 +86,9 @@ do
         echo not ok $NUM - $f : Error on file >> "wp-verification.tap"
         EXITCODE=2
     else
-        NBTOTAL=$(grep "Total" "$FRAMACLOG/$NAME.log" | sed 's/[^0-9]*//g')
-        NBVALID=$(grep "Completely validated" "$FRAMACLOG/$NAME.log" | sed 's/[^0-9]*//g')
-        NBCONSIDERVALID=$(grep "Considered valid" "$FRAMACLOG/$NAME.log" | sed 's/[^0-9]*//g')
+        VERDICT=$(python3 $SCRIPT_VERDICT $FRAMACREPORT/$NAME.json)
+        NBTOTAL=$(echo "$VERDICT" | grep "Total" | sed 's/[^0-9]*//g')
+        NBVALID=$(echo "$VERDICT" | grep "Validated" | sed 's/[^0-9]*//g')
         if [[ -z $(grep "To be validated" "$FRAMACLOG/$NAME.log") ]]
         then
             printf "\033[0;32mProved  \033[0;0m: %s " "$f"
@@ -97,7 +99,7 @@ do
         else
             printf "Unproved: %s " "$f"
             eval "printf '.'%.0s {0..$((80-${#f}))}"
-            printf " (%d/%d) %d sec\n" "$(($NBVALID+$NBCONSIDERVALID))" "$NBTOTAL" "$((END-START))"
+            printf " (%d/%d) %d sec\n" "$(($NBVALID))" "$NBTOTAL" "$((END-START))"
             echo not ok $NUM - $f : Unproved contracts >> "wp-verification.tap"
             EXITCODE=1
         fi

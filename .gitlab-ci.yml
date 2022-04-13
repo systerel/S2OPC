@@ -364,7 +364,7 @@ test-uactt:
 
 test-framac:
   <<: *docker_job
-  image: registry.gitlab.com/systerel/s2opc/framac@sha256:e08df77a482d07c61c59cde8f212c46c3bff8ed8c1987977dd6a42794509dcb0 # framac 1.2
+  image: registry.gitlab.com/systerel/s2opc/framac@sha256:c056041c52539b536a87036007d103127bcddf27f2d7fced921ae98b26040018 # framac 1.2
   stage: gen
   script:
     - './.wp-verification.sh'
