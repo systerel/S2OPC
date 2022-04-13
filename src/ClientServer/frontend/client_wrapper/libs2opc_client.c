@@ -106,7 +106,30 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
                                                 int32_t nElements,
                                                 SOPC_LibSub_DataId* lDataId)
 {
-    SOPC_ReturnStatus status = SOPC_ClientCommon_AddToSubscription(cliId, lszNodeId, lattrId, nElements, lDataId, NULL);
+    OpcUa_CreateMonitoredItemsResponse response;
+    SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, &response);
+    SOPC_ReturnStatus status =
+        SOPC_ClientCommon_AddToSubscription(cliId, lszNodeId, lattrId, nElements, lDataId, &response);
+    if (SOPC_STATUS_OK == status && response.NoOfResults != (int32_t) nElements)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    for (int32_t i = 0; i < nElements && i < response.NoOfResults; ++i)
+    {
+        SOPC_StatusCode ResultStatus = response.Results[i].StatusCode;
+        if (SOPC_IsGoodStatus(ResultStatus))
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem with index '%" PRIi32 "' created.", i);
+        }
+        else
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING,
+                        "Server could not create monitored item with index '%" PRIi32 "', sc = 0x%08" PRIX32 ".", i,
+                        ResultStatus);
+        }
+    }
+
+    SOPC_EncodeableObject_Clear(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, &response);
     return status;
 }
 

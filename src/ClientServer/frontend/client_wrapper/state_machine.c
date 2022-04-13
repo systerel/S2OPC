@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
@@ -1387,54 +1388,34 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
 {
     (void) (arg);
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
 
     /* There should be only one result element */
     pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
     assert(NULL != pMonItResp);
-    for (i = 0; SOPC_STATUS_OK == status && i < pMonItResp->NoOfResults; ++i)
+
+    for (i = 0; i < pMonItResp->NoOfResults; ++i)
     {
-        if (!SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_WARNING,
-                        "Server could not create monitored item with index '%" PRIi32 "', sc = 0x%08" PRIX32 ".", i,
-                        pMonItResp->Results[i].StatusCode);
-        }
-        else
+        if (SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
         {
             if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId, (void*) appCtx) !=
                 (void*) appCtx)
             {
-                status = SOPC_STATUS_NOK;
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "MonitoredItem with index '%" PRIi32 "' created.", i);
+                pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".", i);
             }
         }
     }
 
-    OpcUa_CreateMonitoredItemsResponse* resp = NULL;
-    if (SOPC_STATUS_OK == status)
-    {
-        resp = ((SOPC_CreateMonitoredItem_Ctx*) appCtx)->Results;
-    }
-    if (SOPC_STATUS_OK == status && NULL != resp)
+    OpcUa_CreateMonitoredItemsResponse* resp = ((SOPC_CreateMonitoredItem_Ctx*) appCtx)->Results;
+    if (NULL != resp)
     {
         // Transfer response data into app context
         *resp = *pMonItResp;
         SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pMonItResp);
     }
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM->state = stActivated;
-    }
-    else
-    {
-        pSM->state = stError;
-    }
+    pSM->state = stActivated;
 }
 
 static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
