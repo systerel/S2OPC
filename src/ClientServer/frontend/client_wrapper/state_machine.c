@@ -68,19 +68,20 @@ struct SOPC_StaMac_Machine
     uint32_t iCntMaxKeepAlive;            /* Number of skipped response before sending an empty KeepAlive */
     uint32_t iCntLifetime;                /* Number of deprived publish cycles before subscription deletion */
     uint32_t iSubscriptionID;             /* OPC UA subscription ID, non 0 when subscription is created */
-    uint32_t nMonItClientHandle;  /* Number of client handle generated for monitored items, used as unique identifier */
-    SOPC_SLinkedList* pListMonIt; /* List of monitored items, where the appCtx is the list value,
-                                   * and the id is the uint32_t OPC UA monitored item ID (client handle) */
-    uint32_t nTokenTarget;        /* Target number of available tokens */
-    uint32_t nTokenUsable;        /* Tokens available to the server
-                                   * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;              /* Indicates whether an acknowledgement should be sent
-                                   * in the next PublishRequest */
-    uint32_t iAckSeqNum;          /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId;       /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername;       /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword;       /* See SOPC_LibSub_ConnectionCfg */
-    int64_t iTimeoutMs;           /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    uint32_t nMonItClientHandle;          /* Number of client handle generated for monitored items,
+                                           * used as unique identifier */
+    SOPC_SLinkedList* pListMonIt;         /* List of monitored items, where the appCtx is the list value,
+                                           * and the id is the uint32_t OPC UA monitored item ID */
+    uint32_t nTokenTarget;                /* Target number of available tokens */
+    uint32_t nTokenUsable;                /* Tokens available to the server
+                                           * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;                      /* Indicates whether an acknowledgement should be sent
+                                           * in the next PublishRequest */
+    uint32_t iAckSeqNum;                  /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId;               /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername;               /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword;               /* See SOPC_LibSub_ConnectionCfg */
+    int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
     uintptr_t userContext;                /* A state machine user defined context */
 };
@@ -934,7 +935,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  uintptr_t toolkitCtx)
 {
     bool bProcess = false;
-    uintptr_t appCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)appCtx */
+    uintptr_t appCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)toolkitCtx */
     SOPC_StaMac_State oldState = stError;
     SOPC_StaMac_RequestScope requestScope = SOPC_REQUEST_SCOPE_STATE_MACHINE;
 
