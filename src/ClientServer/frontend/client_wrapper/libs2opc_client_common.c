@@ -563,7 +563,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == status);
+    assert(SOPC_STATUS_OK == mutStatus);
 
     /* Finds the state machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
