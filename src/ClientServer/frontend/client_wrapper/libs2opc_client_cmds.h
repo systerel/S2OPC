@@ -518,9 +518,11 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
  @param[out] results
     Pre-allocated array of status codes indicating the add MonitoredItem operation result.
     It shall have the same size and order than in \p nodeIds array.
+    It might be NULL if the caller does not need this information.
+    Otherwise it is relevant only if return value is >= 0.
  @return
    '0' if operation succeed
-   '<n>' if <n> MonitoredItem failed to be created in server (see results)
+   'N > 0' if N MonitoredItem failed to be created in server (see results)
    '-1' if connectionId not valid
    '-2' if nodeIds or nbNodeIds not valid
    '-<3+index>' if nodeIds[index] is not valid

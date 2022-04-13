@@ -203,12 +203,10 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Context structure to be provided when using ::SOPC_StaMac_CreateMonitoredItem
- *  CtxId is used by
- *  Results might be NULL if not necessary for application.
  */
 typedef struct SOPC_CreateMonitoredItem_Ctx
 {
-    OpcUa_CreateMonitoredItemsResponse* Results;
+    OpcUa_CreateMonitoredItemsResponse* Results; /* might be NULL if not necessary for application. */
 } SOPC_CreateMonitoredItem_Ctx;
 
 /**
