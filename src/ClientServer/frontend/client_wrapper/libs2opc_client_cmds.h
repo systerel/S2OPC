@@ -520,7 +520,7 @@ int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHe
     It shall have the same size and order than in \p nodeIds array.
  @return
    '0' if operation succeed
-   '1' if some MonitoredItems failed to be created in server (see results)
+   '<n>' if <n> MonitoredItem failed to be created in server (see results)
    '-1' if connectionId not valid
    '-2' if nodeIds or nbNodeIds not valid
    '-<3+index>' if nodeIds[index] is not valid

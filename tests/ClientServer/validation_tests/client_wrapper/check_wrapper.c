@@ -369,6 +369,7 @@ START_TEST(test_wrapper_add_monitored_items)
     char* nodeIds2[1] = {"ns=0;i=1013"};
     char* nodeIds3[3] = {"ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001"};
     char* nodeIds3_plus_unknown[4] = {"ns=0;i=1009", "ns=0;i=1011", "ns=0;i=1001", "ns=1;s=Invalid_NodeId"};
+    char* nodeIds2_plus_2_unknown[4] = {"ns=1;s=Invalid_NodeId", "ns=0;i=1009", "ns=0;i=1011", "ns=1;s=Invalid_NodeId"};
 
     char* invalidNodeIds[1] = {NULL};
     char* invalidNodeIds2[2] = {"ns=0;s=Counter", NULL};
@@ -422,6 +423,12 @@ START_TEST(test_wrapper_add_monitored_items)
     /* add multiple monitored items with 1 unkown node id*/
     ck_assert_int_eq(1, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3_plus_unknown, 4, results));
     ck_assert(SOPC_IsGoodStatus(results[0]));
+    ck_assert(SOPC_IsGoodStatus(results[1]));
+    ck_assert(SOPC_IsGoodStatus(results[2]));
+    ck_assert(!SOPC_IsGoodStatus(results[3]));
+
+    ck_assert_int_eq(2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2_plus_2_unknown, 4, results));
+    ck_assert(!SOPC_IsGoodStatus(results[0]));
     ck_assert(SOPC_IsGoodStatus(results[1]));
     ck_assert(SOPC_IsGoodStatus(results[2]));
     ck_assert(!SOPC_IsGoodStatus(results[3]));

@@ -1329,7 +1329,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
         else
         {
             // Set result to 1 if one or several MI creation failed
-            result = 1;
+            result++;
             Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Failed to create MonIt for \"%s\" with data_id %" PRIu32 ".",
                         nodeIds[i], lDataId[i]);
         }
