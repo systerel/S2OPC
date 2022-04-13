@@ -21,7 +21,12 @@
 #include <windows.h>
 
 #include "sopc_builtintypes.h"
-#include "sopc_platform_time.h"
+#include "sopc_time.h"
+
+SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
+{
+    return SOPC_TIME_TIMESOURCE_INTERNAL;
+}
 
 int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {

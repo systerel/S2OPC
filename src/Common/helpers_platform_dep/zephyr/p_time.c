@@ -28,6 +28,14 @@
 
 #include "kernel.h"
 
+#if CONFIG_NET_GPTP
+#include <net/gptp.h>
+#include <net/net_core.h>
+#include "ethernet/gptp/gptp_messages.h"
+// Include MUST follow this order
+#include "ethernet/gptp/gptp_data_set.h"
+#endif
+
 #ifndef __INT32_MAX__
 #include "toolchain/xcc_missing_defs.h"
 #endif
@@ -51,7 +59,13 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
-/* Private time api */
+/***************************************************
+ * DECLARATION OF LOCAL MACROS
+ **************************************************/
+
+/***************************************************
+ * DECLARATION OF LOCAL TYPES/VARIABLES
+ **************************************************/
 
 #define P_TIME_DEBUG (0)
 
@@ -69,6 +83,33 @@ typedef enum P_TIME_STATUS
 static ePTimeStatus gTimeStatus = P_TIME_STATUS_NOT_INITIALIZED;
 static uint64_t gUptimeDate_s = 0;
 
+/***************************************************
+ * DECLARATION OF LOCAL FUNCTIONS
+ **************************************************/
+static uint64_t P_TIME_GetBuildDateTime(void);
+/** /brief Get current internal time with 100 ns precision */
+static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
+
+#if CONFIG_NET_GPTP
+/** Offset between PTp & internal clock, (or 0 if unknown)*/
+static int64_t gPtpSourceSync = 0;
+/** /brief Get current internal time with 100 ns precision, corrected by PTP */
+static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
+
+/** /brief Get current PTP time with 100 ns precision
+ * /return 0 if PtpClock is not ready or provides irrelevant value*/
+static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
+
+#else // CONFIG_NET_GPTP
+// No time correction is PTP is not available
+#define P_TIME_TimeReference_GetCorrected100ns P_TIME_TimeReference_GetInternal100ns
+#endif // CONFIG_NET_GPTP
+
+/***************************************************
+ * IMPLEMENTATION OF LOCAL FUNCTIONS
+ **************************************************/
+
+/***************************************************/
 static uint64_t P_TIME_GetBuildDateTime(void)
 {
     // Get today date numerics values
@@ -153,8 +194,10 @@ static uint64_t P_TIME_GetBuildDateTime(void)
     return mktime(&buildDate);
 }
 
-static uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
+/***************************************************/
+static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
 {
+    SOPC_RealTime result;
     ePTimeStatus expectedStatus = P_TIME_STATUS_NOT_INITIALIZED;
     ePTimeStatus desiredStatus = P_TIME_STATUS_INITIALIZING;
 
@@ -231,87 +274,61 @@ static uint64_t P_TIME_TimeReference_GetCurrent100ns(void)
 
     k_mutex_unlock(&monotonicMutex);
 
-    return value_100ns;
+    result.tick100ns = value_100ns;
+    return result;
 }
 
-/* Public s2opc api */
+/***************************************************
+ * IMPLEMENTATION OF EXTERN FUNCTIONS
+ **************************************************/
 
-int64_t SOPC_Time_GetCurrentTimeUTC()
+/***************************************************/
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
 {
+    SOPC_RealTime now100ns = P_TIME_TimeReference_GetCorrected100ns();
+
     int64_t datetime = 0;
 
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
+    // Compute value in second, used to compute UTC value
+    uint64_t value_in_s = now100ns.tick100ns / SECOND_TO_100NS;
+    uint64_t value_frac_in_100ns = now100ns.tick100ns % SECOND_TO_100NS;
 
-    /*==========================================================*/
-    // Get current ms counter
-
-    uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
-
-    // compute value in second, used to compute UTC value
-    uint64_t value_in_s = value / SECOND_TO_100NS;
-    uint64_t value_frac_in_100ns = value % SECOND_TO_100NS;
-
-    // Check for overflow. Note that currentTimeFrac100NS cannot overflow.
-    // Problem: we don't know the limits of time_t, and they are not #defined.
-    time_t currentTimeT = 0;
-    int64_t limit = 0;
-    switch (sizeof(time_t))
+    // ZEPHYR time_t is 64 bits.
+    SOPC_ReturnStatus result = SOPC_Time_FromTimeT(value_in_s, &datetime);
+    if (SOPC_STATUS_OK != result)
     {
-    case 4:
-        /* Assumes an int32_t */
-        limit = INT32_MAX;
-        break;
-    case 8:
-        /* Assumes an int64_t */
-        limit = INT64_MAX;
-        break;
-    default:
-        datetime = INT64_MAX;
-        result = SOPC_STATUS_NOK;
-        break;
-    }
-
-    if (value_in_s > limit)
-    {
-        result = SOPC_STATUS_NOK;
+        // Time overflow...
         datetime = INT64_MAX;
     }
 
-    if (SOPC_STATUS_OK == result)
-    {
-        currentTimeT = (time_t) value_in_s;
-        result = SOPC_Time_FromTimeT(currentTimeT, &datetime);
-        if (SOPC_STATUS_OK != result)
-        {
-            // Time overflow...
-            datetime = INT64_MAX;
-        }
-
-        // Add to UTC value fractionnal part of value
-        datetime += value_frac_in_100ns;
-    }
+    // Add to UTC value fractional part of value
+    datetime += value_frac_in_100ns;
 
     return datetime;
 }
 
+/***************************************************/
 // Return current ms since last power on
 SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 {
-    uint64_t value = P_TIME_TimeReference_GetCurrent100ns();
+    uint64_t value100ns = P_TIME_TimeReference_GetInternal100ns().tick100ns;
 
-    return (SOPC_TimeReference)(value / MS_TO_100NS);
+    return (SOPC_TimeReference)(value100ns / MS_TO_100NS);
 }
 
+/***************************************************/
 SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
 {
     return (NULL == localtime_r(&t, tm)) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
+/***************************************************/
 SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 {
     return (NULL == gmtime_r(&t, tm)) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
+/***************************************************/
 void SOPC_Sleep(unsigned int milliseconds)
 {
     if (milliseconds > 0)
@@ -325,6 +342,7 @@ void SOPC_Sleep(unsigned int milliseconds)
     return;
 }
 
+/***************************************************/
 SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
 {
     SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
@@ -334,15 +352,13 @@ SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
     }
     else if (NULL != ret)
     {
-        bool ok = SOPC_RealTime_GetTime(ret);
-        if (!ok)
-        {
-            SOPC_RealTime_Delete(&ret);
-        }
+        *ret = P_TIME_TimeReference_GetInternal100ns();
     }
 
     return ret;
 }
+
+/***************************************************/
 void SOPC_RealTime_Delete(SOPC_RealTime** t)
 {
     if (NULL == t)
@@ -353,6 +369,7 @@ void SOPC_RealTime_Delete(SOPC_RealTime** t)
     *t = NULL;
 }
 
+/***************************************************/
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
     if (NULL == t)
@@ -360,26 +377,27 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
         return false;
     }
 
-    *t = P_TIME_TimeReference_GetCurrent100ns();
+    *t = P_TIME_TimeReference_GetInternal100ns();
     return true;
 }
 
+/***************************************************/
 void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
 {
     assert(NULL != t);
 
-    *t += duration_ms * MS_TO_100NS;
+    t->tick100ns += duration_ms * MS_TO_100NS;
 }
 
+/***************************************************/
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 {
     SOPC_ASSERT(NULL != t);
-    SOPC_RealTime t1 = 0;
-    bool ok = true;
+    SOPC_RealTime t1;
 
     if (NULL == now)
     {
-        ok = SOPC_RealTime_GetTime(&t1);
+        t1 = P_TIME_TimeReference_GetInternal100ns();
     }
     else
     {
@@ -387,9 +405,10 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
     }
 
     /* t <= t1 */
-    return ok && ((*t) <= t1);
+    return t->tick100ns <= t1.tick100ns;
 }
 
+/***************************************************/
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
 #if (CONFIG_SYS_CLOCK_TICKS_PER_SEC < 1000)
@@ -400,13 +419,16 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
         return false;
     }
 
-    const int64_t now = P_TIME_TimeReference_GetCurrent100ns();
-    const int64_t expDate = (int64_t) *date;
-    int64_t toWait_us = (expDate - now) / US_TO_100NS;
+    SOPC_RealTime now = P_TIME_TimeReference_GetInternal100ns();
+
+    const int64_t expDateUs = (int64_t) date->tick100ns / US_TO_100NS;
+    const int64_t nowDateUs = (int64_t) now.tick100ns / US_TO_100NS;
+    // No overflow possible thanks to conversion to microseconds
+    int64_t toWait_us = (expDateUs - nowDateUs);
 
     if (toWait_us <= 0)
     {
-        return false;
+        k_yield();
     }
 
     while (toWait_us > 0)
@@ -415,3 +437,107 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
     }
     return false;
 }
+
+#if CONFIG_NET_GPTP
+
+/***************************************************
+ * PTP-SPECIFIC SECTION
+ **************************************************/
+static struct gptp_global_ds* globalDs = NULL;
+
+/***************************************************/
+static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
+{
+    SOPC_RealTime nowPtp = P_TIME_TimeReference_GetPtp100ns();
+    const uint64_t nowInt = P_TIME_TimeReference_GetInternal100ns().tick100ns;
+
+    if (nowPtp.tick100ns != 0)
+    {
+        // PTP is available. Recalculate Internal clock offset.
+        // It will be used if PTP gets unsynchronized
+        if (nowPtp.tick100ns < INT64_MAX && nowInt < INT64_MAX)
+        {
+            gPtpSourceSync = ((int64_t) nowPtp.tick100ns) - ((int64_t) nowInt);
+        }
+    }
+    else
+    {
+        nowPtp.tick100ns = nowInt + gPtpSourceSync;
+    }
+
+    return nowPtp;
+}
+
+/***************************************************/
+static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
+{
+    SOPC_RealTime result;
+    struct net_ptp_time slave_time;
+    bool gm_present = false;
+    int errCode = gptp_event_capture(&slave_time, &gm_present);
+
+    static const uint64_t minTimeOffset = 365 * (2021 - 1970);
+
+    // If time is irrelevant, ignore it
+    if (errCode == 0 && slave_time.second > minTimeOffset)
+    {
+        /* Note : 64 bits with 100 ns precision from 1970 can hold much more than 1000 years*/
+        result.tick100ns = slave_time.second * SECOND_TO_100NS;
+        result.tick100ns += slave_time.nanosecond / 100;
+    }
+    else
+    {
+        result.tick100ns = 0;
+    }
+
+    return result;
+}
+
+/***************************************************/
+SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
+{
+    SOPC_Time_TimeSource result = SOPC_TIME_TIMESOURCE_INTERNAL;
+    static const int port = 1;
+    // Make sure things are computed once only when possible.
+    if (NULL == globalDs)
+    {
+        struct gptp_domain* domain = gptp_get_domain();
+        struct gptp_port_ds* port_ds;
+
+        const int ret = gptp_get_port_data(domain, port, &port_ds, NULL, NULL, NULL, NULL);
+
+        if (ret >= 0 && NULL != port_ds && port == port_ds->port_id.port_number)
+        {
+            globalDs = GPTP_GLOBAL_DS();
+        }
+    }
+
+    if (NULL != globalDs)
+    {
+        switch (globalDs->selected_role[port])
+        {
+        case GPTP_PORT_MASTER:
+            result = SOPC_TIME_TIMESOURCE_PTP_MASTER;
+            break;
+        case GPTP_PORT_SLAVE:
+            result = SOPC_TIME_TIMESOURCE_PTP_SLAVE;
+            break;
+        default:
+            break;
+        }
+    }
+    return result;
+}
+
+#else // CONFIG_NET_GPTP
+
+/***************************************************
+ * NON-PTP-SPECIFIC SECTION
+ **************************************************/
+/***************************************************/
+SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
+{
+    return SOPC_TIME_TIMESOURCE_INTERNAL;
+}
+
+#endif // CONFIG_NET_GPTP

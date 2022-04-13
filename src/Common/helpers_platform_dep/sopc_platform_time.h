@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 
 /**
@@ -61,7 +62,7 @@ void SOPC_Sleep(unsigned int milliseconds);
  * \return the current time in DateTime format
  *
  */
-int64_t SOPC_Time_GetCurrentTimeUTC(void);
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
 
 /**
  * \brief return the current time reference

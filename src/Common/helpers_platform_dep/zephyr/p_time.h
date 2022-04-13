@@ -35,8 +35,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/** Internal unit is 100ns */
-typedef uint64_t SOPC_RealTime;
+/** Definition of SOPC_RealTime for SOPC_TIME.H */
+typedef struct
+{
+    /* Internal unit is 100ns. 64 bits are enough to store more than 1000 years.
+       Reference is boot time*/
+    uint64_t tick100ns;
+} SOPC_RealTime;
 
 /**
  * \brief Create a new time reference.

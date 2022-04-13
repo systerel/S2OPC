@@ -41,6 +41,11 @@
  */
 static uint64_t gGlobalTimeReference = 0;
 
+SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
+{
+    return SOPC_TIME_TIMESOURCE_INTERNAL;
+}
+
 // Called if reference tick = 0
 void P_TIME_SetInitialDateToBuildTime(void)
 {

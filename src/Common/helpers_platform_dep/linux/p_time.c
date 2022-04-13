@@ -35,6 +35,11 @@
 static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
 static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
 
+SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
+{
+    return SOPC_TIME_TIMESOURCE_INTERNAL;
+}
+
 int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {
     struct timespec currentTime;
