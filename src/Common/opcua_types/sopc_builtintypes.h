@@ -694,6 +694,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CompareAux(const void* left, const void* 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
+/*@
+  ensures \result != NULL <==> \valid(\result);
+*/
 SOPC_Variant* SOPC_Variant_Create(void);
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
 // Allocation of the requested array to given length

@@ -98,6 +98,16 @@ SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_Address
 SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_Boolean SOPC_AddressSpace_Get_Executable(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+
+/*@
+  requires space != NULL;
+  requires (node->node_class == OpcUa_NodeClass_Variable || node->node_class == OpcUa_NodeClass_VariableType);
+  ensures \valid(\result); 
+  ensures node->node_class == OpcUa_NodeClass_Variable
+    ==> \result == &node->data.variable.ValueRank;
+  ensures node->node_class == OpcUa_NodeClass_VariableType
+    ==> \result == &node->data.variable_type.ValueRank;
+*/
 int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);

@@ -53,6 +53,8 @@ static bool is_inputArgument(const OpcUa_VariableNode* node);
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
+/*@ requires sopc_addressSpace_configured ==> NULL != address_space_bs__nodes;
+*/
 void address_space_bs__INITIALISATION(void)
 {
     if (sopc_addressSpace_configured)
@@ -65,14 +67,13 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-/*@ requires \valid(address_space_bs__nid_valid);
-  @ requires \valid(address_space_bs__node);
-  @ requires \valid(address_space_bs__nodes);
-  @ requires \separated(address_space_bs__nid_valid, address_space_bs__node, address_space_bs__nodes);
-  @ assigns *address_space_bs__nid_valid;
-  @ assigns *address_space_bs__node;
-  @ ensures \null == address_space_bs__nid ==>
-    *address_space_bs__nid_valid == false && *address_space_bs__node == \old(*address_space_bs__node);
+/*@
+  requires \valid(address_space_bs__nid_valid);
+  requires \valid(address_space_bs__node);
+  requires \valid(address_space_bs__nodes);
+  requires \separated(address_space_bs__nid_valid, address_space_bs__node, address_space_bs__nodes);
+  ensures \null == address_space_bs__nid ==>
+  *address_space_bs__nid_valid == false && *address_space_bs__node == \old(*address_space_bs__node);
  */
 /* This is a_NodeId~ */
 void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i address_space_bs__nid,
@@ -99,14 +100,14 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node+(0..sizeof(SOPC_AddressSpace_Node)-1));
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires \separated(address_space_bs__sc, address_space_bs__variant);
+  requires address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable;
+  assigns *address_space_bs__sc;
+  assigns *address_space_bs__variant;
 */
 void address_space_bs__read_AddressSpace_AccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -126,14 +127,14 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires address_space_bs__nodes != NULL;
+  requires \separated(address_space_bs__sc, address_space_bs__p_node);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
 */
 void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -173,14 +174,10 @@ void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     *address_space_bs__variant = variant;
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires \separated(address_space_bs__p_node, address_space_bs__sc, address_space_bs__variant);
 */
 void address_space_bs__read_AddressSpace_BrowseName_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -196,14 +193,11 @@ void address_space_bs__read_AddressSpace_BrowseName_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires address_space_bs__p_node->node_class == OpcUa_NodeClass_View;
 */
 void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -220,14 +214,12 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+         address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
 */
 void address_space_bs__read_AddressSpace_DataType_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -245,16 +237,9 @@ void address_space_bs__read_AddressSpace_DataType_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_locales);
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_locales,
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
 */
 void address_space_bs__read_AddressSpace_DisplayName_value(
     const constants__t_LocaleIds_i address_space_bs__p_locales,
@@ -276,14 +261,12 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_View ||
+            address_space_bs__p_node->node_class == OpcUa_NodeClass_Object);
 */
 void address_space_bs__read_AddressSpace_EventNotifier_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -301,14 +284,11 @@ void address_space_bs__read_AddressSpace_EventNotifier_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
 */
 void address_space_bs__read_AddressSpace_Executable_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -326,14 +306,11 @@ void address_space_bs__read_AddressSpace_Executable_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
 */
 void address_space_bs__read_AddressSpace_Historizing_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -350,14 +327,14 @@ void address_space_bs__read_AddressSpace_Historizing_value(
     }
 }
 
-/*
-@ requires \valid(address_space_bs__p_node);
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
+/*@
+  requires \valid(address_space_bs__p_node);
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires (address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType ||
+            address_space_bs__p_node->node_class == OpcUa_NodeClass_ObjectType ||
+            address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType ||
+            address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
 */
 void address_space_bs__read_AddressSpace_IsAbstract_value(
     const constants__t_Node_i address_space_bs__p_node,
@@ -377,15 +354,10 @@ void address_space_bs__read_AddressSpace_IsAbstract_value(
     }
 }
 
-/*
-@ requires \valid(*address_space_bs__sc);
-@ requires \valid(*address_space_bs__variant);
-@ requires \separated(
-    address_space_bs__p_node,
-    *address_space_bs__sc,
-    *address_space_bs__variant);
-@ assigns *address_space_bs__sc;
-@ assigns *address_space_bs__variant;
+/*@
+  requires \valid(address_space_bs__sc);
+  requires \valid(address_space_bs__variant);
+  requires \separated(address_space_bs__sc, address_space_bs__p_node);
 */
 void address_space_bs__read_AddressSpace_NodeClass_value(
     const constants__t_Node_i address_space_bs__p_node,
