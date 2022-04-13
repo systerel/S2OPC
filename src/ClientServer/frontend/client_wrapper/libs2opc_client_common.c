@@ -596,7 +596,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     {
         const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, (uintptr_t) appCtx) &&
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             /* Release the lock so that the event handler can work properly while waiting */

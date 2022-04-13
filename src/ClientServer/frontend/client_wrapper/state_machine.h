@@ -207,6 +207,7 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 typedef struct SOPC_CreateMonitoredItem_Ctx
 {
     OpcUa_CreateMonitoredItemsResponse* Results; /* might be NULL if not necessary for application. */
+    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_CreateMonitoredItem */
 } SOPC_CreateMonitoredItem_Ctx;
 
 /**
@@ -266,7 +267,7 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
 /**
  * \brief Returns whether the machine has created the MonitoredItem with the given \p appCtx or not.
  */
-bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx);
+bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItem_Ctx* pAppCtx);
 
 /** \brief Returns the timeout of the machine, used for the synchroneous calls. */
 int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM);

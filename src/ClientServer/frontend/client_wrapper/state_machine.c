@@ -612,6 +612,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
         if (SOPC_STATUS_OK == status)
         {
+            pAppCtx->outCtxId = lCliHndl[0];
             status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
                                                             MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
         }
@@ -740,7 +741,7 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
     return return_code;
 }
 
-bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
+bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItem_Ctx* pAppCtx)
 {
     if (NULL == pSM || NULL == pSM->pListMonIt)
     {
@@ -755,7 +756,7 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, uintptr_t appCtx)
 
     while (!bHasMonIt && NULL != pIter)
     {
-        if (SOPC_SLinkedList_Next(&pIter) == (void*) appCtx)
+        if (SOPC_SLinkedList_Next(&pIter) == (void*) pAppCtx->outCtxId)
         {
             bHasMonIt = true;
         }
@@ -1393,14 +1394,15 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
 
     /* There should be only one result element */
     pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
+    SOPC_CreateMonitoredItem_Ctx* MIappCtx = (SOPC_CreateMonitoredItem_Ctx*) appCtx;
     assert(NULL != pMonItResp);
 
     for (i = 0; i < pMonItResp->NoOfResults; ++i)
     {
         if (SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
         {
-            if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId, (void*) appCtx) !=
-                (void*) appCtx)
+            if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId,
+                                        (void*) MIappCtx->outCtxId) != (void*) MIappCtx->outCtxId)
             {
                 pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".", i);
