@@ -107,7 +107,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \brief Creates a new state machine, initialized in state stInit.
  *
  * \param iscConfig               The configuration identifier to use with this machine
- * \param iCliId                  The client id of the machine
+ * \param iCliId                  The client id of the machine, it shall be unique.
  * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
  * \param szUsername              Zero-terminated username, see SOPC_LibSub_ConnectionCfg
  * \param szPassword              Zero-terminated password, see SOPC_LibSub_ConnectionCfg

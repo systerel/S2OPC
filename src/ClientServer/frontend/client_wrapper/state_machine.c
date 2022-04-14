@@ -53,7 +53,7 @@ struct SOPC_StaMac_Machine
     Mutex mutex;
     SOPC_StaMac_State state;
     uint32_t iscConfig; /* Toolkit scConfig ID */
-    uint32_t iCliId;    /* LibSub connection ID, used by the callback */
+    uint32_t iCliId;    /* LibSub connection ID, used by the callback. It shall be unique. */
 
     /* Keeping two callbacks to avoid modification of LibSub API */
     SOPC_LibSub_DataChangeCbk cbkLibSubDataChanged;             /* Callback when subscribed data changed */
@@ -336,7 +336,9 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     /* Sends the request */
     if (SOPC_STATUS_OK == status)
     {
-        pSM->iSessionCtx = (uintptr_t) &pSM->iSessionCtx; // Use own address as unique identifier
+        // Session is strongly linked to the connection since only 1 can be activated on it
+        // and connection ID is globally unique.
+        pSM->iSessionCtx = pSM->iCliId;
         if (NULL == pSM->szUsername)
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, NULL,
