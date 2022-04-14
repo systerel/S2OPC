@@ -428,6 +428,8 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     /* Sends the request */
     if (SOPC_STATUS_OK == status)
     {
+        // We will use pReqCtx address as context to recognize it when received.
+        // It is acceptable because we keep it in pSM->pListReqCtx and deallocate it only when removed from list
         SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pReqCtx);
     }
 
@@ -1167,6 +1169,9 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     case SE_RCV_DISCOVERY_RESPONSE:
     case SE_SND_REQUEST_FAILED:
         bProcess = false;
+        // We ensure context address pointer comparison is correct
+        // (memory has not been reallocated since we enqueued in pSM->pListReqCtx)
+        // by removing from pSM->pListReqCtx and deallocating memory at same time.
         reqCtx = SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, (void*) toolkitCtx);
         if (NULL != reqCtx)
         {
