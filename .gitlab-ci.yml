@@ -69,6 +69,15 @@ stages:
   - analyses
   - doc
 
+# Avoid to run 2 pipelines in case of MR
+# (1 for branch and 1 for MR)
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
 .docker-job: &docker_job
   tags:
     - docker
@@ -193,7 +202,7 @@ build-win64: &build_win64
       - 'install_win64/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
 
 build-win32:
@@ -209,7 +218,7 @@ build-win32:
       - 'install_win32/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
 
 build-rpi:
@@ -231,7 +240,7 @@ build-rpi:
       - 'install_rpi/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
 
 # Used by coverity, also starts the analysis
@@ -463,5 +472,5 @@ check_doc:
     expire_in: '1 month'
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
