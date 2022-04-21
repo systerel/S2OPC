@@ -550,6 +550,13 @@ void address_space_bs__read_AddressSpace_Value_value(
     }
 }
 
+/*@ requires \valid(node_value);
+  @ requires \valid(new_value);
+  @ requires \valid(previous_value);
+  @ requires (SOPC_LocalizedText_Id == new_value->BuiltInTypeId);
+  @ requires (SOPC_LocalizedText_Id == node_value->BuiltInTypeId);
+  @ requires (node_value->ArrayType == new_value->ArrayType);
+  @*/
 static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
                                                SOPC_Variant* node_value,
                                                const SOPC_Variant* new_value,
@@ -626,6 +633,9 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     return status;
 }
 
+/*@ requires \valid(node_value);
+  @ requires \valid(new_value);
+  @*/
 static bool is_localized_text_and_modifiable(SOPC_Variant* node_value, const SOPC_Variant* new_value)
 {
     bool modifyLocalizedText = false;
@@ -784,6 +794,10 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed(SOPC_Variant* 
     return ret;
 }
 
+/*@ requires \valid(toConvert);
+  @ requires (SOPC_Byte_Id == toConvert->BuiltInTypeId && SOPC_VariantArrayType_Array == toConvert->ArrayType) ||
+             (SOPC_ByteString_Id == toConvert->BuiltInTypeId && SOPC_VariantArrayType_SingleValue == toConvert->ArrayType);
+  @*/
 static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConvert)
 {
     SOPC_Variant* result = SOPC_Variant_Create();
@@ -829,6 +843,9 @@ static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConv
     return result;
 }
 
+/*@ requires \valid(address_space_bs__prev_dataValue);
+  @ requires \valid(*address_space_bs__prev_dataValue);
+  @*/
 void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_user,
                                  const constants__t_LocaleIds_i address_space_bs__p_locales,
                                  const constants__t_Node_i address_space_bs__node,
@@ -893,6 +910,8 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     }
 }
 
+/*@ requires \true;
+  @*/
 void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i address_space_bs__p_user,
                                                  const constants__t_Node_i address_space_bs__p_node,
                                                  const constants__t_Timestamp address_space_bs__p_ts)
