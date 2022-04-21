@@ -14,13 +14,11 @@ def main():
         gbl = data["wp:global"]
         mn = gbl["wp:main"]
         total = mn["total"]
-        if "valid" in mn and mn["valid"] == total:
-            isValidResult = True
-    
-    if isValidResult:
-        print ("Valid")
-    else:
-        print ("Invalid")
+        nb_valid = 0
+        if "valid" in mn:
+            nb_valid = mn["valid"]
+        print("Validated : "+ str(nb_valid))
+        print("Total : "+ str(total))
 
 if __name__ == '__main__':
     sys.exit(main())
