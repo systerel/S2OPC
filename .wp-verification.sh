@@ -78,7 +78,7 @@ do
     let NUM=$NUM+1
     NAME=$(basename $f)
     START=$SECONDS
-    $FRAMAC -wp $WPARGS "$CPPCOMMAND" $f -then -wp-report-json $FRAMACREPORT/$NAME.json -report > "$FRAMACLOG/$NAME.log"
+    $FRAMAC -wp $WPARGS "$CPPCOMMAND" $f -wp-report-json $FRAMACREPORT/$NAME.json -then -report > "$FRAMACLOG/$NAME.log"
     END=$SECONDS
     if [[ -z $(grep "Status Report Summary" "$FRAMACLOG/$NAME.log") ]]
     then

@@ -373,6 +373,7 @@ test-framac:
     paths:
       - 'wp_log/*.log'
       - 'wp-verification.tap'
+      - 'wp_report/*.json'
     when: on_failure
     expire_in: '1 month'
 
