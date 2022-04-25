@@ -244,6 +244,9 @@ class NodeId(object):
             except TypeError:
                 raise ParseError('Invalid bytestring NodeId: ' + nodeid)
 
+        if data == None:
+            raise ParseError('Invalid NodeId: ' + nodeid)
+        
         return NodeId(ns, ty, data)
 
 
@@ -1131,8 +1134,10 @@ def no_metadata_write_in_accesslevel(ua_node, access_level):
               % (access_level, str(ua_node.nodeid), new_access_level))
         return new_access_level
 
+DEBUG_CURRENT_LINE = None
 # Returns an array of Node objects
 def generate_address_space(is_const_addspace, source, out):
+    global DEBUG_CURRENT_LINE
     aliases = {}
     variables = list()
     n_items = 0
@@ -1153,7 +1158,10 @@ def generate_address_space(is_const_addspace, source, out):
             ev, n = next(source)
         except StopIteration:
             raise ParseError('Unexpected end of document while parsing UANodeSet')
-
+        try:
+            DEBUG_CURRENT_LINE = "%s : %s"%(str(n.tag), str(n.attrib))
+        except:
+            DEBUG_CURRENT_LINE = str(n)
         if ev == 'end' and n.tag == UA_NODESET_TAG:
             out.write('};\n')
             if is_const_addspace:
@@ -1204,6 +1212,7 @@ def generate_address_space(is_const_addspace, source, out):
 
 
 def main():
+    global DEBUG_CURRENT_LINE
     argparser = argparse.ArgumentParser(description='Generate the S2OPC address space from an OPC UA NodeSet')
     argparser.add_argument('xml_file', metavar='XML_FILE',
                            help='Path to the address space XML file')
@@ -1219,6 +1228,8 @@ def main():
             generate_address_space(args.const_addspace, iterparse(xml_fd, events=('start', 'end')), out_fd)
         except ParseError as e:
             sys.stderr.write('Woops, an error occurred: %s \n' % str(e))
+            if DEBUG_CURRENT_LINE :
+                sys.stderr.write('Context: %s \n' % DEBUG_CURRENT_LINE)
             sys.exit(1)
 
     print('Done.')
