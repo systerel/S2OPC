@@ -38,8 +38,10 @@
 #include "sopc_pki_stack.h"
 
 #include "key_manager_lib.h"
+#include "mbedtls_common.h"
 
 #include "mbedtls/oid.h"
+#include "mbedtls/ssl.h"
 #include "mbedtls/x509.h"
 
 /**

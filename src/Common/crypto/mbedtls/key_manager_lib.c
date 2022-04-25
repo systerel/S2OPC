@@ -30,6 +30,9 @@
 
 #include "key_manager_lib.h"
 
+// Note : this file MUST be included before other mbedtls headers
+#include "mbedtls_common.h"
+
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
 
@@ -73,14 +76,14 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
         memcpy(null_terminated_buffer, buffer, lenBuf);
         res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
-                        : mbedtls_pk_parse_key(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
+                        : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
         SOPC_Free(null_terminated_buffer);
     }
 
     if (res != 0)
     {
         res = is_public ? mbedtls_pk_parse_public_key(&key->pk, buffer, lenBuf)
-                        : mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0);
+                        : MBEDTLS_PK_PARSE_KEY(&key->pk, buffer, lenBuf, NULL, 0);
     }
 
     if (res != 0)

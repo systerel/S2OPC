@@ -25,6 +25,9 @@
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
 #define SOPC_CRYPTO_PROVIDER_LIB_H_
 
+// Note : this file MUST be included before other mbedtls headers
+#include "mbedtls_common.h"
+
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 

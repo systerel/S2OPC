@@ -30,6 +30,9 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_enums.h"
 
+// Note : this file MUST be included before other mbedtls headers
+#include "mbedtls_common.h"
+
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
 

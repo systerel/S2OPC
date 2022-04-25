@@ -37,6 +37,9 @@
 #include "crypto_provider_lib.h"
 #include "key_manager_lib.h"
 
+// Note : this file MUST be included before other mbedtls headers
+#include "mbedtls_common.h"
+
 #include "mbedtls/aes.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
@@ -415,9 +418,8 @@ SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider*
         else
             lenToCiph = lenPlainText;
 
-        if (mbedtls_rsa_rsaes_oaep_encrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                           MBEDTLS_RSA_PUBLIC, NULL, 0, lenToCiph, (const unsigned char*) pInput,
-                                           (unsigned char*) pOutput) != 0)
+        if (MBEDTLS_RSA_RSAES_OAEP_ENCRYPT(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, NULL,
+                                           0, lenToCiph, (const unsigned char*) pInput, (unsigned char*) pOutput) != 0)
         {
             status = SOPC_STATUS_NOK;
             break;
@@ -466,9 +468,9 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
     {
         // TODO: this might fail because of lenMsgPlain (doc recommend that it is at least sizeof(modulus), but here it
         // is the length of the content)
-        if (mbedtls_rsa_rsaes_oaep_decrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                           MBEDTLS_RSA_PRIVATE, NULL, 0, &lenDeciphed, (const unsigned char*) pInput,
-                                           (unsigned char*) pOutput, lenMsgPlain) != 0)
+        if (MBEDTLS_RSA_RSAES_OAEP_DECRYPT(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, NULL,
+                                           0, &lenDeciphed, (const unsigned char*) pInput, (unsigned char*) pOutput,
+                                           lenMsgPlain) != 0)
         {
             status = SOPC_STATUS_NOK;
             break;
@@ -540,8 +542,8 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
         prsa = mbedtls_pk_rsa(pKey->pk);
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
-        if (mbedtls_rsa_rsassa_pkcs1_v15_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                              MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256,
+        if (MBEDTLS_RSA_RSASSA_PKCS1_V15_SIGN(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
+                                              MBEDTLS_MD_SHA256,
                                               32,                     // hashlen is optional, as md_alg is not MD_NONE
                                               hash, pSignature) != 0) // signature is as long as the key
             status = SOPC_STATUS_NOK;
@@ -572,9 +574,8 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
         prsa = mbedtls_pk_rsa(pKey->pk);
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
-        if (mbedtls_rsa_rsassa_pkcs1_v15_verify(prsa, NULL, NULL,
-                                                MBEDTLS_RSA_PUBLIC,    // Random functions are optional for verification
-                                                MBEDTLS_MD_SHA256, 32, // hashlen is optional, as md_alg is not MD_NONE
+        if (MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY(prsa, MBEDTLS_MD_SHA256,
+                                                32,                     // hashlen is optional, as md_alg is not MD_NONE
                                                 hash, pSignature) != 0) // signature is as long as the key
             status = SOPC_STATUS_NOK;
         else
@@ -709,8 +710,8 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
         prsa = mbedtls_pk_rsa(pKey->pk);
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
-        if (mbedtls_rsa_rsassa_pkcs1_v15_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                              MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA1,
+        if (MBEDTLS_RSA_RSASSA_PKCS1_V15_SIGN(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
+                                              MBEDTLS_MD_SHA1,
                                               20,                     // hashlen is optional, as md_alg is not MD_NONE
                                               hash, pSignature) != 0) // signature is as long as the key
             status = SOPC_STATUS_NOK;
@@ -741,9 +742,8 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
         prsa = mbedtls_pk_rsa(pKey->pk);
         mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V15, 0);
 
-        if (mbedtls_rsa_rsassa_pkcs1_v15_verify(prsa, NULL, NULL,
-                                                MBEDTLS_RSA_PUBLIC,  // Random functions are optional for verification
-                                                MBEDTLS_MD_SHA1, 20, // hashlen is optional, as md_alg is not MD_NONE
+        if (MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY(prsa, MBEDTLS_MD_SHA1,
+                                                20,                     // hashlen is optional, as md_alg is not MD_NONE
                                                 hash, pSignature) != 0) // signature is as long as the key
             status = SOPC_STATUS_NOK;
         else
