@@ -27,8 +27,6 @@ SEES
     data_value_pointer_bs
 
 DEFINITIONS
-    "definitions.def";
-
     d_variables ==
         a_NodeId,
         a_NodeClass,
@@ -187,7 +185,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_AccessLevel))
+        p_node : dom(a_AccessLevel)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -195,7 +193,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
               sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_AccessLevel)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_AccessLevel_Variant(a_AccessLevel(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -207,7 +205,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_BrowseName))
+        p_node : dom(a_BrowseName)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -215,7 +213,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_BrowseName)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_QualifiedName_Variant(a_BrowseName(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -227,7 +225,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_ContainsNoLoops))
+        p_node : dom(a_ContainsNoLoops)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -235,7 +233,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ContainsNoLoops)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_ContainsNoLoops(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -247,7 +245,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_DataType))
+        p_node : dom(a_DataType)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -255,7 +253,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_DataType)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_NodeId_Variant(a_DataType(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -269,7 +267,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_DisplayName))
+        p_node : dom(a_DisplayName)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -277,7 +275,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_DisplayName)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_LocalizedText_Variant(a_DisplayName(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -289,7 +287,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_EventNotifier))
+        p_node : dom(a_EventNotifier)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -297,7 +295,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_EventNotifier)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Byte_Variant(a_EventNotifier(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -309,7 +307,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_Executable))
+        p_node : dom(a_Executable)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -317,7 +315,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Executable)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_Executable(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -329,7 +327,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_Historizing))
+        p_node : dom(a_Historizing)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -337,7 +335,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Historizing)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_Historizing(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -349,7 +347,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_IsAbstract))
+        p_node : dom((a_IsAbstract))
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -357,7 +355,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_IsAbstract)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_IsAbstract(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -368,8 +366,7 @@ OPERATIONS
         p_node : t_Node_i         &
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
-        p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_NodeClass))
+        p_node : dom(a_NodeClass)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -377,7 +374,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_NodeClass)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_NodeClass_Variant(a_NodeClass(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -387,9 +384,7 @@ OPERATIONS
     PRE
         p_node : t_Node_i         &
         p_node : t_Node           &
-        p_node : dom(a_NodeId)    &
-        p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_NodeId))
+        p_node : dom(a_NodeId)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -397,7 +392,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_NodeId)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_NodeId_Variant(a_NodeId(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -409,7 +404,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_Symmetric))
+        p_node : dom(a_Symmetric)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -417,7 +412,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
               sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Symmetric)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_Symmetric(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -429,8 +424,8 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_UserAccessLevel)) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_AccessLevel)) & /* AccessLevel used to generate value */
+        p_node : dom(a_UserAccessLevel) &
+        p_node : dom(a_AccessLevel) & /* AccessLevel used to generate value */
         p_is_user_read_auth : BOOL &
         p_is_user_write_auth : BOOL
     THEN
@@ -440,7 +435,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
               sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_UserAccessLevel)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_AccessLevel_Variant(a_UserAccessLevel(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -452,7 +447,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_UserExecutable)) &
+        p_node : dom(a_UserExecutable) &
         p_is_user_executable_auth : BOOL
     THEN
         CHOICE
@@ -461,7 +456,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
               sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_UserExecutable)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_UserExecutable(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -475,7 +470,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_Value)) &
+        p_node : dom(a_Value) &
         index_range : t_IndexRange_i
     THEN
         CHOICE
@@ -484,10 +479,10 @@ OPERATIONS
             val_ts_src := c_Timestamp_null ||
             sc := e_sc_bad_out_of_memory
         OR
-            IF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = TRUE &
-                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = TRUE
+            IF IsValid_VariantIndex(a_Value(p_node) |-> index_range) = TRUE &
+                HasRange_VariantIndex(a_Value(p_node) |-> index_range) = TRUE
             THEN
-                variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_Value)(p_node)) ||
+                variant :(variant : t_Variant_i & variant = a_Value(p_node)) ||
                 sc := e_sc_ok ||
                 IF a_NodeClass(p_node) = e_ncl_Variable THEN
                     val_sc := a_Value_StatusCode(p_node) ||
@@ -497,7 +492,7 @@ OPERATIONS
                     val_sc := c_RawStatusCode_Good ||
                     val_ts_src := c_Timestamp_null
                 END
-            ELSIF IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> index_range) = FALSE
+            ELSIF IsValid_VariantIndex(a_Value(p_node) |-> index_range) = FALSE
             THEN
                 variant := c_Variant_indet ||
                 val_sc := c_RawStatusCode_BadInvalidState ||
@@ -519,7 +514,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_ValueRank))
+        p_node : dom(a_ValueRank)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -527,7 +522,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ValueRank)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_ValueRank_Variant(a_ValueRank(p_node))) ||
             sc := e_sc_ok
         END
     END
@@ -539,7 +534,7 @@ OPERATIONS
         p_node : t_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(AttributeID_Node_Variant(e_aid_ArrayDimensions))
+        p_node : dom(a_ArrayDimensions)
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -547,7 +542,7 @@ OPERATIONS
             :(sc : t_StatusCode_i &
                 sc = e_sc_bad_out_of_memory)
         OR
-            variant :(variant : t_Variant_i & variant = AttributeID_Node_Variant(e_aid_ArrayDimensions)(p_node)) ||
+            variant :(variant : t_Variant_i & variant = conv_ArrayDimensions_Variant(a_ArrayDimensions(p_node))) ||
             sc := e_sc_ok
         END
     END
