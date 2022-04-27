@@ -38,7 +38,7 @@ typedef struct SOPC_UADP_Network_Message
  * \param nm is the NetworkMessage to encode
  * \param securityCtx is the data use to encrypt and sign. Can be NULL if security is not used
  *
- * \return A buffer containing the UADP bytes or NULL if the operation does not successed
+ * \return A buffer containing the UADP bytes or NULL if the operation does not succeed
  *
  */
 SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,     //
@@ -51,7 +51,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
  * \param getSecurity_Func is a callback to retrieve Security information related to the security token and publisher of
  * the message
  *
- * \return A NetworkMessage corresponding to the UADP packet or NULL if the operation does not successed
+ * \return A NetworkMessage corresponding to the UADP packet or NULL if the operation does not succeed
  *
  */
 SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,

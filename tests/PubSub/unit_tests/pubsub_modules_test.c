@@ -51,13 +51,50 @@ uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {
 SOPC_Buffer encoded_network_msg = {ENCODED_DATA_SIZE, ENCODED_DATA_SIZE,       ENCODED_DATA_SIZE, 0,
                                    ENCODED_DATA_SIZE, encoded_network_msg_data};
 
-uint8_t encoded_network_msg_multi_dsm_data[ENCODED_DATA_SIZE] = {
-    0x7C, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00, 0x05, // Modified number of DSM to 5
-    0xFF, 0x00, 0x01, 0x05, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, 0x03, 0xEF, 0x05,
-    0x54, 0xFD, 0x0A, 0x8F, 0xC2, 0xF5, 0x3D, 0x07, 0xBC, 0xA4, 0x05, 0x00};
+#define ENCODED_DSM_PRE_FIELD_SIZE 3 // DataSet Flags1 + number of fields
 
-SOPC_Buffer encoded_network_msg_multi_dsm = {
-    ENCODED_DATA_SIZE, ENCODED_DATA_SIZE, ENCODED_DATA_SIZE, 0, ENCODED_DATA_SIZE, encoded_network_msg_multi_dsm_data};
+// Content of encoded variables (see "varArr") for Multi-DataSetMessage
+#define ENCODED_VAR0_SIZE 5
+#define ENCODED_VAR1_SIZE 2
+#define ENCODED_VAR2_SIZE 3
+#define ENCODED_VAR3_SIZE 5
+#define ENCODED_VAR4_SIZE 5
+#define ENCODED_VARS0_1_SIZE (ENCODED_VAR0_SIZE + ENCODED_VAR1_SIZE)
+#define ENCODED_VARS0_2_SIZE (ENCODED_VARS0_1_SIZE + ENCODED_VAR2_SIZE)
+#define ENCODED_VARS0_3_SIZE (ENCODED_VARS0_2_SIZE + ENCODED_VAR3_SIZE)
+#define ENCODED_VARS0_4_SIZE (ENCODED_VARS0_3_SIZE + ENCODED_VAR4_SIZE)
+
+uint8_t encoded_vars_dsm[ENCODED_VARS0_4_SIZE] = {0x07, 0x2E, 0x34, 0xB8, 0x00, 0x03, 0xEF, 0x05, 0x54, 0xFD,
+                                                  0x0A, 0x8F, 0xC2, 0xF5, 0x3D, 0x07, 0xBC, 0xA4, 0x05, 0x00};
+
+uint8_t encoded_network_msg_multi_dsm_data[] = {
+    0x7C,                                                       // Flags + Version (NETWORK_MSG_VERSION)
+    0x2E,                                                       // PublisherId (NETWORK_MSG_PUBLISHER_ID)
+    0x03,                                                       // GroupFlags
+    0x2A, 0x00,                                                 // WriterGroupId (NETWORK_MSG_GROUP_ID)
+    0xE8, 0x03, 0x00, 0x00,                                     // GroupVersion (NETWORK_MSG_GROUP_VERSION)
+    0x05,                                                       // Payload header/Message Count
+    0xFF, 0x00,                                                 // DSM WriterId[0]
+    0x00, 0x01, 0x01, 0x01, 0x02, 0x01, 0x03, 0x01,             // DSM WriterId[1..4]
+    0x17, 0x00, 0x12, 0x00, 0x0D, 0x00, 0x0A, 0x00, 0x08, 0x00, // DSM Sizes [0..4]
+    // DSM[0] (Flags, nbFields)
+    0x01, 0x05, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    0x0A, 0x8F, 0xC2, 0xF5, 0x3D,                   // VAR4
+    0x07, 0xBC, 0xA4, 0x05, 0x00,                   // VAR5
+    // DSM[1] (Flags, nbFields)
+    0x01, 0x04, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    0x0A, 0x8F, 0xC2, 0xF5, 0x3D,                   // VAR4
+    // DSM[2] (Flags, nbFields)
+    0x01, 0x03, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    // DSM[3] (Flags, nbFields)
+    0x01, 0x02, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF,                                     // VAR2
+    // DSM[4] (Flags, nbFields)
+    0x01, 0x01, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00 // VAR1
+};
 
 #define NETWORK_MSG_PUBLISHER_ID 46
 #define NETWORK_MSG_VERSION 12
@@ -67,6 +104,11 @@ SOPC_Buffer encoded_network_msg_multi_dsm = {
 #define DATASET_MSG_WRITER_ID_BASE 255
 
 #define NB_DATASET_MSG NB_VARS
+
+#define BYTE1(x) ((uint8_t)(((x) &0xFF)))
+#define BYTE2(x) ((uint8_t)(((x) &0xFF00) >> 8))
+#define BYTE3(x) ((uint8_t)(((x) &0xFF0000) >> 16))
+#define BYTE4(x) ((uint8_t)(((x) &0xFF000000) >> 24))
 
 #if NB_DATASET_MSG > NB_VARS
 #error "A data set message should contain at least one variable in the test"
@@ -205,6 +247,15 @@ END_TEST
 
 START_TEST(test_hl_network_msg_encode_multi_dsm)
 {
+    /*
+     * In this test 5 DSM are created in the same message:
+     * - DSM0 contains varArr[0..4]
+     * - DSM1 contains varArr[0..3]
+     * - DSM2 contains varArr[0..2]
+     * - DSM3 contains varArr[0..1]
+     * - DSM4 contains varArr[0..0]
+     */
+
     // Initialize endianess for encoders
     SOPC_Helper_EndiannessCfg_Initialize();
 
@@ -242,9 +293,111 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     check_network_msg_content_multi_dsm(nm);
 
     SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, false);
+    ck_assert_ptr_nonnull(buffer);
 
-    // NOT SUPPORTED: otherwise use encoded_network_msg_multi_dsm_data
-    ck_assert_ptr_null(buffer);
+#if 0 // switch to debug
+    {
+        fprintf(stderr, "Buffer = (%d)[", buffer->length);
+        for (uint32_t i = 0; i < buffer->length ; i++)
+        {
+            fprintf(stderr, "0x%02X, ", buffer->data[i]);
+        }
+        fprintf(stderr, "]\n");
+    }
+#endif
+
+    uint8_t* data = buffer->data;
+    ck_assert_uint_eq(data[0] & 0x0F, NETWORK_MSG_VERSION); // Version
+    ck_assert_uint_eq(data[0] & 0xF0, 0x70);                // Flags1 (PayloadHdr + GroupHdr+ PublishId)
+    // No ExtendedFlags1/ExtendedFlags2
+    // In this case : PublisherId is of DataType Byte
+    ck_assert_uint_eq(data[1], NETWORK_MSG_PUBLISHER_ID); // PublisherId
+    // No DataSetClassId
+    // GroupFlags
+    ck_assert_uint_eq(data[2], 3);                                // WriterGroupId en + GroupVersion en
+    ck_assert_uint_eq(data[3], BYTE1(NETWORK_MSG_GROUP_ID));      // WriterGroupId
+    ck_assert_uint_eq(data[4], BYTE2(NETWORK_MSG_GROUP_ID));      // WriterGroupId
+    ck_assert_uint_eq(data[5], BYTE1(NETWORK_MSG_GROUP_VERSION)); // GroupVersion
+    ck_assert_uint_eq(data[6], BYTE2(NETWORK_MSG_GROUP_VERSION)); // GroupVersion
+    ck_assert_uint_eq(data[7], BYTE3(NETWORK_MSG_GROUP_VERSION)); // GroupVersion
+    ck_assert_uint_eq(data[8], BYTE4(NETWORK_MSG_GROUP_VERSION)); // GroupVersion
+    // No NetworkMessageNumber
+    // No SequenceNumber
+    // PayloadHeader/Count
+    ck_assert_uint_eq(data[9], BYTE1(NB_VARS)); // Count
+    // PayloadHeader/DataSetWriterIds[0]
+    ck_assert_uint_eq(data[10], BYTE1(DATASET_MSG_WRITER_ID_BASE + 0)); // DataSetWriterIds[0]
+    ck_assert_uint_eq(data[11], BYTE2(DATASET_MSG_WRITER_ID_BASE + 0)); // DataSetWriterIds[0]
+    ck_assert_uint_eq(data[12], BYTE1(DATASET_MSG_WRITER_ID_BASE + 1)); // DataSetWriterIds[1]
+    ck_assert_uint_eq(data[13], BYTE2(DATASET_MSG_WRITER_ID_BASE + 1)); // DataSetWriterIds[1]
+    ck_assert_uint_eq(data[14], BYTE1(DATASET_MSG_WRITER_ID_BASE + 2)); // DataSetWriterIds[2]
+    ck_assert_uint_eq(data[15], BYTE2(DATASET_MSG_WRITER_ID_BASE + 2)); // DataSetWriterIds[2]
+    ck_assert_uint_eq(data[16], BYTE1(DATASET_MSG_WRITER_ID_BASE + 3)); // DataSetWriterIds[3]
+    ck_assert_uint_eq(data[17], BYTE2(DATASET_MSG_WRITER_ID_BASE + 3)); // DataSetWriterIds[3]
+    ck_assert_uint_eq(data[18], BYTE1(DATASET_MSG_WRITER_ID_BASE + 4)); // DataSetWriterIds[4]
+    ck_assert_uint_eq(data[19], BYTE2(DATASET_MSG_WRITER_ID_BASE + 4)); // DataSetWriterIds[4]
+    // No NetworkMessage Header Extended
+    // No security Header
+    // Payload:
+    //   Size[0..4]
+    ck_assert_uint_eq(data[20], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_4_SIZE));
+    ck_assert_uint_eq(data[21], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_4_SIZE));
+    ck_assert_uint_eq(data[22], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_3_SIZE));
+    ck_assert_uint_eq(data[23], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_3_SIZE));
+    ck_assert_uint_eq(data[24], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_2_SIZE));
+    ck_assert_uint_eq(data[25], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_2_SIZE));
+    ck_assert_uint_eq(data[26], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_1_SIZE));
+    ck_assert_uint_eq(data[27], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_1_SIZE));
+    ck_assert_uint_eq(data[28], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VAR0_SIZE));
+    ck_assert_uint_eq(data[29], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VAR0_SIZE));
+    static const uint8_t DS_Flags1 = 1;
+    // Note: each DSM starts with DataSetFlags set to 1 "Valid / DataValue=Variant"
+    // and is followed by 2 bytes giving the number of fields (different for each DSM)
+
+    // Check DSM[0] containing var[0..4]
+    uint16_t dsm_idx = 30;
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1));
+    // DSM[0]/nb DataSet (5 fields)
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(5));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(5));
+    dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
+    ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_4_SIZE);
+
+    // Check DSM[1] containing var[0..3]
+    dsm_idx = dsm_idx + ENCODED_VARS0_4_SIZE;
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1));
+    // DSM[1]/nb DataSet (4 fields)
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(4));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(4));
+    dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
+    ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_3_SIZE);
+
+    // Check DSM[2] containing var[0..2]
+    dsm_idx = dsm_idx + ENCODED_VARS0_3_SIZE;
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    // DSM[2]/nb DataSet (3 fields)
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(3));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(3));
+    dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
+    ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_2_SIZE);
+
+    // Check DSM[3] containing var[0..1]
+    dsm_idx = dsm_idx + ENCODED_VARS0_2_SIZE;
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    // DSM[3]/nb DataSet (2 fields)
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(2));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(2));
+    dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
+    ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_1_SIZE);
+
+    // Check DSM[4] containing var[0..0]
+    dsm_idx = dsm_idx + ENCODED_VARS0_1_SIZE;
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    // DSM[4]/nb DataSet (1 field)
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(1));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(1));
+    dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
+    ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VAR0_SIZE);
 
     SOPC_Buffer_Delete(buffer);
     SOPC_Dataset_LL_NetworkMessage_Delete(nm);
@@ -256,12 +409,83 @@ START_TEST(test_hl_network_msg_decode_multi_dsm)
     // Initialize endianess for encoders
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg_multi_dsm, NULL);
+    const uint32_t bufferLen = sizeof(encoded_network_msg_multi_dsm_data);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(bufferLen);
+    ck_assert_ptr_nonnull(buffer);
 
-    // NOT SUPPORTED
-    ck_assert_ptr_null(uadp_nm);
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
+    SOPC_Buffer_Write(buffer, encoded_network_msg_multi_dsm_data, bufferLen);
+    SOPC_Buffer_SetPosition(buffer, 0);
+
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
+    ck_assert_ptr_nonnull(uadp_nm);
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    ck_assert_ptr_nonnull(nm);
+
+    // Check that Network message is as expected
+    SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm);
+    ck_assert_ptr_nonnull(pubId);
+    ck_assert_uint_eq(pubId->type, DataSet_LL_PubId_Byte_Id);
+    ck_assert_uint_eq(pubId->data.byte, NETWORK_MSG_PUBLISHER_ID);
+
+    const uint8_t nm_version = SOPC_Dataset_LL_NetworkMessage_Get_Version(nm);
+    ck_assert_uint_eq(nm_version, NETWORK_MSG_VERSION);
+
+    const uint16_t nm_groupId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
+    ck_assert_uint_eq(nm_groupId, NETWORK_MSG_GROUP_ID);
+
+    const uint32_t nm_groupVersion = SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm);
+    ck_assert_uint_eq(nm_groupVersion, NETWORK_MSG_GROUP_VERSION);
+
+    for (uint16_t imsg = 0; imsg < NB_DATASET_MSG; imsg++)
+    {
+        const SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, imsg);
+        const uint16_t nb_vars = (uint16_t)(NB_VARS - imsg);
+        const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(msg_dsm);
+        ck_assert_uint_eq(writerId, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + imsg));
+
+        for (uint16_t i = 0; i < nb_vars; i++)
+        {
+            int32_t comparison = -1;
+            const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(msg_dsm, i);
+            SOPC_ReturnStatus status = SOPC_Variant_Compare(var, &varArr[i], &comparison);
+            ck_assert_int_eq(SOPC_STATUS_OK, status);
+            ck_assert_int_eq(comparison, 0);
+        }
+    }
+    uint32_t position;
+    SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(buffer, &position);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(position, bufferLen);
+    SOPC_Buffer_Delete(buffer);
+    SOPC_UADP_NetworkMessage_Delete(uadp_nm);
+}
+END_TEST
+
+START_TEST(test_hl_network_msg_decode_multi_dsm_nok)
+{
+    // Initialize endianess for encoders
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    const uint32_t bufferLen = sizeof(encoded_network_msg_multi_dsm_data);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(bufferLen);
+    ck_assert_ptr_nonnull(buffer);
+
+    SOPC_Buffer_Write(buffer, encoded_network_msg_multi_dsm_data, bufferLen);
+
+    // Modify size header of DSM2
+    uint8_t oldValue;
+    SOPC_Buffer_SetPosition(buffer, 22);
+    SOPC_Buffer_Read(&oldValue, buffer, 1);
+    oldValue++; // corrupt size
+    SOPC_Buffer_SetPosition(buffer, 22);
+    SOPC_Buffer_Write(buffer, &oldValue, 1);
+
+    SOPC_Buffer_SetPosition(buffer, 0);
+
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
+    // Check that Network message is not decoded
+    ck_assert_ptr_null(uadp_nm);
+    SOPC_Buffer_Delete(buffer);
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
 }
 END_TEST
@@ -795,6 +1019,7 @@ int main(void)
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_multi_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm);
+    tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm_nok);
 
     TCase* tc_sub_target_variable_layer = tcase_create("Subscriber target variable layer");
     suite_add_tcase(suite, tc_sub_target_variable_layer);

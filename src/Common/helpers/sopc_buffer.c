@@ -146,6 +146,18 @@ SOPC_ReturnStatus SOPC_Buffer_ResetAfterPosition(SOPC_Buffer* buffer, uint32_t p
     return status;
 }
 
+SOPC_ReturnStatus SOPC_Buffer_GetPosition(SOPC_Buffer* buffer, uint32_t* position)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (buffer != NULL && NULL != position)
+    {
+        status = SOPC_STATUS_OK;
+        *position = buffer->position;
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_Buffer_SetPosition(SOPC_Buffer* buffer, uint32_t position)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;

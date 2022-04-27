@@ -26,10 +26,11 @@
 
 /**
  * For next versions:
- *  - Replaced constantes by variables from configuration,
+ *  - Replace constants by variables from configuration,
  *  - Add code to manage disabled part of the Network Message
  *  - Re- allocate memory of the returned buffer if needed
  *  - Manage other type of publisher id type. Only uint32_t is managed
+ *  - Add error codes to allow identification of encode/decode failure
  */
 
 /* Convert a PublisherId from dataset module to one of Configuration module */
@@ -58,11 +59,8 @@ const bool DATASET_LL_WRITER_GROUP_ID_ENABLED = true;
 const bool DATASET_LL_WRITER_GROUP_VERSION_ENABLED = true;
 const bool DATASET_LL_NETWORK_MESSAGE_NUMBER_ENABLED = false;
 const bool DATASET_LL_SEQUENCE_NUMBER_ENABLED = false;
-// Indicates that only one DataSetMessage is sent in the NetworkMessage
-// the size of DataSetMessage in the NetworkMessage is not managed
-const bool DATASET_LL_MANAGE_ONLY_ONE_DSM = true;
 
-const uint8_t DATASET_LL_DSM_ENCODING_TYPE = 0;
+const uint8_t DATASET_LL_DSM_ENCODING_TYPE = 0; // Must include 1 shift bit.
 const bool DATASET_LL_DSM_IS_VALID = true;
 const bool DATASET_LL_DSM_SEQ_NUMBER_ENABLED = false;
 const bool DATASET_LL_DSM_STATUS_ENABLED = false;
@@ -405,6 +403,13 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         }
     }
 
+    if (DATASET_LL_DATASET_CLASSID_ENABLED)
+    {
+        // Note :  DATASET_LL_DATASET_CLASSID_ENABLED is disabled in this version.
+        // Otherwise, DataSetClassId should be encoded here
+        assert(false);
+    }
+
     // GroupHeader
     //  - set reserved bits to 0
     byte = 0;
@@ -447,11 +452,6 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
     // payload header
     uint8_t msg_count = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
-    if (DATASET_LL_MANAGE_ONLY_ONE_DSM && msg_count > 1)
-    {
-        SOPC_Buffer_Delete(buffer);
-        return NULL;
-    }
 
     status = SOPC_Buffer_Write(buffer, (uint8_t*) &msg_count, 1);
     if (SOPC_STATUS_OK != status)
@@ -470,11 +470,6 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         {
             SOPC_Buffer_Delete(buffer);
             return NULL;
-        }
-
-        if (DATASET_LL_MANAGE_ONLY_ONE_DSM)
-        {
-            break;
         }
     }
 
@@ -545,8 +540,50 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     // payload: write Payload in an intermediate buffer.
     // and encrypt if security is enabled
     SOPC_Buffer* buffer_payload = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    if (NULL == buffer_payload)
+    {
+        SOPC_Buffer_Delete(buffer);
+        return NULL;
+    }
+
+    uint32_t* dsmSizeBufferPos = NULL;
+    if (DATASET_LL_PAYLOAD_HEADER_ENABLED && msg_count > 1)
+    {
+        dsmSizeBufferPos = SOPC_Calloc(msg_count, sizeof(*dsmSizeBufferPos));
+        if (NULL == dsmSizeBufferPos)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        static const uint16_t zero = 0;
+        // DataSet Message size(2 bytes)
+        // Sizes are unknown yet. Write Zeros, and store current position to write it later
+        for (int i = 0; SOPC_STATUS_OK == status && i < msg_count; i++)
+        {
+            status = SOPC_Buffer_GetPosition(buffer_payload, &dsmSizeBufferPos[i]);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_UInt16_Write(&zero, buffer_payload, 0);
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Buffer_Delete(buffer);
+            return NULL;
+        }
+    }
+
     for (int i = 0; i < msg_count; i++)
     {
+        // dsmStartBufferPos is set with buffer position before DSM content
+        uint32_t dsmStartBufferPos;
+        status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Buffer_Delete(buffer);
+            return NULL;
+        }
+
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
 
         // DataSetMessage (1 byte)
@@ -582,9 +619,29 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
             return NULL;
         }
 
-        if (DATASET_LL_MANAGE_ONLY_ONE_DSM)
+        if (msg_count > 1 && NULL != dsmSizeBufferPos)
         {
-            break;
+            // Write the DSM size at the payload start
+            uint32_t dsmEndBufferPos;
+            status = SOPC_Buffer_GetPosition(buffer_payload, &dsmEndBufferPos);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Buffer_Delete(buffer);
+                return NULL;
+            }
+
+            const uint16_t dsmSize = (uint16_t)(dsmEndBufferPos - dsmStartBufferPos);
+            bool writeOk = true;
+            writeOk &= (SOPC_STATUS_OK == SOPC_Buffer_SetPosition(buffer_payload, dsmSizeBufferPos[i]));
+            writeOk &= (SOPC_STATUS_OK == SOPC_UInt16_Write(&dsmSize, buffer_payload, 0));
+            writeOk &= (SOPC_STATUS_OK == SOPC_Buffer_SetPosition(buffer_payload, dsmEndBufferPos));
+
+            if (!writeOk)
+            {
+                SOPC_Buffer_Delete(buffer);
+                SOPC_Buffer_Delete(buffer_payload);
+                return NULL;
+            }
         }
     }
 
@@ -820,14 +877,6 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             return NULL;
         }
 
-        // Only one DataSetMessage is managed
-        if (1 != msg_count)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            return NULL;
-        }
-
         bool allocStatus = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, msg_count);
         if (!allocStatus)
         {
@@ -835,16 +884,19 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             SOPC_Free(uadp_nm);
             return NULL;
         }
-        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
-        uint16_t writer_id;
-        status = SOPC_UInt16_Read(&writer_id, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        for (int i = 0; i < msg_count; i++)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            return NULL;
+            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+            uint16_t writer_id;
+            status = SOPC_UInt16_Read(&writer_id, buffer, 0);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+            SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
         }
-        SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
     }
     else
     {
@@ -1048,9 +1100,32 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     {
         buffer_payload = buffer;
     }
-    // Only DataSetMessage is managed and only one (see previous conditions on msg_count)
-    assert(1 == msg_count);
+
+    // Store DMS size to check it later
+    uint16_t* dsmSizes = NULL;
+
     // No size if there is only one DataSetMessage
+    if (msg_count > 1 && conf->PayloadHeaderFlag)
+    {
+        dsmSizes = SOPC_Calloc(msg_count, sizeof(uint16_t));
+        if (NULL == dsmSizes)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        for (int i = 0; i < msg_count && SOPC_STATUS_OK == status; i++)
+        {
+            status = SOPC_UInt16_Read(&dsmSizes[i], buffer_payload, 0);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+            SOPC_Free(uadp_nm);
+            return NULL;
+        }
+    }
+
+    // Decode DataSetMessages
 
     // Bit 0: DataSetMessage is valid.
     // Bit range 1-2: Field Encoding
@@ -1071,6 +1146,14 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         SOPC_Boolean picoseconds_enabled = false;
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
 
+        uint32_t dsmStartBufferPos;
+        status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+            SOPC_Free(uadp_nm);
+            return NULL;
+        }
         /* DataSetMessages Header */
 
         /** DataSetFlags1 **/
@@ -1225,9 +1308,26 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             return NULL;
         }
 
-        if (DATASET_LL_MANAGE_ONLY_ONE_DSM)
+        if (NULL != dsmSizes)
         {
-            break;
+            uint32_t dsmEndBufferPos;
+            status = SOPC_Buffer_GetPosition(buffer_payload, &dsmEndBufferPos);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
+
+            const uint16_t dsmBufferSize = (uint16_t)(dsmEndBufferPos - dsmStartBufferPos);
+
+            if (dsmBufferSize != dsmSizes[i])
+            {
+                // Mismatching DSM buffer size.
+                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+                SOPC_Free(uadp_nm);
+                return NULL;
+            }
         }
     }
 
