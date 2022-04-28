@@ -28,11 +28,6 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
 {
     assert(NULL != group);
     uint8_t nb_dataSetWriter = SOPC_WriterGroup_Nb_DataSetWriter(group);
-    if (1 != nb_dataSetWriter)
-    {
-        // not managed
-        return NULL;
-    }
     SOPC_Dataset_LL_NetworkMessage* msg_nm = SOPC_Dataset_LL_NetworkMessage_Create(nb_dataSetWriter);
     if (NULL == msg_nm)
     {
@@ -45,19 +40,22 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(msg_nm, SOPC_WriterGroup_Get_Id(group));
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(msg_nm, SOPC_WriterGroup_Get_Version(group));
 
-    // there is only one DataSet Writer => only one DataSet Message
-    SOPC_DataSetWriter* conf_dsw = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
-    SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(msg_nm, 0);
-
-    SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, SOPC_DataSetWriter_Get_Id(conf_dsw));
-    uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
-    bool status = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nbFields);
-    if (!status)
+    const uint8_t nbDataSet = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(msg_nm);
+    for (uint8_t iDataSet = 0; iDataSet < nbDataSet; iDataSet++)
     {
-        SOPC_Dataset_LL_NetworkMessage_Delete(msg_nm);
-        return NULL;
-    }
+        SOPC_DataSetWriter* conf_dsw = SOPC_WriterGroup_Get_DataSetWriter_At(group, iDataSet);
+        SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(msg_nm, iDataSet);
+        SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, SOPC_DataSetWriter_Get_Id(conf_dsw));
 
+        const uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
+
+        const bool status = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nbFields);
+        if (!status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Delete(msg_nm);
+            return NULL;
+        }
+    }
     return msg_nm;
 }
 

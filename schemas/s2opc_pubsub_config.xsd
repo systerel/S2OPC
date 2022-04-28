@@ -1,83 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
-     <xs:element name="PubSub">
-           <xs:complexType>
-                 <xs:sequence>
-                       <xs:element name="connection" maxOccurs="unbounded">
-                             <xs:complexType>
-                                   <xs:sequence>
-                                         <xs:element name="message" maxOccurs="unbounded">
-                                               <xs:complexType>
-                                                     <xs:sequence>
-                                                           <xs:element name="variable" maxOccurs="unbounded">
-                                                                 <xs:complexType>
-                                                                       <xs:attribute name="nodeId" type="xs:string" use="required"/>
-                                                                       <xs:attribute name="displayName" type="xs:string" use="required"/>
-                                                                       <xs:attribute name="dataType" type="dataType" use="required"/>
-                                                                       <xs:attribute name="valueRank" type="valueRank"  use="optional"/>
-                                                                 </xs:complexType>
-                                                           </xs:element>
-                                                     </xs:sequence>
-                                                     <xs:attribute name="id" type="xs:unsignedInt" use="required"/>
-                                                     <xs:attribute name="publishingInterval" type="xs:double" use="required"/>
-                                                     <xs:attribute name="version" type="xs:unsignedInt" use="required"/>
-                                                     <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
-                                                     <xs:attribute name="securityMode" type="securityModeType"/>
-                                               </xs:complexType>
-                                         </xs:element>
-                                   </xs:sequence>
-                                   <xs:attribute name="address" type="xs:string" use="required"/>
-                                   <xs:attribute name="mode" type="modeType" use="required"/>
-                                   <xs:attribute name="interfaceName" type="xs:string"/> <!-- mandatory for publisher with Ethernet protocol, optional otherwise -->
-                             </xs:complexType>
-                       </xs:element>
-                 </xs:sequence>
-                 <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if publisher connection defined -->
-           </xs:complexType>
-     </xs:element>
-     <xs:simpleType name="modeType">
-       <xs:restriction base="xs:string">
-         <xs:enumeration value="publisher"/>
-         <xs:enumeration value="subscriber"/>
-       </xs:restriction>
-     </xs:simpleType>
-     <xs:simpleType name="valueRank">
-       <xs:restriction base="xs:integer">
-           <xs:minInclusive value="-3"/>
-       </xs:restriction> 
-     </xs:simpleType>
-     <xs:simpleType name="securityModeType">
-       <xs:restriction base="xs:string">
-         <xs:enumeration value="none"/>
-         <xs:enumeration value="sign"/>
-         <xs:enumeration value="signAndEncrypt"/>
-       </xs:restriction>
-     </xs:simpleType>
-     <xs:simpleType name="dataType">
-       <xs:restriction base="xs:string">
-         <xs:enumeration value="Null"/>
-         <xs:enumeration value="Boolean"/>
-         <xs:enumeration value="SByte"/>
-         <xs:enumeration value="Byte"/>
-         <xs:enumeration value="Int16"/>
-         <xs:enumeration value="UInt16"/>
-         <xs:enumeration value="Int32"/>
-         <xs:enumeration value="UInt32"/>
-         <xs:enumeration value="Int64"/>
-         <xs:enumeration value="UInt64"/>
-         <xs:enumeration value="Float"/>
-         <xs:enumeration value="Double"/>
-         <xs:enumeration value="DateTime"/>
-         <xs:enumeration value="String"/>
-         <xs:enumeration value="ByteString"/>
-         <xs:enumeration value="Guid"/>
-         <xs:enumeration value="XmlElement"/>
-         <xs:enumeration value="NodeId"/>
-         <xs:enumeration value="ExpandedNodeId"/>
-         <xs:enumeration value="QualifiedName"/>
-         <xs:enumeration value="LocalizedText"/>
-         <xs:enumeration value="StatusCode"/>
-         <xs:enumeration value="Structure"/>
-       </xs:restriction>
-     </xs:simpleType>
- </xs:schema>
+   <xs:simpleType name="modeType">
+     <xs:restriction base="xs:string">
+       <xs:enumeration value="publisher"/>
+       <xs:enumeration value="subscriber"/>
+     </xs:restriction>
+   </xs:simpleType>
+   <xs:simpleType name="valueRank">
+     <xs:restriction base="xs:integer">
+         <xs:minInclusive value="-3"/>
+     </xs:restriction> 
+   </xs:simpleType>
+   <xs:simpleType name="securityModeType">
+     <xs:restriction base="xs:string">
+       <xs:enumeration value="none"/>
+       <xs:enumeration value="sign"/>
+       <xs:enumeration value="signAndEncrypt"/>
+     </xs:restriction>
+   </xs:simpleType>
+   <xs:simpleType name="dataType">
+     <xs:restriction base="xs:string">
+       <xs:enumeration value="Null"/>
+       <xs:enumeration value="Boolean"/>
+       <xs:enumeration value="SByte"/>
+       <xs:enumeration value="Byte"/>
+       <xs:enumeration value="Int16"/>
+       <xs:enumeration value="UInt16"/>
+       <xs:enumeration value="Int32"/>
+       <xs:enumeration value="UInt32"/>
+       <xs:enumeration value="Int64"/>
+       <xs:enumeration value="UInt64"/>
+       <xs:enumeration value="Float"/>
+       <xs:enumeration value="Double"/>
+       <xs:enumeration value="DateTime"/>
+       <xs:enumeration value="String"/>
+       <xs:enumeration value="ByteString"/>
+       <xs:enumeration value="Guid"/>
+       <xs:enumeration value="XmlElement"/>
+       <xs:enumeration value="NodeId"/>
+       <xs:enumeration value="ExpandedNodeId"/>
+       <xs:enumeration value="QualifiedName"/>
+       <xs:enumeration value="LocalizedText"/>
+       <xs:enumeration value="StatusCode"/>
+       <xs:enumeration value="Structure"/>
+     </xs:restriction>
+   </xs:simpleType>
+  <xs:complexType name="connection">
+    <xs:sequence>
+      <xs:element type="message" name="message" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="address" type="xs:string" use="required"/>
+    <xs:attribute name="mode" type="modeType" use="required"/>
+    <xs:attribute name="interfaceName" type="xs:string"/> <!-- mandatory for publisher with Ethernet protocol, optional otherwise -->
+    <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
+  </xs:complexType>
+  <xs:complexType name="message">
+    <xs:sequence>
+      <xs:element type="dataset" name="dataset" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="publishingInterval" type="xs:double" use="required"/>
+    <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
+    <xs:attribute name="securityMode" type="securityModeType"/>
+    <xs:attribute name="groupId" type="xs:unsignedShort" use="optional"/>
+    <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
+   </xs:complexType>
+  <xs:complexType name="dataset">
+    <xs:sequence>
+      <xs:element type="variable" name="variable" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="writerId" type="xs:unsignedShort" use="optional"/> <!-- If omitted, set as groupId of message -->
+  </xs:complexType>
+  <xs:complexType name="variable">
+    <xs:attribute name="nodeId" type="xs:string" use="required"/>
+    <xs:attribute name="displayName" type="xs:string" use="required"/>
+    <xs:attribute name="dataType" type="dataType" use="required"/>
+    <xs:attribute name="valueRank" type="valueRank"  use="optional"/>
+  </xs:complexType>
+  <xs:element name="PubSub">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="connection" name="connection" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -56,24 +56,26 @@
 #define TAG_PUBSUB "PubSub"
 #define TAG_CONNECTION "connection"
 #define TAG_MESSAGE "message"
+#define TAG_DATASET "dataset"
 #define TAG_VARIABLE "variable"
 
-#define ATTR_PUBSUB_ID "publisherId"
-
+#define ATTR_CONNECTION_PUB_ID "publisherId" // TODO: remove Publisher Id from CONNECTION level
 #define ATTR_CONNECTION_ADDR "address"
 #define ATTR_CONNECTION_MODE "mode"
 #define ATTR_CONNECTION_MODE_VAL_PUB "publisher"
 #define ATTR_CONNECTION_MODE_VAL_SUB "subscriber"
 #define ATTR_CONNECTION_IFNAME "interfaceName"
 
-#define ATTR_MESSAGE_ID "id"
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
-#define ATTR_MESSAGE_VERSION "version"
 #define ATTR_MESSAGE_SECURITY "securityMode"
 #define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT "signAndEncrypt"
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
+#define ATTR_MESSAGE_GROUP_ID "groupId"
+#define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
+
+#define ATTR_DATASET_WRITER_ID "writerId"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -86,6 +88,7 @@ typedef enum
     PARSE_START,      // Beginning of file
     PARSE_PUBSUB,     // In a PubSub
     PARSE_CONNECTION, // In a Connection
+    PARSE_DATASET,    // In a DataSet
     PARSE_MESSAGE,    // In a connection message
     PARSE_VARIABLE,   // In a message variable
 } parse_state_t;
@@ -98,15 +101,23 @@ struct sopc_xml_pubsub_variable_t
     int16_t valueRank;
 };
 
+struct sopc_xml_pubsub_dataset_t
+{
+    uint16_t writer_id;
+    uint16_t nb_variables;
+    struct sopc_xml_pubsub_variable_t* variableArr;
+};
+
 struct sopc_xml_pubsub_message_t
 {
-    uint16_t id; // WriteGroupId
     double publishing_interval;
     uint64_t publisher_id;
     uint32_t version;
     SOPC_SecurityMode_Type security_mode;
-    uint16_t nb_variables;
-    struct sopc_xml_pubsub_variable_t* variableArr;
+    uint16_t nb_datasets;
+    uint16_t groupId;
+    uint32_t groupVersion;
+    struct sopc_xml_pubsub_dataset_t* datasetArr;
 };
 
 struct sopc_xml_pubsub_connection_t
@@ -121,12 +132,14 @@ struct sopc_xml_pubsub_connection_t
 struct parse_context_t
 {
     XML_Parser parser;
-    bool is_publisher;
+    bool has_publisher;
     uint64_t publisher_id; // Same config format is used for Pub/Sub but some attributes could be mandatory for one only
     uint32_t nb_connections;
     uint32_t nb_pubconnections;
-    uint32_t nb_messages;
+    uint16_t nb_datasets;
+    uint16_t nb_messages;
     struct sopc_xml_pubsub_connection_t* connectionArr;
+    struct sopc_xml_pubsub_message_t* currentMessage;
     parse_state_t state;
 };
 
@@ -246,37 +259,14 @@ static bool parse_unsigned_value(const char* data, size_t len, uint8_t width, vo
     }
 }
 
-static bool start_pubsub(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    for (size_t i = 0; attrs[i]; ++i)
-    {
-        const char* attr = attrs[i];
-
-        if (strcmp(ATTR_PUBSUB_ID, attr) == 0)
-        {
-            const char* val = attrs[++i];
-
-            if (NULL == val || !parse_unsigned_value(val, strlen(val), 64, &ctx->publisher_id) ||
-                0 == ctx->publisher_id)
-            {
-                LOG_XML_ERRORF("Invalid PublisherId value in PubSub tag: '%s", val);
-                return false;
-            }
-            ctx->is_publisher = true;
-            return true;
-        }
-    }
-    return true;
-}
-
 static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     bool addr = false;
     bool mode = false;
+    uint64_t pubId = 0;
 
     struct sopc_xml_pubsub_connection_t* connection = &ctx->connectionArr[ctx->nb_connections - 1];
     memset(connection, 0, sizeof *connection);
-
     for (size_t i = 0; attrs[i]; ++i)
     {
         // Current attribute name
@@ -308,16 +298,9 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
 
             if (strcmp(ATTR_CONNECTION_MODE_VAL_PUB, attr_val) == 0)
             {
-                if (ctx->is_publisher)
-                {
-                    connection->is_publisher = true;
-                    ctx->nb_pubconnections++;
-                }
-                else
-                {
-                    LOG_XML_ERROR("Connection mode is 'publisher' whereas no publisher id defined by root node");
-                    return false;
-                }
+                connection->is_publisher = true;
+                ctx->nb_pubconnections++;
+                ctx->has_publisher = true;
             }
             else if (strcmp(ATTR_CONNECTION_MODE_VAL_SUB, attr_val) != 0)
             {
@@ -346,6 +329,18 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
             }
             connection->interfaceName = strcpy(connection->interfaceName, attr_val);
         }
+        else if (strcmp(ATTR_CONNECTION_PUB_ID, attr) == 0)
+        {
+            const char* val = attrs[++i];
+
+            if (NULL == val || !parse_unsigned_value(val, strlen(val), 64, &ctx->publisher_id) ||
+                0 == ctx->publisher_id)
+            {
+                LOG_XML_ERRORF("Invalid PublisherId value in PubSub tag: '%s", val);
+                return false;
+            }
+            pubId = ctx->publisher_id;
+        }
         else
         {
             ++i; // Skip value of unknown attribute
@@ -362,6 +357,16 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
         LOG_XML_ERROR("Connection mode is missing");
         return false;
     }
+    else if (connection->is_publisher && pubId == 0)
+    {
+        LOG_XML_ERROR("Connection mode is 'publisher' but no 'publisherId' is defined");
+        return false;
+    }
+    else if (!connection->is_publisher && pubId != 0)
+    {
+        LOG_XML_ERROR("Connection mode is 'subscriber' and a 'publisherId' is defined");
+        return false;
+    }
 
     ctx->state = PARSE_CONNECTION;
     return true;
@@ -369,10 +374,9 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
 
 static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_message_t* msg, const XML_Char** attrs)
 {
-    bool id = false;
     bool pubItv = false;
-    bool version = false;
     bool pubId = false;
+    bool groupId = false;
 
     memset(msg, 0, sizeof *msg);
     // Security is disabled if it is not configured
@@ -382,50 +386,22 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     {
         // Current attribute name
         const char* attr = attrs[i];
+        const char* attr_val = attrs[++i];
+        bool invalidArg = false;
 
-        if (strcmp(ATTR_MESSAGE_ID, attr) == 0)
+        if (NULL == attr_val)
         {
-            // Retrieve current attribute value
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val || !parse_unsigned_value(attr_val, strlen(attr_val), 16, &msg->id) || 0 == msg->id)
-            {
-                LOG_XML_ERRORF("Invalid message id value: '%s", attr_val);
-                return false;
-            }
-
-            id = true;
+            LOG_XML_ERRORF("Missing value for attribute '%s", attr);
+            return false;
         }
-        else if (strcmp(ATTR_MESSAGE_PUBLISHING_ITV, attr) == 0)
+        if (strcmp(ATTR_MESSAGE_PUBLISHING_ITV, attr) == 0)
         {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val || !SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval) ||
-                msg->publishing_interval <= 0.)
-            {
-                LOG_XML_ERRORF("Invalid message publishingInterval value: '%s", attr_val);
-                return false;
-            }
-
+            invalidArg = !SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval) ||
+                         msg->publishing_interval <= 0.;
             pubItv = true;
-        }
-        else if (strcmp(ATTR_MESSAGE_VERSION, attr) == 0)
-        {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val || !parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->version) ||
-                0 == msg->version)
-            {
-                LOG_XML_ERRORF("Invalid message version value: '%s", attr_val);
-                return false;
-            }
-
-            version = true;
         }
         else if (strcmp(ATTR_MESSAGE_SECURITY, attr) == 0)
         {
-            const char* attr_val = attrs[++i];
-
             if (strcmp(ATTR_MESSAGE_SECURITY_VAL_NONE, attr_val) == 0)
             {
                 msg->security_mode = SOPC_SecurityMode_None;
@@ -440,8 +416,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
             }
             else
             {
-                LOG_XML_ERRORF("Invalid message security mode value: '%s", attr_val);
-                return false;
+                invalidArg = true;
             }
         }
         else if (strcmp(ATTR_MESSAGE_PUBLISHER_ID, attr) == 0)
@@ -450,39 +425,44 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
             {
                 // The publisherId is the id of the publisher defined in root node in this case (self id)
                 LOG_XML_ERROR("Message tag shall not contain a publisherId if the connection is in publisher mode");
-                return false;
+                invalidArg = true;
             }
 
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val || !parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publisher_id) ||
-                0 == msg->publisher_id)
-            {
-                LOG_XML_ERRORF("Invalid message publishingId value: '%s", attr_val);
-                return false;
-            }
-
+            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publisher_id);
+            invalidArg |= 0 == msg->publisher_id;
             pubId = true;
+        }
+        else if (strcmp(ATTR_MESSAGE_GROUP_ID, attr) == 0)
+        {
+            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 16, &msg->groupId);
+            invalidArg |= 0 == msg->groupId;
+            groupId = true;
+        }
+        else if (strcmp(ATTR_MESSAGE_GROUP_VERSION, attr) == 0)
+        {
+            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
+            invalidArg |= 0 == msg->groupVersion;
         }
         else
         {
-            ++i; // Skip value of unknown attribute
+            LOG_XML_ERRORF("Unexpected attribute <%s>", attr);
+            return false;
+        }
+        if (invalidArg)
+        {
+            LOG_XML_ERRORF("Invalid attribute argument : (%s='%s')", attr, attr_val);
+            return false;
         }
     }
 
-    if (!id)
-    {
-        LOG_XML_ERROR("Message id is missing");
-        return false;
-    }
-    else if (!pubItv)
+    if (!pubItv)
     {
         LOG_XML_ERROR("Message publishing interval is missing");
         return false;
     }
-    else if (!version)
+    else if (!groupId)
     {
-        LOG_XML_ERROR("Message version is missing");
+        LOG_XML_ERROR("Message groupId is missing");
         return false;
     }
     else if (!pubId && !ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
@@ -499,6 +479,46 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     }
 
     ctx->state = PARSE_MESSAGE;
+    return true;
+}
+
+static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_dataset_t* ds, const XML_Char** attrs)
+{
+    memset(ds, 0, sizeof *ds);
+    assert(NULL != ctx->currentMessage);
+    ds->writer_id = ctx->currentMessage->groupId;
+
+    for (size_t i = 0; attrs[i]; ++i)
+    {
+        // Current attribute name
+        const char* attr = attrs[i];
+        i++;
+        const char* attr_val = attrs[i];
+        bool invalidArg = false;
+
+        if (NULL == attr_val)
+        {
+            LOG_XML_ERRORF("Missing value for attribute '%s", attr);
+            return false;
+        }
+        if (strcmp(ATTR_DATASET_WRITER_ID, attr) == 0)
+        {
+            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
+            invalidArg |= 0 == ds->writer_id;
+        }
+        else
+        {
+            LOG_XML_ERRORF("Unexpected attribute <%s>", attr);
+            return false;
+        }
+        if (invalidArg)
+        {
+            LOG_XML_ERRORF("Invalid attribute argument : (%s='%s')", attr, attr_val);
+            return false;
+        }
+    }
+
+    ctx->state = PARSE_DATASET;
     return true;
 }
 
@@ -661,18 +681,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     struct parse_context_t* ctx = user_data;
     struct sopc_xml_pubsub_connection_t* connection = NULL;
     struct sopc_xml_pubsub_message_t* msg = NULL;
+    struct sopc_xml_pubsub_dataset_t* ds = NULL;
 
     switch (ctx->state)
     {
     case PARSE_START:
         if (strcmp(name, TAG_PUBSUB) != 0)
         {
-            LOG_XML_ERRORF("Unexpected tag %s", name);
-            XML_StopParser(ctx->parser, 0);
-            return;
-        }
-        if (!start_pubsub(ctx, attrs))
-        {
+            LOG_XML_ERRORF("Unexpected tag %s (expected " TAG_PUBSUB ")", name);
             XML_StopParser(ctx->parser, 0);
             return;
         }
@@ -681,7 +697,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_PUBSUB:
         if (strcmp(name, TAG_CONNECTION) != 0)
         {
-            LOG_XML_ERRORF("Unexpected tag %s", name);
+            LOG_XML_ERRORF("Unexpected tag %s (expected " TAG_CONNECTION ")", name);
             XML_StopParser(ctx->parser, 0);
             return;
         }
@@ -710,7 +726,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_CONNECTION:
         if (strcmp(name, TAG_MESSAGE) != 0)
         {
-            LOG_XML_ERRORF("Unexpected tag %s", name);
+            LOG_XML_ERRORF("Unexpected tag %s (expected " TAG_MESSAGE ")", name);
             XML_StopParser(ctx->parser, 0);
             return;
         }
@@ -738,32 +754,65 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_MESSAGE:
-        if (strcmp(name, TAG_VARIABLE) != 0)
+        if (strcmp(name, TAG_DATASET) != 0)
         {
-            LOG_XML_ERRORF("Unexpected tag %s", name);
+            LOG_XML_ERRORF("Unexpected tag '%s' (expected '" TAG_DATASET "')", name);
             XML_StopParser(ctx->parser, 0);
             return;
         }
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
         assert(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
-        if (NULL == msg->variableArr)
+        ctx->currentMessage = msg;
+        if (NULL == msg->datasetArr)
         {
-            assert(msg->nb_variables == 0);
-            msg->variableArr = SOPC_Malloc(sizeof *msg->variableArr);
-            msg->nb_variables = 1;
-            assert(NULL != msg->variableArr);
+            assert(msg->nb_datasets == 0);
+            msg->datasetArr = SOPC_Malloc(sizeof *msg->datasetArr);
+            msg->nb_datasets = 1;
+            assert(NULL != msg->datasetArr);
         }
         else
         {
-            assert(msg->nb_variables > 0);
-            msg->nb_variables++;
-            msg->variableArr =
-                SOPC_Realloc(msg->variableArr, (size_t)(msg->nb_variables - 1) * sizeof *msg->variableArr,
-                             msg->nb_variables * sizeof *msg->variableArr);
-            assert(NULL != msg->variableArr);
+            assert(msg->nb_datasets > 0);
+            msg->nb_datasets++;
+            msg->datasetArr = SOPC_Realloc(msg->datasetArr, (size_t)(msg->nb_datasets - 1) * sizeof *msg->datasetArr,
+                                           msg->nb_datasets * sizeof *msg->datasetArr);
+            assert(NULL != msg->datasetArr);
         }
-        if (!start_variable(ctx, &msg->variableArr[msg->nb_variables - 1], attrs))
+        if (!start_dataset(ctx, &msg->datasetArr[msg->nb_datasets - 1], attrs))
+        {
+            XML_StopParser(ctx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_DATASET:
+        if (strcmp(name, TAG_VARIABLE) != 0)
+        {
+            LOG_XML_ERRORF("Unexpected tag '%s' (expected '" TAG_VARIABLE "')", name);
+            XML_StopParser(ctx->parser, 0);
+            return;
+        }
+        connection = &ctx->connectionArr[ctx->nb_connections - 1];
+        assert(NULL != connection);
+        msg = &connection->messageArr[connection->nb_messages - 1];
+        assert(NULL != msg);
+        ds = &msg->datasetArr[msg->nb_datasets - 1];
+        if (NULL == ds->variableArr)
+        {
+            assert(ds->nb_variables == 0);
+            ds->variableArr = SOPC_Malloc(sizeof *ds->variableArr);
+            ds->nb_variables = 1;
+            assert(NULL != ds->variableArr);
+        }
+        else
+        {
+            assert(ds->nb_variables > 0);
+            ds->nb_variables++;
+            ds->variableArr = SOPC_Realloc(ds->variableArr, (size_t)(ds->nb_variables - 1) * sizeof *ds->variableArr,
+                                           ds->nb_variables * sizeof *ds->variableArr);
+            assert(NULL != ds->variableArr);
+        }
+        if (!start_variable(ctx, &ds->variableArr[ds->nb_variables - 1], attrs))
         {
             XML_StopParser(ctx->parser, 0);
             return;
@@ -778,19 +827,22 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 {
     SOPC_UNUSED_ARG(name);
     struct parse_context_t* ctx = user_data;
-    struct sopc_xml_pubsub_connection_t* connection = NULL;
 
     switch (ctx->state)
     {
     case PARSE_CONNECTION:
         ctx->state = PARSE_PUBSUB;
-        connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        ctx->nb_messages += connection->nb_messages;
         break;
     case PARSE_MESSAGE:
+        ctx->nb_messages++;
+        ctx->currentMessage = NULL;
         ctx->state = PARSE_CONNECTION;
         break;
     case PARSE_VARIABLE:
+        ctx->state = PARSE_DATASET;
+        break;
+    case PARSE_DATASET:
+        ctx->nb_datasets++;
         ctx->state = PARSE_MESSAGE;
         break;
     case PARSE_PUBSUB:
@@ -807,7 +859,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx)
 {
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
-    uint16_t nb_publishedDataSet = 0;
 
     if (NULL == config)
     {
@@ -822,10 +873,11 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
     assert(ctx->nb_messages <= UINT16_MAX);
 
-    if (ctx->is_publisher && allocSuccess)
+    if (ctx->has_publisher && allocSuccess)
     {
-        allocSuccess = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, (uint16_t) ctx->nb_messages);
+        allocSuccess = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, (uint16_t) ctx->nb_datasets);
     }
+    uint16_t pubDataSetIndex = 0; // Index in "SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array"
 
     for (uint16_t icon = 0, pubicon = 0, subicon = 0; icon < ctx->nb_connections && allocSuccess; icon++)
     {
@@ -834,7 +886,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
         if (p_connection->is_publisher)
         {
-            assert(ctx->is_publisher); // Checked on parsing
+            assert(ctx->has_publisher); // Checked on parsing
 
             connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, pubicon);
             assert(NULL != connection);
@@ -847,46 +899,52 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
+
                 // Create writer group
                 SOPC_WriterGroup* writerGroup = SOPC_PubSubConnection_Get_WriterGroup_At(connection, imsg);
-                SOPC_WriterGroup_Set_Id(writerGroup, msg->id);
+                SOPC_WriterGroup_Set_Id(writerGroup, msg->groupId);
+
                 SOPC_WriterGroup_Set_PublishingInterval(writerGroup, msg->publishing_interval);
-                SOPC_WriterGroup_Set_Version(writerGroup, msg->version);
+                SOPC_WriterGroup_Set_Version(writerGroup, msg->groupVersion);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
 
+                // Associate dataSet with writer
+                assert(msg->nb_datasets < 0x100);
+                allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
-                SOPC_PublishedDataSet* pubDataSet =
-                    SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, nb_publishedDataSet);
-                nb_publishedDataSet++;
-                SOPC_PublishedDataSet_Init(pubDataSet, SOPC_PublishedDataItemsDataType, msg->nb_variables);
-
-                // Associate dataSet with writer
-                allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 1);
-                if (allocSuccess)
+                for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
-                    SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
+                    struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
+
+                    SOPC_PublishedDataSet* pubDataSet =
+                        SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, pubDataSetIndex);
+                    pubDataSetIndex++;
+                    SOPC_PublishedDataSet_Init(pubDataSet, SOPC_PublishedDataItemsDataType, ds->nb_variables);
+
+                    SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
                     assert(dataSetWriter != NULL);
-                    SOPC_DataSetWriter_Set_Id(dataSetWriter, msg->id); // Same as WriterGroup
+                    SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id); // Same as WriterGroup
                     SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
-                }
 
-                for (uint16_t ivar = 0; ivar < msg->nb_variables && allocSuccess; ivar++)
-                {
-                    // Fill dataset
-                    struct sopc_xml_pubsub_variable_t* var = &msg->variableArr[ivar];
-                    SOPC_FieldMetaData* fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, ivar);
-                    assert(fieldMetaData != NULL);
-                    SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
-                    SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
+                    for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
+                    {
+                        // Fill dataset
+                        struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
+                        SOPC_FieldMetaData* fieldMetaData =
+                            SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, ivar);
+                        assert(fieldMetaData != NULL);
+                        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
+                        SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
 
-                    SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
-                    assert(publishedVar != NULL);
-                    SOPC_PublishedVariable_Set_NodeId(publishedVar, var->nodeId);
-                    var->nodeId = NULL; // Transfer ownership to publishedVariable
+                        SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
+                        assert(publishedVar != NULL);
+                        SOPC_PublishedVariable_Set_NodeId(publishedVar, var->nodeId);
+                        var->nodeId = NULL; // Transfer ownership to publishedVariable
 
-                    SOPC_PublishedVariable_Set_AttributeId(publishedVar, 13); // Value => AttributeId=13
-                    // SOPC_PublishedVariable_Set_IndexRange() => no indexRange
+                        SOPC_PublishedVariable_Set_AttributeId(publishedVar, 13); // Value => AttributeId=13
+                        // SOPC_PublishedVariable_Set_IndexRange() => no indexRange
+                    }
                 }
             }
         }
@@ -901,29 +959,32 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
-                // Create writer group
+                // Create reader group
                 SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, imsg);
                 assert(readerGroup != NULL);
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
-                allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
+                assert(msg->nb_datasets < 0x100);
+                allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
 
-                if (allocSuccess)
+                for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
-                    SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
+                    struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
+
+                    SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, ids);
                     assert(dataSetReader != NULL);
-                    SOPC_DataSetReader_Set_WriterGroupVersion(dataSetReader, msg->version);
-                    SOPC_DataSetReader_Set_WriterGroupId(dataSetReader, msg->id);
-                    SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, msg->id); // Same as WriterGroup
+                    SOPC_DataSetReader_Set_WriterGroupVersion(dataSetReader, msg->groupVersion);
+                    SOPC_DataSetReader_Set_WriterGroupId(dataSetReader, msg->groupId);
+                    SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, ds->writer_id);
                     SOPC_DataSetReader_Set_ReceiveTimeout(dataSetReader, 2 * msg->publishing_interval);
 
                     SOPC_DataSetReader_Set_PublisherId_UInteger(dataSetReader, msg->publisher_id);
 
                     allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
-                        dataSetReader, SOPC_TargetVariablesDataType, msg->nb_variables);
+                        dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
 
-                    for (uint16_t ivar = 0; ivar < msg->nb_variables && allocSuccess; ivar++)
+                    for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
                     {
-                        struct sopc_xml_pubsub_variable_t* var = &msg->variableArr[ivar];
+                        struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
 
                         SOPC_FieldMetaData* fieldMetaData =
                             SOPC_DataSetReader_Get_FieldMetaData_At(dataSetReader, ivar);
@@ -973,18 +1034,25 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
         {
             struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
 
-            for (uint16_t ivar = 0; ivar < msg->nb_variables; ivar++)
+            for (uint16_t ids = 0; ids < msg->nb_datasets; ids++)
             {
                 // Fill dataset
-                struct sopc_xml_pubsub_variable_t* var = &msg->variableArr[ivar];
-                SOPC_LocalizedText_Clear(&var->displayName);
-                SOPC_NodeId_Clear(var->nodeId);
-                SOPC_Free(var->nodeId);
-                var->nodeId = NULL;
+                struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
+                for (uint16_t ivar = 0; ivar < ds->nb_variables; ivar++)
+                {
+                    // Fill dataset
+                    struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
+                    SOPC_LocalizedText_Clear(&var->displayName);
+                    SOPC_NodeId_Clear(var->nodeId);
+                    SOPC_Free(var->nodeId);
+                    var->nodeId = NULL;
+                }
+                SOPC_Free(ds->variableArr);
+                ds->variableArr = NULL;
             }
 
-            SOPC_Free(msg->variableArr);
-            msg->variableArr = NULL;
+            SOPC_Free(msg->datasetArr);
+            msg->datasetArr = NULL;
         }
 
         SOPC_Free(p_connection->address);
@@ -1015,11 +1083,14 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_ParseXML(FILE* fd)
 
     ctx.state = PARSE_START;
     ctx.parser = parser;
-    ctx.is_publisher = false;
+    ctx.has_publisher = false;
     ctx.publisher_id = 0;
     ctx.nb_connections = 0;
     ctx.nb_pubconnections = 0;
+    ctx.nb_datasets = 0;
+    ctx.nb_messages = 0;
     ctx.connectionArr = NULL;
+    ctx.currentMessage = NULL;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
     // XML_SetCharacterDataHandler(parser, char_data_handler);
