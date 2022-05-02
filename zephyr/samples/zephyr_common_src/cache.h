@@ -63,15 +63,37 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
 /** The SOPC_SetTargetVariables_Func-compatible implementation that copies the values to the cache */
 bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
-void Cache_Dump_NodeId(const SOPC_NodeId* pNid);
+/** Prints on console a human-readable representation of a nid and a Datavalue
+
+ * @param pNid The NodeId to display
+ * @param dv The DataValue to display
+ */
+void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv);
+
+/** Prints on console a human-readable representation of the whole cache
+ * Note:  this call locks the cache during all operation, which will prevent
+ * other tasks to respond in time.
+ * This is only a debug function
+ */
 void Cache_Dump(void);
+
 /** The Cache shall be locked before accessing data (and its content, to prevent it from being freed) */
 void Cache_Lock(void);
+/** Unlock the cache previously locked by ::Cache_Lock */
 void Cache_Unlock(void);
-
+/** Deletes the cache */
 void Cache_Clear(void);
 
+/** Prototype for "listener" event callback. See ::Cache_SetSourceVarListener */
 typedef void(Cache_SourceVarListener)(SOPC_DataValue* pDv);
+
+/** Associates a "listener" to a given nodeId. each time the nodeId is modified
+ * in the Cache, the "listener" is called.
+ * @restriction In current implementation, only one listener is possible.
+ * @param nid The NodeId to monitor. This nid must be allocated before call, and ownership
+ *      s taken by current module (nid must be neither deallocated nor reused after call)
+ * @param listener The event to call
+ */
 void Cache_SetSourceVarListener(SOPC_NodeId* nid, Cache_SourceVarListener* listener);
 
 #endif /* CACHE_H_ */

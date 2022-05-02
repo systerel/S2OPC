@@ -32,7 +32,7 @@
  * The cache is a simple dictionnary { SOPC_NodeId* : SOPC_DataValue*}
  * The elements and keys are not referenced anywhere else, thus references must be cleared
  * when an item is removed.
- * Of course, keys and elements MUSt be MALLOCed.
+ * Of course, keys and elements MUST be MALLOCed.
  */
 SOPC_Dict* g_cache = NULL;
 Mutex g_lock;
@@ -452,100 +452,104 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     return ok;
 }
 
-static void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
+void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
 {
     char* nidStr = SOPC_NodeId_ToCString(nid);
     SOPC_ASSERT(NULL != nid && NULL != nidStr);
 
-    if (NULL == dv)
-    {
-        return;
-    }
+    printk("- %.25s", nidStr);
 
-    static char status[22];
-    if (dv->Status & SOPC_BadStatusMask)
+    if (NULL != dv)
     {
-        sprintf(status, "BAD 0x%08X", dv->Status);
-    }
-    else if (dv->Status & SOPC_UncertainStatusMask)
-    {
-        sprintf(status, "UNCERTAIN 0x%08X", dv->Status);
+        static char status[22];
+        if (dv->Status & SOPC_BadStatusMask)
+        {
+            sprintf(status, "BAD 0x%08X", dv->Status);
+        }
+        else if (dv->Status & SOPC_UncertainStatusMask)
+        {
+            sprintf(status, "UNCERTAIN 0x%08X", dv->Status);
+        }
+        else
+        {
+            sprintf(status, "GOOD");
+        }
+
+        char* type = "";
+        switch (dv->Value.ArrayType)
+        {
+        case SOPC_VariantArrayType_Matrix:
+            type = " ; [MAT]";
+            break;
+        case SOPC_VariantArrayType_Array:
+            type = " ; [ARR]";
+            break;
+        case SOPC_VariantArrayType_SingleValue:
+            break;
+        }
+        printk(" ; Status = %s%s", status, type);
+        if (type[0] == 0)
+        {
+            static const char* typeName[] = {
+                    "Null",           "Boolean",       "SByte",         "Byte",          "Int16",           "UInt16",
+                    "Int32",          "UInt32",        "Int64",         "UInt64",        "Float",           "Double",
+                    "String",         "DateTime",      "Guid",          "ByteString",    "XmlElement",      "NodeId",
+                    "ExpandedNodeId", "StatusCode",    "QualifiedName", "LocalizedText", "ExtensionObject", "DataValue",
+                    "Variant",        "DiagnosticInfo"};
+
+            const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
+            SOPC_ASSERT(typeId <= SOPC_DiagnosticInfo_Id);
+            printk(" ; Type=%.12s ; Val = ", typeName[typeId]);
+
+            switch (typeId)
+            {
+            case SOPC_Boolean_Id:
+                printk("%d", (int) dv->Value.Value.Boolean);
+                break;
+            case SOPC_SByte_Id:
+                printk("%d", (int) dv->Value.Value.Sbyte);
+                break;
+            case SOPC_Byte_Id:
+                printk("%d", (int) dv->Value.Value.Byte);
+                break;
+            case SOPC_UInt16_Id:
+                printk("%d", (int) dv->Value.Value.Uint16);
+                break;
+            case SOPC_Int16_Id:
+                printk("%d", (int) dv->Value.Value.Int16);
+                break;
+            case SOPC_Int32_Id:
+                printk("%d", (int) dv->Value.Value.Int32);
+                break;
+            case SOPC_UInt32_Id:
+                printk("%lu", (unsigned long) dv->Value.Value.Uint32);
+                break;
+            case SOPC_Int64_Id:
+                printk("%lld", (long long) dv->Value.Value.Int64);
+                break;
+            case SOPC_UInt64_Id:
+                printk("%llu", (unsigned long long) dv->Value.Value.Uint64);
+                break;
+            case SOPC_Float_Id:
+                printk("%f", dv->Value.Value.Floatv);
+                break;
+            case SOPC_Double_Id:
+                printk("%f", (float) dv->Value.Value.Doublev);
+                break;
+            case SOPC_String_Id:
+                printk("<%s>", SOPC_String_GetRawCString(&dv->Value.Value.String));
+                break;
+            default:
+                printk("(...)");
+                break;
+            }
+        }
     }
     else
     {
-        sprintf(status, "GOOD");
+        printk("<no value>");
     }
-
-    char* type = "";
-    switch (dv->Value.ArrayType)
-    {
-    case SOPC_VariantArrayType_Matrix:
-        type = " ; [MAT]";
-        break;
-    case SOPC_VariantArrayType_Array:
-        type = " ; [ARR]";
-        break;
-    case SOPC_VariantArrayType_SingleValue:
-        break;
-    }
-    printk("- %.25s ; Status = %s%s", nidStr, status, type);
-    if (type[0] == 0)
-    {
-        static const char* typeName[] = {
-            "Null",           "Boolean",       "SByte",         "Byte",          "Int16",           "UInt16",
-            "Int32",          "UInt32",        "Int64",         "UInt64",        "Float",           "Double",
-            "String",         "DateTime",      "Guid",          "ByteString",    "XmlElement",      "NodeId",
-            "ExpandedNodeId", "StatusCode",    "QualifiedName", "LocalizedText", "ExtensionObject", "DataValue",
-            "Variant",        "DiagnosticInfo"};
-
-        const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
-        SOPC_ASSERT(typeId <= SOPC_DiagnosticInfo_Id);
-        printk(" ; Type=%.12s ; Val = ", typeName[typeId]);
-
-        switch (typeId)
-        {
-        case SOPC_Boolean_Id:
-            printk("%d", (int) dv->Value.Value.Boolean);
-            break;
-        case SOPC_SByte_Id:
-            printk("%d", (int) dv->Value.Value.Sbyte);
-            break;
-        case SOPC_Byte_Id:
-            printk("%d", (int) dv->Value.Value.Byte);
-            break;
-        case SOPC_UInt16_Id:
-            printk("%d", (int) dv->Value.Value.Uint16);
-            break;
-        case SOPC_Int16_Id:
-            printk("%d", (int) dv->Value.Value.Int16);
-            break;
-        case SOPC_Int32_Id:
-            printk("%d", (int) dv->Value.Value.Int32);
-            break;
-        case SOPC_UInt32_Id:
-            printk("%lu", (unsigned long) dv->Value.Value.Uint32);
-            break;
-        case SOPC_Int64_Id:
-            printk("%lld", (long long) dv->Value.Value.Int64);
-            break;
-        case SOPC_UInt64_Id:
-            printk("%llu", (unsigned long long) dv->Value.Value.Uint64);
-            break;
-        case SOPC_Float_Id:
-            printk("%f", dv->Value.Value.Floatv);
-            break;
-        case SOPC_Double_Id:
-            printk("%f", (float) dv->Value.Value.Doublev);
-            break;
-        case SOPC_String_Id:
-            printk("<%s>", SOPC_String_GetRawCString(&dv->Value.Value.String));
-            break;
-        default:
-            printk("(...)");
-            break;
-        }
-        printk("\n");
-    }
+    printk("\n");
 
     SOPC_Free(nidStr);
 }
