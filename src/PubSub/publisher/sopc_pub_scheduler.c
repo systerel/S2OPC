@@ -31,6 +31,7 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_pub_scheduler.h"
@@ -345,7 +346,7 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 
 static void* thread_start_publish(void* arg)
 {
-    (void) arg;
+    SOPC_UNUSED_ARG(arg);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
 

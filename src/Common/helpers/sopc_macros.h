@@ -47,7 +47,7 @@
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
 #endif
 
-//This macro is used to avoid warning about unused argument :
+// This macro is used to avoid warning about unused argument :
 #define SOPC_UNUSED_ARG(arg) (void) (arg)
 
 #endif // SOPC_MACROS_H_

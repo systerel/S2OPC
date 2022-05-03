@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "sopc_buffer.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 
@@ -122,8 +123,8 @@ const SOPC_ExposedBuffer* SOPC_SecretBuffer_Expose(const SOPC_SecretBuffer* sec)
 
 void SOPC_SecretBuffer_Unexpose(const SOPC_ExposedBuffer* buf, const SOPC_SecretBuffer* sec)
 {
-    (void) buf;
-    (void) sec;
+    SOPC_UNUSED_ARG(buf);
+    SOPC_UNUSED_ARG(sec);
 }
 
 SOPC_ExposedBuffer* SOPC_SecretBuffer_ExposeModify(SOPC_SecretBuffer* sec)
@@ -135,6 +136,6 @@ SOPC_ExposedBuffer* SOPC_SecretBuffer_ExposeModify(SOPC_SecretBuffer* sec)
 
 void SOPC_SecretBuffer_UnexposeModify(SOPC_ExposedBuffer* buf, SOPC_SecretBuffer* sec)
 {
-    (void) buf;
-    (void) sec;
+    SOPC_UNUSED_ARG(buf);
+    SOPC_UNUSED_ARG(sec);
 }

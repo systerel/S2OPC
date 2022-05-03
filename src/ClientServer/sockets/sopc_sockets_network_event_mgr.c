@@ -32,6 +32,7 @@
 #include "sopc_atomic.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -274,7 +275,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
 
 static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
 {
-    (void) nullData;
+    SOPC_UNUSED_ARG(nullData);
     bool result = true;
     while (result)
     {

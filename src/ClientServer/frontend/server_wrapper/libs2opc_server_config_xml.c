@@ -27,6 +27,7 @@
 #include "libs2opc_server_internal.h"
 
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
@@ -175,8 +176,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
                                                            const char* userConfigPath,
                                                            SOPC_ConfigServerXML_Custom* customConfig)
 {
-    // Avoid compiler warning on unused parameter, reserved for future use
-    (void) customConfig;
+    SOPC_UNUSED_ARG(customConfig);
 
     if (!SOPC_ServerInternal_IsConfiguring())
     {

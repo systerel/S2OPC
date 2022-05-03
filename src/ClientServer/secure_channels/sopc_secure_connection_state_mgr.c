@@ -104,7 +104,7 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
 
 static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
 {
-    (void) (id);
+    SOPC_UNUSED_ARG(id);
     SOPC_SentRequestMsg_Context* msgCtx = val;
     if (NULL != msgCtx)
     {
@@ -3018,7 +3018,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                  uintptr_t params,
                                                  uintptr_t auxParam)
 {
-    (void) params;
+    SOPC_UNUSED_ARG(params);
     SOPC_SecureConnection* scConnection = NULL;
 
     switch (event)

@@ -777,8 +777,8 @@ static bool StaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
                                                   SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
-    (void) pSM;
-    (void) pEncType;
+    SOPC_UNUSED_ARG(pSM);
+    SOPC_UNUSED_ARG(pEncType);
 
     switch (event)
     {
@@ -798,8 +798,8 @@ static bool StaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
-    (void) pEncType;
+    SOPC_UNUSED_ARG(pSM);
+    SOPC_UNUSED_ARG(pEncType);
 
     switch (event)
     {
@@ -819,7 +819,7 @@ static bool StaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
+    SOPC_UNUSED_ARG(pSM);
 
     switch (event)
     {
@@ -842,7 +842,7 @@ static bool StaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
+    SOPC_UNUSED_ARG(pSM);
 
     switch (event)
     {
@@ -865,7 +865,7 @@ static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
+    SOPC_UNUSED_ARG(pSM);
 
     switch (event)
     {
@@ -889,7 +889,7 @@ static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
+    SOPC_UNUSED_ARG(pSM);
 
     switch (event)
     {
@@ -914,7 +914,7 @@ static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
 {
     bool authorization = false;
 
-    (void) pSM;
+    SOPC_UNUSED_ARG(pSM);
 
     switch (event)
     {
@@ -1146,9 +1146,8 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    void* pParam,
                                    uintptr_t toolkitCtx)
 {
-    /* avoid unused parameter compiler warning */
-    (void) arg;
-    (void) pParam;
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(pParam);
 
     bool bProcess = true;
     SOPC_StaMac_ReqCtx* reqCtx = NULL;
@@ -1217,8 +1216,8 @@ static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
                                                       void* pParam,
                                                       uintptr_t appCtx)
 {
-    (void) (pParam);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(pParam);
+    SOPC_UNUSED_ARG(appCtx);
 
     pSM->state = stActivated;
     pSM->iSessionID = arg;
@@ -1230,9 +1229,9 @@ static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
                                                    void* pParam,
                                                    uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (pParam);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(pParam);
+    SOPC_UNUSED_ARG(appCtx);
 
     /* Put the machine in a correct closed state, events may still be received */
     pSM->state = stError;
@@ -1240,8 +1239,8 @@ static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
 
 static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(appCtx);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t i = 0;
@@ -1323,8 +1322,8 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
                                                          void* pParam,
                                                          uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(appCtx);
     /* TODO: verify revised values?? */
 
     assert(0 == pSM->iSubscriptionID);
@@ -1338,8 +1337,8 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
                                                          void* pParam,
                                                          uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(appCtx);
 
     assert(pSM->iSubscriptionID != 0);
     if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
@@ -1371,7 +1370,7 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
                                                            void* pParam,
                                                            uintptr_t appCtx)
 {
-    (void) (arg);
+    SOPC_UNUSED_ARG(arg);
 
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
@@ -1406,8 +1405,8 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
 
 static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (pParam);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(pParam);
 
     if (0 == appCtx)
     {
@@ -1444,8 +1443,8 @@ static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
                                                   void* pParam,
                                                   uintptr_t appCtx)
 {
-    (void) (arg);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(appCtx);
 
     if (NULL == pParam)
     {
@@ -1482,9 +1481,9 @@ static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
                                         void* pParam,
                                         uintptr_t appCtx)
 {
-    (void) (pSM);
-    (void) (arg);
-    (void) (appCtx);
+    SOPC_UNUSED_ARG(pSM);
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(appCtx);
 
     switch (event)
     {

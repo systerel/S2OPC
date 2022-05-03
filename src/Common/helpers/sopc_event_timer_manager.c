@@ -25,6 +25,7 @@
 #include "sopc_atomic.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
@@ -251,7 +252,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
 
 static void* SOPC_Internal_ThreadLoop(void* arg)
 {
-    (void) arg;
+    SOPC_UNUSED_ARG(arg);
 
     if (!is_initialized())
     {

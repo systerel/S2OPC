@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "sopc_macros.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 
@@ -122,7 +123,7 @@ bool SOPC_ScInternalContext_AddIntermediateInputChunk(SOPC_SecureConnection_TcpP
 
 static void SOPC_ScInternalContext_DeleteIntermediateInputBuffer(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_Buffer_Delete((SOPC_Buffer*) val);
 }
 

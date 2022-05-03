@@ -23,6 +23,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include "crypto_provider_lib.h"
@@ -157,7 +158,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SO
                                                                         const SOPC_AsymmetricKey* pKey,
                                                                         uint32_t* pLenMsg)
 {
-    (void) (pProvider);
+    SOPC_UNUSED_ARG(pProvider);
     size_t lenMessage = 0;
 
     if (NULL == pKey || NULL == pLenMsg)

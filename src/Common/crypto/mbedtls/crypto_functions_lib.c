@@ -30,6 +30,7 @@
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 
@@ -65,7 +66,7 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* p
     unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so
                                                                             // it must be copied first
 
-    (void) pProvider;
+    SOPC_UNUSED_ARG(pProvider);
 
     if (lenOutput < lenPlainText) // TODO: we are in our own lib, arguments have already been verified.
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -97,7 +98,7 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
     unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so
                                                                             // it must be copied first
 
-    (void) pProvider;
+    SOPC_UNUSED_ARG(pProvider);
 
     if (lenOutput < lenCipherText)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -264,7 +265,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
     uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
     uint32_t lenHash = 0;
 
-    (void) (pProvider);
+    SOPC_UNUSED_ARG(pProvider);
 
     if (NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -562,7 +563,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
                                                                       const SOPC_AsymmetricKey* pKey,
                                                                       const uint8_t* pSignature)
 {
-    (void) (pProvider);
+    SOPC_UNUSED_ARG(pProvider);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* hash = NULL;
     mbedtls_rsa_context* prsa = NULL;
@@ -659,7 +660,7 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* 
     uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
     uint32_t lenHash = 0;
 
-    (void) (pProvider);
+    SOPC_UNUSED_ARG(pProvider);
 
     if (NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -730,7 +731,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
                                                                     const SOPC_AsymmetricKey* pKey,
                                                                     const uint8_t* pSignature)
 {
-    (void) (pProvider);
+    SOPC_UNUSED_ARG(pProvider);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* hash = NULL;
     mbedtls_rsa_context* prsa = NULL;
@@ -813,7 +814,7 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
                                                   uint32_t uSequenceNumber,
                                                   uint8_t* pOutput)
 {
-    (void) pProvider;
+    SOPC_UNUSED_ARG(pProvider);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     mbedtls_aes_context aes;

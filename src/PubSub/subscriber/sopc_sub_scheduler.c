@@ -28,6 +28,7 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_mutexes.h"
@@ -254,7 +255,7 @@ static void on_socket_message_received(void* pInputIdentifier, Socket sock);
  */
 static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
-    (void) pCtx;
+    SOPC_UNUSED_ARG(pCtx);
     assert(NULL != pInputIdentifier);
 
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
@@ -269,7 +270,7 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, u
         {
             status = on_message_received((SOPC_PubSubConnection*) pInputIdentifier, schedulerCtx.state,
                                          schedulerCtx.receptionBufferMQTT, schedulerCtx.targetConfig);
-            (void) status;
+            SOPC_UNUSED_ARG(status);
         }
     }
 }

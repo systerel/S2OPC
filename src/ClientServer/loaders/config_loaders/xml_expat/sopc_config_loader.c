@@ -1242,7 +1242,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
-    (void) name;
+    SOPC_UNUSED_ARG(name);
 
     struct parse_context_t* ctx = user_data;
 

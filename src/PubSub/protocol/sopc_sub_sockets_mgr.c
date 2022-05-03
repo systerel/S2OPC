@@ -22,6 +22,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_macros.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -55,7 +56,7 @@ static struct
 
 static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
-    (void) nullData;
+    SOPC_UNUSED_ARG(nullData);
     int32_t nbReady = 0;
     SOPC_SocketSet readSet, writeSet, exceptSet;
     SOPC_TimeReference lastTick = SOPC_TimeReference_GetCurrent();

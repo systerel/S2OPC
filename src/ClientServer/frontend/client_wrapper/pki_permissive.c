@@ -27,9 +27,9 @@ static SOPC_ReturnStatus PKIPermissive_ValidateAnything(const SOPC_PKIProvider* 
                                                         uint32_t* error)
 {
     /* avoid unused parameter compiler warning */
-    (void) (pPKI);
-    (void) (pToValidate);
-    (void) (error);
+    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(error);
     return SOPC_STATUS_OK;
 }
 

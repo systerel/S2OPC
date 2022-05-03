@@ -27,6 +27,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
@@ -368,8 +369,7 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
                                          void* param,
                                          uintptr_t helperContext)
 {
-    // Avoid unused parameter warning
-    (void) IdOrStatus;
+    SOPC_UNUSED_ARG(IdOrStatus);
 
     bool startedOrStopping = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))

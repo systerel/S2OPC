@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 struct SOPC_SLinkedList_Elt
@@ -416,7 +417,7 @@ void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list)
 
 void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val)
 {
-    (void) (id);
+    SOPC_UNUSED_ARG(id);
     SOPC_Free(val);
 }
 

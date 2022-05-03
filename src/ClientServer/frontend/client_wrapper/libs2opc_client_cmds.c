@@ -31,6 +31,7 @@
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 #include "libs2opc_client_common.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -622,7 +623,7 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
 
     GetEndpointsContext* ctx = (GetEndpointsContext*) responseContext;
     const OpcUa_GetEndpointsResponse* getEndpointsResp = (const OpcUa_GetEndpointsResponse*) response;
-    (void) getEndpointsResp;
+    SOPC_UNUSED_ARG(getEndpointsResp);
 
     statusMutex = Mutex_Lock(&ctx->mutex);
     assert(SOPC_STATUS_OK == statusMutex);
@@ -1010,8 +1011,7 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
                                        const void* response,
                                        uintptr_t responseContext)
 {
-    // unused
-    (void) c_id;
+    SOPC_UNUSED_ARG(c_id);
 
     if (SOPC_LibSub_ApplicativeEvent_Response != event)
     {

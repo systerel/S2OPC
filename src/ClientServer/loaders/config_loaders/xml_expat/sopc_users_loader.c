@@ -29,6 +29,7 @@
 #include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_helper_expat.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -153,7 +154,7 @@ static bool end_anonymous(struct parse_context_t* ctx)
 
 static bool start_anonymous(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    (void) attrs; // avoid unused warning from compiler
+    SOPC_UNUSED_ARG(attrs);
 
     if (ctx->hasAnonymous)
     {
@@ -329,7 +330,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
-    (void) name;
+    SOPC_UNUSED_ARG(name);
 
     struct parse_context_t* ctx = user_data;
 
@@ -450,8 +451,8 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
                                            const SOPC_User* pUser,
                                            bool* pbOperationAuthorized)
 {
-    (void) (nodeId);
-    (void) (attributeId);
+    SOPC_UNUSED_ARG(nodeId);
+    SOPC_UNUSED_ARG(attributeId);
     assert(NULL != authorizationManager && NULL != authorizationManager->pData);
     assert(NULL != pbOperationAuthorized);
 

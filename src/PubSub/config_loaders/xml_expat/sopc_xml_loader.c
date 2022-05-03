@@ -31,6 +31,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #ifdef XML_CONFIG_LOADER_LOG
@@ -775,7 +776,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
-    (void) name;
+    SOPC_UNUSED_ARG(name);
     struct parse_context_t* ctx = user_data;
     struct sopc_xml_pubsub_connection_t* connection = NULL;
 

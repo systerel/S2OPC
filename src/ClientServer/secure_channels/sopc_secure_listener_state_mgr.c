@@ -146,7 +146,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                                                  uintptr_t params,
                                                  uintptr_t auxParam)
 {
-    (void) params;
+    SOPC_UNUSED_ARG(params);
 
     switch (event)
     {
@@ -207,7 +207,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                uintptr_t params,
                                                uintptr_t auxParam)
 {
-    (void) params;
+    SOPC_UNUSED_ARG(params);
 
     switch (event)
     {
@@ -283,8 +283,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                                             uintptr_t params,
                                             uintptr_t auxParam)
 {
-    (void) params;
-    (void) auxParam;
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
     bool result = false;
     SOPC_Endpoint_Config* epConfig = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

@@ -36,6 +36,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_common_constants.h"
+#include "sopc_macros.h"
 #include "sopc_protocol_constants.h"
 
 bool SOPC_IsGoodStatus(SOPC_StatusCode status)
@@ -2731,7 +2732,7 @@ void SOPC_LocalizedText_ClearAux(void* value)
 
 static void SOPC_LocalizedText_ListEltFree(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_LocalizedText_ClearAux(val);
     SOPC_Free(val);
 }
@@ -4208,7 +4209,7 @@ void SOPC_Variant_Initialize(SOPC_Variant* variant)
 
 void SOPC_Null_ClearAux(void* value)
 {
-    (void) value;
+    SOPC_UNUSED_ARG(value);
 }
 
 static SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId)
@@ -4223,8 +4224,8 @@ static SOPC_EncodeableObject_PfnClear* GetBuiltInTypeClearFunction(SOPC_BuiltinI
 
 SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src)
 {
-    (void) dest;
-    (void) src;
+    SOPC_UNUSED_ARG(dest);
+    SOPC_UNUSED_ARG(src);
     return SOPC_STATUS_OK;
 }
 
@@ -5140,8 +5141,8 @@ void SOPC_Initialize_Array(int32_t* noOfElts,
                            size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct)
 {
-    (void) initFct;
-    (void) sizeOfElt;
+    SOPC_UNUSED_ARG(initFct);
+    SOPC_UNUSED_ARG(sizeOfElt);
     *noOfElts = 0;
     *eltsArray = NULL;
 }

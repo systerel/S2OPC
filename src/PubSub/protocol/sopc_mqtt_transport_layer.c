@@ -19,6 +19,7 @@
 
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_common_constants.h"
+#include "sopc_macros.h"
 #ifndef USE_MQTT_PAHO
 #define USE_MQTT_PAHO 0
 #endif
@@ -566,9 +567,9 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
     (void) pWks;
     (void) status;
     (void) event;
-    (void) cltId;
+    SOPC_UNUSED_ARG(cltId);
     (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -657,9 +658,9 @@ static eMqttManagerStatus cbRelHdl(MqttManagerHandle* pWks,
     (void) pWks;
     (void) status;
     (void) event;
-    (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    (void) (cltId);
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -755,8 +756,8 @@ static eMqttManagerStatus cbCltRdy(
     (void) status;
     (void) event;
     (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -792,8 +793,8 @@ static eMqttManagerStatus cbCltNotRdy(
     (void) status;
     (void) event;
     (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -828,8 +829,8 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
     (void) status;
     (void) event;
     (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -884,9 +885,9 @@ static eMqttManagerStatus cbQuit(MqttManagerHandle* pWks,
     (void) pWks;
     (void) status;
     (void) event;
-    (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(cltId);
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -924,9 +925,9 @@ static eMqttManagerStatus cbTmo(MqttManagerHandle* pWks,
     (void) pWks;
     (void) status;
     (void) event;
-    (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(cltId);
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
     {
@@ -1055,8 +1056,8 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pCtx)
     {
@@ -1111,8 +1112,8 @@ static eMqttTransportContextStatus cbConnTry(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pCtx)
     {
@@ -1166,8 +1167,8 @@ static eMqttTransportContextStatus cbDiscReq(
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pCtx)
     {
@@ -1208,8 +1209,8 @@ static eMqttTransportContextStatus cbSubRdy(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pCtx)
     {
@@ -1238,8 +1239,8 @@ static eMqttTransportContextStatus cbMsgRcv(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -1267,8 +1268,8 @@ static eMqttTransportContextStatus cbSubReq(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -1443,8 +1444,8 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
     (void) pCtx;
     (void) status;
     (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(bufferData);
+    SOPC_UNUSED_ARG(dataSize);
 
     if (pCtx != NULL)
     {
@@ -2350,7 +2351,7 @@ static void TransportContext_GetPendingMsg(tMqttTransportContext* pClt, char** m
 #if USE_MQTT_PAHO == 1
 static void cb_lib_onConnLost(void* context, char* cause)
 {
-    (void) cause;
+    SOPC_UNUSED_ARG(cause);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2369,7 +2370,7 @@ static void cb_lib_onConnLost(void* context, char* cause)
 
 static int cb_lib_onMsgRcv(void* context, char* topicName, int topicLen, MQTTAsync_message* message)
 {
-    (void) topicLen;
+    SOPC_UNUSED_ARG(topicLen);
     char* payloadptr = NULL;
 
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
@@ -2395,7 +2396,7 @@ static int cb_lib_onMsgRcv(void* context, char* topicName, int topicLen, MQTTAsy
 }
 static void cb_lib_onDisconnect(void* context, MQTTAsync_successData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2412,7 +2413,7 @@ static void cb_lib_onDisconnect(void* context, MQTTAsync_successData* response)
 
 static void cb_lib_onSubscribe(void* context, MQTTAsync_successData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2430,7 +2431,7 @@ static void cb_lib_onSubscribe(void* context, MQTTAsync_successData* response)
 }
 static void cb_lib_onSubscribeFailure(void* context, MQTTAsync_failureData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2449,7 +2450,7 @@ static void cb_lib_onSubscribeFailure(void* context, MQTTAsync_failureData* resp
 
 static void cb_lib_onSend(void* context, MQTTAsync_successData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
 
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
@@ -2469,7 +2470,7 @@ static void cb_lib_onSend(void* context, MQTTAsync_successData* response)
 
 static void cb_lib_onSendFailure(void* context, MQTTAsync_failureData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2488,7 +2489,7 @@ static void cb_lib_onSendFailure(void* context, MQTTAsync_failureData* response)
 
 static void cb_lib_onConnectFailure(void* context, MQTTAsync_failureData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {
@@ -2506,7 +2507,7 @@ static void cb_lib_onConnectFailure(void* context, MQTTAsync_failureData* respon
 }
 static void cb_lib_onConnect(void* context, MQTTAsync_successData* response)
 {
-    (void) response;
+    SOPC_UNUSED_ARG(response);
     tMqttTransportContextIdentification* pClientContext = ((tMqttTransportContextIdentification*) context);
     if (NULL != pClientContext)
     {

@@ -104,8 +104,8 @@ static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* a
                                               const SOPC_ExtensionObject* pUserIdentity,
                                               SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
-    (void) (authenticationManager);
-    (void) (pUserIdentity);
+    SOPC_UNUSED_ARG(authenticationManager);
+    SOPC_UNUSED_ARG(pUserIdentity);
     assert(NULL != pUserAuthenticated);
 
     *pUserAuthenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -120,11 +120,11 @@ static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* autho
                                            const SOPC_User* pUser,
                                            bool* pbOperationAuthorized)
 {
-    (void) (authorizationManager);
-    (void) (operationType);
-    (void) (nodeId);
-    (void) (attributeId);
-    (void) (pUser);
+    SOPC_UNUSED_ARG(authorizationManager);
+    SOPC_UNUSED_ARG(operationType);
+    SOPC_UNUSED_ARG(nodeId);
+    SOPC_UNUSED_ARG(attributeId);
+    SOPC_UNUSED_ARG(pUser);
     assert(NULL != pbOperationAuthorized);
 
     *pbOperationAuthorized = true;

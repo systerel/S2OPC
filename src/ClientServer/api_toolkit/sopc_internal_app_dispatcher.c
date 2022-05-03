@@ -25,6 +25,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 SOPC_ComEvent_Fct* appEventCallback = NULL;
@@ -36,7 +37,7 @@ SOPC_EventHandler* appAddressSpaceNotificationHandler = NULL;
 
 static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t uintParams, uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
 
     void* params = (void*) uintParams; // Always used as a pointer content here
     SOPC_App_Com_Event comEvent = (SOPC_App_Com_Event) event;
@@ -132,8 +133,8 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                                        uintptr_t uintParams,
                                        uintptr_t auxParam)
 {
-    (void) handler;
-    (void) id;
+    SOPC_UNUSED_ARG(handler);
+    SOPC_UNUSED_ARG(id);
     void* params = (void*) uintParams; // Always used as a pointer content here
     OpcUa_WriteValue* wv = NULL;
     SOPC_CallContext* cc = (SOPC_CallContext*) auxParam;

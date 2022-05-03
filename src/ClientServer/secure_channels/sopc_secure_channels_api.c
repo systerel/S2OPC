@@ -25,6 +25,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_chunks_mgr.h"
+#include "sopc_macros.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_connection_state_mgr.h"
 #include "sopc_secure_listener_state_mgr.h"
@@ -36,7 +37,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
                                          uintptr_t params,
                                          uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
     SOPC_SecureChannels_InternalEvent internalEvent = (SOPC_SecureChannels_InternalEvent) event;
 
     switch (internalEvent)
@@ -89,7 +90,7 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
                                         uintptr_t params,
                                         uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
     SOPC_Sockets_OutputEvent sockEvent = (SOPC_Sockets_OutputEvent) event;
 
     switch (sockEvent)
@@ -121,7 +122,7 @@ void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
                                       uintptr_t params,
                                       uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
     SOPC_SecureConnectionStateMgr_OnTimerEvent((SOPC_SecureChannels_TimerEvent) event, id, params, auxParam);
 }
 
@@ -131,7 +132,7 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       uintptr_t params,
                                       uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
 
     SOPC_SecureChannels_InputEvent scEvent = (SOPC_SecureChannels_InputEvent) event;
     switch (scEvent)

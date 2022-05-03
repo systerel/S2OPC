@@ -25,6 +25,7 @@
 #include "sopc_enums.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_secure_channels_api.h"
@@ -78,7 +79,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
                                  uintptr_t params,
                                  uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
     SOPC_SecureChannels_OutputEvent scEvent = (SOPC_SecureChannels_OutputEvent) event;
     bool bres = false;
     uint32_t channel_config_idx = 0;
