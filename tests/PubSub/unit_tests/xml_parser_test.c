@@ -37,7 +37,7 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(0, nb_subconnections);
 
     const uint32_t nb_pub_datasets = SOPC_PubSubConfiguration_Nb_PublishedDataSet(config);
-    ck_assert_uint_eq(2, nb_pub_datasets);
+    ck_assert_uint_eq(3, nb_pub_datasets);
 
     SOPC_PubSubConnection* conn = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
     ck_assert_ptr_nonnull(conn);
@@ -62,12 +62,19 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_double_eq(50., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
-    ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
-    // DataSetWriter
+    ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
+    // DataSetWriter 1
     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
+    ck_assert_uint_eq(50, SOPC_DataSetWriter_Get_Id(dataSetWriter));
+    const SOPC_PublishedDataSet* pubDataSet1 = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
+    ck_assert_ptr_eq(pubDataSet1, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 0));
+
+    // DataSetWriter 2
+    dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 1);
+    // default value for dataset 2
     ck_assert_uint_eq(SOPC_WriterGroup_Get_Id(writerGroup), SOPC_DataSetWriter_Get_Id(dataSetWriter));
-    const SOPC_PublishedDataSet* pubDataSet = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
-    ck_assert_ptr_eq(pubDataSet, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 0));
+    const SOPC_PublishedDataSet* pubDataSet2 = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
+    ck_assert_ptr_eq(pubDataSet2, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 1));
 
     /* Second WriteGroup */
     writerGroup = SOPC_PubSubConnection_Get_WriterGroup_At(conn, 1);
@@ -76,21 +83,22 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(15, SOPC_WriterGroup_Get_Id(writerGroup));
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
     ck_assert_double_eq(30., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
-    ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
+    // Check default value for groupVersion
+    ck_assert_uint_eq(0, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     // DataSetWriter
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
-    ck_assert_uint_eq(SOPC_WriterGroup_Get_Id(writerGroup), SOPC_DataSetWriter_Get_Id(dataSetWriter));
-    pubDataSet = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
-    ck_assert_ptr_eq(pubDataSet, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 1));
+    ck_assert_uint_eq(52, SOPC_DataSetWriter_Get_Id(dataSetWriter));
+    const SOPC_PublishedDataSet* pubDataSet3 = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
+    ck_assert_ptr_eq(pubDataSet3, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 2));
 
+    /*****************************/
     /* Published Data Sets */
     /* First published data set */
-    SOPC_PublishedDataSet* dataSet = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 0);
-    uint32_t nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(dataSet);
+    uint32_t nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataSet1);
     ck_assert_uint_eq(1, nb_fields);
-    SOPC_FieldMetaData* fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataSet, 0);
+    SOPC_FieldMetaData* fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet1, 0);
     ck_assert_int_eq(SOPC_Boolean_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
     ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
     // Variable source
@@ -102,11 +110,40 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_int_eq(5, nodeId->Data.Numeric);
     ck_assert_ptr_null(SOPC_PublishedVariable_Get_IndexRange(pubVar)); // No index range in XML
 
+    /*****************************/
     /* Second published data set */
-    dataSet = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 1);
-    nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(dataSet);
+    nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataSet2);
+    ck_assert_uint_eq(2, nb_fields);
+    fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet2, 0);
+    ck_assert_int_eq(SOPC_UInt32_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
+    ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+
+    pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
+    ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
+    nodeId = SOPC_PublishedVariable_Get_NodeId(pubVar);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
+    ck_assert_int_eq(2, nodeId->Namespace);
+    ck_assert_int_eq(6, nodeId->Data.Numeric);
+    ck_assert_ptr_null(SOPC_PublishedVariable_Get_IndexRange(pubVar)); // No index range in XML
+
+    /* Second variable */
+    fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet2, 1);
+    ck_assert_int_eq(SOPC_UInt16_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
+    ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+
+    pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
+    ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
+    nodeId = SOPC_PublishedVariable_Get_NodeId(pubVar);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
+    ck_assert_int_eq(2, nodeId->Namespace);
+    ck_assert_int_eq(7, nodeId->Data.Numeric);
+    ck_assert_ptr_null(SOPC_PublishedVariable_Get_IndexRange(pubVar)); // No index range in XML
+
+    /*****************************/
+    /* Third published data set */
+    nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataSet3);
     ck_assert_uint_eq(1, nb_fields);
-    fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataSet, 0);
+    fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet3, 0);
     ck_assert_int_eq(SOPC_Int16_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
     ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
 
@@ -168,7 +205,7 @@ START_TEST(test_sub_xml_parsing)
     uint16_t writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(14, writerId); // same as writeGroupId
+    ck_assert_uint_eq(50, writerId); // same as writeGroupId
 
     double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
@@ -195,7 +232,59 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_ptr_null(SOPC_FieldTarget_Get_SourceIndexRange(fieldTarget));
     ck_assert_ptr_null(SOPC_FieldTarget_Get_TargetIndexRange(fieldTarget));
 
-    /* Second ReaderGroup */
+    /* Second Dataset Reader of first group */
+    dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 1);
+    ck_assert_ptr_nonnull(dataSetReader);
+
+    ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
+    writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
+    ck_assert_uint_eq(14, writerGroupId); // message Id
+    writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
+    ck_assert_uint_eq(14, writerId); // same as writeGroupId (default value)
+
+    timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
+    ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
+
+    ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
+
+    pubId = SOPC_DataSetReader_Get_PublisherId(dataSetReader);
+    ck_assert_int_eq(SOPC_UInteger_PublisherId, pubId->type);
+    ck_assert_uint_eq(123, pubId->data.uint);
+
+    // Variable type
+    fieldMetaData = SOPC_DataSetReader_Get_FieldMetaData_At(dataSetReader, 0);
+    ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    ck_assert_int_eq(SOPC_UInt32_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
+
+    // Variable target
+    fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
+    ck_assert_uint_eq(13, SOPC_FieldTarget_Get_AttributeId(fieldTarget)); // Value => AttributeId = 13
+    nodeId = SOPC_FieldTarget_Get_NodeId(fieldTarget);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
+    ck_assert_int_eq(2, nodeId->Namespace);
+    ck_assert_int_eq(6, nodeId->Data.Numeric);
+
+    ck_assert_ptr_null(SOPC_FieldTarget_Get_SourceIndexRange(fieldTarget));
+    ck_assert_ptr_null(SOPC_FieldTarget_Get_TargetIndexRange(fieldTarget));
+
+    // Variable type
+    fieldMetaData = SOPC_DataSetReader_Get_FieldMetaData_At(dataSetReader, 1);
+    ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    ck_assert_int_eq(SOPC_UInt16_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
+
+    // Variable target
+    fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
+    ck_assert_uint_eq(13, SOPC_FieldTarget_Get_AttributeId(fieldTarget)); // Value => AttributeId = 13
+    nodeId = SOPC_FieldTarget_Get_NodeId(fieldTarget);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
+    ck_assert_int_eq(2, nodeId->Namespace);
+    ck_assert_int_eq(7, nodeId->Data.Numeric);
+
+    ck_assert_ptr_null(SOPC_FieldTarget_Get_SourceIndexRange(fieldTarget));
+    ck_assert_ptr_null(SOPC_FieldTarget_Get_TargetIndexRange(fieldTarget));
+
+    /////////////////
+    // Second group
     readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(conn, 1);
     ck_assert_ptr_nonnull(readerGroup);
     ck_assert_uint_eq(SOPC_SecurityMode_Sign, SOPC_ReaderGroup_Get_SecurityMode(readerGroup));
@@ -206,7 +295,7 @@ START_TEST(test_sub_xml_parsing)
     writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
     ck_assert_uint_eq(15, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(15, writerId); // same as writeGroupId
+    ck_assert_uint_eq(52, writerId); // same as writeGroupId
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 100., timeoutMs); // 2*publishingInternval

@@ -51,14 +51,14 @@ uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {
 SOPC_Buffer encoded_network_msg = {ENCODED_DATA_SIZE, ENCODED_DATA_SIZE,       ENCODED_DATA_SIZE, 0,
                                    ENCODED_DATA_SIZE, encoded_network_msg_data};
 
-#define ENCODED_DSM_PRE_FIELD_SIZE 3 // DataSet Flags1 + number of fields
+#define ENCODED_DSM_PRE_FIELD_SIZE 3u // DataSet Flags1 + number of fields
 
 // Content of encoded variables (see "varArr") for Multi-DataSetMessage
-#define ENCODED_VAR0_SIZE 5
-#define ENCODED_VAR1_SIZE 2
-#define ENCODED_VAR2_SIZE 3
-#define ENCODED_VAR3_SIZE 5
-#define ENCODED_VAR4_SIZE 5
+#define ENCODED_VAR0_SIZE 5u
+#define ENCODED_VAR1_SIZE 2u
+#define ENCODED_VAR2_SIZE 3u
+#define ENCODED_VAR3_SIZE 5u
+#define ENCODED_VAR4_SIZE 5u
 #define ENCODED_VARS0_1_SIZE (ENCODED_VAR0_SIZE + ENCODED_VAR1_SIZE)
 #define ENCODED_VARS0_2_SIZE (ENCODED_VARS0_1_SIZE + ENCODED_VAR2_SIZE)
 #define ENCODED_VARS0_3_SIZE (ENCODED_VARS0_2_SIZE + ENCODED_VAR3_SIZE)
@@ -234,6 +234,8 @@ START_TEST(test_hl_network_msg_decode)
     SOPC_Helper_EndiannessCfg_Initialize();
 
     SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(&encoded_network_msg, NULL);
+    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
+    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
     ck_assert_ptr_nonnull(uadp_nm);
 
     // Check network message content
@@ -293,6 +295,8 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     check_network_msg_content_multi_dsm(nm);
 
     SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, false);
+    const SOPC_UADP_NetworkMessage_Error_Code eCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, eCode);
     ck_assert_ptr_nonnull(buffer);
 
 #if 0 // switch to debug
@@ -355,7 +359,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     // and is followed by 2 bytes giving the number of fields (different for each DSM)
 
     // Check DSM[0] containing var[0..4]
-    uint16_t dsm_idx = 30;
+    unsigned int dsm_idx = 30;
     ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1));
     // DSM[0]/nb DataSet (5 fields)
     ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(5));

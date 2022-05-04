@@ -19,11 +19,13 @@
 
 #include <assert.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "sopc_atomic.h"
 #include "sopc_dataset_layer.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
@@ -50,7 +52,7 @@ static void Test_StopSignal(int sig)
     }
 }
 
-#define NB_VARS 7
+#define NB_VARS 8
 
 SOPC_Variant varArr[NB_VARS] = {
     {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12071982}},    // 0
@@ -59,7 +61,8 @@ SOPC_Variant varArr[NB_VARS] = {
     {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}}, // 3
     {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}},      // 4
     {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},      // 5
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = false}}      // 6
+    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 0x12345678}},  // 6
+    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 17}}           // 7
 };
 
 SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
@@ -83,7 +86,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
         uint32_t index = readValue->NodeId.Data.Numeric;
         assert(13 == readValue->AttributeId); // Value => AttributeId=13
         assert(SOPC_IdentifierType_Numeric == readValue->NodeId.IdentifierType);
-        assert(1 == readValue->NodeId.Namespace);
+        assert(1 + (index / 6) == readValue->NodeId.Namespace);
         // index node id
         assert(NB_VARS > index);
         dataValue->Value.ArrayType = varArr[index].ArrayType;
@@ -97,6 +100,10 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
     return dataValues;
 }
 
+static void userDoLog(const char* category, const char* const line)
+{
+    printf("[%s] %s\n", category, line);
+}
 /* Give XML file name as unique parameter
    If there is no parameter, default file name is config_pub_scheduler.xml
 */
@@ -111,6 +118,12 @@ int main(int argc, char** argv)
     {
         filename = "./config_pub_scheduler.xml";
     }
+
+    SOPC_Log_Configuration logConfig;
+    logConfig.logLevel = SOPC_LOG_LEVEL_INFO;
+    logConfig.logSystem = SOPC_LOG_SYSTEM_USER;
+    logConfig.logSysConfig.userSystemLogConfig.doLog = &userDoLog;
+    SOPC_Logger_Initialize(&logConfig);
 
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);

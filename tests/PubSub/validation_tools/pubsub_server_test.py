@@ -62,217 +62,265 @@ NODE_VARIANT_TYPE = { NID_SUB_BOOL : ua.VariantType.Boolean,
                       NID_PUB_INT : ua.VariantType.Int64,
                       NID_PUB_STRING : ua.VariantType.String }
 
-XML_EMPTY = """<PubSub publisherId="1">
+XML_EMPTY = """<PubSub>
 </PubSub>"""
 
-XML_PUBLISHER_ONLY = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="1000" version="1">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBLISHER_ONLY = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="1000" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
 XML_SUBSCRIBER_ONLY = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="1000" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_MQTT = """<PubSub publisherId="1">
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher">
-        <message id="1" publishingInterval="1000" version="1">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
-            <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+XML_PUBSUB_LOOP_MQTT = """<PubSub>
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="1000" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+            </dataset>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message id="1" publishingInterval="1000" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
-            <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
 
-XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="sign">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="signAndEncrypt">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="sign">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="sign">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1" securityMode="signAndEncrypt">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1" securityMode="sign">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_NULL = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Null" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="Null" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_NULL = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Null" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="Null" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Null" />
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Null" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Null" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Null" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
 # Configuration with message on Subscriber side not consistent with the one on Publisher
-XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1">
-            <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""
 
 # Bad formed Configuration ( variabl instead of variable )
-XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub publisherId="1">
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-        <message id="1" publishingInterval="200" version="1">
-            <variabl nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-            <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset>
+                <variabl nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message id="1" publishingInterval="200" version="1" publisherId="1">
-            <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-            <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
-            <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+            </dataset>
         </message>
     </connection>
 </PubSub>"""

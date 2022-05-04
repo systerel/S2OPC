@@ -32,43 +32,80 @@ static int32_t stop = 0;
 static int32_t stateChanged = 0;
 
 static int returnCode = 0;
+static int callIndex = 0;
 
 static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
     assert(NULL != nodesToWrite);
 
-    // only one nbValues is expected
-    assert(1 == nbValues);
+    if (!SOPC_Atomic_Int_Get(&stop))
+    {
+        callIndex++;
+        if (callIndex == 1)
+        {
+            // Only one value in first DSM
+            assert(1 == nbValues);
 
-    if (SOPC_Atomic_Int_Get(&stop))
-    {
-        OpcUa_WriteValue_Clear(&(nodesToWrite[0]));
-        SOPC_Free(nodesToWrite);
-        return true;
-    }
-    SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
-    if (SOPC_Boolean_Id != variant->BuiltInTypeId)
-    {
-        return false;
-    }
-    if (SOPC_VariantArrayType_SingleValue != variant->ArrayType)
-    {
-        return false;
-    }
-    if (true != variant->Value.Boolean)
-    {
-        return false;
+            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            if (SOPC_Boolean_Id != variant->BuiltInTypeId)
+            {
+                return false;
+            }
+            if (SOPC_VariantArrayType_SingleValue != variant->ArrayType)
+            {
+                return false;
+            }
+            if (true != variant->Value.Boolean)
+            {
+                return false;
+            }
+        }
+        else if (callIndex == 2)
+        {
+            // Two variables in second DSM
+            assert(2 == nbValues);
+
+            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            if (SOPC_UInt32_Id != variant->BuiltInTypeId)
+            {
+                return false;
+            }
+            if (SOPC_VariantArrayType_SingleValue != variant->ArrayType)
+            {
+                return false;
+            }
+            if (0x12345678 != variant->Value.Uint32)
+            {
+                return false;
+            }
+            variant = &(nodesToWrite[1].Value.Value);
+            if (SOPC_UInt16_Id != variant->BuiltInTypeId)
+            {
+                return false;
+            }
+            if (SOPC_VariantArrayType_SingleValue != variant->ArrayType)
+            {
+                return false;
+            }
+            if (17 != variant->Value.Uint16)
+            {
+                return false;
+            }
+
+            SOPC_Atomic_Int_Set(&stop, true);
+        }
+
+        if (returnCode == -1)
+        {
+            returnCode = 0;
+        }
     }
 
-    OpcUa_WriteValue_Clear(&(nodesToWrite[0]));
+    for (int32_t i = 0; i < nbValues; i++)
+    {
+        OpcUa_WriteValue_Clear(&(nodesToWrite[i]));
+    }
     SOPC_Free(nodesToWrite);
-
-    if (returnCode == -1)
-    {
-        returnCode = 0;
-    }
-
-    SOPC_Atomic_Int_Set(&stop, true);
 
     return true;
 }
@@ -76,7 +113,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
 static void stateChangedCb(SOPC_PubSubState state)
 {
     stateChanged++;
-    printf("state changed to '%u' !\n", state);
+    printf("[sub]state changed to '%u' !\n", state);
     if (SOPC_Atomic_Int_Get(&stop))
     {
         if (SOPC_PubSubState_Disabled != state)
