@@ -377,7 +377,47 @@ LOCAL_OPERATIONS
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId &
         p_index_range : t_IndexRange_i &
-        p_node : dom(AttributeID_Node_Variant(p_aid)) &
+
+        /* We server only these attributes */
+        p_aid : {
+            e_aid_AccessLevel,
+            e_aid_BrowseName,
+            e_aid_ContainsNoLoops,
+            e_aid_DataType,
+            e_aid_DisplayName,
+            e_aid_EventNotifier,
+            e_aid_Executable,
+            e_aid_Historizing,
+            e_aid_IsAbstract,
+            e_aid_NodeClass,
+            e_aid_NodeId,
+            e_aid_Symmetric,
+            e_aid_UserAccessLevel,
+            e_aid_UserExecutable,
+            e_aid_Value,
+            e_aid_ValueRank,
+            e_aid_ArrayDimensions
+        } &
+
+        (p_aid = e_aid_AccessLevel     => p_node : dom(a_AccessLevel))     &
+        (p_aid = e_aid_BrowseName      => p_node : dom(a_BrowseName))      &
+        (p_aid = e_aid_ContainsNoLoops => p_node : dom(a_ContainsNoLoops)) &
+        (p_aid = e_aid_DataType        => p_node : dom(a_DataType))        &
+        (p_aid = e_aid_DisplayName     => p_node : dom(a_DisplayName))     &
+        (p_aid = e_aid_EventNotifier   => p_node : dom(a_EventNotifier))   &
+        (p_aid = e_aid_Executable      => p_node : dom(a_Executable))      &
+        (p_aid = e_aid_Historizing     => p_node : dom(a_Historizing))     &
+        (p_aid = e_aid_IsAbstract      => p_node : dom(a_IsAbstract))      &
+        (p_aid = e_aid_NodeClass       => p_node : dom(a_NodeClass))       &
+        (p_aid = e_aid_NodeId          => p_node : dom(a_NodeId))          &
+        (p_aid = e_aid_Symmetric       => p_node : dom(a_Symmetric))       &
+        (p_aid = e_aid_UserAccessLevel => p_node : dom(a_UserAccessLevel)) &
+        (p_aid = e_aid_UserExecutable  => p_node : dom(a_UserExecutable))  &
+        (p_aid = e_aid_Value           => p_node : dom(a_Value))           &
+        (p_aid = e_aid_ValueRank       => p_node : dom(a_ValueRank))       &
+        (p_aid = e_aid_ArrayDimensions => p_node : dom(a_ArrayDimensions)) &
+
+        /* For a Variable Value, the read must be authorized */
         (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
         (local_service_treatment /= 0 or
          (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
@@ -396,15 +436,15 @@ LOCAL_OPERATIONS
           val_ts_srv : t_Timestamp &
           /* Attribute is Value and IndexRange of Value is invalid */
           (p_aid = e_aid_Value &
-           IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE
+           IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE
            =>
            val = c_Variant_indet &
            sc = e_sc_bad_index_range_invalid
           ) &
           /* Attribute is Value and IndexRange of Value does not contains data */
           (p_aid = e_aid_Value &
-           IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-           HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE
+           IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+           HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE
            =>
            val = c_Variant_indet &
            sc = e_sc_bad_index_range_no_data
@@ -419,8 +459,8 @@ LOCAL_OPERATIONS
           /* Attribute is not Value or IndexRange of Value is valid and contains data*/
           (p_aid /= e_aid_Value or
            (p_aid = e_aid_Value &
-            IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-            HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE) =>
+            IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+            HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE) =>
            sc = e_sc_ok or
            (val = c_Variant_indet &
             sc = e_sc_bad_out_of_memory)
@@ -429,7 +469,23 @@ LOCAL_OPERATIONS
           /* In case of success set other output paramaters */
           (sc = e_sc_ok =>
             /* Set Variant value */
-            val = AttributeID_Node_Variant(p_aid)(p_node) &
+            (p_aid = e_aid_AccessLevel     => val = conv_AccessLevel_Variant(a_AccessLevel(p_node)))         &
+            (p_aid = e_aid_BrowseName      => val = conv_QualifiedName_Variant(a_BrowseName(p_node)))        &
+            (p_aid = e_aid_ContainsNoLoops => val = conv_Boolean_Variant(a_ContainsNoLoops(p_node)))         &
+            (p_aid = e_aid_DataType        => val = conv_NodeId_Variant(a_DataType(p_node)))                 &
+            (p_aid = e_aid_DisplayName     => val = conv_LocalizedText_Variant(a_DisplayName(p_node)))       &
+            (p_aid = e_aid_EventNotifier   => val = conv_Byte_Variant(a_EventNotifier(p_node)))              &
+            (p_aid = e_aid_Executable      => val = conv_Boolean_Variant(a_Executable(p_node)))              &
+            (p_aid = e_aid_Historizing     => val = conv_Boolean_Variant(a_Historizing(p_node)))             &
+            (p_aid = e_aid_IsAbstract      => val = conv_Boolean_Variant(a_IsAbstract(p_node)))              &
+            (p_aid = e_aid_NodeClass       => val = conv_NodeClass_Variant(a_NodeClass(p_node)))             &
+            (p_aid = e_aid_NodeId          => val = conv_NodeId_Variant(a_NodeId(p_node)))                   &
+            (p_aid = e_aid_Symmetric       => val = conv_Boolean_Variant(a_Symmetric(p_node)))               &
+            (p_aid = e_aid_UserAccessLevel => val = conv_AccessLevel_Variant(a_UserAccessLevel(p_node)))     &
+            (p_aid = e_aid_UserExecutable  => val = conv_Boolean_Variant(a_UserExecutable(p_node)))          &
+            (p_aid = e_aid_Value           => val = a_Value(p_node))                                         &
+            (p_aid = e_aid_ValueRank       => val = conv_ValueRank_Variant(a_ValueRank(p_node)))             &
+            (p_aid = e_aid_ArrayDimensions => val = conv_ArrayDimensions_Variant(a_ArrayDimensions(p_node))) &
             /* Fill status code and timestamp: Variable Value / NOT Variable Value */
             (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
              val_sc = a_Value_StatusCode(p_node) &
