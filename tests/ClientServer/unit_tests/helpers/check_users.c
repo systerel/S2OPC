@@ -21,6 +21,7 @@
 
 #include "check_helpers.h"
 #include "opcua_identifiers.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"
@@ -83,8 +84,7 @@ static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication
                                                          const SOPC_ExtensionObject* token,
                                                          SOPC_UserAuthentication_Status* authenticated)
 {
-    /* avoid unused parameter compiler warning */
-    (void) (authn);
+    SOPC_UNUSED_ARG(authn);
     assert(NULL != token && NULL != authenticated);
 
     /* Only validates the username with the correct password */
@@ -118,8 +118,7 @@ static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Mana
                                                      const SOPC_User* user,
                                                      bool* authorized)
 {
-    /* avoid unused parameter compiler warning */
-    (void) (authz);
+    SOPC_UNUSED_ARG(authz);
 
     assert(NULL != nodeId && NULL != user && NULL != authorized && 1 <= attributeId && attributeId <= 22);
 

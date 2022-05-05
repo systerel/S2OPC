@@ -18,6 +18,7 @@
  */
 
 #include "p_ethernet_if.h"
+#include "sopc_macros.h"
 
 static QueueHandle_t gEthernetReady = NULL;
 
@@ -34,7 +35,7 @@ static ethernetif_config_t fsl_enet_config = {
 
 static void CB_P_ETHERNET_IF_Initialize(void* arg)
 {
-    (void) arg;
+    SOPC_UNUSED_ARG(arg);
 
     tcpip_init(NULL, NULL);
 

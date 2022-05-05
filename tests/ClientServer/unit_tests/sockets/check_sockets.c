@@ -49,8 +49,7 @@ static SOPC_AsyncQueue* socketEvents = NULL;
 
 static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
-    /* avoid unused parameter compiler warning */
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
 
     SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
     ck_assert_ptr_nonnull(ev);

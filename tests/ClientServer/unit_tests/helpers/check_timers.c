@@ -32,6 +32,7 @@
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_macros.h"
 
 #define NB_TIMERS 5
 #define EVENT 1000
@@ -59,8 +60,7 @@ static void timeout_event(SOPC_EventHandler* handler,
                           uintptr_t params,
                           uintptr_t auxParam)
 {
-    /* avoid unused parameter compiler warning */
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
 
     uint32_t triggered = (uint32_t) SOPC_Atomic_Int_Get(&timersTriggered);
 
@@ -129,7 +129,7 @@ static void canceled_timeout_event(SOPC_EventHandler* handler,
                                    uintptr_t params,
                                    uintptr_t auxParam)
 {
-    (void) handler;
+    SOPC_UNUSED_ARG(handler);
 
     uint32_t triggeredWithCancel = (uint32_t) SOPC_Atomic_Int_Get(&timersTriggeredWithCancel);
 

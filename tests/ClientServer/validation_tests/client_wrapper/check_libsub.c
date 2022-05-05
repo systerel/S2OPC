@@ -34,6 +34,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
 #include "sopc_log_manager.h"
+#include "sopc_macros.h"
 #include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
@@ -113,7 +114,7 @@ static void generic_event_callback(SOPC_LibSub_ConnectionId c_id,
                                    const void* response,
                                    uintptr_t responseContext)
 {
-    (void) (event);
+    SOPC_UNUSED_ARG(event);
 
     ck_assert(c_id == con_id);
     ck_assert(SOPC_LibSub_ApplicativeEvent_Response);
@@ -215,10 +216,9 @@ static void datachange_callback_do_nothing(const SOPC_LibSub_ConnectionId c_id,
                                            const SOPC_LibSub_DataId d_id,
                                            const SOPC_LibSub_Value* value)
 {
-    /* avoid unused parameter compiler warning */
-    (void) c_id;
-    (void) d_id;
-    (void) value;
+    SOPC_UNUSED_ARG(c_id);
+    SOPC_UNUSED_ARG(d_id);
+    SOPC_UNUSED_ARG(value);
 }
 
 static void disconnect_callback_multi(const SOPC_LibSub_ConnectionId c_id)

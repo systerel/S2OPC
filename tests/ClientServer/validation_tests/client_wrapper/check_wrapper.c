@@ -32,6 +32,7 @@
 #include "assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_time.h" /* SOPC_Sleep */
@@ -76,9 +77,9 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
 
 static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
-    (void) c_id;
-    (void) node_id;
-    (void) value;
+    SOPC_UNUSED_ARG(c_id);
+    SOPC_UNUSED_ARG(node_id);
+    SOPC_UNUSED_ARG(value);
 }
 
 static Mutex check_counter_mutex;
@@ -90,7 +91,7 @@ static int32_t disconnected = 0;
 
 static void disconnect_callback(const uint32_t c_id)
 {
-    (void) (c_id);
+    SOPC_UNUSED_ARG(c_id);
     SOPC_Atomic_Int_Set(&disconnected, 1);
 }
 

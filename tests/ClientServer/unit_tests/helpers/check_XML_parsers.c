@@ -621,7 +621,6 @@ static const SOPC_ExtensionObject anonymousIdentityToken = {
 static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authenticationManager,
                                       SOPC_UserAuthorization_Manager* authorizationManager)
 {
-    (void) authorizationManager;
     SOPC_ExtensionObject* invalidUserNameToken = build_user_token("invalid user name", "12345");
     SOPC_ExtensionObject* invalidPasswordToken = build_user_token("user1", "01234");
     SOPC_ExtensionObject* noAccessToken = build_user_token("noaccess", "secret");

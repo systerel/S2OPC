@@ -24,6 +24,7 @@
 
 #include "sopc_dict.h"
 #include "sopc_hash.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 static uint64_t str_hash(const void* str)
@@ -306,9 +307,8 @@ END_TEST
 
 static void dict_callback_increment_u32(const void* key, const void* value, void* user_data)
 {
-    /* avoid unused parameter compiler warning */
-    (void) key;
-    (void) value;
+    SOPC_UNUSED_ARG(key);
+    SOPC_UNUSED_ARG(value);
 
     uint32_t* val = user_data;
     ++(*val);

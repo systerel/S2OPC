@@ -27,6 +27,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
@@ -54,7 +55,7 @@ static uint32_t cptReadResps = 0;
 
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
-    (void) status;
+    SOPC_UNUSED_ARG(status);
     SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
@@ -126,9 +127,8 @@ static void* getReadRequest_verif_message(void)
 
 int main(int argc, char* argv[])
 {
-    /* avoid unused parameter compiler warning */
-    (void) argc;
-    (void) argv;
+    SOPC_UNUSED_ARG(argc);
+    SOPC_UNUSED_ARG(argv);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_WriteRequest* pWriteReqSent = NULL;

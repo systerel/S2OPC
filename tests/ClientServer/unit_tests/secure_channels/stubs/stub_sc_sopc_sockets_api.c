@@ -25,6 +25,7 @@
 
 #include "event_helpers.h"
 #include "hexlify.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 SOPC_AsyncQueue* socketsInputEvents = NULL;
@@ -42,7 +43,8 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uin
 
     status = SOPC_AsyncQueue_BlockingEnqueue(socketsInputEvents, (void*) scParams);
 
-    (void) status; // avoid unused parameter compiler warning: status is not used if asserts are not compiled in
+    // avoid unused parameter compiler warning: status is not used if asserts are not compiled in
+    SOPC_UNUSED_ARG(status);
     assert(status == SOPC_STATUS_OK);
 }
 

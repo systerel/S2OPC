@@ -24,6 +24,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_macros.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_network_layer.h"
 #include "sopc_time.h"
@@ -47,8 +48,6 @@ static t_id id2 = {MQTT_INVALID_TRANSPORT_ASYNC_HANDLE, 0, false, false};
 
 static void pFctGetHandleSuccess(MqttTransportAsyncHandle idx, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
     ((t_id*) pCtx)->idx = idx;
     ((t_id*) pCtx)->bIsConnected = 0;
     printf("***** CB GET HANDLE : %d \r\n", idx);
@@ -56,8 +55,6 @@ static void pFctGetHandleSuccess(MqttTransportAsyncHandle idx, void* pCtx)
 
 static void pFctGetHandleFailure(MqttTransportAsyncHandle idx, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
     ((t_id*) pCtx)->idx = idx;
     ((t_id*) pCtx)->bIsConnected = 0;
     printf("***** CB GET HANDLE FAILURE : %d \r\n", idx);
@@ -65,8 +62,6 @@ static void pFctGetHandleFailure(MqttTransportAsyncHandle idx, void* pCtx)
 
 static void pFctHandleRdy(MqttTransportAsyncHandle idx, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
     printf("***** CB HANDLE READY : %d \r\n", idx);
     ((t_id*) pCtx)->idx = idx;
     ((t_id*) pCtx)->bIsConnected = 1;
@@ -74,8 +69,6 @@ static void pFctHandleRdy(MqttTransportAsyncHandle idx, void* pCtx)
 
 static void pFctHandleNotRdy(MqttTransportAsyncHandle idx, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
     printf("***** CB HANDLE NOT READY : %d \r\n", idx);
     ((t_id*) pCtx)->idx = idx;
     ((t_id*) pCtx)->bIsConnected = 0;
@@ -83,10 +76,7 @@ static void pFctHandleNotRdy(MqttTransportAsyncHandle idx, void* pCtx)
 
 static void pFctMessageRcv(MqttTransportAsyncHandle idx, uint8_t* data, uint16_t size, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
-    (void) data;
-    (void) size;
+    SOPC_UNUSED_ARG(idx);
     printf("***** CB RCV MSG %s : size = %d \r\n", data, size);
     if (strncmp((char*) data, "MESSAGE_CLIENT_1", size) == 0)
     {
@@ -99,8 +89,6 @@ static void pFctMessageRcv(MqttTransportAsyncHandle idx, uint8_t* data, uint16_t
 }
 static void pFctReleaseHandle(MqttTransportAsyncHandle idx, void* pCtx)
 {
-    (void) idx;
-    (void) pCtx;
     printf("***** CB RELEASE HANDLE : %d \r\n", idx);
     ((t_id*) pCtx)->idx = 0xFFFF;
     ((t_id*) pCtx)->bIsConnected = 0;
@@ -121,7 +109,7 @@ static const char* expectedResultsBuffer[10] = {"MESSAGE 1", "MESSAGE 2", "MESSA
 
 static void pFctReceiveMessage(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* ctx)
 {
-    (void) ctx;
+    SOPC_UNUSED_ARG(ctx);
     printf("***** SYNC GET MSG : handle %p - size = %" PRId16, (void*) pCtx, size);
 
     printf("\r\nMessage read = %s\r\n", data);

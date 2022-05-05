@@ -25,6 +25,7 @@
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_network_layer.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_time.h"
@@ -140,7 +141,7 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
 
 static void readyToReceive(void* sockContext, Socket sock)
 {
-    (void) sockContext;
+    SOPC_UNUSED_ARG(sockContext);
     if (SOPC_Atomic_Int_Get(&stop))
     {
         return;

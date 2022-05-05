@@ -32,6 +32,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_key_manager.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
@@ -233,8 +234,7 @@ int main(int argc, char* argv[])
                 serviceEvent->auxParam != 0)
             { // SC connection index
 
-                /* avoid unused parameter compiler warning */
-                (void) scConfigIdx;
+                SOPC_UNUSED_ARG(scConfigIdx);
 
                 scConfigIdx = (uint32_t)(uintptr_t) serviceEvent->params;
                 scConnectionId = (uint32_t) serviceEvent->auxParam;

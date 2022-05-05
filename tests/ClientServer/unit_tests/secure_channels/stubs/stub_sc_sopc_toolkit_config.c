@@ -339,8 +339,7 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
-    /* avoid unused parameter compiler warning */
-    (void) addressSpace;
+    SOPC_UNUSED_ARG(addressSpace);
 
     // No services implemented
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -348,8 +347,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNotif_Fct* pAddSpaceNotifFct)
 {
-    /* avoid unused parameter compiler warning */
-    (void) pAddSpaceNotifFct;
+    SOPC_UNUSED_ARG(pAddSpaceNotifFct);
 
     // No services implemented
     return SOPC_STATUS_NOT_SUPPORTED;
