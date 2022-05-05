@@ -71,6 +71,7 @@
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
@@ -85,7 +86,7 @@
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
 {
-    (void) sig;
+    SOPC_UNUSED_ARG(sig);
 
     if (stopSignal != 0)
     {
@@ -122,8 +123,8 @@ int main(int argc, char* const argv[])
     signal(SIGTERM, signal_stop_server);
 
     /* Parse command line arguments ? */
-    (void) argc;
-    (void) argv;
+    SOPC_UNUSED_ARG(argc);
+    SOPC_UNUSED_ARG(argv);
 
     /* General initializations */
     const char* log_path = getenv_default("LOG_PATH", LOG_PATH);
@@ -337,7 +338,7 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
             if (idx < g_n_samples)
             {
                 bool ok = SOPC_RealTime_GetTime(&g_ts_emissions[idx]);
-                (void) ok;
+                SOPC_UNUSED_ARG(ok);
             }
         }
     }

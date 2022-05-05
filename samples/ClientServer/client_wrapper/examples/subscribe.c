@@ -33,6 +33,7 @@
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_common_config.h"
+#include "sopc_macros.h"
 
 #include "sopc_time.h"
 
@@ -67,8 +68,8 @@ static void disconnect_callback(const uint32_t c_id)
 
 int main(int argc, char* const argv[])
 {
-    (void) (argc);
-    (void) (argv);
+    SOPC_UNUSED_ARG(argc);
+    SOPC_UNUSED_ARG(argv);
 
     int res = 0;
 

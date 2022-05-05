@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include "sopc_helper_uri.h"
+#include "sopc_macros.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
 
@@ -33,7 +34,7 @@
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
 {
-    (void) sig;
+    SOPC_UNUSED_ARG(sig);
 
     if (stopSignal != 0)
     {

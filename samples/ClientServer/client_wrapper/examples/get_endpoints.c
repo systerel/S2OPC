@@ -32,6 +32,7 @@
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_common_config.h"
+#include "sopc_macros.h"
 
 static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
 {
@@ -96,8 +97,8 @@ static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
 
 int main(int argc, char* const argv[])
 {
-    (void) (argc);
-    (void) (argv);
+    SOPC_UNUSED_ARG(argc);
+    SOPC_UNUSED_ARG(argv);
 
     int res = 0;
 

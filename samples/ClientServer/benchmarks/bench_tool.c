@@ -295,9 +295,6 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
 
 static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
 {
-    /* avoid unused parameter compiler warning */
-    (void) pParam;
-
     struct app_ctx_t* ctx = (struct app_ctx_t*) smCtx;
     bool shutdown = false;
     bool more_needed = false;

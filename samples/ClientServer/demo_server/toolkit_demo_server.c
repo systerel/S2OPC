@@ -27,6 +27,7 @@
 #include "libs2opc_server_config.h"
 
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 /*---------------------------------------------------------------------------
@@ -121,14 +122,14 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* cal
                                                      SOPC_Variant** outputArgs,
                                                      void* param)
 {
-    (void) callContextPtr;
-    (void) objectId;
-    (void) nbInputArgs;
-    (void) inputArgs;
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(objectId);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(param);
     // Note: pointers given by the toolkit are always valid
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    (void) param;
     return SOPC_STATUS_OK;
 }
 
@@ -140,10 +141,11 @@ static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_Cal
                                                                   SOPC_Variant** outputArgs,
                                                                   void* param)
 {
-    (void) callContextPtr;
-    (void) objectId;
-    (void) nbInputArgs;
-    (void) inputArgs;
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(objectId);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(param);
     // Note: pointers given by the toolkit are always valid
     *nbOutputArgs = 1;
     *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
@@ -151,7 +153,7 @@ static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_Cal
     SOPC_Variant_Initialize(&((*outputArgs)[0]));
     (*outputArgs)[0].BuiltInTypeId = SOPC_UInt32_Id;
     (*outputArgs)[0].Value.Uint32 = 42;
-    (void) param;
+
     return SOPC_STATUS_OK;
 }
 
@@ -243,7 +245,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 int main(int argc, char* argv[])
 {
     // Note: avoid unused parameter warning from compiler
-    (void) argc;
+    SOPC_UNUSED_ARG(argc);
 
     /* Get the toolkit build information and print it */
     SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();

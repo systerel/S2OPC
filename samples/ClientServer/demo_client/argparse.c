@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_macros.h"
+
 #define OPT_UNSET 1
 #define OPT_LONG (1 << 1)
 
@@ -59,7 +61,7 @@ static int prefix_cmp(const char* str, const char* prefix)
 
 static void argparse_error(struct argparse* self, const struct argparse_option* opt, const char* reason, int flags)
 {
-    (void) self;
+    SOPC_UNUSED_ARG(self);
     if (flags & OPT_LONG)
     {
         fprintf(stderr, "error: option `--%s` %s\n", opt->long_name, reason);
@@ -472,7 +474,7 @@ void argparse_usage(struct argparse* self)
 
 int argparse_help_cb(struct argparse* self, const struct argparse_option* option)
 {
-    (void) option;
+    SOPC_UNUSED_ARG(option);
     argparse_usage(self);
     exit(0);
 }

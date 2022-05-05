@@ -29,6 +29,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
@@ -580,7 +581,7 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       void* opParam,
                                       SOPC_StatusCode opStatus)
 {
-    (void) callCtxPtr;
+    SOPC_UNUSED_ARG(callCtxPtr);
     /* Watch modifications of configuration paths and the start/stop command */
     if (AS_WRITE_EVENT != event)
     {
@@ -600,7 +601,7 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
 
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
-    (void) idOrStatus;
+    SOPC_UNUSED_ARG(idOrStatus);
     SOPC_EncodeableType* message_type = NULL;
     OpcUa_WriteResponse* writeResponse = NULL;
     OpcUa_ReadResponse* response = NULL;

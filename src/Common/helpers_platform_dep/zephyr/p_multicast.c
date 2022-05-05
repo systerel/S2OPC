@@ -28,8 +28,8 @@
 #include "net/socket.h"
 
 #include "sopc_assert.h"
-#include "sopc_macros.h"
 #include "sopc_dict.h"
+#include "sopc_macros.h"
 
 #include "p_multicast.h"
 

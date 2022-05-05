@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -637,7 +638,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                                   uintptr_t appCtx)
 {
     /* avoid unused parameter compiler warning */
-    (void) pParam;
+    SOPC_UNUSED_ARG(pParam);
 
     bool bProcess = true;
 
