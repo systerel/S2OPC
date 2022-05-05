@@ -457,7 +457,8 @@ LOCAL_OPERATIONS
            sc = e_sc_bad_index_range_no_data
           ) &
           /* Attribute is not Value or IndexRange of Value is valid and contains data*/
-          (p_aid /= e_aid_Value or
+          ((p_aid /= e_aid_Value &
+            IsRangeDefined(p_index_range) = FALSE) or
            (p_aid = e_aid_Value &
             IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
             HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE) =>
@@ -499,8 +500,9 @@ LOCAL_OPERATIONS
           /* In case of failure set other output parameters */
           (not (sc = e_sc_ok) =>
              val = c_Variant_indet &
+             /* The following two properties are not actually implemented
              val_sc = c_RawStatusCode_BadInvalidState &
-             val_ts_src = c_Timestamp_null &
+             val_ts_src = c_Timestamp_null & */
              val_ts_srv = c_Timestamp_null)
         )
     END
