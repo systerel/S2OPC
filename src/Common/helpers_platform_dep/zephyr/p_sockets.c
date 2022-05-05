@@ -27,6 +27,7 @@
 
 /* s2opc includes */
 
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 
 /* platform dep includes */
@@ -435,7 +436,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     if (nbReady < 0)
     {
         const int errId = errno;
-        (void) errId; // In case SOCKETS_DEBUG is not defined
+        SOPC_UNUSED_ARG(errId); // In case SOCKETS_DEBUG is not defined
         SOCKETS_DEBUG(" ** SOPC_Socket_WaitSocketEvents failed with errno = %d (%s) \n", errId, strerror((errId)));
     }
     return (int32_t) nbReady;
@@ -507,8 +508,8 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
 
 SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
 {
-    (void) sock;
-    (void) bytesToRead;
+    SOPC_UNUSED_ARG(sock);
+    SOPC_UNUSED_ARG(bytesToRead);
     // Function not available on Zephyr
     return SOPC_STATUS_NOK;
 }

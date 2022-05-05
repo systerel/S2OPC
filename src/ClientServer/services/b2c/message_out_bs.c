@@ -148,7 +148,7 @@ void message_out_bs__alloc_resp_msg(const constants__t_msg_type_i message_out_bs
 void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg)
 {
     /* NOTHING TO DO: in B model now message_out_bs__msg = c_msg_out now */
-    (void) message_out_bs__msg;
+    SOPC_UNUSED_ARG(message_out_bs__msg);
 }
 
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)
@@ -372,7 +372,7 @@ void message_out_bs__encode_msg(const constants__t_channel_config_idx_i message_
 void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
                                          const constants__t_msg_i message_out_bs__msg)
 {
-    (void) message_out_bs__msg;
+    SOPC_UNUSED_ARG(message_out_bs__msg);
     // In this case the message header shall have been copied into msg, we should free the header structure since then
     // Message structure dealloaction is now responsibility of the user application
     SOPC_Free(message_out_bs__msg_header);

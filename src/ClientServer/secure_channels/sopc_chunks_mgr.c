@@ -32,6 +32,7 @@
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
@@ -4011,8 +4012,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
 
 void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
 {
-    (void) auxParam;
-
+    SOPC_UNUSED_ARG(auxParam);
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     SOPC_Buffer* buffer = (void*) params;
 

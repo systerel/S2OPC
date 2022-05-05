@@ -44,7 +44,7 @@ void monitored_item_queue_it_bs__continue_iter_monitored_item(
     t_bool* const monitored_item_queue_it_bs__continue,
     constants__t_monitoredItemPointer_i* const monitored_item_queue_it_bs__p_monitoredItem)
 {
-    (void) monitored_item_queue_it_bs__p_queue;
+    SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_queue);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_SLinkedListIterator* it = (SOPC_SLinkedListIterator*) monitored_item_queue_it_bs__p_iterator;
     SOPC_GCC_DIAGNOSTIC_RESTORE

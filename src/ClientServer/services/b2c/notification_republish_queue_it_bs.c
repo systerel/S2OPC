@@ -18,6 +18,7 @@
  */
 
 #include "notification_republish_queue_it_bs.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include <assert.h>
@@ -34,7 +35,7 @@ void notification_republish_queue_it_bs__clear_notif_republish_iterator(
     const constants__t_notifRepublishQueue_i notification_republish_queue_it_bs__p_queue,
     const constants__t_notifRepublishQueueIterator_i notification_republish_queue_it_bs__p_iterator)
 {
-    (void) notification_republish_queue_it_bs__p_queue;
+    SOPC_UNUSED_ARG(notification_republish_queue_it_bs__p_queue);
     SOPC_Free(notification_republish_queue_it_bs__p_iterator);
 }
 
@@ -44,7 +45,7 @@ void notification_republish_queue_it_bs__continue_iter_notif_republish(
     t_bool* const notification_republish_queue_it_bs__continue,
     constants__t_sub_seq_num_i* const notification_republish_queue_it_bs__seq_num)
 {
-    (void) notification_republish_queue_it_bs__p_queue;
+    SOPC_UNUSED_ARG(notification_republish_queue_it_bs__p_queue);
 
     void* notifMsg = SOPC_SLinkedList_NextWithId(notification_republish_queue_it_bs__p_iterator,
                                                  notification_republish_queue_it_bs__seq_num);

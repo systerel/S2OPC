@@ -19,6 +19,7 @@
 
 #include "publish_request_queue_bs.h"
 #include "publish_request_queue_impl.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 /*--------------
@@ -53,7 +54,7 @@ void publish_request_queue_bs__allocate_new_publish_queue(
 
 static void SOPC_InternalPublishRequestQueueElement_Free(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_InternalPublishRequestQueueElement* elt = (SOPC_InternalPublishRequestQueueElement*) val;
     OpcUa_PublishResponse_Clear(elt->resp_msg);
     SOPC_Free(elt->resp_msg);

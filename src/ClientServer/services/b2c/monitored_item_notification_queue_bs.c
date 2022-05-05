@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "monitored_item_notification_queue_bs.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 /*--------------
@@ -61,7 +62,7 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
 
 static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_InternalNotificationElement* notifElt = (SOPC_InternalNotificationElement*) val;
     OpcUa_WriteValue_Clear(notifElt->value);
     SOPC_Free(notifElt->value);

@@ -648,7 +648,7 @@ void Helpers_SetLogger(SOPC_LibSub_LogCbk cbk)
 
 void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text)
 {
-    (void) text; // In case SOPC_CONSOLE_PRINTF is not defined
+    SOPC_UNUSED_ARG(text); // In case SOPC_CONSOLE_PRINTF is not defined
     SOPC_CONSOLE_PRINTF("# ");
     switch (log_level)
     {

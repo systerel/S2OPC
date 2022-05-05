@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include "service_discovery_servers_internal.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
 
@@ -257,7 +258,7 @@ void service_register_server2_set_bs__get_registered_server2_registered_server(
 
 static void freeRecord(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_RegisterServer2Record_Internal* record = val;
 
     if (NULL != record)

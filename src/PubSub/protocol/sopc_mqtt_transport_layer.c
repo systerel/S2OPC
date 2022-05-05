@@ -564,11 +564,9 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
                                    void* bufferData,               /* Shall be tMqttGetHandleRequest */
                                    uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(cltId);
-    (void) bufferData;
     SOPC_UNUSED_ARG(dataSize);
 
     if (NULL != pWks)
@@ -655,10 +653,8 @@ static eMqttManagerStatus cbRelHdl(MqttManagerHandle* pWks,
                                    void* bufferData,               /* Not used */
                                    uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) (cltId);
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -685,13 +681,8 @@ static eMqttManagerStatus cbSnd(
     void* bufferData,               /* Message to send */
     uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
-
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -715,13 +706,8 @@ static eMqttManagerStatus cbRcv(
     void* bufferData,               /* Message received */
     uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) cltId;
-    (void) bufferData;
-    (void) dataSize;
-
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     if (NULL != pWks)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -752,10 +738,8 @@ static eMqttManagerStatus cbCltRdy(
     void* bufferData,               /* Not used */
     uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) cltId;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -789,10 +773,8 @@ static eMqttManagerStatus cbCltNotRdy(
     void* bufferData,               /* Not used */
     uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) cltId;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -825,10 +807,7 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
                                    void* bufferData,               /* Not used */
                                    uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
-    (void) cltId;
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -882,9 +861,8 @@ static eMqttManagerStatus cbQuit(MqttManagerHandle* pWks,
                                  void* bufferData,               /* Not used */
                                  uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(cltId);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
@@ -922,9 +900,8 @@ static eMqttManagerStatus cbTmo(MqttManagerHandle* pWks,
                                 void* bufferData,               /* Not used */
                                 uint16_t dataSize)
 {
-    (void) pWks;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(cltId);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
@@ -980,12 +957,7 @@ static eMqttTransportContextStatus cbConnReq(
     void* bufferData,  /* Shall be tMqttTransportContextConnexionConfig in the case of RESERVED_STATUS, else not used*/
     uint16_t dataSize) /* Shall be sizeof(tMqttTransportContextConnexionConfig) in the case of RESERVED_STATUS */
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
-    (void) bufferData;
-    (void) dataSize;
-
+    SOPC_UNUSED_ARG(event);
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -1053,9 +1025,8 @@ static eMqttTransportContextStatus cbConnClr(tMqttTransportContext* pCtx,
                                              void* bufferData,                   /* Not used */
                                              uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -1109,9 +1080,8 @@ static eMqttTransportContextStatus cbConnTry(tMqttTransportContext* pCtx,
                                              void* bufferData,                   /* Not used */
                                              uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -1164,9 +1134,8 @@ static eMqttTransportContextStatus cbDiscReq(
     void* bufferData,                   /* Not used */
     uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -1206,9 +1175,8 @@ static eMqttTransportContextStatus cbSubRdy(tMqttTransportContext* pCtx,
                                             void* bufferData,                   /* Not used. */
                                             uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -1236,9 +1204,8 @@ static eMqttTransportContextStatus cbMsgRcv(tMqttTransportContext* pCtx,
                                             void* bufferData,                   /* Message received. */
                                             uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
     if (NULL != pCtx)
@@ -1265,9 +1232,8 @@ static eMqttTransportContextStatus cbSubReq(tMqttTransportContext* pCtx,
                                             void* bufferData,                   /* Not used */
                                             uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
     if (NULL != pCtx)
@@ -1314,12 +1280,6 @@ static eMqttTransportContextStatus cbPubReq(
     void* bufferData,                   /* Shall be not NULL in the case of SEND event. Else not used.*/
     uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
-    (void) bufferData;
-    (void) dataSize;
-
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -1411,11 +1371,8 @@ static eMqttTransportContextStatus cbPubBck(tMqttTransportContext* pCtx,
                                             void* bufferData,                   /* Shall be not NULL. */
                                             uint16_t dataSize)                  /* Shall be > 0. */
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
-    (void) bufferData;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     if (NULL != pCtx)
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CALLBACKS == 1
@@ -1441,9 +1398,8 @@ static eMqttTransportContextStatus cbTick(tMqttTransportContext* pCtx,
                                           void* bufferData,                   /* Not used. */
                                           uint16_t dataSize)
 {
-    (void) pCtx;
-    (void) status;
-    (void) event;
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(bufferData);
     SOPC_UNUSED_ARG(dataSize);
 
@@ -2684,8 +2640,8 @@ static int api_lib_send_msg(tMqttTransportContext* pCtx, uint8_t* data, uint16_t
 
     return 0;
 #else
-    (void) data;
-    (void) dataSize;
+    SOPC_UNUSED_ARG(data);
+    SOPC_UNUSED_ARG(dataSize);
     return -1;
 #endif
 }

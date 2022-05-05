@@ -392,7 +392,6 @@ void address_space_bs__read_AddressSpace_Value_value(
     constants__t_RawStatusCode* const address_space_bs__val_sc,
     constants__t_Timestamp* const address_space_bs__val_ts_src)
 {
-    (void) address_space_bs__p_locales;
     assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
            address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__val_sc = OpcUa_BadInvalidState;
@@ -731,7 +730,8 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
                                  constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__serviceStatusCode,
                                  constants__t_DataValue_i* const address_space_bs__prev_dataValue)
 {
-    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
+    SOPC_UNUSED_ARG(
+        address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__node;
     SOPC_Variant* pvar = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node);
     SOPC_Variant* convertedValue = NULL;
@@ -790,7 +790,8 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
                                                  const constants__t_Node_i address_space_bs__p_node,
                                                  const constants__t_Timestamp address_space_bs__p_ts)
 {
-    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
+    SOPC_UNUSED_ARG(
+        address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     assert(node->node_class == OpcUa_NodeClass_Variable);
     bool result = true;
@@ -828,7 +829,8 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
                                             const constants__t_Node_i address_space_bs__p_node,
                                             const constants__t_RawStatusCode address_space_bs__p_sc)
 {
-    (void) (address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
+    SOPC_UNUSED_ARG(
+        address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     assert(node->node_class == OpcUa_NodeClass_Variable);
     bool result = SOPC_AddressSpace_Set_StatusCode(address_space_bs__nodes, node, address_space_bs__p_sc);
@@ -853,7 +855,7 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
                                             const constants__t_Node_i address_space_bs__node,
                                             constants__t_RawStatusCode* const address_space_bs__sc)
 {
-    (void) (address_space_bs__p_user); /* User is already authorized for this operation */
+    SOPC_UNUSED_ARG(address_space_bs__p_user); /* User is already authorized for this operation */
     *address_space_bs__sc = SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__node);
 }
 

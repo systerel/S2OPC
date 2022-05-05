@@ -25,6 +25,7 @@
 #include "kernel.h"
 
 #include "sopc_atomic.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #ifdef CONFIG_SOPC_HELPER_IMPL_INSTRUM
@@ -79,7 +80,7 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
 
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)
 {
-    (void) old_size;
+    SOPC_UNUSED_ARG(old_size);
     void* result = realloc(ptr, new_size);
     CHECK_ALLOC_RESULT(result, new_size);
     return result;

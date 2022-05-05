@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 
 static MqttManagerHandle* g_ptrMqttManagerHandle = NULL;
 

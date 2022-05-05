@@ -22,6 +22,7 @@
 #include <inttypes.h>
 
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
@@ -169,7 +170,7 @@ void msg_subscription_publish_bs__set_publish_response_msg(
     const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg)
 {
     /* Only to set variable in the B model */
-    (void) msg_subscription_publish_bs__p_publish_resp_msg;
+    SOPC_UNUSED_ARG(msg_subscription_publish_bs__p_publish_resp_msg);
 }
 
 void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
@@ -179,7 +180,7 @@ void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
     const constants__t_client_handle_i msg_subscription_publish_bs__p_clientHandle,
     const constants__t_WriteValuePointer_i msg_subscription_publish_bs__p_wv_pointer)
 {
-    (void) msg_subscription_publish_bs__p_monitored_item_id;
+    SOPC_UNUSED_ARG(msg_subscription_publish_bs__p_monitored_item_id);
     assert(SOPC_ExtObjBodyEncoding_Object == msg_subscription_publish_bs__p_notifMsg->NotificationData->Encoding);
     OpcUa_DataChangeNotification* dataChangeNotif =
         (OpcUa_DataChangeNotification*) msg_subscription_publish_bs__p_notifMsg->NotificationData->Body.Object.Value;

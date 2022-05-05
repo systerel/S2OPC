@@ -18,6 +18,7 @@
  */
 
 #include "sopc_common_constants.h"
+#include "sopc_macros.h"
 #include "sopc_udp_sockets.h"
 
 #include <arpa/inet.h>
@@ -124,7 +125,7 @@ static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInf
                                                     const SOPC_Socket_AddressInfo* localAddr,
                                                     unsigned int if_index)
 {
-    (void) localAddr;
+    SOPC_UNUSED_ARG(localAddr);
     assert(if_index > 0);
     assert(multiCastAddr != NULL);
     struct ipv6_mreq membership;

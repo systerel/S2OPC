@@ -31,6 +31,7 @@
 #include "util_b2c.h"
 
 #include "sopc_internal_app_dispatcher.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
@@ -100,7 +101,7 @@ void service_mgr_bs__client_channel_connected_event_discovery(
     const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
     const constants__t_channel_i service_mgr_bs__channel)
 {
-    (void) service_mgr_bs__channel;
+    SOPC_UNUSED_ARG(service_mgr_bs__channel);
     SOPC_SLinkedList* sLinkedList = NULL;
     SOPC_SLinkedListIterator listIt = NULL;
     SOPC_DiscoveryRequest_ToSend* elt = NULL;
@@ -132,7 +133,7 @@ void service_mgr_bs__client_channel_connected_event_discovery(
 
 static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_DiscoveryRequest_ToSend* elt = val;
     SOPC_EncodeableType* reqEncType = NULL;
     SOPC_EncodeableType* respEncType = NULL;
@@ -166,7 +167,7 @@ void service_mgr_bs__client_discovery_req_failures_on_final_connection_failure(
 
 static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     SOPC_DiscoveryRequest_ToSend* elt = val;
     if (NULL != elt)
     {

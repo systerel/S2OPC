@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "browse_treatment_result_bs.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
@@ -272,5 +273,5 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
 void browse_treatment_result_bs__unused_browse_view(
     const constants__t_NodeId_i browse_treatment_result_bs__p_browseView)
 {
-    (void) browse_treatment_result_bs__p_browseView;
+    SOPC_UNUSED_ARG(browse_treatment_result_bs__p_browseView);
 }

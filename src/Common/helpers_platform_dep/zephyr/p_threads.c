@@ -49,6 +49,7 @@
 /* s2opc includes */
 
 #include "sopc_enums.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_build_info.h"
 
@@ -309,7 +310,7 @@ static bool P_THREAD_Join(tThreadHandle* pHandle);
 // Thread internal callback
 static void P_THREAD_InternalCallback(void* pContext, void* pCtx, void* pNotUsed)
 {
-    (void) pNotUsed;
+    SOPC_UNUSED_ARG(pNotUsed);
 
     tThreadWks* pWks = (tThreadWks*) pContext;
 

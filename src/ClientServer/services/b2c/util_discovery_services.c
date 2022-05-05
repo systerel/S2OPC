@@ -278,7 +278,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
         }
 
         /* Note: comparison with requested URL is not necessary since we have to return a default URL in any case */
-        (void) requestEndpointUrl;
+        SOPC_UNUSED_ARG(requestEndpointUrl);
         serviceResult = constants_statuscodes_bs__e_sc_ok;
     }
     else

@@ -28,6 +28,7 @@
 #include "net/socket.h"
 
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 #include "sopc_dict.h"
 
 #include "p_multicast.h"
@@ -183,7 +184,7 @@ SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_
 /***************************************************/
 SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope)
 {
-    (void) sock;
+    SOPC_UNUSED_ARG(sock);
     // In zephyr the TTL is common to interface
     struct net_if* ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
     if (NULL == ptrNetIf)

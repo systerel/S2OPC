@@ -188,7 +188,7 @@ void user_authentication_bs__is_valid_user_authentication(
     const constants__t_user_token_i user_authentication_bs__p_user_token,
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
-    (void) user_authentication_bs__p_token_type; // Only for B precondition corresponding to asserts:
+    SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
     assert(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
     assert(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
 

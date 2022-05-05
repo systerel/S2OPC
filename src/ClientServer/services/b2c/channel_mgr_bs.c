@@ -27,6 +27,7 @@
 #include "sopc_secure_channels_api.h"
 
 #include "sopc_crypto_profiles.h"
+#include "sopc_macros.h"
 #include "sopc_types.h"
 
 #include "channel_mgr_bs.h"
@@ -141,13 +142,13 @@ void channel_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i channe
 extern void channel_mgr_bs__define_SecurityPolicy(const constants__t_channel_i channel_mgr_bs__p_channel)
 {
     // Nothing to do since config is static, it is only for B model
-    (void) channel_mgr_bs__p_channel;
+    SOPC_UNUSED_ARG(channel_mgr_bs__p_channel);
 }
 
 extern void channel_mgr_bs__reset_SecurityPolicy(const constants__t_channel_i channel_mgr_bs__channel)
 {
     // Nothing to do since config is static, it is only for B model
-    (void) channel_mgr_bs__channel;
+    SOPC_UNUSED_ARG(channel_mgr_bs__channel);
 }
 
 void channel_mgr_bs__get_SecurityPolicy(const constants__t_channel_i channel_mgr_bs__channel,
@@ -174,5 +175,5 @@ void channel_mgr_bs__get_SecurityPolicy(const constants__t_channel_i channel_mgr
 
 void channel_mgr_bs__channel_do_nothing(const constants__t_channel_i channel_mgr_bs__channel)
 {
-    (void) channel_mgr_bs__channel;
+    SOPC_UNUSED_ARG(channel_mgr_bs__channel);
 }

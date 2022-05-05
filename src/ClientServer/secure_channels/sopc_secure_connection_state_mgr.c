@@ -3076,8 +3076,6 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                                 uintptr_t params,
                                                 uintptr_t auxParam)
 {
-    (void) params;
-
     switch (event)
     {
     /* Timer events */

@@ -25,6 +25,7 @@
 
 #include "sopc_dict.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
@@ -42,7 +43,7 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
 
 static void SOPC_InternalMonitoredItemId_Free(void* data)
 {
-    (void) data;
+    SOPC_UNUSED_ARG(data);
     // Nothing to do: uintptr_t value
 }
 

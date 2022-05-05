@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 /*------------------------
@@ -107,7 +108,7 @@ void notification_republish_queue_bs__allocate_new_republish_queue(
 
 static void SOPC_InternalDeallocNotifMsg(uint32_t id, void* val)
 {
-    (void) id;
+    SOPC_UNUSED_ARG(id);
     OpcUa_NotificationMessage_Clear(val);
     SOPC_Free(val);
 }

@@ -761,10 +761,10 @@ static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport con
                                      uint16_t size,             /* Size of data received, in bytes. */
                                      void* pUserContext)        /* User context, used as pub sub connection */
 {
-    (void) pCtx;
-    (void) data;
-    (void) size;
-    (void) pUserContext;
+    SOPC_UNUSED_ARG(pCtx);
+    SOPC_UNUSED_ARG(data);
+    SOPC_UNUSED_ARG(size);
+    SOPC_UNUSED_ARG(pUserContext);
     return;
 }
 

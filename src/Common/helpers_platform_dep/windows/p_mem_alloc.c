@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 void* SOPC_Malloc(size_t size)
@@ -38,6 +39,6 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
 
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)
 {
-    (void) old_size;
+    SOPC_UNUSED_ARG(old_size);
     return realloc(ptr, new_size);
 }

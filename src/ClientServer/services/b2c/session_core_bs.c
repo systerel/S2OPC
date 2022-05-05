@@ -923,7 +923,7 @@ void session_core_bs__client_create_session_req_do_crypto(
     t_bool* const session_core_bs__valid,
     t_bool* const session_core_bs__nonce_needed)
 {
-    (void) session_core_bs__p_channel;
+    SOPC_UNUSED_ARG(session_core_bs__p_channel);
     /* Produce the Nonce when SC:Sec_pol is not "None" */
     SOPC_CryptoProvider* pProvider = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
@@ -1237,7 +1237,7 @@ void session_core_bs__server_activate_session_check_crypto(
     const constants__t_msg_i session_core_bs__activate_req_msg,
     t_bool* const session_core_bs__valid)
 {
-    (void) session_core_bs__channel;
+    SOPC_UNUSED_ARG(session_core_bs__channel);
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
     SOPC_CryptoProvider* provider = NULL;
     ServerSessionData* pSession = NULL;
@@ -1314,33 +1314,33 @@ void session_core_bs__client_activate_session_resp_check(
     const constants__t_msg_i session_core_bs__p_resp_msg,
     t_bool* const session_core_bs__valid)
 {
-    (void) session_core_bs__p_session;
-    (void) session_core_bs__p_channel_config_idx;
-    (void) session_core_bs__p_resp_msg;
+    SOPC_UNUSED_ARG(session_core_bs__p_session);
+    SOPC_UNUSED_ARG(session_core_bs__p_channel_config_idx);
+    SOPC_UNUSED_ARG(session_core_bs__p_resp_msg);
     /* TODO: check parameter + add other operation to retrieve new server nonce ?*/
     *session_core_bs__valid = true;
 }
 
 void session_core_bs__client_close_session_req_msg(const constants__t_msg_i session_core_bs__req_msg)
 {
-    (void) session_core_bs__req_msg;
+    SOPC_UNUSED_ARG(session_core_bs__req_msg);
 }
 
 void session_core_bs__client_close_session_resp_msg(const constants__t_msg_i session_core_bs__resp_msg)
 {
-    (void) session_core_bs__resp_msg;
+    SOPC_UNUSED_ARG(session_core_bs__resp_msg);
 }
 
 void session_core_bs__server_close_session_check_req(const constants__t_msg_i session_core_bs__req_msg,
                                                      const constants__t_msg_i session_core_bs__resp_msg)
 {
-    (void) session_core_bs__req_msg;
-    (void) session_core_bs__resp_msg;
+    SOPC_UNUSED_ARG(session_core_bs__req_msg);
+    SOPC_UNUSED_ARG(session_core_bs__resp_msg);
 }
 
 void session_core_bs__session_do_nothing(const constants__t_session_i session_core_bs__session)
 {
-    (void) session_core_bs__session;
+    SOPC_UNUSED_ARG(session_core_bs__session);
 }
 
 void session_core_bs__set_session_app_context(
