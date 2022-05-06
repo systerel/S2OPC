@@ -26,8 +26,6 @@ SEES
     service_write_decode_bs /* TODO: move to refinment */
 
 DEFINITIONS
-    "definitions.def";
-
     d_variables ==
         /* Attributes (mandatory) */
         a_NodeId,
@@ -216,102 +214,320 @@ OPERATIONS
           val_sc : t_RawStatusCode &
           val_ts_src : t_Timestamp &
           val_ts_srv : t_Timestamp &
-          (p_node : dom(AttributeID_Node_Variant(p_aid))
-           =>
-           /* Specific treatement for Value of Variable attribute: check access rights + index range */
-           (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
+
+          /* Specific treatement for Value attribute */
+          (p_aid = e_aid_Value =>
+           (ncl = e_ncl_Variable =>
+             /* Specific treatement for Value of Variable attribute: check access rights + index range */
              (local_service_treatment = 0 &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = FALSE =>
-               val = c_Variant_indet &
-               sc = e_sc_bad_not_readable) &
+                val = c_Variant_indet &
+                sc = e_sc_bad_not_readable) &
              (local_service_treatment = 0 &
               conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
               not(e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) =>
-                 val = c_Variant_indet &
-                 sc = e_sc_bad_user_access_denied) &
-
+                val = c_Variant_indet &
+                sc = e_sc_bad_user_access_denied) &
              (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
-              IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
+               IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE =>
                  val = c_Variant_indet &
                  sc = e_sc_bad_index_range_invalid
              ) &
-
              (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
-               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-               HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE  =>
+               IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+               HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE  =>
                  val = c_Variant_indet &
                  sc = e_sc_bad_index_range_no_data
              ) &
-
              (local_service_treatment /= 0 or
               (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
                e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
-               IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-               HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE
-              =>
-                (val = AttributeID_Node_Variant(p_aid)(p_node) &
-                sc = e_sc_ok) or
-                (val = c_Variant_indet &
-                  sc = e_sc_bad_out_of_memory)
+               IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+               HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE =>
+                /* FIXME: Should depend on the index range? */
+                (val = a_Value(p_node) & sc = e_sc_ok) or
+                (val = c_Variant_indet & sc = e_sc_bad_out_of_memory)
              )
+           ) &
 
-           ) &
            /* Specific treatement for Value of VariableType attribute: check index range */
-           (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) &
-               ncl = e_ncl_VariableType & p_aid = e_aid_Value =>
-               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
-                 sc = e_sc_bad_index_range_invalid
-               ) &
-               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = FALSE =>
-                 sc = e_sc_bad_index_range_no_data
-               ) &
-               (IsValid_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE &
-                HasRange_VariantIndex(AttributeID_Node_Variant(e_aid_Value)(p_node) |-> p_index_range) = TRUE =>
-                (val = AttributeID_Node_Variant(p_aid)(p_node) &
-                 sc = e_sc_ok) or
-                (val = c_Variant_indet &
-                  sc = e_sc_bad_out_of_memory)
-                )
+           (ncl = e_ncl_VariableType =>
+             (IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE =>
+                val = c_Variant_indet &
+                sc = e_sc_bad_index_range_invalid
+             ) &
+             (IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+              HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE =>
+                val = c_Variant_indet &
+                sc = e_sc_bad_index_range_no_data
+             ) &
+             (IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
+              HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE =>
+               /* FIXME: Should depend on the index range? */
+               (val = a_Value(p_node) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory)
+             )
            ) &
-           /* Generic treatment for all other attributes */
-           (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) &
-             not(ncl = e_ncl_VariableType & p_aid = e_aid_Value) =>
-               /* Other attributes are not expecting a defined index range */
-               (IsRangeDefined(p_index_range) = TRUE =>
-                 val = c_Variant_indet &
-                 sc = e_sc_bad_index_range_invalid) &
-               /* Nominal case */
-               (IsRangeDefined(p_index_range) = FALSE =>
-                (val = AttributeID_Node_Variant(p_aid)(p_node) &
-                 sc = e_sc_ok) or
-                 (val = c_Variant_indet &
-                  sc = e_sc_bad_out_of_memory))
+
+           /* Any other node class does not carry a Value attribute */
+           (ncl /: {e_ncl_Variable, e_ncl_VariableType} =>
+             val = c_Variant_indet &
+             sc = e_sc_bad_attribute_id_invalid
+           )
           ) &
+
+          /* All the other attributes are on the same model */
+
+          (p_aid = e_aid_AccessLevel =>
+           (p_node : dom(a_AccessLevel) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_AccessLevel_Variant(a_AccessLevel(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_AccessLevel) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_BrowseName =>
+           (p_node : dom(a_BrowseName) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_QualifiedName_Variant(a_BrowseName(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_BrowseName) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_ContainsNoLoops =>
+           (p_node : dom(a_ContainsNoLoops) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_ContainsNoLoops(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_ContainsNoLoops) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_DataType =>
+           (p_node : dom(a_DataType) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_NodeId_Variant(a_DataType(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_DataType) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_DisplayName =>
+           (p_node : dom(a_DisplayName) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_LocalizedText_Variant(a_DisplayName(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_DisplayName) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_EventNotifier =>
+           (p_node : dom(a_EventNotifier) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Byte_Variant(a_EventNotifier(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_EventNotifier) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_Executable =>
+           (p_node : dom(a_Executable) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_Executable(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_Executable) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_Historizing =>
+           (p_node : dom(a_Historizing) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_Historizing(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_Historizing) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_IsAbstract =>
+           (p_node : dom(a_IsAbstract) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_IsAbstract(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_IsAbstract) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_NodeClass =>
+           (p_node : dom(a_NodeClass) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_NodeClass_Variant(a_NodeClass(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_NodeClass) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_NodeId =>
+           (p_node : dom(a_NodeId) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_NodeId_Variant(a_NodeId(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_NodeId) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_Symmetric =>
+           (p_node : dom(a_Symmetric) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_Symmetric(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_Symmetric) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_UserAccessLevel =>
+           (p_node : dom(a_UserAccessLevel) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_AccessLevel_Variant(a_UserAccessLevel(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_UserAccessLevel) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_UserExecutable =>
+           (p_node : dom(a_UserExecutable) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_Boolean_Variant(a_UserExecutable(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_UserExecutable) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_ValueRank =>
+           (p_node : dom(a_ValueRank) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_ValueRank_Variant(a_ValueRank(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_ValueRank) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          (p_aid = e_aid_ArrayDimensions =>
+           (p_node : dom(a_ArrayDimensions) =>
+             (IsRangeDefined(p_index_range) = TRUE =>
+               val = c_Variant_indet & sc = e_sc_bad_index_range_no_data) &
+             (IsRangeDefined(p_index_range) = FALSE =>
+               (val = conv_ArrayDimensions_Variant(a_ArrayDimensions(p_node)) & sc = e_sc_ok) or
+               (val = c_Variant_indet & sc = e_sc_bad_out_of_memory))
+           ) &
+           (p_node /: dom(a_ArrayDimensions) =>
+             val = c_Variant_indet & sc = e_sc_bad_attribute_id_invalid
+           )
+          ) &
+
+          /* Any other attribute */
+          (p_aid /: {e_aid_AccessLevel,
+                     e_aid_BrowseName,
+                     e_aid_ContainsNoLoops,
+                     e_aid_DataType,
+                     e_aid_DisplayName,
+                     e_aid_EventNotifier,
+                     e_aid_Executable,
+                     e_aid_Historizing,
+                     e_aid_IsAbstract,
+                     e_aid_NodeClass,
+                     e_aid_NodeId,
+                     e_aid_Symmetric,
+                     e_aid_UserAccessLevel,
+                     e_aid_UserExecutable,
+                     e_aid_Value,
+                     e_aid_ValueRank,
+                     e_aid_ArrayDimensions} =>
+             val = c_Variant_indet &
+             sc = e_sc_bad_attribute_id_invalid
+          ) &
+
           /* Specific treatement for status code and timestamps for Variable Value */
-          (sc = e_sc_ok & ncl = e_ncl_Variable & p_aid = e_aid_Value =>
-           val_sc = a_Value_StatusCode(p_node) &
-           val_ts_src = a_Value_SourceTimestamp(p_node) &
-           val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/ ) &
-          /* Generic treatement for status code and timestamps     */
-          (sc = e_sc_ok & not (ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
-           val_sc = c_RawStatusCode_Good &
-           val_ts_src = c_Timestamp_null &
-           val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/)
+          (sc = e_sc_ok =>
+            (ncl = e_ncl_Variable & p_aid = e_aid_Value =>
+               val_sc = a_Value_StatusCode(p_node) &
+               val_ts_src = a_Value_SourceTimestamp(p_node) &
+               val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/ ) &
+            /* Generic treatement for status code and timestamps     */
+            (not(ncl = e_ncl_Variable & p_aid = e_aid_Value) =>
+               val_sc = c_RawStatusCode_Good &
+               val_ts_src = c_Timestamp_null &
+               val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/)
           ) &
-          /* Invalid attribute for the given node */
-          (not(p_node : dom(AttributeID_Node_Variant(p_aid)))
-           =>
-           val = c_Variant_indet &
-           sc = e_sc_bad_attribute_id_invalid &
-           val_sc = c_RawStatusCode_BadInvalidState &
-           val_ts_src = c_Timestamp_null &
-           val_ts_srv = c_Timestamp_null
-          )
+          (sc /= e_sc_ok =>
+            val_sc = c_RawStatusCode_BadInvalidState &
+            val_ts_src = c_Timestamp_null &
+            val_ts_srv /= c_Timestamp_null /* current date on S2OPC server*/)
        )
     END /* LET END */
     END
