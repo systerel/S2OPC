@@ -24,6 +24,14 @@
 
 #include "sopc_pubsub_conf.h"
 
+/**
+ *  /brief
+ *      Reads the content of a XML file and extracts the ::SOPC_PubSubConfiguration
+ *  /param fd
+ *      A opened non-NULL file descriptor. (Text file, validating the XSD schema
+ *      's2opc_pubsub_config.xsd'
+ *  /return The PubSub configuration, or NULL in case of invalid parameter (or invalid file content)
+ */
 SOPC_PubSubConfiguration* SOPC_PubSubConfig_ParseXML(FILE* fd);
 
 #endif /* XML_EXPAT_H_ */

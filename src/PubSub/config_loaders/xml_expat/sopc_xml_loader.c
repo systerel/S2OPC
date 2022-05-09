@@ -34,6 +34,14 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
+/**
+ * \brief
+ *  This module provides an XML parsing for PubSub configurations.
+ *  The input XML file is supposed to be previously checked towards 's2opc_pubsub_config.xsd'
+ *    however, the code is robust to invalid XML or non-validatings schemas.
+ *  It is possible to debug file parsing by defining the flag ::XML_CONFIG_LOADER_LOG
+ */
+
 #ifdef XML_CONFIG_LOADER_LOG
 #define LOG(str) fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
 #define LOG_XML_ERROR(str)                                                                         \
@@ -51,6 +59,7 @@
 #define LOG_XML_ERRORF(format, ...)
 #endif
 
+#define TEXT_EQUALS(x, y) (strcmp((x), (y)) == 0)
 #define LOG_MEMORY_ALLOCATION_FAILURE LOG("Memory allocation failure")
 
 #define TAG_PUBSUB "PubSub"
@@ -97,7 +106,9 @@ struct sopc_xml_pubsub_variable_t
 {
     SOPC_NodeId* nodeId;
     SOPC_LocalizedText displayName;
+    bool has_displayName;
     SOPC_BuiltinId dataType;
+    bool has_dataType;
     int16_t valueRank;
 };
 
@@ -123,7 +134,9 @@ struct sopc_xml_pubsub_message_t
 struct sopc_xml_pubsub_connection_t
 {
     char* address;
+    uint64_t publisher_id;
     bool is_publisher;
+    bool is_mode_set;
     char* interfaceName;
     uint16_t nb_messages;
     struct sopc_xml_pubsub_message_t* messageArr;
@@ -133,7 +146,6 @@ struct parse_context_t
 {
     XML_Parser parser;
     bool has_publisher;
-    uint64_t publisher_id; // Same config format is used for Pub/Sub but some attributes could be mandatory for one only
     uint32_t nb_connections;
     uint32_t nb_pubconnections;
     uint16_t nb_datasets;
@@ -259,227 +271,273 @@ static bool parse_unsigned_value(const char* data, size_t len, uint8_t width, vo
     }
 }
 
-static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs)
+static bool copy_any_string_attribute_value(char** to, const char* from)
 {
-    bool addr = false;
-    bool mode = false;
-    uint64_t pubId = 0;
+    assert(to != NULL);
+    bool result = false;
+    *to = SOPC_Malloc(strlen(from) + 1);
+    if (NULL == *to)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+    }
+    else
+    {
+        strcpy(*to, from);
+        result = true;
+    }
+    return result;
+}
 
-    struct sopc_xml_pubsub_connection_t* connection = &ctx->connectionArr[ctx->nb_connections - 1];
-    memset(connection, 0, sizeof *connection);
-    for (size_t i = 0; attrs[i]; ++i)
+/**
+ * /brief This callback is used to extract a given attribute (name and value)
+ * /param attr_name The attribute name (non-NULL).
+ * /param attr_val The attribute value (non-NULL).
+ * /param user_param A user defined parameter
+ * /return true if the parameter is correct and expected
+ */
+typedef bool (*attribute_parser_cb)(const char* attr_name,
+                                    const char* attr_val,
+                                    struct parse_context_t* ctx,
+                                    void* user_param);
+
+/**
+ * /brief Parse all attributes and calls the user callback for every valid attribute.
+ * /param attrs A NULL-terminated array of attributes
+ * /param ctx A non-NULL pointer to the parsing context.
+ * /param callback A non-NULL pointer to the user parsing callback.
+ * /param user_param The user parameter that will be passed to 'callback'
+ * /return true if the parsing is successful
+ */
+static bool parse_attributes(const XML_Char** attrs,
+                             attribute_parser_cb callback,
+                             struct parse_context_t* ctx,
+                             void* user_param)
+{
+    bool result = true;
+    assert(NULL != callback && NULL != attrs);
+    for (size_t i = 0; attrs[i] && result; ++i)
     {
         // Current attribute name
-        const char* attr = attrs[i];
-
-        if (strcmp(ATTR_CONNECTION_ADDR, attr) == 0)
+        const char* attr_name = attrs[i];
+        const char* attr_val = attrs[++i];
+        if (NULL == attr_val)
         {
-            // Retrieve current attribute value
-            const char* attr_val = attrs[++i];
-
-            if (attr_val == NULL)
-            {
-                LOG_XML_ERROR("Missing value for connection address attribute");
-                return false;
-            }
-
-            connection->address = SOPC_Malloc(strlen(attr_val) + 1);
-            if (NULL == connection->address)
-            {
-                LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
-            }
-            connection->address = strcpy(connection->address, attr_val);
-            addr = true;
-        }
-        else if (strcmp(ATTR_CONNECTION_MODE, attr) == 0)
-        {
-            const char* attr_val = attrs[++i];
-
-            if (strcmp(ATTR_CONNECTION_MODE_VAL_PUB, attr_val) == 0)
-            {
-                connection->is_publisher = true;
-                ctx->nb_pubconnections++;
-                ctx->has_publisher = true;
-            }
-            else if (strcmp(ATTR_CONNECTION_MODE_VAL_SUB, attr_val) != 0)
-            {
-                LOG_XML_ERRORF("Invalid connection mode: %s", attr_val);
-                return false;
-            }
-
-            mode = true;
-        }
-        else if (strcmp(ATTR_CONNECTION_IFNAME, attr) == 0)
-        {
-            // Retrieve current attribute value
-            const char* attr_val = attrs[++i];
-
-            if (attr_val == NULL)
-            {
-                LOG_XML_ERROR("Missing value for connection interfaceName attribute");
-                return false;
-            }
-
-            connection->interfaceName = SOPC_Malloc(strlen(attr_val) + 1);
-            if (NULL == connection->interfaceName)
-            {
-                LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
-            }
-            connection->interfaceName = strcpy(connection->interfaceName, attr_val);
-        }
-        else if (strcmp(ATTR_CONNECTION_PUB_ID, attr) == 0)
-        {
-            const char* val = attrs[++i];
-
-            if (NULL == val || !parse_unsigned_value(val, strlen(val), 64, &ctx->publisher_id) ||
-                0 == ctx->publisher_id)
-            {
-                LOG_XML_ERRORF("Invalid PublisherId value in PubSub tag: '%s", val);
-                return false;
-            }
-            pubId = ctx->publisher_id;
+            LOG_XML_ERRORF("Missing value for attribute '%s", attr_name);
+            result = false;
         }
         else
         {
-            ++i; // Skip value of unknown attribute
+            result = callback(attr_name, attr_val, ctx, user_param);
+            if (!result)
+            {
+                LOG_XML_ERRORF("Invalid attribute argument : (%s='%s')", attr_name, attr_val);
+            }
         }
     }
+    return result;
+}
 
-    if (!addr)
-    {
-        LOG_XML_ERROR("Connection address is missing");
-        return false;
-    }
-    else if (!mode)
-    {
-        LOG_XML_ERROR("Connection mode is missing");
-        return false;
-    }
-    else if (connection->is_publisher && pubId == 0)
-    {
-        LOG_XML_ERROR("Connection mode is 'publisher' but no 'publisherId' is defined");
-        return false;
-    }
-    else if (!connection->is_publisher && pubId != 0)
-    {
-        LOG_XML_ERROR("Connection mode is 'subscriber' and a 'publisherId' is defined");
-        return false;
-    }
+static bool parse_connection_attributes(const char* attr_name,
+                                        const char* attr_val,
+                                        struct parse_context_t* ctx,
+                                        void* user_param)
+{
+    bool result = false;
+    assert(NULL != user_param);
+    struct sopc_xml_pubsub_connection_t* connection = (struct sopc_xml_pubsub_connection_t*) user_param;
 
-    ctx->state = PARSE_CONNECTION;
+    if (TEXT_EQUALS(ATTR_CONNECTION_ADDR, attr_name))
+    {
+        result = copy_any_string_attribute_value(&connection->address, attr_val);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_MODE, attr_name))
+    {
+        connection->is_mode_set = true;
+        if (TEXT_EQUALS(ATTR_CONNECTION_MODE_VAL_PUB, attr_val))
+        {
+            connection->is_publisher = true;
+            result = true;
+            ctx->nb_pubconnections++;
+            ctx->has_publisher = true;
+        }
+        else if (TEXT_EQUALS(ATTR_CONNECTION_MODE_VAL_SUB, attr_val))
+        {
+            connection->is_publisher = false;
+            result = true;
+        }
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_IFNAME, attr_name))
+    {
+        result = copy_any_string_attribute_value(&connection->interfaceName, attr_val);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_PUB_ID, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 64, &connection->publisher_id);
+        result &= (0 != connection->publisher_id);
+    }
+    else
+    {
+        LOG_XML_ERRORF("Unexpected 'connection' attribute <%s>", attr_name);
+    }
+    return result;
+}
+
+static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    struct sopc_xml_pubsub_connection_t* connection = &ctx->connectionArr[ctx->nb_connections - 1];
+    memset(connection, 0, sizeof *connection);
+
+    bool result = parse_attributes(attrs, parse_connection_attributes, ctx, (void*) connection);
+
+    if (result)
+    {
+        if (!connection->address)
+        {
+            LOG_XML_ERROR("Connection address is missing");
+            result = false;
+        }
+        else if (!connection->is_mode_set)
+        {
+            LOG_XML_ERROR("Connection mode is missing");
+            result = false;
+        }
+        else if (connection->is_publisher && connection->publisher_id == 0)
+        {
+            LOG_XML_ERROR("Connection mode is 'publisher' but no 'publisherId' is defined");
+            result = false;
+        }
+        else if (!connection->is_publisher && connection->publisher_id != 0)
+        {
+            LOG_XML_ERROR("Connection mode is 'subscriber' and a 'publisherId' is defined");
+            result = false;
+        }
+        else
+        {
+            ctx->state = PARSE_CONNECTION;
+        }
+    }
     return true;
+}
+
+static bool parse_message_attributes(const char* attr_name,
+                                     const char* attr_val,
+                                     struct parse_context_t* ctx,
+                                     void* user_param)
+{
+    (void) ctx;
+    bool result = false;
+    assert(NULL != user_param);
+    struct sopc_xml_pubsub_message_t* msg = (struct sopc_xml_pubsub_message_t*) user_param;
+
+    if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHING_ITV, attr_name))
+    {
+        result = SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval);
+        result &= msg->publishing_interval > 0.;
+        result = true;
+    }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY, attr_name))
+    {
+        result = true;
+        if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY_VAL_NONE, attr_val))
+        {
+            msg->security_mode = SOPC_SecurityMode_None;
+        }
+        else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY_VAL_SIGN, attr_val))
+        {
+            msg->security_mode = SOPC_SecurityMode_Sign;
+        }
+        else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT, attr_val))
+        {
+            msg->security_mode = SOPC_SecurityMode_SignAndEncrypt;
+        }
+        else
+        {
+            result = false;
+        }
+    }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHER_ID, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publisher_id);
+        result &= msg->publisher_id > 0;
+    }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_GROUP_ID, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &msg->groupId);
+        result &= msg->groupId > 0;
+    }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_GROUP_VERSION, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
+        result &= msg->groupVersion > 0;
+    }
+    else
+    {
+        LOG_XML_ERRORF("Unexpected 'message' attribute <%s>", attr_name);
+    }
+    return result;
 }
 
 static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_message_t* msg, const XML_Char** attrs)
 {
-    bool pubItv = false;
-    bool pubId = false;
-    bool groupId = false;
-
     memset(msg, 0, sizeof *msg);
     // Security is disabled if it is not configured
     msg->security_mode = SOPC_SecurityMode_None;
+    msg->publishing_interval = 0.0;
 
-    for (size_t i = 0; attrs[i]; ++i)
+    bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
+
+    if (result)
     {
-        // Current attribute name
-        const char* attr = attrs[i];
-        const char* attr_val = attrs[++i];
-        bool invalidArg = false;
-
-        if (NULL == attr_val)
+        if (msg->publishing_interval <= 0.0)
         {
-            LOG_XML_ERRORF("Missing value for attribute '%s", attr);
-            return false;
+            LOG_XML_ERROR("Message publishing interval is missing");
+            result = false;
         }
-        if (strcmp(ATTR_MESSAGE_PUBLISHING_ITV, attr) == 0)
+        else if (msg->groupId == 0)
         {
-            invalidArg = !SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval) ||
-                         msg->publishing_interval <= 0.;
-            pubItv = true;
+            LOG_XML_ERROR("Message groupId is missing");
+            result = false;
         }
-        else if (strcmp(ATTR_MESSAGE_SECURITY, attr) == 0)
+        else if (msg->publisher_id == 0 && !ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
         {
-            if (strcmp(ATTR_MESSAGE_SECURITY_VAL_NONE, attr_val) == 0)
-            {
-                msg->security_mode = SOPC_SecurityMode_None;
-            }
-            else if (strcmp(ATTR_MESSAGE_SECURITY_VAL_SIGN, attr_val) == 0)
-            {
-                msg->security_mode = SOPC_SecurityMode_Sign;
-            }
-            else if (strcmp(ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT, attr_val) == 0)
-            {
-                msg->security_mode = SOPC_SecurityMode_SignAndEncrypt;
-            }
-            else
-            {
-                invalidArg = true;
-            }
+            // A subscriber connection shall provide the message publisherId source
+            LOG_XML_ERROR("Message publisherId is missing in a connection in subscriber mode");
+            result = false;
         }
-        else if (strcmp(ATTR_MESSAGE_PUBLISHER_ID, attr) == 0)
+        else if (msg->publisher_id > 0 && ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
         {
-            if (ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
-            {
-                // The publisherId is the id of the publisher defined in root node in this case (self id)
-                LOG_XML_ERROR("Message tag shall not contain a publisherId if the connection is in publisher mode");
-                invalidArg = true;
-            }
-
-            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publisher_id);
-            invalidArg |= 0 == msg->publisher_id;
-            pubId = true;
-        }
-        else if (strcmp(ATTR_MESSAGE_GROUP_ID, attr) == 0)
-        {
-            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 16, &msg->groupId);
-            invalidArg |= 0 == msg->groupId;
-            groupId = true;
-        }
-        else if (strcmp(ATTR_MESSAGE_GROUP_VERSION, attr) == 0)
-        {
-            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
-            invalidArg |= 0 == msg->groupVersion;
+            // A publisher connection shall NOT provide a message publisherId source (itself here)
+            LOG_XML_ERROR("Message publisherId shall not be provided in a connection in publisher mode");
+            result = false;
         }
         else
         {
-            LOG_XML_ERRORF("Unexpected attribute <%s>", attr);
-            return false;
-        }
-        if (invalidArg)
-        {
-            LOG_XML_ERRORF("Invalid attribute argument : (%s='%s')", attr, attr_val);
-            return false;
+            ctx->state = PARSE_MESSAGE;
         }
     }
+    return result;
+}
 
-    if (!pubItv)
-    {
-        LOG_XML_ERROR("Message publishing interval is missing");
-        return false;
-    }
-    else if (!groupId)
-    {
-        LOG_XML_ERROR("Message groupId is missing");
-        return false;
-    }
-    else if (!pubId && !ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
-    {
-        // A subscriber connection shall provide the message publisherId source
-        LOG_XML_ERROR("Message publisherId is missing in a connection in subscriber mode");
-        return false;
-    }
-    else if (pubId && ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
-    {
-        // A publisher connection shall NOT provide a message publisherId source (itself here)
-        LOG_XML_ERROR("Message publisherId shall not be provided in a connection in publisher mode");
-        return false;
-    }
+static bool parse_dataset_attributes(const char* attr_name,
+                                     const char* attr_val,
+                                     struct parse_context_t* ctx,
+                                     void* user_param)
+{
+    (void) ctx;
+    bool result = false;
+    assert(NULL != user_param);
+    struct sopc_xml_pubsub_dataset_t* ds = (struct sopc_xml_pubsub_dataset_t*) user_param;
 
-    ctx->state = PARSE_MESSAGE;
-    return true;
+    if (TEXT_EQUALS(ATTR_DATASET_WRITER_ID, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
+        result &= ds->writer_id > 0;
+    }
+    else
+    {
+        LOG_XML_ERRORF("Unexpected 'dataset' attribute <%s>", attr_name);
+    }
+    return result;
 }
 
 static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_dataset_t* ds, const XML_Char** attrs)
@@ -488,38 +546,10 @@ static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_da
     assert(NULL != ctx->currentMessage);
     ds->writer_id = ctx->currentMessage->groupId;
 
-    for (size_t i = 0; attrs[i]; ++i)
-    {
-        // Current attribute name
-        const char* attr = attrs[i];
-        i++;
-        const char* attr_val = attrs[i];
-        bool invalidArg = false;
-
-        if (NULL == attr_val)
-        {
-            LOG_XML_ERRORF("Missing value for attribute '%s", attr);
-            return false;
-        }
-        if (strcmp(ATTR_DATASET_WRITER_ID, attr) == 0)
-        {
-            invalidArg = !parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
-            invalidArg |= 0 == ds->writer_id;
-        }
-        else
-        {
-            LOG_XML_ERRORF("Unexpected attribute <%s>", attr);
-            return false;
-        }
-        if (invalidArg)
-        {
-            LOG_XML_ERRORF("Invalid attribute argument : (%s='%s')", attr, attr_val);
-            return false;
-        }
-    }
+    bool result = parse_attributes(attrs, parse_dataset_attributes, ctx, (void*) ds);
 
     ctx->state = PARSE_DATASET;
-    return true;
+    return result;
 }
 
 static bool builtintype_id_from_tag(const char* typeName, SOPC_BuiltinId* type_id)
@@ -547,132 +577,95 @@ static bool builtintype_id_from_tag(const char* typeName, SOPC_BuiltinId* type_i
     return false;
 }
 
-static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_variable_t* var, const XML_Char** attrs)
+static bool parse_variable_attributes(const char* attr_name,
+                                      const char* attr_val,
+                                      struct parse_context_t* ctx,
+                                      void* user_param)
 {
-    bool nodeId = false;
-    bool dispName = false;
-    bool dataType = false;
-    bool valueRank = false;
+    (void) ctx;
+    bool result = false;
+    assert(NULL != user_param);
+    struct sopc_xml_pubsub_variable_t* var = (struct sopc_xml_pubsub_variable_t*) user_param;
 
-    memset(var, 0, sizeof *var);
-
-    var->valueRank = SCALAR_ARRAY_RANK;
-    for (size_t i = 0; attrs[i]; ++i)
+    if (TEXT_EQUALS(ATTR_VARIABLE_NODE_ID, attr_name))
     {
-        // Current attribute name
-        const char* attr = attrs[i];
-
-        if (strcmp(ATTR_VARIABLE_NODE_ID, attr) == 0)
+        assert(strlen(attr_val) <= INT32_MAX);
+        var->nodeId = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
+        result = (NULL != var->nodeId);
+    }
+    else if (TEXT_EQUALS(ATTR_VARIABLE_DISPLAY_NAME, attr_name))
+    {
+        var->has_displayName = true;
+        SOPC_LocalizedText_Initialize(&var->displayName);
+        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&var->displayName.defaultText, attr_val);
+        result = (SOPC_STATUS_OK == status);
+        if (!result)
         {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val)
-            {
-                LOG_XML_ERROR("Missing value for variable nodeId attribute");
-                return false;
-            }
-
-            assert(strlen(attr_val) <= INT32_MAX);
-            var->nodeId = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
-            if (NULL == var->nodeId)
-            {
-                LOG_XML_ERROR("NodeId parsing failed or memory failure");
-                return false;
-            }
-            nodeId = true;
+            LOG_MEMORY_ALLOCATION_FAILURE;
         }
-        else if (strcmp(ATTR_VARIABLE_DISPLAY_NAME, attr) == 0)
+    }
+    else if (TEXT_EQUALS(ATTR_VARIABLE_VALUE_RANK, attr_name))
+    {
+        int64_t rank;
+
+        result = parse_signed64_value(attr_val, &rank) && rank >= -3 && rank <= 65535;
+        if (result && rank > 0)
         {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val)
-            {
-                LOG_XML_ERROR("Missing value for variable displayName attribute");
-                return false;
-            }
-
-            SOPC_LocalizedText_Initialize(&var->displayName);
-            SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&var->displayName.defaultText, attr_val);
-            if (SOPC_STATUS_OK != status)
-            {
-                LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
-            }
-            dispName = true;
-        }
-        else if (strcmp(ATTR_VARIABLE_VALUE_RANK, attr) == 0)
-        {
-            const char* attr_val = attrs[++i];
-            int64_t rank;
-
-            if (NULL == attr_val)
-            {
-                LOG_XML_ERROR("Missing value for variable " ATTR_VARIABLE_VALUE_RANK " attribute");
-                return false;
-            }
-
-            if (valueRank)
-            {
-                LOG_XML_ERROR("Attribute defined several times :arrayRank");
-                return false;
-            }
-
-            if (!parse_signed64_value(attr_val, &rank) || rank < -3 || rank > 65535)
-            {
-                LOG_XML_ERRORF("Invalid attribute arrayRank value: '%s", attr_val);
-                return false;
-            }
-            if (rank > 0)
-            {
-                var->valueRank = (int16_t) rank;
-            }
-            else
-            {
-                var->valueRank = -1;
-            }
-
-            valueRank = true;
-        }
-        else if (strcmp(ATTR_VARIABLE_DATA_TYPE, attr) == 0)
-        {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val)
-            {
-                LOG_XML_ERROR("Missing value for variable dataType attribute");
-                return false;
-            }
-
-            dataType = builtintype_id_from_tag(attr_val, &var->dataType);
-            if (!dataType)
-            {
-                LOG_XML_ERRORF("DataType attribute value not recognized as BuiltInType: '%s", attr_val);
-                return false;
-            }
+            var->valueRank = (int16_t) rank;
         }
         else
         {
-            ++i; // Skip value of unknown attribute
+            var->valueRank = -1;
         }
     }
+    else if (TEXT_EQUALS(ATTR_VARIABLE_DATA_TYPE, attr_name))
+    {
+        var->has_dataType = true;
+        result = builtintype_id_from_tag(attr_val, &var->dataType);
+        if (!result)
+        {
+            LOG_XML_ERRORF("DataType attribute value not recognized as BuiltInType: '%s", attr_val);
+        }
+    }
+    else
+    {
+        LOG_XML_ERRORF("Unexpected 'variable' attribute <%s>", attr_name);
+    }
+    return result;
+}
 
-    if (!nodeId)
-    {
-        LOG_XML_ERROR("Variable nodeId is missing");
-        return false;
-    }
-    else if (!dispName)
-    {
-        LOG_XML_ERROR("Variable displayName is missing");
-        return false;
-    }
-    else if (!dataType)
-    {
-        LOG_XML_ERROR("Variable dataType is missing");
-        return false;
-    }
+static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_variable_t* var, const XML_Char** attrs)
+{
+    memset(var, 0, sizeof *var);
+    var->valueRank = SCALAR_ARRAY_RANK;
+    var->nodeId = NULL;
+    var->has_displayName = false;
+    var->has_dataType = false;
 
-    ctx->state = PARSE_VARIABLE;
+    bool result = parse_attributes(attrs, parse_variable_attributes, ctx, (void*) var);
+
+    if (result)
+    {
+        if (!var->nodeId)
+        {
+            LOG_XML_ERROR("Variable nodeId is missing");
+            result = false;
+        }
+        else if (!var->has_displayName)
+        {
+            LOG_XML_ERROR("Variable displayName is missing");
+            result = false;
+        }
+        else if (!var->has_dataType)
+        {
+            LOG_XML_ERROR("Variable dataType is missing");
+            result = false;
+        }
+        else
+        {
+            ctx->state = PARSE_VARIABLE;
+        }
+    }
     return true;
 }
 
@@ -893,7 +886,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             pubicon++;
 
             // Publisher connection
-            SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, ctx->publisher_id);
+            SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id);
             allocSuccess = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
 
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
@@ -1084,7 +1077,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_ParseXML(FILE* fd)
     ctx.state = PARSE_START;
     ctx.parser = parser;
     ctx.has_publisher = false;
-    ctx.publisher_id = 0;
     ctx.nb_connections = 0;
     ctx.nb_pubconnections = 0;
     ctx.nb_datasets = 0;
