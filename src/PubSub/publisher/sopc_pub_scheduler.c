@@ -177,6 +177,12 @@ static struct
  * It computes when it should wake up and sleeps until then (if not past) */
 static void* thread_start_publish(void* arg);
 
+/**
+ * Sends a publish message
+ * /param context The message context to send
+ */
+static void MessageCtx_send_publish_message(MessageCtx* context);
+
 // Clear pub scheduler context
 static void SOPC_PubScheduler_Context_Clear(void)
 {
@@ -344,6 +350,121 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
+static void MessageCtx_send_publish_message(MessageCtx* context)
+{
+    /* Steps to send a message
+     * - retrieve the NetworkMessage
+     * - for each DataSetMessage:
+     *   - call GetVariables
+     *   - for each DataSetField:
+     *     - check type
+     *     - encode value
+     * Note that there is a problem because the writer group contains the number of DataSetFields,
+     *  but we use this info for all the DSMs... -> TODO investigate
+     */
+
+    assert(NULL != context);
+    SOPC_Dataset_NetworkMessage* message = context->message;
+    assert(NULL != message);
+
+    /* TODO: Problem: single DataSetWriter but maybe-multiple DataSetMessages */
+    const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(context->group);
+
+    size_t ndsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
+    SOPC_ASSERT(1 == ndsm && "Unsupported multi-DSM");
+
+    SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
+    uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+
+    const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
+    assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
+
+    /* TODO: shouldn't this be called for each DSM ? */
+    SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dataset);
+    assert(NULL != values);
+
+    /* Check value-type compatibility and encode */
+    /* TODO: simplify and externalize the type check */
+    bool typeCheckingSuccess = true;
+    for (size_t i = 0; i < nbFields && typeCheckingSuccess; ++i)
+    {
+        /* TODO: this function should take a size_t */
+        SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, (uint16_t) i);
+        assert(NULL != fieldData);
+        SOPC_DataValue* dv = &values[i];
+
+        bool isBad = false;
+        bool isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+
+        // We also want to consider case the value was valid but provided with Bad status, therefore we
+        // do not consider isNullOrBad in the first condition
+        if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
+        {
+            // If status is bad and value has not status type, set value as a Bad status code
+            // (see spec part 14: Table 16: DataSetMessage field representation options)
+            if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
+            {
+                SOPC_Variant_Clear(&dv->Value);
+                dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
+                dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+                dv->Value.Value.Status = dv->Status;
+            }
+        }
+        else if (!isCompatible || isBad)
+        {
+            // If value is Bad whereas the data value status code is not bad, it is considered as an
+            // error since this is not the type expected for this value from an OpcUa server.
+
+            if (!isCompatible)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_PUBSUB,
+                    "GetSourceVariables returned values incompatible with the current PubSub configuration");
+            }
+            typeCheckingSuccess = false;
+        }
+
+        /* TODO: avoid the creation of a Variant to delete it immediately,
+         *  or change the behavior of Set_Variant_At because it is its sole use */
+        SOPC_Variant* variant = SOPC_Variant_Create();
+        assert(NULL != variant);
+        SOPC_Variant_Move(variant, &dv->Value);
+        /* TODO: this function should take a size_t */
+        SOPC_NetworkMessage_Set_Variant_At(message, 0, (uint16_t) i, variant, fieldData);
+    }
+
+    /* Always destroy the created DataValues */
+    for (size_t i = 0; i < nbFields; ++i)
+    {
+        SOPC_DataValue_Clear(&values[i]);
+    }
+    SOPC_Free(values);
+
+    /* Finally send it */
+    if (typeCheckingSuccess)
+    {
+        SOPC_PubSub_SecurityType* security = context->security;
+        if (NULL != security)
+        {
+            security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+            assert(NULL != security->msgNonceRandom); /* TODO: Fail sooner, don't call GetVariables */
+            security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
+            pubSchedulerCtx.sequenceNumber++;
+        }
+        SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+        if (NULL != security)
+        {
+            SOPC_Free(security->msgNonceRandom);
+            security->msgNonceRandom = NULL;
+        }
+
+        context->transport->fctSend(context->transport, buffer);
+        SOPC_Buffer_Delete(buffer);
+        buffer = NULL;
+    }
+
+}
+
 static void* thread_start_publish(void* arg)
 {
     SOPC_UNUSED_ARG(arg);
@@ -364,114 +485,7 @@ static void* thread_start_publish(void* arg)
         MessageCtx* context = MessageCtxArray_FindMostExpired();
         if (SOPC_RealTime_IsExpired(context->next_timeout, now))
         {
-            /* Steps to send a message (TODO: externalize this):
-             * - retrieve the NetworkMessage
-             * - for each DataSetMessage:
-             *   - call GetVariables
-             *   - for each DataSetField:
-             *     - check type
-             *     - encode value
-             * Note that there is a problem because the writer group contains the number of DataSetFields,
-             *  but we use this info for all the DSMs... -> TODO investigate
-             */
-            SOPC_Dataset_NetworkMessage* message = context->message;
-            assert(NULL != message);
-
-            /* TODO: Problem: single DataSetWriter but maybe-multiple DataSetMessages */
-            const SOPC_DataSetWriter* writer = SOPC_PubScheduler_Group_Get_Unique_Writer(context->group);
-
-            size_t ndsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
-            SOPC_ASSERT(1 == ndsm && "Unsupported multi-DSM");
-
-            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
-            uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
-
-            const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
-            assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
-
-            /* TODO: shouldn't this be called for each DSM ? */
-            SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dataset);
-            assert(NULL != values);
-
-            /* Check value-type compatibility and encode */
-            /* TODO: simplify and externalize the type check */
-            bool typeCheckingSuccess = true;
-            for (size_t i = 0; i < nbFields && typeCheckingSuccess; ++i)
-            {
-                /* TODO: this function should take a size_t */
-                SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, (uint16_t) i);
-                assert(NULL != fieldData);
-                SOPC_DataValue* dv = &values[i];
-
-                bool isBad = false;
-                bool isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
-
-                // We also want to consider case the value was valid but provided with Bad status, therefore we
-                // do not consider isNullOrBad in the first condition
-                if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
-                {
-                    // If status is bad and value has not status type, set value as a Bad status code
-                    // (see spec part 14: Table 16: DataSetMessage field representation options)
-                    if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
-                    {
-                        SOPC_Variant_Clear(&dv->Value);
-                        dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
-                        dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-                        dv->Value.Value.Status = dv->Status;
-                    }
-                }
-                else if (!isCompatible || isBad)
-                {
-                    // If value is Bad whereas the data value status code is not bad, it is considered as an
-                    // error since this is not the type expected for this value from an OpcUa server.
-
-                    if (!isCompatible)
-                    {
-                        SOPC_Logger_TraceError(
-                            SOPC_LOG_MODULE_PUBSUB,
-                            "GetSourceVariables returned values incompatible with the current PubSub configuration");
-                    }
-                    typeCheckingSuccess = false;
-                }
-
-                /* TODO: avoid the creation of a Variant to delete it immediately,
-                 *  or change the behavior of Set_Variant_At because it is its sole use */
-                SOPC_Variant* variant = SOPC_Variant_Create();
-                assert(NULL != variant);
-                SOPC_Variant_Move(variant, &dv->Value);
-                /* TODO: this function should take a size_t */
-                SOPC_NetworkMessage_Set_Variant_At(message, 0, (uint16_t) i, variant, fieldData);
-            }
-
-            /* Always destroy the created DataValues */
-            for (size_t i = 0; i < nbFields; ++i)
-            {
-                SOPC_DataValue_Clear(&values[i]);
-            }
-            SOPC_Free(values);
-
-            /* Finally send it */
-            if (typeCheckingSuccess)
-            {
-                SOPC_PubSub_SecurityType* security = context->security;
-                if (NULL != security)
-                {
-                    security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-                    assert(NULL != security->msgNonceRandom); /* TODO: Fail sooner, don't call GetVariables */
-                    security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
-                    pubSchedulerCtx.sequenceNumber++;
-                }
-                SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
-                if (NULL != security)
-                {
-                    SOPC_Free(security->msgNonceRandom);
-                    security->msgNonceRandom = NULL;
-                }
-
-                context->transport->fctSend(context->transport, buffer);
-                SOPC_Buffer_Delete(buffer);
-                buffer = NULL;
-            }
+            MessageCtx_send_publish_message (context);
 
             /* Re-schedule this message */
             SOPC_RealTime_AddDuration(context->next_timeout, context->publishingInterval);
