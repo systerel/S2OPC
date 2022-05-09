@@ -18,6 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
 from time import sleep
 from shutil import copyfile, move
 import argparse
@@ -690,14 +691,19 @@ def testPubSubDynamicConf():
 
         helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
+    except Exception as e:
+        logger.add_test('Received exception %s'%e, False)
+
     finally:
         # restore default XML file
         if defaultXml2Restore:
             move(DEFAULT_XML_PATH + ".bakup", DEFAULT_XML_PATH)
 
         pubsubserver.disconnect()
+        retcode = -1 if logger.has_failed_tests else 0
         logger.add_test('Not connected to OPCUA Server', not pubsubserver.isConnected())
         logger.finalize_report()
+        sys.exit(retcode)
 
 # test with static configuration : data/config_pubsub_server.xml
 def testPubSubStaticConf():
@@ -790,10 +796,15 @@ def testPubSubStaticConf():
         logger.add_test('Subscriber uint is changed', 1245 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', 9874 == pubsubserver.getValue(NID_SUB_INT))
 
+    except Exception as e:
+        logger.add_test('Received exception %s'%e, False)
+
     finally:
         pubsubserver.disconnect()
         logger.add_test('Not connected to OPCUA Server', not pubsubserver.isConnected())
+        retcode = -1 if logger.has_failed_tests else 0
         logger.finalize_report()
+        sys.exit(retcode)
 
 
 

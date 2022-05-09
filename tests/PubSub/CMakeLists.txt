@@ -59,7 +59,8 @@ if(ENABLE_TESTING)
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap")
   endfunction()
 
-  # Function to add a validatoin test using the pubsub server code
+  # Function to add a validation test using the pubsub server code
+  # Note: no tap-wrap used in this case, as caller is directly calling TapLogger (python script).
   function(s2opc_server_validation_test name)
     set(test_name "validation::${name}")
     if(PUBSUB_STATIC_CONFIG)
@@ -68,7 +69,7 @@ if(ENABLE_TESTING)
       set(test_server_static "")
     endif()
 
-    #Note: use absolute path for scripts to allow ctest to be run from another another path
+    # Note: use absolute path for scripts to allow ctest to be run from another path
     add_test(NAME "${test_name}"
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
@@ -246,8 +247,8 @@ if(ENABLE_TESTING)
            $<TARGET_FILE:udp_multi_sub_test>)
   set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
 
-  if(S2OPC_PUBSUB_ONLY)
-    # it is not possible to use both PubSub and ClientServer libraries
+  if(S2OPC_PUBSUB_ONLY OR S2OPC_CLIENTSERVER_ONLY)
+    # This test requires both PubSub and ClientServer libraries
   else()
     s2opc_server_validation_test("pubsub_server_test.py")
   endif()
