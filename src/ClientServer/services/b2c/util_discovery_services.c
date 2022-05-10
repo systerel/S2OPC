@@ -176,12 +176,13 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
             OpcUa_UserTokenPolicy* destUserTokenPolicy = &newEndPointDescription->UserIdentityTokens[userIdTokenIdx];
             OpcUa_UserTokenPolicy_Initialize(destUserTokenPolicy);
             // Note: ignoring return status since only cases of failure are empty string as source of data
-            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->IssuedTokenType, &srcUserTokenPolicy->IssuedTokenType);
-            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->IssuerEndpointUrl,
-                                          &srcUserTokenPolicy->IssuerEndpointUrl);
-            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->PolicyId, &srcUserTokenPolicy->PolicyId);
-            (void) SOPC_String_AttachFrom(&destUserTokenPolicy->SecurityPolicyUri,
-                                          &srcUserTokenPolicy->SecurityPolicyUri);
+            SOPC_UNUSED_RESULT(
+                SOPC_String_AttachFrom(&destUserTokenPolicy->IssuedTokenType, &srcUserTokenPolicy->IssuedTokenType));
+            SOPC_UNUSED_RESULT(SOPC_String_AttachFrom(&destUserTokenPolicy->IssuerEndpointUrl,
+                                                      &srcUserTokenPolicy->IssuerEndpointUrl));
+            SOPC_UNUSED_RESULT(SOPC_String_AttachFrom(&destUserTokenPolicy->PolicyId, &srcUserTokenPolicy->PolicyId));
+            SOPC_UNUSED_RESULT(SOPC_String_AttachFrom(&destUserTokenPolicy->SecurityPolicyUri,
+                                                      &srcUserTokenPolicy->SecurityPolicyUri));
 
             destUserTokenPolicy->TokenType = srcUserTokenPolicy->TokenType;
         }

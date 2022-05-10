@@ -387,7 +387,7 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     if (allEndpointsClosed)
     {
         // Server is considered stopped when no client connection possible anymore
-        (void) SOPC_ServerInternal_SetStoppedState();
+        SOPC_UNUSED_RESULT(SOPC_ServerInternal_SetStoppedState());
         sopc_server_helper_config.stoppedCb(sopc_server_helper_config.serverStoppedStatus);
     }
 }
@@ -495,7 +495,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
         if (stopServer)
         {
             // Note: if stopping was not requested using StopServer API, set stopping state when force by sig stop
-            (void) SOPC_ServerInternal_SetStoppingState();
+            SOPC_UNUSED_RESULT(SOPC_ServerInternal_SetStoppingState());
         }
 
         // Shutdown phase
