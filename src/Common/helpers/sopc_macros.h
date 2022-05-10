@@ -50,4 +50,7 @@
 // This macro is used to avoid warning about unused argument :
 #define SOPC_UNUSED_ARG(arg) (void) (arg)
 
+// This macro is used to avoid warning about unused return function :
+#define SOPC_UNUSED_RESULT(arg) (void) (arg)
+
 #endif // SOPC_MACROS_H_
