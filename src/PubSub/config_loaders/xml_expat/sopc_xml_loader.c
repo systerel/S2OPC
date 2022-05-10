@@ -132,6 +132,11 @@ struct parse_context_t
 static bool parse(XML_Parser parser, FILE* fd)
 {
     char buf[65365];
+    if (fd == NULL)
+    {
+        LOG_XML_ERROR("Error: no input file provided");
+        return false;
+    }
 
     while (!feof(fd))
     {
