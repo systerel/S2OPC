@@ -18,6 +18,7 @@
  */
 
 #include "p_channel.h"
+#include "sopc_macros.h"
 
 // Deinitialize channel
 void P_CHANNEL_DeInit(tChannel* p)
@@ -83,8 +84,8 @@ eChannelResult P_CHANNEL_Init(tChannel* p,          // Channel workspace
             DEBUG_incrementCpt();
             DEBUG_incrementCpt();
 
-            (void) memset(p->channelData, 0, totalDataSize);
-            (void) memset(p->channelRecord, 0, nbElts * sizeof(uint16_t));
+            SOPC_UNUSED_RESULT(memset(p->channelData, 0, totalDataSize));
+            SOPC_UNUSED_RESULT(memset(p->channelRecord, 0, nbElts * sizeof(uint16_t)));
             p->maxSizeTotalElts = nbElts;
             p->maxSizeTotalData = totalDataSize;
             p->maxSizeDataPerElt = maxEltSize;

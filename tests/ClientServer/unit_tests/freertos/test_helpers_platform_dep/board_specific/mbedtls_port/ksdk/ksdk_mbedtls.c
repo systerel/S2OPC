@@ -14,6 +14,7 @@
 #endif
 
 #include "fsl_common.h"
+#include "sopc_macros.h"
 
 #if defined(FSL_FEATURE_SOC_LTC_COUNT) && (FSL_FEATURE_SOC_LTC_COUNT > 0)
 #include "fsl_ltc.h"
@@ -4218,12 +4219,12 @@ int mbedtls_hardware_poll(void* data, unsigned char* output, size_t len, size_t*
 
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {
-    (void) Mutex_Initialization(pMutex);
+    SOPC_UNUSED_RESULT(Mutex_Initialization(pMutex));
 }
 
 static void mutex_free(mbedtls_threading_mutex_t* pMutex)
 {
-    (void) Mutex_Clear(pMutex);
+    SOPC_UNUSED_RESULT(Mutex_Clear(pMutex));
 }
 
 static int mutex_lock(mbedtls_threading_mutex_t* pMutex)

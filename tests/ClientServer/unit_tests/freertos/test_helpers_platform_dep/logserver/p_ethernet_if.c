@@ -85,7 +85,7 @@ eEthernetIfResult P_ETHERNET_IF_GetIp(ip_addr_t* pAdressInfo)
     if (xSemaphoreTake(gEthernetReady, 0) == pdPASS)
     {
         xSemaphoreGive(gEthernetReady);
-        (void) memcpy(pAdressInfo, &gnetif.ip_addr, sizeof(ip_addr_t));
+        SOPC_UNUSED_RESULT(memcpy(pAdressInfo, &gnetif.ip_addr, sizeof(ip_addr_t)));
         return ETHERNET_IF_RESULT_OK;
     }
     return ETHERNET_IF_RESULT_NOK;

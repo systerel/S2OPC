@@ -18,6 +18,7 @@
  */
 
 #include "p_generic_socket_srv.h"
+#include "sopc_macros.h"
 
 // *** Workspaces definitions ***
 
@@ -690,7 +691,7 @@ static void ClientStopThenDestroy(tLogClientWks** p)
         P_CHANNEL_DeInit(&(*p)->channelInput);
 
         // Workspace destruction
-        (void) memset(*p, 0, sizeof(tLogClientWks));
+        SOPC_UNUSED_RESULT(memset(*p, 0, sizeof(tLogClientWks)));
         vPortFree(*p);
         *p = NULL;
         DEBUG_decrementCpt();
@@ -1018,7 +1019,7 @@ static void cbTaskSocketServerMonitor(void* pParameters)
                             resLwip = lwip_setsockopt(p->socketTCP, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
                             if (resLwip == 0)
                             {
-                                (void) memset(&sin, 0, sizeof(struct sockaddr_in));
+                                SOPC_UNUSED_RESULT(memset(&sin, 0, sizeof(struct sockaddr_in)));
                                 sin.sin_addr.s_addr = htonl(INADDR_ANY);
                                 sin.sin_family = AF_INET;
                                 sin.sin_port = htons(p->port);
@@ -1421,7 +1422,7 @@ void P_LOG_SRV_StopAndDestroy(tLogSrvWks** p)
         }
 
         P_UTILS_LIST_DeInitMT(&(*p)->clientList);
-        (void) memset(*p, 0, sizeof(tLogSrvWks));
+        SOPC_UNUSED_RESULT(memset(*p, 0, sizeof(tLogSrvWks)));
         vPortFree(*p);
         *p = NULL;
         DEBUG_decrementCpt();

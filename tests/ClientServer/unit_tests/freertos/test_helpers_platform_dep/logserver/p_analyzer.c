@@ -18,6 +18,7 @@
  */
 
 #include "p_analyzer.h"
+#include "sopc_macros.h"
 
 typedef enum E_ANALYZER_EVENT
 {
@@ -269,7 +270,7 @@ eAnalyzerResult UpdateAnalyzerTmo(tAnalyzerWks* pCtx)
         return ANALYZER_RESULT_NOK;
     }
 
-    (void) tabAnalyzerFsm[pCtx->status][ANALYZER_EVENT_TIMEOUT](pCtx, ANALYZER_EVENT_TIMEOUT, 0);
+    SOPC_UNUSED_RESULT(tabAnalyzerFsm[pCtx->status][ANALYZER_EVENT_TIMEOUT](pCtx, ANALYZER_EVENT_TIMEOUT, 0));
 
     return result;
 }
