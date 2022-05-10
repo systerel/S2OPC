@@ -913,7 +913,7 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
 
     if (NULL == request || NULL == requestContext)
     {
-        (void) SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
+        SOPC_UNUSED_RESULT(SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &request));
         SOPC_Free(requestContext);
 
         return NULL;
