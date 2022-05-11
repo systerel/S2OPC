@@ -48,7 +48,10 @@ static bool Network_Check_ReceivedSecurityMode(SOPC_SecurityMode_Type mode, bool
  * Warning: these constant cannot be changed without added new code
  */
 
+const bool DATASET_LL_VERSION_FLAGS_ENABLED = true;
+const bool DATASET_LL_FLAGS1_ENABLED = true;
 const bool DATASET_LL_PUBLISHER_ID_ENABLED = true;
+const bool DATASET_LL_GROUP_FLAGS_ENABLED = true;
 const bool DATASET_LL_GROUP_HEADER_ENABLED = true;
 const bool DATASET_LL_PAYLOAD_HEADER_ENABLED = true;
 const bool DATASET_LL_DATASET_CLASSID_ENABLED = false;
@@ -123,6 +126,26 @@ const uint8_t C_NETWORK_MESSAGE_COMP_BIT_7 = 255 - 128;
  * bit is the position of the bit. Type is SOPC_Byte
  */
 #define Network_Message_Get_Bool_Bit(byte, bit) ((byte & (C_NETWORK_MESSAGE_BIT_##bit)) ? true : false)
+
+static inline SOPC_ReturnStatus valid_bool_to_status(const bool b)
+{
+    return (b ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
+}
+
+static inline void check_status_and_set_default(const SOPC_ReturnStatus status,
+                                                const SOPC_UADP_NetworkMessage_Error_Code code)
+{
+    if (SOPC_STATUS_OK != status)
+    {
+        network_Error_Code = code;
+    }
+}
+
+static inline void set_status_default(SOPC_ReturnStatus* const status, const SOPC_UADP_NetworkMessage_Error_Code code)
+{
+    *status = SOPC_STATUS_NOK;
+    network_Error_Code = code;
+}
 
 /**
  * Private
@@ -344,12 +367,16 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    SOPC_Buffer* buffer_payload = NULL;
+    uint32_t* dsmSizeBufferPos = NULL;
     uint8_t byte = 0;
     bool flags1_enabled;
     // security flags is enabled
     bool securityEnabled = (NULL != security);
     bool signedEnabled = false;
     bool encryptedEnabled = false;
+    const uint8_t dsm_count = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
+
     if (NULL != security)
     {
         signedEnabled =
@@ -370,14 +397,9 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     flags1_enabled = Network_Layer_Is_Flags1_Enabled(nm, securityEnabled);
     Network_Message_Set_Bool_Bit(&byte, 7, flags1_enabled);
     status = SOPC_Buffer_Write(buffer, &byte, 1);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Buffer_Delete(buffer);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-        return NULL;
-    }
+    check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
 
-    if (flags1_enabled)
+    if (flags1_enabled && SOPC_STATUS_OK == status)
     {
         // Bit range 0-2: PublisherId Type
         byte = (uint8_t) SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->type;
@@ -388,26 +410,16 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         Network_Message_Set_Bool_Bit(&byte, 7, DATASET_LL_EXTENDED_FLAGS2_ENABLED);
 
         status = SOPC_Buffer_Write(buffer, &byte, 1);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
     }
 
-    if (DATASET_LL_PUBLISHER_ID_ENABLED)
+    if (DATASET_LL_PUBLISHER_ID_ENABLED && SOPC_STATUS_OK == status)
     {
         status = Network_Layer_PublisherId_Write(buffer, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm));
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_PubId_Failed;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_PubId_Failed);
     }
 
-    if (DATASET_LL_DATASET_CLASSID_ENABLED)
+    if (DATASET_LL_DATASET_CLASSID_ENABLED && SOPC_STATUS_OK == status)
     {
         // Note :  DATASET_LL_DATASET_CLASSID_ENABLED is disabled in this version.
         // Otherwise, DataSetClassId should be encoded here
@@ -415,75 +427,54 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     }
 
     // GroupHeader
-    //  - set reserved bits to 0
-    byte = 0;
-    //  - WriterGroupId enabled
-    Network_Message_Set_Bool_Bit(&byte, 0, DATASET_LL_WRITER_GROUP_ID_ENABLED);
-    //  - WriterGroupVersion enabled
-    Network_Message_Set_Bool_Bit(&byte, 1, DATASET_LL_WRITER_GROUP_VERSION_ENABLED);
-    //  - NetworkMessageNumber enabled
-    Network_Message_Set_Bool_Bit(&byte, 2, DATASET_LL_NETWORK_MESSAGE_NUMBER_ENABLED);
-    //  - SequenceNumber enabled
-    Network_Message_Set_Bool_Bit(&byte, 3, DATASET_LL_SEQUENCE_NUMBER_ENABLED);
-    status = SOPC_Buffer_Write(buffer, &byte, 1);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer_Delete(buffer);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-        return NULL;
+        //  - set reserved bits to 0
+        byte = 0;
+        //  - WriterGroupId enabled
+        Network_Message_Set_Bool_Bit(&byte, 0, DATASET_LL_WRITER_GROUP_ID_ENABLED);
+        //  - WriterGroupVersion enabled
+        Network_Message_Set_Bool_Bit(&byte, 1, DATASET_LL_WRITER_GROUP_VERSION_ENABLED);
+        //  - NetworkMessageNumber enabled
+        Network_Message_Set_Bool_Bit(&byte, 2, DATASET_LL_NETWORK_MESSAGE_NUMBER_ENABLED);
+        //  - SequenceNumber enabled
+        Network_Message_Set_Bool_Bit(&byte, 3, DATASET_LL_SEQUENCE_NUMBER_ENABLED);
+        status = SOPC_Buffer_Write(buffer, &byte, 1);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
     }
 
-    if (DATASET_LL_WRITER_GROUP_ID_ENABLED)
+    if (DATASET_LL_WRITER_GROUP_ID_ENABLED && SOPC_STATUS_OK == status)
     {
         uint16_t byte_2 = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
         status = SOPC_UInt16_Write(&byte_2, buffer, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_GroupId_Failed;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_GroupId_Failed);
     }
 
-    if (DATASET_LL_WRITER_GROUP_VERSION_ENABLED)
+    if (DATASET_LL_WRITER_GROUP_VERSION_ENABLED && SOPC_STATUS_OK == status)
     {
         uint32_t version = SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm);
         status = SOPC_UInt32_Write(&version, buffer, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_GroupVersion_Failed;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_GroupVersion_Failed);
     }
 
     // payload header
-    uint8_t dsm_count = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
-
-    status = SOPC_Buffer_Write(buffer, (uint8_t*) &dsm_count, 1);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer_Delete(buffer);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-        return NULL;
-    }
+        status = SOPC_Buffer_Write(buffer, (const uint8_t*) &dsm_count, 1);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
 
-    for (int i = 0; i < dsm_count; i++)
-    {
-        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-        // - writer id
-        uint16_t byte_2 = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
-        status = SOPC_UInt16_Write(&byte_2, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        for (int i = 0; i < dsm_count && SOPC_STATUS_OK == status; i++)
         {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_WriterId_Failed;
-            return NULL;
+            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+            // - writer id
+            uint16_t byte_2 = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+            status = SOPC_UInt16_Write(&byte_2, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_WriterId_Failed);
         }
     }
 
     // security header
-    if (securityEnabled)
+    if (securityEnabled && SOPC_STATUS_OK == status)
     {
         byte = 0;
         // - NetworkMessage Signed
@@ -495,107 +486,87 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         // - Force key reset
         Network_Message_Set_Bool_Bit(&byte, 3, DATASET_LL_SECURITY_KEY_RESET_ENABLED);
         status = SOPC_Buffer_Write(buffer, &byte, 1);
-        if (SOPC_STATUS_OK != status)
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-            return NULL;
+            status = SOPC_UInt32_Write(&security->groupKeys->tokenId, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed);
         }
 
-        status = SOPC_UInt32_Write(&security->groupKeys->tokenId, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed;
-            return NULL;
+            uint32_t nonceRandomLength;
+            status = SOPC_CryptoProvider_PubSubGetLength_MessageRandom(security->provider, &nonceRandomLength);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+
+            assert(4 == nonceRandomLength &&            // Size is fixed to 4 bytes. See OPCUA Spec Part 14 - Table 75
+                   nonceRandomLength + 4 <= UINT8_MAX); // check before cast to uint8
+
+            // Random bytes + SequenceNumber 32 bits
+            if (SOPC_STATUS_OK == status)
+            {
+                uint8_t nonceLength = (uint8_t)(nonceRandomLength + 4);
+                status = SOPC_Byte_Write(&nonceLength, buffer, 0);
+                check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_Write(buffer, security->msgNonceRandom, nonceRandomLength);
+                check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+            }
         }
 
-        uint32_t nonceRandomLength;
-        status = SOPC_CryptoProvider_PubSubGetLength_MessageRandom(security->provider, &nonceRandomLength);
-        assert(4 == nonceRandomLength); // Size is fixed to 4 bytes. See OPCUA Spec Part 14 - Table 75
-        if (SOPC_STATUS_OK != status || nonceRandomLength + 4 > UINT8_MAX) // check before cast to uint8
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed;
-            return NULL;
-        }
-        // Random bytes + SequenceNumber 32 bits
-        uint8_t nonceLength = (uint8_t)(nonceRandomLength + 4);
-        status = SOPC_Byte_Write(&nonceLength, buffer, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-            return NULL;
+            status = SOPC_UInt32_Write(&security->sequenceNumber, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
         }
 
-        status = SOPC_Buffer_Write(buffer, security->msgNonceRandom, nonceRandomLength);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed;
-            return NULL;
-        }
-        status = SOPC_UInt32_Write(&security->sequenceNumber, buffer, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed;
-            return NULL;
-        }
-
-        if (DATASET_LL_SECURITY_FOOTER_ENABLED)
+        if (DATASET_LL_SECURITY_FOOTER_ENABLED && SOPC_STATUS_OK == status)
         {
             // Security Footer is not used with AES-CTR
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_SecuFooter_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_SecuFooter_Failed);
         }
     }
 
     // payload: write Payload in an intermediate buffer.
     // and encrypt if security is enabled
-    SOPC_Buffer* buffer_payload = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
-    if (NULL == buffer_payload)
+
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer_Delete(buffer);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Alloc_Failed;
-        return NULL;
+        buffer_payload = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+        if (NULL == buffer_payload)
+        {
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_Alloc_Failed);
+        }
     }
 
-    uint32_t* dsmSizeBufferPos = NULL;
-    if (DATASET_LL_PAYLOAD_HEADER_ENABLED && dsm_count > 1)
+    if (DATASET_LL_PAYLOAD_HEADER_ENABLED && dsm_count > 1 && SOPC_STATUS_OK == status)
     {
         dsmSizeBufferPos = SOPC_Calloc(dsm_count, sizeof(*dsmSizeBufferPos));
         if (NULL == dsmSizeBufferPos)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Alloc_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_Alloc_Failed);
         }
 
-        static const uint16_t zero = 0;
+        const uint16_t zero = 0;
+
         // DataSet Message size(2 bytes)
         // Sizes are unknown yet. Write Zeros, and store current position to write it later
         for (int i = 0; SOPC_STATUS_OK == status && i < dsm_count; i++)
         {
             status = SOPC_Buffer_GetPosition(buffer_payload, &dsmSizeBufferPos[i]);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed);
+
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_UInt16_Write(&zero, buffer_payload, 0);
+                check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed);
             }
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            SOPC_Free(dsmSizeBufferPos);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed;
-            return NULL;
         }
     }
 
-    for (int i = 0; i < dsm_count; i++)
+    for (int i = 0; i < dsm_count && SOPC_STATUS_OK == status; i++)
     {
         // dsmStartBufferPos is set with buffer position before DSM content
         uint32_t dsmStartBufferPos;
@@ -603,6 +574,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         assert(SOPC_STATUS_OK == status);
 
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+        assert(NULL != dsm);
 
         // DataSetMessage (1 byte)
 
@@ -622,26 +594,15 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         //   - extended flags 2 is disabled
         Network_Message_Set_Bool_Bit(&byte, 7, DATASET_LL_DSM_FLAGS2_ENABLED);
         status = SOPC_Buffer_Write(buffer_payload, (uint8_t*) &byte, 1);
-        if (SOPC_STATUS_OK != status)
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
+
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Buffer_Delete(buffer);
-            SOPC_Buffer_Delete(buffer_payload);
-            SOPC_Free(dsmSizeBufferPos);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed;
-            return NULL;
+            status = Network_DataSetFields_To_UADP(buffer_payload, dsm);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed);
         }
 
-        status = Network_DataSetFields_To_UADP(buffer_payload, dsm);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Buffer_Delete(buffer);
-            SOPC_Buffer_Delete(buffer_payload);
-            SOPC_Free(dsmSizeBufferPos);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed;
-            return NULL;
-        }
-
-        if (NULL != dsmSizeBufferPos)
+        if (NULL != dsmSizeBufferPos && SOPC_STATUS_OK == status)
         {
             // Write the DSM size at the payload start
             uint32_t dsmEndBufferPos;
@@ -656,11 +617,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
             if (!writeOk)
             {
-                SOPC_Buffer_Delete(buffer);
-                SOPC_Buffer_Delete(buffer_payload);
-                SOPC_Free(dsmSizeBufferPos);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed;
-                return NULL;
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed);
             }
         }
     }
@@ -671,49 +628,229 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     }
 
     // Encrypt the Payload if encrypt is enabled
-    if (encryptedEnabled)
+    if (encryptedEnabled && SOPC_STATUS_OK == status)
     {
         SOPC_Buffer* payload_encrypted = SOPC_PubSub_Security_Encrypt(security, buffer_payload);
         if (NULL == payload_encrypted)
         {
-            SOPC_Buffer_Delete(buffer);
-            SOPC_Buffer_Delete(buffer_payload);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_EncryptPaylod_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_EncryptPaylod_Failed);
         }
-        // replace payload by the encrypted buffer
-        SOPC_Buffer_Delete(buffer_payload);
-        buffer_payload = payload_encrypted;
+        else
+        {
+            // replace payload by the encrypted buffer
+            SOPC_Buffer_Delete(buffer_payload);
+            buffer_payload = payload_encrypted;
+        }
     }
 
     // Write the Payload in the NetworkMessage Buffer
-    SOPC_Buffer_SetPosition(buffer_payload, 0);
-    int64_t nbread = SOPC_Buffer_ReadFrom(buffer, buffer_payload, buffer_payload->length);
-    status = SOPC_Buffer_SetPosition(buffer, buffer->length);
-    if (buffer_payload->length != nbread || SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer_Delete(buffer);
-        SOPC_Buffer_Delete(buffer_payload);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_PayloadFlush_Failed;
-        return NULL;
-    }
-    SOPC_Buffer_Delete(buffer_payload);
-    /* end payload */
+        SOPC_Buffer_SetPosition(buffer_payload, 0);
+        int64_t nbread = SOPC_Buffer_ReadFrom(buffer, buffer_payload, buffer_payload->length);
+        status = SOPC_Buffer_SetPosition(buffer, buffer->length);
 
-    // Signature
-    if (signedEnabled)
-    {
-        status = SOPC_PubSub_Security_Sign(security, buffer);
-        if (SOPC_STATUS_OK != status)
+        if (buffer_payload->length != nbread || SOPC_STATUS_OK != status)
         {
-            SOPC_Buffer_Delete(buffer);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Write_Sign_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Write_PayloadFlush_Failed);
         }
     }
 
-    SOPC_Buffer_SetPosition(buffer, 0);
+    if (NULL != buffer_payload)
+    {
+        SOPC_Buffer_Delete(buffer_payload);
+    }
+    /* end payload */
+
+    // Signature
+    if (signedEnabled && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PubSub_Security_Sign(security, buffer);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Sign_Failed);
+    }
+
+    if (NULL != buffer)
+    {
+        SOPC_Buffer_SetPosition(buffer, 0);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Buffer_Delete(buffer);
+        buffer = NULL;
+    }
+
     return buffer;
+}
+
+/**
+ * /brief Encode the payload of a datasetmessage
+ * /param dsm The DataSetMessage to decode
+ * /param buffer_payload The Payload
+ * /param dsmSize The expected size (bytes) of the decoded payload from the DataSetMessage.
+ *  Set to 0 if unknown
+ * /return SOPC_STATUS_OK in case of success:
+ *    - dsmSize matches actual decoded size, or dsmSize = 0
+ *    - decoding stream is consistent (and payload large enough).
+ *    Otherwise, network_Error_Code is set to a specific error code and an error code is returned.
+ */
+static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* dsm,
+                                               SOPC_Buffer* buffer_payload,
+                                               uint16_t dsmSize)
+{
+    assert(NULL != buffer_payload);
+    assert(NULL != dsm);
+    // Note :  dsmSizes may be NULL
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Byte data;
+    SOPC_Boolean seq_nb_enabled = false;
+    SOPC_Boolean status_enabled = false;
+    SOPC_Boolean maj_version_enabled = false;
+    SOPC_Boolean min_version_enabled = false;
+    SOPC_Boolean dsm_flags2 = false;
+    SOPC_Boolean timestamp_enabled = false;
+    SOPC_Boolean picoseconds_enabled = false;
+
+    uint32_t dsmStartBufferPos;
+    status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
+    assert(SOPC_STATUS_OK == status);
+    /* DataSetMessages Header */
+
+    /** DataSetFlags1 **/
+    if (DATASET_LL_FLAGS1_ENABLED)
+    {
+        status = SOPC_Byte_Read(&data, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = valid_bool_to_status(Network_Message_Get_Bool_Bit(data, 0));
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_InvalidBit);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            uint8_t field_encoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
+            if (DATASET_LL_DSM_ENCODING_TYPE != field_encoding)
+            {
+                // not managed yet
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType);
+            }
+            else
+            {
+                seq_nb_enabled = Network_Message_Get_Bool_Bit(data, 3);
+                status_enabled = Network_Message_Get_Bool_Bit(data, 4);
+                maj_version_enabled = Network_Message_Get_Bool_Bit(data, 5);
+                min_version_enabled = Network_Message_Get_Bool_Bit(data, 6);
+                dsm_flags2 = Network_Message_Get_Bool_Bit(data, 7);
+                timestamp_enabled = false;
+                picoseconds_enabled = false;
+            }
+        }
+    }
+
+    /** DataSetFlags2 **/
+    if (dsm_flags2 && SOPC_STATUS_OK == status)
+    {
+        // Bit range 0-3: UADP DataSetMessage type
+        // Bit 4: Timestamp enabled
+        // Bit 5: PicoSeconds enabled
+        status = SOPC_Byte_Read(&data, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            uint8_t dataSmessage_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
+            if (0 != dataSmessage_type)
+            {
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmType);
+            }
+            else
+            {
+                timestamp_enabled = Network_Message_Get_Bool_Bit(data, 4);
+                picoseconds_enabled = Network_Message_Get_Bool_Bit(data, 5);
+            }
+        }
+    }
+
+    /** DataSetMessage SequenceNumber **/
+    if (seq_nb_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint16_t notUsed;
+        status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum);
+    }
+
+    /** Timestamp **/
+    if (timestamp_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint64_t timestamp;
+        status = SOPC_UInt64_Read(&timestamp, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp);
+    }
+
+    /** PicoSeconds **/
+    if (picoseconds_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint16_t notUsed;
+        status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmPicoseconds);
+    }
+
+    /** Status **/
+    if (status_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint16_t notUsed;
+        status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Short_Failed);
+    }
+
+    /** ConfigurationVersion MajorVersion **/
+    if (maj_version_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint32_t not_used;
+        status = SOPC_UInt32_Read(&not_used, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Int_Failed);
+    }
+
+    /** ConfigurationVersion MinorVersion **/
+    if (min_version_enabled && SOPC_STATUS_OK == status)
+    {
+        // not managed yet
+        uint32_t not_used;
+        status = SOPC_UInt32_Read(&not_used, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Int_Failed);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Data Key Frame DataSetMessage Data */
+        status = UADP_To_DataSetFields(buffer_payload, dsm);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed);
+    }
+
+    if (0 != dsmSize && SOPC_STATUS_OK == status)
+    {
+        uint32_t dsmEndBufferPos;
+        status = SOPC_Buffer_GetPosition(buffer_payload, &dsmEndBufferPos);
+        assert(SOPC_STATUS_OK == status);
+
+        const uint16_t dsmBufferSize = (uint16_t)(dsmEndBufferPos - dsmStartBufferPos);
+
+        if (dsmBufferSize != dsmSize)
+        {
+            // Mismatching DSM buffer size.
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed);
+        }
+    }
+
+    return status;
 }
 
 SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
@@ -745,23 +882,22 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     //  Bit 5: GroupHeader enabled
     //  Bit 6: PayloadHeader enabled
     //  Bit 7: ExtendedFlags1 enabled
+    if (DATASET_LL_VERSION_FLAGS_ENABLED)
     {
         SOPC_Byte data;
         SOPC_Byte version;
         status = SOPC_Byte_Read(&data, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
+            version = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
+            SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, version);
+            conf->PublisherIdFlag = Network_Message_Get_Bool_Bit(data, 4);
+            conf->GroupHeaderFlag = Network_Message_Get_Bool_Bit(data, 5);
+            conf->PayloadHeaderFlag = Network_Message_Get_Bool_Bit(data, 6);
+            flags1_enabled = Network_Message_Get_Bool_Bit(data, 7);
         }
-        version = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
-        SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, version);
-        conf->PublisherIdFlag = Network_Message_Get_Bool_Bit(data, 4);
-        conf->GroupHeaderFlag = Network_Message_Get_Bool_Bit(data, 5);
-        conf->PayloadHeaderFlag = Network_Message_Get_Bool_Bit(data, 6);
-        flags1_enabled = Network_Message_Get_Bool_Bit(data, 7);
     }
 
     // Bit range 0-2: PublisherId Type
@@ -770,31 +906,26 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     // Bit 5: Timestamp enabled
     // Bit 6: PicoSeconds enabled
     // Bit 7: ExtendedFlags2 enabled
-    if (flags1_enabled)
+    if (flags1_enabled && SOPC_STATUS_OK == status)
     {
         SOPC_Byte data;
         status = SOPC_Byte_Read(&data, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
-        }
-        pub_id_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_3 - 1);
-        // other flags are not managed
-        conf->DataSetClassIdFlag = Network_Message_Get_Bool_Bit(data, 3);
-        conf->SecurityFlag = Network_Message_Get_Bool_Bit(data, 4);
-        conf->TimestampFlag = Network_Message_Get_Bool_Bit(data, 5);
-        conf->PicoSecondsFlag = Network_Message_Get_Bool_Bit(data, 6);
-        flags2_enabled = Network_Message_Get_Bool_Bit(data, 7);
-        if (conf->DataSetClassIdFlag || conf->TimestampFlag || conf->PicoSecondsFlag || flags2_enabled)
-        {
-            // not managed yet
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1;
-            return NULL;
+            pub_id_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_3 - 1);
+            // other flags are not managed
+            conf->DataSetClassIdFlag = Network_Message_Get_Bool_Bit(data, 3);
+            conf->SecurityFlag = Network_Message_Get_Bool_Bit(data, 4);
+            conf->TimestampFlag = Network_Message_Get_Bool_Bit(data, 5);
+            conf->PicoSecondsFlag = Network_Message_Get_Bool_Bit(data, 6);
+            flags2_enabled = Network_Message_Get_Bool_Bit(data, 7);
+            if (conf->DataSetClassIdFlag || conf->TimestampFlag || conf->PicoSecondsFlag || flags2_enabled)
+            {
+                // not managed yet
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1);
+            }
         }
     }
     else
@@ -813,29 +944,20 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     // Others: not used
     conf->PromotedFieldsFlag = false;
 
-    if (conf->PublisherIdFlag)
+    if (conf->PublisherIdFlag && SOPC_STATUS_OK == status)
     {
         status = Network_Layer_PublisherId_Read(buffer, pub_id_type, nm);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType);
     }
 
-    if (conf->DataSetClassIdFlag)
+    if (conf->DataSetClassIdFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
-        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-        SOPC_Free(uadp_nm);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId;
-        return NULL;
+        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId);
     }
 
     // Group Header
-    if (conf->GroupHeaderFlag)
+    if (conf->GroupHeaderFlag && SOPC_STATUS_OK == status)
     {
         // Bit 0: WriterGroupId enabled
         // Bit 1: GroupVersion enabled
@@ -845,256 +967,208 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         {
             SOPC_Byte data;
             status = SOPC_Byte_Read(&data, buffer, 0);
-            if (SOPC_STATUS_OK != status)
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+            if (SOPC_STATUS_OK == status)
             {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-                return NULL;
+                conf->GroupIdFlag = Network_Message_Get_Bool_Bit(data, 0);
+                conf->GroupVersionFlag = Network_Message_Get_Bool_Bit(data, 1);
+                conf->NetworkMessageNumberFlag = Network_Message_Get_Bool_Bit(data, 2);
+                conf->SequenceNumberFlag = Network_Message_Get_Bool_Bit(data, 3);
             }
-            conf->GroupIdFlag = Network_Message_Get_Bool_Bit(data, 0);
-            conf->GroupVersionFlag = Network_Message_Get_Bool_Bit(data, 1);
-            conf->NetworkMessageNumberFlag = Network_Message_Get_Bool_Bit(data, 2);
-            conf->SequenceNumberFlag = Network_Message_Get_Bool_Bit(data, 3);
         }
 
-        if (conf->GroupIdFlag)
+        if (conf->GroupIdFlag && SOPC_STATUS_OK == status)
         {
             status = SOPC_UInt16_Read(&group_id, buffer, 0);
-            if (SOPC_STATUS_OK != status)
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Short_Failed);
+
+            if (SOPC_STATUS_OK == status)
             {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Short_Failed;
-                return NULL;
+                SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, group_id);
             }
-            SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, group_id);
         }
 
-        if (conf->GroupVersionFlag)
+        if (conf->GroupVersionFlag && SOPC_STATUS_OK == status)
         {
             uint32_t group_version;
             status = SOPC_UInt32_Read(&group_version, buffer, 0);
-            if (SOPC_STATUS_OK != status)
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Int_Failed);
+
+            if (SOPC_STATUS_OK == status)
             {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Int_Failed;
-                return NULL;
+                SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, group_version);
             }
-            SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, group_version);
         }
-        if (conf->NetworkMessageNumberFlag)
+
+        if (conf->NetworkMessageNumberFlag && SOPC_STATUS_OK == status)
         {
             // not managed yet
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum);
         }
-        if (conf->SequenceNumberFlag)
+
+        if (conf->SequenceNumberFlag && SOPC_STATUS_OK == status)
         {
             // not managed yet
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_SeqNum;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_SeqNum);
         }
     }
 
     // Payload Header
     // Only DataSetMessage is managed
-    if (conf->PayloadHeaderFlag)
+    if (conf->PayloadHeaderFlag && SOPC_STATUS_OK == status)
     {
         status = SOPC_Byte_Read(&msg_count, buffer, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
-        }
-
-        bool allocStatus = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, msg_count);
-        if (!allocStatus)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed;
-            return NULL;
-        }
-        for (int i = 0; i < msg_count; i++)
-        {
-            SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-            uint16_t writer_id;
-            status = SOPC_UInt16_Read(&writer_id, buffer, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Short_Failed;
-                return NULL;
-            }
-            SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
     }
-    else
+    else if (SOPC_STATUS_OK == status)
     {
-        // If there is no Payload header, NetworkMessage contains one DataSetMessage
-
         msg_count = 1;
+    }
 
-        bool allocStatus = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, 1);
-        if (!allocStatus)
+    if (SOPC_STATUS_OK == status)
+    {
+        status = valid_bool_to_status(SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, msg_count));
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed);
+    }
+
+    for (int i = 0; i < msg_count && SOPC_STATUS_OK == status; i++)
+    {
+        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+        uint16_t writer_id;
+        status = SOPC_UInt16_Read(&writer_id, buffer, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Short_Failed);
+
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed;
-            return NULL;
+            SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
         }
     }
 
     // Timestamp
-    if (conf->TimestampFlag)
+    if (conf->TimestampFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
-        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-        SOPC_Free(uadp_nm);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_Timestamp;
-        return NULL;
+        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Timestamp);
     }
 
     // Picoseconds
-    if (conf->PicoSecondsFlag)
+    if (conf->PicoSecondsFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
-        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-        SOPC_Free(uadp_nm);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_Picosceonds;
-        return NULL;
+        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Picosceonds);
     }
 
-    // Picoseconds
-    if (conf->PromotedFieldsFlag)
+    // Promoted fields
+    if (conf->PromotedFieldsFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
-        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-        SOPC_Free(uadp_nm);
-        network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_PromotedFields;
-        return NULL;
+        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_PromotedFields);
     }
 
     // Security Header
-    if (conf->SecurityFlag)
+    if (conf->SecurityFlag && SOPC_STATUS_OK == status)
     {
+        uint8_t data;
+        uint32_t securityTokenId;
+        uint8_t securityNonceLength;
+        uint8_t securityMessageNonce[4];
+        uint32_t sequenceNumber;
+
         if (NULL == getSecurity_Func || 0 == group_id || !conf->PublisherIdFlag)
         {
             // Security information cannot be retrieved. The message is not processed
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Security_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_Security_Failed);
         }
-
-        uint8_t data;
-        status = SOPC_Byte_Read(&data, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        else
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
+            status = SOPC_Byte_Read(&data, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
         }
 
-        securitySignedEnabled = Network_Message_Get_Bool_Bit(data, 0);
-        securityEncryptedEnabled = Network_Message_Get_Bool_Bit(data, 1);
-        securityFooterEnabled = Network_Message_Get_Bool_Bit(data, 2);
-        securityResetEnabled = Network_Message_Get_Bool_Bit(data, 3);
+        if (SOPC_STATUS_OK == status)
+        {
+            securitySignedEnabled = Network_Message_Get_Bool_Bit(data, 0);
+            securityEncryptedEnabled = Network_Message_Get_Bool_Bit(data, 1);
+            securityFooterEnabled = Network_Message_Get_Bool_Bit(data, 2);
+            securityResetEnabled = Network_Message_Get_Bool_Bit(data, 3);
+        }
 
-        if (securityFooterEnabled || securityResetEnabled)
+        if ((securityFooterEnabled || securityResetEnabled) && SOPC_STATUS_OK == status)
         {
             // security footer not used and reset not managed.
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_SecurityFooterReset;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_SecurityFooterReset);
         }
 
-        uint32_t securityTokenId;
-        status = SOPC_UInt32_Read(&securityTokenId, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Int_Failed;
-            return NULL;
+            status = SOPC_UInt32_Read(&securityTokenId, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Int_Failed);
         }
 
-        /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
-        security = getSecurity_Func(
-            securityTokenId, Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)),
-            group_id);
-        // Checked the security configuration of subscriber
-        if (NULL == security ||
-            !Network_Check_ReceivedSecurityMode(security->mode, securitySignedEnabled, securityEncryptedEnabled))
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed;
-            return NULL;
+            /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
+            security = getSecurity_Func(
+                securityTokenId, Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)),
+                group_id);
+            // Checked the security configuration of subscriber
+            if (NULL == security ||
+                !Network_Check_ReceivedSecurityMode(security->mode, securitySignedEnabled, securityEncryptedEnabled))
+            {
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed);
+            }
         }
-        assert(securityTokenId == security->groupKeys->tokenId);
 
-        // Check signature before decoding
-        if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed;
-            return NULL;
+            assert(securityTokenId == security->groupKeys->tokenId);
+
+            // Check signature before decoding
+            if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
+            {
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed);
+            }
         }
 
-        uint8_t securityNonceLength;
-        status = SOPC_Byte_Read(&securityNonceLength, buffer, 0);
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
+            status = SOPC_Byte_Read(&securityNonceLength, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
         }
 
-        if (securityNonceLength != 8)
+        if (SOPC_STATUS_OK == status)
         {
-            // See Spec OPC UA Part 14 - Table 76
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecurityNonce_Failed;
-            return NULL;
+            if (securityNonceLength != 8)
+            {
+                // See Spec OPC UA Part 14 - Table 76
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecurityNonce_Failed);
+            }
         }
 
-        uint8_t securityMessageNonce[4];
-        status = SOPC_Buffer_Read(securityMessageNonce, buffer, 4);
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-            return NULL;
+            status = SOPC_Buffer_Read(securityMessageNonce, buffer, 4);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
         }
 
-        // Get sequence number and check it is greater than last one received for the same (TokenId, PublisherId)
-        uint32_t sequenceNumber;
-        status = SOPC_UInt32_Read(&sequenceNumber, buffer, 0);
-        if (SOPC_STATUS_OK != status ||
+        if (SOPC_STATUS_OK == status)
+        {
+            // Get sequence number and check it is greater than last one received for the same (TokenId, PublisherId)
+            status = SOPC_UInt32_Read(&sequenceNumber, buffer, 0);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed);
+        }
+
+        if (SOPC_STATUS_OK == status &&
             !Network_Layer_Is_Sequence_Number_Newer(sequenceNumber, security->sequenceNumber))
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed;
-            return NULL;
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed);
         }
-        security->sequenceNumber = sequenceNumber;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            security->sequenceNumber = sequenceNumber;
+        }
 
         // Note: security footer not used for now
         // if (securityFooterEnabled)
@@ -1104,40 +1178,34 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         //}
 
         // decrypt Payload
-        if (securityEncryptedEnabled)
+        if (securityEncryptedEnabled && SOPC_STATUS_OK == status)
         {
             uint32_t sizeSignature;
             status = SOPC_PubSub_Security_GetSignSize(security, securitySignedEnabled, &sizeSignature);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecuritySignSize_Failed;
-                return NULL;
-            }
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_SecuritySignSize_Failed);
 
-            // New data are Payload and signature.
-            uint32_t sizePayload = SOPC_Buffer_Remaining(buffer) - sizeSignature;
-
-            // This data shall be forget after calling Decrypt function
-            security->msgNonceRandom = securityMessageNonce;
-            // This function decrypt "sizePayload" bytes of the buffer from current position
-            // Crypted data are replace by clear data in the buffer
-            buffer_payload = SOPC_PubSub_Security_Decrypt(security, buffer, sizePayload);
-            security->msgNonceRandom = NULL;
-            if (NULL == buffer_payload)
+            if (SOPC_STATUS_OK == status)
             {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecurityDecrypt_Failed;
-                return NULL;
+                // New data are Payload and signature.
+                uint32_t sizePayload = SOPC_Buffer_Remaining(buffer) - sizeSignature;
+
+                // This data shall be forget after calling Decrypt function
+                security->msgNonceRandom = securityMessageNonce;
+                // This function decrypt "sizePayload" bytes of the buffer from current position
+                // Crypted data are replace by clear data in the buffer
+                buffer_payload = SOPC_PubSub_Security_Decrypt(security, buffer, sizePayload);
+                security->msgNonceRandom = NULL;
+                if (NULL == buffer_payload)
+                {
+                    set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecurityDecrypt_Failed);
+                }
             }
         }
     }
     else
     {
         // check that subscriber expects security mode is none
-        if (NULL != getSecurity_Func) // if NULL, security mode is None
+        if (NULL != getSecurity_Func && SOPC_STATUS_OK == status) // if NULL, security mode is None
         {
             security = getSecurity_Func(
                 SOPC_PUBSUB_SKS_DEFAULT_TOKENID,
@@ -1145,15 +1213,13 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             // if security is NULL, there is no reader configured with security sign or encrypt/sign
             if (NULL != security && !Network_Check_ReceivedSecurityMode(security->mode, false, false))
             {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed;
-                return NULL;
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed);
             }
         }
     }
+
     // Payload
-    if (NULL == buffer_payload)
+    if (NULL == buffer_payload && SOPC_STATUS_OK == status)
     {
         buffer_payload = buffer;
     }
@@ -1162,7 +1228,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     uint16_t* dsmSizes = NULL;
 
     // No size if there is only one DataSetMessage
-    if (msg_count > 1 && conf->PayloadHeaderFlag)
+    if (msg_count > 1 && conf->PayloadHeaderFlag && SOPC_STATUS_OK == status)
     {
         dsmSizes = SOPC_Calloc(msg_count, sizeof(uint16_t));
         if (NULL == dsmSizes)
@@ -1174,13 +1240,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         {
             status = SOPC_UInt16_Read(&dsmSizes[i], buffer_payload, 0);
         }
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed;
-            return NULL;
-        }
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed);
     }
 
     // Decode DataSetMessages
@@ -1192,204 +1252,25 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     // Bit 5: ConfigurationVersionMajorVersion enabled
     // Bit 6: ConfigurationVersionMinorVersion enable
     // Bit 7: DataSetFlags2 enabled
-    for (int i = 0; i < msg_count; i++)
+    for (int i = 0; i < msg_count && SOPC_STATUS_OK == status; i++)
     {
-        SOPC_Byte data;
-        SOPC_Boolean seq_nb_enabled = false;
-        SOPC_Boolean status_enabled = false;
-        SOPC_Boolean maj_version_enabled = false;
-        SOPC_Boolean min_version_enabled = false;
-        SOPC_Boolean dsm_flags2 = false;
-        SOPC_Boolean timestamp_enabled = false;
-        SOPC_Boolean picoseconds_enabled = false;
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
 
-        uint32_t dsmStartBufferPos;
-        status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
-        assert(SOPC_STATUS_OK == status);
-        /* DataSetMessages Header */
+        const uint16_t size = (NULL == dsmSizes ? 0 : dsmSizes[i]);
+        status = decode_dataSetMessage(dsm, buffer_payload, size);
+    }
 
-        /** DataSetFlags1 **/
-        {
-            status = SOPC_Byte_Read(&data, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-                return NULL;
-            }
-            SOPC_Boolean isValid = Network_Message_Get_Bool_Bit(data, 0);
-            if (!isValid)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_InvalidBit;
-                return NULL;
-            }
+    if (NULL != dsmSizes)
+    {
+        SOPC_Free(dsmSizes);
+    }
 
-            uint8_t field_encoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
-            if (DATASET_LL_DSM_ENCODING_TYPE != field_encoding)
-            {
-                // not managed yet
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType;
-                return NULL;
-            }
-            seq_nb_enabled = Network_Message_Get_Bool_Bit(data, 3);
-            status_enabled = Network_Message_Get_Bool_Bit(data, 4);
-            maj_version_enabled = Network_Message_Get_Bool_Bit(data, 5);
-            min_version_enabled = Network_Message_Get_Bool_Bit(data, 6);
-            dsm_flags2 = Network_Message_Get_Bool_Bit(data, 7);
-            timestamp_enabled = false;
-            picoseconds_enabled = false;
-        }
-
-        /** DataSetFlags2 **/
-        if (dsm_flags2)
-        {
-            // Bit range 0-3: UADP DataSetMessage type
-            // Bit 4: Timestamp enabled
-            // Bit 5: PicoSeconds enabled
-            status = SOPC_Byte_Read(&data, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed;
-                return NULL;
-            }
-            uint8_t dataSmessage_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
-            if (0 != dataSmessage_type)
-            {
-                // not managed yet
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_DsmType;
-                return NULL;
-            }
-            timestamp_enabled = Network_Message_Get_Bool_Bit(data, 4);
-            picoseconds_enabled = Network_Message_Get_Bool_Bit(data, 5);
-        }
-
-        /** DataSetMessage SequenceNumber **/
-        if (seq_nb_enabled)
-        {
-            // not managed yet
-            uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum;
-                return NULL;
-            }
-        }
-
-        /** Timestamp **/
-        if (timestamp_enabled)
-        {
-            // not managed yet
-            uint64_t timestamp;
-            status = SOPC_UInt64_Read(&timestamp, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp;
-                return NULL;
-            }
-        }
-
-        /** PicoSeconds **/
-        if (picoseconds_enabled)
-        {
-            // not managed yet
-            uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Unsupported_DsmPicoseconds;
-                return NULL;
-            }
-        }
-
-        /** Status **/
-        if (status_enabled)
-        {
-            // not managed yet
-            uint16_t notUsed;
-            status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Short_Failed;
-                return NULL;
-            }
-        }
-
-        /** ConfigurationVersion MajorVersion **/
-        if (maj_version_enabled)
-        {
-            // not managed yet
-            uint32_t not_used;
-            status = SOPC_UInt32_Read(&not_used, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Int_Failed;
-                return NULL;
-            }
-        }
-
-        /** ConfigurationVersion MinorVersion **/
-        if (min_version_enabled)
-        {
-            // not managed yet
-            uint32_t not_used;
-            status = SOPC_UInt32_Read(&not_used, buffer_payload, 0);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_Int_Failed;
-                return NULL;
-            }
-        }
-
-        /* Data Key Frame DataSetMessage Data */
-        status = UADP_To_DataSetFields(buffer_payload, dsm);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-            SOPC_Free(uadp_nm);
-            network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed;
-            return NULL;
-        }
-
-        if (NULL != dsmSizes)
-        {
-            uint32_t dsmEndBufferPos;
-            status = SOPC_Buffer_GetPosition(buffer_payload, &dsmEndBufferPos);
-            assert(SOPC_STATUS_OK == status);
-
-            const uint16_t dsmBufferSize = (uint16_t)(dsmEndBufferPos - dsmStartBufferPos);
-
-            if (dsmBufferSize != dsmSizes[i])
-            {
-                // Mismatching DSM buffer size.
-                SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
-                SOPC_Free(uadp_nm);
-                network_Error_Code = SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed;
-                return NULL;
-            }
-        }
+    if (SOPC_STATUS_OK != status)
+    {
+        assert(SOPC_UADP_NetworkMessage_Error_Code_None != network_Error_Code);
+        SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
+        SOPC_Free(uadp_nm);
+        uadp_nm = NULL;
     }
 
     // delete the Payload if it has been decrypted

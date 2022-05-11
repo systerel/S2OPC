@@ -117,7 +117,6 @@ typedef enum
  * or ::SOPC_UADP_NetworkMessage_Encode
  * This value is not thread-safe, and is only intended for debugging/maintenance purpose
  * @return The last error code.
- * @FIXME Use an additional parameter to encode/decode function rather than this context-less function.
  */
 SOPC_UADP_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Get_Last_Error(void);
 
