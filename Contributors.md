@@ -26,3 +26,4 @@ the legal rights to contribute.
 * Adrien COURNAND <adrien@systerel.fr>
 * Jeremie Chabod <jeremie.chabod@systerel.fr>
 * sauvegrain <sauvegrain@systerel.fr>
+* Raphal <gael.raphal-stg@systerel.fr>
