@@ -590,6 +590,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                 }
                 if (NULL == result)
                 {
+                    SOPC_Free(nodeId);
                     status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
