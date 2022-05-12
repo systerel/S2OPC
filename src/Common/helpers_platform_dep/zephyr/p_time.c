@@ -91,8 +91,40 @@ static uint64_t P_TIME_GetBuildDateTime(void);
 static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
 
 #if CONFIG_NET_GPTP
+/***************************************************
+ * GPTP SPECIFIC DECLARATIONS
+ **************************************************/
+/*
+ * PTP implementation details:
+ * - PtP clock is used to read actual time received. This time is used to:
+ *   - Compute gPtpSourceSync, which is constantly updated to resynchronize local clock
+ *          to PtP time (In calls to ::SOPC_Time_GetCurrentTimeUTC)
+ *   - Compute gLocalClockCorrFactor, which is updated every CLOCK_CORRECTION_MEASURE_DURATION seconds
+ *          by measuring the elapsing difference between internal and PtP clocks. If the correction is
+ *          lower than CLOCK_CORRECTION_RANGE, then this correction is accepted and applied to :
+ *      - Continue the correction of internal clock deviation in the case the PtP is lost.
+ *      - Adjust actual requested ticks in call to SOPC_Sleep
+ *      - Adjust actual requested ticks in call to SOPC_RealTime-related features. As they rely on
+ *          internal clock, and as the time reference is also used by caller, the correction shall be
+ *          applied on SOPC_RealTime operations (SOPC_RealTime_AddDuration).
+ * SOPC_TimeReference-related features are not resynchronized and remain on internal MONOTONIC clock.
+ */
+
+#define GPTP_ASSERT(x) SOPC_ASSERT(x)
+#define GPTP_CORRECT(x) ((x) *gLocalClockCorrFactor)
+#define CLOCK_CORRECTION_MEASURE_DURATION 10.0
+#define CLOCK_CORRECTION_RANGE 0.1
+
 /** Offset between PTp & internal clock, (or 0 if unknown)*/
 static int64_t gPtpSourceSync = 0;
+/** date of local clock at last PtP synchronized time (last update of gPtpSourceSync) */
+static uint64_t gLastLocSyncDate = 0;
+
+/** Local clock correction factor
+ * Range [1 - CLOCK_CORRECTION_RANGE .. 1 + CLOCK_CORRECTION_RANGE]
+ *  */
+static float gLocalClockCorrFactor = 1.0;
+
 /** /brief Get current internal time with 100 ns precision, corrected by PTP */
 static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
 
@@ -101,8 +133,11 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
 static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
 
 #else // CONFIG_NET_GPTP
+#define GPTP_ASSERT(x)
+#define GPTP_CORRECT(x) (x)
 // No time correction is PTP is not available
 #define P_TIME_TimeReference_GetCorrected100ns P_TIME_TimeReference_GetInternal100ns
+
 #endif // CONFIG_NET_GPTP
 
 /***************************************************
@@ -333,7 +368,8 @@ void SOPC_Sleep(unsigned int milliseconds)
 {
     if (milliseconds > 0)
     {
-        k_sleep(K_MSEC(milliseconds));
+        GPTP_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
+        k_sleep(K_MSEC(GPTP_CORRECT(milliseconds)));
     }
     else
     {
@@ -384,9 +420,16 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 /***************************************************/
 void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
 {
-    assert(NULL != t);
+    GPTP_ASSERT(NULL != t && fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
 
-    t->tick100ns += duration_ms * MS_TO_100NS;
+    /* RealTime measures relate to internal clock, which may diverge from real "actual" time
+     By applying correction on time addition here, we ensure that further calls to SleepUntil
+     will continue to provide continuous non-diverging times.
+     Example if local clock is slower by 10%, SOPC_RealTime_AddDuration (100ms) will actually add "110 ms" so that
+     expected local time matches actual time.
+     */
+
+    t->tick100ns += (uint64_t) GPTP_CORRECT(duration_ms * MS_TO_100NS);
 }
 
 /***************************************************/
@@ -448,23 +491,79 @@ static struct gptp_global_ds* globalDs = NULL;
 /***************************************************/
 static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
 {
-    SOPC_RealTime nowPtp = P_TIME_TimeReference_GetPtp100ns();
-    const uint64_t nowInt = P_TIME_TimeReference_GetInternal100ns().tick100ns;
+    static uint64_t connectionStartLoc = 0;
+    static uint64_t connectionStartPtp = 0;
 
-    if (nowPtp.tick100ns != 0)
+    SOPC_RealTime nowPtp = P_TIME_TimeReference_GetPtp100ns();
+    const uint64_t nowPtpInt = nowPtp.tick100ns;
+    const uint64_t nowLocInt = P_TIME_TimeReference_GetInternal100ns().tick100ns;
+
+    // During synchronization phase, invalid time laps may appear
+    bool invalidTimes = false;
+
+    // Check that PtP is currently SLAVE to avoid re-synchronizing clock on local measure
+    if (nowPtpInt != 0)
     {
+        if (connectionStartLoc == 0)
+        {
+            // Start correction measure
+            connectionStartLoc = nowLocInt;
+            connectionStartPtp = nowPtpInt;
+        }
+        else if (nowPtpInt < connectionStartPtp || nowLocInt < connectionStartLoc)
+        {
+            invalidTimes = true;
+        }
+        else
+        {
+            const float measurePtpDuration = (float) (nowPtpInt - connectionStartPtp);
+
+            if (measurePtpDuration / SECOND_TO_100NS > CLOCK_CORRECTION_MEASURE_DURATION)
+            {
+                const float measureLocDuration = (float) (nowLocInt - connectionStartLoc);
+                float newFactor = measureLocDuration / measurePtpDuration;
+
+                // Check consistency of correction
+                if (fabs(1.0 - newFactor) < CLOCK_CORRECTION_RANGE)
+                {
+                    // Accept this correction factor
+                    gLocalClockCorrFactor = newFactor;
+                }
+
+                // Restart measure
+                invalidTimes = true;
+            }
+        }
+        // Check if correction measure is ready
+
         // PTP is available. Recalculate Internal clock offset.
         // It will be used if PTP gets unsynchronized
-        if (nowPtp.tick100ns < INT64_MAX && nowInt < INT64_MAX)
+        if (nowPtpInt < INT64_MAX && nowLocInt < INT64_MAX)
         {
-            gPtpSourceSync = ((int64_t) nowPtp.tick100ns) - ((int64_t) nowInt);
+            gPtpSourceSync = ((int64_t) nowPtpInt) - ((int64_t) nowLocInt);
         }
+        gLastLocSyncDate = nowLocInt;
     }
     else
     {
-        nowPtp.tick100ns = nowInt + gPtpSourceSync;
-    }
+        // PTP is not available. Apply deviation correction since PtP disconnection
+        nowPtp.tick100ns = nowLocInt + gPtpSourceSync;
+        if (gLastLocSyncDate > 0 && gLastLocSyncDate < nowLocInt)
+        {
+            const uint64_t delta = (nowLocInt - gLastLocSyncDate);
 
+            const float corrFact = (1.0 - gLocalClockCorrFactor) / gLocalClockCorrFactor;
+            const int64_t corr = (int64_t)(delta * corrFact);
+            nowPtp.tick100ns += corr;
+        }
+
+        invalidTimes = true;
+    }
+    if (invalidTimes)
+    {
+        connectionStartLoc = 0;
+        connectionStartPtp = 0;
+    }
     return nowPtp;
 }
 
@@ -478,8 +577,10 @@ static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
 
     static const uint64_t minTimeOffset = 365 * (2021 - 1970);
 
-    // If time is irrelevant, ignore it
-    if (errCode == 0 && slave_time.second > minTimeOffset)
+    // If time is irrelevant or provided locally, ignore it
+    // a "PtP MASTER" state can be observed in transitions (connection/disconnection)
+    if (errCode == 0 && slave_time.second > minTimeOffset &&
+        SOPC_Time_GetTimeSource() == SOPC_TIME_TIMESOURCE_PTP_SLAVE)
     {
         /* Note : 64 bits with 100 ns precision from 1970 can hold much more than 1000 years*/
         result.tick100ns = slave_time.second * SECOND_TO_100NS;
@@ -491,6 +592,12 @@ static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
     }
 
     return result;
+}
+
+/***************************************************/
+float SOPC_RealTime_GetClockCorrection(void)
+{
+    return gLocalClockCorrFactor;
 }
 
 /***************************************************/
