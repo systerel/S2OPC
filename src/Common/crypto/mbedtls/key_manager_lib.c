@@ -972,6 +972,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 {
     if (NULL == szPath || NULL == ppCRL)
     {
+        fprintf(stderr, "> KeyManager: crl file \"%s\" parse failed: misses the trailing '\n'", szPath);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 

@@ -168,6 +168,7 @@ typedef struct
     NodeId of the Node that contains the attribute to read. zero-terminated string
   @var SOPC_ClientHelper_ReadValue::attributeId
     AttributeId of the Node that contains the value to read. 0 is not valid.
+    All possible OPC UA attribute ids can be found in the header file sopc_builtintypes.h
     Ids of attributes are defined in Part 6.
   @var SOPC_ClientHelper_ReadValue::indexRange
     Used only if the attribute 'Value' is an array. Otherwise, it should be NULL.
@@ -659,7 +660,8 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     A pre-allocated array of SOPC_DataValue, filled with the result of each read value.
     It should not be NULL and be at least \p nbElements long.
     When return, the order of this list matches the order of \p readValues.
-
+    After using this function, the user must invoke \a SOPC_ClientHelper_ReadResults_Free()
+    function in order to free the returned SOPC_DataValues.
  @return
    '0' if operation succeed
    '-1' if connectionId not valid

@@ -36,7 +36,7 @@ static void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus
 // The global helper config variable (singleton), it shall not be accessed outside of wrapper code
 typedef struct SOPC_Helper_Config
 {
-    // Flag atomically set when the structure is initialized during call to SOPC_Helper_Initialize
+    // Flag atomically set when the structure is initialized during call to SOPC_HelperConfigServer_Initialize
     // and singleton config is initialized
     int32_t initialized;
 

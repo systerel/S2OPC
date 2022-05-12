@@ -59,6 +59,11 @@ typedef enum SOPC_Log_System
     SOPC_LOG_SYSTEM_NO_LOG /**< no system logger */
 } SOPC_Log_System;
 
+/**
+ * \brief This union provides possible logging configurations
+ * \param fileSystemLogConfig An accurate log configuration for file system
+ * \param userSystemLogConfig A structure to configure a callback for the user system log
+ */
 typedef union SOPC_Log_SystemConfiguration {
     SOPC_LogSystem_File_Configuration fileSystemLogConfig; /**< log file system configuration */
     SOPC_LogSystem_User_Configuration userSystemLogConfig; /**< log user system configuration */
@@ -66,8 +71,8 @@ typedef union SOPC_Log_SystemConfiguration {
 
 typedef struct SOPC_Log_Configuration
 {
-    SOPC_Log_Level logLevel;                   /**< default log level */
-    SOPC_Log_System logSystem;                 /**< discriminant for the log system configuration */
+    SOPC_Log_Level logLevel;   /**< default log level */
+    SOPC_Log_System logSystem; /**< discriminant of the log system configuration used in \a logSysConfig */
     SOPC_Log_SystemConfiguration logSysConfig; /**< log system configuration */
 } SOPC_Log_Configuration;
 

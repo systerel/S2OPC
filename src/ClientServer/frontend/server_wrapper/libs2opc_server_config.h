@@ -38,6 +38,12 @@
  *        Call to ::SOPC_HelperConfigServer_Initialize is required before any other operation
  *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
+ * The default log configuration is provided by the SOPC_Common_GetDefaultLogConfiguration function in sopc_common.c. \n
+ * By default, the log configuration is : \n
+ *  .logLevel     = \a SOPC_LOG_LEVEL_INFO \n
+ *  .logSystem    = \a SOPC_LOG_SYSTEM_FILE \n
+ *  .logSysConfig = {.fileSystemLogConfig = {.logDirPath = "", .logMaxBytes = 1048576, .logMaxFiles = 50}}
+ *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void);
