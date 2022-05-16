@@ -32,7 +32,7 @@ typedef struct SOPC_AsyncQueue SOPC_AsyncQueue;
 
 SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queueName);
 
-/** @brief: enqueue in FIFO mode */
+/** @brief: enqueue in LILO mode */
 SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue, void* element);
 
 /** @brief: enqueue in LIFO mode */
