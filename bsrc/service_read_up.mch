@@ -25,50 +25,8 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    address_space,
     message_in_bs,
     message_out_bs
-
-DEFINITIONS
-    "definitions.def";
-    d_inv_read == (
-        nb_ReadValue          : NAT                           &
-        nb_ReadValue         <= k_n_read_resp_max             &
-        ReadValues_TimestampToReturn : t_TimestampsToReturn_i &
-        ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i
-    )
-    ;
-    d_inv_response == (
-        data_Value_Value           : t_ReadValue +-> t_Variant &
-        data_Value_StatusCode      : t_ReadValue +-> t_RawStatusCode &
-        data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
-        data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp
-    )
-
-ABSTRACT_VARIABLES
-    nb_ReadValue,
-    ReadValues_TimestampToReturn,
-    ReadValue_NodeId,
-    ReadValue_AttributeId,
-    data_Value_Value,
-    data_Value_StatusCode,
-    data_Value_SourceTimestamp,
-    data_Value_ServerTimestamp
-
-INVARIANT
-    d_inv_read &
-    d_inv_response
-
-INITIALISATION
-    nb_ReadValue          := 0  ||
-    ReadValues_TimestampToReturn := c_TimestampsToReturn_indet ||
-    ReadValue_NodeId      := {} ||
-    ReadValue_AttributeId := {} ||
-    data_Value_Value      := {} ||
-    data_Value_StatusCode := {} ||
-    data_Value_SourceTimestamp := {} ||
-    data_Value_ServerTimestamp := {}
 
 OPERATIONS
 
@@ -83,19 +41,8 @@ OPERATIONS
         p_response_msg : t_msg_i   &
         p_response_msg = c_msg_out
     THEN
-        nb_ReadValue,
-        ReadValue_NodeId,
-        ReadValue_AttributeId,
-        data_Value_Value,
-        data_Value_StatusCode,
         StatusCode_service
         :(
-          nb_ReadValue          : NAT                           &
-          nb_ReadValue         <= k_n_read_resp_max             &
-          ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
-          ReadValue_AttributeId : t_ReadValue +-> t_AttributeId_i &
-          data_Value_Value      : t_ReadValue +-> t_Variant &
-          data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode &
           StatusCode_service    : t_StatusCode_i &
           StatusCode_service    : {e_sc_ok, e_sc_bad_too_many_ops, e_sc_bad_nothing_to_do,
                                    e_sc_bad_timestamps_to_return_invalid, e_sc_bad_max_age_invalid,

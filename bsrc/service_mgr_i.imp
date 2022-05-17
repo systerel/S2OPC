@@ -93,22 +93,11 @@ DEFINITIONS
         WriteValue_AttributeId,
         WriteValue_DataValue,
 
-        nb_ReadValue,
-        ReadValue_NodeId,
-        ReadValue_AttributeId,
-        data_Value_Value,
-        data_Value_StatusCode,
         StatusCode_service,
         ResponseWrite_allocated,
         ResponseWrite_StatusCode
         :(
             a_Value                  : t_Node +-> t_Variant          &
-            nb_ReadValue             : NAT                           &
-            nb_ReadValue            <= k_n_read_resp_max             &
-            ReadValue_NodeId         : t_ReadValue +-> t_NodeId      &
-            ReadValue_AttributeId    : t_ReadValue +-> t_AttributeId_i &
-            data_Value_Value         : t_ReadValue +-> t_Variant     &
-            data_Value_StatusCode    : t_ReadValue +-> t_RawStatusCode &
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
             ResponseWrite_allocated  : BOOL                          &
