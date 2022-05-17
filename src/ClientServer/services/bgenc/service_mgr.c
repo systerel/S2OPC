@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 07/07/2021 14:14:14
+ Date                 : 01/06/2022 13:20:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -162,40 +162,6 @@ void service_mgr__get_response_type(
    }
 }
 
-void service_mgr__treat_read_request(
-   const constants__t_user_i service_mgr__p_user,
-   const constants__t_LocaleIds_i service_mgr__p_locales,
-   const constants__t_msg_i service_mgr__p_request_msg,
-   const constants__t_msg_i service_mgr__p_response_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
-   {
-      t_entier4 service_mgr__l_nb_ReadValue;
-      t_bool service_mgr__l_is_valid;
-      constants__t_TimestampsToReturn_i service_mgr__l_TimestampsToReturn;
-      
-      service_read__check_ReadRequest(service_mgr__p_request_msg,
-         &service_mgr__l_is_valid,
-         &service_mgr__l_nb_ReadValue,
-         &service_mgr__l_TimestampsToReturn,
-         service_mgr__StatusCode_service);
-      if (service_mgr__l_is_valid == true) {
-         service_read__alloc_read_response(service_mgr__l_nb_ReadValue,
-            service_mgr__p_response_msg,
-            &service_mgr__l_is_valid);
-         if (service_mgr__l_is_valid == true) {
-            service_read__fill_read_response(service_mgr__l_TimestampsToReturn,
-               service_mgr__p_user,
-               service_mgr__p_locales,
-               service_mgr__p_request_msg,
-               service_mgr__p_response_msg);
-         }
-         else {
-            *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-         }
-      }
-   }
-}
-
 void service_mgr__treat_write_request(
    const constants__t_user_i service_mgr__p_user,
    const constants__t_LocaleIds_i service_mgr__p_locales,
@@ -240,7 +206,7 @@ void service_mgr__treat_session_local_service_req(
             &service_mgr__l_user);
          constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
             &service_mgr__l_supported_locales);
-         service_mgr__treat_read_request(service_mgr__l_user,
+         service_read_up__treat_read_request(service_mgr__l_user,
             service_mgr__l_supported_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,
@@ -293,7 +259,7 @@ void service_mgr__treat_session_nano_service_req(
             &service_mgr__l_user);
          session_mgr__get_server_session_preferred_locales(service_mgr__session,
             &service_mgr__l_locales);
-         service_mgr__treat_read_request(service_mgr__l_user,
+         service_read_up__treat_read_request(service_mgr__l_user,
             service_mgr__l_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,

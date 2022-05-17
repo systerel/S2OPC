@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 06/03/2020 14:49:15
+ Date                 : 01/06/2022 13:20:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,7 +45,7 @@
 #include "request_handle_bs.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr_bs.h"
-#include "service_read.h"
+#include "service_read_up.h"
 #include "service_register_nodes.h"
 #include "service_response_cb_bs.h"
 #include "service_set_discovery_server.h"
@@ -120,12 +120,6 @@ extern void service_mgr__treat_discovery_service_req(
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_msg_i service_mgr__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
-extern void service_mgr__treat_read_request(
-   const constants__t_user_i service_mgr__p_user,
-   const constants__t_LocaleIds_i service_mgr__p_locales,
-   const constants__t_msg_i service_mgr__p_request_msg,
-   const constants__t_msg_i service_mgr__p_response_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 extern void service_mgr__treat_session_local_service_req(
    const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
