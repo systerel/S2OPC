@@ -143,6 +143,9 @@ typedef SOPC_Byte SOPC_Boolean;
 
 typedef int8_t SOPC_SByte;
 
+/**
+ *  \brief This structure provides string encapsulation
+ */
 typedef struct SOPC_String
 {
     int32_t Length;
@@ -167,6 +170,9 @@ typedef struct SOPC_Guid
     SOPC_Byte Data4[8];
 } SOPC_Guid;
 
+/**
+ *  \brief This enum provides fundamental identifier type
+ */
 typedef enum SOPC_IdentifierType
 {
     SOPC_IdentifierType_Numeric = 0x00,
@@ -175,6 +181,9 @@ typedef enum SOPC_IdentifierType
     SOPC_IdentifierType_ByteString = 0x03,
 } SOPC_IdentifierType;
 
+/**
+ *  \brief This structure describes a basic NodeID in OPC UA
+ */
 typedef struct SOPC_NodeId
 {
     SOPC_IdentifierType IdentifierType;
@@ -188,6 +197,10 @@ typedef struct SOPC_NodeId
     } Data;
 } SOPC_NodeId;
 
+/**
+ *  \brief ExpandedNodeId allows the namespace to be specified explicitly as a string
+ *  or with an index in the Server’s namespace table.
+ */
 typedef struct SOPC_ExpandedNodeId
 {
     SOPC_NodeId NodeId;
@@ -195,6 +208,9 @@ typedef struct SOPC_ExpandedNodeId
     uint32_t ServerIndex;
 } SOPC_ExpandedNodeId;
 
+/**
+ *  \brief This structure provides vendor specific diagnostic information
+ */
 typedef struct SOPC_DiagnosticInfo
 {
     int32_t SymbolicId;
@@ -225,6 +241,9 @@ typedef struct SOPC_LocalizedText
     SOPC_SLinkedList* localizedTextList; // If NULL => no other localized text defined
 } SOPC_LocalizedText;
 
+/**
+ *  \brief This enum provides additional information on which data type format transported.
+ */
 typedef enum SOPC_ExtObjectBodyEncoding
 {
     SOPC_ExtObjBodyEncoding_None = 0x00,
@@ -233,6 +252,10 @@ typedef enum SOPC_ExtObjectBodyEncoding
     SOPC_ExtObjBodyEncoding_Object = 0x03
 } SOPC_ExtObjectBodyEncoding;
 
+/**
+ *  \brief An ExtensionObject is a container for any Structured DataTypes which cannot be encoded as one of the other
+ * built-in data types. it contains fields that describes which data is transported and how it is described.
+ */
 typedef struct SOPC_ExtensionObject
 {
     SOPC_ExpandedNodeId TypeId;
@@ -267,9 +290,9 @@ typedef enum SOPC_VariantArrayType
     SOPC_VariantArrayType_Matrix = 0x2
 } SOPC_VariantArrayType;
 
-struct SOPC_DataValue;
-struct SOPC_Variant;
-
+/**
+ *  \brief This union provides all possible contents for Variant arrays, depending on their \a SOPC_BuiltinId.
+ */
 typedef union SOPC_VariantArrayValue {
     SOPC_Boolean* BooleanArr;
     SOPC_SByte* SbyteArr;
@@ -298,6 +321,9 @@ typedef union SOPC_VariantArrayValue {
     SOPC_DiagnosticInfo* DiagInfoArr; // TODO: not present ?
 } SOPC_VariantArrayValue;
 
+/**
+ *  \brief This union provides all possible contents for Variant, depending on their \a SOPC_BuiltinId.
+ */
 typedef union SOPC_VariantValue {
     SOPC_Boolean Boolean;
     SOPC_SByte Sbyte;
@@ -338,6 +364,9 @@ typedef union SOPC_VariantValue {
 
 } SOPC_VariantValue;
 
+/**
+ *  \brief This structure provides variant encapsulation
+ */
 typedef struct SOPC_Variant
 {
     bool DoNotClear; // flag indicating if variant content must be freed
@@ -346,6 +375,9 @@ typedef struct SOPC_Variant
     SOPC_VariantValue Value;
 } SOPC_Variant;
 
+/**
+ *  \brief Each attribute in OPC UA has a DataValue caracterized by the following structure
+ */
 typedef struct SOPC_DataValue
 {
     SOPC_Variant Value;
@@ -363,11 +395,79 @@ S2OPC_COMMON_EXPORT extern const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNode
 #define SECURITY_POLICY_BASIC256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Initialize() will get the
+ *  same description.
+ *
+ * \warning This kind of function must be used to prevent indeterminist behavior for any builtintypes.
+ *
+ * \brief Initialize a pointer for a specific builtintype (Boolean, String, Int16...)
+ *
+ * \param b  The pointer related to the specific builtintype will be initialized to "0".
+ */
 void SOPC_Boolean_Initialize(SOPC_Boolean* b);
+
+/**
+ * \note The functions which have prototype as: \p SOPC_BUILTINTYPE_InitializeAux() will get the
+ *  same description.
+ * \brief Initialize a generic pointer using cast method.
+ *
+ * \param value  The pointer will be initialized to "0".
+ */
 void SOPC_Boolean_InitializeAux(void* value);
+
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_CopyAux() will get the
+ *  same description.
+ *
+ * \brief Copy the content of a generic pointer to another one.
+ *
+ * \param dest a generic pointer that will be casted in <em>specific builtintype pointer</em> to receive \p src content.
+ *
+ * \param src a generic pointer that will be casted in <em>specific builtintype pointer</em> and its content will be
+ * copied in \p dest.
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ */
 SOPC_ReturnStatus SOPC_Boolean_CopyAux(void* dest, const void* src);
+
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_CompareAux() will get the
+ *  same description.
+ * \brief Compare the content of a generic pointer to another one and set the result in the comparison parameter.
+ *
+ * \param left a generic pointer that will be casted in <em>specific builtintype pointer</em>
+ *
+ * \param right a generic pointer that will be casted in <em>specific builtintype pointer</em>
+ *
+ * \param comparison these possible values are:
+ *                      * 1 : left pointer < right pointer
+ *                      * 0 : left pointer == right pointer
+ *                      * -1 : right pointer < left pointer
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ */
 SOPC_ReturnStatus SOPC_Boolean_CompareAux(const void* left, const void* right, int32_t* comparison);
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Clear() will get the
+ *  same description.
+ *
+ * \brief Clear the content of a specific builtintype pointer.
+ *
+ * \param b The specific builtintype pointer content will be cleared to  \a "0,false,Free": depending on if
+ *  it is a String, Boolean, integer, etc.
+ */
 void SOPC_Boolean_Clear(SOPC_Boolean* b);
+
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_ClearAux() will get the
+ *  same description.
+ *
+ * \brief Clear the content of a generic pointer.
+ *
+ * \param value The generic pointer content will be casted in <em>specific builtintype pointer</em>
+ *  and its content will be cleared to  \a "0,false,Free" depending on if it is a String, Boolean, integer, etc.
+ */
 void SOPC_Boolean_ClearAux(void* value);
 
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte);
@@ -442,13 +542,52 @@ void SOPC_Double_ClearAux(void* value);
 
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring);
 void SOPC_ByteString_InitializeAux(void* value);
+
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Create() will get the
+ *  same description.
+ *
+ * \warning This kind of function do x-bytes of allocation memory, so the pointer must be freed by invoking
+ * \p SOPC_BUILTINTYPE_Delete() function.
+ *
+ * \brief Create a valid specific builtintype pointer.
+ *
+ * \return A valid pointer otherwise it returns NULL pointer if allocation failed.
+ */
 SOPC_ByteString* SOPC_ByteString_Create(void);
+
+/**
+ * \warning This function do x-bytes of allocation memory, so the pointer must be freed by invoking
+ * \p SOPC_ByteString_Delete() function.
+ *
+ * \brief Allocate a number of \p size bytes and initialize its content to "0", this allocation looks like calloc
+ * function.
+ *
+ * \param bstring The ByteString pointer which will be initialized.
+ *
+ * \param size number of bytes to be allocate.
+ *
+ * \return A valid pointer otherwise it returns NULL pointer if allocation failed.
+ */
 SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
 SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOPC_Byte* bytes, int32_t length);
 SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
 SOPC_ReturnStatus SOPC_ByteString_CopyAux(void* dest, const void* src);
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
 void SOPC_ByteString_ClearAux(void* value);
+
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Delete() will get the
+ *  same description.
+ *
+ * \warning This kind of function frees the memory used, so each \p SOPC_BUILTINTYPE_Create() function
+ * need to call \p SOPC_BUILTINTYPE_Delete() function to avoid <em>leak memory or segmentation fault error</em>.
+ *
+ * \brief Free a specific builtintype pointer thus it will transform it into an invalid pointer.
+ *
+ * \param bstring The specific builtintype pointer that will be freed.
+ *
+ */
 void SOPC_ByteString_Delete(SOPC_ByteString* bstring);
 
 SOPC_ReturnStatus SOPC_ByteString_Compare(const SOPC_ByteString* left,
@@ -456,25 +595,132 @@ SOPC_ReturnStatus SOPC_ByteString_Compare(const SOPC_ByteString* left,
                                           int32_t* comparison);
 SOPC_ReturnStatus SOPC_ByteString_CompareAux(const void* left, const void* right, int32_t* comparison);
 
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Equal() will get the
+ *  same description.
+ * \brief Compare the content of two specific builtintype pointer and return true or false according to the result
+ *
+ * \param left The content of a specific builtintype pointer to be compare with another pointer of the same type.
+ *
+ * \param right The content of a specific builtintype pointer to be compare with another pointer of the same type.
+ *
+ * \return true if the two contents are equal otherwise false.
+ */
 bool SOPC_ByteString_Equal(const SOPC_ByteString* left, const SOPC_ByteString* right);
 
 void SOPC_String_Initialize(SOPC_String* string);
 void SOPC_String_InitializeAux(void* value);
 SOPC_String* SOPC_String_Create(void);
+
+/**
+ * \brief Copy a C-String to the Data field of the SOPC_String object
+ *
+ * \param string The pointer to the SOPC_String object
+ *
+ * \param cString  The C-String that would be copied in the Data field
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
+ */
 SOPC_ReturnStatus SOPC_String_CopyFromCString(SOPC_String* string, const char* cString);
 SOPC_ReturnStatus SOPC_String_CopyAux(void* dest, const void* src);
-SOPC_ReturnStatus SOPC_String_InitializeFromCString(SOPC_String* string, const char* cString);
-char* SOPC_String_GetCString(const SOPC_String* string);          // Copy
-const char* SOPC_String_GetRawCString(const SOPC_String* string); // Pointer to string
 
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_InitializeFromCString() will get the
+ *  same description.
+ * \brief Initialize the content of a specific builtintype pointer with a C-String.
+ *
+ * \param string The specific builtintype pointer
+ *
+ * \param cString The C-String.
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if there are bad input
+ *  parameters or SOPC_STATUS_NOK if an error occurs.
+ */
+SOPC_ReturnStatus SOPC_String_InitializeFromCString(SOPC_String* string, const char* cString);
+
+/**
+ * \warning This function do x-bytes of allocation memory, so the return value must be freed after this call function.
+ *
+ * \brief Retreive the C-String of a SOPC_String pointer.
+ *
+ * \param string The SOPC_String pointer whose content will be extracted.
+ *
+ * \return A valid C-String otherwise it returns NULL pointer if allocation failed or there were bad input parameters.
+ */
+char* SOPC_String_GetCString(const SOPC_String* string);
+
+/**
+ * \warning The value returned is not a copy, so :
+ *  - The returned value can only be used while the input object is defined.
+ *  - The returned value shall not be freed.
+ *
+ * \brief Retreive the raw C-String of a SOPC_String pointer.
+ *
+ * \param string The SOPC_String pointer whose content will be extracted.
+ *
+ * \return A valid C-String otherwise it returns NULL pointer if allocation failed.
+ */
+const char* SOPC_String_GetRawCString(const SOPC_String* string);
+
+/**
+ * \brief Create a shallow copy of \a src into \a dest. The \a src string must not be cleared before \a dest is cleared
+ *
+ * \param dest  The pointer to the destination SOPC_String object.
+ *
+ * \param src  The pointer to the source SOPC_String object.
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ */
 SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src);
+
+/**
+ * \brief Create a shallow copy of \a src (C-String) into \a dest.
+ *
+ * \param dest  The pointer to the destination SOPC_String object
+ *
+ * \param src  The C-String data that will be copied to the destination SOPC_String object
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ */
 SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src);
 
+/**
+ * \note Since an allocation is used, the user must freed the \a dest pointer after using it.
+ *  Furthermore, it is a copy, so be sure to clear bytes on clear.
+ *
+ * \brief Create a copy of \a src into \a dest.
+ *
+ * \param dest  The pointer to the destination SOPC_String object.
+ *
+ * \param src  The pointer to the source SOPC_String object.
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if there are bad inputs
+ * parameters or SOPC_STATUS_OUT_OF_MEMORY if no space memory available.
+ */
 SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src);
 void SOPC_String_Clear(SOPC_String* bstring);
 void SOPC_String_ClearAux(void* value);
 void SOPC_String_Delete(SOPC_String* bstring);
 
+/**
+ * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Compare() will get approximately the
+ *  same description (some parameters might change according to the goal function).
+ *
+ * \brief Compare the content of a String pointer to another one and set the result in the comparison parameter.
+ *
+ * \param left a generic pointer that will be casted in <em>specific builtintype pointer</em>
+ *
+ * \param right a generic pointer that will be casted in <em>specific builtintype pointer</em>
+ *
+ * \param ignoreCase false if ignore sensitive case otherwise it is true.
+ *
+ * \param comparison these possible values are:
+ *                      * 1 : left pointer < right pointer
+ *                      * 0 : left pointer == right pointer
+ *                      * -1 : right pointer < left pointer
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ */
 SOPC_ReturnStatus SOPC_String_Compare(const SOPC_String* left,
                                       const SOPC_String* right,
                                       bool ignoreCase,
