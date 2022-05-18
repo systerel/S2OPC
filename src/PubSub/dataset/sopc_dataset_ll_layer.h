@@ -100,12 +100,12 @@ SOPC_Dataset_LL_DataSetMessage* SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At
 /* PUBLISHER ID */
 // publisher id type
 SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(
-    SOPC_Dataset_LL_NetworkMessage_Header* nmh);
+    const SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 // publisher id
 /* Return address of the internal publisher id type
  * User shall not delete data
  */
-SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh);
+const SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(const SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 
 void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_Byte id);
 void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint16_t id);
@@ -113,10 +113,10 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_Netwo
 void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint64_t id);
 /* WRITER GROUP ID */
 void SOPC_Dataset_LL_NetworkMessage_Set_GroupId(SOPC_Dataset_LL_NetworkMessage* nm, uint16_t id);
-uint16_t SOPC_Dataset_LL_NetworkMessage_Get_GroupId(SOPC_Dataset_LL_NetworkMessage* nm);
+uint16_t SOPC_Dataset_LL_NetworkMessage_Get_GroupId(const SOPC_Dataset_LL_NetworkMessage* nm);
 /* WRITER GROUP VERSION */
 void SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(SOPC_Dataset_LL_NetworkMessage* nm, uint32_t version);
-uint32_t SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(SOPC_Dataset_LL_NetworkMessage* nm);
+uint32_t SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(const SOPC_Dataset_LL_NetworkMessage* nm);
 
 /**
  * Header DataSetMessage

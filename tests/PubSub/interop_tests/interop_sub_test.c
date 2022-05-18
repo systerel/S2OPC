@@ -99,7 +99,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
         result = -1;
     }
     {
-        SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
+        const SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
         if (false == config->GroupIdFlag || DataSet_LL_PubId_UInt16_Id != publisher_id->type ||
             3 != publisher_id->data.uint16)
         {

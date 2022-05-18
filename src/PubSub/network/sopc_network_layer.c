@@ -35,7 +35,7 @@ static uint32_t network_Error_Code = SOPC_UADP_NetworkMessage_Error_Code_None;
  */
 
 /* Convert a PublisherId from dataset module to one of Configuration module */
-static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_PublisherId* src);
+static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src);
 
 /*
  * Check if security mode as enum is equals to security mode as boolean
@@ -178,7 +178,7 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
  * Private
  * Write a publisher id.
  */
-static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, SOPC_Dataset_LL_PublisherId* pub_id);
+static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, const SOPC_Dataset_LL_PublisherId* pub_id);
 
 /**
  * Private
@@ -270,7 +270,7 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
     return status;
 }
 
-static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, SOPC_Dataset_LL_PublisherId* pub_id)
+static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, const SOPC_Dataset_LL_PublisherId* pub_id)
 {
     assert(NULL != buffer && NULL != pub_id);
     // String Publisher Id is not managed
@@ -344,7 +344,7 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
 
 static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Header* nmh, bool security)
 {
-    SOPC_Dataset_LL_PublisherId* pub_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nmh);
+    const SOPC_Dataset_LL_PublisherId* pub_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nmh);
     return (DataSet_LL_PubId_Byte_Id != pub_id->type || DATASET_LL_DATASET_CLASSID_ENABLED || security ||
             DATASET_LL_TIMESTAMP_ENABLED || DATASET_LL_PICOSECONDS_ENABLED);
 }
@@ -1369,7 +1369,7 @@ SOPC_UADP_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Get_Last_Error(void
     return result;
 }
 
-static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_PublisherId* src)
+static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src)
 {
     SOPC_Conf_PublisherId result;
     switch (src->type)

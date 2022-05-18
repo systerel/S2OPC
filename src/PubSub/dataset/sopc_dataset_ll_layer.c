@@ -213,7 +213,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_Netwo
     }
 }
 
-SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+const SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
     if (NULL == nmh || !nmh->flagsConfig.PublisherIdFlag)
     {
@@ -226,7 +226,7 @@ SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC
  * Hyp: only uint32 is managed
  */
 SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(
-    SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+    const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
     return nmh->publisher_id.type;
 }
@@ -332,7 +332,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_GroupId(SOPC_Dataset_LL_NetworkMessage* 
     }
 }
 
-uint16_t SOPC_Dataset_LL_NetworkMessage_Get_GroupId(SOPC_Dataset_LL_NetworkMessage* nm)
+uint16_t SOPC_Dataset_LL_NetworkMessage_Get_GroupId(const SOPC_Dataset_LL_NetworkMessage* nm)
 {
     if (NULL == nm)
     {
@@ -349,7 +349,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(SOPC_Dataset_LL_NetworkMess
     }
 }
 
-uint32_t SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(SOPC_Dataset_LL_NetworkMessage* nm)
+uint32_t SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(const SOPC_Dataset_LL_NetworkMessage* nm)
 {
     if (NULL == nm)
     {

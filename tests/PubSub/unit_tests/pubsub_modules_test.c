@@ -431,7 +431,7 @@ START_TEST(test_hl_network_msg_decode_multi_dsm)
     ck_assert_ptr_nonnull(nm);
 
     // Check that Network message is as expected
-    SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
+    const SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
     ck_assert_ptr_nonnull(pubId);
     ck_assert_uint_eq(pubId->type, DataSet_LL_PubId_Byte_Id);
     ck_assert_uint_eq(pubId->data.byte, NETWORK_MSG_PUBLISHER_ID);

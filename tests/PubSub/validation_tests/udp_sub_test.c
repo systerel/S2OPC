@@ -82,7 +82,7 @@ static void printPublisherId(const SOPC_UADP_NetworkMessage* uadp_nm)
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     const SOPC_UADP_Configuration* config = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
-    SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
+    const SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
     switch (publisher_id->type)
     {
     case DataSet_LL_PubId_Byte_Id:
