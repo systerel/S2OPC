@@ -43,12 +43,20 @@ static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_P
 static bool Network_Check_ReceivedSecurityMode(SOPC_SecurityMode_Type mode, bool ssigned, bool encrypted);
 
 /**
+ * Decode a newtwork message (V1 format)
+ */
+static SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
+                                           uint32_t payload_sign_position,
+                                           SOPC_Dataset_LL_NetworkMessage* nm,
+                                           SOPC_Dataset_LL_NetworkMessage_Header* header,
+                                           SOPC_UADP_GetSecurity_Func getSecurity_Func);
+
+/**
  * Constants definition for Hard-Coded value.
  * It defines the part of the Network Message which are not managed.
  * Warning: these constant cannot be changed without added new code
  */
 
-const bool DATASET_LL_VERSION_FLAGS_ENABLED = true;
 const bool DATASET_LL_FLAGS1_ENABLED = true;
 const bool DATASET_LL_PUBLISHER_ID_ENABLED = true;
 const bool DATASET_LL_GROUP_FLAGS_ENABLED = true;
@@ -180,13 +188,13 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, SO
  */
 static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
                                                         SOPC_Byte pub_id_type,
-                                                        SOPC_Dataset_LL_NetworkMessage* nm);
+                                                        SOPC_Dataset_LL_NetworkMessage_Header* header);
 
 /**
  * Private
  * Return true if ExtendedFlags1 block should be enabled.
  */
-static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage* nm, bool security);
+static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Header* nmh, bool security);
 
 /**
  * Private
@@ -203,6 +211,7 @@ static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t p
 static SOPC_UADP_NetworkMessage* SOPC_Network_Message_Create(void)
 {
     SOPC_UADP_NetworkMessage* result = SOPC_Calloc(1, sizeof(SOPC_UADP_NetworkMessage));
+    assert(NULL != result);
     result->nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
     return result;
 }
@@ -290,9 +299,9 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, SO
 
 static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
                                                         SOPC_Byte pub_id_type,
-                                                        SOPC_Dataset_LL_NetworkMessage* nm)
+                                                        SOPC_Dataset_LL_NetworkMessage_Header* header)
 {
-    assert(NULL != buffer && NULL != nm);
+    assert(NULL != buffer && NULL != header);
     // String Publisher Id is not managed
     assert(DataSet_LL_PubId_String_Id != pub_id_type);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -302,28 +311,28 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
     {
         SOPC_Byte id;
         status = SOPC_Byte_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, id);
         break;
     }
     case DataSet_LL_PubId_UInt16_Id:
     {
         uint16_t id;
         status = SOPC_UInt16_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nm, id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(header, id);
         break;
     }
     case DataSet_LL_PubId_UInt32_Id:
     {
         uint32_t id;
         status = SOPC_UInt32_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nm, id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(header, id);
         break;
     }
     case DataSet_LL_PubId_UInt64_Id:
     {
         uint64_t id;
         status = SOPC_UInt64_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nm, id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(header, id);
         break;
     }
     case DataSet_LL_PubId_String_Id:
@@ -333,9 +342,9 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
     return status;
 }
 
-static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage* nm, bool security)
+static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Header* nmh, bool security)
 {
-    SOPC_Dataset_LL_PublisherId* pub_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm);
+    SOPC_Dataset_LL_PublisherId* pub_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nmh);
     return (DataSet_LL_PubId_Byte_Id != pub_id->type || DATASET_LL_DATASET_CLASSID_ENABLED || security ||
             DATASET_LL_TIMESTAMP_ENABLED || DATASET_LL_PICOSECONDS_ENABLED);
 }
@@ -375,6 +384,10 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     bool securityEnabled = (NULL != security);
     bool signedEnabled = false;
     bool encryptedEnabled = false;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    assert(NULL != header);
+    // TODO : use conf rather than constants to encode message
+    // const SOPC_UADP_Configuration* conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
     const uint8_t dsm_count = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
 
     if (NULL != security)
@@ -385,7 +398,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     }
 
     // UADP version bit 0-3
-    byte = SOPC_Dataset_LL_NetworkMessage_Get_Version(nm);
+    byte = SOPC_Dataset_LL_NetworkMessage_GetVersion(header);
     // UADP flags bit 4-7
     //  - PublisherId enabled
     Network_Message_Set_Bool_Bit(&byte, 4, DATASET_LL_PUBLISHER_ID_ENABLED);
@@ -394,7 +407,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     //  - PayloadHeader enabled
     Network_Message_Set_Bool_Bit(&byte, 6, DATASET_LL_PAYLOAD_HEADER_ENABLED);
     //  - ExtendedFlags1 enabled
-    flags1_enabled = Network_Layer_Is_Flags1_Enabled(nm, securityEnabled);
+    flags1_enabled = Network_Layer_Is_Flags1_Enabled(header, securityEnabled);
     Network_Message_Set_Bool_Bit(&byte, 7, flags1_enabled);
     status = SOPC_Buffer_Write(buffer, &byte, 1);
     check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
@@ -402,7 +415,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     if (flags1_enabled && SOPC_STATUS_OK == status)
     {
         // Bit range 0-2: PublisherId Type
-        byte = (uint8_t) SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->type;
+        byte = (uint8_t) SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->type;
         Network_Message_Set_Bool_Bit(&byte, 3, DATASET_LL_DATASET_CLASSID_ENABLED);
         Network_Message_Set_Bool_Bit(&byte, 4, securityEnabled);
         Network_Message_Set_Bool_Bit(&byte, 5, DATASET_LL_TIMESTAMP_ENABLED);
@@ -415,7 +428,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
     if (DATASET_LL_PUBLISHER_ID_ENABLED && SOPC_STATUS_OK == status)
     {
-        status = Network_Layer_PublisherId_Write(buffer, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm));
+        status = Network_Layer_PublisherId_Write(buffer, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_PubId_Failed);
     }
 
@@ -853,28 +866,22 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     return status;
 }
 
-SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
-                                                          SOPC_UADP_GetSecurity_Func getSecurity_Func)
+SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffer* buffer,
+                                                        SOPC_Dataset_LL_NetworkMessage_Header* header)
 {
+    assert(NULL != header);
+
     SOPC_ReturnStatus status;
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_Network_Message_Create();
-    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-    SOPC_UADP_Configuration* conf = &uadp_nm->conf;
     SOPC_Boolean flags1_enabled = false;
     SOPC_Boolean flags2_enabled = false;
+    SOPC_Byte data;
+    SOPC_Byte version = 0;
+    SOPC_UADP_Configuration* conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
     // Publisher Id Type. Read in Extended flags1 or Byte if no flags1
     SOPC_Byte pub_id_type = DataSet_LL_PubId_Byte_Id;
-    // number of DataSetMessage. Should be one
-    SOPC_Byte msg_count = 0;
-    SOPC_PubSub_SecurityType* security = NULL;
-    SOPC_Buffer* buffer_payload = NULL;
-    uint32_t payload_position = buffer->position;
 
-    uint8_t securitySignedEnabled = false;
-    uint8_t securityEncryptedEnabled = false;
-    uint8_t securityFooterEnabled = false;
-    uint8_t securityResetEnabled = false;
-    uint16_t group_id = 0; // default value means not used
+    status = SOPC_Byte_Read(&data, buffer, 0);
+    check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
 
     // Version and Flags
     //  Bit range 0-3: Version of the UADP NetworkMessage
@@ -882,22 +889,14 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     //  Bit 5: GroupHeader enabled
     //  Bit 6: PayloadHeader enabled
     //  Bit 7: ExtendedFlags1 enabled
-    if (DATASET_LL_VERSION_FLAGS_ENABLED)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Byte data;
-        SOPC_Byte version;
-        status = SOPC_Byte_Read(&data, buffer, 0);
-        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
-
-        if (SOPC_STATUS_OK == status)
-        {
-            version = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
-            SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, version);
-            conf->PublisherIdFlag = Network_Message_Get_Bool_Bit(data, 4);
-            conf->GroupHeaderFlag = Network_Message_Get_Bool_Bit(data, 5);
-            conf->PayloadHeaderFlag = Network_Message_Get_Bool_Bit(data, 6);
-            flags1_enabled = Network_Message_Get_Bool_Bit(data, 7);
-        }
+        version = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
+        SOPC_Dataset_LL_NetworkMessage_SetVersion(header, version);
+        conf->PublisherIdFlag = Network_Message_Get_Bool_Bit(data, 4);
+        conf->GroupHeaderFlag = Network_Message_Get_Bool_Bit(data, 5);
+        conf->PayloadHeaderFlag = Network_Message_Get_Bool_Bit(data, 6);
+        flags1_enabled = Network_Message_Get_Bool_Bit(data, 7);
     }
 
     // Bit range 0-2: PublisherId Type
@@ -908,7 +907,6 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
     // Bit 7: ExtendedFlags2 enabled
     if (flags1_enabled && SOPC_STATUS_OK == status)
     {
-        SOPC_Byte data;
         status = SOPC_Byte_Read(&data, buffer, 0);
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
 
@@ -936,21 +934,64 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         conf->PicoSecondsFlag = false;
         flags2_enabled = false;
     }
-    // starting here, we assume that flags2_enabled is false
-    // and do not manage the following bits for now:
+
+    // The following bits are not managed for now:
     // Bit 0: Chunk message
     // Bit 1: PromotedFields enabled
     // Bit range 2-4: UADP NetworkMessage type
     // Others: not used
-    conf->PromotedFieldsFlag = false;
+    if (flags2_enabled && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Byte_Read(&data, buffer, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            const bool chunkMsg = Network_Message_Get_Bool_Bit(data, 0);
+            conf->PromotedFieldsFlag = Network_Message_Get_Bool_Bit(data, 1);
+            const uint8_t messageType = (data >> 2) & 0x07;
+            if (chunkMsg || conf->PromotedFieldsFlag || messageType != 0)
+            {
+                set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Flags2);
+            }
+        }
+    }
 
     if (conf->PublisherIdFlag && SOPC_STATUS_OK == status)
     {
-        status = Network_Layer_PublisherId_Read(buffer, pub_id_type, nm);
+        status = Network_Layer_PublisherId_Read(buffer, pub_id_type, header);
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType);
     }
 
-    if (conf->DataSetClassIdFlag && SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK != status)
+    {
+        version = 0;
+    }
+    return version;
+}
+
+static SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
+                                           uint32_t payload_sign_position,
+                                           SOPC_Dataset_LL_NetworkMessage* nm,
+                                           SOPC_Dataset_LL_NetworkMessage_Header* header,
+                                           SOPC_UADP_GetSecurity_Func getSecurity_Func)
+{
+    assert(NULL != header && NULL != nm);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // number of DataSetMessage. Should be one
+    SOPC_Byte msg_count = 0;
+    SOPC_PubSub_SecurityType* security = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+
+    SOPC_UADP_Configuration* conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+    uint8_t securitySignedEnabled = false;
+    uint8_t securityEncryptedEnabled = false;
+    uint8_t securityFooterEnabled = false;
+    uint8_t securityResetEnabled = false;
+    uint16_t group_id = 0; // default value means not used
+
+    if (conf->DataSetClassIdFlag)
     {
         // not managed yet
         set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId);
@@ -1110,8 +1151,8 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         {
             /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
             security = getSecurity_Func(
-                securityTokenId, Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)),
-                group_id);
+                securityTokenId,
+                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
             // Checked the security configuration of subscriber
             if (NULL == security ||
                 !Network_Check_ReceivedSecurityMode(security->mode, securitySignedEnabled, securityEncryptedEnabled))
@@ -1125,7 +1166,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
             assert(securityTokenId == security->groupKeys->tokenId);
 
             // Check signature before decoding
-            if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
+            if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_sign_position))
             {
                 set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed);
             }
@@ -1209,7 +1250,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         {
             security = getSecurity_Func(
                 SOPC_PUBSUB_SKS_DEFAULT_TOKENID,
-                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)), group_id);
+                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
             // if security is NULL, there is no reader configured with security sign or encrypt/sign
             if (NULL != security && !Network_Check_ReceivedSecurityMode(security->mode, false, false))
             {
@@ -1265,18 +1306,48 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
         SOPC_Free(dsmSizes);
     }
 
+    // delete the Payload if it has been decrypted
+    if (NULL != buffer_payload && buffer != buffer_payload)
+    {
+        SOPC_Buffer_Delete(buffer_payload);
+    }
+
+    return status;
+}
+
+SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
+                                                          SOPC_UADP_GetSecurity_Func getSecurity_Func)
+{
+    SOPC_ReturnStatus status;
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_Network_Message_Create();
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    const uint32_t payload_sign_position = buffer->position;
+
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    assert(NULL != header);
+
+    status = SOPC_UADP_NetworkMessageHeader_Decode(buffer, header);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        const uint8_t version = SOPC_Dataset_LL_NetworkMessage_GetVersion(header);
+        switch (version)
+        {
+        case UADP_VERSION1:
+            status = Decode_Message_V1(buffer, payload_sign_position, nm, header, getSecurity_Func);
+            break;
+        default:
+            set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Version);
+            break;
+        }
+    }
+
     if (SOPC_STATUS_OK != status)
     {
         assert(SOPC_UADP_NetworkMessage_Error_Code_None != network_Error_Code);
         SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
         SOPC_Free(uadp_nm);
         uadp_nm = NULL;
-    }
-
-    // delete the Payload if it has been decrypted
-    if (NULL != buffer_payload && buffer != buffer_payload)
-    {
-        SOPC_Buffer_Delete(buffer_payload);
     }
 
     return uadp_nm;

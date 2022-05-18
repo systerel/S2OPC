@@ -79,31 +79,33 @@ static void printVariant(const SOPC_Variant* variant)
 
 static void printPublisherId(const SOPC_UADP_NetworkMessage* uadp_nm)
 {
-    SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(uadp_nm->nm);
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    const SOPC_UADP_Configuration* config = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+    SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
     switch (publisher_id->type)
     {
     case DataSet_LL_PubId_Byte_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type Byte - Value %" PRIu8 "\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type Byte - Value %" PRIu8 "\n", config->GroupIdFlag,
                publisher_id->data.byte);
         break;
     case DataSet_LL_PubId_UInt16_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type UInt16 - Value %" PRIu16 "\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type UInt16 - Value %" PRIu16 "\n", config->GroupIdFlag,
                publisher_id->data.uint16);
         break;
     case DataSet_LL_PubId_UInt32_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type UInt32 - Value %" PRIu32 "\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type UInt32 - Value %" PRIu32 "\n", config->GroupIdFlag,
                publisher_id->data.uint32);
         break;
     case DataSet_LL_PubId_UInt64_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type UInt64 - Value %" PRIu64 "\n", uadp_nm->conf.GroupIdFlag,
+        printf("Publisher Id:\n - Enabled %d\n - Type UInt64 - Value %" PRIu64 "\n", config->GroupIdFlag,
                publisher_id->data.uint64);
         break;
     case DataSet_LL_PubId_String_Id:
-        printf("Publisher Id:\n - Enabled %d\n - Type String not managed\n", uadp_nm->conf.PublisherIdFlag);
+        printf("Publisher Id:\n - Enabled %d\n - Type String not managed\n", config->PublisherIdFlag);
         break;
     default:
-        printf("Publisher Id:\n - Enabled %d\n - Type not managed %u\n", uadp_nm->conf.PublisherIdFlag,
-               publisher_id->type);
+        printf("Publisher Id:\n - Enabled %d\n - Type not managed %u\n", config->PublisherIdFlag, publisher_id->type);
     }
 }
 
@@ -112,13 +114,15 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
     if (NULL != uadp_nm)
     {
         SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-        printf("UADP Version %d\n", SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
+        SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+        const SOPC_UADP_Configuration* config = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+        printf("UADP Version %d\n", SOPC_Dataset_LL_NetworkMessage_GetVersion(header));
         printPublisherId(uadp_nm);
-        printf("Security Enabled %d\n", uadp_nm->conf.SecurityFlag);
-        printf("Group Header Enabled %d\n", uadp_nm->conf.GroupHeaderFlag);
-        printf("Writer Group Id:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
+        printf("Security Enabled %d\n", config->SecurityFlag);
+        printf("Group Header Enabled %d\n", config->GroupHeaderFlag);
+        printf("Writer Group Id:\n - Enabled %d\n - Value %d\n", config->GroupIdFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
-        printf("Writer Group Version:\n - Enabled %d\n - Value %u\n", uadp_nm->conf.GroupVersionFlag,
+        printf("Writer Group Version:\n - Enabled %d\n - Value %u\n", config->GroupVersionFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
         uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
         printf("Nb DataSetMessage %d\n", nbDsm);

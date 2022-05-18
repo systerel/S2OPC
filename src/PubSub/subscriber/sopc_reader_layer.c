@@ -73,7 +73,8 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-    SOPC_UADP_Configuration* uadp_conf = &(uadp_nm->conf);
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
 
     uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
 
@@ -126,12 +127,13 @@ static bool SOPC_Sub_Filter_Reader_NetworkMessage(const SOPC_DataSetReader* read
 static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_DataSetReader* reader,
                                                const SOPC_UADP_NetworkMessage* uadp_nm)
 {
-    const SOPC_UADP_Configuration* uadp_conf = &(uadp_nm->conf);
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    const SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
     assert(NULL != uadp_conf && NULL != nm);
 
-    SOPC_DataSet_LL_PublisherIdType nm_pubid_type = SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(nm);
-    SOPC_Dataset_LL_PublisherId* nm_pubid = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm);
+    SOPC_DataSet_LL_PublisherIdType nm_pubid_type = SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(header);
+    SOPC_Dataset_LL_PublisherId* nm_pubid = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
     const SOPC_Conf_PublisherId* conf_pubid = SOPC_DataSetReader_Get_PublisherId(reader);
     assert(NULL != nm_pubid && NULL != conf_pubid);
 
@@ -201,15 +203,21 @@ static bool SOPC_Sub_Filter_Reader_WriterAttr(const uint32_t expectedValue,
 static bool SOPC_Sub_Filter_Reader_WriterGroupId(const SOPC_DataSetReader* reader,
                                                  const SOPC_UADP_NetworkMessage* uadp_nm)
 {
-    return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_WriterGroupId(reader), uadp_nm->conf.GroupIdFlag,
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    const SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+    return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_WriterGroupId(reader), uadp_conf->GroupIdFlag,
                                              SOPC_Dataset_LL_NetworkMessage_Get_GroupId(uadp_nm->nm));
 }
 
 static bool SOPC_Sub_Filter_Reader_WriterGroupVersion(const SOPC_DataSetReader* reader,
                                                       const SOPC_UADP_NetworkMessage* uadp_nm)
 {
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    const SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
     return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_WriterGroupVersion(reader),
-                                             uadp_nm->conf.GroupVersionFlag,
+                                             uadp_conf->GroupVersionFlag,
                                              SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(uadp_nm->nm));
 }
 

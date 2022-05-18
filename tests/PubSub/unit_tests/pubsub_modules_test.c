@@ -119,11 +119,12 @@ uint8_t encoded_network_msg_multi_dsm_data[] = {
 static void check_network_msg_content_uni_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
 {
     ck_assert_uint_eq(1, SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm));
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
 
-    ck_assert_uint_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->type);
-    ck_assert_uint_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->data.byte);
+    ck_assert_uint_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->type);
+    ck_assert_uint_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->data.byte);
 
-    ck_assert_uint_eq(NETWORK_MSG_VERSION, SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
+    ck_assert_uint_eq(NETWORK_MSG_VERSION, SOPC_Dataset_LL_NetworkMessage_GetVersion(header));
 
     ck_assert_uint_eq(NETWORK_MSG_GROUP_ID, SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
     ck_assert_uint_eq(NETWORK_MSG_GROUP_VERSION, SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
@@ -147,11 +148,12 @@ static void check_network_msg_content_uni_dsm(SOPC_Dataset_LL_NetworkMessage* nm
 static void check_network_msg_content_multi_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
 {
     ck_assert_uint_eq(NB_DATASET_MSG, SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm));
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
 
-    ck_assert_uint_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->type);
-    ck_assert_uint_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm)->data.byte);
+    ck_assert_uint_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->type);
+    ck_assert_uint_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->data.byte);
 
-    ck_assert_uint_eq(NETWORK_MSG_VERSION, SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
+    ck_assert_uint_eq(NETWORK_MSG_VERSION, SOPC_Dataset_LL_NetworkMessage_GetVersion(header));
 
     ck_assert_uint_eq(NETWORK_MSG_GROUP_ID, SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
     ck_assert_uint_eq(NETWORK_MSG_GROUP_VERSION, SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
@@ -184,13 +186,14 @@ START_TEST(test_hl_network_msg_encode)
     SOPC_Helper_EndiannessCfg_Initialize();
 
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
 
     bool res = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, 1);
     ck_assert_int_eq(true, res);
 
-    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, NETWORK_MSG_PUBLISHER_ID);
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, NETWORK_MSG_PUBLISHER_ID);
 
-    SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, NETWORK_MSG_VERSION);
+    SOPC_Dataset_LL_NetworkMessage_SetVersion(header, NETWORK_MSG_VERSION);
 
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, NETWORK_MSG_GROUP_ID);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
@@ -261,11 +264,12 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     // Initialize endianess for encoders
     SOPC_Helper_EndiannessCfg_Initialize();
 
-    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(NB_DATASET_MSG);
+    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(NB_DATASET_MSG, 1);
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
 
-    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, NETWORK_MSG_PUBLISHER_ID);
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, NETWORK_MSG_PUBLISHER_ID);
 
-    SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, NETWORK_MSG_VERSION);
+    SOPC_Dataset_LL_NetworkMessage_SetVersion(header, NETWORK_MSG_VERSION);
 
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, NETWORK_MSG_GROUP_ID);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
@@ -423,15 +427,16 @@ START_TEST(test_hl_network_msg_decode_multi_dsm)
     SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
     ck_assert_ptr_nonnull(uadp_nm);
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     ck_assert_ptr_nonnull(nm);
 
     // Check that Network message is as expected
-    SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm);
+    SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
     ck_assert_ptr_nonnull(pubId);
     ck_assert_uint_eq(pubId->type, DataSet_LL_PubId_Byte_Id);
     ck_assert_uint_eq(pubId->data.byte, NETWORK_MSG_PUBLISHER_ID);
 
-    const uint8_t nm_version = SOPC_Dataset_LL_NetworkMessage_Get_Version(nm);
+    const uint8_t nm_version = SOPC_Dataset_LL_NetworkMessage_GetVersion(header);
     ck_assert_uint_eq(nm_version, NETWORK_MSG_VERSION);
 
     const uint16_t nm_groupId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
@@ -568,10 +573,11 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr)
 
 static SOPC_Dataset_LL_NetworkMessage* build_NetworkMessage_From_VarArr(void)
 {
-    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(1);
+    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(1, 1);
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     ck_assert_ptr_nonnull(nm);
 
-    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, NETWORK_MSG_PUBLISHER_ID);
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, NETWORK_MSG_PUBLISHER_ID);
 
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, NETWORK_MSG_GROUP_ID);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
@@ -928,14 +934,16 @@ static void equal_NetworkMessage(SOPC_Dataset_LL_NetworkMessage* left, SOPC_Data
     ck_assert_ptr_nonnull(left);
     ck_assert_ptr_nonnull(right);
 
-    ck_assert_int_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(left));
-    ck_assert_int_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(right));
+    SOPC_Dataset_LL_NetworkMessage_Header* hLeft = SOPC_Dataset_LL_NetworkMessage_GetHeader(left);
+    SOPC_Dataset_LL_NetworkMessage_Header* hRight = SOPC_Dataset_LL_NetworkMessage_GetHeader(right);
+    ck_assert_int_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(hLeft));
+    ck_assert_int_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(hRight));
 
-    ck_assert_int_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(left)->data.byte);
-    ck_assert_int_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(right)->data.byte);
+    ck_assert_int_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(hLeft)->data.byte);
+    ck_assert_int_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(hRight)->data.byte);
 
-    ck_assert_uint_eq(SOPC_Dataset_LL_NetworkMessage_Get_Version(left),
-                      SOPC_Dataset_LL_NetworkMessage_Get_Version(right));
+    ck_assert_uint_eq(SOPC_Dataset_LL_NetworkMessage_GetVersion(hLeft),
+                      SOPC_Dataset_LL_NetworkMessage_GetVersion(hRight));
 
     ck_assert_uint_eq(SOPC_Dataset_LL_NetworkMessage_Get_GroupId(left),
                       SOPC_Dataset_LL_NetworkMessage_Get_GroupId(right));

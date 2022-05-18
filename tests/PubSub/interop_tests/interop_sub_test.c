@@ -89,36 +89,40 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
     }
     int result = 0;
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-    if (1 != SOPC_Dataset_LL_NetworkMessage_Get_Version(nm))
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    const SOPC_UADP_Configuration* config = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+    assert(NULL != config);
+
+    if (1 != SOPC_Dataset_LL_NetworkMessage_GetVersion(header))
     {
-        printf("UADP Version NOK : %d\n", SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
+        printf("UADP Version NOK : %d\n", SOPC_Dataset_LL_NetworkMessage_GetVersion(header));
         result = -1;
     }
     {
-        SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(uadp_nm->nm);
-        if (false == uadp_nm->conf.GroupIdFlag || DataSet_LL_PubId_UInt16_Id != publisher_id->type ||
+        SOPC_Dataset_LL_PublisherId* publisher_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
+        if (false == config->GroupIdFlag || DataSet_LL_PubId_UInt16_Id != publisher_id->type ||
             3 != publisher_id->data.uint16)
         {
-            printf("Publisher Id NOK :\n - Enabled %d\n - Type %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
+            printf("Publisher Id NOK :\n - Enabled %d\n - Type %d\n - Value %d\n", config->GroupIdFlag,
                    (int) publisher_id->type, publisher_id->data.byte);
             result = -1;
         }
     }
-    if (!uadp_nm->conf.GroupHeaderFlag)
+    if (!config->GroupHeaderFlag)
     {
         printf("Group Header should be enabled\n");
         result = -1;
     }
-    if (false == uadp_nm->conf.GroupIdFlag || 10 != SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm))
+    if (false == config->GroupIdFlag || 10 != SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm))
     {
-        printf("Writer Group Id NOK:\n - Enabled %d\n - Value %d\n", uadp_nm->conf.GroupIdFlag,
+        printf("Writer Group Id NOK:\n - Enabled %d\n - Value %d\n", config->GroupIdFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
         result = -1;
     }
 
-    if (false == uadp_nm->conf.GroupVersionFlag || 0 != SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm))
+    if (false == config->GroupVersionFlag || 0 != SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm))
     {
-        printf("Writer Group Version NOK:\n - Enabled %d\n - Value %u\n", uadp_nm->conf.GroupVersionFlag,
+        printf("Writer Group Version NOK:\n - Enabled %d\n - Value %u\n", config->GroupVersionFlag,
                SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
         result = -1;
     }

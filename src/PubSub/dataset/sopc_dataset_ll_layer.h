@@ -23,10 +23,15 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_pubsub_conf.h"
+
+#define UADP_VERSION1 1
+#define UADP_DEFAULT_VERSION UADP_VERSION1
 
 typedef struct SOPC_Dataset_LL_DataSetMessage SOPC_Dataset_LL_DataSetMessage;
 
 typedef struct SOPC_Dataset_LL_NetworkMessage SOPC_Dataset_LL_NetworkMessage;
+typedef struct SOPC_Dataset_LL_NetworkMessage_Header SOPC_Dataset_LL_NetworkMessage_Header;
 
 typedef enum SOPC_DataSet_LL_PublisherIdType
 {
@@ -57,13 +62,20 @@ typedef struct SOPC_Dataset_LL_PublisherId
  * \brief Create a NetworkMessage
  *
  * \param dsm_nb  Number of DataSetMessage to allocate
+ * \param uadp_version  Version of UADP message
  *
  * \return Dataset_LL_NetworkMessage
  */
-SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb);
+SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb, uint8_t uadp_version);
 
 // todo change interface to create nm without dsm
 SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_CreateEmpty(void);
+
+/** \brief returns the Header of a network message */
+SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader(SOPC_Dataset_LL_NetworkMessage* nm);
+
+/** \brief returns the Configuration of a network message */
+SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 
 /**
  * Allocate memory for the internal dataset messages array of a Network Message
@@ -75,10 +87,10 @@ bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_Ne
  */
 void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm);
 
-uint8_t SOPC_Dataset_LL_NetworkMessage_Get_Version(SOPC_Dataset_LL_NetworkMessage* nm);
+uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 
 // Only for decoding: precondition: version <= 15 (4 bits)
-void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t version);
+void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint8_t version);
 
 uint8_t SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(SOPC_Dataset_LL_NetworkMessage* nm);
 
@@ -87,17 +99,18 @@ SOPC_Dataset_LL_DataSetMessage* SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At
 
 /* PUBLISHER ID */
 // publisher id type
-SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(SOPC_Dataset_LL_NetworkMessage* nm);
+SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(
+    SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 // publisher id
 /* Return address of the internal publisher id type
  * User shall not delete data
  */
-SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage* nm);
+SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh);
 
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_Byte id);
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_NetworkMessage* nm, uint16_t id);
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_NetworkMessage* nm, uint32_t id);
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_NetworkMessage* nm, uint64_t id);
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_Byte id);
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint16_t id);
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint32_t id);
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint64_t id);
 /* WRITER GROUP ID */
 void SOPC_Dataset_LL_NetworkMessage_Set_GroupId(SOPC_Dataset_LL_NetworkMessage* nm, uint16_t id);
 uint16_t SOPC_Dataset_LL_NetworkMessage_Get_GroupId(SOPC_Dataset_LL_NetworkMessage* nm);

@@ -29,7 +29,6 @@
 typedef struct SOPC_UADP_Network_Message
 {
     SOPC_Dataset_LL_NetworkMessage* nm;
-    SOPC_UADP_Configuration conf;
 } SOPC_UADP_NetworkMessage;
 
 /**
@@ -56,6 +55,13 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
  */
 SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
                                                           SOPC_UADP_GetSecurity_Func getSecurity_Func);
+
+/** Extract the message header
+ * \param buffer The Buffer to decode
+ * \param buffer The header to header to fill with decoded buffer
+ * \return SOPC_STATUS_OK if header is correct.*/
+SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffer* buffer,
+                                                        SOPC_Dataset_LL_NetworkMessage_Header* header);
 
 void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm);
 
@@ -95,7 +101,9 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Read_InvalidBit,
     SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1 = 0x30000000,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Version = 0x30000000,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags2,
     SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType,
     SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId,
     SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum,

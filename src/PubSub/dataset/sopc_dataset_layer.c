@@ -22,21 +22,28 @@
 #include "sopc_dataset_layer.h"
 #include "sopc_dataset_ll_layer.h"
 
-static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_WriterGroup* group);
+static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_WriterGroup* group);
 
 SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_WriterGroup* group)
 {
     assert(NULL != group);
     uint8_t nb_dataSetWriter = SOPC_WriterGroup_Nb_DataSetWriter(group);
-    SOPC_Dataset_LL_NetworkMessage* msg_nm = SOPC_Dataset_LL_NetworkMessage_Create(nb_dataSetWriter);
+    // TODO :replace by a configurable value through writer group
+    SOPC_Dataset_LL_NetworkMessage* msg_nm =
+        SOPC_Dataset_LL_NetworkMessage_Create(nb_dataSetWriter, UADP_DEFAULT_VERSION);
     if (NULL == msg_nm)
+    {
+        return NULL;
+    }
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(msg_nm);
+    if (NULL == header)
     {
         return NULL;
     }
 
     // UADP version is already set to default one
 
-    SOPC_NetworkMessage_Set_PublisherId(msg_nm, group);
+    SOPC_NetworkMessage_Set_PublisherId(header, group);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(msg_nm, SOPC_WriterGroup_Get_Id(group));
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(msg_nm, SOPC_WriterGroup_Get_Version(group));
 
@@ -80,7 +87,7 @@ void SOPC_NetworkMessage_Set_Variant_At(SOPC_Dataset_NetworkMessage* nm,
 }
 
 // private
-static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_WriterGroup* group)
+static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_WriterGroup* group)
 {
     const SOPC_PubSubConnection* conf_connection = SOPC_WriterGroup_Get_Connection(group);
     const SOPC_Conf_PublisherId* conf_pubid = SOPC_PubSubConnection_Get_PublisherId(conf_connection);
@@ -89,18 +96,18 @@ static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage* 
     assert(SOPC_UInteger_PublisherId == conf_pubid->type);
     if (UINT32_MAX < conf_id)
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nm, conf_id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nmh, conf_id);
     }
     else if (UINT16_MAX < conf_id)
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nm, (uint32_t) conf_id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nmh, (uint32_t) conf_id);
     }
     else if (UINT8_MAX < conf_id)
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nm, (uint16_t) conf_id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nmh, (uint16_t) conf_id);
     }
     else
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nm, (uint8_t) conf_id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nmh, (uint8_t) conf_id);
     }
 }

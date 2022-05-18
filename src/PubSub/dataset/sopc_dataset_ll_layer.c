@@ -18,7 +18,10 @@
  */
 
 #include <assert.h>
+#include <string.h>
+
 #include "sopc_mem_alloc.h"
+#include "sopc_pubsub_conf.h"
 
 #include "sopc_dataset_ll_layer.h"
 
@@ -42,18 +45,22 @@ typedef struct Dataset_LL_Group
     uint32_t version;
 } Dataset_LL_Group;
 
+// UADP Comment network Header
+struct SOPC_Dataset_LL_NetworkMessage_Header
+{
+    uint8_t UADP_version;
+    SOPC_UADP_Configuration flagsConfig;
+    int networkMessage_type;
+    SOPC_Dataset_LL_PublisherId publisher_id;
+    // dataset_classId not managed
+};
+
 struct SOPC_Dataset_LL_NetworkMessage
 {
     // network_message_header
+    SOPC_Dataset_LL_NetworkMessage_Header msgHeader;
 
-    // version is set to 1 for OPC UA Pub-Sub spec 1.4
-    uint8_t UADP_version;
-
-    bool publisher_id_enabled;
-
-    SOPC_Dataset_LL_PublisherId publisher_id;
     // only DataSetMessage payload is managed
-    int networkMessage_type;
 
     Dataset_LL_Group group;
 
@@ -71,9 +78,6 @@ struct SOPC_Dataset_LL_NetworkMessage
     uint8_t dataset_messages_length;
 };
 
-// version is set to 1 for OPC UA Pub-Sub spec 1.4
-#define UADP_VERSION 1
-
 /**
  * Private
  * Free attributes of a given field
@@ -90,14 +94,14 @@ void Dataset_LL_Delete_DataSetMessages_Array(SOPC_Dataset_LL_NetworkMessage* nm)
  * BODY NetworkMessage
  */
 
-SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb)
+SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb, uint8_t uadp_version)
 {
-    SOPC_Dataset_LL_NetworkMessage* result = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
+    struct SOPC_Dataset_LL_NetworkMessage* result = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
     if (NULL == result)
     {
         return NULL;
     }
-    result->UADP_version = UADP_VERSION;
+    result->msgHeader.UADP_version = uadp_version;
     bool status = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(result, dsm_nb);
     if (!status)
     {
@@ -109,17 +113,17 @@ SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t ds
 
 SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_CreateEmpty(void)
 {
-    SOPC_Dataset_LL_NetworkMessage* result = SOPC_Calloc(1, sizeof(SOPC_Dataset_LL_NetworkMessage));
+    struct SOPC_Dataset_LL_NetworkMessage* result = SOPC_Calloc(1, sizeof(SOPC_Dataset_LL_NetworkMessage));
 
-    result->UADP_version = UADP_VERSION;
+    memset(&result->msgHeader, 0, sizeof(result->msgHeader));
 
     // publisher id type is int 32
-    result->publisher_id_enabled = true;
-    result->publisher_id.data.byte = 0;
-    result->publisher_id.type = DataSet_LL_PubId_Byte_Id;
+    result->msgHeader.flagsConfig.PublisherIdFlag = true;
+    result->msgHeader.publisher_id.data.byte = 0;
+    result->msgHeader.publisher_id.type = DataSet_LL_PubId_Byte_Id;
 
     // only DataSetMessage payload is managed
-    result->networkMessage_type = 0;
+    result->msgHeader.networkMessage_type = 0;
 
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(result, 0);
 
@@ -136,21 +140,21 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
     SOPC_Free(nm);
 }
 
-uint8_t SOPC_Dataset_LL_NetworkMessage_Get_Version(SOPC_Dataset_LL_NetworkMessage* nm)
+uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
-    if (NULL == nm)
+    if (NULL == nmh)
     {
         return 0;
     }
-    return nm->UADP_version;
+    return nmh->UADP_version;
 }
 
-void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t version)
+void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint8_t version)
 {
     assert(version <= 15); // Encoded on 4 bits
-    if (NULL != nm)
+    if (NULL != nmh)
     {
-        nm->UADP_version = version;
+        nmh->UADP_version = version;
     }
 }
 
@@ -173,57 +177,58 @@ SOPC_Dataset_LL_DataSetMessage* SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At
     return nm->dataset_messages + index;
 }
 
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_Byte id)
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_Byte id)
 {
-    if (NULL != nm)
+    if (NULL != nmh)
     {
-        nm->publisher_id.type = DataSet_LL_PubId_Byte_Id;
-        nm->publisher_id.data.byte = id;
+        nmh->publisher_id.type = DataSet_LL_PubId_Byte_Id;
+        nmh->publisher_id.data.byte = id;
     }
 }
 
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_NetworkMessage* nm, uint16_t id)
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint16_t id)
 {
-    if (NULL != nm)
+    if (NULL != nmh)
     {
-        nm->publisher_id.type = DataSet_LL_PubId_UInt16_Id;
-        nm->publisher_id.data.uint16 = id;
+        nmh->publisher_id.type = DataSet_LL_PubId_UInt16_Id;
+        nmh->publisher_id.data.uint16 = id;
     }
 }
 
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_NetworkMessage* nm, uint32_t id)
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint32_t id)
 {
-    if (NULL != nm)
+    if (NULL != nmh)
     {
-        nm->publisher_id.type = DataSet_LL_PubId_UInt32_Id;
-        nm->publisher_id.data.uint32 = id;
+        nmh->publisher_id.type = DataSet_LL_PubId_UInt32_Id;
+        nmh->publisher_id.data.uint32 = id;
     }
 }
 
-void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_NetworkMessage* nm, uint64_t id)
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint64_t id)
 {
-    if (NULL != nm)
+    if (NULL != nmh)
     {
-        nm->publisher_id.type = DataSet_LL_PubId_UInt64_Id;
-        nm->publisher_id.data.uint64 = id;
+        nmh->publisher_id.type = DataSet_LL_PubId_UInt64_Id;
+        nmh->publisher_id.data.uint64 = id;
     }
 }
 
-SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage* nm)
+SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
-    if (NULL == nm || !nm->publisher_id_enabled)
+    if (NULL == nmh || !nmh->flagsConfig.PublisherIdFlag)
     {
         return NULL;
     }
-    return &(nm->publisher_id);
+    return &(nmh->publisher_id);
 }
 
 /**
  * Hyp: only uint32 is managed
  */
-SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(SOPC_Dataset_LL_NetworkMessage* nm)
+SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(
+    SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
-    return nm->publisher_id.type;
+    return nmh->publisher_id.type;
 }
 
 /**
@@ -393,6 +398,24 @@ void Dataset_LL_Delete_DataSetFieldAttributes(SOPC_Dataset_LL_DataSetField* fiel
         SOPC_Variant_Delete(field->variant);
         field->variant = NULL;
     }
+}
+
+SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+{
+    if (NULL == nmh)
+    {
+        return NULL;
+    }
+    return &nmh->flagsConfig;
+}
+
+SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader(SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    if (NULL == nm)
+    {
+        return NULL;
+    }
+    return &nm->msgHeader;
 }
 
 bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t dsm_nb)

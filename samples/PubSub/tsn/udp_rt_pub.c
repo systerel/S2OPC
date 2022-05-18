@@ -77,11 +77,12 @@ static void Timestamp_Normalize(struct timespec* timestamp)
 
 static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
 {
-    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(1);
+    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(1, 1);
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
-    SOPC_Dataset_LL_NetworkMessage_SetVersion(nm, 1);
+    SOPC_Dataset_LL_NetworkMessage_SetVersion(header, 1);
     SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(dsm, 5);
-    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nm, 15300);
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(header, 15300);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, 1245);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, 963852);
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, 123);
