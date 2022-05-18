@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 01/06/2022 14:09:55
+ Date                 : 01/06/2022 14:32:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -180,6 +180,9 @@ void INITIALISATION(void) {
    app_cb_call_context_bs__INITIALISATION();
    session_mgr__INITIALISATION();
    msg_read_request_bs__INITIALISATION();
+   msg_read_request__INITIALISATION();
+   msg_read_response_bs__INITIALISATION();
+   service_read_it__INITIALISATION();
    user_authorization_bs__INITIALISATION();
    data_value_pointer_bs__INITIALISATION();
    address_space_bs__INITIALISATION();
@@ -193,9 +196,6 @@ void INITIALISATION(void) {
    service_response_cb_bs__INITIALISATION();
    write_value_pointer_bs__INITIALISATION();
    address_space__INITIALISATION();
-   msg_read_request__INITIALISATION();
-   msg_read_response_bs__INITIALISATION();
-   service_read_it__INITIALISATION();
    service_read_1__INITIALISATION();
    service_read__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();
