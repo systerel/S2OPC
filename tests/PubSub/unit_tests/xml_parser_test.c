@@ -201,8 +201,8 @@ START_TEST(test_sub_xml_parsing)
     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
 
-    ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
-    uint16_t writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
+    ck_assert_uint_eq(1, SOPC_ReaderGroup_Get_GroupVersion(readerGroup));
+    uint16_t writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(50, writerId); // same as writeGroupId
@@ -212,7 +212,7 @@ START_TEST(test_sub_xml_parsing)
 
     ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
 
-    pubId = SOPC_DataSetReader_Get_PublisherId(dataSetReader);
+    pubId = SOPC_ReaderGroup_Get_PublisherId(readerGroup);
     ck_assert_int_eq(SOPC_UInteger_PublisherId, pubId->type);
     ck_assert_uint_eq(123, pubId->data.uint);
 
@@ -236,8 +236,8 @@ START_TEST(test_sub_xml_parsing)
     dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 1);
     ck_assert_ptr_nonnull(dataSetReader);
 
-    ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
-    writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
+    ck_assert_uint_eq(1, SOPC_ReaderGroup_Get_GroupVersion(readerGroup));
+    writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(14, writerId); // same as writeGroupId (default value)
@@ -247,7 +247,7 @@ START_TEST(test_sub_xml_parsing)
 
     ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
 
-    pubId = SOPC_DataSetReader_Get_PublisherId(dataSetReader);
+    pubId = SOPC_ReaderGroup_Get_PublisherId(readerGroup);
     ck_assert_int_eq(SOPC_UInteger_PublisherId, pubId->type);
     ck_assert_uint_eq(123, pubId->data.uint);
 
@@ -291,8 +291,8 @@ START_TEST(test_sub_xml_parsing)
     dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
     ck_assert_ptr_nonnull(dataSetReader);
 
-    ck_assert_uint_eq(1, SOPC_DataSetReader_Get_WriterGroupVersion(dataSetReader));
-    writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(dataSetReader);
+    ck_assert_uint_eq(1, SOPC_ReaderGroup_Get_GroupVersion(readerGroup));
+    writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(15, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
     ck_assert_uint_eq(52, writerId); // same as writeGroupId
@@ -302,7 +302,7 @@ START_TEST(test_sub_xml_parsing)
 
     ck_assert_int_eq(SOPC_TargetVariablesDataType, SOPC_DataSetReader_Get_DataSet_TargetType(dataSetReader));
 
-    pubId = SOPC_DataSetReader_Get_PublisherId(dataSetReader);
+    pubId = SOPC_ReaderGroup_Get_PublisherId(readerGroup);
     ck_assert_int_eq(SOPC_UInteger_PublisherId, pubId->type);
     ck_assert_uint_eq(456, pubId->data.uint);
 

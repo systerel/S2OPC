@@ -958,6 +958,11 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, imsg);
                 assert(readerGroup != NULL);
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
+                SOPC_ReaderGroup_Set_GroupVersion(readerGroup, msg->groupVersion);
+                SOPC_ReaderGroup_Set_GroupId(readerGroup, msg->groupId);
+
+                SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id);
+
                 assert(msg->nb_datasets < 0x100);
                 allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
 
@@ -967,12 +972,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, ids);
                     assert(dataSetReader != NULL);
-                    SOPC_DataSetReader_Set_WriterGroupVersion(dataSetReader, msg->groupVersion);
-                    SOPC_DataSetReader_Set_WriterGroupId(dataSetReader, msg->groupId);
                     SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, ds->writer_id);
                     SOPC_DataSetReader_Set_ReceiveTimeout(dataSetReader, 2 * msg->publishing_interval);
-
-                    SOPC_DataSetReader_Set_PublisherId_UInteger(dataSetReader, msg->publisher_id);
 
                     allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
                         dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);

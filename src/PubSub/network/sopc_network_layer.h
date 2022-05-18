@@ -23,8 +23,10 @@
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_pubsub_security.h"
+#include "sopc_sub_target_variable.h"
 
 // TODO: use security mode instead of security enabled
+// TODO: remove SOPC_UADP_NetworkMessage_Get_Last_Error and provide a call-specific return value
 //
 typedef struct SOPC_UADP_Network_Message
 {
@@ -44,24 +46,89 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
                                              SOPC_PubSub_SecurityType* securityCtx); //
 
 /**
+ * \brief A callback for ReaderGroup identification. When a network message is received, this
+ *      callback is expected to return a matching ::SOPC_ReaderGroup. It is used to check if the remaining
+ *      parts of the message has to be decoded or not.
+ *
+ * \param connection is the Network connection
+ * \param uadp_conf Configuration of the received message
+ * \param pubid Publisher Id received
+ * \param groupVersion Group Version received
+ * \param groupId Group Id received
+ *
+ * \return A ::SOPC_ReaderGroup matching the received message or NULL if no configured connection matches.
+ */
+typedef const SOPC_ReaderGroup* (*SOPC_UADP_NetworkMessage_GetReaderGroup)(const SOPC_PubSubConnection* connection,
+                                                                           const SOPC_UADP_Configuration* uadp_conf,
+                                                                           const SOPC_Dataset_LL_PublisherId* pubid,
+                                                                           const uint32_t groupVersion,
+                                                                           const uint32_t groupId);
+
+/**
+ * \brief A callback for DataSetReader identification. When a DataSet content is received, this
+ *      callback is expected to return a matching ::SOPC_DataSetReader. It is used to check if the content of
+ *      the dataset has to be decoded or not, and to route decoding to the correct reader.
+ *
+ * \param group is the Reader Group on which the DataSet is received
+ * \param uadp_conf Configuration of the received message
+ * \param dataSetWriterId DataSetWriter Id received
+ *
+ * \return A ::SOPC_DataSetReader matching the received DataSet or NULL if no matching Reader is configured for the
+ * given group.
+ */
+typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SOPC_ReaderGroup* group,
+                                                                        const SOPC_UADP_Configuration* uadp_conf,
+                                                                        const uint16_t dataSetWriterId);
+
+/**
+ * \brief A callback for DataSet message application. When a compliant DataSet is received, this
+ *      callback is expected to forward all variables received in ::dsm to  ::targetConfig, depending on filter
+ * parameters in ::reader
+ *
+ * \param dsm The received DataSetMessage
+ * \param targetConfig Configuration of the Subscriber receive event
+ * \param reader The matching reader.
+ *
+ * \return - ::SOPC_STATUS_OK if all variables were written
+ *         - ::SOPC_STATUS_ENCODING_ERROR if the received DataSetMessage does not match expected ::reader configuration.
+ *         - ::SOPC_STATUS_ENCODING_ERROR if the user-level ::SOPC_SubTargetVariable_SetVariables fails.
+ */
+typedef SOPC_ReturnStatus (*SOPC_UADP_NetworkMessage_SetDsm)(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                             SOPC_SubTargetVariableConfig* targetConfig,
+                                                             const SOPC_DataSetReader* reader);
+
+typedef struct
+{
+    SOPC_UADP_NetworkMessage_GetReaderGroup getGroup_Func;
+    SOPC_UADP_NetworkMessage_GetReader getReader_Func;
+    SOPC_UADP_NetworkMessage_SetDsm setDsm_Func;
+} SOPC_UADP_NetworkMessage_Reader_Callbacks;
+
+typedef struct
+{
+    SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
+    SOPC_UADP_GetSecurity_Func getSecurity_Func;
+    SOPC_SubTargetVariableConfig* targetConfig;
+} SOPC_UADP_NetworkMessage_Reader_Configuration;
+
+/**
  * \brief Decode a UADP packet into a NetworkMessage
  *
  * \param buffer the UADP byte to decode
- * \param getSecurity_Func is a callback to retrieve Security information related to the security token and publisher of
- * the message
- *
- * \return A NetworkMessage corresponding to the UADP packet or NULL if the operation does not succeed
- *
- */
-SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(SOPC_Buffer* buffer,
-                                                          SOPC_UADP_GetSecurity_Func getSecurity_Func);
 
-/** Extract the message header
- * \param buffer The Buffer to decode
- * \param buffer The header to header to fill with decoded buffer
- * \return SOPC_STATUS_OK if header is correct.*/
-SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffer* buffer,
-                                                        SOPC_Dataset_LL_NetworkMessage_Header* header);
+ * \param reader_config The configuration for message parsing/filtering
+ * \param connection The related connection
+ *
+ * \return a pointer to a new network message (must be freed by caller) if decoding succeeded and led
+ *          to at least 1 variable update.
+ *          Otherwise, call ::SOPC_UADP_NetworkMessage_Get_Last_Error to identify decoding error.
+ *          Note that this can simply caused by the fact that the received message does not
+ *          fit any Group/PublisherId/WriterId filters.
+ */
+SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(
+    SOPC_Buffer* buffer,
+    const SOPC_UADP_NetworkMessage_Reader_Configuration* reader_config,
+    const SOPC_PubSubConnection* connection);
 
 void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm);
 
@@ -97,11 +164,15 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Read_SecurityDecrypt_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSkip_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_InvalidBit,
     SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Version = 0x30000000,
+    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup = 0x30000000,
+    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingReader,
+    SOPC_UADP_NetworkMessage_Error_Read_BadMetaData,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Version = 0x40000000,
     SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1,
     SOPC_UADP_NetworkMessage_Error_Unsupported_Flags2,
     SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType,

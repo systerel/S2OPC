@@ -806,7 +806,6 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
 static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
 {
     assert(NULL != group);
-    uint8_t size = SOPC_ReaderGroup_Nb_DataSetReader(group);
     if (SOPC_SecurityMode_Invalid == SOPC_ReaderGroup_Get_SecurityMode(group) ||
         SOPC_SecurityMode_None == SOPC_ReaderGroup_Get_SecurityMode(group))
     {
@@ -817,43 +816,38 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
     assert(NULL != schedulerCtx.securityCtx);
 
     // Create a new sub security context for each publisher id managed by this reader group
-    size = SOPC_ReaderGroup_Nb_DataSetReader(group);
-    for (uint8_t i = 0; i < size; i++)
+    const SOPC_Conf_PublisherId* pubId = SOPC_ReaderGroup_Get_PublisherId(group);
+    assert(NULL != pubId); // Reader without publisher id are not managed
+
+    // check the publisher id is already registered.
+    SOPC_SubScheduler_Security_Pub_Ctx* pubCtx =
+        SOPC_SubScheduler_Get_Security_Pub_Ctx(SOPC_PUBSUB_SKS_DEFAULT_TOKENID, *pubId);
+
+    if (NULL == pubCtx)
     {
-        SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
-        const SOPC_Conf_PublisherId* pubId = SOPC_DataSetReader_Get_PublisherId(reader);
-        assert(NULL != pubId); // Reader without publisher id are not managed
-
-        // check the publisher id is already registered.
-        SOPC_SubScheduler_Security_Pub_Ctx* pubCtx =
-            SOPC_SubScheduler_Get_Security_Pub_Ctx(SOPC_PUBSUB_SKS_DEFAULT_TOKENID, *pubId);
-
-        if (NULL == pubCtx)
-        {
-            // not found, create a new one
-            pubCtx = SOPC_SubScheduler_Pub_Ctx_Create(pubId);
-            if (NULL != pubCtx)
-            {
-                SOPC_UNUSED_RESULT(SOPC_Array_Append(schedulerCtx.securityCtx, pubCtx));
-            }
-        }
-
+        // not found, create a new one
+        pubCtx = SOPC_SubScheduler_Pub_Ctx_Create(pubId);
         if (NULL != pubCtx)
         {
-            // check if the writer group is already registered.
-            uint16_t writerGroupId = SOPC_DataSetReader_Get_WriterGroupId(reader);
-            SOPC_SubScheduler_Security_Reader_Ctx* readerCtx =
-                SOPC_SubScheduler_Pub_Ctx_Get_Reader_Ctx(pubCtx, writerGroupId);
+            SOPC_UNUSED_RESULT(SOPC_Array_Append(schedulerCtx.securityCtx, pubCtx));
+        }
+    }
 
-            if (NULL == readerCtx)
+    if (NULL != pubCtx)
+    {
+        // check if the writer group is already registered.
+        uint16_t writerGroupId = SOPC_ReaderGroup_Get_GroupId(group);
+        SOPC_SubScheduler_Security_Reader_Ctx* readerCtx =
+            SOPC_SubScheduler_Pub_Ctx_Get_Reader_Ctx(pubCtx, writerGroupId);
+
+        if (NULL == readerCtx)
+        {
+            // not found, create a new one
+            readerCtx =
+                SOPC_SubScheduler_Reader_Ctx_Create(pubId, writerGroupId, SOPC_ReaderGroup_Get_SecurityMode(group));
+            if (NULL != readerCtx)
             {
-                // not found, create a new one
-                readerCtx =
-                    SOPC_SubScheduler_Reader_Ctx_Create(pubId, writerGroupId, SOPC_ReaderGroup_Get_SecurityMode(group));
-                if (NULL != readerCtx)
-                {
-                    SOPC_UNUSED_RESULT(SOPC_Array_Append(pubCtx->readers, readerCtx));
-                }
+                SOPC_UNUSED_RESULT(SOPC_Array_Append(pubCtx->readers, readerCtx));
             }
         }
     }

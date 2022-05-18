@@ -28,46 +28,67 @@
  * Filter at NetworkMessage Level
  *
  */
-static bool SOPC_Sub_Filter_Reader_NetworkMessage(const SOPC_DataSetReader* reader,
-                                                  const SOPC_UADP_NetworkMessage* uadp_nm);
-static inline bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_DataSetReader* reader,
-                                                      const SOPC_Dataset_LL_NetworkMessage* nm,
-                                                      const SOPC_Dataset_LL_NetworkMessage_Header* header,
-                                                      const SOPC_UADP_Configuration* uadp_conf);
-static inline bool SOPC_Sub_Filter_Reader_WriterGroupId(const SOPC_DataSetReader* reader,
-                                                        const SOPC_Dataset_LL_NetworkMessage* nm,
-                                                        const SOPC_UADP_Configuration* uadp_conf);
-static inline bool SOPC_Sub_Filter_Reader_WriterGroupVersion(const SOPC_DataSetReader* reader,
-                                                             const SOPC_Dataset_LL_NetworkMessage* nm,
-                                                             const SOPC_UADP_Configuration* uadp_conf);
+static inline bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf_pubid,
+                                                      const SOPC_Dataset_LL_PublisherId* nm_pubid);
 
-/**
- * Filter at DataSetMessage Level
- *
- * Only DataSetWriter id is filter for this version.
- *
- * Next Step is filtering on:
- *  - DataSetMetaData : version
- *  - DataSetFieldContentMask
- */
-static bool SOPC_Sub_Filter_Reader_DataSetMessage(const SOPC_DataSetReader* reader,
-                                                  const SOPC_UADP_Configuration* contentMask,
-                                                  const SOPC_Dataset_LL_DataSetMessage* dsm);
-static bool SOPC_Sub_Filter_Reader_DataSetWriter(const SOPC_DataSetReader* reader,
-                                                 const SOPC_UADP_Configuration* contentMask,
-                                                 const SOPC_Dataset_LL_DataSetMessage* dsm);
 static bool SOPC_Sub_Filter_Reader_FieldMetaData(const SOPC_DataSetReader* reader,
                                                  const SOPC_Dataset_LL_DataSetMessage* dsm);
+/** \brief
+ *      Identify a reader in connection matching received parameters
+ * \param connection The connection configuration
+ * \param uadp_conf The received message configuration
+ * \param pubid The Publisher Id received
+ * \param groupVersion The GroupVersion received
+ * \param groupId The GroupId received
+ * \return the reader group, or NULL if no matching group found
+ */
+static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnection* connection,
+                                                       const SOPC_UADP_Configuration* uadp_conf,
+                                                       const SOPC_Dataset_LL_PublisherId* pubid,
+                                                       const uint32_t groupVersion,
+                                                       const uint32_t groupId);
 
-// Generic function to filter a writer Attribute
-static bool SOPC_Sub_Filter_Reader_WriterAttr(uint32_t expectedValue, bool msgEnabled, uint32_t msgValue);
+/** \brief
+ *      Identify a reader in a group matching received parameters in nm
+ * \param group The group configuration
+ * \param uadp_conf The received message configuration
+ * \param writerId The received dataset writerId
+ *
+ * \return the dataset reader, or NULL if no matching reader found
+ */
+static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
+                                                    const SOPC_UADP_Configuration* uadp_conf,
+                                                    const uint16_t writerId);
+
+/** \brief
+ *      Received a DSM and applies changes to target variables.
+ * \pre Groups & Writer Id must have been checked prior to call.
+ * \param dsm The received DataSetMesasge
+ * \param uadp_conf The received message configuration
+ * \param writerId The received dataset writerId
+ *
+ * \return the dataset reader, or NULL if no matching reader found
+ */
+static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                             SOPC_SubTargetVariableConfig* config,
+                                             const SOPC_DataSetReader* reader);
+
+const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Default_Readers = {
+    .getGroup_Func = &SOPC_Sub_GetReaderGroup,
+    .getReader_Func = &SOPC_Sub_GetReader,
+    .setDsm_Func = &SOPC_Sub_ReceiveDsm};
 
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
                                         SOPC_SubTargetVariableConfig* config,
                                         SOPC_UADP_GetSecurity_Func securityCBck)
 {
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, securityCBck);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
+        .getSecurity_Func = securityCBck,
+        .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
+        .targetConfig = config};
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
     if (NULL == uadp_nm)
     {
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
@@ -75,92 +96,115 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
         return SOPC_STATUS_ENCODING_ERROR;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
-    SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
-
-    uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
-
-    // Iterate on DataSetReader through ReaderGroup
-    for (uint16_t i = 0; i < nbReaderGroup; i++)
-    {
-        SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, i);
-        assert(NULL != readerGroup);
-
-        uint8_t nbReader = SOPC_ReaderGroup_Nb_DataSetReader(readerGroup);
-        for (uint8_t j = 0; j < nbReader; j++)
-        {
-            SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, j);
-            assert(NULL != reader);
-
-            // Applies filter at Network Message Level
-            if (SOPC_Sub_Filter_Reader_NetworkMessage(reader, uadp_nm))
-            {
-                // Applies filter at DataSetMessage Message Level
-                uint16_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
-                for (uint8_t k = 0; k < nbDsm; k++)
-                {
-                    SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, k);
-                    assert(NULL != dsm);
-                    if (SOPC_Sub_Filter_Reader_DataSetMessage(reader, uadp_conf, dsm))
-                    {
-                        bool write_succes = SOPC_SubTargetVariable_SetVariables(config, reader, dsm);
-                        if (!write_succes)
-                        {
-                            status = SOPC_STATUS_NOK;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
     return status;
 }
 
-static bool SOPC_Sub_Filter_Reader_NetworkMessage(const SOPC_DataSetReader* reader,
-                                                  const SOPC_UADP_NetworkMessage* uadp_nm)
+static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnection* connection,
+                                                       const SOPC_UADP_Configuration* uadp_conf,
+                                                       const SOPC_Dataset_LL_PublisherId* pubid,
+                                                       const uint32_t groupVersion,
+                                                       const uint32_t groupId)
 {
-    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
-    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
-    const SOPC_UADP_Configuration* uadp_conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
+    assert(NULL != connection && uadp_conf != NULL);
+    // Find a matching ReaderGroup in connection
+    const uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
 
-    return (SOPC_Sub_Filter_Reader_PublisherId(reader, nm, header, uadp_conf) &&
-            SOPC_Sub_Filter_Reader_WriterGroupId(reader, nm, uadp_conf) &&
-            SOPC_Sub_Filter_Reader_WriterGroupVersion(reader, nm, uadp_conf));
+    SOPC_ReaderGroup* result = NULL;
+
+    for (uint16_t i = 0; i < nbReaderGroup && NULL == result; i++)
+    {
+        bool match = true;
+        SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, i);
+        assert(NULL != readerGroup);
+
+        if (uadp_conf->GroupVersionFlag)
+        {
+            // Check group version
+            const uint32_t confVersion = SOPC_ReaderGroup_Get_GroupVersion(readerGroup);
+
+            match &= (groupVersion == confVersion) || (0 == confVersion);
+        }
+
+        if (match && uadp_conf->GroupIdFlag)
+        {
+            // Check group Id
+            const uint16_t confGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
+
+            match &= (confGroupId == groupId) || (0 == confGroupId);
+        }
+
+        if (match && uadp_conf->PublisherIdFlag)
+        {
+            // Check PublisherIdFlag
+            const SOPC_Conf_PublisherId* expPubId = SOPC_ReaderGroup_Get_PublisherId(readerGroup);
+            match &= SOPC_Sub_Filter_Reader_PublisherId(expPubId, pubid);
+        }
+        if (match)
+        {
+            result = readerGroup;
+        }
+    }
+    return result;
 }
 
-static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_DataSetReader* reader,
-                                               const SOPC_Dataset_LL_NetworkMessage* nm,
-                                               const SOPC_Dataset_LL_NetworkMessage_Header* header,
-                                               const SOPC_UADP_Configuration* uadp_conf)
+static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
+                                                    const SOPC_UADP_Configuration* uadp_conf,
+                                                    const uint16_t writerId)
 {
-    assert(NULL != uadp_conf && NULL != nm);
+    assert(NULL != group && uadp_conf != NULL);
+    // Find a matching reader in group
+    const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
+    const SOPC_DataSetReader* result = NULL;
 
-    SOPC_DataSet_LL_PublisherIdType nm_pubid_type = SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(header);
-    const SOPC_Dataset_LL_PublisherId* nm_pubid = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
-    const SOPC_Conf_PublisherId* conf_pubid = SOPC_DataSetReader_Get_PublisherId(reader);
-    assert(NULL != nm_pubid && NULL != conf_pubid);
+    for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
+    {
+        const SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
+        const uint16_t readerWriterId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
+
+        if (writerId == readerWriterId && writerId != 0)
+        {
+            result = reader;
+        }
+    }
+    return result;
+}
+
+// See SOPC_UADP_NetworkMessage_SetDsm
+static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                             SOPC_SubTargetVariableConfig* targetConfig,
+                                             const SOPC_DataSetReader* reader)
+{
+    assert(NULL != dsm && NULL != reader);
+    SOPC_ReturnStatus result = SOPC_STATUS_ENCODING_ERROR;
+
+    if (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm))
+    {
+        bool write_succes = targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm);
+        if (write_succes)
+        {
+            result = SOPC_STATUS_OK;
+        }
+    }
+    return result;
+}
+
+static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf_pubid,
+                                               const SOPC_Dataset_LL_PublisherId* nm_pubid)
+{
+    assert(NULL != conf_pubid && NULL != nm_pubid);
 
     switch (conf_pubid->type)
     {
     case SOPC_String_PublisherId:
         // Not managed
-        assert(DataSet_LL_PubId_String_Id != nm_pubid_type);
+        assert(DataSet_LL_PubId_String_Id != nm_pubid->type);
         return false;
     case SOPC_UInteger_PublisherId:
     {
         uint64_t nm_pubid64;
 
-        // Publisher id is expected in the Network Message
-        if (!uadp_conf->PublisherIdFlag)
-        {
-            return false;
-        }
-
-        switch (nm_pubid_type)
+        switch (nm_pubid->type)
         {
         case DataSet_LL_PubId_Byte_Id:
             nm_pubid64 = nm_pubid->data.byte;
@@ -189,51 +233,6 @@ static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_DataSetReader* reader,
     }
 }
 
-static bool SOPC_Sub_Filter_Reader_WriterAttr(const uint32_t expectedValue,
-                                              const bool msgEnabled,
-                                              const uint32_t msgValue)
-{
-    // if there is no expected writer group attribute, this filter is passed
-    if (0 == expectedValue)
-    {
-        return true;
-    }
-
-    // Group attribute is expected in the Network Message
-    if (!msgEnabled)
-    {
-        return false;
-    }
-    return (expectedValue == msgValue);
-}
-
-static inline bool SOPC_Sub_Filter_Reader_WriterGroupId(const SOPC_DataSetReader* reader,
-                                                        const SOPC_Dataset_LL_NetworkMessage* nm,
-                                                        const SOPC_UADP_Configuration* uadp_conf)
-{
-    return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_WriterGroupId(reader),
-                                             uadp_conf->GroupIdFlag,
-                                             SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
-}
-
-static inline bool SOPC_Sub_Filter_Reader_WriterGroupVersion(const SOPC_DataSetReader* reader,
-                                                             const SOPC_Dataset_LL_NetworkMessage* nm,
-                                                             const SOPC_UADP_Configuration* uadp_conf)
-{
-    return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_WriterGroupVersion(reader),
-                                             uadp_conf->GroupVersionFlag,
-                                             SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
-}
-
-static bool SOPC_Sub_Filter_Reader_DataSetWriter(const SOPC_DataSetReader* reader,
-                                                 const SOPC_UADP_Configuration* contentMask,
-                                                 const SOPC_Dataset_LL_DataSetMessage* dsm)
-{
-    return SOPC_Sub_Filter_Reader_WriterAttr(SOPC_DataSetReader_Get_DataSetWriterId(reader),
-                                             contentMask->PayloadHeaderFlag,
-                                             SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm));
-}
-
 static bool SOPC_Sub_Filter_Reader_FieldMetaData(const SOPC_DataSetReader* reader,
                                                  const SOPC_Dataset_LL_DataSetMessage* dsm)
 {
@@ -252,12 +251,4 @@ static bool SOPC_Sub_Filter_Reader_FieldMetaData(const SOPC_DataSetReader* reade
     }
 
     return result;
-}
-
-static bool SOPC_Sub_Filter_Reader_DataSetMessage(const SOPC_DataSetReader* reader,
-                                                  const SOPC_UADP_Configuration* contentMask,
-                                                  const SOPC_Dataset_LL_DataSetMessage* dsm)
-{
-    return (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm) &&
-            SOPC_Sub_Filter_Reader_DataSetWriter(reader, contentMask, dsm));
 }

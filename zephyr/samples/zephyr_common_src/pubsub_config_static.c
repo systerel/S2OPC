@@ -136,16 +136,13 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     assert(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
+    SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, publisherId);
     if (allocSuccess)
     {
         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
         assert(reader != NULL);
-        SOPC_DataSetReader_Set_WriterGroupVersion(reader, version);
-        SOPC_DataSetReader_Set_WriterGroupId(reader, messageId);
-        SOPC_DataSetReader_Set_DataSetWriterId(reader,
-                                               messageId); // Same as WriterGroup
+        SOPC_DataSetReader_Set_DataSetWriterId(reader,  messageId);
         SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2 * interval);
-        SOPC_DataSetReader_Set_PublisherId_UInteger(reader, publisherId);
         return reader;
     }
     return NULL;

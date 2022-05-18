@@ -27,6 +27,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_network_layer.h"
+#include "sopc_reader_layer.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
@@ -41,6 +42,107 @@ static int32_t stop = 0;
 
 static int returnCode = -1;
 static int sleepCount = 20;
+
+static const uint32_t subGroupVersion = 963852;
+static const uint32_t subGroupId = 1245;
+static SOPC_PubSubConfiguration* configuration = NULL;
+static SOPC_PubSubConnection* subConnection = NULL;
+
+// Create connection, group and setup metadata so that message is accepted
+// There are 2 groups created (one for "udp_pub_test" and the second for "udp_pub_conf_test")
+static void setupConnection(void)
+{
+    SOPC_FieldMetaData* meta = NULL;
+    SOPC_ReaderGroup* subReader = NULL;
+    SOPC_DataSetReader* dsReader = NULL;
+    configuration = SOPC_PubSubConfiguration_Create();
+    assert(NULL != configuration);
+    // "udp_pub_test"
+    SOPC_PubSubConfiguration_Allocate_SubConnection_Array(configuration, 1);
+    subConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(configuration, 0);
+
+    SOPC_PubSubConnection_Allocate_ReaderGroup_Array(subConnection, 2);
+    subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 0);
+
+    SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_None);
+    SOPC_ReaderGroup_Allocate_DataSetReader_Array(subReader, 1);
+    dsReader = SOPC_ReaderGroup_Get_DataSetReader_At(subReader, 0);
+    SOPC_ReaderGroup_Set_GroupId(subReader, (uint16_t) subGroupId);
+    SOPC_ReaderGroup_Set_GroupVersion(subReader, subGroupVersion);
+    SOPC_ReaderGroup_Set_PublisherId_UInteger(subReader, 15300);
+
+    SOPC_DataSetReader_Set_DataSetWriterId(dsReader, 123);
+
+    SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 5);
+    // Var 1
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
+    // Var 2
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Byte_Id);
+    // Var 3
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
+    // Var 4
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
+    // Var 5
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 4);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
+
+    // Configuration for "udp_pub_conf_test"
+    subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 1);
+
+    SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_None);
+    SOPC_ReaderGroup_Allocate_DataSetReader_Array(subReader, 1);
+    dsReader = SOPC_ReaderGroup_Get_DataSetReader_At(subReader, 0);
+    SOPC_ReaderGroup_Set_GroupId(subReader, (uint16_t) 45612);
+    SOPC_ReaderGroup_Set_GroupVersion(subReader, 123456);
+    //    SOPC_ReaderGroup_Set_PublisherId_UInteger(subReader, 15300);
+
+    SOPC_DataSetReader_Set_DataSetWriterId(dsReader, 12);
+
+    SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 4);
+    // Var 1
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
+    // Var 2
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
+    // Var 3
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
+    // Var 4
+    meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
+    assert(NULL != meta);
+    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
+}
+
+static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuffer)
+{
+    assert(NULL != subConnection);
+    const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
+        .getSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
+
+    return SOPC_UADP_NetworkMessage_Decode(pBuffer, &readerConf, subConnection);
+}
 
 static void printVariant(const SOPC_Variant* variant)
 {
@@ -141,6 +243,13 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
             }
         }
     }
+    else
+    {
+        printf("UADP Msg = <NULL>\n");
+        const SOPC_UADP_NetworkMessage_Error_Code errCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
+
+        printf("Last SOPC_UADP_NetworkMessage_Get_Last_Error()= %d (0x%08X)\n", (int) errCode, (int) errCode);
+    }
 }
 
 static void readyToReceive(void* sockContext, Socket sock)
@@ -159,7 +268,7 @@ static void readyToReceive(void* sockContext, Socket sock)
         buffer->position = 0;
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, NULL);
+            SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer);
             printNetworkMessage(uadp_nm);
             if (NULL != uadp_nm)
             {
@@ -189,9 +298,12 @@ static void tick(void* tickCtx)
 
 int main(void)
 {
+    printf("main -UDP_SUB_TEST\n");
     Socket sock;
     SOPC_Socket_AddressInfo* listenAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
+
+    setupConnection();
 
     SOPC_Helper_EndiannessCfg_Initialize();
 
@@ -225,6 +337,7 @@ int main(void)
     SOPC_UDP_Socket_Close(&sock);
     SOPC_UDP_SocketAddress_Delete(&listenAddr);
     SOPC_UDP_SocketAddress_Delete(&localAddr);
+    SOPC_PubSubConfiguration_Delete(configuration);
 
     return returnCode;
 }

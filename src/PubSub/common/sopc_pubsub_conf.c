@@ -149,20 +149,18 @@ struct SOPC_DataSetWriter
 
 struct SOPC_ReaderGroup
 {
-    SOPC_PubSubConnection* parent;
-
     SOPC_SecurityMode_Type securityMode;
+    SOPC_Conf_PublisherId publisherId;
 
     uint8_t dataSetReaders_length;
     SOPC_DataSetReader* dataSetReaders;
+    uint16_t groupId;
+    uint32_t groupVersion;
 };
 
 struct SOPC_DataSetReader
 {
-    SOPC_Conf_PublisherId publisherId;
-    uint16_t writerGroupId;
-    // for next version : move in messageSettings
-    uint32_t writerGroupVersion;
+    struct SOPC_ReaderGroup* parent;
     uint16_t dataSetWriterId;
     SOPC_DataSetMetaData metaData;
     SOPC_SubscribedDataSetType targetType;
@@ -282,6 +280,7 @@ static bool SOPC_PubSubConfiguration_Allocate_PubSubConnection_Array(SOPC_PubSub
     for (uint32_t i = 0; i < nb; i++)
     {
         (*arrayPtr)[i].type = type;
+        (*arrayPtr)[i].publisherId.type = SOPC_Null_PublisherId;
     }
 
     return true;
@@ -514,7 +513,7 @@ bool SOPC_PubSubConnection_Allocate_ReaderGroup_Array(SOPC_PubSubConnection* con
     connection->readerGroups_length = nb;
     for (int i = 0; i < nb; i++)
     {
-        connection->readerGroups[i].parent = connection;
+        connection->readerGroups[i].publisherId.type = SOPC_Null_PublisherId;
     }
     return true;
 }
@@ -554,6 +553,10 @@ bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint
     {
         return false;
     }
+    for (size_t i = 0; i < nb; i++)
+    {
+        group->dataSetReaders[i].parent = group;
+    }
     group->dataSetReaders_length = nb;
     return true;
 }
@@ -568,6 +571,51 @@ SOPC_DataSetReader* SOPC_ReaderGroup_Get_DataSetReader_At(const SOPC_ReaderGroup
 {
     assert(NULL != group && index < group->dataSetReaders_length);
     return &group->dataSetReaders[index];
+}
+
+uint16_t SOPC_ReaderGroup_Get_GroupId(const SOPC_ReaderGroup* group)
+{
+    assert(NULL != group);
+    return group->groupId;
+}
+
+void SOPC_ReaderGroup_Set_GroupId(SOPC_ReaderGroup* group, uint16_t id)
+{
+    assert(NULL != group);
+    group->groupId = id;
+}
+
+uint32_t SOPC_ReaderGroup_Get_GroupVersion(const SOPC_ReaderGroup* group)
+{
+    assert(NULL != group);
+    return group->groupVersion;
+}
+
+void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version)
+{
+    assert(NULL != group);
+    group->groupVersion = version;
+}
+
+const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group)
+{
+    assert(NULL != group);
+    return &(group->publisherId);
+}
+
+void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id)
+{
+    assert(NULL != group);
+    group->publisherId.type = SOPC_UInteger_PublisherId;
+    group->publisherId.data.uint = id;
+}
+
+bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char* id)
+{
+    assert(NULL != group && NULL != id);
+    group->publisherId.type = SOPC_String_PublisherId;
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&group->publisherId.data.string, id);
+    return (SOPC_STATUS_OK == status);
 }
 
 /** DataSetReader **/
@@ -585,49 +633,10 @@ static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
     SOPC_Free(metaData->fields);
 }
 
-const SOPC_Conf_PublisherId* SOPC_DataSetReader_Get_PublisherId(const SOPC_DataSetReader* reader)
+SOPC_ReaderGroup* SOPC_DataSetReader_Get_ReaderGroup(const SOPC_DataSetReader* reader)
 {
     assert(NULL != reader);
-    return &(reader->publisherId);
-}
-
-void SOPC_DataSetReader_Set_PublisherId_UInteger(SOPC_DataSetReader* reader, uint64_t id)
-{
-    assert(NULL != reader);
-    reader->publisherId.type = SOPC_UInteger_PublisherId;
-    reader->publisherId.data.uint = id;
-}
-
-bool SOPC_DataSetReader_Set_PublisherId_String(SOPC_DataSetReader* reader, const char* id)
-{
-    assert(NULL != reader && NULL != id);
-    reader->publisherId.type = SOPC_String_PublisherId;
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&reader->publisherId.data.string, id);
-    return (SOPC_STATUS_OK == status);
-}
-
-uint16_t SOPC_DataSetReader_Get_WriterGroupId(const SOPC_DataSetReader* reader)
-{
-    assert(NULL != reader);
-    return reader->writerGroupId;
-}
-
-void SOPC_DataSetReader_Set_WriterGroupId(SOPC_DataSetReader* reader, uint16_t id)
-{
-    assert(NULL != reader);
-    reader->writerGroupId = id;
-}
-
-uint32_t SOPC_DataSetReader_Get_WriterGroupVersion(const SOPC_DataSetReader* reader)
-{
-    assert(NULL != reader);
-    return reader->writerGroupVersion;
-}
-
-void SOPC_DataSetReader_Set_WriterGroupVersion(SOPC_DataSetReader* reader, uint32_t version)
-{
-    assert(NULL != reader);
-    reader->writerGroupVersion = version;
+    return reader->parent;
 }
 
 uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader)
@@ -1042,7 +1051,6 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
     {
         for (int i = 0; i < group->dataSetReaders_length; i++)
         {
-            SOPC_Conf_PublisherId_Clear(&(group->dataSetReaders[i].publisherId));
             SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
         }
         group->dataSetReaders_length = 0;

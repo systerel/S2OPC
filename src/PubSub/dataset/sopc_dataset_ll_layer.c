@@ -140,7 +140,7 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
     SOPC_Free(nm);
 }
 
-uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
     if (NULL == nmh)
     {
@@ -183,6 +183,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(SOPC_Dataset_LL_Network
     {
         nmh->publisher_id.type = DataSet_LL_PubId_Byte_Id;
         nmh->publisher_id.data.byte = id;
+        nmh->flagsConfig.PublisherIdFlag = true;
     }
 }
 
@@ -192,6 +193,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(SOPC_Dataset_LL_Netwo
     {
         nmh->publisher_id.type = DataSet_LL_PubId_UInt16_Id;
         nmh->publisher_id.data.uint16 = id;
+        nmh->flagsConfig.PublisherIdFlag = true;
     }
 }
 
@@ -201,6 +203,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(SOPC_Dataset_LL_Netwo
     {
         nmh->publisher_id.type = DataSet_LL_PubId_UInt32_Id;
         nmh->publisher_id.data.uint32 = id;
+        nmh->flagsConfig.PublisherIdFlag = true;
     }
 }
 
@@ -210,10 +213,12 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_Netwo
     {
         nmh->publisher_id.type = DataSet_LL_PubId_UInt64_Id;
         nmh->publisher_id.data.uint64 = id;
+        nmh->flagsConfig.PublisherIdFlag = true;
     }
 }
 
-const SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+const SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(
+    const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
     if (NULL == nmh || !nmh->flagsConfig.PublisherIdFlag)
     {
@@ -400,6 +405,16 @@ void Dataset_LL_Delete_DataSetFieldAttributes(SOPC_Dataset_LL_DataSetField* fiel
     }
 }
 
+const SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig_Const(
+    const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
+{
+    if (NULL == nmh)
+    {
+        return NULL;
+    }
+    return &nmh->flagsConfig;
+}
+
 SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
     if (NULL == nmh)
@@ -407,6 +422,16 @@ SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(SOPC_Dat
         return NULL;
     }
     return &nmh->flagsConfig;
+}
+
+const SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(
+    const SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    if (NULL == nm)
+    {
+        return NULL;
+    }
+    return &nm->msgHeader;
 }
 
 SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader(SOPC_Dataset_LL_NetworkMessage* nm)

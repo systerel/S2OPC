@@ -21,6 +21,7 @@
 #define SOPC_SUB_READER_H_
 
 #include "sopc_buffer.h"
+#include "sopc_network_layer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
@@ -37,4 +38,8 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_SubTargetVariableConfig* config,
                                         SOPC_UADP_GetSecurity_Func securityCBck);
 
+/**
+ * Return default reception filtering functions.
+ */
+extern const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Default_Readers;
 #endif /* SOPC_SUB_READER_H_ */

@@ -158,18 +158,19 @@ bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint
 uint8_t SOPC_ReaderGroup_Nb_DataSetReader(const SOPC_ReaderGroup* group);
 SOPC_DataSetReader* SOPC_ReaderGroup_Get_DataSetReader_At(const SOPC_ReaderGroup* group, uint8_t index);
 
+uint16_t SOPC_ReaderGroup_Get_GroupId(const SOPC_ReaderGroup* group);
+void SOPC_ReaderGroup_Set_GroupId(SOPC_ReaderGroup* group, uint16_t id);
+
+uint32_t SOPC_ReaderGroup_Get_GroupVersion(const SOPC_ReaderGroup* group);
+void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version);
+
+const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group);
+void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id);
+bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char* id);
+
 /** DataSetReader **/
 
-const SOPC_Conf_PublisherId* SOPC_DataSetReader_Get_PublisherId(const SOPC_DataSetReader* reader);
-void SOPC_DataSetReader_Set_PublisherId_UInteger(SOPC_DataSetReader* reader, uint64_t id);
-bool SOPC_DataSetReader_Set_PublisherId_String(SOPC_DataSetReader* reader, const char* id);
-
-uint16_t SOPC_DataSetReader_Get_WriterGroupId(const SOPC_DataSetReader* reader);
-void SOPC_DataSetReader_Set_WriterGroupId(SOPC_DataSetReader* reader, uint16_t id);
-
-uint32_t SOPC_DataSetReader_Get_WriterGroupVersion(const SOPC_DataSetReader* reader);
-void SOPC_DataSetReader_Set_WriterGroupVersion(SOPC_DataSetReader* reader, uint32_t version);
-
+SOPC_ReaderGroup* SOPC_DataSetReader_Get_ReaderGroup(const SOPC_DataSetReader* reader);
 uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader);
 void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t id);
 
