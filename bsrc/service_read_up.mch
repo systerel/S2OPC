@@ -32,14 +32,17 @@ OPERATIONS
 
     StatusCode_service <-- treat_read_request(p_user, p_locales, p_request_msg, p_response_msg) =
     PRE
-        p_user         : t_user_i  &
-        p_user         : t_user    &
-        p_locales      : t_LocaleIds_i &
-        p_locales      : t_LocaleIds &
-        p_request_msg  : t_msg_i   &
-        p_request_msg  = c_msg_in  &
-        p_response_msg : t_msg_i   &
-        p_response_msg = c_msg_out
+        p_user         : t_user_i                 &
+        p_user         : t_user                   &
+        p_locales      : t_LocaleIds_i            &
+        p_locales      : t_LocaleIds              &
+        p_request_msg  : t_msg_i                  &
+        p_request_msg  = c_msg_in                 &
+        c_msg_in       : t_msg                    &
+        a_msg_in_type  = e_msg_attribute_read_req &
+        p_response_msg : t_msg_i                  &
+        p_response_msg = c_msg_out                &
+        c_msg_out      : t_msg
     THEN
         StatusCode_service
         :(
