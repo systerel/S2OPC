@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 01/06/2022 14:09:27
+ Date                 : 01/06/2022 14:17:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -160,6 +160,7 @@ extern void service_mgr__treat_write_request(
    const constants__t_user_i service_mgr__p_user,
    const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__write_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 
 /*--------------------

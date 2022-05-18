@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 01/06/2022 14:09:27
+ Date                 : 01/06/2022 14:17:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -166,6 +166,7 @@ void service_mgr__treat_write_request(
    const constants__t_user_i service_mgr__p_user,
    const constants__t_LocaleIds_i service_mgr__p_locales,
    const constants__t_msg_i service_mgr__write_msg,
+   const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
       t_entier4 service_mgr__l_nb_req;
@@ -187,6 +188,8 @@ void service_mgr__treat_write_request(
          }
       }
       service_write_decode_bs__free_write_request();
+      address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
+      address_space__dealloc_write_request_responses();
    }
 }
 
@@ -220,9 +223,8 @@ void service_mgr__treat_session_local_service_req(
          service_mgr__treat_write_request(service_mgr__l_user,
             service_mgr__l_supported_locales,
             service_mgr__req_msg,
+            service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
-         address_space__dealloc_write_request_responses();
          break;
       case constants__e_msg_view_browse_req:
          service_set_view__treat_browse_request(constants__c_session_indet,
@@ -273,9 +275,8 @@ void service_mgr__treat_session_nano_service_req(
          service_mgr__treat_write_request(service_mgr__l_user,
             service_mgr__l_locales,
             service_mgr__req_msg,
+            service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
-         address_space__dealloc_write_request_responses();
          break;
       case constants__e_msg_view_browse_req:
          service_set_view__treat_browse_request(service_mgr__session,

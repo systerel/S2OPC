@@ -128,7 +128,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
     PRE
         p_user : t_user_i    &
         p_user : t_user      &
@@ -137,7 +137,10 @@ LOCAL_OPERATIONS
         write_msg : t_msg_i  &
         write_msg = c_msg_in &
         c_msg_in : t_msg     &
-        a_msg_in_type = e_msg_attribute_write_req
+        a_msg_in_type = e_msg_attribute_write_req &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg
     THEN
         StatusCode_service,
         a_Value,
@@ -412,7 +415,7 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg) =
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
     VAR
         l_nb_req,
         l_bret
@@ -429,7 +432,10 @@ OPERATIONS
                 StatusCode_service := e_sc_bad_out_of_memory
             END
         END;
-        free_write_request
+        free_write_request;
+        /* TODO: the following may fail (malloc) */
+        write_WriteResponse_msg_out(resp_msg);
+        dealloc_write_request_responses
     END
     ;
 
@@ -447,10 +453,7 @@ OPERATIONS
                 // Write request case
                 l_user <-- get_local_user (endpoint_config_idx);
                 l_supported_locales <-- get_SupportedLocales (endpoint_config_idx);
-                StatusCode_service <-- treat_write_request (l_user, l_supported_locales, req_msg);
-                /* TODO: the following may fail (malloc) */
-                write_WriteResponse_msg_out(resp_msg);
-                dealloc_write_request_responses
+                StatusCode_service <-- treat_write_request (l_user, l_supported_locales, req_msg, resp_msg)
             OR e_msg_view_browse_req THEN
                 StatusCode_service <-- treat_browse_request(c_session_indet, req_msg, resp_msg)
             OR e_msg_view_translate_browse_paths_to_node_ids_req THEN
@@ -478,10 +481,7 @@ OPERATIONS
                 // Write request case
                 l_user <-- get_session_user_server(session);
                 l_locales <-- get_SupportedLocales (endpoint_config_idx);
-                StatusCode_service <-- treat_write_request (l_user, l_locales, req_msg);
-                /* TODO: the following may fail (malloc) */
-                write_WriteResponse_msg_out(resp_msg);
-                dealloc_write_request_responses
+                StatusCode_service <-- treat_write_request (l_user, l_locales, req_msg, resp_msg)
             OR e_msg_view_browse_req THEN
                 StatusCode_service <-- treat_browse_request(session, req_msg, resp_msg)
             OR e_msg_view_browse_next_req THEN
