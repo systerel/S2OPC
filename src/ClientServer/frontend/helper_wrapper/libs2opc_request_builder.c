@@ -440,27 +440,20 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
                                                           SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                           SOPC_BrowseRequest_ResultMask resultMask)
 {
-    if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
-        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
-        !SOPC_TypeHelperInternal_CheckNodeClassMask(nodeClassMask) ||
-        !SOPC_TypeHelperInternal_CheckResultMask(resultMask))
+    OpcUa_BrowseDescription* browseVal = BrowseRequest_InitializeBrowsevalPointer(
+        browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
+    if (browseVal == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    OpcUa_BrowseDescription* bd = &browseRequest->NodesToBrowse[index];
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bd->BrowseDirection = browseDirection;
-    bd->IncludeSubtypes = includeSubtypes;
-    bd->NodeClassMask = nodeClassMask;
-    bd->ResultMask = resultMask;
-    status = SOPC_NodeId_Copy(&bd->NodeId, nodeId);
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&browseVal->NodeId, nodeId);
     if (SOPC_STATUS_OK == status && NULL != referenceTypeId)
     {
-        status = SOPC_NodeId_Copy(&bd->ReferenceTypeId, referenceTypeId);
+        status = SOPC_NodeId_Copy(&browseVal->ReferenceTypeId, referenceTypeId);
     }
     if (SOPC_STATUS_OK != status)
     {
-        OpcUa_BrowseDescription_Clear(bd);
+        OpcUa_BrowseDescription_Clear(browseVal);
     }
     return status;
 }
