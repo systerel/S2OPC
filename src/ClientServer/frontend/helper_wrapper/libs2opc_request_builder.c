@@ -563,6 +563,13 @@ static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsePvalPointer(
     size_t nbPathElements,
     OpcUa_RelativePathElement* pathElements)
 {
+    if (!CHECK_ELEMENT_EXISTS(tbpRequest, NoOfBrowsePaths, index) || NULL == startingNodeId || 0 == nbPathElements ||
+        nbPathElements > INT32_MAX || NULL == pathElements)
+    {
+        return NULL;
+    }
+    OpcUa_BrowsePath* BrowsePResult = &tbpRequest->BrowsePaths[index];
+    return BrowsePResult;
 }
 
 SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
