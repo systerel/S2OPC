@@ -314,26 +314,23 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
                                                   SOPC_String* indexRange,
                                                   SOPC_DataValue* value)
 {
-    if (!CHECK_ELEMENT_EXISTS(writeRequest, NoOfNodesToWrite, index) ||
-        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
+    OpcUa_WriteValue* writeVal = WriteRequest_InitializeWritevalPointer(writeRequest, index, attribute);
+    if (writeVal == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    OpcUa_WriteValue* wv = &writeRequest->NodesToWrite[index];
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    wv->AttributeId = attribute;
-    status = SOPC_NodeId_Copy(&wv->NodeId, nodeId);
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&writeVal->NodeId, nodeId);
     if (SOPC_STATUS_OK == status && NULL != indexRange)
     {
-        status = SOPC_String_Copy(&wv->IndexRange, indexRange);
+        status = SOPC_String_Copy(&writeVal->IndexRange, indexRange);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_DataValue_Copy(&wv->Value, value);
+        status = SOPC_DataValue_Copy(&writeVal->Value, value);
     }
     if (SOPC_STATUS_OK != status)
     {
-        OpcUa_WriteValue_Clear(wv);
+        OpcUa_WriteValue_Clear(writeVal);
     }
     return status;
 }
