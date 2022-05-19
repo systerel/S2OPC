@@ -45,7 +45,7 @@ void SOPC_SubTargetVariableConfig_Delete(SOPC_SubTargetVariableConfig* targetCon
 
 /* Function used by subscriber scheduler to set target variables */
 bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetConfig,
-                                         SOPC_DataSetReader* reader,
-                                         SOPC_Dataset_LL_DataSetMessage* dsm);
+                                         const SOPC_DataSetReader* reader,
+                                         const SOPC_Dataset_LL_DataSetMessage* dsm);
 
 #endif /* SOPC_SUB_TARGET_VARIABLE_H_ */

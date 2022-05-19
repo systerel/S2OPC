@@ -46,8 +46,8 @@ void SOPC_SubTargetVariableConfig_Delete(SOPC_SubTargetVariableConfig* targetCon
 }
 
 bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetConfig,
-                                         SOPC_DataSetReader* reader,
-                                         SOPC_Dataset_LL_DataSetMessage* dsm)
+                                         const SOPC_DataSetReader* reader,
+                                         const SOPC_Dataset_LL_DataSetMessage* dsm)
 {
     if (NULL == targetConfig || NULL == reader || NULL == dsm)
     {
