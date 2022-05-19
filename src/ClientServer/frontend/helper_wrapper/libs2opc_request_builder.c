@@ -605,26 +605,23 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
                                                           size_t nbPathElements,
                                                           OpcUa_RelativePathElement* pathElements)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (!CHECK_ELEMENT_EXISTS(tbpRequest, NoOfBrowsePaths, index) || NULL == startingNodeId || 0 == nbPathElements ||
-        nbPathElements > INT32_MAX || NULL == pathElements)
+    const char* startingNodeIdCString = SOPC_NodeId_ToCString(startingNodeId);
+    OpcUa_BrowsePath* browsePVal = TranslateBPRequest_InitializeBrowsePvalPointer(
+        tbpRequest, index, startingNodeIdCString, nbPathElements, pathElements);
+    if (browsePVal == NULL)
     {
-        return status;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    OpcUa_BrowsePath* bp = &tbpRequest->BrowsePaths[index];
-
-    status = SOPC_NodeId_Copy(&bp->StartingNode, startingNodeId);
-
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&browsePVal->StartingNode, startingNodeId);
     if (SOPC_STATUS_OK == status)
     {
-        bp->RelativePath.Elements = pathElements;
-        bp->RelativePath.NoOfElements = (int32_t) nbPathElements;
+        browsePVal->RelativePath.Elements = pathElements;
+        browsePVal->RelativePath.NoOfElements = (int32_t) nbPathElements;
     }
     else
     {
-        OpcUa_BrowsePath_Clear(bp);
+        OpcUa_BrowsePath_Clear(browsePVal);
     }
-
     return status;
 }
 
