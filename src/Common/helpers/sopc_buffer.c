@@ -276,7 +276,7 @@ SOPC_ReturnStatus SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint
     {
         if (buffer->position + count <= buffer->length)
         {
-            if (memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest)
+            if (NULL == data_dest || memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest)
             {
                 buffer->position = buffer->position + count;
                 status = SOPC_STATUS_OK;

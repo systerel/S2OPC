@@ -148,6 +148,7 @@ SOPC_ReturnStatus SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src
  * to next position to read)
  *
  *  \param data_dest    Pointer to the bytes to set to read bytes value of the buffer (HYP: nb bytes >= count bytes)
+ *                      If NULL ,then data are simply skipped
  *  \param buffer       Pointer to the buffer to read from
  *  \param count        Number of bytes to read from the buffer (count + buffer->position <= buffer->length)
  *
