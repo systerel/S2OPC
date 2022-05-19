@@ -173,7 +173,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
+    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     PRE
         p_user : t_user_i &
         p_user : t_user &
@@ -189,26 +189,27 @@ LOCAL_OPERATIONS
             nid = WriteValue_NodeId(p_wvi) &
             aid = WriteValue_AttributeId(p_wvi)
         IN
+        p_status,
         a_Value,
-        ResponseWrite_StatusCode,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
         local_service_treatment :(
-            local_service_treatment = local_service_treatment$0 &
+            p_status : t_StatusCode_i &
+            p_status : t_StatusCode &
 
-            {p_wvi} <<| ResponseWrite_StatusCode = {p_wvi} <<| ResponseWrite_StatusCode$0 &
+            local_service_treatment = local_service_treatment$0 &
 
             (aid : t_AttributeId
             =>
-                ResponseWrite_StatusCode(p_wvi) = d_treat_write (dataValue, index_range, nid, aid, p_user, p_locales)
+                p_status = d_treat_write (dataValue, index_range, nid, aid, p_user, p_locales)
                 or
-                ResponseWrite_StatusCode(p_wvi) = e_sc_bad_out_of_memory
+                p_status = e_sc_bad_out_of_memory
             ) &
             (not(aid : t_AttributeId)
             =>
-                ResponseWrite_StatusCode(p_wvi) = e_sc_bad_attribute_id_invalid
+                p_status = e_sc_bad_attribute_id_invalid
             ) &
-            (ResponseWrite_StatusCode(p_wvi) = e_sc_ok =>
+            (p_status = e_sc_ok =>
                 a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
 
                 (local_service_treatment /= 0
@@ -239,7 +240,7 @@ LOCAL_OPERATIONS
                         a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
                 )
             ) &
-            (not (ResponseWrite_StatusCode(p_wvi) = e_sc_ok)
+            (not (p_status = e_sc_ok)
             =>
                 a_Value = a_Value$0 &
                 a_Value_StatusCode = a_Value_StatusCode$0 &
@@ -544,14 +545,13 @@ OPERATIONS
     END
     ;
 
-    treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
+    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     VAR
         l_aid,
         l_nid,
         l_dataValue,
         l_index_range,
         l_status1,
-        l_status2,
         l_prev_dataValue,
         l_node,
         l_access_lvl,
@@ -569,12 +569,11 @@ OPERATIONS
     IN
         l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range <-- getall_WriteValue(p_wvi);
         /* Avoids the IFs with a local operation. */
-        l_status2, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, p_locales, l_nid, l_aid, l_dataValue, l_index_range);
+        p_status, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, p_locales, l_nid, l_aid, l_dataValue, l_index_range);
         l_new_val := c_Variant_indet;
-        set_ResponseWrite_StatusCode(p_wvi, l_status2);
         l_wv <-- getall_WriteValuePointer(p_wvi);
         /* If write succeeded, generates a data change event for subscriptions */
-        IF l_status2 = e_sc_ok
+        IF p_status = e_sc_ok
         THEN
             /* Check access level: read access right <=> data change event for subscription */
             /*
@@ -604,7 +603,7 @@ OPERATIONS
         THEN
             l_bres_wv_copy, l_wv_copy <-- copy_write_value_pointer_content (l_wv);
             IF l_bres_wv_copy = TRUE THEN
-                srv_write_notification (l_wv_copy, l_status2)
+                srv_write_notification (l_wv_copy, p_status)
             ELSE
                 /* TODO: Generates an out of memory service result or error trace ? */
                 skip
@@ -896,14 +895,16 @@ OPERATIONS
     VAR
         l_nb_req,
         l_continue,
-        l_wvi
+        l_wvi,
+        l_status
     IN
         StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
-            treat_write_request_WriteValue (p_user, p_locales, l_wvi)
+            l_status <-- treat_write_request_WriteValue (p_user, p_locales, l_wvi);
+            set_ResponseWrite_StatusCode(l_wvi, l_status)
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &
             wreqs_iterated <: t_WriteValue &

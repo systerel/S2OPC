@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 30/09/2021 09:56:25
+ Date                 : 01/06/2022 14:40:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -102,14 +102,14 @@ void address_space__is_mandatory_attribute(
 void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
-   const constants__t_WriteValue_i address_space__p_wvi) {
+   const constants__t_WriteValue_i address_space__p_wvi,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__p_status) {
    {
       constants__t_AttributeId_i address_space__l_aid;
       constants__t_NodeId_i address_space__l_nid;
       constants__t_DataValue_i address_space__l_dataValue;
       constants__t_IndexRange_i address_space__l_index_range;
       constants_statuscodes_bs__t_StatusCode_i address_space__l_status1;
-      constants_statuscodes_bs__t_StatusCode_i address_space__l_status2;
       constants__t_DataValue_i address_space__l_prev_dataValue;
       constants__t_Node_i address_space__l_node;
       constants__t_access_level address_space__l_access_lvl;
@@ -140,15 +140,13 @@ void address_space__treat_write_request_WriteValue(
          address_space__l_aid,
          address_space__l_dataValue,
          address_space__l_index_range,
-         &address_space__l_status2,
+         address_space__p_status,
          &address_space__l_prev_dataValue,
          &address_space__l_node);
       address_space__l_new_val = constants__c_Variant_indet;
-      response_write_bs__set_ResponseWrite_StatusCode(address_space__p_wvi,
-         address_space__l_status2);
       service_write_decode_bs__getall_WriteValuePointer(address_space__p_wvi,
          &address_space__l_wv);
-      if (address_space__l_status2 == constants_statuscodes_bs__e_sc_ok) {
+      if (*address_space__p_status == constants_statuscodes_bs__e_sc_ok) {
          address_space_bs__get_AccessLevel(address_space__l_node,
             &address_space__l_access_lvl);
          constants__is_t_access_level_currentRead(address_space__l_access_lvl,
@@ -190,7 +188,7 @@ void address_space__treat_write_request_WriteValue(
             &address_space__l_wv_copy);
          if (address_space__l_bres_wv_copy == true) {
             service_response_cb_bs__srv_write_notification(address_space__l_wv_copy,
-               address_space__l_status2);
+               *address_space__p_status);
          }
          else {
             ;
@@ -705,6 +703,7 @@ void address_space__treat_write_request_WriteValues(
       t_entier4 address_space__l_nb_req;
       t_bool address_space__l_continue;
       constants__t_WriteValue_i address_space__l_wvi;
+      constants_statuscodes_bs__t_StatusCode_i address_space__l_status;
       
       *address_space__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       service_write_decode_bs__get_nb_WriteValue(&address_space__l_nb_req);
@@ -715,7 +714,10 @@ void address_space__treat_write_request_WriteValues(
             &address_space__l_wvi);
          address_space__treat_write_request_WriteValue(address_space__p_user,
             address_space__p_locales,
-            address_space__l_wvi);
+            address_space__l_wvi,
+            &address_space__l_status);
+         response_write_bs__set_ResponseWrite_StatusCode(address_space__l_wvi,
+            address_space__l_status);
       }
    }
 }
