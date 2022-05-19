@@ -161,6 +161,14 @@ static OpcUa_ReadValueId* ReadRequest_InitializeReadvalPointer(OpcUa_ReadRequest
                                                                size_t index,
                                                                SOPC_AttributeId attribute)
 {
+    if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index) ||
+        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
+    {
+        return NULL;
+    }
+    OpcUa_ReadValueId* ReadvalResult = &readRequest->NodesToRead[index];
+    ReadvalResult->AttributeId = attribute;
+    return ReadvalResult;
 }
 
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* readRequest,
