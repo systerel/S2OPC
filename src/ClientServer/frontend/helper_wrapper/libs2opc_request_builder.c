@@ -412,28 +412,21 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
                                                                      SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                                      SOPC_BrowseRequest_ResultMask resultMask)
 {
-    if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
-        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
-        !SOPC_TypeHelperInternal_CheckNodeClassMask(nodeClassMask) ||
-        !SOPC_TypeHelperInternal_CheckResultMask(resultMask))
+    OpcUa_BrowseDescription* browseVal = BrowseRequest_InitializeBrowsevalPointer(
+        browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
+    if (browseVal == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    OpcUa_BrowseDescription* bd = &browseRequest->NodesToBrowse[index];
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bd->BrowseDirection = browseDirection;
-    bd->IncludeSubtypes = includeSubtypes;
-    bd->NodeClassMask = nodeClassMask;
-    bd->ResultMask = resultMask;
-    status = SOPC_NodeId_InitializeFromCString(&bd->NodeId, nodeId, (int32_t) strlen(nodeId));
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&browseVal->NodeId, nodeId, (int32_t) strlen(nodeId));
     if (SOPC_STATUS_OK == status && NULL != referenceTypeId)
     {
-        status =
-            SOPC_NodeId_InitializeFromCString(&bd->ReferenceTypeId, referenceTypeId, (int32_t) strlen(referenceTypeId));
+        status = SOPC_NodeId_InitializeFromCString(&browseVal->ReferenceTypeId, referenceTypeId,
+                                                   (int32_t) strlen(referenceTypeId));
     }
     if (SOPC_STATUS_OK != status)
     {
-        OpcUa_BrowseDescription_Clear(bd);
+        OpcUa_BrowseDescription_Clear(browseVal);
     }
     return status;
 }
