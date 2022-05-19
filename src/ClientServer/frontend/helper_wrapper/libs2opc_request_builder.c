@@ -381,6 +381,15 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
     return req;
 }
 
+static OpcUa_BrowseDescription* BrowseRequest_InitializeBrowsevalPointer(OpcUa_BrowseRequest* browseRequest,
+                                                                         size_t index,
+                                                                         OpcUa_BrowseDirection browseDirection,
+                                                                         bool includeSubtypes,
+                                                                         SOPC_BrowseRequest_NodeClassMask nodeClassMask,
+                                                                         SOPC_BrowseRequest_ResultMask resultMask)
+{
+}
+
 SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_BrowseRequest* browseRequest,
                                                                      size_t index,
                                                                      const char* nodeId,
