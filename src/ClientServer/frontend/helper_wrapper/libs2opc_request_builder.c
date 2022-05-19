@@ -269,6 +269,14 @@ static OpcUa_WriteValue* WriteRequest_InitializeWritevalPointer(OpcUa_WriteReque
                                                                 size_t index,
                                                                 SOPC_AttributeId attribute)
 {
+    if (!CHECK_ELEMENT_EXISTS(writeRequest, NoOfNodesToWrite, index) ||
+        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
+    {
+        return NULL;
+    }
+    OpcUa_WriteValue* WritevalResult = &writeRequest->NodesToWrite[index];
+    WritevalResult->AttributeId = attribute;
+    return WritevalResult;
 }
 
 SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest* writeRequest,
