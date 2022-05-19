@@ -157,6 +157,12 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetMaxAge(OpcUa_ReadRequest* readRequest, dou
     return SOPC_STATUS_OK;
 }
 
+static OpcUa_ReadValueId* ReadRequest_InitializeReadvalPointer(OpcUa_ReadRequest* readRequest,
+                                                               size_t index,
+                                                               SOPC_AttributeId attribute)
+{
+}
+
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* readRequest,
                                                            size_t index,
                                                            const char* nodeId,
