@@ -200,15 +200,12 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 SOPC_AttributeId attribute,
                                                 SOPC_String* indexRange)
 {
-    if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index) ||
-        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
+    OpcUa_ReadValueId* readVal = ReadRequest_InitializeReadvalPointer(readRequest, index, attribute);
+    if (readVal == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    OpcUa_ReadValueId* readVal = &readRequest->NodesToRead[index];
-    readVal->AttributeId = attribute;
-    status = SOPC_NodeId_Copy(&readVal->NodeId, nodeId);
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&readVal->NodeId, nodeId);
     if (SOPC_STATUS_OK == status && NULL != indexRange)
     {
         status = SOPC_String_Copy(&readVal->IndexRange, indexRange);
