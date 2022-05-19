@@ -388,6 +388,19 @@ static OpcUa_BrowseDescription* BrowseRequest_InitializeBrowsevalPointer(OpcUa_B
                                                                          SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                                          SOPC_BrowseRequest_ResultMask resultMask)
 {
+    if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
+        !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
+        !SOPC_TypeHelperInternal_CheckNodeClassMask(nodeClassMask) ||
+        !SOPC_TypeHelperInternal_CheckResultMask(resultMask))
+    {
+        return NULL;
+    }
+    OpcUa_BrowseDescription* BrowseDescrResult = &browseRequest->NodesToBrowse[index];
+    BrowseDescrResult->BrowseDirection = browseDirection;
+    BrowseDescrResult->IncludeSubtypes = includeSubtypes;
+    BrowseDescrResult->NodeClassMask = nodeClassMask;
+    BrowseDescrResult->ResultMask = resultMask;
+    return BrowseDescrResult;
 }
 
 SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_BrowseRequest* browseRequest,
