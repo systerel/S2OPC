@@ -121,7 +121,9 @@ PROPERTIES
     t_StatusCode = t_StatusCode_i - {c_StatusCode_indet} &
 
     conv_StatusCode_To_RawStatusCode : t_StatusCode --> t_RawStatusCode &
-    conv_RawStatusCode_To_StatusCode : t_RawStatusCode --> t_StatusCode /* Possible precision loss */
+    conv_RawStatusCode_To_StatusCode : t_RawStatusCode --> t_StatusCode & /* Possible precision loss */
+
+    conv_StatusCode_To_RawStatusCode(e_sc_ok)                = c_RawStatusCode_Good
 
 OPERATIONS
 
