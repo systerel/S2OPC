@@ -556,6 +556,15 @@ OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Cre
     return req;
 }
 
+static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsePvalPointer(
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
+    size_t index,
+    const char* startingNodeId,
+    size_t nbPathElements,
+    OpcUa_RelativePathElement* pathElements)
+{
+}
+
 SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
     size_t index,
