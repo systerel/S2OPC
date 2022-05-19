@@ -264,6 +264,13 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues)
     }
     return req;
 }
+
+static OpcUa_WriteValue* WriteRequest_InitializeWritevalPointer(OpcUa_WriteRequest* writeRequest,
+                                                                size_t index,
+                                                                SOPC_AttributeId attribute)
+{
+}
+
 SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest* writeRequest,
                                                              size_t index,
                                                              const char* nodeId,
