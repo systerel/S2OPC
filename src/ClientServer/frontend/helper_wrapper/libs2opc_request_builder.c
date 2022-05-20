@@ -166,9 +166,9 @@ static OpcUa_ReadValueId* ReadRequest_InitializeReadvalPointer(OpcUa_ReadRequest
     {
         return NULL;
     }
-    OpcUa_ReadValueId* ReadvalResult = &readRequest->NodesToRead[index];
-    ReadvalResult->AttributeId = attribute;
-    return ReadvalResult;
+    OpcUa_ReadValueId* readValResult = &readRequest->NodesToRead[index];
+    readValResult->AttributeId = attribute;
+    return readValResult;
 }
 
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* readRequest,
@@ -178,7 +178,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
                                                            const char* indexRange)
 {
     OpcUa_ReadValueId* readVal = ReadRequest_InitializeReadvalPointer(readRequest, index, attribute);
-    if (readVal == NULL)
+    if (NULL == readVal)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -201,7 +201,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 SOPC_String* indexRange)
 {
     OpcUa_ReadValueId* readVal = ReadRequest_InitializeReadvalPointer(readRequest, index, attribute);
-    if (readVal == NULL)
+    if (NULL == readVal)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -274,9 +274,9 @@ static OpcUa_WriteValue* WriteRequest_InitializeWritevalPointer(OpcUa_WriteReque
     {
         return NULL;
     }
-    OpcUa_WriteValue* WritevalResult = &writeRequest->NodesToWrite[index];
-    WritevalResult->AttributeId = attribute;
-    return WritevalResult;
+    OpcUa_WriteValue* writeValResult = &writeRequest->NodesToWrite[index];
+    writeValResult->AttributeId = attribute;
+    return writeValResult;
 }
 
 SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest* writeRequest,
@@ -287,7 +287,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
                                                              SOPC_DataValue* value)
 {
     OpcUa_WriteValue* writeVal = WriteRequest_InitializeWritevalPointer(writeRequest, index, attribute);
-    if (writeVal == NULL)
+    if (NULL == writeVal)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -315,7 +315,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
                                                   SOPC_DataValue* value)
 {
     OpcUa_WriteValue* writeVal = WriteRequest_InitializeWritevalPointer(writeRequest, index, attribute);
-    if (writeVal == NULL)
+    if (NULL == writeVal)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -396,12 +396,12 @@ static OpcUa_BrowseDescription* BrowseRequest_InitializeBrowsedescPointer(
     {
         return NULL;
     }
-    OpcUa_BrowseDescription* BrowseDescrResult = &browseRequest->NodesToBrowse[index];
-    BrowseDescrResult->BrowseDirection = browseDirection;
-    BrowseDescrResult->IncludeSubtypes = includeSubtypes;
-    BrowseDescrResult->NodeClassMask = nodeClassMask;
-    BrowseDescrResult->ResultMask = resultMask;
-    return BrowseDescrResult;
+    OpcUa_BrowseDescription* browseDescrResult = &browseRequest->NodesToBrowse[index];
+    browseDescrResult->BrowseDirection = browseDirection;
+    browseDescrResult->IncludeSubtypes = includeSubtypes;
+    browseDescrResult->NodeClassMask = nodeClassMask;
+    browseDescrResult->ResultMask = resultMask;
+    return browseDescrResult;
 }
 
 SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_BrowseRequest* browseRequest,
@@ -415,7 +415,7 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
 {
     OpcUa_BrowseDescription* browseDesc = BrowseRequest_InitializeBrowsedescPointer(
         browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
-    if (browseDesc == NULL)
+    if (NULL == browseDesc)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -443,7 +443,7 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
 {
     OpcUa_BrowseDescription* browseDesc = BrowseRequest_InitializeBrowsedescPointer(
         browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
-    if (browseDesc == NULL)
+    if (NULL == browseDesc)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -557,7 +557,7 @@ OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Cre
     return req;
 }
 
-static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsepathPointer(
+static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsePathPointer(
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
     size_t index,
     const char* startingNodeId,
@@ -569,8 +569,8 @@ static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsepathPointer(
     {
         return NULL;
     }
-    OpcUa_BrowsePath* BrowsePResult = &tbpRequest->BrowsePaths[index];
-    return BrowsePResult;
+    OpcUa_BrowsePath* browsePathResult = &tbpRequest->BrowsePaths[index];
+    return browsePathResult;
 }
 
 SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
@@ -581,8 +581,8 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
     OpcUa_RelativePathElement* pathElements)
 {
     OpcUa_BrowsePath* browsePath =
-        TranslateBPRequest_InitializeBrowsepathPointer(tbpRequest, index, startingNodeId, nbPathElements, pathElements);
-    if (browsePath == NULL)
+        TranslateBPRequest_InitializeBrowsePathPointer(tbpRequest, index, startingNodeId, nbPathElements, pathElements);
+    if (NULL == browsePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -607,9 +607,9 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
                                                           OpcUa_RelativePathElement* pathElements)
 {
     const char* startingNodeIdCString = SOPC_NodeId_ToCString(startingNodeId);
-    OpcUa_BrowsePath* browsePath = TranslateBPRequest_InitializeBrowsepathPointer(
+    OpcUa_BrowsePath* browsePath = TranslateBPRequest_InitializeBrowsePathPointer(
         tbpRequest, index, startingNodeIdCString, nbPathElements, pathElements);
-    if (browsePath == NULL)
+    if (NULL == browsePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
