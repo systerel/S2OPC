@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -145,6 +146,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
     SOPC_CertificateList* pCert = NULL;
     uint32_t lenThmb = 0;
     char* pThmb = NULL;
+    int nbCharThmb = 0;
 
     if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
     {
@@ -218,7 +220,9 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                         {
                             for (k = 0; k < lenThmb; ++k)
                             {
-                                printf("%02x", pThmb[k]);
+                                nbCharThmb = printf("%02" SCNx8, pThmb[k]);
+                                assert(2 == nbCharThmb);
+
                                 if (k < lenThmb - 1)
                                 {
                                     printf(":");
