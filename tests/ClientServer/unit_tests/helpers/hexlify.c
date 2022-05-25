@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,14 +32,15 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
     assert(n <= INT32_MAX);
     size_t i;
     char buffer[3];
+    int res = 0;
 
     if (!src || !dst)
         return -1;
 
     for (i = 0; i < n; ++i)
     {
-        int res = sprintf(buffer, "%02x", src[i]); // sprintf copies the last \0 too
-        assert(res > 0);
+        res = sprintf(buffer, "%02" SCNx8, src[i]); // sprintf copies the last \0 too
+        assert(2 == res);
         memcpy(dst + 2 * i, buffer, 2);
     }
 
