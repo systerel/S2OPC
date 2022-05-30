@@ -12,6 +12,7 @@ LOG_MODULE_REGISTER(net_gptp_sample, LOG_LEVEL_DBG);
 #include <errno.h>
 #include <console/console.h>
 
+#include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
 #include "sopc_threads.h"
@@ -25,15 +26,13 @@ LOG_MODULE_REGISTER(net_gptp_sample, LOG_LEVEL_DBG);
 #include "ethernet/gptp/gptp_messages.h"
 #include "ethernet/gptp/gptp_data_set.h"
 
+#define SECOND_TO_100NS (10000000)
+#define MS_TO_US (1000)
+#define ONE_SECOND_MS (1000)
+
 static int gSubTestId = 0;
 static int gTestId = 0;
 static Mutex gMutex;
-
-static int init_app(void)
-{
-
-	return 0;
-}
 
 static const char* sourceToString(const SOPC_Time_TimeSource source)
 {
@@ -51,10 +50,10 @@ static void gptp_phase_dis_cb(uint8_t *gm_identity,
                               struct gptp_scaled_ns *last_gm_ph_change,
                               double *last_gm_freq_change)
 {
-    (void)gm_identity;
-    (void)time_base;
-    (void)last_gm_ph_change;
-    (void)last_gm_freq_change;
+    SOPC_UNUSED_ARG(gm_identity);
+    SOPC_UNUSED_ARG(time_base);
+    SOPC_UNUSED_ARG(last_gm_ph_change);
+    SOPC_UNUSED_ARG(last_gm_freq_change);
     /* Note:
      * Monitoring phase discontinuities is not used in current implementation
      * but may be used to correct/smooth time corrections
@@ -66,22 +65,22 @@ static void gptp_phase_dis_cb(uint8_t *gm_identity,
 static const char* DateToString(const SOPC_DateTime dt)
 {
     static char dateOnce [10];
-    struct tm tm;
+    struct tm tmDate;
     time_t seconds = 0;
     SOPC_ReturnStatus status = SOPC_Time_ToTimeT(dt, &seconds);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
-    status = SOPC_Time_Breakdown_UTC(seconds, &tm);
+    status = SOPC_Time_Breakdown_UTC(seconds, &tmDate);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
-    size_t res = strftime(dateOnce, sizeof(dateOnce) - 1, "%H:%M:%S", &tm);
+    size_t res = strftime(dateOnce, sizeof(dateOnce) - 1, "%H:%M:%S", &tmDate);
     SOPC_ASSERT(res == 8);
     return dateOnce;
 }
 
 static void* test_thread(void* context)
 {
-    (void)context;
+    SOPC_UNUSED_ARG(context);
     SOPC_RealTime t0;
     SOPC_RealTime rt1;
     SOPC_RealTime rt2;
@@ -121,17 +120,17 @@ static void* test_thread(void* context)
             {
                 printk("\n");
                 printk("===================================\n");
-                printk("Test #1: Requesting 'Sleep(1000ms)'\n\n");
+                printk("Test #1: Requesting 'Sleep(%dms)'\n\n", ONE_SECOND_MS);
                 printk("-----------------------------------\n");
                 printk("Delta RT, delta DateTime, Ptp Corr\n");
             }
             SOPC_RealTime_GetTime (&rt1);
             dt1 = SOPC_Time_GetCurrentTimeUTC();
-            SOPC_Sleep(1000);
+            SOPC_Sleep(ONE_SECOND_MS);
             SOPC_RealTime_GetTime (&rt2);
             dt2 = SOPC_Time_GetCurrentTimeUTC();
-            const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / 1000;
-            const int deltaDt100us = (dt2 - dt1) / 1000;
+            const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / MS_TO_US;
+            const int deltaDt100us = (dt2 - dt1) / MS_TO_US;
             printk("dRT=(%3d.%01d ms) dDT=(%3d.%01d ms)\n",
                     deltaRt100us /10, abs(deltaRt100us %10),
                     deltaDt100us /10, abs(deltaDt100us %10));
@@ -142,18 +141,18 @@ static void* test_thread(void* context)
             {
                 printk("\n");
                 printk("========================================\n");
-                printk("Test #2: Requesting 'SleepUntil(+1000ms)'\n\n");
+                printk("Test #2: Requesting 'SleepUntil(+%dms)'\n\n", ONE_SECOND_MS);
                 printk("----------------------------------------\n");
                 printk("Delta RT, delta DateTime, Ptp Corr\n");
             }
             SOPC_RealTime_GetTime (&rt1);
             SOPC_RealTime_GetTime (&rt2);
             dt1 = SOPC_Time_GetCurrentTimeUTC();
-            SOPC_RealTime_AddDuration(&rt2, 1000);
+            SOPC_RealTime_AddDuration(&rt2, ONE_SECOND_MS);
             SOPC_RealTime_SleepUntil(&rt2);
             dt2 = SOPC_Time_GetCurrentTimeUTC();
-            const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / 1000;
-            const int deltaDt100us = (dt2 - dt1) / 1000;
+            const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / MS_TO_US;
+            const int deltaDt100us = (dt2 - dt1) / MS_TO_US;
             printk("dRT=(%4d.%01d ms) dDT=(%4d.%01d ms) DT=(%s)\n",
                     deltaRt100us /10, abs(deltaRt100us %10),
                     deltaDt100us /10, abs(deltaDt100us %10),
@@ -184,7 +183,7 @@ static void* test_thread(void* context)
                 SOPC_RealTime_GetTime (&rt1);
                 dt1 = SOPC_Time_GetCurrentTimeUTC();
             }
-            SOPC_Sleep(1000);
+            SOPC_Sleep(ONE_SECOND_MS);
             pre --;
 
             if (pre < -1)
@@ -192,8 +191,8 @@ static void* test_thread(void* context)
                 dt2 = SOPC_Time_GetCurrentTimeUTC();
                 SOPC_RealTime_GetTime (&rt2);
 
-                const int deltaRts = (rt2.tick100ns - rt1.tick100ns) / 10000000;
-                const int deltaDts = (dt2 - dt1) / 10000000;
+                const int deltaRts = (rt2.tick100ns - rt1.tick100ns) / SECOND_TO_100NS;
+                const int deltaDts = (dt2 - dt1) / SECOND_TO_100NS;
                 printk("dRT=(%6d s) dDT=(%6d s)\n",
                         deltaRts,
                         deltaDts);
@@ -216,8 +215,6 @@ static void* test_thread(void* context)
 
 void main(void)
 {
-	init_app();
-
 	static struct gptp_phase_dis_cb phase_dis;
 	gptp_register_phase_dis_cb(&phase_dis, gptp_phase_dis_cb);
 
@@ -225,6 +222,13 @@ void main(void)
     Thread thread = P_THREAD_Create(&test_thread, NULL, "demo", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
 
     SOPC_ASSERT(thread != NULL);
+
+    printk("\nZephyr PtP demo running\n\n");
+    printk("Enter command:\n");
+    printk(" - 's' to start 'SLEEP' test\n");
+    printk(" - 'u' to start 'SLEEP_NTIL' test\n");
+    printk(" - 'c' to start 'CHRONOMETER' test\n");
+    printk(" - ' ' to stop current test\n");
 
 	for (;;)
 	{

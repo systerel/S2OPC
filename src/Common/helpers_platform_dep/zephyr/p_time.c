@@ -115,7 +115,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
 #define CLOCK_CORRECTION_MEASURE_DURATION 10.0
 #define CLOCK_CORRECTION_RANGE 0.1
 
-/** Offset between PTp & internal clock, (or 0 if unknown)*/
+/** Offset between PtP & internal clock, (or 0 if unknown)*/
 static int64_t gPtpSourceSync = 0;
 /** date of local clock at last PtP synchronized time (last update of gPtpSourceSync) */
 static uint64_t gLastLocSyncDate = 0;
@@ -129,13 +129,15 @@ static float gLocalClockCorrFactor = 1.0;
 static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
 
 /** /brief Get current PTP time with 100 ns precision
- * /return 0 if PtpClock is not ready or provides irrelevant value*/
+ * /return
+ *   - Current time (unit = 100ns, from 1970, Jan. 1st)
+ *   - 0 if PtpClock is not ready or provides irrelevant value*/
 static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
 
 #else // CONFIG_NET_GPTP
 #define GPTP_ASSERT(x)
 #define GPTP_CORRECT(x) (x)
-// No time correction is PTP is not available
+// No time correction if PTP is not available
 #define P_TIME_TimeReference_GetCorrected100ns P_TIME_TimeReference_GetInternal100ns
 
 #endif // CONFIG_NET_GPTP
@@ -335,9 +337,11 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
         // Time overflow...
         datetime = INT64_MAX;
     }
-
-    // Add to UTC value fractional part of value
-    datetime += value_frac_in_100ns;
+    else
+    {
+        // Add to UTC value fractional part of value
+        datetime += value_frac_in_100ns;
+    }
 
     return datetime;
 }
@@ -575,7 +579,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
     bool gm_present = false;
     int errCode = gptp_event_capture(&slave_time, &gm_present);
 
-    static const uint64_t minTimeOffset = 365 * (2021 - 1970);
+    static const uint64_t minTimeOffset = 365 * (2021 - 1970) * 24 * 60 * 60;
 
     // If time is irrelevant or provided locally, ignore it
     // a "PtP MASTER" state can be observed in transitions (connection/disconnection)
