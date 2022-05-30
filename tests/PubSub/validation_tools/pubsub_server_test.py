@@ -700,8 +700,8 @@ def testPubSubDynamicConf():
             move(DEFAULT_XML_PATH + ".bakup", DEFAULT_XML_PATH)
 
         pubsubserver.disconnect()
-        retcode = -1 if logger.has_failed_tests else 0
         logger.add_test('Not connected to OPCUA Server', not pubsubserver.isConnected())
+        retcode = -1 if logger.has_failed_tests else 0
         logger.finalize_report()
         sys.exit(retcode)
 
