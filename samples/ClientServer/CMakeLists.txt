@@ -46,8 +46,10 @@ if(ENABLE_SAMPLES)
   # Manage the Nano profiles extended mode
   if (WITH_NANO_EXTENDED)
     set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
+    set(TOOLKIT_DEMO_FILE_TRANSFER "toolkit_demo_file_transfer")
   else()
     set(TOOLKIT_DEMO_SERVER "toolkit_demo_nano_server")
+    # set(TOOLKIT_DEMO_FILE_TRANSFER "toolkit_demo_nano_file_transfer")
   endif()
 
   if (expat_FOUND)
@@ -87,6 +89,21 @@ if(ENABLE_SAMPLES)
       )
   else()
     message(WARNING "Demo server ${TOOLKIT_DEMO_SERVER} executable will not be compiled since Expat library not available.")
+  endif()
+
+  if (expat_FOUND)
+    add_executable(${TOOLKIT_DEMO_FILE_TRANSFER}
+      "demo_file_transfer/toolkit_demo_file_transfer.c"
+      "demo_file_transfer/sopc_file_transfer.c")
+    target_link_libraries(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE s2opc_serverwrapper)
+    target_compile_options(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
+
+    target_link_libraries(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
+    target_compile_definitions(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE "WITH_EXPAT")
+
+  else()
+    message(WARNING "Demo file transfer ${TOOLKIT_DEMO_FILE_TRANSFER} executable will not be compiled since Expat library not available.")
   endif()
 
   # Demo clients (S2OPC only without extension)
