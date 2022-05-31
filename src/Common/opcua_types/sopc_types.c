@@ -20159,6 +20159,17 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy 
     /* Default security policy shall be used only when
    secure channel security policy is non-None since password will be non-encrypted */
 };
+
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {sizeof(SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID) - 1, true,
+                 (SOPC_Byte*) SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_Basic256Sha256_URI) - 1, true,
+                          (SOPC_Byte*) SOPC_SecurityPolicy_Basic256Sha256_URI},
+    /* Basic256Sha256 security policy might be used to ensure password is encrypted in any security policy and mode */
+};
 #endif
 
 /*============================================================================

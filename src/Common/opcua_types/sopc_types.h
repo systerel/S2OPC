@@ -7245,6 +7245,13 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_User
  */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
 
+// UserTokenPolicyId for username token type with Basic256Sha256 SecurityPolicy example
+#define SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID "username_Basic256Sha256"
+/** Example username security policy supported and configured with Basic256Sha256 security policy.
+ *  With this security policy, the password will be encrypted in any SecureChannel security policy and mode.
+ */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
+
 #endif
 
 /*============================================================================

@@ -739,6 +739,13 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_User
  */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
 
+// UserTokenPolicyId for username token type with Basic256Sha256 SecurityPolicy example
+#define SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID "username_Basic256Sha256"
+/** Example username security policy supported and configured with Basic256Sha256 security policy.
+ *  With this security policy, the password will be encrypted in any SecureChannel security policy and mode.
+ */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
+
 #endif
 
 /*============================================================================
@@ -1085,6 +1092,17 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy 
     .SecurityPolicyUri = {0, true, NULL},
     /* Default security policy shall be used only when
    secure channel security policy is non-None since password will be non-encrypted */
+};
+
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_UserName,
+    .PolicyId = {sizeof(SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID) - 1, true,
+                 (SOPC_Byte*) SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_Basic256Sha256_URI) - 1, true,
+                          (SOPC_Byte*) SOPC_SecurityPolicy_Basic256Sha256_URI},
+    /* Basic256Sha256 security policy might be used to ensure password is encrypted in any security policy and mode */
 };
 #endif
 """
