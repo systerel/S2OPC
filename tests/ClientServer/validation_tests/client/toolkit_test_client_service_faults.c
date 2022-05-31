@@ -195,6 +195,7 @@ int main(void)
     uint32_t loopCpt = 0;
 
     uint32_t channel_config_idx = 0;
+    SOPC_PKIProvider* pki = NULL;
 
     /* Initialize SOPC_Common */
 
@@ -225,6 +226,28 @@ int main(void)
         }
     }
 
+    // Init PKI provider with certificate authority
+    if (SOPC_STATUS_OK == status)
+    {
+        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
+        char* lPathsTrustedLinks[] = {NULL};
+        char* lPathsUntrustedRoots[] = {NULL};
+        char* lPathsUntrustedLinks[] = {NULL};
+        char* lPathsIssuedCerts[] = {NULL};
+        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
+        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
+                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf(">>Stub_Client: Failed to create PKI\n");
+        }
+        else
+        {
+            printf(">>Stub_Client: PKI created\n");
+            scConfig.pki = pki;
+        }
+    }
+
     // Configure the secure channel connection and retrieve associated channel configuration index
     if (SOPC_STATUS_OK == status)
     {
@@ -249,7 +272,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameNone_ID, "wrongUser",
+            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "wrongUser",
             (const uint8_t*) "noPassword", (int32_t) strlen("noPassword"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with invalid user identity\n");
     }
@@ -293,8 +316,8 @@ int main(void)
         SOPC_Atomic_Int_Set(&sessionActivationFault, 0);
         // Use 1, 2, 3 as session contexts
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameNone_ID, "user1", (const uint8_t*) "password",
-            (int32_t) strlen("password"));
+            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "user1",
+            (const uint8_t*) "password", (int32_t) strlen("password"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with valid user identity\n");
     }
 
@@ -500,6 +523,7 @@ int main(void)
     }
 
     SOPC_Toolkit_Clear();
+    SOPC_PKIProvider_Free(&pki);
 
     if (SOPC_STATUS_OK == status)
     {

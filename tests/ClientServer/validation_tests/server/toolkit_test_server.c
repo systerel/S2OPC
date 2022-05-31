@@ -430,7 +430,8 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_SecurityConfig_AddUserTokenPolicy(
-                    sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy); /* Necessary for UACTT tests only */
+                    sp,
+                    &SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy); /* Necessary for UACTT tests only */
             }
         }
     }
