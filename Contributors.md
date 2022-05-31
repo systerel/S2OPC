@@ -28,3 +28,4 @@ the legal rights to contribute.
 * sauvegrain <sauvegrain@systerel.fr>
 * Raphal <gael.raphal-stg@systerel.fr>
 * Shahbaaz Ramjane <shahbaaz.ramjane@systerel.fr>
+* Robin Barrucand <robin.barrucand@systerel.fr>
