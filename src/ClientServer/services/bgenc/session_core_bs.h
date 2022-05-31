@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 05/01/2022 17:34:35
+ Date                 : 31/05/2022 15:47:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -182,6 +182,10 @@ extern void session_core_bs__server_get_session_from_token(
 extern void session_core_bs__server_is_valid_session_token(
    const constants__t_session_token_i session_core_bs__token,
    t_bool * const session_core_bs__ret);
+extern void session_core_bs__server_may_need_user_token_encryption(
+   const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
+   const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+   t_bool * const session_core_bs__p_bres);
 extern void session_core_bs__server_session_timeout_evaluation(
    const constants__t_session_i session_core_bs__session,
    t_bool * const session_core_bs__expired);
@@ -193,6 +197,11 @@ extern void session_core_bs__server_session_timeout_start_timer(
    t_bool * const session_core_bs__timer_created);
 extern void session_core_bs__server_session_timeout_stop_timer(
    const constants__t_session_i session_core_bs__session);
+extern void session_core_bs__server_set_fresh_nonce(
+   const constants__t_session_i session_core_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+   t_bool * const session_core_bs__p_bres,
+   constants__t_Nonce_i * const session_core_bs__p_nonce);
 extern void session_core_bs__session_do_nothing(
    const constants__t_session_i session_core_bs__session);
 extern void session_core_bs__set_session_app_context(

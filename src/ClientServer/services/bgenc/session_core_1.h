@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 05/01/2022 17:34:00
+ Date                 : 31/05/2022 15:46:52
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -100,9 +100,11 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__server_get_fresh_session_token session_core_bs__server_get_fresh_session_token
 #define session_core_1__server_get_session_from_token session_core_bs__server_get_session_from_token
 #define session_core_1__server_is_valid_session_token session_core_bs__server_is_valid_session_token
+#define session_core_1__server_may_need_user_token_encryption session_core_bs__server_may_need_user_token_encryption
 #define session_core_1__server_session_timeout_evaluation session_core_bs__server_session_timeout_evaluation
 #define session_core_1__server_session_timeout_msg_received session_core_bs__server_session_timeout_msg_received
 #define session_core_1__server_session_timeout_start_timer session_core_bs__server_session_timeout_start_timer
+#define session_core_1__server_set_fresh_nonce session_core_bs__server_set_fresh_nonce
 #define session_core_1__session_do_nothing session_core_bs__session_do_nothing
 #define session_core_1__set_session_app_context session_core_bs__set_session_app_context
 #define session_core_1__set_session_channel session_core_2__set_session_channel

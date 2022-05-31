@@ -111,23 +111,44 @@ OPERATIONS
     END
     ;
 
-    bret <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
+    /* Fills the Signature. Do not call when SC:Sec_pol is None */
+    bret <-- write_create_session_resp_signature(p_msg, p_signature) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_out &
         a_msg_out_type = e_msg_session_create_resp &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx &
-        p_nonce : t_Nonce_i &
-        p_nonce : t_Nonce &
-        p_signature : t_SignatureData_i &
-        p_signature : t_SignatureData
+        p_signature : t_SignatureData_i
     THEN
         bret :: BOOL
     END
     ;
 
-    /* Fills the Nonce and Certificate. Do not call when SC:Sec_pol is None */
+    /* Fills the Certificate. Do not call when (SC:Sec_pol is None with UserToken:Sec_pol being all None) */
+    bret <-- write_create_session_resp_cert(p_msg, p_channel_config_idx) =
+    PRE
+        p_msg : t_msg_i &
+        p_msg = c_msg_out &
+        a_msg_out_type = e_msg_session_create_resp &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        bret :: BOOL
+    END
+    ;
+
+    /* Fills the server Nonce */
+    write_create_session_resp_nonce(p_msg, p_nonce) =
+    PRE
+        p_msg : t_msg_i &
+        p_msg = c_msg_out &
+        a_msg_out_type = e_msg_session_create_resp &
+        p_nonce : t_Nonce_i &
+        p_nonce : t_Nonce
+    THEN
+        skip
+    END
+    ;
+
     bret <-- write_create_session_req_msg_crypto(p_req_msg, p_channel_config_idx, p_nonce) =
     PRE
         p_req_msg : t_msg_i &
@@ -170,7 +191,7 @@ OPERATIONS
     ;
 
 
-    write_activate_session_resp_msg_crypto(activate_resp_msg, nonce) =
+    write_activate_session_resp_nonce(activate_resp_msg, nonce) =
     PRE
         activate_resp_msg : t_msg_i &
         activate_resp_msg = c_msg_out &

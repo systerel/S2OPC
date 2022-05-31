@@ -255,17 +255,42 @@ OPERATIONS
     END
     ;
 
+    p_bres, p_nonce <-- server_set_fresh_nonce(p_session, p_channel_config_idx) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        p_bres,
+        p_nonce,
+        a_NonceServer
+        :(
+            p_bres : BOOL &
+            p_nonce : t_Nonce_i &
+            (p_bres = TRUE
+             =>
+             a_NonceServer(p_session) : t_Nonce &
+             {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+             p_nonce = a_NonceServer(p_session)) &
+            (p_bres = FALSE
+             =>
+             a_NonceServer = a_NonceServer$0 &
+             p_nonce = c_Nonce_indet)
+         )
+    END
+    ;
+
     /* This implements the crypto challenge in CreateSession.
-     * valid tracks the alloc and success of both the a_NonceServer() and signature
-     * TODO? split to gather common Nonce-generation code with others using it
+     * valid tracks the alloc and success of signature
      */
     status, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_channel_config_idx) =
     PRE
         p_session : t_session_i &
-        p_session : t_session   &
-        p_req_msg : t_msg_i     &
-        p_req_msg = c_msg_in    &
-        c_msg_in : t_msg        &
+        p_session : t_session &
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_req &
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
@@ -273,22 +298,30 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx
     THEN
         status,
-        signature,
-        a_NonceServer
+        signature
         :(
             status        : t_StatusCode_i        &
             signature     : t_SignatureData_i     &
-            a_NonceServer : t_session +-> t_Nonce &
 
             (status = e_sc_ok
              =>
-             signature : t_SignatureData &
-             a_NonceServer(p_session) : t_Nonce &
-             {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0) &
+             signature : t_SignatureData) &
             (status /= e_sc_ok
              =>
-             a_NonceServer = a_NonceServer$0)
+             signature = c_SignatureData_indet)
          )
+    END
+    ;
+
+    /* Returns true if user token policies for the current SC security policy includes possible user token encryption */
+    p_bres <-- server_may_need_user_token_encryption(p_endpoint_config_idx, p_channel_config_idx) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        p_bres :: BOOL
     END
     ;
 
@@ -541,21 +574,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_req
     THEN
-        p_valid,
-        a_NonceServer
-        :(  p_valid : BOOL &
-            a_NonceServer : t_session +-> t_Nonce &
-
-            (   p_valid = TRUE
-                =>
-                {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-                p_session : dom(a_NonceServer)
-            ) &
-            (   p_valid = FALSE
-                =>
-                a_NonceServer = a_NonceServer$0
-            )
-        )
+        p_valid :: BOOL
     END;
 
     client_close_session_req_msg (req_msg) =

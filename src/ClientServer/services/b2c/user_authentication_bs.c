@@ -75,23 +75,6 @@ void user_authentication_bs__get_user_token_type_from_token(
         util_get_user_token_type_from_token(user_authentication_bs__p_user_token);
 }
 
-static bool secuModeEnumIncludedInSecuModeMasks(OpcUa_MessageSecurityMode msgSecurityMode, uint16_t securityModes)
-{
-    switch (msgSecurityMode)
-    {
-    case OpcUa_MessageSecurityMode_Invalid:
-        return false;
-    case OpcUa_MessageSecurityMode_None:
-        return (securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0;
-    case OpcUa_MessageSecurityMode_Sign:
-        return (securityModes & SOPC_SECURITY_MODE_SIGN_MASK) != 0;
-    case OpcUa_MessageSecurityMode_SignAndEncrypt:
-        return (securityModes & SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK) != 0;
-    default:
-        return false;
-    }
-}
-
 /*
  * If user token is provided we check it is compatible with 1 user token policy,
  * otherwise we only check some user policies are available */
@@ -119,7 +102,7 @@ static bool SOPC_UserTokenPolicyEval_Internal(
         SOPC_SecurityPolicy* secPol = &epConfig->secuConfigurations[epSecPolIdx];
 
         if (0 == strcmp(scConfig->reqSecuPolicyUri, SOPC_String_GetRawCString(&secPol->securityPolicy)) &&
-            secuModeEnumIncludedInSecuModeMasks(scConfig->msgSecurityMode, secPol->securityModes))
+            util_SecuModeEnumIncludedInSecuModeMasks(scConfig->msgSecurityMode, secPol->securityModes))
         {
             if (constants__c_userTokenType_indet != user_authentication_bs__p_user_token_type)
             {

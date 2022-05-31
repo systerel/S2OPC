@@ -90,4 +90,7 @@ void util_NodeId_borrowReference_or_indet__C_to_B(constants__t_NodeId_i* bnodeId
  */
 t_bool util_SOPC_Boolean_to_B(const SOPC_Boolean b);
 
+/* Returns true if the security mode enumerated value is included in the security mode masks */
+bool util_SecuModeEnumIncludedInSecuModeMasks(OpcUa_MessageSecurityMode msgSecurityMode, uint16_t securityModes);
+
 #endif /* UTIL_B2C_H */

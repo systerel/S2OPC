@@ -306,14 +306,18 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (channel);
         l_secpol <-- get_SecurityPolicy(channel);
         IF l_secpol /= e_secpol_None THEN
-            res_activated <-- server_activate_session_check_crypto(session, channel, l_channel_config_idx, activate_req_msg);
-            IF res_activated = TRUE THEN
-                l_nonce <-- get_NonceServer(session, FALSE);
-                write_activate_session_resp_msg_crypto(activate_resp_msg, l_nonce)
-            END
+            res_activated <-- server_activate_session_check_crypto(session, channel, l_channel_config_idx, activate_req_msg)
         ELSE
             res_activated := TRUE
-        END;
+        END
+        ;
+        IF res_activated = TRUE THEN
+            res_activated, l_nonce <-- server_set_fresh_nonce(session, l_channel_config_idx);
+            IF res_activated = TRUE THEN
+                write_activate_session_resp_nonce(activate_resp_msg, l_nonce)
+            END
+        END
+        ;
         /* Note: results[] and diagnosticInfos[] info fields should not be filled
            since it concerns SoftwareCertificate from request which is reserved for a future use */
         IF res_activated = TRUE THEN
@@ -374,8 +378,11 @@ OPERATIONS
         l_signature,
         l_nonce,
         l_secpol,
+        l_set_cert,
         l_bret
     IN
+        l_set_cert := FALSE;
+        l_bret := FALSE;
         service_ret := e_sc_bad_out_of_memory;
         l_nsession <-- init_new_session (FALSE);
         l_valid_session <-- is_valid_session (l_nsession);
@@ -398,17 +405,46 @@ OPERATIONS
                 IF service_ret = e_sc_ok THEN
                     l_secpol <-- get_SecurityPolicy(channel);
                     IF l_secpol /= e_secpol_None THEN
+                        /* If the security policy is not none, the nonce and server certificate are needed */
+                        l_set_cert := TRUE;
                         /* Do the cryptographic challenge which may fail because of mallocs */
                         l_crypto_status, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_channel_config_idx);
                         IF  l_crypto_status = e_sc_ok THEN
-                            l_nonce <-- get_NonceServer(l_nsession, FALSE);
-                            l_bret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_channel_config_idx, l_nonce, l_signature);
+                            /* Write server signature */
+                            l_bret <-- write_create_session_resp_signature(create_resp_msg, l_signature);
                             clear_Signature(l_nsession, FALSE, l_signature);
                             IF l_bret = FALSE THEN
                                 service_ret := e_sc_bad_unexpected_error
                             END
                         ELSE
                             service_ret := l_crypto_status
+                        END
+                    END
+                    ;
+                    IF service_ret = e_sc_ok THEN
+                        IF l_set_cert = FALSE THEN
+                            /* In case the security policy is None we might still need the nonce for password encryption */
+                            l_endpoint_config_idx <-- server_get_endpoint_config (channel);
+                            l_set_cert <-- server_may_need_user_token_encryption(l_endpoint_config_idx, l_channel_config_idx)
+                        END
+                        ;
+                        IF l_set_cert = TRUE THEN
+                            /* Write server certificate */
+                            l_bret <-- write_create_session_resp_cert(create_resp_msg, l_channel_config_idx)
+                        ELSE
+                            l_bret := TRUE
+                        END
+                        ;
+                        IF l_bret = TRUE THEN
+                            l_bret, l_nonce <-- server_set_fresh_nonce(l_nsession, l_channel_config_idx);
+                            IF l_bret = TRUE THEN
+                                /* Write server nonce */
+                                write_create_session_resp_nonce(create_resp_msg, l_nonce)
+                            END
+                        END
+                        ;
+                        IF l_bret = FALSE THEN
+                            service_ret := e_sc_bad_unexpected_error
                         END
                     END
                 END

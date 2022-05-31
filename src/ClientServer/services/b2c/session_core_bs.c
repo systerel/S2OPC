@@ -544,7 +544,6 @@ void session_core_bs__server_create_session_req_do_crypto(
     SOPC_Endpoint_Config* pECfg = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     ServerSessionData* pSession = NULL;
-    SOPC_ByteString* pNonce = NULL;
     OpcUa_SignatureData* pSign = NULL;
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
@@ -575,10 +574,9 @@ void session_core_bs__server_create_session_req_do_crypto(
         return;
     }
 
-    /* If security policy is not None, generate the nonce and a signature */
-    if (strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0)
+    /* If security policy is not None, generate the signature */
+    if (SOPC_STATUS_OK == status && strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0)
     {
-        pNonce = &pSession->nonceServer;
         pSign = &pSession->signatureData;
 
         if (pReq->ClientNonce.Length < LENGTH_NONCE)
@@ -591,33 +589,24 @@ void session_core_bs__server_create_session_req_do_crypto(
         /* TODO: don't create it each time, maybe add it to the session */
         pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
 
-        /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
-        SOPC_ByteString_Clear(pNonce);
-        pNonce->Length = LENGTH_NONCE;
-
-        status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, LENGTH_NONCE, &pNonce->Data);
-
         /* Use the server private key to sign the client certificate + client nonce */
         /* TODO: check client certificate is the one provided for the Secure Channel */
         /* a) Prepare the buffer to sign */
 
-        if (SOPC_STATUS_OK == status)
+        if (pReq->ClientCertificate.Length >= 0 && pReq->ClientNonce.Length > 0 &&
+            (uint64_t) pReq->ClientCertificate.Length + (uint64_t) pReq->ClientNonce.Length <=
+                SIZE_MAX / sizeof(uint8_t))
         {
-            if (pReq->ClientCertificate.Length >= 0 && pReq->ClientNonce.Length > 0 &&
-                (uint64_t) pReq->ClientCertificate.Length + (uint64_t) pReq->ClientNonce.Length <=
-                    SIZE_MAX / sizeof(uint8_t))
-            {
-                lenToSign = (uint32_t) pReq->ClientCertificate.Length + (uint32_t) pReq->ClientNonce.Length;
-                pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
-            }
-            else
-            {
-                pToSign = NULL;
-            }
-            if (NULL == pToSign)
-            {
-                status = SOPC_STATUS_NOK;
-            }
+            lenToSign = (uint32_t) pReq->ClientCertificate.Length + (uint32_t) pReq->ClientNonce.Length;
+            pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
+        }
+        else
+        {
+            pToSign = NULL;
+        }
+        if (NULL == pToSign)
+        {
+            status = SOPC_STATUS_NOK;
         }
 
         if (SOPC_STATUS_OK == status)
@@ -675,11 +664,6 @@ void session_core_bs__server_create_session_req_do_crypto(
                                                  SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
         }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            *session_core_bs__signature = pSign;
-        }
-
         bool application_uri_ok = false;
 
         if (SOPC_STATUS_OK == status)
@@ -704,6 +688,15 @@ void session_core_bs__server_create_session_req_do_crypto(
     }
 
     /* Clean */
+    if (constants_statuscodes_bs__e_sc_ok == *session_core_bs__status)
+    {
+        *session_core_bs__signature = pSign;
+    }
+    else
+    {
+        OpcUa_SignatureData_Clear(pSign);
+    }
+
     if (NULL != pToSign)
     {
         SOPC_Free(pToSign);
@@ -1246,7 +1239,6 @@ void session_core_bs__server_activate_session_check_crypto(
     const OpcUa_SignatureData* pSignCandid = &pReq->ClientSignature;
     SOPC_CertificateList* pCrtCli = NULL;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -1294,12 +1286,6 @@ void session_core_bs__server_activate_session_check_crypto(
                                       &pSignCandid->Signature) == SOPC_STATUS_OK)
     {
         *session_core_bs__valid = true;
-
-        // renew the server Nonce
-        SOPC_Free(pNonce->Data);
-        pNonce->Data = NULL;
-        status = SOPC_CryptoProvider_GenerateRandomBytes(provider, (uint32_t) pNonce->Length, &pNonce->Data);
-        assert(SOPC_STATUS_OK == status);
     }
 
     /* Clear */
@@ -1410,7 +1396,8 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
                 event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
                 event.params = (uintptr_t) NULL;
                 event.auxParam = 0;
-                // Note: next timer is not revised session timeout but revised timeout - latest msg received time
+                // Note: next timer is not revised session timeout but revised timeout - latest msg received
+                // time
                 timerId = SOPC_EventTimer_Create(
                     SOPC_Services_GetEventHandler(), event,
                     session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg);
@@ -1493,4 +1480,92 @@ void session_core_bs__server_session_timeout_stop_timer(const constants__t_sessi
         session_RevisedSessionTimeout[session_core_bs__session] = 0;
         server_session_latest_msg_receveived[session_core_bs__session] = 0;
     }
+}
+
+void session_core_bs__server_set_fresh_nonce(
+    const constants__t_session_i session_core_bs__p_session,
+    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+    t_bool* const session_core_bs__p_bres,
+    constants__t_Nonce_i* const session_core_bs__p_nonce)
+{
+    SOPC_SecureChannel_Config* pSCCfg = NULL;
+    SOPC_CryptoProvider* provider = NULL;
+    ServerSessionData* pSession = NULL;
+    SOPC_ByteString* pNonce = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    /* Default answer */
+    *session_core_bs__p_bres = false;
+    *session_core_bs__p_nonce = constants__c_Nonce_indet;
+
+    assert(constants__c_session_indet != session_core_bs__p_session);
+
+    pSession = &serverSessionDataArray[session_core_bs__p_session];
+
+    /* Retrieve the security policy and mode */
+    pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+
+    if (NULL == pSCCfg)
+    {
+        return;
+    }
+
+    /* Retrieve ptrs to ServerNonce */
+    pNonce = &pSession->nonceServer;
+
+    /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
+    SOPC_ByteString_Clear(pNonce);
+    pNonce->Length = LENGTH_NONCE;
+
+    provider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+    status = SOPC_CryptoProvider_GenerateRandomBytes(provider, (uint32_t) pNonce->Length, &pNonce->Data);
+    if (SOPC_STATUS_OK == status)
+    {
+        *session_core_bs__p_bres = true;
+        *session_core_bs__p_nonce = pNonce;
+    }
+
+    /* Clear */
+    SOPC_CryptoProvider_Free(provider);
+}
+
+void session_core_bs__server_may_need_user_token_encryption(
+    const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
+    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
+    t_bool* const session_core_bs__p_bres)
+{
+    *session_core_bs__p_bres = false;
+
+    /* Retrieve the secure channel configuration and available user token policies for the security policy and mode */
+    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
+    assert(NULL != epConfig);
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
+    assert(NULL != scConfig);
+
+    bool foundUserSecuPolicyWithEncryption = false;
+
+    for (uint8_t epSecPolIdx = 0; epSecPolIdx < epConfig->nbSecuConfigs && !foundUserSecuPolicyWithEncryption;
+         epSecPolIdx++)
+    {
+        SOPC_SecurityPolicy* secPol = &epConfig->secuConfigurations[epSecPolIdx];
+
+        if (0 == strcmp(scConfig->reqSecuPolicyUri, SOPC_String_GetRawCString(&secPol->securityPolicy)) &&
+            util_SecuModeEnumIncludedInSecuModeMasks(scConfig->msgSecurityMode, secPol->securityModes))
+        {
+            for (uint8_t i = 0; i < secPol->nbOfUserTokenPolicies && !foundUserSecuPolicyWithEncryption; i++)
+            {
+                if (secPol->userTokenPolicies[i].SecurityPolicyUri.Length > 0 &&
+                    0 != strcmp(SOPC_SecurityPolicy_None_URI,
+                                SOPC_String_GetRawCString(&secPol->userTokenPolicies[i].SecurityPolicyUri)))
+                {
+                    /* Note: since we check only None, we might return true with an invalid policy configured in server
+                             which is ok since we only use it to generate additional parameters for session responses */
+                    foundUserSecuPolicyWithEncryption = true;
+                }
+            }
+        }
+    }
+    *session_core_bs__p_bres = foundUserSecuPolicyWithEncryption;
 }

@@ -211,9 +211,7 @@ OPERATIONS
                     a_state(l_nsession) := e_session_created                ||
                     nsession := l_nsession                                  ||
                     service_ret := e_sc_ok                                  ||
-                    IF a_SecurityPolicy(channel) /= e_secpol_None THEN
-                        a_NonceServer(l_nsession) := l_nonce
-                    END
+                    a_NonceServer(l_nsession) := l_nonce
                     // sends response
                 OR
                     // sends error response

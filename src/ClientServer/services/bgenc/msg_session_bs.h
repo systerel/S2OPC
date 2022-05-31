@@ -21,7 +21,7 @@
 
  File Name            : msg_session_bs.h
 
- Date                 : 05/01/2022 17:34:26
+ Date                 : 01/06/2022 15:14:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,7 +75,7 @@ extern void msg_session_bs__write_activate_session_req_msg_crypto(
    const constants__t_msg_i msg_session_bs__activate_req_msg,
    const constants__t_SignatureData_i msg_session_bs__signature,
    t_bool * const msg_session_bs__bret);
-extern void msg_session_bs__write_activate_session_resp_msg_crypto(
+extern void msg_session_bs__write_activate_session_resp_nonce(
    const constants__t_msg_i msg_session_bs__activate_resp_msg,
    const constants__t_Nonce_i msg_session_bs__nonce);
 extern void msg_session_bs__write_create_session_msg_server_endpoints(
@@ -111,13 +111,18 @@ extern void msg_session_bs__write_create_session_req_msg_sessionName(
    const constants__t_session_application_context_i msg_session_bs__p_app_context);
 extern void msg_session_bs__write_create_session_req_msg_sessionTimeout(
    const constants__t_msg_i msg_session_bs__create_req_msg);
-extern void msg_session_bs__write_create_session_resp_msg_crypto(
+extern void msg_session_bs__write_create_session_resp_cert(
    const constants__t_msg_i msg_session_bs__p_msg,
    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
-   const constants__t_Nonce_i msg_session_bs__p_nonce,
-   const constants__t_SignatureData_i msg_session_bs__p_signature,
    t_bool * const msg_session_bs__bret);
 extern void msg_session_bs__write_create_session_resp_msg_maxRequestMessageSize(
    const constants__t_msg_i msg_session_bs__p_resp_msg);
+extern void msg_session_bs__write_create_session_resp_nonce(
+   const constants__t_msg_i msg_session_bs__p_msg,
+   const constants__t_Nonce_i msg_session_bs__p_nonce);
+extern void msg_session_bs__write_create_session_resp_signature(
+   const constants__t_msg_i msg_session_bs__p_msg,
+   const constants__t_SignatureData_i msg_session_bs__p_signature,
+   t_bool * const msg_session_bs__bret);
 
 #endif

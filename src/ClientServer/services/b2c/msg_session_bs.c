@@ -246,11 +246,9 @@ void msg_session_bs__write_create_session_msg_server_endpoints(
         (uint32_t*) &createSessionResp->NoOfServerEndpoints, &createSessionResp->ServerEndpoints);
 }
 
-void msg_session_bs__write_create_session_resp_msg_crypto(
+void msg_session_bs__write_create_session_resp_cert(
     const constants__t_msg_i msg_session_bs__p_msg,
     const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
-    const constants__t_Nonce_i msg_session_bs__p_nonce,
-    const constants__t_SignatureData_i msg_session_bs__p_signature,
     t_bool* const msg_session_bs__bret)
 {
     SOPC_SecureChannel_Config* pSCCfg = NULL;
@@ -258,7 +256,6 @@ void msg_session_bs__write_create_session_resp_msg_crypto(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_msg;
-    OpcUa_SignatureData* pSig = msg_session_bs__p_signature;
 
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
@@ -266,7 +263,7 @@ void msg_session_bs__write_create_session_resp_msg_crypto(
     {
         result = false;
     }
-    if (result != false)
+    if (result)
     {
         pCrtSrv = pSCCfg->crt_srv;
         if (NULL == pCrtSrv)
@@ -276,27 +273,47 @@ void msg_session_bs__write_create_session_resp_msg_crypto(
     }
 
     /* Write the Certificate */
-    if (result != false)
+    if (result)
     {
         SOPC_ByteString_Clear(&pResp->ServerCertificate);
         assert(pCrtSrv->length <= INT32_MAX);
         status = SOPC_ByteString_CopyFromBytes(&pResp->ServerCertificate, pCrtSrv->data, (int32_t) pCrtSrv->length);
+        result = SOPC_STATUS_OK == status;
+    }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            pResp->ServerCertificate.Length = (int32_t) pCrtSrv->length;
-            /* TODO: should borrow a reference instead of copy */
-            /* Copy Nonce */
-            status = SOPC_ByteString_Copy(&pResp->ServerNonce, msg_session_bs__p_nonce);
-        }
+    *msg_session_bs__bret = result;
+}
 
+void msg_session_bs__write_create_session_resp_nonce(const constants__t_msg_i msg_session_bs__p_msg,
+                                                     const constants__t_Nonce_i msg_session_bs__p_nonce)
+{
+    OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_msg;
+
+    /* Borrow Nonce */
+    pResp->ServerNonce.DoNotClear = true;
+    pResp->ServerNonce.Data = msg_session_bs__p_nonce->Data;
+    pResp->ServerNonce.Length = msg_session_bs__p_nonce->Length;
+}
+
+void msg_session_bs__write_create_session_resp_signature(const constants__t_msg_i msg_session_bs__p_msg,
+                                                         const constants__t_SignatureData_i msg_session_bs__p_signature,
+                                                         t_bool* const msg_session_bs__bret)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool result = true;
+    OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_msg;
+    OpcUa_SignatureData* pSig = msg_session_bs__p_signature;
+
+    /* Write the Signature */
+    if (result)
+    {
         /* TODO: should borrow a reference instead of copy */
         /* Copy Signature, which is not a built-in, so copy its fields */
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && constants__c_SignatureData_indet != pSig)
         {
             status = SOPC_String_Copy(&pResp->ServerSignature.Algorithm, &pSig->Algorithm);
         }
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && constants__c_SignatureData_indet != pSig)
         {
             status = SOPC_ByteString_Copy(&pResp->ServerSignature.Signature, &pSig->Signature);
         }
@@ -401,16 +418,15 @@ void msg_session_bs__write_activate_session_req_msg_crypto(const constants__t_ms
     }
 }
 
-void msg_session_bs__write_activate_session_resp_msg_crypto(const constants__t_msg_i msg_session_bs__activate_resp_msg,
-                                                            const constants__t_Nonce_i msg_session_bs__nonce)
+void msg_session_bs__write_activate_session_resp_nonce(const constants__t_msg_i msg_session_bs__activate_resp_msg,
+                                                       const constants__t_Nonce_i msg_session_bs__nonce)
 {
     OpcUa_ActivateSessionResponse* pResp = (OpcUa_ActivateSessionResponse*) msg_session_bs__activate_resp_msg;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    /* Write the nonce */
-    /* TODO: this can also fail because of the malloc */
-    status = SOPC_ByteString_Copy(&pResp->ServerNonce, msg_session_bs__nonce);
-    assert(SOPC_STATUS_OK == status);
+    /* Borrow Nonce */
+    pResp->ServerNonce.DoNotClear = true;
+    pResp->ServerNonce.Data = msg_session_bs__nonce->Data;
+    pResp->ServerNonce.Length = msg_session_bs__nonce->Length;
 }
 
 static void minimize_max_message_length_create_session_msg(

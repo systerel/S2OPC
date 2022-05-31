@@ -1542,3 +1542,20 @@ t_bool util_SOPC_Boolean_to_B(const SOPC_Boolean b)
     }
     return false;
 }
+
+bool util_SecuModeEnumIncludedInSecuModeMasks(OpcUa_MessageSecurityMode msgSecurityMode, uint16_t securityModes)
+{
+    switch (msgSecurityMode)
+    {
+    case OpcUa_MessageSecurityMode_Invalid:
+        return false;
+    case OpcUa_MessageSecurityMode_None:
+        return (securityModes & SOPC_SECURITY_MODE_NONE_MASK) != 0;
+    case OpcUa_MessageSecurityMode_Sign:
+        return (securityModes & SOPC_SECURITY_MODE_SIGN_MASK) != 0;
+    case OpcUa_MessageSecurityMode_SignAndEncrypt:
+        return (securityModes & SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK) != 0;
+    default:
+        return false;
+    }
+}
