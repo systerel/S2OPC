@@ -87,20 +87,14 @@ DEFINITIONS
 
     d_treat_session_service_req ==
         a_Value,
-
-        StatusCode_service,
-        ResponseWrite_allocated,
-        ResponseWrite_StatusCode
+        StatusCode_service
         :(
             a_Value                  : t_Node +-> t_Variant          &
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
-            ResponseWrite_allocated  : BOOL                          &
             a_Value                  : t_Node +-> t_Variant          &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated  : BOOL
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
         )
 
 

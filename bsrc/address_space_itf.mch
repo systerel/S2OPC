@@ -27,38 +27,18 @@ SEES
     message_out_bs
 
 DEFINITIONS
-    "address_space.def";
-
-    d_variables ==
-        /* Service Write */
-        ResponseWrite_allocated,
-        ResponseWrite_StatusCode
-    ;
-
-    d_inv ==
-    (
-        /* Service Write */
-        ResponseWrite_allocated : BOOL &
-        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-        (ResponseWrite_allocated = FALSE
-         =>
-         ResponseWrite_StatusCode = {})
-    )
+    "address_space.def"
 
 ABSTRACT_VARIABLES
-    d_adsp_variables,
-    d_variables
+    d_adsp_variables
 
 INVARIANT
-    d_adsp_invariant &
-    d_inv
+    d_adsp_invariant
 
 INITIALISATION
-    d_adsp_variables,
-    d_variables
+    d_adsp_variables
     :(
-        d_adsp_invariant &
-        d_inv
+        d_adsp_invariant
     )
 
 OPERATIONS
@@ -80,17 +60,13 @@ OPERATIONS
         c_msg_out : t_msg
     THEN
         StatusCode_service,
-        a_Value,
-        ResponseWrite_StatusCode,
-        ResponseWrite_allocated
+        a_Value
         :(
             StatusCode_service       : t_StatusCode_i &
             StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
             a_Value                  : t_Node +-> t_Variant &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated  : BOOL
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
         )
     END
 
