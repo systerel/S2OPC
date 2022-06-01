@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 01/06/2022 13:20:23
+ Date                 : 01/06/2022 14:09:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -206,7 +206,7 @@ void service_mgr__treat_session_local_service_req(
             &service_mgr__l_user);
          constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
             &service_mgr__l_supported_locales);
-         service_read_up__treat_read_request(service_mgr__l_user,
+         service_read__treat_read_request(service_mgr__l_user,
             service_mgr__l_supported_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,
@@ -259,7 +259,7 @@ void service_mgr__treat_session_nano_service_req(
             &service_mgr__l_user);
          session_mgr__get_server_session_preferred_locales(service_mgr__session,
             &service_mgr__l_locales);
-         service_read_up__treat_read_request(service_mgr__l_user,
+         service_read__treat_read_request(service_mgr__l_user,
             service_mgr__l_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,

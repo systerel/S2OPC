@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : service_read_up.h
+ File Name            : service_read.h
 
- Date                 : 01/06/2022 13:53:00
+ Date                 : 01/06/2022 14:09:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _service_read_up_h
-#define _service_read_up_h
+#ifndef _service_read_h
+#define _service_read_h
 
 /*--------------------------
    Added by the Translator
@@ -52,16 +52,16 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void service_read_up__INITIALISATION(void);
+extern void service_read__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_read_up__treat_read_request(
-   const constants__t_user_i service_read_up__p_user,
-   const constants__t_LocaleIds_i service_read_up__p_locales,
-   const constants__t_msg_i service_read_up__p_request_msg,
-   const constants__t_msg_i service_read_up__p_response_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_read_up__StatusCode_service);
+extern void service_read__treat_read_request(
+   const constants__t_user_i service_read__p_user,
+   const constants__t_LocaleIds_i service_read__p_locales,
+   const constants__t_msg_i service_read__p_request_msg,
+   const constants__t_msg_i service_read__p_response_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const service_read__StatusCode_service);
 
 #endif

@@ -32,7 +32,7 @@ IMPORTS
     message_out_bs,
     service_mgr_bs,
     session_mgr,
-    service_read_up,
+    service_read,
     request_handle_bs,
     service_response_cb_bs,
     address_space,

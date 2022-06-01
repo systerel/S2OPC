@@ -17,10 +17,8 @@
  * under the License.
  */
 
-/* Temporary machine on top of service_read, should replace service_read in the end. */
-
 MACHINE
-    service_read_up
+    service_read
 
 SEES
     constants,

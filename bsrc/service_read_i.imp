@@ -18,10 +18,10 @@
  */
 
 IMPLEMENTATION
-    service_read_up_i
+    service_read_i
 
 REFINES
-    service_read_up
+    service_read
 
 SEES
     constants,
