@@ -37,7 +37,9 @@
  * Maximum resolution time for the event timers evaluation
  *
  */
+#ifndef SOPC_TIMER_RESOLUTION_MS
 #define SOPC_TIMER_RESOLUTION_MS 50
+#endif
 
 /**
  * \brief Initialize the event timer manager (necessary to create timers)

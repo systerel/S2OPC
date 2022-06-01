@@ -214,8 +214,21 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
 
         if (timer->isPeriodicTimer)
         {
-            // Set target time reference
+            // Set next target time reference
             timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
+            compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+
+            // Generate missed events until target time is greater than current time
+            while (compareResult >= 0)
+            {
+                status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
+                                                timer->event.params, timer->event.auxParam);
+                SOPC_ASSERT(status == SOPC_STATUS_OK);
+                // Set next target time reference
+                timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
+                compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+            }
+
             // Add to list of timers to restart it
             if (timer != SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (void*) timer))
             {
@@ -356,6 +369,15 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
         {
             result = 0;
             SOPC_Free(newTimer);
+        }
+        else if (msDelay <= SOPC_TIMER_RESOLUTION_MS)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "EventTimerManager: creating an event timer with a delay value less than or equal "
+                                     "to event timers resolution (%" PRIu64 " < %u) for timer id=%" PRIu32
+                                     " with event=%" PRIi32 " and associated id=%" PRIu32,
+                                     msDelay, SOPC_TIMER_RESOLUTION_MS, newTimer->id, newTimer->event.event,
+                                     newTimer->event.eltId);
         }
     } // else 0 is invalid value => no timer available
     else
