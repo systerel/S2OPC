@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 01/06/2022 16:34:26
+ Date                 : 01/06/2022 17:07:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,7 +51,6 @@
 #include "service_set_discovery_server.h"
 #include "service_set_view.h"
 #include "service_unregister_nodes.h"
-#include "service_write_decode_bs.h"
 #include "session_mgr.h"
 #include "subscription_mgr.h"
 
@@ -156,12 +155,6 @@ extern void service_mgr__treat_session_service_req(
    const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
    t_bool * const service_mgr__async_resp_msg);
-extern void service_mgr__treat_write_request(
-   const constants__t_user_i service_mgr__p_user,
-   const constants__t_LocaleIds_i service_mgr__p_locales,
-   const constants__t_msg_i service_mgr__write_msg,
-   const constants__t_msg_i service_mgr__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service);
 
 /*--------------------
    OPERATIONS Clause

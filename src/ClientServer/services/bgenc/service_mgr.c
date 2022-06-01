@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 01/06/2022 16:34:26
+ Date                 : 01/06/2022 17:07:54
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -162,37 +162,6 @@ void service_mgr__get_response_type(
    }
 }
 
-void service_mgr__treat_write_request(
-   const constants__t_user_i service_mgr__p_user,
-   const constants__t_LocaleIds_i service_mgr__p_locales,
-   const constants__t_msg_i service_mgr__write_msg,
-   const constants__t_msg_i service_mgr__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
-   {
-      t_entier4 service_mgr__l_nb_req;
-      t_bool service_mgr__l_bret;
-      
-      service_write_decode_bs__decode_write_request(service_mgr__write_msg,
-         service_mgr__StatusCode_service);
-      if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-         service_write_decode_bs__get_nb_WriteValue(&service_mgr__l_nb_req);
-         address_space_itf__alloc_write_request_responses(service_mgr__l_nb_req,
-            &service_mgr__l_bret);
-         if (service_mgr__l_bret == true) {
-            address_space_itf__treat_write_request_WriteValues(service_mgr__p_user,
-               service_mgr__p_locales,
-               service_mgr__StatusCode_service);
-         }
-         else {
-            *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-         }
-      }
-      service_write_decode_bs__free_write_request();
-      address_space_itf__write_WriteResponse_msg_out(service_mgr__resp_msg);
-      address_space_itf__dealloc_write_request_responses();
-   }
-}
-
 void service_mgr__treat_session_local_service_req(
    const constants__t_endpoint_config_idx_i service_mgr__endpoint_config_idx,
    const constants__t_msg_type_i service_mgr__req_typ,
@@ -220,7 +189,7 @@ void service_mgr__treat_session_local_service_req(
             &service_mgr__l_user);
          constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
             &service_mgr__l_supported_locales);
-         service_mgr__treat_write_request(service_mgr__l_user,
+         address_space_itf__treat_write_request(service_mgr__l_user,
             service_mgr__l_supported_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,
@@ -272,7 +241,7 @@ void service_mgr__treat_session_nano_service_req(
             &service_mgr__l_user);
          constants__get_SupportedLocales(service_mgr__endpoint_config_idx,
             &service_mgr__l_locales);
-         service_mgr__treat_write_request(service_mgr__l_user,
+         address_space_itf__treat_write_request(service_mgr__l_user,
             service_mgr__l_locales,
             service_mgr__req_msg,
             service_mgr__resp_msg,

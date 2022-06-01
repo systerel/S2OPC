@@ -36,7 +36,6 @@ IMPORTS
     request_handle_bs,
     service_response_cb_bs,
     address_space_itf,
-    service_write_decode_bs,
     service_get_endpoints_bs,
     service_set_view,
     subscription_mgr,
@@ -88,10 +87,6 @@ DEFINITIONS
 
     d_treat_session_service_req ==
         a_Value,
-        nb_WriteValue,
-        WriteValue_NodeId,
-        WriteValue_AttributeId,
-        WriteValue_DataValue,
 
         StatusCode_service,
         ResponseWrite_allocated,
@@ -101,11 +96,6 @@ DEFINITIONS
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
             ResponseWrite_allocated  : BOOL                          &
-            nb_WriteValue            : NAT                           &
-            nb_WriteValue <= k_n_WriteResponse_max                   &
-            WriteValue_NodeId        : t_WriteValue +-> t_NodeId     &
-            WriteValue_AttributeId   : t_WriteValue +-> t_AttributeId &
-            WriteValue_DataValue     : t_WriteValue +-> t_DataValue  &
             a_Value                  : t_Node +-> t_Variant          &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
@@ -125,36 +115,6 @@ LOCAL_OPERATIONS
         resp_msg_typ :(resp_msg_typ : t_msg_type_i &
                        resp_msg_typ : t_msg_type &
                        resp_msg_typ : s_service_resps)
-    END
-    ;
-
-    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
-    PRE
-        p_user : t_user_i    &
-        p_user : t_user      &
-        p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds   &
-        write_msg : t_msg_i  &
-        write_msg = c_msg_in &
-        c_msg_in : t_msg     &
-        a_msg_in_type = e_msg_attribute_write_req &
-        resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
-        c_msg_out : t_msg
-    THEN
-        StatusCode_service,
-        a_Value,
-        ResponseWrite_StatusCode,
-        ResponseWrite_allocated
-        :(
-            StatusCode_service       : t_StatusCode_i &
-            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            a_Value                  : t_Node +-> t_Variant &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated  : BOOL
-        )
     END
     ;
 
@@ -412,30 +372,6 @@ OPERATIONS
                 resp_msg_typ := e_msg_subscription_delete_subscriptions_resp
             END
         END
-    END
-    ;
-
-    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
-    VAR
-        l_nb_req,
-        l_bret
-    IN
-        StatusCode_service <-- decode_write_request(write_msg);
-        IF StatusCode_service = e_sc_ok
-        THEN
-            l_nb_req <-- get_nb_WriteValue;
-            l_bret <-- alloc_write_request_responses(l_nb_req);
-            IF l_bret = TRUE
-            THEN
-                StatusCode_service <-- treat_write_request_WriteValues(p_user, p_locales)
-            ELSE
-                StatusCode_service := e_sc_bad_out_of_memory
-            END
-        END;
-        free_write_request;
-        /* TODO: the following may fail (malloc) */
-        write_WriteResponse_msg_out(resp_msg);
-        dealloc_write_request_responses
     END
     ;
 

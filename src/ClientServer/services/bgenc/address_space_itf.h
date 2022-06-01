@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 01/06/2022 16:34:18
+ Date                 : 01/06/2022 17:07:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,12 +39,15 @@
    IMPORTS Clause
   -----------------*/
 #include "address_space.h"
+#include "service_write_decode_bs.h"
 
 /*--------------
    SEES Clause
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
+#include "message_in_bs.h"
+#include "message_out_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -54,10 +57,8 @@ extern void address_space_itf__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define address_space_itf__alloc_write_request_responses address_space__alloc_write_request_responses
 #define address_space_itf__check_nodeId_isValid address_space__check_nodeId_isValid
 #define address_space_itf__check_object_has_method address_space__check_object_has_method
-#define address_space_itf__dealloc_write_request_responses address_space__dealloc_write_request_responses
 #define address_space_itf__get_BrowseName address_space__get_BrowseName
 #define address_space_itf__get_DisplayName address_space__get_DisplayName
 #define address_space_itf__get_Executable address_space__get_Executable
@@ -82,8 +83,16 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__read_variable_compat_type address_space__read_variable_compat_type
 #define address_space_itf__readall_AddressSpace_Node address_space__readall_AddressSpace_Node
 #define address_space_itf__set_local_service_treatment address_space__set_local_service_treatment
-#define address_space_itf__treat_write_request_WriteValues address_space__treat_write_request_WriteValues
 #define address_space_itf__unset_local_service_treatment address_space__unset_local_service_treatment
-#define address_space_itf__write_WriteResponse_msg_out address_space__write_WriteResponse_msg_out
+
+/*--------------------
+   OPERATIONS Clause
+  --------------------*/
+extern void address_space_itf__treat_write_request(
+   const constants__t_user_i address_space_itf__p_user,
+   const constants__t_LocaleIds_i address_space_itf__p_locales,
+   const constants__t_msg_i address_space_itf__write_msg,
+   const constants__t_msg_i address_space_itf__resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_itf__StatusCode_service);
 
 #endif

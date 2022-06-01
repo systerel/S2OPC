@@ -25,10 +25,13 @@ REFINES
 
 SEES
     constants,
-    constants_statuscodes_bs
+    constants_statuscodes_bs,
+    message_in_bs,
+    message_out_bs
 
 IMPORTS
-    address_space
+    address_space,
+    service_write_decode_bs
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
    but it would trigger a bug in the project check. */
@@ -60,11 +63,31 @@ PROMOTES
     get_conv_Variant_Type,
     read_variable_compat_type,
     check_object_has_method,
-    check_nodeId_isValid,
+    check_nodeId_isValid
 
-    treat_write_request_WriteValues ,
-    alloc_write_request_responses,
-    dealloc_write_request_responses,
-    write_WriteResponse_msg_out
+OPERATIONS
+
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
+    VAR
+        l_nb_req,
+        l_bret
+    IN
+        StatusCode_service <-- decode_write_request(write_msg);
+        IF StatusCode_service = e_sc_ok
+        THEN
+            l_nb_req <-- get_nb_WriteValue;
+            l_bret <-- alloc_write_request_responses(l_nb_req);
+            IF l_bret = TRUE
+            THEN
+                StatusCode_service <-- treat_write_request_WriteValues(p_user, p_locales)
+            ELSE
+                StatusCode_service := e_sc_bad_out_of_memory
+            END
+        END;
+        free_write_request;
+        /* TODO: the following may fail (malloc) */
+        write_WriteResponse_msg_out(resp_msg);
+        dealloc_write_request_responses
+    END
 
 END

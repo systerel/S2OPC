@@ -22,7 +22,9 @@ MACHINE
 
 SEES
     constants,
-    constants_statuscodes_bs
+    constants_statuscodes_bs,
+    message_in_bs,
+    message_out_bs
 
 DEFINITIONS
     "address_space.def";
@@ -63,75 +65,33 @@ OPERATIONS
 
     d_adsp_operations;
 
-    /* --------------------------------------------------------------------- */
-    /* Service Write */
-
-    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
+    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
     PRE
-        p_user : t_user_i &
-        p_user : t_user   &
+        p_user : t_user_i    &
+        p_user : t_user      &
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
-        ResponseWrite_allocated = TRUE
+        write_msg : t_msg_i  &
+        write_msg = c_msg_in &
+        c_msg_in : t_msg     &
+        a_msg_in_type = e_msg_attribute_write_req &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg
     THEN
         StatusCode_service,
         a_Value,
-        a_Value_StatusCode,
-        a_Value_SourceTimestamp,
-        ResponseWrite_StatusCode
-        :(
-            StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode &
-
-            a_Value : t_Node +-> t_Variant &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            a_Value_StatusCode : t_Node +-> t_RawStatusCode &
-            dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
-            dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
-        )
-    END
-    ;
-
-    bret <-- alloc_write_request_responses(nb_req) =
-    PRE
-        nb_req : NAT &
-        ResponseWrite_allocated = FALSE
-    THEN
-        bret,
         ResponseWrite_StatusCode,
         ResponseWrite_allocated
         :(
-            bret : BOOL &
+            StatusCode_service       : t_StatusCode_i &
+            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
+            a_Value                  : t_Node +-> t_Variant &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated : BOOL &
-            (ResponseWrite_allocated = FALSE
-             =>
-             ResponseWrite_StatusCode = {}) &
-            bret = ResponseWrite_allocated
+            ResponseWrite_allocated  : BOOL
         )
-    END
-    ;
-
-    dealloc_write_request_responses =
-    PRE
-        ResponseWrite_allocated = TRUE
-    THEN
-        ResponseWrite_allocated  := FALSE ||
-        ResponseWrite_StatusCode := {}
-    END
-    ;
-
-    /* Promoted */
-    write_WriteResponse_msg_out(msg_out) =
-    PRE
-        msg_out : t_msg_i &
-        msg_out : t_msg
-    THEN
-        skip
     END
 
 END
