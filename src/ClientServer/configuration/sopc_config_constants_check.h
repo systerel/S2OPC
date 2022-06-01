@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 
+#include "sopc_event_timer_manager.h"
 #include "sopc_toolkit_config_constants.h"
 
 /* Maximum value accepted in B model */
@@ -68,6 +69,11 @@
  * Note: max republish notifs == 2 * max publish requests */
 #if SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS > INT32_MAX / 2
 #error "Maximum subscription publish requests > INT32_MAX / 2"
+#endif
+
+/** Minimum publish interval shall be greater to the event timer resolution */
+#if 2 * SOPC_TIMER_RESOLUTION_MS > SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION
+#error "Minimum publish interval < 2 * SOPC_TIMER_RESOLUTION_MS"
 #endif
 
 /** Minimum number of publish intervals before a keep alive is sent (server to client) */
