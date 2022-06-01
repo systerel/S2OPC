@@ -17,8 +17,11 @@
  * under the License.
  */
 
-MACHINE
-    service_read
+REFINEMENT
+    service_read_1_r
+
+REFINES
+    service_read_1
 
 SEES
     constants,
@@ -71,12 +74,7 @@ INITIALISATION
 OPERATIONS
 
     p_read_ok, p_nb_ReadValue, p_tsToReturn, p_statusCode <-- check_ReadRequest(p_msg) =
-    PRE
-        p_msg  : t_msg_i &
-        p_msg  = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_attribute_read_req
-    THEN
+    BEGIN
         p_read_ok,
         p_nb_ReadValue,
         p_tsToReturn,
@@ -111,41 +109,51 @@ OPERATIONS
     END
     ;
 
-    p_isvalid <-- alloc_read_response(p_nb_resps, p_resp_msg) =
-    PRE
-        p_nb_resps : NAT                              &
-        p_nb_resps <= k_n_read_resp_max               &
-        p_resp_msg : t_msg_i                          &
-        p_resp_msg = c_msg_out                        &
-        c_msg_out  : t_msg
-    THEN
-        p_isvalid :: BOOL  /* malloc result */
-    END
-    ;
-
     fill_read_response(p_TimestampsToReturn, p_user, p_locales, req_msg, resp_msg) =
-    PRE
-        p_TimestampsToReturn : t_TimestampsToReturn_i &
-        p_TimestampsToReturn : t_TimestampsToReturn   &
-        p_user    : t_user_i &
-        p_user    : t_user   &
-        p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds &
-        req_msg   : t_msg_i &
-        req_msg   = c_msg_in &
-        c_msg_in  : t_msg &
-        resp_msg  : t_msg_i &
-        resp_msg  = c_msg_out &
-        c_msg_out : t_msg &
-        nb_ReadValue > 0
-    THEN
+    BEGIN
         data_Value_Value,
-        data_Value_StatusCode,
-        data_Value_SourceTimestamp,
-        data_Value_ServerTimestamp
+        data_Value_StatusCode
         :(
-            d_inv_response
-         )
+            /* TODO: It would be nice to specify that a response is always sent, even when there is an error */
+            data_Value_Value : t_ReadValue +-> t_Variant &
+            data_Value_Value =
+                %rvi.(rvi : t_ReadValue &
+                      rvi : cast_t_ReadValue[1..nb_ReadValue] &
+                      /* ith node id has a node in the Address Space */
+                      rvi : dom(ReadValue_NodeId) &
+                      ReadValue_NodeId(rvi) : dom(a_NodeId~) &
+                      /* Node is in the domain of the attribute */
+                      rvi : dom(ReadValue_AttributeId) &
+                      a_NodeId~(ReadValue_NodeId(rvi)) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
+                      /* TODO: add use-access levels */
+                      |
+                      AttributeID_Node_Variant(ReadValue_AttributeId(rvi))(a_NodeId~(ReadValue_NodeId(rvi)))
+                     ) &
+
+            data_Value_StatusCode : t_ReadValue +-> t_RawStatusCode &
+            data_Value_StatusCode =
+                %rvi.(rvi : t_ReadValue &
+                      rvi : cast_t_ReadValue[1..nb_ReadValue]
+                      |
+                      /* TODO: split in two different noks (nodeId invalid, or attrId invalid) */
+                      /* TODO: out_of_memory handling and user validation */
+                      {FALSE |-> conv_StatusCode_To_RawStatusCode(e_sc_bad_internal_error),
+                       TRUE  |->
+                                 {FALSE |-> c_RawStatusCode_Good,
+                                  TRUE  |-> a_Value_StatusCode(a_NodeId~(ReadValue_NodeId(rvi)))}
+                                 (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
+                                       rvi : dom(ReadValue_NodeId) &
+                                       ReadValue_NodeId(rvi) : dom(a_NodeId~) &
+                                       a_NodeClass(a_NodeId~(ReadValue_NodeId(rvi))) = e_ncl_Variable))}
+                      (bool(rvi : dom(data_Value_Value)))
+                     )
+
+            /*(!ii.ii : dom(data_Value_Value) & ReadValue_Node(ii) : dom(att(ReadValue_AttributeId(ii)))
+                => data_Value_Value(ii) = att(ReadValue_AttributeId(ii))(ReadValue_Node(ii)) ) &
+            data_Value_StatusCode : set_read_elements --> t_StatusCode &
+            data_Value_SourceTimestamp
+            data_Value_ServerTimestamp */
+        )
     END
 
 END

@@ -21,7 +21,7 @@
 
  File Name            : service_read_up.c
 
- Date                 : 01/06/2022 13:20:24
+ Date                 : 01/06/2022 13:53:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -52,17 +52,17 @@ void service_read_up__treat_read_request(
       t_bool service_read_up__l_is_valid;
       constants__t_TimestampsToReturn_i service_read_up__l_TimestampsToReturn;
       
-      service_read__check_ReadRequest(service_read_up__p_request_msg,
+      service_read_1__check_ReadRequest(service_read_up__p_request_msg,
          &service_read_up__l_is_valid,
          &service_read_up__l_nb_ReadValue,
          &service_read_up__l_TimestampsToReturn,
          service_read_up__StatusCode_service);
       if (service_read_up__l_is_valid == true) {
-         service_read__alloc_read_response(service_read_up__l_nb_ReadValue,
+         service_read_1__alloc_read_response(service_read_up__l_nb_ReadValue,
             service_read_up__p_response_msg,
             &service_read_up__l_is_valid);
          if (service_read_up__l_is_valid == true) {
-            service_read__fill_read_response(service_read_up__l_TimestampsToReturn,
+            service_read_1__fill_read_response(service_read_up__l_TimestampsToReturn,
                service_read_up__p_user,
                service_read_up__p_locales,
                service_read_up__p_request_msg,

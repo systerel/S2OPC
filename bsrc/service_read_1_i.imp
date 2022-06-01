@@ -18,10 +18,10 @@
  */
 
 IMPLEMENTATION
-    service_read_i
+    service_read_1_i
 
 REFINES
-    service_read_r
+    service_read_1_r
 
 DEFINITIONS
     "definitions.def"

@@ -31,7 +31,7 @@ SEES
     message_out_bs
 
 IMPORTS
-    service_read
+    service_read_1
 
 OPERATIONS
 

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 01/06/2022 13:20:51
+ Date                 : 01/06/2022 13:53:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -107,7 +107,7 @@
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
 #include "service_mgr_bs.h"
-#include "service_read.h"
+#include "service_read_1.h"
 #include "service_read_it.h"
 #include "service_read_up.h"
 #include "service_register_nodes.h"
@@ -196,7 +196,7 @@ void INITIALISATION(void) {
    msg_read_request__INITIALISATION();
    msg_read_response_bs__INITIALISATION();
    service_read_it__INITIALISATION();
-   service_read__INITIALISATION();
+   service_read_1__INITIALISATION();
    service_read_up__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();
    service_browse_it__INITIALISATION();
