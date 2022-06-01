@@ -21,7 +21,7 @@
 
  File Name            : service_read_1.c
 
- Date                 : 01/06/2022 13:52:59
+ Date                 : 01/06/2022 16:34:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -61,11 +61,11 @@ void service_read_1__fill_read_response_1(
       constants__t_Timestamp service_read_1__l_ts_srv;
       
       if (service_read_1__p_sc == constants_statuscodes_bs__e_sc_ok) {
-         address_space__readall_AddressSpace_Node(service_read_1__p_nid,
+         address_space_itf__readall_AddressSpace_Node(service_read_1__p_nid,
             &service_read_1__l_is_valid,
             &service_read_1__l_node);
          if (service_read_1__l_is_valid == true) {
-            address_space__read_Node_Attribute(service_read_1__p_user,
+            address_space_itf__read_Node_Attribute(service_read_1__p_user,
                service_read_1__p_locales,
                service_read_1__l_node,
                service_read_1__p_nid,
@@ -97,7 +97,7 @@ void service_read_1__fill_read_response_1(
                   service_read_1__l_raw_sc,
                   service_read_1__l_ts_src,
                   service_read_1__l_ts_srv);
-               address_space__read_AddressSpace_free_variant(service_read_1__l_value);
+               address_space_itf__read_AddressSpace_free_variant(service_read_1__l_value);
             }
             else {
                constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(service_read_1__l_sc,

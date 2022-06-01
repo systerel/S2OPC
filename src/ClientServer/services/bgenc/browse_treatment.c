@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 06/03/2020 14:49:05
+ Date                 : 01/06/2022 16:34:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -69,7 +69,7 @@ void browse_treatment__local_is_valid_ReferenceTypeId(
    const constants__t_NodeId_i browse_treatment__p_referenceTypeId,
    t_bool * const browse_treatment__bres) {
    if (browse_treatment__p_refType_defined == true) {
-      address_space__is_valid_ReferenceTypeId(browse_treatment__p_referenceTypeId,
+      address_space_itf__is_valid_ReferenceTypeId(browse_treatment__p_referenceTypeId,
          browse_treatment__bres);
    }
    else {
@@ -176,11 +176,11 @@ void browse_treatment__fill_browse_result_ref(
       *browse_treatment__p_alloc_failed = false;
       *browse_treatment__p_continue = true;
       browse_treatment_result_bs__unused_browse_view(browse_treatment__p_browseView);
-      address_space__get_Reference_ReferenceType(browse_treatment__p_ref,
+      address_space_itf__get_Reference_ReferenceType(browse_treatment__p_ref,
          &browse_treatment__l_RefType);
-      address_space__get_Reference_TargetNode(browse_treatment__p_ref,
+      address_space_itf__get_Reference_TargetNode(browse_treatment__p_ref,
          &browse_treatment__l_TargetNode);
-      address_space__get_Reference_IsForward(browse_treatment__p_ref,
+      address_space_itf__get_Reference_IsForward(browse_treatment__p_ref,
          &browse_treatment__l_IsForward);
       constants__get_Is_Dir_Forward_Compatible(browse_treatment__p_browseDirection,
          browse_treatment__l_IsForward,

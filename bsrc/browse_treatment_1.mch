@@ -21,7 +21,7 @@ MACHINE
     browse_treatment_1
 SEES
     constants,
-    address_space
+    address_space_itf
 
 OPERATIONS
 

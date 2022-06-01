@@ -19,47 +19,22 @@
 
 /******************************************************************************
 
- File Name            : service_browse_it.h
+ File Name            : address_space_itf.c
 
- Date                 : 01/06/2022 16:34:25
+ Date                 : 01/06/2022 16:34:18
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _service_browse_it_h
-#define _service_browse_it_h
-
-/*--------------------------
-   Added by the Translator
-  --------------------------*/
-#include "b2c.h"
-
-/*--------------
-   SEES Clause
-  --------------*/
+/*------------------------
+   Exported Declarations
+  ------------------------*/
 #include "address_space_itf.h"
-#include "constants.h"
-
-/*----------------------------
-   CONCRETE_VARIABLES Clause
-  ----------------------------*/
-extern t_entier4 service_browse_it__bvi_i;
-extern t_entier4 service_browse_it__nb_bvi;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void service_browse_it__INITIALISATION(void);
+void address_space_itf__INITIALISATION(void) {
+}
 
-/*--------------------
-   OPERATIONS Clause
-  --------------------*/
-extern void service_browse_it__continue_iter_browse_request(
-   t_bool * const service_browse_it__p_continue,
-   constants__t_BrowseValue_i * const service_browse_it__p_bvi);
-extern void service_browse_it__init_iter_browse_request(
-   const t_entier4 service_browse_it__p_nb_req,
-   t_bool * const service_browse_it__p_continue);
-
-#endif

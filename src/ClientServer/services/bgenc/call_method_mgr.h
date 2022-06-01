@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 25/11/2019 16:27:21
+ Date                 : 01/06/2022 16:34:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,7 +47,7 @@
 /*--------------
    SEES Clause
   --------------*/
-#include "address_space.h"
+#include "address_space_itf.h"
 #include "channel_mgr.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"

@@ -23,7 +23,7 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    address_space,
+    address_space_itf,
     message_in_bs,
     message_out_bs
 

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.h
 
- Date                 : 06/03/2020 14:49:05
+ Date                 : 01/06/2022 16:34:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -48,7 +48,7 @@
 /*--------------
    SEES Clause
   --------------*/
-#include "address_space.h"
+#include "address_space_itf.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 

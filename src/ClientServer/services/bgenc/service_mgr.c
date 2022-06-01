@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 01/06/2022 14:17:38
+ Date                 : 01/06/2022 16:34:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -176,10 +176,10 @@ void service_mgr__treat_write_request(
          service_mgr__StatusCode_service);
       if (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
          service_write_decode_bs__get_nb_WriteValue(&service_mgr__l_nb_req);
-         address_space__alloc_write_request_responses(service_mgr__l_nb_req,
+         address_space_itf__alloc_write_request_responses(service_mgr__l_nb_req,
             &service_mgr__l_bret);
          if (service_mgr__l_bret == true) {
-            address_space__treat_write_request_WriteValues(service_mgr__p_user,
+            address_space_itf__treat_write_request_WriteValues(service_mgr__p_user,
                service_mgr__p_locales,
                service_mgr__StatusCode_service);
          }
@@ -188,8 +188,8 @@ void service_mgr__treat_write_request(
          }
       }
       service_write_decode_bs__free_write_request();
-      address_space__write_WriteResponse_msg_out(service_mgr__resp_msg);
-      address_space__dealloc_write_request_responses();
+      address_space_itf__write_WriteResponse_msg_out(service_mgr__resp_msg);
+      address_space_itf__dealloc_write_request_responses();
    }
 }
 
@@ -1138,7 +1138,7 @@ void service_mgr__server_receive_local_service_req(
       t_bool service_mgr__l_valid_resp_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       
-      address_space__set_local_service_treatment();
+      address_space_itf__set_local_service_treatment();
       switch (service_mgr__req_class) {
       case constants__e_msg_session_service_class:
       case constants__e_msg_discovery_service_class:
@@ -1199,7 +1199,7 @@ void service_mgr__server_receive_local_service_req(
       else {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
       }
-      address_space__unset_local_service_treatment();
+      address_space_itf__unset_local_service_treatment();
    }
 }
 

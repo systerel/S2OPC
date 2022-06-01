@@ -28,7 +28,7 @@ SEES
     message_in_bs,
     message_out_bs,
     write_value_pointer_bs,
-    address_space,
+    address_space_itf,
     request_handle_bs,
     session_mgr
 

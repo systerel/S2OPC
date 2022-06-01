@@ -1,0 +1,70 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    address_space_itf_i
+
+REFINES
+    address_space_itf
+
+SEES
+    constants,
+    constants_statuscodes_bs
+
+IMPORTS
+    address_space
+
+/* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
+   but it would trigger a bug in the project check. */
+
+PROMOTES
+    read_Node_Attribute,
+    readall_AddressSpace_Node,
+    get_NodeClass,
+    get_BrowseName,
+    get_DisplayName,
+    is_transitive_subtype,
+    is_valid_ReferenceTypeId,
+    is_NodeId_equal,
+    get_TypeDefinition,
+    get_Reference_ReferenceType,
+    get_Reference_TargetNode,
+    get_Reference_IsForward,
+    get_Node_RefIndexEnd,
+    get_RefIndex_Reference,
+    get_Value_StatusCode,
+    read_AddressSpace_clear_value,
+    read_AddressSpace_free_variant,
+    set_local_service_treatment,
+    unset_local_service_treatment,
+    get_user_authorization ,
+    get_Executable,
+    get_InputArguments,
+    get_conv_Variant_ValueRank,
+    get_conv_Variant_Type,
+    read_variable_compat_type,
+    check_object_has_method,
+    check_nodeId_isValid,
+
+    treat_write_request_WriteValues ,
+    alloc_write_request_responses,
+    dealloc_write_request_responses,
+    write_WriteResponse_msg_out
+
+END

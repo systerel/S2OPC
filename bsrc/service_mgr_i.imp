@@ -35,7 +35,7 @@ IMPORTS
     service_read,
     request_handle_bs,
     service_response_cb_bs,
-    address_space,
+    address_space_itf,
     service_write_decode_bs,
     service_get_endpoints_bs,
     service_set_view,

@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 06/03/2020 14:49:26
+ Date                 : 01/06/2022 16:34:35
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -254,7 +254,7 @@ void translate_browse_path__check_startingNode(
          *translate_browse_path__StatusCode = constants_statuscodes_bs__e_sc_bad_node_id_invalid;
       }
       else {
-         address_space__readall_AddressSpace_Node(translate_browse_path__nodeid,
+         address_space_itf__readall_AddressSpace_Node(translate_browse_path__nodeid,
             &translate_browse_path__l_isvalid,
             &translate_browse_path__l_src_node);
          if (translate_browse_path__l_isvalid == false) {

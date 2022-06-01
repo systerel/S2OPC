@@ -23,7 +23,7 @@ REFINES
     call_method_mgr
 
 SEES
-    address_space,
+    address_space_itf,
     constants,
     constants_statuscodes_bs,
     channel_mgr,

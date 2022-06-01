@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_target_it.c
 
- Date                 : 06/03/2020 14:49:06
+ Date                 : 01/06/2022 16:34:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,7 +57,7 @@ void browse_treatment_target_it__init_iter_reference(
    t_bool * const browse_treatment_target_it__p_continue) {
    browse_treatment_target_it__Node = browse_treatment_target_it__p_node;
    browse_treatment_target_it__RefIndex = browse_treatment_target_it__p_startIndex;
-   address_space__get_Node_RefIndexEnd(browse_treatment_target_it__p_node,
+   address_space_itf__get_Node_RefIndexEnd(browse_treatment_target_it__p_node,
       &browse_treatment_target_it__RefIndexEnd);
    *browse_treatment_target_it__p_continue = (browse_treatment_target_it__RefIndexEnd >= browse_treatment_target_it__RefIndex);
 }
@@ -66,7 +66,7 @@ void browse_treatment_target_it__continue_iter_reference(
    t_bool * const browse_treatment_target_it__p_continue,
    constants__t_Reference_i * const browse_treatment_target_it__p_ref,
    t_entier4 * const browse_treatment_target_it__p_nextRefIndex) {
-   address_space__get_RefIndex_Reference(browse_treatment_target_it__Node,
+   address_space_itf__get_RefIndex_Reference(browse_treatment_target_it__Node,
       browse_treatment_target_it__RefIndex,
       browse_treatment_target_it__p_ref);
    browse_treatment_target_it__RefIndex = browse_treatment_target_it__RefIndex +

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 10/01/2020 17:41:37
+ Date                 : 01/06/2022 16:34:33
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -204,14 +204,14 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             &subscription_mgr__l_queueSize,
             &subscription_mgr__l_indexRange);
          if (subscription_mgr__l_bres == true) {
-            address_space__readall_AddressSpace_Node(subscription_mgr__l_nid,
+            address_space_itf__readall_AddressSpace_Node(subscription_mgr__l_nid,
                &subscription_mgr__l_bres,
                &subscription_mgr__l_node);
             if (subscription_mgr__l_bres == false) {
                subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
             }
             else {
-               address_space__read_Node_Attribute(subscription_mgr__p_user,
+               address_space_itf__read_Node_Attribute(subscription_mgr__p_user,
                   subscription_mgr__p_locales,
                   subscription_mgr__l_node,
                   subscription_mgr__l_nid,
@@ -248,7 +248,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                   subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
                      &subscription_mgr__l_revSamplingItv,
                      &subscription_mgr__l_revQueueSize);
-                  address_space__read_AddressSpace_free_variant(subscription_mgr__l_value);
+                  address_space_itf__read_AddressSpace_free_variant(subscription_mgr__l_value);
                }
             }
          }
@@ -315,7 +315,7 @@ void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
             if (subscription_mgr__l_session_valid == true) {
                session_mgr__get_session_user_server(subscription_mgr__l_session,
                   &subscription_mgr__l_user);
-               address_space__get_user_authorization(constants__e_operation_type_read,
+               address_space_itf__get_user_authorization(constants__e_operation_type_read,
                   subscription_mgr__l_nid,
                   subscription_mgr__l_aid,
                   subscription_mgr__l_user,
@@ -797,7 +797,7 @@ void subscription_mgr__server_subscription_data_changed(
       write_value_pointer_bs__get_write_value_pointer_NodeId_AttributeId(subscription_mgr__p_new_write_value_pointer,
          &subscription_mgr__l_nid,
          &subscription_mgr__l_aid);
-      address_space__readall_AddressSpace_Node(subscription_mgr__l_nid,
+      address_space_itf__readall_AddressSpace_Node(subscription_mgr__l_nid,
          &subscription_mgr__l_nid_valid,
          &subscription_mgr__l_node);
       if (subscription_mgr__l_nid_valid == true) {

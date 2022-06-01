@@ -21,7 +21,7 @@ MACHINE
     translate_browse_path
 
 SEES
-    address_space,
+    address_space_itf,
     constants,
     constants_statuscodes_bs,
     message_in_bs

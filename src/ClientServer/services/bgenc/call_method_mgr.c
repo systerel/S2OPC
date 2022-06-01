@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 31/03/2022 07:53:49
+ Date                 : 01/06/2022 16:34:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -153,32 +153,32 @@ void call_method_mgr__check_method_call_inputs(
       msg_call_method_bs__read_CallMethod_Objectid(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          &call_method_mgr__l_objectid);
-      address_space__check_nodeId_isValid(call_method_mgr__l_objectid,
+      address_space_itf__check_nodeId_isValid(call_method_mgr__l_objectid,
          call_method_mgr__StatusCode,
          &call_method_mgr__l_object);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
          msg_call_method_bs__read_CallMethod_MethodId(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
             &call_method_mgr__l_methodid);
-         address_space__check_nodeId_isValid(call_method_mgr__l_methodid,
+         address_space_itf__check_nodeId_isValid(call_method_mgr__l_methodid,
             call_method_mgr__StatusCode,
             &call_method_mgr__l_method);
          if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-            address_space__get_NodeClass(call_method_mgr__l_method,
+            address_space_itf__get_NodeClass(call_method_mgr__l_method,
                &call_method_mgr__l_nodeClass);
             if (call_method_mgr__l_nodeClass == constants__e_ncl_Method) {
                session_mgr__get_session_user_server(call_method_mgr__p_session,
                   &call_method_mgr__l_user);
-               address_space__get_Executable(call_method_mgr__l_method,
+               address_space_itf__get_Executable(call_method_mgr__l_method,
                   &call_method_mgr__l_valid_executable);
-               address_space__get_user_authorization(constants__e_operation_type_executable,
+               address_space_itf__get_user_authorization(constants__e_operation_type_executable,
                   call_method_mgr__l_methodid,
                   constants__e_aid_UserExecutable,
                   call_method_mgr__l_user,
                   &call_method_mgr__l_valid_user_executable);
                if ((call_method_mgr__l_valid_executable == true) &&
                   (call_method_mgr__l_valid_user_executable == true)) {
-                  address_space__check_object_has_method(call_method_mgr__l_objectid,
+                  address_space_itf__check_object_has_method(call_method_mgr__l_objectid,
                      call_method_mgr__l_methodid,
                      &call_method_mgr__l_object_has_method);
                   if (call_method_mgr__l_object_has_method == true) {
@@ -224,7 +224,7 @@ void call_method_mgr__check_method_call_arguments(
       constants__t_Variant_i call_method_mgr__l_val;
       constants_statuscodes_bs__t_StatusCode_i call_method_mgr__l_arg_status;
       
-      address_space__get_InputArguments(call_method_mgr__p_method_node,
+      address_space_itf__get_InputArguments(call_method_mgr__p_method_node,
          &call_method_mgr__l_input_arg_variant);
       argument_pointer_bs__read_variant_nb_argument(call_method_mgr__l_input_arg_variant,
          call_method_mgr__p_method_node,
@@ -293,15 +293,15 @@ void call_method_mgr__check_method_call_one_argument_type(
       t_bool call_method_mgr__l_bool;
       t_bool call_method_mgr__l_compat_with_conv;
       
-      address_space__get_conv_Variant_Type(call_method_mgr__p_value,
+      address_space_itf__get_conv_Variant_Type(call_method_mgr__p_value,
          &call_method_mgr__l_value_type);
-      address_space__get_conv_Variant_ValueRank(call_method_mgr__p_value,
+      address_space_itf__get_conv_Variant_ValueRank(call_method_mgr__p_value,
          &call_method_mgr__l_value_valueRank);
       argument_pointer_bs__read_argument_type(call_method_mgr__p_arg,
          &call_method_mgr__l_arg_type);
       argument_pointer_bs__read_argument_valueRank(call_method_mgr__p_arg,
          &call_method_mgr__l_arg_valueRank);
-      address_space__read_variable_compat_type(call_method_mgr__l_value_type,
+      address_space_itf__read_variable_compat_type(call_method_mgr__l_value_type,
          call_method_mgr__l_value_valueRank,
          call_method_mgr__l_arg_type,
          call_method_mgr__l_arg_valueRank,

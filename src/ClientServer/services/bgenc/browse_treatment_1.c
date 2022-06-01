@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_1.c
 
- Date                 : 06/03/2020 14:49:03
+ Date                 : 01/06/2022 16:34:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,11 +46,11 @@ void browse_treatment_1__getall_SourceNode_NbRef(
    t_bool * const browse_treatment_1__p_isvalid,
    t_entier4 * const browse_treatment_1__p_nb_ref,
    constants__t_Node_i * const browse_treatment_1__p_src_node) {
-   address_space__readall_AddressSpace_Node(browse_treatment_1__p_src_nodeid,
+   address_space_itf__readall_AddressSpace_Node(browse_treatment_1__p_src_nodeid,
       browse_treatment_1__p_isvalid,
       browse_treatment_1__p_src_node);
    if (*browse_treatment_1__p_isvalid == true) {
-      address_space__get_Node_RefIndexEnd(*browse_treatment_1__p_src_node,
+      address_space_itf__get_Node_RefIndexEnd(*browse_treatment_1__p_src_node,
          browse_treatment_1__p_nb_ref);
    }
    else {
@@ -68,14 +68,14 @@ void browse_treatment_1__Is_RefTypes_Compatible(
       t_bool browse_treatment_1__l_node_ids_equal;
       
       if (browse_treatment_1__p_is_ref_type1 == true) {
-         address_space__is_NodeId_equal(browse_treatment_1__p_ref_type1,
+         address_space_itf__is_NodeId_equal(browse_treatment_1__p_ref_type1,
             browse_treatment_1__p_ref_type2,
             &browse_treatment_1__l_node_ids_equal);
          if (browse_treatment_1__l_node_ids_equal == true) {
             *browse_treatment_1__p_ref_types_compat = true;
          }
          else if (browse_treatment_1__p_inc_subtypes == true) {
-            address_space__is_transitive_subtype(browse_treatment_1__p_ref_type2,
+            address_space_itf__is_transitive_subtype(browse_treatment_1__p_ref_type2,
                browse_treatment_1__p_ref_type1,
                browse_treatment_1__p_ref_types_compat);
          }
@@ -105,17 +105,17 @@ void browse_treatment_1__get_optional_fields_ReferenceDescription(
          &browse_treatment_1__l_local_server,
          &browse_treatment_1__l_NodeId);
       if (browse_treatment_1__l_local_server == true) {
-         address_space__readall_AddressSpace_Node(browse_treatment_1__l_NodeId,
+         address_space_itf__readall_AddressSpace_Node(browse_treatment_1__l_NodeId,
             &browse_treatment_1__l_isvalid,
             &browse_treatment_1__l_node);
          if (browse_treatment_1__l_isvalid == true) {
-            address_space__get_BrowseName(browse_treatment_1__l_node,
+            address_space_itf__get_BrowseName(browse_treatment_1__l_node,
                browse_treatment_1__p_BrowseName);
-            address_space__get_DisplayName(browse_treatment_1__l_node,
+            address_space_itf__get_DisplayName(browse_treatment_1__l_node,
                browse_treatment_1__p_DisplayName);
-            address_space__get_NodeClass(browse_treatment_1__l_node,
+            address_space_itf__get_NodeClass(browse_treatment_1__l_node,
                browse_treatment_1__p_NodeClass);
-            address_space__get_TypeDefinition(browse_treatment_1__l_node,
+            address_space_itf__get_TypeDefinition(browse_treatment_1__l_node,
                browse_treatment_1__p_TypeDefinition);
          }
          else {

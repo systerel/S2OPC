@@ -25,7 +25,7 @@ REFINES
 
 SEES
     constants,
-    address_space
+    address_space_itf
 
 CONCRETE_VARIABLES
     nb_bvi,

@@ -22,7 +22,7 @@ MACHINE
 
 SEES
     constants,
-    address_space
+    address_space_itf
 
 ABSTRACT_VARIABLES
     starting_node,
