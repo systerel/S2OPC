@@ -24,6 +24,7 @@
 
 START_TEST(test_pub_xml_parsing)
 {
+    fprintf(stderr, "opening 'config_pub.xml'\n"); // TODO JCH
     FILE* fd = fopen("./config_pub.xml", "r");
     ck_assert_ptr_nonnull(fd);
 
@@ -65,14 +66,15 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
     // DataSetWriter 1
     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
+    ck_assert_ptr_nonnull(dataSetWriter);
     ck_assert_uint_eq(50, SOPC_DataSetWriter_Get_Id(dataSetWriter));
     const SOPC_PublishedDataSet* pubDataSet1 = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
     ck_assert_ptr_eq(pubDataSet1, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 0));
 
     // DataSetWriter 2
     dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 1);
-    // default value for dataset 2
-    ck_assert_uint_eq(SOPC_WriterGroup_Get_Id(writerGroup), SOPC_DataSetWriter_Get_Id(dataSetWriter));
+    ck_assert_ptr_nonnull(dataSetWriter);
+    ck_assert_uint_eq(51, SOPC_DataSetWriter_Get_Id(dataSetWriter));
     const SOPC_PublishedDataSet* pubDataSet2 = SOPC_DataSetWriter_Get_DataSet(dataSetWriter);
     ck_assert_ptr_eq(pubDataSet2, SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 1));
 
@@ -162,6 +164,7 @@ END_TEST
 
 START_TEST(test_sub_xml_parsing)
 {
+    fprintf(stderr, "opening 'config_sub.xml'\n"); // TODO JCH
     FILE* fd = fopen("./config_sub.xml", "r");
     ck_assert_ptr_nonnull(fd);
 
@@ -205,7 +208,7 @@ START_TEST(test_sub_xml_parsing)
     uint16_t writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(50, writerId); // same as writeGroupId
+    ck_assert_uint_eq(0, writerId); // same as writeGroupId
 
     double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
@@ -240,7 +243,7 @@ START_TEST(test_sub_xml_parsing)
     writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(14, writerId); // same as writeGroupId (default value)
+    ck_assert_uint_eq(0, writerId); // same as writeGroupId (default value)
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval

@@ -7,7 +7,7 @@
                 <!-- one to many -->
                 <variable nodeId="ns=1;i=5" displayName="Toto" dataType="Boolean"/>
             </dataset>
-            <dataset>
+            <dataset writerId="51">
                 <!-- one to many -->
                 <variable nodeId="ns=2;i=6" displayName="Titi" dataType="UInt32"/>
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
