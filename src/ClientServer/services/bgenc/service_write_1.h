@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.h
 
- Date                 : 02/06/2022 13:24:09
+ Date                 : 02/06/2022 13:39:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,8 +39,8 @@
    IMPORTS Clause
   -----------------*/
 #include "address_space.h"
-#include "address_space_it.h"
 #include "response_write_bs.h"
+#include "service_write_1_it.h"
 
 /*--------------
    SEES Clause

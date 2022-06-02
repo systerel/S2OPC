@@ -33,7 +33,7 @@ SEES
 
 IMPORTS
     address_space,
-    address_space_it,
+    service_write_1_it,
     response_write_bs
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,

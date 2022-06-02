@@ -19,16 +19,16 @@
 
 /******************************************************************************
 
- File Name            : address_space_it.h
+ File Name            : service_write_1_it.h
 
- Date                 : 06/03/2020 14:49:02
+ Date                 : 02/06/2022 13:39:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _address_space_it_h
-#define _address_space_it_h
+#ifndef _service_write_1_it_h
+#define _service_write_1_it_h
 
 /*--------------------------
    Added by the Translator
@@ -43,21 +43,21 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 address_space_it__wreqs_i;
+extern t_entier4 service_write_1_it__wreqs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void address_space_it__INITIALISATION(void);
+extern void service_write_1_it__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void address_space_it__continue_iter_write_request(
-   t_bool * const address_space_it__continue,
-   constants__t_WriteValue_i * const address_space_it__wvi);
-extern void address_space_it__init_iter_write_request(
-   const t_entier4 address_space_it__nb_req,
-   t_bool * const address_space_it__continue);
+extern void service_write_1_it__continue_iter_write_request(
+   t_bool * const service_write_1_it__continue,
+   constants__t_WriteValue_i * const service_write_1_it__wvi);
+extern void service_write_1_it__init_iter_write_request(
+   const t_entier4 service_write_1_it__nb_req,
+   t_bool * const service_write_1_it__continue);
 
 #endif

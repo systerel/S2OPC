@@ -19,9 +19,9 @@
 
 /******************************************************************************
 
- File Name            : address_space_it.c
+ File Name            : service_write_1_it.c
 
- Date                 : 06/03/2020 14:49:02
+ Date                 : 02/06/2022 13:39:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,37 +30,37 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include "address_space_it.h"
+#include "service_write_1_it.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-t_entier4 address_space_it__wreqs_i;
+t_entier4 service_write_1_it__wreqs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void address_space_it__INITIALISATION(void) {
-   address_space_it__wreqs_i = 0;
+void service_write_1_it__INITIALISATION(void) {
+   service_write_1_it__wreqs_i = 0;
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void address_space_it__init_iter_write_request(
-   const t_entier4 address_space_it__nb_req,
-   t_bool * const address_space_it__continue) {
-   address_space_it__wreqs_i = address_space_it__nb_req;
-   *address_space_it__continue = (0 < address_space_it__nb_req);
+void service_write_1_it__init_iter_write_request(
+   const t_entier4 service_write_1_it__nb_req,
+   t_bool * const service_write_1_it__continue) {
+   service_write_1_it__wreqs_i = service_write_1_it__nb_req;
+   *service_write_1_it__continue = (0 < service_write_1_it__nb_req);
 }
 
-void address_space_it__continue_iter_write_request(
-   t_bool * const address_space_it__continue,
-   constants__t_WriteValue_i * const address_space_it__wvi) {
-   constants__get_cast_t_WriteValue(address_space_it__wreqs_i,
-      address_space_it__wvi);
-   address_space_it__wreqs_i = address_space_it__wreqs_i -
+void service_write_1_it__continue_iter_write_request(
+   t_bool * const service_write_1_it__continue,
+   constants__t_WriteValue_i * const service_write_1_it__wvi) {
+   constants__get_cast_t_WriteValue(service_write_1_it__wreqs_i,
+      service_write_1_it__wvi);
+   service_write_1_it__wreqs_i = service_write_1_it__wreqs_i -
       1;
-   *address_space_it__continue = (0 < address_space_it__wreqs_i);
+   *service_write_1_it__continue = (0 < service_write_1_it__wreqs_i);
 }
 

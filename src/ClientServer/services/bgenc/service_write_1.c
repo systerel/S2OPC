@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.c
 
- Date                 : 02/06/2022 13:24:09
+ Date                 : 02/06/2022 13:39:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -72,10 +72,10 @@ void service_write_1__treat_write_request_WriteValues(
       
       *service_write_1__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       service_write_decode_bs__get_nb_WriteValue(&service_write_1__l_nb_req);
-      address_space_it__init_iter_write_request(service_write_1__l_nb_req,
+      service_write_1_it__init_iter_write_request(service_write_1__l_nb_req,
          &service_write_1__l_continue);
       while (service_write_1__l_continue == true) {
-         address_space_it__continue_iter_write_request(&service_write_1__l_continue,
+         service_write_1_it__continue_iter_write_request(&service_write_1__l_continue,
             &service_write_1__l_wvi);
          address_space__treat_write_request_WriteValue(service_write_1__p_user,
             service_write_1__p_locales,
