@@ -156,11 +156,13 @@ struct SOPC_ReaderGroup
     SOPC_DataSetReader* dataSetReaders;
     uint16_t groupId;
     uint32_t groupVersion;
+    bool hasNonZeroWriterIds;
+    bool hasZeroWriterIds;
 };
 
 struct SOPC_DataSetReader
 {
-    struct SOPC_ReaderGroup* parent;
+    struct SOPC_ReaderGroup* group;
     uint16_t dataSetWriterId;
     SOPC_DataSetMetaData metaData;
     SOPC_SubscribedDataSetType targetType;
@@ -513,6 +515,7 @@ bool SOPC_PubSubConnection_Allocate_ReaderGroup_Array(SOPC_PubSubConnection* con
     connection->readerGroups_length = nb;
     for (int i = 0; i < nb; i++)
     {
+        memset(&connection->readerGroups[i], 0, sizeof(SOPC_ReaderGroup));
         connection->readerGroups[i].publisherId.type = SOPC_Null_PublisherId;
     }
     return true;
@@ -555,7 +558,7 @@ bool SOPC_ReaderGroup_Allocate_DataSetReader_Array(SOPC_ReaderGroup* group, uint
     }
     for (size_t i = 0; i < nb; i++)
     {
-        group->dataSetReaders[i].parent = group;
+        group->dataSetReaders[i].group = group;
     }
     group->dataSetReaders_length = nb;
     return true;
@@ -618,6 +621,12 @@ bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char
     return (SOPC_STATUS_OK == status);
 }
 
+bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group)
+{
+    assert(NULL != group);
+    return group->hasNonZeroWriterIds;
+}
+
 /** DataSetReader **/
 
 static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
@@ -636,7 +645,7 @@ static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
 SOPC_ReaderGroup* SOPC_DataSetReader_Get_ReaderGroup(const SOPC_DataSetReader* reader)
 {
     assert(NULL != reader);
-    return reader->parent;
+    return reader->group;
 }
 
 uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader)
@@ -648,6 +657,16 @@ uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader
 void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t id)
 {
     assert(NULL != reader);
+    if (id != 0)
+    {
+        reader->group->hasNonZeroWriterIds = true;
+    }
+    else
+    {
+        reader->group->hasZeroWriterIds = true;
+    }
+    assert(!(reader->group->hasNonZeroWriterIds && reader->group->hasZeroWriterIds));
+
     reader->dataSetWriterId = id;
 }
 

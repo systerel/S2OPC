@@ -527,9 +527,11 @@ static bool parse_dataset_attributes(const char* attr_name,
     bool result = false;
     assert(NULL != user_param);
     struct sopc_xml_pubsub_dataset_t* ds = (struct sopc_xml_pubsub_dataset_t*) user_param;
+    ds->writer_id = 0;
 
     if (TEXT_EQUALS(ATTR_DATASET_WRITER_ID, attr_name))
     {
+        // If present, the writerId cannot be equal to 0
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
@@ -544,7 +546,7 @@ static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_da
 {
     memset(ds, 0, sizeof *ds);
     assert(NULL != ctx->currentMessage);
-    ds->writer_id = ctx->currentMessage->groupId;
+    ds->writer_id = 0;
 
     bool result = parse_attributes(attrs, parse_dataset_attributes, ctx, (void*) ds);
 
@@ -820,6 +822,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 {
     SOPC_UNUSED_ARG(name);
     struct parse_context_t* ctx = user_data;
+    struct sopc_xml_pubsub_connection_t* connection = NULL;
+    struct sopc_xml_pubsub_message_t* msg = NULL;
+    struct sopc_xml_pubsub_dataset_t* ds = NULL;
 
     switch (ctx->state)
     {
@@ -827,6 +832,35 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_PUBSUB;
         break;
     case PARSE_MESSAGE:
+        // It must be ensured that all dataset have consistent writerId (all 0 or all non-0)
+        connection = &ctx->connectionArr[ctx->nb_connections - 1];
+        assert(NULL != connection);
+        msg = &connection->messageArr[connection->nb_messages - 1];
+        assert(NULL != msg);
+        if (msg->nb_datasets == 0)
+        {
+            LOG("Message requires at least one DataSet.");
+            XML_StopParser(ctx->parser, 0);
+            return;
+        }
+        else
+        {
+            bool hasZero = false;
+            bool hasNonzero = false;
+            for (uint16_t iDs = 0; iDs < msg->nb_datasets; iDs++)
+            {
+                ds = &msg->datasetArr[iDs];
+                const bool isZero = (ds->writer_id == 0);
+                hasZero |= isZero;
+                hasNonzero |= !isZero;
+                if (hasNonzero && hasZero)
+                {
+                    LOG_XML_ERROR("Multiple DSM in the same message must be either all or none defining 'writer_id'");
+                    XML_StopParser(ctx->parser, 0);
+                    return;
+                }
+            }
+        }
         ctx->nb_messages++;
         ctx->currentMessage = NULL;
         ctx->state = PARSE_CONNECTION;
@@ -835,6 +869,25 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_DATASET;
         break;
     case PARSE_DATASET:
+        connection = &ctx->connectionArr[ctx->nb_connections - 1];
+        assert(NULL != connection);
+        msg = &connection->messageArr[connection->nb_messages - 1];
+        assert(NULL != msg);
+        assert(msg->nb_datasets > 0);
+        // Check that there is no duplicate of writerid for the same Group
+        for (int jDs = 0; jDs < msg->nb_datasets - 1; ++jDs)
+        {
+            const uint16_t writerId = msg->datasetArr[msg->nb_datasets - 1].writer_id;
+            const uint16_t jWriterId = msg->datasetArr[jDs].writer_id;
+            if (writerId > 0 && writerId == jWriterId)
+            {
+                LOG_XML_ERRORF("Multiple definition of writerId = %d in message (Group=%d, version =%d)",
+                               (int) writerId, (int) msg->groupId, (int) msg->groupVersion);
+                XML_StopParser(ctx->parser, 0);
+                return;
+            }
+        }
+
         ctx->nb_datasets++;
         ctx->state = PARSE_MESSAGE;
         break;
@@ -919,7 +972,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
                     assert(dataSetWriter != NULL);
-                    SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id); // Same as WriterGroup
+                    SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id);
+
                     SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
 
                     for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)

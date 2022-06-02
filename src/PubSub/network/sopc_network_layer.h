@@ -72,13 +72,15 @@ typedef const SOPC_ReaderGroup* (*SOPC_UADP_NetworkMessage_GetReaderGroup)(const
  * \param group is the Reader Group on which the DataSet is received
  * \param uadp_conf Configuration of the received message
  * \param dataSetWriterId DataSetWriter Id received
+ * \param dataSetIndex The index of the DataSet in the received message
  *
  * \return A ::SOPC_DataSetReader matching the received DataSet or NULL if no matching Reader is configured for the
  * given group.
  */
 typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SOPC_ReaderGroup* group,
                                                                         const SOPC_UADP_Configuration* uadp_conf,
-                                                                        const uint16_t dataSetWriterId);
+                                                                        const uint16_t dataSetWriterId,
+                                                                        const uint8_t dataSetIndex);
 
 /**
  * \brief A callback for DataSet message application. When a compliant DataSet is received, this

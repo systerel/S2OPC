@@ -53,12 +53,14 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
  * \param group The group configuration
  * \param uadp_conf The received message configuration
  * \param writerId The received dataset writerId
+ * \param dataSetIndex The index of the DataSet in the received message
  *
  * \return the dataset reader, or NULL if no matching reader found
  */
 static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
                                                     const SOPC_UADP_Configuration* uadp_conf,
-                                                    const uint16_t writerId);
+                                                    const uint16_t writerId,
+                                                    const uint8_t dataSetIndex);
 
 /** \brief
  *      Received a DSM and applies changes to target variables.
@@ -150,22 +152,33 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
 
 static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
                                                     const SOPC_UADP_Configuration* uadp_conf,
-                                                    const uint16_t writerId)
+                                                    const uint16_t writerId,
+                                                    const uint8_t dataSetIndex)
 {
     assert(NULL != group && uadp_conf != NULL);
     // Find a matching reader in group
-    const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
     const SOPC_DataSetReader* result = NULL;
 
-    for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
+    // Note: it has been checked previously that the group does not contain both zero and non-zero writerId
+    if (SOPC_ReaderGroup_HasNonZeroDataSetWriterId(group))
     {
-        const SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
-        const uint16_t readerWriterId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
-
-        if (writerId == readerWriterId && writerId != 0)
+        const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
+        for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
         {
-            result = reader;
+            // Find matching WriterId
+            const SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
+            const uint16_t readerWriterId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
+
+            if (writerId == readerWriterId && writerId != 0)
+            {
+                result = reader;
+            }
         }
+    }
+    else
+    {
+        // Use configuration order
+        result = SOPC_ReaderGroup_Get_DataSetReader_At(group, dataSetIndex);
     }
     return result;
 }

@@ -97,7 +97,9 @@ typedef struct SOPC_Conf_PublisherId
     } data;
 } SOPC_Conf_PublisherId;
 
+/*************************/
 /** PubSubConfiguration **/
+/*************************/
 SOPC_PubSubConfiguration* SOPC_PubSubConfiguration_Create(void);
 void SOPC_PubSubConfiguration_Delete(SOPC_PubSubConfiguration* configuration);
 
@@ -119,7 +121,9 @@ uint32_t SOPC_PubSubConfiguration_Nb_PublishedDataSet(const SOPC_PubSubConfigura
 SOPC_PublishedDataSet* SOPC_PubSubConfiguration_Get_PublishedDataSet_At(const SOPC_PubSubConfiguration* configuration,
                                                                         uint16_t index);
 
+/**********************/
 /** PubSubConnection **/
+/**********************/
 
 const char* SOPC_PubSubConnection_Get_Name(const SOPC_PubSubConnection* connection);
 // make a copy of name
@@ -150,7 +154,9 @@ bool SOPC_PubSubConnection_Allocate_ReaderGroup_Array(SOPC_PubSubConnection* con
 uint16_t SOPC_PubSubConnection_Nb_ReaderGroup(const SOPC_PubSubConnection* connection);
 SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);
 
+/******************/
 /** Reader Group **/
+/******************/
 SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
 
@@ -167,13 +173,22 @@ void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version
 const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id);
 bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char* id);
+/**
+ * /brief Indicates if the group contains readers with WriterIds specified or not.
+ * /param  group The group to check
+ * /return true if all readers in group contain only non-zero writerIds.
+ * false if all readers in group contain only zero writerIds.
+ * Other cases are impossible (checked during configuration elaboration)
+ */
+bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
+/*******************/
 /** DataSetReader **/
+/*******************/
 
 SOPC_ReaderGroup* SOPC_DataSetReader_Get_ReaderGroup(const SOPC_DataSetReader* reader);
 uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader);
 void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t id);
-
 SOPC_SubscribedDataSetType SOPC_DataSetReader_Get_DataSet_TargetType(const SOPC_DataSetReader* reader);
 // void SOPC_DataSetReader_Set_DataSet_TargetType(SOPC_DataSetReader* reader, SOPC_SubscribedDataSetType type);
 
@@ -186,7 +201,9 @@ bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
 uint16_t SOPC_DataSetReader_Nb_FieldMetaData(const SOPC_DataSetReader* reader);
 SOPC_FieldMetaData* SOPC_DataSetReader_Get_FieldMetaData_At(const SOPC_DataSetReader* reader, uint16_t index);
 
+/**********************/
 /** SOPC_FieldTarget **/
+/**********************/
 
 // return receiver index range. Type is numeric range format
 const char* SOPC_FieldTarget_Get_SourceIndexRange(const SOPC_FieldTarget* target);
@@ -208,7 +225,9 @@ const char* SOPC_FieldTarget_Get_TargetIndexRange(const SOPC_FieldTarget* target
 // copy the given string
 bool SOPC_FieldTarget_Set_TargetIndexRange(SOPC_FieldTarget* target, const char* sourceIndexRange);
 
+/******************/
 /** Writer Group **/
+/******************/
 const SOPC_PubSubConnection* SOPC_WriterGroup_Get_Connection(const SOPC_WriterGroup* group);
 
 uint16_t SOPC_WriterGroup_Get_Id(const SOPC_WriterGroup* group);
@@ -231,7 +250,9 @@ bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);
 SOPC_DataSetWriter* SOPC_WriterGroup_Get_DataSetWriter_At(const SOPC_WriterGroup* group, uint8_t index);
 
+/*******************/
 /** DataSetWriter **/
+/*******************/
 uint16_t SOPC_DataSetWriter_Get_Id(const SOPC_DataSetWriter* writer);
 void SOPC_DataSetWriter_Set_Id(SOPC_DataSetWriter* writer, uint16_t id);
 
@@ -246,7 +267,9 @@ uint16_t SOPC_PublishedDataSet_Nb_FieldMetaData(const SOPC_PublishedDataSet* dat
 SOPC_FieldMetaData* SOPC_PublishedDataSet_Get_FieldMetaData_At(const SOPC_PublishedDataSet* dataset, uint16_t index);
 SOPC_PublishedDataSetSourceType SOPC_PublishedDataSet_Get_DataSet_SourceType(const SOPC_PublishedDataSet* dataset);
 
+/****************************/
 /** SOPC_PublishedVariable **/
+/****************************/
 
 const SOPC_NodeId* SOPC_PublishedVariable_Get_NodeId(const SOPC_PublishedVariable* variable);
 /**
@@ -263,7 +286,9 @@ const char* SOPC_PublishedVariable_Get_IndexRange(const SOPC_PublishedVariable* 
 // copy the given string
 bool SOPC_PublishedVariable_Set_IndexRange(SOPC_PublishedVariable* variable, const char* indexRange);
 
+/************************/
 /** SOPC_FieldMetaData **/
+/************************/
 
 int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata);
 /* n > 1: the dataType is an array with the specified number of dimensions.

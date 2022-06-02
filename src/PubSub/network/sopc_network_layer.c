@@ -1282,7 +1282,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
                 SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
             }
 
-            dsmReaders[i] = readerConf->callbacks.getReader_Func(group, conf, writer_id);
+            dsmReaders[i] = readerConf->callbacks.getReader_Func(group, conf, writer_id, (uint8_t) i);
 
             // Check if there is at last one DSM to read, otherwise decoding can be canceled
             if (dsmReaders[i] != NULL)
