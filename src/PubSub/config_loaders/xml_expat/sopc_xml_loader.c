@@ -160,7 +160,7 @@ static bool parse(XML_Parser parser, FILE* fd)
     char buf[65365];
     if (fd == NULL)
     {
-        LOG_XML_ERROR("Error: no input file provided");
+        LOG("Error: no input file provided");
         return false;
     }
 
@@ -841,10 +841,12 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_PUBSUB:
         break;
     case PARSE_START:
-        assert(false && "Got end_element callback when in PARSE_START state.");
+        LOG_XML_ERROR("Got end_element callback when in PARSE_START state.");
+        assert(false);
         break;
     default:
-        assert(false && "Unknown state.");
+        LOG_XML_ERROR("Unknown state.");
+        assert(false);
         break;
     }
 }

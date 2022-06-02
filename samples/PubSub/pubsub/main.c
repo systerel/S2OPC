@@ -165,8 +165,12 @@ int main(int argc, char* const argv[])
         printf("PUBSUB_XML_CONFIG: %s\n", config_path);
 
         FILE* fd = fopen(config_path, "r");
-        config = SOPC_PubSubConfig_ParseXML(fd);
-        int closed = fclose(fd);
+        int closed = -1;
+        if (NULL != fd)
+        {
+            config = SOPC_PubSubConfig_ParseXML(fd);
+            closed = fclose(fd);
+        }
 
         status = (0 == closed && NULL != config) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
         if (SOPC_STATUS_OK != status)
