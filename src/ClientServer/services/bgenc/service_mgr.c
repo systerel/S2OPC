@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 01/06/2022 17:07:54
+ Date                 : 02/06/2022 15:06:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -1100,6 +1100,7 @@ void service_mgr__server_receive_local_service_req(
    const constants__t_application_context_i service_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__ret) {
    {
+      t_bool service_mgr__l_prev_local_treatment;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_msg_i service_mgr__l_resp_msg;
@@ -1107,7 +1108,8 @@ void service_mgr__server_receive_local_service_req(
       t_bool service_mgr__l_valid_resp_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       
-      address_space_itf__set_local_service_treatment();
+      address_space_itf__is_local_service_treatment(&service_mgr__l_prev_local_treatment);
+      address_space_itf__set_local_service_treatment(true);
       switch (service_mgr__req_class) {
       case constants__e_msg_session_service_class:
       case constants__e_msg_discovery_service_class:
@@ -1168,7 +1170,7 @@ void service_mgr__server_receive_local_service_req(
       else {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
       }
-      address_space_itf__unset_local_service_treatment();
+      address_space_itf__set_local_service_treatment(service_mgr__l_prev_local_treatment);
    }
 }
 

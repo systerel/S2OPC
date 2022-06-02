@@ -21,7 +21,7 @@
 
  File Name            : address_space_local.c
 
- Date                 : 06/03/2020 14:49:02
+ Date                 : 02/06/2022 15:06:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,32 +35,25 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-t_entier4 address_space_local__local_service_treatment_i;
+t_bool address_space_local__local_service_treatment;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void address_space_local__INITIALISATION(void) {
-   address_space_local__local_service_treatment_i = 0;
+   address_space_local__local_service_treatment = false;
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void address_space_local__set_local_service_treatment(void) {
-   address_space_local__local_service_treatment_i = address_space_local__local_service_treatment_i +
-      1;
-}
-
-void address_space_local__unset_local_service_treatment(void) {
-   if (address_space_local__local_service_treatment_i != 0) {
-      address_space_local__local_service_treatment_i = address_space_local__local_service_treatment_i -
-         1;
-   }
-}
-
 void address_space_local__is_local_service_treatment(
-   t_bool * const address_space_local__bres) {
-   *address_space_local__bres = (address_space_local__local_service_treatment_i != 0);
+   t_bool * const address_space_local__p_res) {
+   *address_space_local__p_res = address_space_local__local_service_treatment;
+}
+
+void address_space_local__set_local_service_treatment(
+   const t_bool address_space_local__p_val) {
+   address_space_local__local_service_treatment = address_space_local__p_val;
 }
 

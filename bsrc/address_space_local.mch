@@ -24,30 +24,24 @@ ABSTRACT_VARIABLES
     local_service_treatment
 
 INVARIANT
-    local_service_treatment : NAT
+    local_service_treatment : BOOL
 
 INITIALISATION
-    local_service_treatment := 0
+    local_service_treatment := FALSE
 
 OPERATIONS
 
-    set_local_service_treatment =
+    p_res <-- is_local_service_treatment =
     BEGIN
-        local_service_treatment := local_service_treatment + 1
+        p_res := local_service_treatment
     END
     ;
 
-    unset_local_service_treatment =
-    BEGIN
-        IF local_service_treatment /= 0 THEN
-            local_service_treatment := local_service_treatment - 1
-        END
-    END
-    ;
-
-    bres <-- is_local_service_treatment =
-    BEGIN
-        bres := bool(local_service_treatment /= 0)
+    set_local_service_treatment(p_val) =
+    PRE
+        p_val : BOOL
+    THEN
+        local_service_treatment := p_val
     END
 
 END

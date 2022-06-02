@@ -21,7 +21,7 @@
 
  File Name            : address_space_local.h
 
- Date                 : 06/03/2020 14:49:02
+ Date                 : 02/06/2022 15:06:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,7 +38,7 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 address_space_local__local_service_treatment_i;
+extern t_bool address_space_local__local_service_treatment;
 
 /*------------------------
    INITIALISATION Clause
@@ -49,8 +49,8 @@ extern void address_space_local__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void address_space_local__is_local_service_treatment(
-   t_bool * const address_space_local__bres);
-extern void address_space_local__set_local_service_treatment(void);
-extern void address_space_local__unset_local_service_treatment(void);
+   t_bool * const address_space_local__p_res);
+extern void address_space_local__set_local_service_treatment(
+   const t_bool address_space_local__p_val);
 
 #endif

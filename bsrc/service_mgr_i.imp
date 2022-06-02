@@ -1027,6 +1027,7 @@ OPERATIONS
 
     ret <-- server_receive_local_service_req (endpoint_config_idx, req_class, req_typ, req_msg, app_context) =
     VAR
+        l_prev_local_treatment,
         l_resp_msg_typ,
         l_resp_msg_header,
         l_resp_msg,
@@ -1034,7 +1035,8 @@ OPERATIONS
         l_valid_resp_header,
         l_ret
     IN
-        set_local_service_treatment;
+        l_prev_local_treatment <-- is_local_service_treatment;
+        set_local_service_treatment (TRUE);
         CASE req_class OF
             EITHER e_msg_session_service_class,
                 e_msg_discovery_service_class
@@ -1071,7 +1073,7 @@ OPERATIONS
         ELSE
             ret := e_sc_bad_out_of_memory
         END;
-        unset_local_service_treatment
+        set_local_service_treatment (l_prev_local_treatment)
     END
     ;
 

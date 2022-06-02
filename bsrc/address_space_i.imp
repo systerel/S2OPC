@@ -55,8 +55,8 @@ PROMOTES
     get_Value_StatusCode,
     read_AddressSpace_clear_value,
     read_AddressSpace_free_variant,
+    is_local_service_treatment,
     set_local_service_treatment,
-    unset_local_service_treatment,
     get_user_authorization,
     get_Executable,
     get_InputArguments,
@@ -136,7 +136,7 @@ DEFINITIONS
                                                                     s_AuthorizedOperations))
                                                    }(conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid)))),
                                          TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
-                                        }(bool(local_service_treatment /= 0))
+                                        }(bool(local_service_treatment = TRUE))
                               }(bool(d_Type_IsVariableSubtype
                                        (DataValue_LocalDataType(dVal), DataValue_ValueRank(dVal),
                                         a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid)))))
@@ -209,14 +209,14 @@ LOCAL_OPERATIONS
 
                     a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
 
-                    (local_service_treatment /= 0
+                    (local_service_treatment = TRUE
                     =>
                         a_Value_StatusCode = a_Value_StatusCode$0
                                              <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)} &
                         a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
                                               <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
                     ) &
-                    (local_service_treatment = 0
+                    (local_service_treatment = FALSE
                     =>
                         (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE
                         =>
@@ -325,7 +325,7 @@ LOCAL_OPERATIONS
 
         /* For a Variable Value, the read must be authorized */
         (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
-        (local_service_treatment /= 0 or
+        (local_service_treatment = TRUE or
          (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
           e_operation_type_read |-> a_NodeId(p_node) |-> p_aid |-> p_user : s_AuthorizedOperations)))
     THEN
@@ -461,6 +461,7 @@ OPERATIONS
         l_node,
         l_access_lvl,
         l_access_read,
+        l_prev_local_treatment,
         l_isvalid,
         l_local_treatment,
         l_wv,
@@ -490,10 +491,11 @@ OPERATIONS
             IF l_access_read = TRUE THEN
                 /* Read updated value after write: necessary since write value item can be partial due to indexRange */
                 /* Set local treatment since user can be anyone in subscription: avoid user right verification */
-                set_local_service_treatment;
+                l_prev_local_treatment <-- is_local_service_treatment;
+                set_local_service_treatment(TRUE);
                 l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv
                 <-- read_AddressSpace_Attribute_value(p_user, p_locales, l_node, l_nid, l_aid, c_IndexRange_indet);
-                unset_local_service_treatment;
+                set_local_service_treatment(l_prev_local_treatment);
                 IF l_new_sc = e_sc_ok THEN
                     gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
                 ELSE

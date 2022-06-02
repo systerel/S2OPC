@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 02/06/2022 13:23:57
+ Date                 : 02/06/2022 15:06:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -79,13 +79,13 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_conv_Variant_ValueRank address_space_bs__get_conv_Variant_ValueRank
 #define address_space__get_user_authorization user_authorization_bs__get_user_authorization
 #define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
+#define address_space__is_local_service_treatment address_space_local__is_local_service_treatment
 #define address_space__is_transitive_subtype address_space_typing__is_transitive_subtype
 #define address_space__is_valid_ReferenceTypeId address_space_typing__is_valid_ReferenceTypeId
 #define address_space__read_AddressSpace_clear_value address_space_bs__read_AddressSpace_clear_value
 #define address_space__read_AddressSpace_free_variant address_space_bs__read_AddressSpace_free_variant
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
 #define address_space__set_local_service_treatment address_space_local__set_local_service_treatment
-#define address_space__unset_local_service_treatment address_space_local__unset_local_service_treatment
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
