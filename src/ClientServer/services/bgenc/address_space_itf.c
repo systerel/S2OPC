@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.c
 
- Date                 : 01/06/2022 17:07:46
+ Date                 : 02/06/2022 08:51:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -36,39 +36,5 @@
    INITIALISATION Clause
   ------------------------*/
 void address_space_itf__INITIALISATION(void) {
-}
-
-/*--------------------
-   OPERATIONS Clause
-  --------------------*/
-void address_space_itf__treat_write_request(
-   const constants__t_user_i address_space_itf__p_user,
-   const constants__t_LocaleIds_i address_space_itf__p_locales,
-   const constants__t_msg_i address_space_itf__write_msg,
-   const constants__t_msg_i address_space_itf__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const address_space_itf__StatusCode_service) {
-   {
-      t_entier4 address_space_itf__l_nb_req;
-      t_bool address_space_itf__l_bret;
-      
-      service_write_decode_bs__decode_write_request(address_space_itf__write_msg,
-         address_space_itf__StatusCode_service);
-      if (*address_space_itf__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-         service_write_decode_bs__get_nb_WriteValue(&address_space_itf__l_nb_req);
-         address_space__alloc_write_request_responses(address_space_itf__l_nb_req,
-            &address_space_itf__l_bret);
-         if (address_space_itf__l_bret == true) {
-            address_space__treat_write_request_WriteValues(address_space_itf__p_user,
-               address_space_itf__p_locales,
-               address_space_itf__StatusCode_service);
-         }
-         else {
-            *address_space_itf__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-         }
-      }
-      service_write_decode_bs__free_write_request();
-      address_space__write_WriteResponse_msg_out(address_space_itf__resp_msg);
-      address_space__dealloc_write_request_responses();
-   }
 }
 

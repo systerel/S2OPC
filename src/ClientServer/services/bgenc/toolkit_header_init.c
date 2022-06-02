@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 01/06/2022 16:34:54
+ Date                 : 02/06/2022 08:52:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -119,6 +119,7 @@
 #include "service_set_discovery_server_data_bs.h"
 #include "service_set_view.h"
 #include "service_unregister_nodes.h"
+#include "service_write.h"
 #include "service_write_decode_bs.h"
 #include "session_channel_it.h"
 #include "session_core.h"
@@ -197,6 +198,7 @@ void INITIALISATION(void) {
    service_response_cb_bs__INITIALISATION();
    write_value_pointer_bs__INITIALISATION();
    address_space__INITIALISATION();
+   service_write__INITIALISATION();
    address_space_itf__INITIALISATION();
    service_read_1__INITIALISATION();
    service_read__INITIALISATION();

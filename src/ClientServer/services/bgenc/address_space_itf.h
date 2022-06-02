@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 01/06/2022 17:07:46
+ Date                 : 02/06/2022 08:51:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,8 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "address_space.h"
-#include "service_write_decode_bs.h"
+#include "service_write.h"
 
 /*--------------
    SEES Clause
@@ -57,42 +56,33 @@ extern void address_space_itf__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define address_space_itf__check_nodeId_isValid address_space__check_nodeId_isValid
-#define address_space_itf__check_object_has_method address_space__check_object_has_method
-#define address_space_itf__get_BrowseName address_space__get_BrowseName
-#define address_space_itf__get_DisplayName address_space__get_DisplayName
-#define address_space_itf__get_Executable address_space__get_Executable
-#define address_space_itf__get_InputArguments address_space__get_InputArguments
-#define address_space_itf__get_NodeClass address_space__get_NodeClass
-#define address_space_itf__get_Node_RefIndexEnd address_space__get_Node_RefIndexEnd
-#define address_space_itf__get_RefIndex_Reference address_space__get_RefIndex_Reference
-#define address_space_itf__get_Reference_IsForward address_space__get_Reference_IsForward
-#define address_space_itf__get_Reference_ReferenceType address_space__get_Reference_ReferenceType
-#define address_space_itf__get_Reference_TargetNode address_space__get_Reference_TargetNode
-#define address_space_itf__get_TypeDefinition address_space__get_TypeDefinition
-#define address_space_itf__get_Value_StatusCode address_space__get_Value_StatusCode
-#define address_space_itf__get_conv_Variant_Type address_space__get_conv_Variant_Type
-#define address_space_itf__get_conv_Variant_ValueRank address_space__get_conv_Variant_ValueRank
-#define address_space_itf__get_user_authorization address_space__get_user_authorization
-#define address_space_itf__is_NodeId_equal address_space__is_NodeId_equal
-#define address_space_itf__is_transitive_subtype address_space__is_transitive_subtype
-#define address_space_itf__is_valid_ReferenceTypeId address_space__is_valid_ReferenceTypeId
-#define address_space_itf__read_AddressSpace_clear_value address_space__read_AddressSpace_clear_value
-#define address_space_itf__read_AddressSpace_free_variant address_space__read_AddressSpace_free_variant
-#define address_space_itf__read_Node_Attribute address_space__read_Node_Attribute
-#define address_space_itf__read_variable_compat_type address_space__read_variable_compat_type
-#define address_space_itf__readall_AddressSpace_Node address_space__readall_AddressSpace_Node
-#define address_space_itf__set_local_service_treatment address_space__set_local_service_treatment
-#define address_space_itf__unset_local_service_treatment address_space__unset_local_service_treatment
-
-/*--------------------
-   OPERATIONS Clause
-  --------------------*/
-extern void address_space_itf__treat_write_request(
-   const constants__t_user_i address_space_itf__p_user,
-   const constants__t_LocaleIds_i address_space_itf__p_locales,
-   const constants__t_msg_i address_space_itf__write_msg,
-   const constants__t_msg_i address_space_itf__resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const address_space_itf__StatusCode_service);
+#define address_space_itf__check_nodeId_isValid service_write__check_nodeId_isValid
+#define address_space_itf__check_object_has_method service_write__check_object_has_method
+#define address_space_itf__get_BrowseName service_write__get_BrowseName
+#define address_space_itf__get_DisplayName service_write__get_DisplayName
+#define address_space_itf__get_Executable service_write__get_Executable
+#define address_space_itf__get_InputArguments service_write__get_InputArguments
+#define address_space_itf__get_NodeClass service_write__get_NodeClass
+#define address_space_itf__get_Node_RefIndexEnd service_write__get_Node_RefIndexEnd
+#define address_space_itf__get_RefIndex_Reference service_write__get_RefIndex_Reference
+#define address_space_itf__get_Reference_IsForward service_write__get_Reference_IsForward
+#define address_space_itf__get_Reference_ReferenceType service_write__get_Reference_ReferenceType
+#define address_space_itf__get_Reference_TargetNode service_write__get_Reference_TargetNode
+#define address_space_itf__get_TypeDefinition service_write__get_TypeDefinition
+#define address_space_itf__get_Value_StatusCode service_write__get_Value_StatusCode
+#define address_space_itf__get_conv_Variant_Type service_write__get_conv_Variant_Type
+#define address_space_itf__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
+#define address_space_itf__get_user_authorization service_write__get_user_authorization
+#define address_space_itf__is_NodeId_equal service_write__is_NodeId_equal
+#define address_space_itf__is_transitive_subtype service_write__is_transitive_subtype
+#define address_space_itf__is_valid_ReferenceTypeId service_write__is_valid_ReferenceTypeId
+#define address_space_itf__read_AddressSpace_clear_value service_write__read_AddressSpace_clear_value
+#define address_space_itf__read_AddressSpace_free_variant service_write__read_AddressSpace_free_variant
+#define address_space_itf__read_Node_Attribute service_write__read_Node_Attribute
+#define address_space_itf__read_variable_compat_type service_write__read_variable_compat_type
+#define address_space_itf__readall_AddressSpace_Node service_write__readall_AddressSpace_Node
+#define address_space_itf__set_local_service_treatment service_write__set_local_service_treatment
+#define address_space_itf__treat_write_request service_write__treat_write_request
+#define address_space_itf__unset_local_service_treatment service_write__unset_local_service_treatment
 
 #endif
