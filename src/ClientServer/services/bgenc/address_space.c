@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 01/06/2022 14:40:13
+ Date                 : 02/06/2022 13:23:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -32,16 +32,10 @@
   ------------------------*/
 #include "address_space.h"
 
-/*----------------------------
-   CONCRETE_VARIABLES Clause
-  ----------------------------*/
-t_bool address_space__ResponseWrite_allocated;
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void address_space__INITIALISATION(void) {
-   address_space__ResponseWrite_allocated = false;
 }
 
 /*--------------------
@@ -680,51 +674,6 @@ void address_space__read_Node_Attribute(
          }
       }
    }
-}
-
-void address_space__alloc_write_request_responses(
-   const t_entier4 address_space__nb_req,
-   t_bool * const address_space__bret) {
-   if (address_space__nb_req <= constants__k_n_WriteResponse_max) {
-      response_write_bs__alloc_write_request_responses_malloc(address_space__nb_req,
-         &address_space__ResponseWrite_allocated);
-   }
-   else {
-      address_space__ResponseWrite_allocated = false;
-   }
-   *address_space__bret = address_space__ResponseWrite_allocated;
-}
-
-void address_space__treat_write_request_WriteValues(
-   const constants__t_user_i address_space__p_user,
-   const constants__t_LocaleIds_i address_space__p_locales,
-   constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service) {
-   {
-      t_entier4 address_space__l_nb_req;
-      t_bool address_space__l_continue;
-      constants__t_WriteValue_i address_space__l_wvi;
-      constants_statuscodes_bs__t_StatusCode_i address_space__l_status;
-      
-      *address_space__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
-      service_write_decode_bs__get_nb_WriteValue(&address_space__l_nb_req);
-      address_space_it__init_iter_write_request(address_space__l_nb_req,
-         &address_space__l_continue);
-      while (address_space__l_continue == true) {
-         address_space_it__continue_iter_write_request(&address_space__l_continue,
-            &address_space__l_wvi);
-         address_space__treat_write_request_WriteValue(address_space__p_user,
-            address_space__p_locales,
-            address_space__l_wvi,
-            &address_space__l_status);
-         response_write_bs__set_ResponseWrite_StatusCode(address_space__l_wvi,
-            address_space__l_status);
-      }
-   }
-}
-
-void address_space__dealloc_write_request_responses(void) {
-   address_space__ResponseWrite_allocated = false;
-   response_write_bs__reset_ResponseWrite();
 }
 
 void address_space__check_nodeId_isValid(

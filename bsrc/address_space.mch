@@ -23,116 +23,111 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    service_write_decode_bs /* TODO: move to refinment */
+    service_write_decode_bs, /* TODO: move to refinment */
+    data_value_pointer_bs
 
 DEFINITIONS
-    "address_space.def";
-
-    d_variables ==
-        /* Service Write */
-        ResponseWrite_allocated,
-        ResponseWrite_StatusCode
-    ;
-
-    d_inv ==
-    (
-        /* Service Write */
-        ResponseWrite_allocated : BOOL &
-        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-        (ResponseWrite_allocated = FALSE
-         =>
-         ResponseWrite_StatusCode = {})
-    )
+    "address_space.def"
 
 ABSTRACT_VARIABLES
-    d_adsp_variables,
-    d_variables
+    d_adsp_variables
 
 INVARIANT
-    d_adsp_invariant &
-    d_inv
+    d_adsp_invariant
 
 INITIALISATION
-    d_adsp_variables,
-    d_variables
+    d_adsp_variables
     :(
-        d_adsp_invariant &
-        d_inv
+        d_adsp_invariant
     )
 
 OPERATIONS
 
     d_adsp_operations;
 
-    /* --------------------------------------------------------------------- */
-    /* Service Write */
-
-    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
+    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     PRE
         p_user : t_user_i &
-        p_user : t_user   &
+        p_user : t_user &
         p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds   &
-        ResponseWrite_allocated = TRUE
+        p_locales : t_LocaleIds &
+        p_wvi : t_WriteValue_i &
+        p_wvi : t_WriteValue
     THEN
-        StatusCode_service,
+        LET dataValue, index_range, nid, aid BE
+            dataValue = WriteValue_DataValue(p_wvi) &
+            index_range = WriteValue_IndexRange(p_wvi) &
+            nid = WriteValue_NodeId(p_wvi) &
+            aid = WriteValue_AttributeId(p_wvi)
+        IN
+        p_status,
         a_Value,
         a_Value_StatusCode,
         a_Value_SourceTimestamp,
-        ResponseWrite_StatusCode
-        :(
-            StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode &
+        local_service_treatment :(
+            p_status : t_StatusCode_i &
+            p_status : t_StatusCode &
 
-            a_Value : t_Node +-> t_Variant &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            a_Value_StatusCode : t_Node +-> t_RawStatusCode &
-            dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
-            dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
+            local_service_treatment = local_service_treatment$0 &
+
+            (aid : t_AttributeId
+            =>
+                p_status : {
+                    e_sc_bad_node_id_unknown,
+                    e_sc_bad_not_writable,
+                    e_sc_bad_type_mismatch,
+                    e_sc_bad_not_writable,
+                    e_sc_bad_user_access_denied,
+                    e_sc_bad_index_range_invalid,
+                    e_sc_bad_index_range_no_data,
+                    e_sc_bad_invalid_argument,
+                    e_sc_bad_out_of_memory,
+                    e_sc_ok
+                }
+            ) &
+            (not(aid : t_AttributeId)
+            =>
+                p_status = e_sc_bad_attribute_id_invalid
+            ) &
+            (p_status = e_sc_ok =>
+                a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
+
+                (local_service_treatment /= 0
+                =>
+                    a_Value_StatusCode = a_Value_StatusCode$0
+                        <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)} &
+                    a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+                        <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
+                ) &
+                (local_service_treatment = 0
+                =>
+                    (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE
+                    =>
+                        a_Value_StatusCode = a_Value_StatusCode$0
+                            <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)}
+                    ) &
+                    (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE)
+                    =>
+                        a_Value_StatusCode = a_Value_StatusCode$0) &
+
+                    (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE
+                    =>
+                        a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+                            <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
+                    ) &
+                    (not(conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE)
+                    =>
+                        a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
+                )
+            ) &
+            (not (p_status = e_sc_ok)
+            =>
+                a_Value = a_Value$0 &
+                a_Value_StatusCode = a_Value_StatusCode$0 &
+                a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+            )
         )
-    END
-    ;
-
-    bret <-- alloc_write_request_responses(nb_req) =
-    PRE
-        nb_req : NAT &
-        ResponseWrite_allocated = FALSE
-    THEN
-        bret,
-        ResponseWrite_StatusCode,
-        ResponseWrite_allocated
-        :(
-            bret : BOOL &
-            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            ResponseWrite_allocated : BOOL &
-            (ResponseWrite_allocated = FALSE
-             =>
-             ResponseWrite_StatusCode = {}) &
-            bret = ResponseWrite_allocated
-        )
-    END
-    ;
-
-    dealloc_write_request_responses =
-    PRE
-        ResponseWrite_allocated = TRUE
-    THEN
-        ResponseWrite_allocated  := FALSE ||
-        ResponseWrite_StatusCode := {}
-    END
-    ;
-
-    /* Promoted */
-    write_WriteResponse_msg_out(msg_out) =
-    PRE
-        msg_out : t_msg_i &
-        msg_out : t_msg
-    THEN
-        skip
+        END
     END
 
 END

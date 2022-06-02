@@ -30,7 +30,7 @@ SEES
     message_out_bs
 
 IMPORTS
-    address_space,
+    service_write_1,
     service_write_decode_bs
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,

@@ -1,0 +1,147 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    service_write_1_i
+
+REFINES
+    service_write_1_r
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    service_write_decode_bs,
+    service_response_cb_bs,
+    write_value_pointer_bs,
+    data_value_pointer_bs
+
+IMPORTS
+    address_space,
+    address_space_it,
+    response_write_bs
+
+/* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
+   but it would trigger a bug in the project check. */
+
+PROMOTES
+    read_Node_Attribute,
+    readall_AddressSpace_Node,
+    get_NodeClass,
+    get_BrowseName,
+    get_DisplayName,
+    is_transitive_subtype,
+    is_valid_ReferenceTypeId,
+    is_NodeId_equal,
+    get_TypeDefinition,
+    get_Reference_ReferenceType,
+    get_Reference_TargetNode,
+    get_Reference_IsForward,
+    get_Node_RefIndexEnd,
+    get_RefIndex_Reference,
+    get_Value_StatusCode,
+    read_AddressSpace_clear_value,
+    read_AddressSpace_free_variant,
+    set_local_service_treatment,
+    unset_local_service_treatment,
+    get_user_authorization ,
+    get_Executable,
+    get_InputArguments,
+    get_conv_Variant_ValueRank,
+    get_conv_Variant_Type,
+    read_variable_compat_type,
+    check_object_has_method,
+    check_nodeId_isValid,
+
+    write_WriteResponse_msg_out
+
+CONCRETE_VARIABLES
+    ResponseWrite_allocated
+
+DEFINITIONS
+    "definitions.def";
+
+    /* Relation associating to a node a value which is requested to be written
+    in the address space */
+    d_a_DataValue_requested ==
+        (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                     WriteValue_NodeId~ ;
+         (cast_t_WriteValue[1..nb_WriteValue] /\
+             WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue)
+
+INITIALISATION
+    ResponseWrite_allocated := FALSE
+
+OPERATIONS
+
+    bret <-- alloc_write_request_responses(nb_req) =
+    BEGIN
+        IF nb_req <= k_n_WriteResponse_max THEN
+            ResponseWrite_allocated <-- alloc_write_request_responses_malloc(nb_req)
+        ELSE
+            ResponseWrite_allocated := FALSE
+        END;
+        bret := ResponseWrite_allocated
+    END
+    ;
+
+    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
+    VAR
+        l_nb_req,
+        l_continue,
+        l_wvi,
+        l_status
+    IN
+        StatusCode_service := e_sc_ok;
+        l_nb_req <-- get_nb_WriteValue;
+        l_continue <-- init_iter_write_request(l_nb_req);
+        WHILE l_continue = TRUE DO
+            l_continue, l_wvi <-- continue_iter_write_request;
+            l_status <-- treat_write_request_WriteValue (p_user, p_locales, l_wvi);
+            set_ResponseWrite_StatusCode(l_wvi, l_status)
+        INVARIANT
+            wreqs_to_iterate <: t_WriteValue &
+            wreqs_iterated <: t_WriteValue &
+            wreqs_to_iterate /\ wreqs_iterated = {} &
+            wreqs_to_iterate \/ wreqs_iterated = cast_t_WriteValue[1..nb_WriteValue] &
+            l_continue = bool(wreqs_to_iterate /= {}) &
+
+            a_Value : t_Node +-> t_Variant &
+
+            a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &
+            a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &
+            a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
+
+            !wvi.(wvi : t_WriteValue & wvi : wreqs_iterated
+                => ResponseWrite_StatusCode(wvi) : {e_sc_ok,
+                    e_sc_bad_out_of_memory, e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid,
+                    e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_type_mismatch,
+                    e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data})
+        VARIANT
+            card(wreqs_to_iterate)
+        END
+    END
+    ;
+
+    dealloc_write_request_responses =
+    BEGIN
+        ResponseWrite_allocated := FALSE;
+        reset_ResponseWrite
+    END
+
+END

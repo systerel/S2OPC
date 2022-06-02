@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 01/06/2022 14:40:13
+ Date                 : 02/06/2022 13:23:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,11 +39,9 @@
    IMPORTS Clause
   -----------------*/
 #include "address_space_bs.h"
-#include "address_space_it.h"
 #include "address_space_local.h"
 #include "address_space_typing.h"
 #include "gen_subscription_event_bs.h"
-#include "response_write_bs.h"
 #include "user_authorization_bs.h"
 
 /*--------------
@@ -55,11 +53,6 @@
 #include "service_response_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "write_value_pointer_bs.h"
-
-/*----------------------------
-   CONCRETE_VARIABLES Clause
-  ----------------------------*/
-extern t_bool address_space__ResponseWrite_allocated;
 
 /*------------------------
    INITIALISATION Clause
@@ -93,7 +86,6 @@ extern void address_space__INITIALISATION(void);
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
 #define address_space__set_local_service_treatment address_space_local__set_local_service_treatment
 #define address_space__unset_local_service_treatment address_space_local__unset_local_service_treatment
-#define address_space__write_WriteResponse_msg_out response_write_bs__write_WriteResponse_msg_out
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -133,23 +125,14 @@ extern void address_space__treat_write_1(
    constants_statuscodes_bs__t_StatusCode_i * const address_space__serviceStatusCode,
    constants__t_DataValue_i * const address_space__prev_dataValue,
    constants__t_Node_i * const address_space__node);
-extern void address_space__treat_write_request_WriteValue(
-   const constants__t_user_i address_space__p_user,
-   const constants__t_LocaleIds_i address_space__p_locales,
-   const constants__t_WriteValue_i address_space__p_wvi,
-   constants_statuscodes_bs__t_StatusCode_i * const address_space__p_status);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void address_space__alloc_write_request_responses(
-   const t_entier4 address_space__nb_req,
-   t_bool * const address_space__bret);
 extern void address_space__check_nodeId_isValid(
    const constants__t_NodeId_i address_space__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
    constants__t_Node_i * const address_space__node);
-extern void address_space__dealloc_write_request_responses(void);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
@@ -169,9 +152,10 @@ extern void address_space__read_variable_compat_type(
    const t_entier4 address_space__p_var_vr,
    t_bool * const address_space__btyp_ok,
    t_bool * const address_space__btyp_need_conv);
-extern void address_space__treat_write_request_WriteValues(
+extern void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
-   constants_statuscodes_bs__t_StatusCode_i * const address_space__StatusCode_service);
+   const constants__t_WriteValue_i address_space__p_wvi,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__p_status);
 
 #endif

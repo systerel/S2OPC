@@ -1,0 +1,141 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+REFINEMENT
+    service_write_1_r
+
+REFINES
+    service_write_1
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    service_write_decode_bs,
+    data_value_pointer_bs
+
+DEFINITIONS
+    "address_space.def";
+
+    d_variables ==
+        ResponseWrite_allocated,
+        ResponseWrite_StatusCode
+    ;
+
+    d_inv ==
+    (
+        ResponseWrite_allocated : BOOL &
+        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+        (ResponseWrite_allocated = FALSE
+         =>
+         ResponseWrite_StatusCode = {})
+    )
+    ;
+
+    /* Relation associating to a node a value which is requested to be written
+       in the address space */
+    d_a_DataValue_requested ==
+        (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                     WriteValue_NodeId~ ;
+         (cast_t_WriteValue[1..nb_WriteValue] /\
+          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_DataValue)
+
+
+ABSTRACT_VARIABLES
+    d_adsp_variables,
+    d_variables
+
+INVARIANT
+    d_adsp_invariant &
+    d_inv
+
+INITIALISATION
+    d_adsp_variables,
+    d_variables
+    :(
+        d_adsp_invariant &
+        d_inv
+    )
+
+OPERATIONS
+
+    /* --------------------------------------------------------------------- */
+    /* Service Write */
+
+    StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds
+    THEN
+        StatusCode_service := e_sc_ok ||
+        a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        ResponseWrite_StatusCode
+        :(  ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+
+            /* For a given node, the write request message may provide different values to be written
+               as the value attribute of this node. In this case, the written value is chosen among
+               possible values. */
+
+            /* At most one value should be written for each node */
+            a_Value : t_Node +-> t_Variant &
+
+            /* The value requested to be written should be contained in the requested values */
+            a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &
+
+            /* Same for meta-attributes */
+            a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &
+            a_Value_SourceTimestamp <: a_Value_SourceTimestamp$0 <+ (d_a_DataValue_requested;DataValue_SourceTimestamp) &
+
+            ResponseWrite_StatusCode[cast_t_WriteValue[1..nb_WriteValue]]
+            <: {e_sc_ok, e_sc_bad_out_of_memory,
+                e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid,
+                e_sc_bad_node_id_unknown, e_sc_bad_not_writable, e_sc_bad_type_mismatch,
+                e_sc_bad_user_access_denied, e_sc_bad_index_range_no_data}
+        )
+    END
+    ;
+
+    bret <-- alloc_write_request_responses(nb_req) =
+    BEGIN
+        IF nb_req <= k_n_WriteResponse_max THEN
+            bret,
+            ResponseWrite_StatusCode,
+            ResponseWrite_allocated
+            :(
+                bret : BOOL &
+                ResponseWrite_allocated  : BOOL                          &
+                ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+                (ResponseWrite_allocated = TRUE
+                 =>
+                 ResponseWrite_StatusCode = cast_t_WriteValue[1..nb_req] * {e_sc_bad_internal_error}) &
+                (ResponseWrite_allocated = FALSE
+                 =>
+                 ResponseWrite_StatusCode = {}) &
+                bret = ResponseWrite_allocated
+            )
+        ELSE
+            ResponseWrite_allocated := FALSE ||
+            bret := FALSE
+        END
+    END
+
+END
