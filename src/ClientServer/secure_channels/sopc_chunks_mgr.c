@@ -45,6 +45,7 @@
 static const uint8_t SOPC_HEL[3] = {'H', 'E', 'L'};
 static const uint8_t SOPC_ACK[3] = {'A', 'C', 'K'};
 static const uint8_t SOPC_ERR[3] = {'E', 'R', 'R'};
+static const uint8_t SOPC_RHE[3] = {'R', 'H', 'E'};
 static const uint8_t SOPC_MSG[3] = {'M', 'S', 'G'};
 static const uint8_t SOPC_OPN[3] = {'O', 'P', 'N'};
 static const uint8_t SOPC_CLO[3] = {'C', 'L', 'O'};
@@ -2250,6 +2251,10 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
         break;
     case SOPC_MSG_TYPE_ERR:
         msgTypeBytes = SOPC_ERR;
+        result = SOPC_UA_FINAL_CHUNK == isFinalChar;
+        break;
+    case SOPC_MSG_TYPE_RHE:
+        msgTypeBytes = SOPC_RHE;
         result = SOPC_UA_FINAL_CHUNK == isFinalChar;
         break;
     case SOPC_MSG_TYPE_SC_OPN:

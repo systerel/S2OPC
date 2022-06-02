@@ -63,6 +63,7 @@ typedef enum
                     // params = (SOPC_Buffer*) buffer positioned to message payload
                     /* -------------------------< */
     INT_SC_SND_ERR,
+    INT_SC_SND_RHE,
     INT_SC_SND_OPN,        /* >------------------------- */
                            // id = secure channel connection index,
                            // params = (SOPC_Buffer*) buffer positioned to message payload,

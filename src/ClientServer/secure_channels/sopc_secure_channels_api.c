@@ -73,6 +73,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_SND_HEL:
     case INT_SC_SND_ACK:
     case INT_SC_SND_ERR:
+    case INT_SC_SND_RHE:
     case INT_SC_SND_OPN:
     case INT_SC_SND_CLO:
     case INT_SC_SND_MSG_CHUNKS:

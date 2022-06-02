@@ -1574,6 +1574,83 @@ static bool get_certificate_der(SOPC_CertificateList* cert, SOPC_Buffer** buffer
     return true;
 }
 
+static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection* scConnection,
+                                                           uint32_t scConnectionIdx,
+                                                           uint32_t socketIdx)
+{
+    assert(scConnection != NULL);
+    SOPC_Buffer* msgBuffer = NULL;
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    bool result = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_REVERSE_INIT);
+    SOPC_String urlOrURI;
+    SOPC_String_Initialize(&urlOrURI);
+
+    // Create OPC UA TCP Reverse Hello message
+    // Max size of buffer is message minimum size + URI and URL bytes length
+    msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_RHE_MIN_MSG_LENGTH + 2 * SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH);
+
+    if (msgBuffer != NULL && scConfig != NULL)
+    {
+        // Let size of the header for the chunk manager
+        status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_SetPosition(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
+        }
+        // Encode Reverse Hello message body
+
+        // Encode serverURI
+        if (SOPC_STATUS_OK == status)
+        {
+            // TODO: do not use sc config here ?
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) scConfig->serverUri);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_Write(&urlOrURI, msgBuffer, 0);
+            SOPC_String_Clear(&urlOrURI);
+        }
+
+        // Encode clientURL
+        if (SOPC_STATUS_OK == status)
+        {
+            // TODO: do not use sc config here ?
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) scConfig->url);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_Write(&urlOrURI, msgBuffer, 0);
+            SOPC_String_Clear(&urlOrURI);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            result = true;
+        }
+    }
+
+    if (result)
+    {
+        scConnection->socketIndex = socketIdx;
+        scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_HEL, scConnectionIdx, (uintptr_t) msgBuffer, 0);
+    }
+    else if (msgBuffer != NULL)
+    {
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(msgBuffer);
+    }
+
+    return result;
+}
+
 static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* scConnection,
                                                        SOPC_Buffer* opnReqMsgBuffer,
                                                        uint32_t* requestHandle,
@@ -3036,11 +3113,12 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 {
     SOPC_UNUSED_ARG(params);
     SOPC_SecureConnection* scConnection = NULL;
+    bool result = false;
 
     switch (event)
     {
     case SOCKET_CONNECTION:
-        // CLIENT side only
+        // CLIENT side (or SERVER side with ReverseHello)
         /* id = secure channel connection index,
            auxParam = socket index */
 
@@ -3050,7 +3128,10 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         scConnection = SC_GetConnection(eltId);
 
-        if (scConnection == NULL || scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT)
+        // Connection shall be in INIT state in case of CLIENT and in REVERSE_INIT state in case of SERVER
+        if (scConnection == NULL ||
+            ((scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT || scConnection->isServerConnection) &&
+             (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || !scConnection->isServerConnection)))
         {
             // In case of unidentified secure connection problem or wrong state,
             // close the socket
@@ -3058,7 +3139,17 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             return;
         }
 
-        if (!SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam))
+        if (scConnection->isServerConnection)
+        {
+            // Send a Reverse Hello message on TCP connection
+            result = SC_ServerTransition_TcpReverserInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
+        }
+        else
+        {
+            // Send an Hello message on TCP connection
+            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam);
+        }
+        if (!result)
         {
             // Error case: close the secure connection if invalid state or unexpected error.
             //  (client case only on SOCKET_CONNECTION event)
