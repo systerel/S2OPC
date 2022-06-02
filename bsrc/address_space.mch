@@ -63,12 +63,9 @@ OPERATIONS
         p_status,
         a_Value,
         a_Value_StatusCode,
-        a_Value_SourceTimestamp,
-        local_service_treatment :(
+        a_Value_SourceTimestamp :(
             p_status : t_StatusCode_i &
             p_status : t_StatusCode &
-
-            local_service_treatment = local_service_treatment$0 &
 
             (aid : t_AttributeId
             =>
