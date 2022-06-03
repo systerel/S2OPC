@@ -263,6 +263,32 @@ typedef OpcUa_UserTokenPolicy SOPC_UserTokenPolicy;
 SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* destSecuConfig,
                                                          const SOPC_UserTokenPolicy* userTokenPolicy);
 
+/**
+ * \brief Add a reverse connection configuration for a client to the server endpoint configuration
+ *
+ * \param destEndpoint       Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
+ * \param clientAppUri       The client ApplicationUri. It might be empty since it is not checked for now.
+ * \param clientEndpointUrl  The client endpoint URL to connect to establish the reverse connection.
+ *
+ * \return True if the client to connect configuration added successfully
+ *         or false if ::SOPC_MAX_REVERSE_CLIENT_CONNECTIONS are already defined or invalid parameters are provided.
+ */
+bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
+                                            const char* clientAppUri,
+                                            const char* clientEndpointUrl);
+/**
+ * \brief Configure the endpoint to not listen to incoming connections
+ *        in case only reverse connections shall be possible.
+ *        It will fail if no reverse connection is configured.
+ *
+ * \param destEndpoint  Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
+ *
+ * \return True if the server endpoint is correctly configured to not listen for incoming connections from client.
+ *         False in case no reverse connection configuration was defined with ::SOPC_EndpointConfig_AddClientToConnect
+ *         or invalid parameter is provided.
+ */
+bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
+
 /* Address space configuration without XML */
 
 /**

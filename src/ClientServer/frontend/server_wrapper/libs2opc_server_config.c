@@ -575,6 +575,11 @@ void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
         return;
     }
     SOPC_Free(epConfig->endpointURL);
+    for (int i = 0; i < epConfig->nbClientsToConnect && i < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS; i++)
+    {
+        SOPC_Free(epConfig->clientsToConnect[i].clientApplicationURI);
+        SOPC_Free(epConfig->clientsToConnect[i].clientEndpointURL);
+    }
     for (int i = 0; i < epConfig->nbSecuConfigs && i < SOPC_MAX_SECU_POLICIES_CFG; i++)
     {
         SOPC_String_Clear(&epConfig->secuConfigurations[i].securityPolicy);

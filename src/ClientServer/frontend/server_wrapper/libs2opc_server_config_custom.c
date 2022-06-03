@@ -427,6 +427,38 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
     return SOPC_STATUS_OK;
 }
 
+bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
+                                            const char* clientAppURI,
+                                            const char* clientEndpointURL)
+{
+    // Note: clientAppURI ignored for now since no verification is implemented
+    if (NULL == destEndpoint || NULL == clientEndpointURL || !SOPC_ServerInternal_IsConfiguring() ||
+        destEndpoint->nbClientsToConnect >= SOPC_MAX_REVERSE_CLIENT_CONNECTIONS)
+    {
+        return false;
+    }
+    destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientApplicationURI = SOPC_strdup(clientAppURI);
+    destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientEndpointURL = SOPC_strdup(clientEndpointURL);
+    if (NULL == destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientEndpointURL)
+    {
+        SOPC_Free(destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientApplicationURI);
+        return false;
+    }
+
+    destEndpoint->nbClientsToConnect++;
+    return true;
+}
+
+bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint)
+{
+    if (NULL == destEndpoint || !SOPC_ServerInternal_IsConfiguring() || destEndpoint->nbClientsToConnect <= 0)
+    {
+        return false;
+    }
+    destEndpoint->noListening = true;
+    return true;
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
 {
     if (!SOPC_ServerInternal_IsConfiguring())

@@ -101,6 +101,16 @@
 #define SOPC_SC_CONNECTION_TIMEOUT_MS 10000
 #endif
 
+/** @brief Maximum number of configured reverse connection from a server endpoint to clients */
+#ifndef SOPC_MAX_REVERSE_CLIENT_CONNECTIONS
+#define SOPC_MAX_REVERSE_CLIENT_CONNECTIONS 5
+#endif
+
+/** @brief Delay before retrying to establish a reverse connection when socket connection failed */
+#ifndef SOPC_REVERSE_CONNECTION_RETRY_DELAY_MS
+#define SOPC_REVERSE_CONNECTION_RETRY_DELAY_MS 1000
+#endif
+
 /* SESSION CONFIGURATION */
 
 /** @brief Maximum number of sessions (and subscriptions: 1 per session) established */

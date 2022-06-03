@@ -63,7 +63,9 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
+#ifndef SOPC_MAX_SECU_POLICIES_CFG
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
+#endif
 
 typedef struct SOPC_SecurityPolicy
 {
@@ -72,19 +74,38 @@ typedef struct SOPC_SecurityPolicy
     uint8_t nbOfUserTokenPolicies; /**< The number elements in the user security policies supported array (<= 10) */
     OpcUa_UserTokenPolicy
         userTokenPolicies[SOPC_MAX_SECU_POLICIES_CFG]; /**< The array of user security policies supported,
-                                                        * use the constant predefined policies provided
-                                                        * (password encryption is not provided and shall be implemented
-                                                        *  by authorization manager if applicable)
+                                                        * it is possible to use the predefined policies provided:
+                                                        * ::SOPC_UserTokenPolicy_Anonymous,
+                                                        * ::SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy or
+                                                        * ::SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy supported
                                                         */
 } SOPC_SecurityPolicy;
 
 typedef struct SOPC_Server_Config SOPC_Server_Config;
 
-/* Server static configuration of a Endpoint listener */
+/**
+ * \brief OPC UA server client to reverse connect configuration type.
+ *        From specification part 6 (v1.05.01):
+ *        "For each Client, the administrator shall provide
+ *         an ApplicationUri and an EndpointUrl for the Client."
+ *
+ * \note There is no indication to validate the ApplicationUri in specification.
+ *       It might be checked in the future using the CreateSessionRequest content .
+ */
+typedef struct SOPC_Server_ClientToConnect
+{
+    char* clientApplicationURI; /**< The client application URI.
+                                     It might be empty since it is not checked for now. */
+    char* clientEndpointURL;    /**< The client endpoint URL to connect to establish the reverse connection. */
+} SOPC_Server_ClientToConnect;
+
+/**
+ * \brief Server configuration of a Endpoint connection listener
+ */
 typedef struct SOPC_Endpoint_Config
 {
-    struct SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
-    char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
+    char* endpointURL;                   /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
     bool hasDiscoveryEndpoint; /**< Implicit discovery endpoint with same endpoint URL is added if necessary when set */
     uint8_t nbSecuConfigs;     /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
@@ -100,6 +121,13 @@ typedef struct SOPC_Endpoint_Config
         authenticationManager; /**< The user authentication manager: user authentication on session activation */
     SOPC_UserAuthorization_Manager*
         authorizationManager; /**< The user authorization manager: user access level evaluation */
+
+    /* Configure reverse connection mechanism */
+    bool noListening;           /**< If Flag is set, the server does not listen connection initiated by clients */
+    uint8_t nbClientsToConnect; /**< Number of clients to connect using reverse connection mechanism */
+    SOPC_Server_ClientToConnect
+        clientsToConnect[SOPC_MAX_REVERSE_CLIENT_CONNECTIONS]; /**< Array of configuration for reverse connection
+                                                                     to clients */
 } SOPC_Endpoint_Config;
 
 struct SOPC_Client_Config
