@@ -357,6 +357,9 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
     case SOPC_SecurityPolicy_Basic256Sha256:
         sUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
         break;
+    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep:
+        sUri = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI;
+        break;
     default:
         return NULL;
     }

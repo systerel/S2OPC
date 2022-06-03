@@ -30,9 +30,30 @@
 #include "sopc_secret_buffer.h"
 
 /* ------------------------------------------------------------------------------------------------
+ * Aes128-Sha256-RsaOaep
+ * ------------------------------------------------------------------------------------------------
+ */
+
+SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* pProvider,
+                                                    const uint8_t* pInput,
+                                                    uint32_t lenPlainText,
+                                                    const SOPC_ExposedBuffer* pKey,
+                                                    const SOPC_ExposedBuffer* pIV,
+                                                    uint8_t* pOutput,
+                                                    uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
+                                                    const uint8_t* pInput,
+                                                    uint32_t lenCipherText,
+                                                    const SOPC_ExposedBuffer* pKey,
+                                                    const SOPC_ExposedBuffer* pIV,
+                                                    uint8_t* pOutput,
+                                                    uint32_t lenOutput);
+
+/* ------------------------------------------------------------------------------------------------
  * Basic256Sha256
  * ------------------------------------------------------------------------------------------------
  */
+
 SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* pProvider,
                                                     const uint8_t* pInput,
                                                     uint32_t lenPlainText,
