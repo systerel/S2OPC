@@ -64,6 +64,11 @@ static bool checkEncryptionAlgorithm(constants__t_SecurityPolicy secpol, SOPC_St
         return 0 == strcmp("http://www.w3.org/2001/04/xmlenc#rsa-oaep", SOPC_String_GetRawCString(encryptionAlgo));
     case constants__e_secpol_B256S256:
         return 0 == strcmp("http://www.w3.org/2001/04/xmlenc#rsa-oaep", SOPC_String_GetRawCString(encryptionAlgo));
+    case constants__e_secpol_Aes128Sha256RsaOaep:
+        return 0 == strcmp("http://www.w3.org/2001/04/xmlenc#rsa-oaep", SOPC_String_GetRawCString(encryptionAlgo));
+    case constants__e_secpol_Aes256Sha256RsaPss:
+        return 0 == strcmp("http://opcfoundation.org/UA/security/rsa-oaep-sha2-256",
+                           SOPC_String_GetRawCString(encryptionAlgo));
     default:
         assert(false && "Invalid security policy");
         return false;
@@ -81,6 +86,10 @@ const char* util_getEncryptionAlgorithm(constants__t_SecurityPolicy secpol)
         return "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
     case constants__e_secpol_B256S256:
         return "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+    case constants__e_secpol_Aes128Sha256RsaOaep:
+        return "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+    case constants__e_secpol_Aes256Sha256RsaPss:
+        return "http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
     default:
         assert(false && "Invalid security policy");
         return NULL;

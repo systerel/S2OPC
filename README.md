@@ -49,7 +49,9 @@ For details, see:
 - Available security policies (encryption schemes) with any security mode:
     - http://opcfoundation.org/UA/SecurityPolicy#None,
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256,
-    - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
+    - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256,
+    - http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep,
+    - http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss.
 - UserNameIdentity token password encryption for the available security policies
 
 Client side (e.g.: `samples/ClientServer/demo_client`):

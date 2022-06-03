@@ -33,6 +33,8 @@
 
 bool wait_value(int32_t* atomic, int32_t val);
 
+Suite* tests_make_suite_crypto_Aes256Sha256RsaPss(void);
+Suite* tests_make_suite_crypto_Aes128Sha256RsaOaep(void);
 Suite* tests_make_suite_crypto_B256S256(void);
 Suite* tests_make_suite_crypto_B256(void);
 Suite* tests_make_suite_crypto_None(void);

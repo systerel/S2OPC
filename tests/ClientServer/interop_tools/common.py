@@ -28,6 +28,8 @@ sUri = 'opc.tcp://localhost:4841'
 securityPolicyNoneURI = "http://opcfoundation.org/UA/SecurityPolicy#None"
 securityPolicyBasic256URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 securityPolicyBasic256Sha256URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+securityPolicyAes128Sha256RsaOaep = "http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep"
+securityPolicyAes256Sha256RsaPss = "http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss"
 
 # chaine aléatoire de 30 caractères
 random_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(random.randint(0,30)))
