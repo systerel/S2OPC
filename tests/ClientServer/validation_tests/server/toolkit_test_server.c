@@ -444,6 +444,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         status = Server_SetDefaultCryptographicConfig();
     }
 
+    if (!SOPC_EndpointConfig_AddClientToConnect(ep, NULL, "opc.tcp://localhost:4844"))
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
     return status;
 }
 
