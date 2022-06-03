@@ -44,6 +44,25 @@ static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigI
         {
             scListener->state = SECURE_LISTENER_STATE_OPENING;
             scListener->serverEndpointConfigIdx = endpointConfigIdx;
+            scListener->socketIndex = 0; // Set on SOCKET_LISTENER_OPENED
+            result = true;
+        }
+    }
+    return result;
+}
+
+static bool SOPC_SecureListenerStateMgr_NoListener(uint32_t endpointConfigIdx)
+{
+    bool result = false;
+    SOPC_SecureListener* scListener = NULL;
+    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    {
+        scListener = &(secureListenersArray[endpointConfigIdx]);
+        if (scListener->state == SECURE_LISTENER_STATE_CLOSED)
+        {
+            scListener->state = SECURE_LISTENER_STATE_INACTIVE;
+            scListener->serverEndpointConfigIdx = endpointConfigIdx;
+            scListener->socketIndex = 0; // No socket associated since no actual listener
             result = true;
         }
     }
@@ -59,7 +78,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
     {
         result = true;
         scListener = &(secureListenersArray[endpointConfigIdx]);
-        if (scListener->state == SECURE_LISTENER_STATE_OPENED)
+        if (SECURE_LISTENER_STATE_OPENED == scListener->state || SECURE_LISTENER_STATE_INACTIVE == scListener->state)
         {
             // Close all active secure connections established on the listener
             for (idx = 0; idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++)
@@ -72,7 +91,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
                     scListener->connectionIdxArray[idx] = 0;
                 }
             }
-            if (!socketFailure)
+            if (SECURE_LISTENER_STATE_OPENED == scListener->state && !socketFailure)
             {
                 // Close the socket listener in case it is not a socket failure (already done)
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, (uintptr_t) NULL,
@@ -153,6 +172,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
     /* SC connection manager -> SC listener state manager */
     case INT_EP_SC_CREATED:
     {
+        /* id = endpoint description configuration index,
+           auxParam = (uint32_t) secure channel connection index */
         assert(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -162,7 +183,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
            auxParam = socket index for connection */
         SOPC_SecureListener* scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
 
-        if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
+        if (NULL == scListener ||
+            (SECURE_LISTENER_STATE_OPENED != scListener->state && SECURE_LISTENER_STATE_INACTIVE != scListener->state))
         {
             // Error case: require secure channel closure
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
@@ -299,20 +321,42 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
         {
-            result = SOPC_SecureListenerStateMgr_OpeningListener(eltId);
-        }
-        if (!result)
-        {
-            // Nothing to do: it means EP is already open or in opening step
-        }
-        else
-        {
-            // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            // Notify Sockets layer to create the listener
-            SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, eltId, (uintptr_t) epConfig->endpointURL,
-                                      SOPC_LISTENER_LISTEN_ALL_INTERFACES);
-            SOPC_GCC_DIAGNOSTIC_RESTORE
+            if (!epConfig->noListening)
+            {
+                result = SOPC_SecureListenerStateMgr_OpeningListener(eltId);
+
+                if (result)
+                {
+                    // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+                    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                    // Notify Sockets layer to create the listener
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, eltId, (uintptr_t) epConfig->endpointURL,
+                                              SOPC_LISTENER_LISTEN_ALL_INTERFACES);
+                    SOPC_GCC_DIAGNOSTIC_RESTORE
+                }
+            }
+            else
+            {
+                assert(epConfig->nbClientsToConnect > 0 &&
+                       "Endpoint cannot be configured to not listen without reverse connection");
+                // Define a listener
+                result = SOPC_SecureListenerStateMgr_NoListener(eltId);
+            }
+            for (uint8_t clientToConnIdx = 0; result && clientToConnIdx < epConfig->nbClientsToConnect;
+                 clientToConnIdx++)
+            {
+                // Self generate SC_REVERSE_CONNECT events for connection state manager
+                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL,
+                                                         (uintptr_t) clientToConnIdx);
+            }
+            if (!result)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "ScListenerMgr: EP_OPEN epCfgIdx=%" PRIu32
+                    " failed, check index < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS and EP state was EP_CLOSED.",
+                    eltId);
+            }
         }
         break;
     case EP_CLOSE:

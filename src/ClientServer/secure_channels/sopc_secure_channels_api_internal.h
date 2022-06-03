@@ -26,10 +26,12 @@
 typedef enum
 {
     /* SC listener manager -> SC connection manager */
-    INT_EP_SC_CREATE = 0x400, /* id = endpoint description configuration index,
-                         auxParam = socket index */
-    INT_EP_SC_CLOSE,          /* id = secure channel connection index,
-                                 auxParam = (uint32_t) endpoint description configuration index */
+    INT_EP_SC_CREATE = 0x400,  /* id = endpoint description configuration index,
+                                  auxParam = socket index */
+    INT_EP_SC_CLOSE,           /* id = secure channel connection index,
+                                  auxParam = (uint32_t) endpoint description configuration index */
+    INT_EP_SC_REVERSE_CONNECT, /* id = endpoint description configuration index,
+                                  auxParam = client to connect configuration index in endpoint config */
     /* SC connection manager -> SC listener manager */
     INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
                                auxParam = (uint32_t) secure channel connection index */

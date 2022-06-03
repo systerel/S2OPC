@@ -204,7 +204,8 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                 // Remove the connection configuration created on connection establishment
                 bool configRes =
                     SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-                if (!configRes && scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
+                if (!configRes && scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT &&
+                    scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
                     scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE &&
                     scConnection->state != SECURE_CONNECTION_STATE_SC_INIT)
                 {
@@ -1580,19 +1581,33 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
 {
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer = NULL;
-    SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
+    assert(NULL != epConfig);
+    assert(NULL != epConfig->serverConfigPtr);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_REVERSE_INIT);
     SOPC_String urlOrURI;
     SOPC_String_Initialize(&urlOrURI);
+    int32_t serverUriLen = epConfig->serverConfigPtr->serverDescription.ApplicationUri.Length;
+    size_t serverEndpointUrlLen = strlen(epConfig->endpointURL);
 
-    // Create OPC UA TCP Reverse Hello message
-    // Max size of buffer is message minimum size + URI and URL bytes length
-    msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_RHE_MIN_MSG_LENGTH + 2 * SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH);
-
-    if (msgBuffer != NULL && scConfig != NULL)
+    if (serverUriLen <= SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH &&
+        serverEndpointUrlLen <= SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH)
+    {
+        // Create OPC UA TCP Reverse Hello message
+        // Max size of buffer is message minimum size + URI and URL bytes length
+        msgBuffer = SOPC_Buffer_Create(SOPC_TCP_UA_RHE_MIN_MSG_LENGTH + (uint32_t) serverUriLen +
+                                       (uint32_t) serverEndpointUrlLen);
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr RHE: serverURI length (%" PRIi32 ") or endpointURL length (%" PRIu32
+                               ") > 4096 for endpointCfgIdx=%" PRIu32 " not found",
+                               serverUriLen, (uint32_t) serverEndpointUrlLen, scConnection->serverEndpointConfigIdx);
+    }
+    if (msgBuffer != NULL && epConfig != NULL)
     {
         // Let size of the header for the chunk manager
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
@@ -1605,14 +1620,7 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
         // Encode serverURI
         if (SOPC_STATUS_OK == status)
         {
-            // TODO: do not use sc config here ?
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) scConfig->serverUri);
-            SOPC_GCC_DIAGNOSTIC_RESTORE
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_String_Write(&urlOrURI, msgBuffer, 0);
+            status = SOPC_String_Write(&epConfig->serverConfigPtr->serverDescription.ApplicationUri, msgBuffer, 0);
             SOPC_String_Clear(&urlOrURI);
         }
 
@@ -1621,7 +1629,7 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
         {
             // TODO: do not use sc config here ?
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) scConfig->url);
+            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) epConfig->endpointURL);
             SOPC_GCC_DIAGNOSTIC_RESTORE
         }
         if (SOPC_STATUS_OK == status)
@@ -1639,8 +1647,8 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
     if (result)
     {
         scConnection->socketIndex = socketIdx;
-        scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_HEL, scConnectionIdx, (uintptr_t) msgBuffer, 0);
+        scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_RHE, scConnectionIdx, (uintptr_t) msgBuffer, 0);
     }
     else if (msgBuffer != NULL)
     {
@@ -2700,6 +2708,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                                    uintptr_t params,
                                                    uintptr_t auxParam)
 {
+    SOPC_Endpoint_Config* epConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_StatusCode errorStatus;
@@ -2741,6 +2750,47 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         }
         break;
     }
+    case INT_EP_SC_REVERSE_CONNECT:
+        /* id = endpoint description configuration index,
+           auxParam = client to connect configuration index in endpoint config */
+
+        assert(auxParam <= UINT8_MAX);
+        SOPC_Logger_TraceDebug(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "ScStateMgr: INT_EP_SC_REVERSE_CONNECT epCfgIdx=%" PRIu32 " clientToConnectIdx=%" PRIuPTR, eltId, auxParam);
+
+        // Retrieve EP configuration
+        epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
+        if (epConfig != NULL && epConfig->nbClientsToConnect > auxParam)
+        {
+            uint32_t conn_idx = 0;
+
+            // Note: we do not know the socket index yet, it will be set by SOPC_SC_CONNECTION_TIMEOUT_MS
+            // TODO: do not use this function anyway since the timeout should not be set for the SC yet ?
+            //       See SC_CONNECT management that use this timeout even if SC not really created ...
+            if (initServerSC(0, eltId, &conn_idx))
+            {
+                scConnection = SC_GetConnection(conn_idx);
+                assert(NULL != scConnection);
+                // Change initial state for a reverse init
+                scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
+                // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, conn_idx,
+                                          (uintptr_t) epConfig->clientsToConnect[auxParam].clientEndpointURL, 0);
+                SOPC_GCC_DIAGNOSTIC_RESTORE
+            }
+            else
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "ScStateMgr: INT_EP_SC_REVERSE_CONNECT failed (no more SCs available) epCfgIdx=%" PRIu32
+                    " clientToConnectIdx=%" PRIuPTR,
+                    eltId, auxParam);
+            }
+        }
+        break;
+
     /* OPC UA chunks message manager -> SC connection manager */
     case INT_SC_RCV_HEL:
     {
@@ -3141,6 +3191,9 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         if (scConnection->isServerConnection)
         {
+            // Add connection into associated EP listener
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
+                                                     (uintptr_t) NULL, (uintptr_t) eltId);
             // Send a Reverse Hello message on TCP connection
             result = SC_ServerTransition_TcpReverserInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
         }

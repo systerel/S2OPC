@@ -37,7 +37,9 @@ typedef enum
 {
     SECURE_LISTENER_STATE_CLOSED = 0,
     SECURE_LISTENER_STATE_OPENING,
-    SECURE_LISTENER_STATE_OPENED
+    SECURE_LISTENER_STATE_OPENED,
+    SECURE_LISTENER_STATE_INACTIVE /*<< This state is used when only reverse connections are managed but no listener is
+                                      active. Listener is still used to keep SC associated to this EP. */
 } SOPC_SecureListener_State;
 
 typedef enum

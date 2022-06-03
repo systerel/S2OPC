@@ -45,6 +45,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     /* SC listener manager -> SC connection state manager */
     case INT_EP_SC_CREATE:
     case INT_EP_SC_CLOSE:
+    case INT_EP_SC_REVERSE_CONNECT:
         SOPC_SecureConnectionStateMgr_OnInternalEvent(internalEvent, eltId, params, auxParam);
         break;
 

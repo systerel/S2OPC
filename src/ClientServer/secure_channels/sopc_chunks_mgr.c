@@ -3330,7 +3330,8 @@ static bool SC_Chunks_TreatSendBufferTCPonly(uint32_t scConnectionIdx,
     assert(inputBuffer != NULL);
     assert(outputBuffer != NULL);
     assert(errorStatus != NULL);
-    assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType || SOPC_MSG_TYPE_ERR == sendMsgType);
+    assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType || SOPC_MSG_TYPE_ERR == sendMsgType ||
+           SOPC_MSG_TYPE_RHE == sendMsgType);
     *outputBuffer = NULL;
 
     // Set the position at the beginning of the buffer
@@ -4248,9 +4249,9 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
     if (isTcpUaOnly)
     {
-        // HEL / ACK / ERR case
+        // HEL / ACK / ERR / RHE case
         assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
-               SOPC_MSG_TYPE_ERR == sendMsgType);
+               SOPC_MSG_TYPE_ERR == sendMsgType || SOPC_MSG_TYPE_RHE == sendMsgType);
         result = SC_Chunks_TreatSendBufferTCPonly(scConnectionIdx, scConnection, sendMsgType, inputMsgBuffer,
                                                   &outputChunkBuffer, errorStatus);
 
@@ -4445,6 +4446,12 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             socketWillClose = true;
             isSendTcpOnly = true;
             sendMsgType = SOPC_MSG_TYPE_ERR;
+            break;
+        case INT_SC_SND_RHE:
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScChunksMgr: INT_SC_SND_RHE scIdx=%" PRIu32, eltId);
+
+            isSendTcpOnly = true;
+            sendMsgType = SOPC_MSG_TYPE_RHE;
             break;
         case INT_SC_SND_OPN:
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScChunksMgr: INT_SC_SND_OPN scIdx=%" PRIu32, eltId);
