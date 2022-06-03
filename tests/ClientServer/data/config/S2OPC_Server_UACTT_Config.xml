@@ -82,6 +82,16 @@
               <UserPolicy policyId="username" tokenType="username" securityUri=""/>
             </UserPolicies>
           </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anonymous" tokenType="anonymous"/>
+              <UserPolicy policyId="username" tokenType="username" securityUri=""/>
+            </UserPolicies>
+          </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
             <SecurityModes>
               <SecurityMode mode="None"/>
