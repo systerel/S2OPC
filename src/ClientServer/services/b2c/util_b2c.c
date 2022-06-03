@@ -1230,6 +1230,11 @@ bool util_channel__SecurityPolicy_C_to_B(const char* uri, constants__t_SecurityP
         *secpol = constants__e_secpol_B256S256;
         return true;
     }
+    if (strncmp(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI, strlen(uri)) == 0)
+    {
+        *secpol = constants__e_secpol_Aes128Sha256RsaOaep;
+        return true;
+    }
 
     return false;
 }
@@ -1244,6 +1249,8 @@ const char* util_channel__SecurityPolicy_B_to_C(constants__t_SecurityPolicy secp
         return SOPC_SecurityPolicy_Basic256_URI;
     case constants__e_secpol_B256S256:
         return SOPC_SecurityPolicy_Basic256Sha256_URI;
+    case constants__e_secpol_Aes128Sha256RsaOaep:
+        return SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI;
     default:
         assert(false && "Invalid security policy");
         return NULL;
