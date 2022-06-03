@@ -580,6 +580,7 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
     uint32_t encryptKeyLength = 0;
     uint32_t signKeyLength = 0;
     uint32_t initVectorLength = 0;
+    uint32_t secureChannelLength = 0;
 
     status = SOPC_CryptoProvider_DeriveGetLengths(cryptoProvider, &encryptKeyLength, &signKeyLength, &initVectorLength);
 
@@ -623,11 +624,26 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
         }
     }
 
+    if (result)
+    {
+        status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cryptoProvider, &secureChannelLength);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            result = true;
+        }
+        else
+        {
+            result = false;
+            *errorStatus = OpcUa_BadTcpInternalError;
+        }
+    }
+
     // Check nonce length is correct for current security policy
     if (result)
     {
-        if (SOPC_SecretBuffer_GetLength(serverNonce) != encryptKeyLength ||
-            SOPC_SecretBuffer_GetLength(clientNonce) != encryptKeyLength)
+        if (SOPC_SecretBuffer_GetLength(serverNonce) != secureChannelLength ||
+            SOPC_SecretBuffer_GetLength(clientNonce) != secureChannelLength)
         {
             result = false;
             *errorStatus = OpcUa_BadNonceInvalid;
