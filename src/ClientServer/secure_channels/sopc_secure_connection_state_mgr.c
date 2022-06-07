@@ -2709,6 +2709,16 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CONNECTED, scConnection->serverEndpointConfigIdx,
                                (uintptr_t) scConnection->endpointConnectionConfigIdx, scIdx);
 
+        // For ReverseConnection, from part 6 v1.05.01 §7.1.3
+        // When a SecureChannel is established, the Server shall immediately create a new socket
+        // and sends a new ReverseHello
+        if (scConnection->isReverseConnection)
+        {
+            // Generate SC_REVERSE_CONNECT events for connection state manager
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
+                                                     (uintptr_t) NULL, (uintptr_t) scConnection->reverseConnIdx);
+        }
+
         return;
     }
     else if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED)
@@ -3296,6 +3306,15 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         }
 
         scConnection->connectionTimeoutTimerId = 0; // Timer is expired, do not keep reference on it
+
+        // Manage reverse connection retry attempt
+        if (scConnection->isServerConnection && scConnection->isReverseConnection)
+        {
+            assert(scConnection->reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+            // Generate SC_REVERSE_CONNECT events for connection state manager
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
+                                                     (uintptr_t) NULL, scConnection->reverseConnIdx);
+        }
 
         // Check SC valid + avoid to close a secure channel established just after timeout
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
