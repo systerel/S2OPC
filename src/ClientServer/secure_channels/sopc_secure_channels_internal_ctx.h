@@ -169,9 +169,11 @@ typedef struct SOPC_SecureConnection
     /* Set by SC connection state manager */
     SOPC_SecureConnection_State state;
     uint32_t endpointConnectionConfigIdx;
+    // SC reverse connection info
     bool isReverseConnection; // use ReverseHello mechanism fpr this connection
     uint8_t
         reverseConnIdx; // reverse connection index in endpoint configuration (set only if isReverseConnection is true)
+
     uint32_t socketIndex; // associated TCP socket index (defined when state != TCP_INIT or SC_CLOSED)
 
     // SC connection timeout management
@@ -214,6 +216,8 @@ typedef struct SOPC_SecureListener
     uint32_t connectionIdxArray[SOPC_MAX_SOCKETS_CONNECTIONS];   // index of connected connections on the listener
     bool isUsedConnectionIdxArray[SOPC_MAX_SOCKETS_CONNECTIONS]; //
     uint32_t lastConnectionIdxArrayIdx;
+    // Management of retry timeouts for reverse connection to clients
+    uint32_t reverseConnRetryTimerIds[SOPC_MAX_REVERSE_CLIENT_CONNECTIONS];
 } SOPC_SecureListener;
 
 /** @brief Array containing all listeners that can be used */

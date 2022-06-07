@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_secure_channels_api.h"
@@ -69,8 +70,11 @@ static bool SOPC_SecureListenerStateMgr_NoListener(uint32_t endpointConfigIdx)
     return result;
 }
 
-static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx, bool socketFailure)
+static bool SOPC_SecureListenerStateMgr_CloseListener(SOPC_Endpoint_Config* epConfig,
+                                                      uint32_t endpointConfigIdx,
+                                                      bool socketFailure)
 {
+    assert(NULL != epConfig);
     SOPC_SecureListener* scListener = NULL;
     bool result = false;
     uint32_t idx = 0;
@@ -80,6 +84,12 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
         scListener = &(secureListenersArray[endpointConfigIdx]);
         if (SECURE_LISTENER_STATE_OPENED == scListener->state || SECURE_LISTENER_STATE_INACTIVE == scListener->state)
         {
+            // Stop all reverse connection retry timers associated to listener
+            for (idx = 0; idx < epConfig->nbClientsToConnect; idx++)
+            {
+                SOPC_EventTimer_Cancel(scListener->reverseConnRetryTimerIds[idx]);
+            }
+
             // Close all active secure connections established on the listener
             for (idx = 0; idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++)
             {
@@ -289,7 +299,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         if (epConfig != NULL)
         {
-            SOPC_SecureListenerStateMgr_CloseListener(eltId, true);
+            SOPC_SecureListenerStateMgr_CloseListener(epConfig, eltId, true);
         }
         // Notify Services layer that EP_OPEN failed
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, (uintptr_t) NULL, SOPC_STATUS_CLOSED);
@@ -365,7 +375,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
         {
-            result = SOPC_SecureListenerStateMgr_CloseListener(eltId, false);
+            result = SOPC_SecureListenerStateMgr_CloseListener(epConfig, eltId, false);
             if (!result)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;

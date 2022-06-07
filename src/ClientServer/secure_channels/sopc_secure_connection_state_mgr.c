@@ -254,6 +254,30 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
     return status;
 }
 
+static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t endpointConfigIdx, uint8_t reverseConnIdx)
+{
+    assert(NULL != timerId);
+    assert(endpointConfigIdx > 0);
+    assert(endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+    assert(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+    SOPC_Event event;
+    event.eltId = endpointConfigIdx;
+    event.event = TIMER_SC_SERVER_REVERSE_CONN_RETRY;
+    event.params = (uintptr_t) reverseConnIdx;
+    event.auxParam = 0;
+
+    *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, SOPC_REVERSE_CONNECTION_RETRY_DELAY_MS);
+
+    if (0 == *timerId)
+    {
+        // In case of failure we will only stop attempts
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: epCfgIdx=%" PRIu32 " reverseConnIdx=%" PRIu8
+                               " ReverseConnection timer creation failed, no retry will be done for this connection",
+                               endpointConfigIdx, reverseConnIdx);
+    }
+}
+
 static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_t connectionIdx, uint32_t timeoutMs)
 {
     assert(NULL != timerId);
@@ -475,6 +499,7 @@ static void SC_CloseSecureConnection(
     {
         // De-activate of SC connection timeout
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+        scConnection->connectionTimeoutTimerId = 0;
     }
     if (!scConnection->isServerConnection)
     {
@@ -2604,6 +2629,7 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
 
         // De-activate SC connection timeout (client side)
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+        scConnection->connectionTimeoutTimerId = 0;
 
         SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTED, scIdx, (uintptr_t) NULL,
                                scConnection->endpointConnectionConfigIdx);
@@ -2678,6 +2704,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
 
         // De-activate SC connection timeout (server side)
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
+        scConnection->connectionTimeoutTimerId = 0;
 
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CONNECTED, scConnection->serverEndpointConfigIdx,
                                (uintptr_t) scConnection->endpointConnectionConfigIdx, scIdx);
@@ -3166,6 +3193,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 {
     SOPC_UNUSED_ARG(params);
     SOPC_SecureConnection* scConnection = NULL;
+    SOPC_SecureListener* scListener = NULL;
     bool result = false;
 
     switch (event)
@@ -3223,6 +3251,18 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
+            // Manage reverse connections retry attempts
+            if (scConnection->isServerConnection && scConnection->isReverseConnection)
+            {
+                assert(scConnection->reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+                scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
+
+                // Configure a timer for next reverse connection attempt to client
+                SC_Server_StartReverseConnRetryTimer(
+                    &scListener->reverseConnRetryTimerIds[scConnection->reverseConnIdx],
+                    scConnection->serverEndpointConfigIdx, scConnection->reverseConnIdx);
+            }
+
             // Since there was a socket failure, consider the socket close now
             SC_CloseSecureConnection(scConnection, eltId, true, true, 0,
                                      "SecureConnection: disconnected (SOCKET_FAILURE event)");
@@ -3265,6 +3305,24 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTimeout,
                                      "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
         }
+        break;
+    }
+    case TIMER_SC_SERVER_REVERSE_CONN_RETRY:
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: TIMER_SC_SERVER_REVERSE_CONN_RETRY epCfgIdx=%" PRIu32
+                               " reverseConnIdx=%" PRIuPTR,
+                               eltId, params);
+
+        assert(eltId > 0);
+        assert(eltId <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+        assert(params < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+
+        // Reset connection retry timer id
+        secureListenersArray[eltId].reverseConnRetryTimerIds[params] = 0;
+
+        // Generate SC_REVERSE_CONNECT events for connection state manager
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL, params);
         break;
     }
     case TIMER_SC_CLIENT_OPN_RENEW:
