@@ -2520,16 +2520,23 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     return true;
 }
 
-static bool initServerSC(uint32_t socketIndex, uint32_t serverEndpointConfigIdx, uint32_t* conn_idx)
+static bool initServerSC(uint32_t socketIndex,
+                         uint32_t serverEndpointConfigIdx,
+                         bool reverseConn,
+                         uint8_t reverseConnIdx,
+                         uint32_t* connIdx)
 {
-    if (!SC_InitNewConnection(conn_idx))
+    if (!SC_InitNewConnection(connIdx))
     {
         return false;
     }
 
-    SOPC_SecureConnection* scConnection = SC_GetConnection(*conn_idx);
+    SOPC_SecureConnection* scConnection = SC_GetConnection(*connIdx);
     assert(scConnection != NULL);
 
+    // record if the connection is in reverse mode and index
+    scConnection->isReverseConnection = reverseConn;
+    scConnection->reverseConnIdx = reverseConnIdx;
     // set the socket index associated
     scConnection->socketIndex = socketIndex;
     // record the endpoint description configuration
@@ -2543,7 +2550,7 @@ static bool initServerSC(uint32_t socketIndex, uint32_t serverEndpointConfigIdx,
     }
 
     // Activate SC connection timeout (server side)
-    SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), *conn_idx);
+    SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), *connIdx);
     if (SOPC_STATUS_NOK == status)
     {
         return false;
@@ -2714,6 +2721,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     SOPC_StatusCode errorStatus;
     char* errorReason = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t connectionIdx = 0;
 
     switch (event)
     {
@@ -2728,14 +2736,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                "ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
                                auxParam);
 
-        uint32_t conn_idx = 0;
-
-        if (initServerSC((uint32_t) auxParam, eltId, &conn_idx))
+        if (initServerSC((uint32_t) auxParam, eltId, false, 0, &connectionIdx))
         {
             // notify socket that connection is accepted
-            SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL, conn_idx);
+            SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL, connectionIdx);
             // notify secure listener that connection is accepted
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, (uintptr_t) NULL, conn_idx);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, (uintptr_t) NULL, connectionIdx);
         }
         else
         {
@@ -2763,20 +2769,17 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL && epConfig->nbClientsToConnect > auxParam)
         {
-            uint32_t conn_idx = 0;
-
-            // Note: we do not know the socket index yet, it will be set by SOPC_SC_CONNECTION_TIMEOUT_MS
-            // TODO: do not use this function anyway since the timeout should not be set for the SC yet ?
-            //       See SC_CONNECT management that use this timeout even if SC not really created ...
-            if (initServerSC(0, eltId, &conn_idx))
+            // Note: we do not know the socket index yet, it will be set by
+            // SC_ServerTransition_TcpReverserInit_To_TcpInit after SOCKET_CONNECTION
+            if (initServerSC(0, eltId, true, (uint8_t) auxParam, &connectionIdx))
             {
-                scConnection = SC_GetConnection(conn_idx);
+                scConnection = SC_GetConnection(connectionIdx);
                 assert(NULL != scConnection);
                 // Change initial state for a reverse init
                 scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
                 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
                 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, conn_idx,
+                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, connectionIdx,
                                           (uintptr_t) epConfig->clientsToConnect[auxParam].clientEndpointURL, 0);
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }
