@@ -17,6 +17,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_file_transfer.h"
+#include "sopc_platform_time.h"
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
@@ -30,6 +31,13 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
+}
+
+static void ServerStoppedCallback(SOPC_ReturnStatus status)
+{
+    (void) status;
+    SOPC_FileTransfer_Clear();
+    printf("******* Server stopped\n");
 }
 
 int main(int argc, char* argv[])
@@ -74,16 +82,36 @@ int main(int argc, char* argv[])
 
         printf("******* File added ...\n");
         SOPC_FileTransfer_Add_File(file_id, path, open_id, close_id, read_id, write_id, getPos_id, setPos_id);
+        // status = SOPC_ServerHelper_Serve(true);
+        status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to start server ...\n");
+            SOPC_FileTransfer_Clear();
+            return 1;
+        }
+
         printf("******* Start server ...\n");
-        status = SOPC_ServerHelper_Serve(true);
-    }
 
-    SOPC_FileTransfer_Clear();
-    printf("******* Server stopped\n");
+        /********************/
+        /* USER CODE BEGING */
+        /********************/
 
-    if (SOPC_STATUS_OK != status)
-    {
-        return 1;
+        char name[STR_BUFF_SIZE];
+        while (1)
+        {
+            status = SOPC_FileTransfer_Get_TmpPath(file_id, name);
+            if (SOPC_STATUS_OK == status)
+            {
+                printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", name);
+            }
+            SOPC_Sleep(500);
+        }
+
+        /********************/
+        /* END USER CODE   */
+        /********************/
     }
 
     return 0;

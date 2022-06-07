@@ -978,6 +978,54 @@ SOPC_StatusCode SOPC_FileTransfer_SetPos_TmpFile(FT_FileHandle handle, const SOP
     return status;
 }
 
+SOPC_StatusCode SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
+{
+    (void) name;
+    bool found = false;
+    SOPC_StatusCode status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == node_id)
+    {
+        return status;
+    }
+    status = SOPC_STATUS_NOK;
+    FT_FileType_t* file = SOPC_Dict_Get(g_str_objectId_to_file, node_id, &found);
+    if (!found)
+    {
+        printf("<FileTransfer_Get_TmpPath> Imposible to retrieve the file object '%s'\n", node_id);
+        return status;
+    }
+    if (false == file->is_open)
+    {
+        printf("<FileTransfer_Get_TmpPath> File object '%s' is not open yet\n", node_id);
+        return status;
+    }
+
+    if (NULL == file->fp)
+    {
+        printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialize yet\n", node_id);
+        return status;
+    }
+
+    if (NULL != file->tmp_path)
+    {
+        if (file->tmp_path->Length < 0)
+        {
+            printf("<FileTransfer_Get_TmpPath> File object '%s' is not created yet\n", node_id);
+            return status;
+        }
+    }
+    else
+    {
+        printf("<FileTransfer_Get_TmpPath> Unexpected error\n");
+        return status;
+    }
+
+    status = SOPC_STATUS_OK;
+    memcpy(name, SOPC_String_GetCString(file->tmp_path), (size_t) file->tmp_path->Length + 1);
+    name = SOPC_String_GetCString(file->tmp_path);
+    return status;
+}
+
 static SOPC_StatusCode local_write_open_count(void)
 {
     g_open_count++;

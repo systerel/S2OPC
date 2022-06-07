@@ -206,6 +206,14 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
                                              const char* setposId);
 
 /**
+ * \brief Function to get the temporary file path name created by the API
+ * \param node_id The nodeId of the file object
+ * \param name The output name of the temporary file path
+ * \return SOPC_STATUS_OK if no error
+ */
+SOPC_StatusCode SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name);
+
+/**
  * \brief Uninitialize the API (Free the memory)
  */
 void SOPC_FileTransfer_Clear(void);
