@@ -57,8 +57,10 @@ int main(int argc, char* argv[])
 
     // Services side stub code
     SOPC_Server_Config sConfig;
+    memset(&sConfig, 0, sizeof(sConfig));
     sConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config epConfig;
+    memset(&epConfig, 0, sizeof(epConfig));
     epConfig.serverConfigPtr = &sConfig;
     sConfig.endpoints = &epConfig;
     uint32_t epConfigIdx = 0;
