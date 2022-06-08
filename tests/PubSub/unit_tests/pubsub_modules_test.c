@@ -536,17 +536,23 @@ START_TEST(test_hl_network_msg_decode_multi_dsm_nok)
     SOPC_Buffer* buffer = SOPC_Buffer_Create(bufferLen);
     ck_assert_ptr_nonnull(buffer);
 
-    SOPC_Buffer_Write(buffer, encoded_network_msg_multi_dsm_data, bufferLen);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buffer, encoded_network_msg_multi_dsm_data, bufferLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Modify size header of DSM2
     uint8_t oldValue;
-    SOPC_Buffer_SetPosition(buffer, 22);
-    SOPC_Buffer_Read(&oldValue, buffer, 1);
+    status = SOPC_Buffer_SetPosition(buffer, 22);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_Buffer_Read(&oldValue, buffer, 1);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     oldValue++; // corrupt size
-    SOPC_Buffer_SetPosition(buffer, 22);
-    SOPC_Buffer_Write(buffer, &oldValue, 1);
+    status = SOPC_Buffer_SetPosition(buffer, 22);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_Buffer_Write(buffer, &oldValue, 1);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    SOPC_Buffer_SetPosition(buffer, 0);
+    status = SOPC_Buffer_SetPosition(buffer, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
     // Check that Network message is not decoded
@@ -599,7 +605,7 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, 
     {
         SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, (uint8_t) iDsr);
         ck_assert_ptr_nonnull(dataSetReader);
-        SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, DATASET_MSG_WRITER_ID_BASE + iDsr);
+        SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + iDsr));
 
         const uint8_t nbVars = (uint8_t)(iDsr < NB_VARS ? NB_VARS - iDsr : 1);
         allocSuccess =

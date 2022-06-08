@@ -942,7 +942,6 @@ static inline SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffe
         if (SOPC_STATUS_OK == status)
         {
             pub_id_type = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_3 - 1);
-            // other flags are not managed
             conf->DataSetClassIdFlag = Network_Message_Get_Bool_Bit(data, 3);
             conf->SecurityFlag = Network_Message_Get_Bool_Bit(data, 4);
             conf->TimestampFlag = Network_Message_Get_Bool_Bit(data, 5);
@@ -1307,7 +1306,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
     if (conf->PicoSecondsFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
-        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Picosceonds);
+        set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_Picoseconds);
     }
 
     // Promoted fields

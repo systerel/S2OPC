@@ -74,7 +74,7 @@ typedef const SOPC_ReaderGroup* (*SOPC_UADP_NetworkMessage_GetReaderGroup)(const
  * \param dataSetWriterId DataSetWriter Id received
  * \param dataSetIndex The index of the DataSet in the received message
  *
- * \return A ::SOPC_DataSetReader matching the received DataSet or NULL if no matching Reader is configured for the
+ * \return A ::SOPC_DataSetReader matching the received DataSet or \c NULL if no matching Reader is configured for the
  * given group.
  */
 typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SOPC_ReaderGroup* group,
@@ -84,15 +84,16 @@ typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SO
 
 /**
  * \brief A callback for DataSet message application. When a compliant DataSet is received, this
- *      callback is expected to forward all variables received in ::dsm to  ::targetConfig, depending on filter
- * parameters in ::reader
+ *      callback is expected to forward all variables received in \a dsm to \a targetConfig, depending on filter
+ * parameters in \a reader
  *
- * \param dsm The received DataSetMessage
+ * \param dsm The received \c DataSetMessage
  * \param targetConfig Configuration of the Subscriber receive event
  * \param reader The matching reader.
  *
  * \return - ::SOPC_STATUS_OK if all variables were written
- *         - ::SOPC_STATUS_ENCODING_ERROR if the received DataSetMessage does not match expected ::reader configuration.
+ *         - ::SOPC_STATUS_ENCODING_ERROR if the received DataSetMessage does not match expected \a reader
+ * configuration.
  *         - ::SOPC_STATUS_ENCODING_ERROR if the user-level ::SOPC_SubTargetVariable_SetVariables fails.
  */
 typedef SOPC_ReturnStatus (*SOPC_UADP_NetworkMessage_SetDsm)(const SOPC_Dataset_LL_DataSetMessage* dsm,
@@ -134,8 +135,9 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(
 
 void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm);
 
-/** Error code returned by ::SOPC_UADP_NetworkMessage_Encode
- * or ::SOPC_UADP_NetworkMessage_Encode */
+/** Error code used by ::SOPC_UADP_NetworkMessage_Encode
+ * or ::SOPC_UADP_NetworkMessage_Decode. Call ::SOPC_UADP_NetworkMessage_Get_Last_Error to
+ * retrieve the last encountered error */
 typedef enum
 {
     SOPC_UADP_NetworkMessage_Error_Code_None = 0,
@@ -182,7 +184,7 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum,
     SOPC_UADP_NetworkMessage_Error_Unsupported_SeqNum,
     SOPC_UADP_NetworkMessage_Error_Unsupported_Timestamp,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Picosceonds,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Picoseconds,
     SOPC_UADP_NetworkMessage_Error_Unsupported_SecurityFooterReset,
     SOPC_UADP_NetworkMessage_Error_Unsupported_PromotedFields,
     SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType,
@@ -194,8 +196,8 @@ typedef enum
 
 /**
  * Return the last decode/encode error and reset its value.
- * This function should be called after a NULL returned value in a call to ::SOPC_UADP_NetworkMessage_Encode
- * or ::SOPC_UADP_NetworkMessage_Encode
+ * This function should be called after a \c NULL returned value in a call to ::SOPC_UADP_NetworkMessage_Encode
+ * or ::SOPC_UADP_NetworkMessage_Decode
  * This value is not thread-safe, and is only intended for debugging/maintenance purpose
  * @return The last error code.
  */

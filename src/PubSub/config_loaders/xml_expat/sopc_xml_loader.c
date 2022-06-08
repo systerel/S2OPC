@@ -433,7 +433,6 @@ static bool parse_message_attributes(const char* attr_name,
     {
         result = SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval);
         result &= msg->publishing_interval > 0.;
-        result = true;
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY, attr_name))
     {
