@@ -37,34 +37,36 @@
 
 typedef enum
 {
-    PARSE_START,             // Beginning of file
-    PARSE_S2OPC,             // In a S2OPC
-    PARSE_SRVCONFIG,         // ..In a server config tag
-    PARSE_NAMESPACES,        // ....In namespaces
-    PARSE_NAMESPACE,         // ......In namespace
-    PARSE_LOCALES,           // ....In locales
-    PARSE_LOCALE,            // ......In locale
-    PARSE_APPLICATION_DESC,  // ....In application description
-    PARSE_APPLICATION_URI,   // ......Application URI
-    PARSE_PRODUCT_URI,       // ......Product URI
-    PARSE_APPLICATION_NAME,  // ......Application Name
-    PARSE_APPLICATION_CERT,  // ....In application certificate
-    PARSE_SERVER_CERT,       // ......Server certificate
-    PARSE_SERVER_KEY,        // ......Server key
-    PARSE_TRUSTED_ISSUERS,   // ......Trusted issuer certificates
-    PARSE_TRUSTED_ISSUER,    // ........Trusted issuer certificate + crl
-    PARSE_ISSUED_CERTS,      // ......Trusted issued certificates
-    PARSE_ISSUED_CERT,       // ........Trusted issued certificate
-    PARSE_UNTRUSTED_ISSUERS, // ......Untrusted issuer certificates
-    PARSE_UNTRUSTED_ISSUER,  // ........Untrusted issuer certificate + crl
-    PARSE_ENDPOINTS,         // ....In an Endpoints tag
-    PARSE_ENDPOINT,          // ......In an Endpoint tag
-    PARSE_SECURITY_POLICIES, // ........In security policies tag
-    PARSE_SECURITY_POLICY,   // ..........In security policy tag
-    PARSE_SECURITY_MODES,    // ............In security modes tag
-    PARSE_SECURITY_MODE,     // ..............In security mode tag
-    PARSE_USER_POLICIES,     // ............In user polcies tag
-    PARSE_USER_POLICY        // ..............In user policy tag
+    PARSE_START,               // Beginning of file
+    PARSE_S2OPC,               // In a S2OPC
+    PARSE_SRVCONFIG,           // ..In a server config tag
+    PARSE_NAMESPACES,          // ....In namespaces
+    PARSE_NAMESPACE,           // ......In namespace
+    PARSE_LOCALES,             // ....In locales
+    PARSE_LOCALE,              // ......In locale
+    PARSE_APPLICATION_DESC,    // ....In application description
+    PARSE_APPLICATION_URI,     // ......Application URI
+    PARSE_PRODUCT_URI,         // ......Product URI
+    PARSE_APPLICATION_NAME,    // ......Application Name
+    PARSE_APPLICATION_CERT,    // ....In application certificate
+    PARSE_SERVER_CERT,         // ......Server certificate
+    PARSE_SERVER_KEY,          // ......Server key
+    PARSE_TRUSTED_ISSUERS,     // ......Trusted issuer certificates
+    PARSE_TRUSTED_ISSUER,      // ........Trusted issuer certificate + crl
+    PARSE_ISSUED_CERTS,        // ......Trusted issued certificates
+    PARSE_ISSUED_CERT,         // ........Trusted issued certificate
+    PARSE_UNTRUSTED_ISSUERS,   // ......Untrusted issuer certificates
+    PARSE_UNTRUSTED_ISSUER,    // ........Untrusted issuer certificate + crl
+    PARSE_ENDPOINTS,           // ....In an Endpoints tag
+    PARSE_ENDPOINT,            // ......In an Endpoint tag
+    PARSE_REVERSE_CONNECTIONS, // ........In reverse connections tag
+    PARSE_REVERSE_CONNECTION,  // ..........In reverse connection tag
+    PARSE_SECURITY_POLICIES,   // ........In security policies tag
+    PARSE_SECURITY_POLICY,     // ..........In security policy tag
+    PARSE_SECURITY_MODES,      // ............In security modes tag
+    PARSE_SECURITY_MODE,       // ..............In security mode tag
+    PARSE_USER_POLICIES,       // ............In user polcies tag
+    PARSE_USER_POLICY          // ..............In user policy tag
 } parse_state_t;
 
 struct parse_context_t
@@ -742,6 +744,15 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
         epConfig.hasDiscoveryEndpoint = (strcmp(attr_val, "true") == 0);
     }
 
+    // Manage the enableListening flag
+    bool enableListening = true; // default value
+    attr_val = get_attr(ctx, "enableListening", attrs);
+    if (attr_val != NULL)
+    {
+        enableListening = (strcmp(attr_val, "true") == 0);
+    }
+    epConfig.noListening = !enableListening;
+
     if (!SOPC_Array_Append(ctx->endpoints, epConfig) || SOPC_Array_Size(ctx->endpoints) > UINT8_MAX)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
@@ -763,6 +774,57 @@ static bool end_endpoint(struct parse_context_t* ctx)
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no security policy defined for the endpoint");
         return false;
     }
+
+    return true;
+}
+
+static bool start_reverse_connection(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    SOPC_Endpoint_Config* epConfig = ctx->currentEpConfig;
+
+    if (epConfig->nbClientsToConnect >= SOPC_MAX_REVERSE_CLIENT_CONNECTIONS)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Maximum number of reverse connections %d reached",
+                       SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+        return false;
+    }
+
+    const char* attr_val = get_attr(ctx, "clientUrl", attrs);
+
+    if (attr_val == NULL)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "clientUrl attribute missing");
+        return false;
+    }
+
+    char* clientUrl = SOPC_strdup(attr_val);
+
+    if (clientUrl == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    attr_val = get_attr(ctx, "clientAppUri", attrs);
+
+    char* clientAppURI = NULL;
+    if (attr_val != NULL)
+    {
+        clientAppURI = SOPC_strdup(attr_val);
+
+        if (clientAppURI == NULL)
+        {
+            SOPC_Free(clientUrl);
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    epConfig->clientsToConnect[epConfig->nbClientsToConnect].clientApplicationURI = clientAppURI;
+    epConfig->clientsToConnect[epConfig->nbClientsToConnect].clientEndpointURL = clientUrl;
+    epConfig->nbClientsToConnect++;
+
+    ctx->state = PARSE_REVERSE_CONNECTION;
 
     return true;
 }
@@ -1164,6 +1226,26 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             ctx->state = PARSE_SECURITY_POLICIES;
         }
+        else if (strcmp(name, "ReverseConnections") == 0)
+        {
+            ctx->state = PARSE_REVERSE_CONNECTIONS;
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_REVERSE_CONNECTIONS:
+        if (strcmp(name, "ReverseConnection") == 0)
+        {
+            if (!start_reverse_connection(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
         else
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
@@ -1260,6 +1342,12 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_SECURITY_MODES:
         ctx->state = PARSE_SECURITY_POLICY;
+        break;
+    case PARSE_REVERSE_CONNECTION:
+        ctx->state = PARSE_REVERSE_CONNECTIONS;
+        break;
+    case PARSE_REVERSE_CONNECTIONS:
+        ctx->state = PARSE_ENDPOINT;
         break;
     case PARSE_SECURITY_POLICY:
         if (!end_policy(ctx))

@@ -451,14 +451,27 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     SOPC_Endpoint_Config* epConfig = &sConfig->endpoints[0];
     ck_assert_ptr_eq(epConfig->serverConfigPtr, sConfig);
     ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME", epConfig->endpointURL));
+    ck_assert(epConfig->noListening);
+
+    /* Check reverse connections */
+    ck_assert_uint_eq(2, epConfig->nbClientsToConnect);
+    /* 1st reverse connection */
+    ck_assert_ptr_null(epConfig->clientsToConnect[0].clientApplicationURI);
+    int strEqual = strcmp("opc.tcp://localhost:4842", epConfig->clientsToConnect[0].clientEndpointURL);
+    ck_assert_int_eq(0, strEqual);
+    /* 2nd reverse connection */
+    strEqual = strcmp("urn:S2OPC:client", epConfig->clientsToConnect[1].clientApplicationURI);
+    ck_assert_int_eq(0, strEqual);
+    strEqual = strcmp("opc.tcp://localhost:4843", epConfig->clientsToConnect[1].clientEndpointURL);
+    ck_assert_int_eq(0, strEqual);
 
     /* Check security policies */
     ck_assert_uint_eq(3, epConfig->nbSecuConfigs);
 
     /* 1st secu policy */
     SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[0];
-    int strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
-                          SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
     ck_assert_int_eq(0, strEqual);
     ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);
     ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_NONE_MASK, SOPC_SECURITY_MODE_NONE_MASK);

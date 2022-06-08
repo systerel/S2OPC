@@ -37,7 +37,11 @@
     </ApplicationDescription>
     <Endpoints>
       <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
-      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME">
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME" enableListening="false">
+        <ReverseConnections>
+          <ReverseConnection clientUrl="opc.tcp://localhost:4842"/>
+          <ReverseConnection clientAppUri="urn:S2OPC:client" clientUrl="opc.tcp://localhost:4843"/>
+        </ReverseConnections>
         <SecurityPolicies>
           <!-- Only None/Basic256/Basic256Sha256 available -->
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
@@ -70,6 +74,7 @@
         </SecurityPolicies>
       </Endpoint>
       <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2">
+        <ReverseConnections/>
         <SecurityPolicies>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
             <SecurityModes>

@@ -198,14 +198,30 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="ReverseConnectionType">
+    <xs:attribute type="xs:anyURI" name="clientUrl" use="required"/>
+    <xs:attribute type="xs:anyURI" name="clientAppUri" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="ReverseConnectionsType">
+    <xs:sequence>
+      <xs:element type="ReverseConnectionType" name="ReverseConnection" maxOccurs="5" minOccurs="0">
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="EndpointType">
     <xs:sequence>
-      <xs:element type="SecurityPoliciesType" name="SecurityPolicies" />
+      <xs:element type="ReverseConnectionsType" name="ReverseConnections" minOccurs="0"/>
+      <xs:element type="SecurityPoliciesType" name="SecurityPolicies"/>
     </xs:sequence>
     <xs:attribute type="xs:anyURI" name="url" use="required"/>
     <xs:attribute type="xs:boolean" name="hasDiscoveryEndpoint" use="optional" default="true">
         <xs:annotation>
           <xs:documentation>By default each endpoint has an implicit discovery endpoint if security mode None is not available. Set to 'false' to deactivate.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name="enableListening" use="optional" default="true">
+        <xs:annotation>
+          <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least ReverseConnection is defined.</xs:documentation>
         </xs:annotation>
     </xs:attribute>
   </xs:complexType>

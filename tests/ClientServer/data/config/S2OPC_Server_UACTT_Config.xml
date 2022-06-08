@@ -60,7 +60,10 @@
       <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
     </ApplicationDescription>
     <Endpoints>
-      <Endpoint url="opc.tcp://localhost:4841">
+      <Endpoint url="opc.tcp://localhost:4841" enableListening="true">
+        <ReverseConnections>
+          <ReverseConnection clientAppUri="urn:S2OPC:client" clientUrl="opc.tcp://localhost:4844"/>
+        </ReverseConnections>
         <SecurityPolicies>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
             <SecurityModes>
