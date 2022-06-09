@@ -67,6 +67,17 @@
               <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
             </UserPolicies>
           </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon2" tokenType="anonymous"/>
+              <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
         </SecurityPolicies>
       </Endpoint>
       <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2">

@@ -453,7 +453,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME", epConfig->endpointURL));
 
     /* Check security policies */
-    ck_assert_uint_eq(3, epConfig->nbSecuConfigs);
+    ck_assert_uint_eq(4, epConfig->nbSecuConfigs);
 
     /* 1st secu policy */
     SOPC_SecurityPolicy* secuPolicy = &epConfig->secuConfigurations[0];
@@ -492,6 +492,34 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     /* 3rd secu policy */
     secuPolicy = &epConfig->secuConfigurations[2];
     strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256",
+                      SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+    ck_assert_int_eq(0, strEqual);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    ck_assert_int_eq(secuPolicy->securityModes | SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK,
+                     SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK);
+    ck_assert_uint_eq(2, secuPolicy->nbOfUserTokenPolicies);
+
+    // 1st user policy
+    userPolicy = &secuPolicy->userTokenPolicies[0];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("anon2", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, userPolicy->TokenType);
+    ck_assert_int_ge(0, userPolicy->SecurityPolicyUri.Length);
+    // 2nd user policy
+    userPolicy = &secuPolicy->userTokenPolicies[1];
+    ck_assert_int_ge(0, userPolicy->IssuedTokenType.Length);
+    ck_assert_int_ge(0, userPolicy->IssuerEndpointUrl.Length);
+    ck_assert_int_eq(0, strcmp("user1", SOPC_String_GetRawCString(&userPolicy->PolicyId)));
+    ck_assert_int_eq(OpcUa_UserTokenType_UserName, userPolicy->TokenType);
+    ck_assert_int_eq(0, strcmp("http://opcfoundation.org/UA/SecurityPolicy#None",
+                               SOPC_String_GetRawCString(&userPolicy->SecurityPolicyUri)));
+
+    /* 4rd secu policy */
+    secuPolicy = &epConfig->secuConfigurations[3];
+    strEqual = strcmp("http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep",
                       SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
     ck_assert_int_eq(0, strEqual);
     ck_assert_int_eq(secuPolicy->securityModes & SOPC_SECURITY_MODE_SIGN_MASK, SOPC_SECURITY_MODE_SIGN_MASK);
