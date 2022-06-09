@@ -281,6 +281,8 @@ test-check:
   image: docker.aix.systerel.fr/c838/check@sha256:6805805e14420a9b635c2305526a4535f9edd191ff22801fc84cca94410b1a03 # digest of check:1.14
   script:
     - ./.check-code.sh
+    # Check generated types are up to date
+    - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd && ./.format.sh && git ls-files -m | test 0 -eq `wc -l`'
   variables:
       DOCKER_IMAGE: 'sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff'
   artifacts:
