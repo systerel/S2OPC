@@ -231,7 +231,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
                 timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
                 compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
             }
-            if (0 == loopLimit)
+            if (compareResult >= 0)
             {
                 SOPC_Logger_TraceWarning(
                     SOPC_LOG_MODULE_COMMON,
