@@ -41,6 +41,10 @@
 #define SOPC_TIMER_RESOLUTION_MS 50
 #endif
 
+#if SOPC_TIMER_RESOLUTION_MS <= 0
+#error "Timer resolution cannot be <= 0"
+#endif
+
 /**
  * \brief Initialize the event timer manager (necessary to create timers)
  *

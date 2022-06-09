@@ -215,18 +215,30 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
         if (timer->isPeriodicTimer)
         {
             // Set next target time reference
+            assert(timer->periodMs > 0 && "A periodic timer cannot have a period of 0 ms");
             timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
             compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
 
+            uint16_t loopLimit = SOPC_TIMER_RESOLUTION_MS;
             // Generate missed events until target time is greater than current time
-            while (compareResult >= 0)
+            while (compareResult >= 0 && loopLimit > 0)
             {
+                loopLimit--;
                 status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
                                                 timer->event.params, timer->event.auxParam);
                 SOPC_ASSERT(status == SOPC_STATUS_OK);
                 // Set next target time reference
                 timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
                 compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+            }
+            if (0 == loopLimit)
+            {
+                SOPC_Logger_TraceWarning(
+                    SOPC_LOG_MODULE_COMMON,
+                    "EventTimerManager: limit number of generated events during 1 timer evaluation "
+                    "reached, some expiration events will not be generated: id=%" PRIu32 " with event=%" PRIi32
+                    ", period=%" PRIu64 " and associated id=%" PRIu32,
+                    timer->id, timer->event.event, timer->periodMs, timer->event.eltId);
             }
 
             // Add to list of timers to restart it
@@ -329,8 +341,18 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
                                                uint64_t msDelay,
                                                bool isPeriodic)
 {
-    if (!is_initialized())
+    if (!is_initialized() || NULL == eventHandler || 0 == msDelay)
     {
+        return 0;
+    }
+
+    if (isPeriodic && msDelay < 2 * SOPC_TIMER_RESOLUTION_MS)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "EventTimerManager: creating an event timer with a period value less than 2 times the event timers "
+            "resolution (%" PRIu64 " < 2*%u) with event=%" PRIi32,
+            msDelay, SOPC_TIMER_RESOLUTION_MS, event.event);
         return 0;
     }
 
@@ -346,7 +368,7 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
 
     if (newTimer == NULL)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        return 0;
     }
 
     // Configure timeout parameters
@@ -369,15 +391,6 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
         {
             result = 0;
             SOPC_Free(newTimer);
-        }
-        else if (msDelay <= SOPC_TIMER_RESOLUTION_MS)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                     "EventTimerManager: creating an event timer with a delay value less than or equal "
-                                     "to event timers resolution (%" PRIu64 " < %u) for timer id=%" PRIu32
-                                     " with event=%" PRIi32 " and associated id=%" PRIu32,
-                                     msDelay, SOPC_TIMER_RESOLUTION_MS, newTimer->id, newTimer->event.event,
-                                     newTimer->event.eltId);
         }
     } // else 0 is invalid value => no timer available
     else
@@ -407,14 +420,30 @@ uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_Ev
 
 bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod)
 {
+    if (!is_initialized() || 0 == timerId || 0 == msPeriod)
+    {
+        return false;
+    }
+
     bool result = false;
     SOPC_EventTimer* timer = NULL;
     Mutex_Lock(&timersMutex);
     timer = (SOPC_EventTimer*) SOPC_SLinkedList_FindFromId(timers, timerId);
     if (timer != NULL && timer->isPeriodicTimer)
     {
-        result = true;
-        timer->periodMs = msPeriod;
+        if (msPeriod < 2 * SOPC_TIMER_RESOLUTION_MS)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "EventTimerManager: modifying an event timer with a period value less than 2 times the event timers "
+                "resolution (%" PRIu64 " < 2*%u) with id=%" PRIu32 "event=%" PRIi32,
+                msPeriod, SOPC_TIMER_RESOLUTION_MS, timerId, timer->event.event);
+        }
+        else
+        {
+            result = true;
+            timer->periodMs = msPeriod;
+        }
     }
     Mutex_Unlock(&timersMutex);
     return result;
