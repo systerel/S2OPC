@@ -57,6 +57,7 @@ source = r'''
     const char* SOPC_SecurityPolicy_Basic128Rsa15 = "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15";
     const char* SOPC_SecurityPolicy_Basic256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256";
     const char* SOPC_SecurityPolicy_Basic256Sha256_URI = "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256";
+    const char* SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI = "http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep";
     const uint8_t SOPC_SecurityMode_None_Mask = 0x01;
     const uint8_t SOPC_SecurityMode_Sign_Mask = 0x02;
     const uint8_t SOPC_SecurityMode_SignAndEncrypt_Mask = 0x04;

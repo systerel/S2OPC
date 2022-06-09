@@ -94,6 +94,7 @@ typedef enum
 #define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI "http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep"
 
 typedef enum
 {
