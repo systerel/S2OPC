@@ -80,6 +80,72 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                                  uintptr_t requestContext);
 
 /**
+ * \brief Enumerated type for a connection to a server Endpoint
+ */
+typedef enum SOPC_EndpointConnectionType
+{
+    SOPC_EndpointConnectionType_Classic, /*<< Classic connection to server endpoint initiated by client */
+    SOPC_EndpointConnectionType_Reverse, /*<< Reverse connection to server endpoint initiated by server */
+} SOPC_EndpointConnectionType;
+
+/**
+ * \brief Configuration parameters for a classic connection to a server endpoint
+ */
+typedef struct SOPC_EndpointConnection_Classic
+{
+    SOPC_EndpointConnectionConfigIdx
+        endpointConnectionConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
+                                        returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
+} SOPC_EndpointConnection_Classic;
+
+/**
+ * \brief Configuration parameters for a reverse connection to a server endpoint
+ */
+typedef struct SOPC_EndpointConnection_Reverse
+{
+    SOPC_ReverseEndpointConfigIdx
+        reverseEndpointConfigIdx; /*<< Index of the Reverse Endpoint configuration to listen for server connection
+                                       returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig() */
+    SOPC_EndpointConnectionConfigIdx
+        endpointConnectionConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
+                                    returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
+} SOPC_EndpointConnection_Reverse;
+
+/**
+ * \brief Configuration parameters for a connection to a server endpoint.
+ *        The connection is either initiated by the client (classic) or by the server (reverse).
+ */
+typedef struct SOPC_EndpointConnectionCfg
+{
+    SOPC_EndpointConnectionType connectionType;
+    union {
+        SOPC_EndpointConnection_Classic classic;
+        SOPC_EndpointConnection_Reverse reverse;
+    } data;
+} SOPC_EndpointConnectionCfg;
+
+/**
+ * \brief Create an endpoint connection configuration for a classic connection (initiated by client)
+ *
+ * \param endpointConnectionConfigIdx  Index of the Secure Channel configuration for endpoint connection
+ *                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig()
+ */
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx);
+
+/**
+ * \brief Create an endpoint connection configuration for a reverse connection (initiated by server)
+ *
+ * \param reverseEndpointConfigIdx     Index of the Reverse Endpoint configuration to listen for server connection
+ *                                     returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig()
+ * \param endpointConnectionConfigIdx  Index of the Secure Channel configuration for endpoint connection returned by
+ * ::SOPC_ToolkitClient_AddSecureChannelConfig()
+ */
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
+    SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx,
+    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx);
+
+/**
  * \brief Request to activate a new session for the given endpoint connection configuration as client.
  *
  *   When requesting activation of a session the following steps are automatically done:
@@ -95,8 +161,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  *   See helper functions ::SOPC_ToolkitClient_AsyncActivateSession_Anonymous(),
  *   ::SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword().
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by
- *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
  *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
@@ -108,7 +173,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  * \return                       true in case of success, false in case of memory allocation issue
  *
  */
-bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                              const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken);
@@ -116,8 +181,7 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx en
 /**
  * \brief Request to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by
- *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
  *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
@@ -126,11 +190,10 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx en
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
-    const char* sessionName,
-    uintptr_t sessionContext,
-    const char* policyId);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                                    const char* sessionName,
+                                                                    uintptr_t sessionContext,
+                                                                    const char* policyId);
 
 /**
  * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
@@ -143,8 +206,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
  *          - SecureChannel security policy is None and user token security policy is None or empty
  *          - SecureChannel security mode is Sign only and user token security policy is None
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by
- *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
  *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
@@ -157,7 +219,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    SOPC_EndpointConnectionCfg endpointConnectionCfg,
     const char* sessionName,
     uintptr_t sessionContext,
     const char* policyId,
@@ -195,16 +257,41 @@ void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId);
  *
  *   In case of service response received, the SE_RCV_DISCOVERY_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param discoveryReqStruct     OPC UA Discovery message request payload structure pointer (OpcUa_<MessageStruct>*).
  *                               Deallocated by toolkit.
  * \param requestContext         A context value, it will be provided with corresponding response or in case of sending
  *                               error notification
  *
+ * \return true in case of success, false otherwise
+ *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext);
+/**
+ * \brief Request to open a connection listener for the given reverse endpoint description configuration as a client.
+ *
+ *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
+ *   otherwise the listener could be considered as opened.
+ *
+ * \param reverseEndpointConfigIdx  Endpoint description configuration index provided by
+ *                                  SOPC_ToolkitClient_AddReverseEndpointConfig()
+ *
+ */
+void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
+
+/**
+ * \brief Request to close a connection listener for the given endpoint description configuration.
+ *
+ *   In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
+ *   once triggered if the listener was opened it could be now considered closed.
+ *
+ * \param reverseEndpointConfigIdx  Endpoint description configuration index provided to
+ *                                  SOPC_ToolkitClient_AsyncOpenReverseEndpoint()
+ *
+ */
+void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
 
 #endif /* SOPC_TOOLKIT_ASYNC_API_H_ */

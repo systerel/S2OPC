@@ -45,6 +45,10 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
 
     switch (comEvent)
     {
+    case SE_REVERSE_ENDPOINT_CLOSED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_REVERSE_ENDPOINT_CLOSED reverseEndpointConfigIdx=%" PRIu32, id);
+        break;
     case SE_SESSION_ACTIVATION_FAILURE:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "App: SE_SESSION_ACTIVATION_FAILURE session=%" PRIu32 " context=%" PRIuPTR, id,
@@ -99,7 +103,7 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
                                SOPC_EncodeableType_GetName(encType), auxParam);
         break;
     default:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN EVENT");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKNOWN EVENT");
         break;
     }
 

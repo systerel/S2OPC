@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "sopc_toolkit_async_api.h"
@@ -47,16 +48,67 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                requestContext);
 }
 
-bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx)
+{
+    assert(0 != endpointConnectionConfigIdx && "Invalid secure connection configuration index 0");
+    assert(endpointConnectionConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+           "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
+    return (SOPC_EndpointConnectionCfg){.connectionType = SOPC_EndpointConnectionType_Classic,
+                                        .data.classic = {.endpointConnectionConfigIdx = endpointConnectionConfigIdx}};
+}
+
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
+    SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx,
+    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx)
+{
+    assert(0 != reverseEndpointConfigIdx && "Invalid reverse endpoint index 0");
+    assert(reverseEndpointConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+           "Invalid reverse endpoint index <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
+    assert(reverseEndpointConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+           "Invalid reverse endpoint index > 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
+    assert(0 != endpointConnectionConfigIdx && "Invalid secure connection configuration index 0");
+    assert(endpointConnectionConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+           "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
+    return (SOPC_EndpointConnectionCfg){.connectionType = SOPC_EndpointConnectionType_Reverse,
+                                        .data.reverse = {.reverseEndpointConfigIdx = reverseEndpointConfigIdx,
+                                                         .endpointConnectionConfigIdx = endpointConnectionConfigIdx}};
+}
+
+bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                              const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken)
 {
+    uint32_t connectionConfigIdx = 0;
+    uint32_t reverseEndpointConfigIdx = 0;
+    switch (endpointConnectionCfg.connectionType)
+    {
+    case SOPC_EndpointConnectionType_Classic:
+        connectionConfigIdx = endpointConnectionCfg.data.classic.endpointConnectionConfigIdx;
+        break;
+    case SOPC_EndpointConnectionType_Reverse:
+        connectionConfigIdx = endpointConnectionCfg.data.reverse.endpointConnectionConfigIdx;
+        reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
+        if (0 == reverseEndpointConfigIdx)
+        {
+            return false;
+        }
+        break;
+    default:
+        return false;
+    }
+    if (0 == connectionConfigIdx)
+    {
+        return false;
+    }
+
     SOPC_Internal_SessionAppContext* sessionAppContext = SOPC_Calloc(1, sizeof(*sessionAppContext));
     if (NULL == sessionAppContext)
     {
         return false;
     }
+    sessionAppContext->userToken = userToken;
     if (NULL != sessionName)
     {
         size_t len = strlen(sessionName);
@@ -72,16 +124,15 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx en
         }
     }
     sessionAppContext->userSessionContext = sessionContext;
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionIdx, (uintptr_t) userToken,
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, connectionConfigIdx, (uintptr_t) reverseEndpointConfigIdx,
                                (uintptr_t) sessionAppContext);
     return true;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
-    const char* sessionName,
-    uintptr_t sessionContext,
-    const char* policyId)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                                    const char* sessionName,
+                                                                    uintptr_t sessionContext,
+                                                                    const char* policyId)
 {
     if (NULL == policyId || strlen(policyId) == 0)
     {
@@ -105,7 +156,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
 
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user);
+        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
         status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
     }
     if (SOPC_STATUS_OK != status)
@@ -119,7 +170,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    SOPC_EndpointConnectionCfg endpointConnectionCfg,
     const char* sessionName,
     uintptr_t sessionContext,
     const char* policyId,
@@ -160,7 +211,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
 
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user);
+        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
         status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
     }
     if (SOPC_STATUS_OK != status)
@@ -185,10 +236,51 @@ void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId)
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, (uintptr_t) NULL, 0);
 }
 
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext)
 {
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, endpointConnectionIdx, (uintptr_t) discoveryReqStruct,
-                               requestContext);
+    uint32_t connectionConfigIdx = 0;
+    uint32_t reverseEndpointConfigIdx = 0;
+    switch (endpointConnectionCfg.connectionType)
+    {
+    case SOPC_EndpointConnectionType_Classic:
+        connectionConfigIdx = endpointConnectionCfg.data.classic.endpointConnectionConfigIdx;
+        break;
+    case SOPC_EndpointConnectionType_Reverse:
+        connectionConfigIdx = endpointConnectionCfg.data.reverse.endpointConnectionConfigIdx;
+        reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
+        if (0 == reverseEndpointConfigIdx)
+        {
+            return false;
+        }
+        break;
+    default:
+        return false;
+    }
+    if (0 == connectionConfigIdx)
+    {
+        return false;
+    }
+
+    SOPC_Internal_DiscoveryContext* discoveryContext = SOPC_Calloc(1, sizeof(*discoveryContext));
+    if (NULL == discoveryContext)
+    {
+        return false;
+    }
+    discoveryContext->opcuaMessage = discoveryReqStruct;
+    discoveryContext->discoveryAppContext = requestContext;
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, connectionConfigIdx,
+                               (uintptr_t) reverseEndpointConfigIdx, (uintptr_t) discoveryContext);
+    return true;
+}
+
+void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_REVERSE_ENDPOINT, reverseEndpointConfigIdx, (uintptr_t) NULL, 0);
+}
+
+void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_REVERSE_ENDPOINT, reverseEndpointConfigIdx, (uintptr_t) NULL, 0);
 }

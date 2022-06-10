@@ -123,6 +123,15 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, auxParam);
         assert(status == SOPC_STATUS_OK);
         break;
+    case EP_REVERSE_CLOSED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: EP_REVERSE_CLOSED reverseEpCfgIdx=%" PRIu32 " returnStatus=%" PRIuPTR, id,
+                               auxParam);
+        //  id = reverse endpoint config index,
+        // auxParams = SOPC_ReturnStatus
+        status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL, auxParam);
+        assert(status == SOPC_STATUS_OK);
+        break;
     case SC_CONNECTED:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SC_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
@@ -131,7 +140,19 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // => B model entry point to add
         assert(id <= constants__t_channel_i_max);
         assert(auxParam <= constants__t_channel_config_idx_i_max);
-        io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam, id);
+        io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam,
+                                                        constants__c_reverse_endpoint_config_idx_indet, id);
+        break;
+    case SC_REVERSE_CONNECTED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SC_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
+        // id = secure channel connection index,
+        // params = (uint32_t) secure channel configuration index,
+        // auxParams = (uint32) reverse endpoint configuration index
+        // => B model entry point to add
+        assert(id <= constants__t_channel_i_max);
+        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        io_dispatch_mgr__client_channel_connected_event((uint32_t) params, (uint32_t) auxParam, id);
         break;
     case SC_CONNECTION_TIMEOUT:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SC_SC_CONNECTION_TIMEOUT scCfgIdx=%" PRIu32,
@@ -212,6 +233,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     SOPC_Internal_AsyncSendMsgData* msg_data;
     SOPC_NodeId* nodeId = NULL;
     char* nodeIdStr = NULL;
+    const char* reverseEndpointURL = NULL;
+    SOPC_Internal_SessionAppContext* sessionContext = NULL;
+    SOPC_Internal_DiscoveryContext* discoveryContext = NULL;
 
     switch (event)
     {
@@ -433,29 +457,78 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                      id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
-    case APP_TO_SE_ACTIVATE_SESSION:
+    case APP_TO_SE_OPEN_REVERSE_ENDPOINT:
+        /* id = reverse endpoint description config index */
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION scCfgIdx=%" PRIu32 " ctx=%" PRIuPTR, id,
-                               auxParam);
+                               "ServicesMgr: APP_TO_SE_OPEN_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
+        // Check config index is valid
+        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointConfig(id);
 
-        // id == secure channel configuration
-        // params = user authentication
-        // auxParam = user application session context
+        if (NULL == reverseEndpointURL)
+        {
+            status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL,
+                                              SOPC_STATUS_INVALID_PARAMETERS);
+            assert(SOPC_STATUS_OK == status);
+        }
+        else
+        {
+            status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_OPEN,
+                                                      id, // Reverse endpoint config idx
+                                                      (uintptr_t) NULL, 0);
+            assert(SOPC_STATUS_OK == status);
+        }
+        break;
+    case APP_TO_SE_CLOSE_REVERSE_ENDPOINT:
+        /* id = reverse endpoint description config index */
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_CLOSE_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
+        // Check config index is valid
+        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointConfig(id);
+        if (NULL == reverseEndpointURL)
+        {
+            status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL,
+                                              SOPC_STATUS_INVALID_PARAMETERS);
+            assert(SOPC_STATUS_OK == status);
+        }
+        else
+        {
+            status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_CLOSE, id, (uintptr_t) NULL, 0);
+            assert(SOPC_STATUS_OK == status);
+        }
+        break;
+    case APP_TO_SE_ACTIVATE_SESSION:
+        // id = endpoint connection config index,
+        // params = reverse endpoint connection index or 0 if not a reverse connection
+        // auxParam = (SOPC_Internal_SessionAppContext*)
         assert(id <= constants__t_channel_config_idx_i_max);
-        assert((void*) params != NULL);
+        assert((void*) auxParam != NULL);
+        sessionContext = (SOPC_Internal_SessionAppContext*) auxParam;
 
-        io_dispatch_mgr__client_activate_new_session(id, (constants__t_user_token_i) params,
-                                                     (SOPC_Internal_SessionAppContext*) auxParam, &bres);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION scCfgIdx=%" PRIu32 " reverseEpCfgIdx=%" PRIuPTR
+                               " ctx=%" PRIuPTR,
+                               id, params, sessionContext->userSessionContext);
 
-        if (bres == false)
+        io_dispatch_mgr__client_activate_new_session(
+            id, (uint32_t) params, (constants__t_user_token_i) sessionContext->userToken, sessionContext, &bres);
+
+        if (bres)
+        {
+            sessionContext->userToken = NULL; // Provided as separated parameter
+        }
+        else
         {
             SOPC_App_EnqueueComEvent(SE_SESSION_ACTIVATION_FAILURE,
-                                     0,                // session id (not yet defined)
-                                     (uintptr_t) NULL, // user ?
-                                     auxParam);        // user application session context
-            SOPC_Logger_TraceWarning(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION failed scCfgIdx=%" PRIu32 " ctx=%" PRIuPTR, id, auxParam);
+                                     0,                                   // session id (not yet defined)
+                                     (uintptr_t) NULL,                    // user ?
+                                     sessionContext->userSessionContext); // user application session context
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION failed scCfgIdx=%" PRIu32
+                                     " reverseEpCfgIdx=%" PRIuPTR " ctx=%" PRIuPTR,
+                                     id, params, auxParam);
+            SOPC_ExtensionObject_Clear(sessionContext->userToken);
+            SOPC_Free(sessionContext->userToken);
+            SOPC_Free(sessionContext);
         }
         break;
     case APP_TO_SE_SEND_SESSION_REQUEST:
@@ -500,31 +573,38 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     case APP_TO_SE_SEND_DISCOVERY_REQUEST:
-        if ((void*) params != NULL)
+        // id = endpoint connection config index,
+        // params = reverse endpoint connection index or 0 if not a reverse connection
+        // auxParam = (SOPC_Internal_DiscoveryContext*)
+        assert(id <= constants_bs__t_channel_config_idx_i_max);
+        assert((void*) auxParam != NULL);
+
+        discoveryContext = (SOPC_Internal_DiscoveryContext*) auxParam;
+
+        if (discoveryContext->opcuaMessage != NULL)
         {
-            encType = *(SOPC_EncodeableType**) params;
+            encType = *(SOPC_EncodeableType**) discoveryContext->opcuaMessage;
         }
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_SEND_DISCOVERY_REQUEST scCfgIdx=%" PRIu32
-                               " msgType=%s ctx=%" PRIuPTR,
-                               id, SOPC_EncodeableType_GetName(encType), auxParam);
+                               " reverseEpCfgIdx=%" PRIuPTR " msgType=%s ctx=%" PRIuPTR,
+                               id, params, SOPC_EncodeableType_GetName(encType), discoveryContext->discoveryAppContext);
 
-        // id == endpoint connection config idx
-        // params = request
-        assert(id <= constants_bs__t_channel_config_idx_i_max);
-
-        io_dispatch_mgr__client_send_discovery_request(id, (constants__t_msg_i) params, auxParam, &sCode);
+        io_dispatch_mgr__client_send_discovery_request(id, (uint32_t) params,
+                                                       (constants__t_msg_i) discoveryContext->opcuaMessage,
+                                                       discoveryContext->discoveryAppContext, &sCode);
         if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
             status = SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode),
-                                              (uintptr_t) encType, auxParam);
+                                              (uintptr_t) encType, discoveryContext->discoveryAppContext);
             assert(SOPC_STATUS_OK == status);
 
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
-                                     " msgType=%s ctx=%" PRIuPTR,
-                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
+                                     "ServicesMgr: APP_TO_SE_SEND_DISCOVERY_REQUEST failed scCfgIdx=%" PRIu32
+                                     " reverseEpCfgIdx=%" PRIuPTR " msgType=%s ctx=%" PRIuPTR,
+                                     id, params, SOPC_EncodeableType_GetName(encType), auxParam);
         }
+        SOPC_Free(discoveryContext);
         break;
     case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,

@@ -339,15 +339,17 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         // Session is strongly linked to the connection since only 1 can be activated on it
         // and connection ID is globally unique.
         pSM->iSessionCtx = pSM->iCliId;
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+
         if (NULL == pSM->szUsername)
         {
-            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, NULL,
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL,
                                                                        (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
         }
         else
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-                pSM->iscConfig, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
+                endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
                 (const uint8_t*) pSM->szPassword, pSM->szPassword != NULL ? (int32_t) strlen(pSM->szPassword) : 0);
         }
     }

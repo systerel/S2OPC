@@ -129,6 +129,24 @@ typedef uint32_t SOPC_EndpointConfigIdx;
 SOPC_EndpointConfigIdx SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 /**
+ * \brief Index type for reverse endpoint configuration
+ */
+typedef uint32_t SOPC_ReverseEndpointConfigIdx;
+
+/**
+ *  \brief Record the given client reverse endpoint configuration in given index
+ *  (SOPC_Toolkit_Initialize required)
+ *
+ *  \param reverseEndpointURL  The client endpointURL for reverse connections from server(s)
+ *
+ *  Note1: it is forbidden to have 2 configurations with same endpointURL
+ *
+ *  \return reverse endpoint configuration index configuration succeeded,
+ *  0 if toolkit is not initialized or parameters provided are incorrect
+ */
+SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL);
+
+/**
  * \brief Get Toolkit build information
  *
  *

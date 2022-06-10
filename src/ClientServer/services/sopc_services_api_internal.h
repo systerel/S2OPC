@@ -37,8 +37,15 @@ typedef struct SOPC_Internal_AsyncSendMsgData
 
 typedef struct SOPC_Internal_SessionAppContext
 {
+    SOPC_ExtensionObject* userToken;
     char* sessionName;
     uintptr_t userSessionContext;
 } SOPC_Internal_SessionAppContext;
+
+typedef struct SOPC_Internal_DiscoveryContext
+{
+    void* opcuaMessage;            /**< (OpcUa_<MessageStruct>*) OPC UA message payload structure (header ignored)*/
+    uintptr_t discoveryAppContext; /**< User application request context */
+} SOPC_Internal_DiscoveryContext;
 
 #endif /* SOPC_SERVICES_API_INTERNAL_H */

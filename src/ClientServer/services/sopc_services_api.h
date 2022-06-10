@@ -91,9 +91,12 @@ typedef enum SOPC_Services_Event
                                         auxParam = user application session context
                                       */
     /* App to Services events : client side */
+    APP_TO_SE_OPEN_REVERSE_ENDPOINT,  /* id = reverse endpoint description config index */
+    APP_TO_SE_CLOSE_REVERSE_ENDPOINT, /* id = reverse endpoint description config index
+                                       */
     APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
                                       /* id = endpoint connection config index,
-                                       * params = (user token structure)
+                                         params = reverse endpoint connection index or 0 if not a reverse connection
                                          auxParam = (SOPC_Internal_SessionAppContext*)
                                        */
     APP_TO_SE_SEND_SESSION_REQUEST,   /* id = session id,
@@ -102,9 +105,8 @@ typedef enum SOPC_Services_Event
                                          auxParam = user application request context
                                       */
     APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = endpoint connection config index,
-                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
-                                         ignored)
-                                         auxParam = user application request context
+                                         params = reverse endpoint connection index or 0 if not a reverse connection
+                                         auxParam = (SOPC_Internal_DiscoveryContext*)
                                        */
     APP_TO_SE_CLOSE_SESSION,          // id = session id
     APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /* Request to close all established SC connections.

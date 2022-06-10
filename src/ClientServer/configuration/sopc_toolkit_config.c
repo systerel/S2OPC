@@ -55,16 +55,21 @@ static struct
     uint8_t initDone;
     uint8_t serverConfigLocked;
     Mutex mut;
+    /* Specific client */
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
+    const char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
+    uint32_t scConfigIdxMax;
+    uint32_t reverseEpConfigIdxMax;
+    /* Specific server */
     SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
-    uint32_t scConfigIdxMax;
     uint32_t serverScLastConfigIdx;
     uint32_t epConfigIdxMax;
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
 tConfig = {.initDone = false,
            .serverConfigLocked = false,
            .scConfigIdxMax = 0,
+           .reverseEpConfigIdxMax = 0,
            .serverScLastConfigIdx = 0,
            .epConfigIdxMax = 0};
 
@@ -105,6 +110,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             if (SOPC_STATUS_OK == status)
             {
                 memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
+                memset(tConfig.reverseEpConfigs, 0, sizeof(tConfig.reverseEpConfigs));
                 memset(tConfig.serverScConfigs, 0, sizeof(tConfig.serverScConfigs));
                 memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
                 SOPC_App_Initialize();
@@ -304,6 +310,7 @@ void SOPC_Toolkit_Clear(void)
         tConfig.initDone = false;
         tConfig.serverConfigLocked = false;
         tConfig.scConfigIdxMax = 0;
+        tConfig.reverseEpConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
         Mutex_Unlock(&tConfig.mut);
@@ -375,7 +382,7 @@ static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChanne
     return result;
 }
 
-uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
+SOPC_EndpointConnectionConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     assert(NULL != scConfig);
     uint32_t result = 0;
@@ -404,6 +411,22 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
         {
             Mutex_Lock(&tConfig.mut);
             res = tConfig.scConfigs[scConfigIdx];
+            Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return res;
+}
+
+const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
+{
+    const char* res = NULL;
+    if (reverseEpCfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+        reverseEpCfgIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    {
+        if (tConfig.initDone)
+        {
+            Mutex_Lock(&tConfig.mut);
+            res = tConfig.reverseEpConfigs[reverseEpCfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
             Mutex_Unlock(&tConfig.mut);
         }
     }
@@ -560,6 +583,31 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
             }
         }
         Mutex_Unlock(&tConfig.mut);
+    }
+    return result;
+}
+
+SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL)
+{
+    uint32_t result = 0;
+    assert(NULL != reverseEndpointURL);
+
+    if (tConfig.initDone)
+    {
+        Mutex_Lock(&tConfig.mut);
+        if (tConfig.reverseEpConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+        {
+            tConfig.reverseEpConfigIdxMax++;
+            assert(NULL == tConfig.reverseEpConfigs[tConfig.reverseEpConfigIdxMax]);
+            tConfig.reverseEpConfigs[tConfig.reverseEpConfigIdxMax] = reverseEndpointURL;
+            result = tConfig.reverseEpConfigIdxMax;
+        }
+        Mutex_Unlock(&tConfig.mut);
+    }
+    if (0 != result)
+    {
+        // Make server endpoint and client reverse endpoint configuration indexes disjoints
+        return result + SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
     }
     return result;
 }

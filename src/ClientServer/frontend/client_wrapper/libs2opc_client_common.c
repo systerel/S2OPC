@@ -751,7 +751,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     /* send the request */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(iscConfig, pReq, (uintptr_t) pReqCtx);
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(iscConfig);
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);
     }
 
     /* free if needed */

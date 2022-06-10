@@ -29,6 +29,7 @@
 
 #include "sopc_address_space.h"
 #include "sopc_event_handler.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 
 /**
@@ -78,14 +79,24 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
 
 /**
  *  \brief (CLIENT SIDE ONLY)  Return the secure channel configuration for the given index or null if not defined.
- * (SOPC_Toolkit_Configured required)
  * Note: the set of indexes of secure channel configuration for client and server are disjoint
  *
  *  \param scConfigIdx  The secure channel configuration index requested
  *
  *  \return Secure channel configuration at given index or NULL if
- *  index invalid or toolkit is not configured yet
+ *  index invalid or toolkit is not initialized
  */
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
+
+/**
+ *  \brief (CLIENT SIDE ONLY)  Return the client endpoint URL for the given reverse endpoint configuration index
+ *  or null if not defined
+ * Note: the set of indexes of (reverse) endpoint configuration indexes for client and server are disjoint
+ *
+ *  \param reverseEpCfgIdx  The secure channel configuration index requested
+ *
+ *  \return The client endpointURL of the reverse endpoint or NULL if index invalid or toolkit is not initialized
+ */
+const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
 
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */
