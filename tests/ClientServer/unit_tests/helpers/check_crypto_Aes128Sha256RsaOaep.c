@@ -80,7 +80,7 @@ START_TEST(test_crypto_symm_lengths_Aes128Sha256RsaOaep)
 
     // Check sizes
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == SOPC_STATUS_OK);
-    ck_assert(32 == len);
+    ck_assert(16 == len);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == SOPC_STATUS_OK);
     ck_assert(32 == len);
     ck_assert(SOPC_CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == SOPC_STATUS_OK);
@@ -200,7 +200,7 @@ START_TEST(test_crypto_symm_crypt_Aes128Sha256RsaOaep)
     memset(iv, 0, sizeof(iv));
     pSecIV = SOPC_SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
     ck_assert(NULL != pSecIV);
-    ck_assert(unhexlify("c3b44b95d9d2f25670eee9a0de099fa3", input, 16) == 16);
+    ck_assert(unhexlify("6e29201190152df4ee058139def610bb", input, 16) == 16);
     memset(output, 0, sizeof(output));
     ck_assert(SOPC_CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == SOPC_STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
@@ -457,7 +457,7 @@ START_TEST(test_crypto_derive_lengths_Aes128Sha256RsaOaep)
 
     // Check sizes
     ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == SOPC_STATUS_OK);
-    ck_assert(32 == lenKey);
+    ck_assert(16 == lenKey);
     ck_assert(32 == lenKeyBis);
     ck_assert(16 == lenIV);
 }
@@ -473,7 +473,7 @@ START_TEST(test_crypto_derive_data_Aes128Sha256RsaOaep)
     ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == SOPC_STATUS_OK);
     lenOutp = lenKey + lenKeyBis + lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenSecr) ==
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &lenSecr) ==
               SOPC_STATUS_OK); // TODO: use future GetLength_Nonce
     lenSeed = lenSecr;
 
@@ -580,19 +580,19 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     ck_assert(SOPC_CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == SOPC_STATUS_OK);
     lenOutp = lenKey + lenKeyBis + lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenCliNonce) ==
+    ck_assert(SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &lenCliNonce) ==
               SOPC_STATUS_OK); // TODO: use future GetLength_Nonce
     lenSerNonce = lenCliNonce;
 
     // Prepares security key sets
     memset(zeros, 0, 32);
-    cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    cliKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKeyBis);
     ck_assert_ptr_nonnull(cliKS.signKey);
     cliKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
     ck_assert_ptr_nonnull(cliKS.encryptKey);
     cliKS.initVector = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenIV);
     ck_assert_ptr_nonnull(cliKS.initVector);
-    serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
+    serKS.signKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKeyBis);
     ck_assert_ptr_nonnull(serKS.signKey);
     serKS.encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(zeros, lenKey);
     ck_assert_ptr_nonnull(serKS.encryptKey);
@@ -610,33 +610,35 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     // 4 lines for each assert
     pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
     ck_assert_ptr_nonnull(pout);
-    ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2 * lenKey) == 0);
+    ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
+    ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2 * lenKeyBis) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
+    // TODO: remove the last 32 bytes (init vector result) 
     ck_assert(memcmp(hexoutput, "d8de10ac4fb579f2718ddcb50ea68d1851c76644b26454e3f9339958d23429d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
-    ck_assert(memcmp(hexoutput, "4167de62880e0bdc023aa133965c34ff", 2 * lenIV) == 0);
+    ck_assert(memcmp(hexoutput, "51c76644b26454e3f9339958d23429d5", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
     pout = SOPC_SecretBuffer_Expose(serKS.signKey);
     ck_assert_ptr_nonnull(pout);
-    ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2 * lenKey) == 0);
+    ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
+    ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2 * lenKeyBis) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
     pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
+    // TODO: remove the last 32 bytes (init vector result) 
     ck_assert(memcmp(hexoutput, "2c86aecfd5629ee05c49345bce3b2a7ca959a0bf4c9c281b8516a369650dbc4e", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(serKS.initVector);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
-    ck_assert(memcmp(hexoutput, "39a4f596bcbb99e0b48114f60fc6af21", 2 * lenIV) == 0);
+    ck_assert(memcmp(hexoutput, "a959a0bf4c9c281b8516a369650dbc4e", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Another run, just to be sure...
@@ -649,33 +651,35 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     // 4 lines for each assert
     pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
     ck_assert_ptr_nonnull(pout);
-    ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2 * lenKey) == 0);
+    ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
+    ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2 * lenKeyBis) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
+    // TODO: remove the last 32 bytes (init vector result) 
     ck_assert(memcmp(hexoutput, "7a6c2cdc20a842a0e2039075935b14a07f578c157091328adc9d52bbb8ef727d", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
-    ck_assert(memcmp(hexoutput, "dcf97c356f5ef87b7049900f74355c13", 2 * lenIV) == 0);
+    ck_assert(memcmp(hexoutput, "7f578c157091328adc9d52bbb8ef727d", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.initVector);
     pout = SOPC_SecretBuffer_Expose(serKS.signKey);
     ck_assert_ptr_nonnull(pout);
-    ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2 * lenKey) == 0);
+    ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
+    ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2 * lenKeyBis) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
     pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
+    // TODO: remove the last 32 bytes (init vector result) 
     ck_assert(memcmp(hexoutput, "2439bdd8fc365b0fe7b7e2cfcefee67ea7bdea6c157d0b23092f0abc015792d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(serKS.initVector);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t) lenIV);
-    ck_assert(memcmp(hexoutput, "005a70781b43979940c77368677718cd", 2 * lenIV) == 0);
+    ck_assert(memcmp(hexoutput, "a7bdea6c157d0b23092f0abc015792d5", 2 * lenIV) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Clears KS
