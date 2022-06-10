@@ -258,7 +258,8 @@ static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t end
 {
     assert(NULL != timerId);
     assert(endpointConfigIdx > 0);
-    assert(endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+    assert(endpointConfigIdx <=
+           SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS); // Server endpoint (first half of lsitener array)
     assert(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
     SOPC_Event event;
     event.eltId = endpointConfigIdx;
@@ -788,6 +789,58 @@ static void SC_ClientTransition_Connected_To_Disconnected(SOPC_SecureConnection*
 
     SC_Client_SendCloseSecureChannelRequestAndClose(scConnection, scConnectionIdx, OpcUa_BadSecureChannelClosed,
                                                     "Secure channel requested to be closed by client");
+}
+
+static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rheMsgBuffer,
+                                                                 char** serverURI,
+                                                                 char** serverURL)
+{
+    assert(rheMsgBuffer != NULL);
+    assert(serverURI != NULL);
+    assert(serverURL != NULL);
+
+    bool result = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_String sopcServerURI;
+    SOPC_String sopcServerURL;
+    SOPC_String_Initialize(&sopcServerURI);
+    SOPC_String_Initialize(&sopcServerURL);
+
+    result = true;
+
+    // Read the ReverseHello message content
+
+    // Read Reverse Hello message body
+
+    // Read serverURI
+    status = SOPC_String_Read(&sopcServerURI, rheMsgBuffer, 0);
+
+    // Read clientURL
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Read(&sopcServerURL, rheMsgBuffer, 0);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        result = true;
+        // Move C strings into output variables
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *serverURI = (char*) SOPC_String_GetRawCString(&sopcServerURI);
+        sopcServerURI.DoNotClear = true;
+        *serverURL = (char*) SOPC_String_GetRawCString(&sopcServerURL);
+        sopcServerURL.DoNotClear = true;
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+    else
+    {
+        // Buffer will not be used anymore
+        SOPC_Buffer_Delete(rheMsgBuffer);
+    }
+    SOPC_String_Clear(&sopcServerURI);
+    SOPC_String_Clear(&sopcServerURL);
+
+    return result;
 }
 
 static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* scConnection, SOPC_Buffer* ackMsgBuffer)
@@ -2557,7 +2610,7 @@ static bool initServerSC(uint32_t socketIndex,
 
     // record if the connection is in reverse mode and index
     scConnection->isReverseConnection = reverseConn;
-    scConnection->reverseConnIdx = reverseConnIdx;
+    scConnection->serverReverseConnIdx = reverseConnIdx;
     // set the socket index associated
     scConnection->socketIndex = socketIndex;
     // record the endpoint description configuration
@@ -2627,8 +2680,17 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
         scConnection->connectionTimeoutTimerId = 0;
 
-        SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTED, scIdx, (uintptr_t) NULL,
-                               scConnection->endpointConnectionConfigIdx);
+        if (scConnection->isReverseConnection)
+        {
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_REVERSE_CONNECTED, scIdx,
+                                   (uintptr_t) scConnection->endpointConnectionConfigIdx,
+                                   (uintptr_t) scConnection->serverReverseConnIdx);
+        }
+        else
+        {
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTED, scIdx, (uintptr_t) NULL,
+                                   scConnection->endpointConnectionConfigIdx);
+        }
         return;
     }
     else if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
@@ -2712,7 +2774,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         {
             // Generate SC_REVERSE_CONNECT events for connection state manager
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
-                                                     (uintptr_t) NULL, (uintptr_t) scConnection->reverseConnIdx);
+                                                     (uintptr_t) NULL, (uintptr_t) scConnection->serverReverseConnIdx);
         }
 
         return;
@@ -2755,6 +2817,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     char* errorReason = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t connectionIdx = 0;
+    char* serverURI = NULL;
+    char* serverURL = NULL;
+    bool result = false;
 
     switch (event)
     {
@@ -2854,6 +2919,69 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         break;
     }
+    case INT_SC_RCV_RHE:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_RHE scIdx=%" PRIu32, eltId);
+
+        buffer = (void*) params;
+        scConnection = SC_GetConnection(eltId);
+        errorStatus = SOPC_GoodGenericStatus;
+
+        if (scConnection == NULL)
+        {
+            // Jump to the end of the if
+        }
+        else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || scConnection->isServerConnection)
+        {
+            SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
+                                     "ReverseHello message received not expected");
+        }
+        else if (!SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(buffer, &serverURI, &serverURL))
+        {
+            SC_CloseSecureConnection(scConnection, eltId, false, false, errorStatus,
+                                     "Error on HELLO message treatment");
+        }
+        else
+        {
+            // notify secure listener that connection is accepted
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_RHE_DECODED, eltId, (uintptr_t) serverURI,
+                                                     (uintptr_t) serverURL);
+        }
+        // Note: check serverURI compared to connection configuration ? (not defined in configuration for now)
+        SOPC_Buffer_Delete(buffer);
+
+        break;
+    case INT_SC_RCV_RHE_TRANSITION:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_RHE_TRANSITION scIdx=%" PRIu32,
+                               eltId);
+
+        scConnection = SC_GetConnection(eltId);
+        errorStatus = SOPC_GoodGenericStatus;
+
+        if (scConnection == NULL)
+        {
+            // Jump to the end of the if
+        }
+        else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || scConnection->isServerConnection)
+        {
+            SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
+                                     "ReverseHello message received not expected");
+        }
+        else
+        {
+            // Do REVERSE_INIT -> INIT transition now we choose the secure connection to use
+            scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
+            // Do INIT -> NEGOTIATE transition
+            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, scConnection->socketIndex);
+            if (!result)
+            {
+                // Error case: close the secure connection if invalid state or unexpected error.
+                //  (client case only on SOCKET_CONNECTION event)
+                SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
+                                         "SecureConnection: closed on INT_SC_RCV_RHE_TRANSITION");
+            }
+        }
+
+        break;
     case INT_SC_RCV_ACK:
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: INT_SC_RCV_ACK scIdx=%" PRIu32, eltId);
@@ -3155,16 +3283,17 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_EP_SC_CLOSE:
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " epCfgIdx=%" PRIuPTR, eltId, auxParam);
+                               "ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " (reverse)EpCfgIdx=%" PRIuPTR, eltId,
+                               auxParam);
 
         /* id = secure channel connection index,
-           auxParam = endpoint description configuration index */
+           auxParam = (reverse) endpoint configuration index */
         scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
-                                     "Endpoint secure connection listener closed");
+                                     "Endpoint secure connection closed");
         }
         break;
     }
@@ -3258,13 +3387,13 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             // Manage reverse connections retry attempts
             if (scConnection->isServerConnection && scConnection->isReverseConnection)
             {
-                assert(scConnection->reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+                assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
                 scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
 
                 // Configure a timer for next reverse connection attempt to client
                 SC_Server_StartReverseConnRetryTimer(
-                    &scListener->reverseConnRetryTimerIds[scConnection->reverseConnIdx],
-                    scConnection->serverEndpointConfigIdx, scConnection->reverseConnIdx);
+                    &scListener->reverseConnRetryTimerIds[scConnection->serverReverseConnIdx],
+                    scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
             }
 
             // Since there was a socket failure, consider the socket close now
@@ -3304,11 +3433,13 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         // Manage reverse connection retry attempt
         if (scConnection->isServerConnection && scConnection->isReverseConnection)
         {
-            assert(scConnection->reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+            assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
             // Generate SC_REVERSE_CONNECT events for connection state manager
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
-                                                     (uintptr_t) NULL, scConnection->reverseConnIdx);
+                                                     (uintptr_t) NULL, scConnection->serverReverseConnIdx);
         }
+
+        // TODO: client side reverse connection to remove from reverse EP !
 
         // Check SC valid + avoid to close a secure channel established just after timeout
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
@@ -3328,7 +3459,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                eltId, params);
 
         assert(eltId > 0);
-        assert(eltId <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+        assert(eltId <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS); // Server endpoint (first half of listener array)
         assert(params < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
 
         // Reset connection retry timer id
@@ -3420,8 +3551,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     bool result = false;
     char* errorMsg = "";
     uint32_t idx = 0;
+    uint32_t scCfgIdx = 0;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_SecureConnection* scConnection = NULL;
+    uint32_t reverseEpCfgIdx = 0;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     switch (event)
     {
@@ -3431,24 +3564,41 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     /* Services events: */
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32, eltId);
+    case SC_REVERSE_CONNECT:
+        if (SC_CONNECT == event)
+        {
+            // id = secure channel configuration index
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32, eltId);
+            scCfgIdx = eltId;
+        }
+        else if (SC_REVERSE_CONNECT == event)
+        {
+            // id = reverse endpoint configuration index
+            // params = (uint32_t) secure channel configuration index
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ScStateMgr: SC_REVERSE_CONNECT reverseEpCfg=%" PRIu32 " scCfgIdx=%" PRIuPTR, eltId,
+                                   params);
+            scCfgIdx = (uint32_t) params;
+            reverseEpCfgIdx = eltId;
+        }
 
         /* id = secure channel connection configuration index */
 
         /* Define INIT state of a client */
-        scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(eltId);
+        scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scCfgIdx);
         if (scConfig != NULL)
         {
             result = SC_InitNewConnection(&idx);
             if (result)
             {
                 SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, eltId, idx);
+                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, scCfgIdx,
+                                       idx);
 
                 scConnection = SC_GetConnection(idx);
                 assert(scConnection != NULL);
                 // record the secure channel connection configuration
-                scConnection->endpointConnectionConfigIdx = eltId;
+                scConnection->endpointConnectionConfigIdx = scCfgIdx;
 
                 result = sc_init_key_and_certs(scConnection);
                 errorMsg = "Failed to initialize keys and certificates for connection";
@@ -3459,8 +3609,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 // TODO: add a connection failure ? (with config idx + (optional) connection id)
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
-                                       eltId);
-                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, eltId, (uintptr_t) NULL, 0);
+                                       scCfgIdx);
+                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, scCfgIdx, (uintptr_t) NULL,
+                                       0);
                 return;
             }
         }
@@ -3473,18 +3624,30 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), idx);
             if (SOPC_STATUS_OK == status)
             {
-                // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, idx, (uintptr_t) scConfig->url, 0);
-                SOPC_GCC_DIAGNOSTIC_RESTORE
+                if (SC_CONNECT == event)
+                {
+                    // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
+                    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, idx, (uintptr_t) scConfig->url, 0);
+                    SOPC_GCC_DIAGNOSTIC_RESTORE
+                }
+                else if (SC_REVERSE_CONNECT == event)
+                {
+                    scConnection->isReverseConnection = true;
+                    scConnection->clientReverseEpConfigIdx = reverseEpCfgIdx;
+                    scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
+                    SOPC_SecureChannels_EnqueueInternalEvent(INT_REVERSE_EP_REQ_CONNECTION, reverseEpCfgIdx,
+                                                             (uintptr_t) NULL, (uintptr_t) idx);
+                }
             }
             else
             {
                 result = false;
                 errorMsg = "Failed to create a timer for connection establishment timeout";
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to activate SC time out",
-                                       eltId);
+                                       "ScStateMgr: SC_CONNECT/SC_REVERSE_CONNECT scCfgIdx=%" PRIu32
+                                       " failed to activate SC time out",
+                                       scCfgIdx);
             }
         }
         if (!result)

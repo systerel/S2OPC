@@ -25,7 +25,8 @@
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 
-SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
+// First half of listeners for server endpoints and second half for client reverse endpoints
+SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2 + 1];
 SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
 uint32_t lastSecureConnectionArrayIdx = 0;
 
@@ -38,7 +39,8 @@ SOPC_EventHandler* secureChannelsEventHandler = NULL;
 
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc* setSocketsListener)
 {
-    memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
+    memset(secureListenersArray, 0,
+           sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2 + 1));
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1));
     lastSecureConnectionArrayIdx = 0;
 

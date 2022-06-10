@@ -46,12 +46,15 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_EP_SC_CREATE:
     case INT_EP_SC_CLOSE:
     case INT_EP_SC_REVERSE_CONNECT:
+    case INT_SC_RCV_RHE_TRANSITION:
         SOPC_SecureConnectionStateMgr_OnInternalEvent(internalEvent, eltId, params, auxParam);
         break;
 
     /* SC connection manager -> SC listener state manager */
     case INT_EP_SC_CREATED:
+    case INT_EP_SC_RHE_DECODED:
     case INT_EP_SC_DISCONNECTED:
+    case INT_REVERSE_EP_REQ_CONNECTION:
         SOPC_SecureListenerStateMgr_OnInternalEvent(internalEvent, eltId, params, auxParam);
         break;
 
@@ -59,6 +62,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
     case INT_SC_RCV_HEL:
     case INT_SC_RCV_ACK:
     case INT_SC_RCV_ERR:
+    case INT_SC_RCV_RHE:
     case INT_SC_RCV_OPN:
     case INT_SC_RCV_CLO:
     case INT_SC_RCV_MSG_CHUNKS:
@@ -143,10 +147,13 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
     /* Services manager -> SC listener state manager */
     case EP_OPEN:
     case EP_CLOSE:
+    case REVERSE_EP_OPEN:
+    case REVERSE_EP_CLOSE:
         SOPC_SecureListenerStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
+    case SC_REVERSE_CONNECT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
@@ -172,7 +179,10 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
     /* External events */
     case EP_OPEN:
     case EP_CLOSE:
+    case REVERSE_EP_OPEN:
+    case REVERSE_EP_CLOSE:
     case SC_CONNECT:
+    case SC_REVERSE_CONNECT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
     case SC_SERVICE_SND_ERR:

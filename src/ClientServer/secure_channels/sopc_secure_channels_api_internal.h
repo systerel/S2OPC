@@ -29,14 +29,23 @@ typedef enum
     INT_EP_SC_CREATE = 0x400,  /* id = endpoint description configuration index,
                                   auxParam = socket index */
     INT_EP_SC_CLOSE,           /* id = secure channel connection index,
-                                  auxParam = (uint32_t) endpoint description configuration index */
-    INT_EP_SC_REVERSE_CONNECT, /* id = endpoint description configuration index,
+                                  (auxParam = (reverse) endpoint configuration index) */
+    INT_EP_SC_REVERSE_CONNECT, /* Server:
+                                  id = endpoint description configuration index,
                                   auxParam = (uint16_t) client to connect configuration index in endpoint config */
+    INT_SC_RCV_RHE_TRANSITION, // id = secure channel connection index,
+
     /* SC connection manager -> SC listener manager */
-    INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
-                               auxParam = (uint32_t) secure channel connection index */
-    INT_EP_SC_DISCONNECTED, /* id = endpoint description configuration index,
-                               auxParam = (uint32_t) secure channel connection index */
+    INT_EP_SC_CREATED,             /* id = endpoint description configuration index,
+                                      auxParam = (uint32_t) secure channel connection index */
+    INT_EP_SC_RHE_DECODED,         /* id = secure channel connection index,
+                                      param = (char*) serverURI,
+                                      auxParam = (char*) serverEndpointURL */
+    INT_EP_SC_DISCONNECTED,        /* id = endpoint description configuration index,
+                                      auxParam = (uint32_t) secure channel connection index */
+    INT_REVERSE_EP_REQ_CONNECTION, /* Client: a connection is requested through the opened reverse endpoint
+                                   id = reverse endpoint configuration index,
+                                   auxParam = (uint32_t) secure channel connection index */
 
     /* OPC UA chunks message manager -> SC connection manager */
     INT_SC_RCV_HEL, /* >------------------------- */
@@ -49,6 +58,9 @@ typedef enum
                     // params = (SOPC_Buffer*) buffer positioned to message payload,
     INT_SC_RCV_CLO, // auxParam = (uint32_t) requestId context if request (server side)
                     //                       / requestHandle if response (client side)
+    INT_SC_RCV_RHE, // id = secure channel connection index,
+                    // params = (SOPC_Buffer*) buffer positioned to message payload,
+                    // INT_SC_RCV_RHE_TRANSITION is the final step in listener => connection manage
     INT_SC_RCV_MSG_CHUNKS,
     INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
 

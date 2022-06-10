@@ -39,7 +39,12 @@ typedef enum
 {
     EP_OPEN = 0x200,    /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */
+    REVERSE_EP_OPEN,    /* id = reverse endpoint configuration index */
+    REVERSE_EP_CLOSE,   /* id = reverse endpoint configuration index */
     SC_CONNECT,         /* id = secure channel configuration index */
+    SC_REVERSE_CONNECT, /* Activate the connection on next available server reverse connection
+                           id = reverse endpoint configuration index
+                           params = (uint32_t) secure channel configuration index */
     SC_DISCONNECT,      /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
                           params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
@@ -59,8 +64,14 @@ typedef enum
                               auxParams = (uint32_t) secure channel connection index */
     EP_CLOSED,             /* id = endpoint description config index,
                                  auxParams = SOPC_ReturnStatus */
+    EP_REVERSE_CLOSED,     /* id = reverse endpoint config index,
+                              auxParams = SOPC_ReturnStatus */
     SC_CONNECTED,          /* id = secure channel connection index,
                               auxParams = (uint32_t) secure channel configuration index */
+    SC_REVERSE_CONNECTED,  /* id = secure channel connection index,
+                              params = (uint32_t) secure channel configuration index,
+                              auxParams = (uint32) reverse endpoint configuration index
+                            */
     SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index */
     SC_DISCONNECTED,       /* id = secure channel connection index
                               auxParam = SOPC_StatusCode

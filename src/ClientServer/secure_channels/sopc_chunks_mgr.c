@@ -162,6 +162,10 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
         {
             chunkCtx->currentMsgType = SOPC_MSG_TYPE_ERR;
         }
+        else if (memcmp(msgType, SOPC_RHE, 3) == 0)
+        {
+            chunkCtx->currentMsgType = SOPC_MSG_TYPE_RHE;
+        }
         else if (memcmp(msgType, SOPC_MSG, 3) == 0)
         {
             chunkCtx->currentMsgType = SOPC_MSG_TYPE_SC_MSG;
@@ -262,6 +266,9 @@ static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Ty
         break;
     case SOPC_MSG_TYPE_ERR:
         return INT_SC_RCV_ERR;
+        break;
+    case SOPC_MSG_TYPE_RHE:
+        return INT_SC_RCV_RHE;
         break;
     case SOPC_MSG_TYPE_SC_OPN:
         return INT_SC_RCV_OPN;
@@ -1735,6 +1742,21 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
 
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected ERR message received (epCfgIdx=%" PRIu32
+                                   ", scCfgIdx=%" PRIu32 ")",
+                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+        }
+        // Nothing to do: whole payload to transmit to the secure connection state manager
+        break;
+    case SOPC_MSG_TYPE_RHE:
+        if (scConnection->isServerConnection || chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_FINAL)
+        {
+            // A server shall not receive an RHE message
+            // or RHE message chunk shall be final
+            result = false;
+            *errorStatus = OpcUa_BadTcpMessageTypeInvalid;
+
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ChunksMgr: invalid or unexpected RHE message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
                                    scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
         }

@@ -170,9 +170,11 @@ typedef struct SOPC_SecureConnection
     SOPC_SecureConnection_State state;
     uint32_t endpointConnectionConfigIdx;
     // SC reverse connection info
-    bool isReverseConnection; // use ReverseHello mechanism for this connection
-    uint16_t
-        reverseConnIdx; // reverse connection index in endpoint configuration (set only if isReverseConnection is true)
+    bool isReverseConnection;          // use ReverseHello mechanism fpr this connection
+    uint16_t serverReverseConnIdx;     // reverse connection index in endpoint configuration
+                                       // (set only on server side if isReverseConnection is true)
+    uint32_t clientReverseEpConfigIdx; // reverse endpoint configuration index
+                                       // (set only on client side if isReverseConnection is true)
 
     uint32_t socketIndex; // associated TCP socket index (defined when state != TCP_INIT or SC_CLOSED)
 
@@ -200,7 +202,7 @@ typedef struct SOPC_SecureConnection
     /* Server or Client side connection */
     bool isServerConnection;
     // (Server side specific)
-    uint32_t serverEndpointConfigIdx; // endpoint description configuration association
+    uint32_t serverEndpointConfigIdx; // (reverse) endpoint description configuration association
 
     SOPC_AsymmetricKey* privateKey;
     SOPC_CertificateList* serverCertificate;
@@ -210,6 +212,7 @@ typedef struct SOPC_SecureConnection
 typedef struct SOPC_SecureListener
 {
     SOPC_SecureListener_State state;
+    bool reverseEnpoint; // true if it is a client reverse endpoint
     uint32_t serverEndpointConfigIdx;
     uint32_t socketIndex; // associated TCP socket index (in OPENED state only)
     // Management of the active connections on the listener
@@ -220,8 +223,8 @@ typedef struct SOPC_SecureListener
     uint32_t reverseConnRetryTimerIds[SOPC_MAX_REVERSE_CLIENT_CONNECTIONS];
 } SOPC_SecureListener;
 
-/** @brief Array containing all listeners that can be used */
-extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
+/** @brief Array containing all listeners that can be used for server endpoints and client reverse endpoints */
+extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2 + 1];
 
 /** @brief Array containing all connections that can be used */
 extern SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
