@@ -149,7 +149,7 @@ START_TEST(test_sockets)
 
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, endpointDescConfigId, (uintptr_t) uri, (uint32_t) true);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, endpointDescConfigId, (uintptr_t) uri, (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     SOPC_Free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
@@ -158,7 +158,7 @@ START_TEST(test_sockets)
     // Create client connection
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* SERVER SIDE: accepted connection (socket level only)

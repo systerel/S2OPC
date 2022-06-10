@@ -456,9 +456,9 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
     switch (socketEvent)
     {
-    case SOCKET_CREATE_SERVER:
+    case SOCKET_CREATE_LISTENER:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SocketEvent: SOCKET_CREATE_SERVER epCfgIdx=%" PRIu32 " URI=%s allItfs=%s", eltId,
+                               "SocketEvent: SOCKET_CREATE_LISTENER epCfgIdx=%" PRIu32 " URI=%s allItfs=%s", eltId,
                                (char*) params, auxParam ? "true" : "false");
         /*
         id = endpoint description config index,
@@ -497,9 +497,9 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
         break;
-    case SOCKET_CREATE_CLIENT:
+    case SOCKET_CREATE_CONNECTION:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SocketEvent: SOCKET_CREATE_CLIENT scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
+                               "SocketEvent: SOCKET_CREATE_CONNECTION scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
         /*
         id = secure channel connection index,
         params = (const char*) URI
@@ -535,10 +535,10 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                    (int) socketElt->state, socketElt->connectionId);
         }
         break;
-    case SOCKET_CLOSE_SERVER:
+    case SOCKET_CLOSE_LISTENER:
         assert(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SocketEvent: SOCKET_CLOSE_SERVER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
+                               "SocketEvent: SOCKET_CLOSE_LISTENER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
                                auxParam);
         /* id = socket index */
         socketElt = &socketsArray[eltId];

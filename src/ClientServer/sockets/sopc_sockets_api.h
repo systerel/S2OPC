@@ -36,27 +36,27 @@
 typedef enum
 {
     /* External events */
-    SOCKET_CREATE_SERVER = 0x0, /* id = endpoint description config index,
-                             params = (const char*) URI,
-                             auxParam = (bool) listenAllInterfaces
-                          */
-    SOCKET_ACCEPTED_CONNECTION, /* id = socket index,
-                                   auxParam = secure channel connection index */
+    SOCKET_CREATE_LISTENER = 0x0, /* id = endpoint description config index,
+                                   params = (const char*) URI,
+                                   auxParam = (bool) listenAllInterfaces
+                                 */
+    SOCKET_ACCEPTED_CONNECTION,   /* id = socket index,
+                                     auxParam = secure channel connection index */
 
-    SOCKET_CREATE_CLIENT, /* id = secure channel connection index,
-                             params = (const char*) URI
-                          */
-    SOCKET_CLOSE,         /* id = socket index, auxParam = secure channel connection index  */
-    SOCKET_CLOSE_SERVER,  /* id = socket index, auxParam = endpoint description config index */
-    SOCKET_WRITE          /* id = socket index,
-                             params = (SOPC_Buffer*) message buffer */
+    SOCKET_CREATE_CONNECTION, /* id = secure channel connection index,
+                                 params = (const char*) URI
+                               */
+    SOCKET_CLOSE,             /* id = socket index, auxParam = secure channel connection index  */
+    SOCKET_CLOSE_LISTENER,    /* id = socket index, auxParam = endpoint description config index */
+    SOCKET_WRITE              /* id = socket index,
+                                 params = (SOPC_Buffer*) message buffer */
 } SOPC_Sockets_InputEvent;
 
 typedef enum
 {
     SOCKET_LISTENER_OPENED = 0x100, /* id = endpoint description config index,
-                               auxParam = (uint32_t) socket index
-                           */
+                                       auxParam = (uint32_t) socket index
+                                    */
     SOCKET_LISTENER_CONNECTION,     /* id = endpoint description config index,
                                        auxParam = (uint32_t) new connection socket index
                                    */

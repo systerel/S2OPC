@@ -231,7 +231,7 @@ static void establishSC(void)
 
     // Retrieve socket event
     printf("SC_Rcv_Buffer Init: Checking correct socket creation event received\n");
-    socketEvent = Check_Socket_Event_Received(SOCKET_CREATE_CLIENT, scConfigIdx,
+    socketEvent = Check_Socket_Event_Received(SOCKET_CREATE_CONNECTION, scConfigIdx,
                                               0); // scConfigIdx == scIdx since there is only 1 SC
 
     ck_assert(socketEvent != NULL);
@@ -239,7 +239,7 @@ static void establishSC(void)
     res = strcmp(sEndpointUrl, (char*) socketEvent->params);
     if (res != 0)
     {
-        printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CLIENT params\n");
+        printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CONNECTION params\n");
         ck_assert(false);
     }
     SOPC_Free(socketEvent);

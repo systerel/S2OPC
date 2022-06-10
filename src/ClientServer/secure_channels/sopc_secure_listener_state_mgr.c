@@ -104,7 +104,7 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(SOPC_Endpoint_Config* epCo
             if (SECURE_LISTENER_STATE_OPENED == scListener->state && !socketFailure)
             {
                 // Close the socket listener in case it is not a socket failure (already done)
-                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, scListener->socketIndex, (uintptr_t) NULL,
+                SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_LISTENER, scListener->socketIndex, (uintptr_t) NULL,
                                           (uintptr_t) endpointConfigIdx);
             }
             memset(scListener, 0, sizeof(SOPC_SecureListener));
@@ -258,7 +258,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENING)
         {
             // Error case: require socket closure
-            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_SERVER, (uint32_t) auxParam, (uintptr_t) NULL, (uintptr_t) eltId);
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_LISTENER, (uint32_t) auxParam, (uintptr_t) NULL, (uintptr_t) eltId);
         }
         else
         {
@@ -340,7 +340,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                     // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
                     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                     // Notify Sockets layer to create the listener
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER, eltId, (uintptr_t) epConfig->endpointURL,
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) epConfig->endpointURL,
                                               SOPC_LISTENER_LISTEN_ALL_INTERFACES);
                     SOPC_GCC_DIAGNOSTIC_RESTORE
                 }
