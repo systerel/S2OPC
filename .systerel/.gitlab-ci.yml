@@ -175,14 +175,14 @@ build-linux64-NoASan-NoPyS2OPC:
 
 build-win64: &build_win64
   stage: build-others
-  image: docker.aix.systerel.fr/c838/mingw_build@sha256:b9d5619a72109f24f8fe4c7cce03216153542cd20734a9eaae01104ca5166b8a # digest of mingw_build:1.12
+  image: docker.aix.systerel.fr/c838/mingw_build@sha256:6d6f54912b5a6b6e3b4d0815c64d8975a72673224a77fd70bef5ed35571c153d # digest of mingw_build:1.13
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
     - *build_command_line
   variables: &build_win64_variables
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_IMAGE: 'sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5'
+    DOCKER_IMAGE: 'sha256:4edcdfff072522487730fb268bf834438d47a8fc5e662e5ac7868c4ecb367dcb'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
   artifacts:
