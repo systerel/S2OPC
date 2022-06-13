@@ -66,6 +66,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+#define SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength 32
 
 // Aes128-Sha256-RsaOaep, sizes in bytes
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block 16
@@ -79,6 +80,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SecureChannelNonceLength 32
 
 // Basic256, sizes in bytes
 #define SOPC_SecurityPolicy_Basic256_SymmLen_Block 16
@@ -92,6 +94,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits 1024
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits 2048
 #define SOPC_SecurityPolicy_Basic256_URI_SignAlgo "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+#define SOPC_SecurityPolicy_Basic256_SecureChannelNonceLength 32
 
 // CryptoProfiles instances
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep;

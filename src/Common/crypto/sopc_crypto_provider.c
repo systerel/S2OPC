@@ -422,10 +422,17 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(cons
     case SOPC_SecurityPolicy_None_ID:
     default:
         return SOPC_STATUS_INVALID_PARAMETERS;
+    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
+        *pLenNonce = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SecureChannelNonceLength;
+        break;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
+        *pLenNonce = SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength;
+        break;
     case SOPC_SecurityPolicy_Basic256_ID:
-        return SOPC_CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, pLenNonce);
+        *pLenNonce = SOPC_SecurityPolicy_Basic256_SecureChannelNonceLength;
+        break;
     }
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider* pProvider,
