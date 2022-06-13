@@ -112,7 +112,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     The disconnect callback might be called before the function returns if connection succeeds and then fails
     immediately (in this case *pCliId is already set)
  */
-SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConnectionId cfgId, SOPC_LibSub_ConnectionId* pCliId);
+SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /**
  * @brief
