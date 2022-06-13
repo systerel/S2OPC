@@ -291,6 +291,9 @@ if(WITH_MINIMAL_FOOTPRINT)
   list(APPEND S2OPC_COMPILER_FLAGS -DWITH_MINIMAL_FOOTPRINT)
 endif()
 
+# Display remaining configuration flags
+print_if_activated("PUBSUB_STATIC_CONFIG")
+
 # check if compiler support new sanitization options
 include(CheckCCompilerFlag)
 set(CMAKE_REQUIRED_LIBRARIES "-fsanitize=address")
