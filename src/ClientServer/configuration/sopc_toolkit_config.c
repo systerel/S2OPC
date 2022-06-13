@@ -137,6 +137,10 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     return status;
 }
 
+static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
+{
+}
+
 SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
@@ -150,7 +154,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
             {
                 tConfig.serverConfigLocked = true;
                 SOPC_AddressSpace_Check_Configured();
-                status = SOPC_STATUS_OK;
+                status = SOPC_ToolkitServer_SecurityCheck();
             }
             else
             {
