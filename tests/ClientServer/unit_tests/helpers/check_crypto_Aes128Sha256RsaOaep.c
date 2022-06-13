@@ -611,12 +611,13 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
-    ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2 * lenKeyBis) == 0);
+    ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2 * lenKeyBis) ==
+              0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    // TODO: remove the last 32 bytes (init vector result) 
+    // TODO: remove the last 32 bytes (init vector result)
     ck_assert(memcmp(hexoutput, "d8de10ac4fb579f2718ddcb50ea68d1851c76644b26454e3f9339958d23429d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
@@ -627,12 +628,13 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     pout = SOPC_SecretBuffer_Expose(serKS.signKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
-    ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2 * lenKeyBis) == 0);
+    ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2 * lenKeyBis) ==
+              0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
     pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    // TODO: remove the last 32 bytes (init vector result) 
+    // TODO: remove the last 32 bytes (init vector result)
     ck_assert(memcmp(hexoutput, "2c86aecfd5629ee05c49345bce3b2a7ca959a0bf4c9c281b8516a369650dbc4e", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(serKS.initVector);
@@ -652,12 +654,13 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     pout = SOPC_SecretBuffer_Expose(cliKS.signKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
-    ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2 * lenKeyBis) == 0);
+    ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2 * lenKeyBis) ==
+              0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.signKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    // TODO: remove the last 32 bytes (init vector result) 
+    // TODO: remove the last 32 bytes (init vector result)
     ck_assert(memcmp(hexoutput, "7a6c2cdc20a842a0e2039075935b14a07f578c157091328adc9d52bbb8ef727d", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(cliKS.initVector);
@@ -668,12 +671,13 @@ START_TEST(test_crypto_derive_keysets_Aes128Sha256RsaOaep)
     pout = SOPC_SecretBuffer_Expose(serKS.signKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKeyBis) == (int32_t) lenKeyBis);
-    ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2 * lenKeyBis) == 0);
+    ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2 * lenKeyBis) ==
+              0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.signKey);
     pout = SOPC_SecretBuffer_Expose(serKS.encryptKey);
     ck_assert_ptr_nonnull(pout);
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t) lenKey);
-    // TODO: remove the last 32 bytes (init vector result) 
+    // TODO: remove the last 32 bytes (init vector result)
     ck_assert(memcmp(hexoutput, "2439bdd8fc365b0fe7b7e2cfcefee67ea7bdea6c157d0b23092f0abc015792d5", 2 * lenKey) == 0);
     SOPC_SecretBuffer_Unexpose(pout, serKS.encryptKey);
     pout = SOPC_SecretBuffer_Expose(serKS.initVector);
