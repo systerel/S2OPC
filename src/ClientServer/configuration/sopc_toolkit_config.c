@@ -144,6 +144,56 @@ static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_
 
 static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
 {
+    SOPC_Endpoint_Config* pEpConfig;
+    SOPC_SecurityPolicy* pSecurityPolicy;
+    OpcUa_UserTokenPolicy* pUserTokenPolicies;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus statusSecurityCheck = SOPC_STATUS_OK;
+    SOPC_String securityPolicyNoneURI;
+
+    SOPC_String_Initialize(&securityPolicyNoneURI);
+    status = SOPC_String_AttachFromCstring(&securityPolicyNoneURI, SOPC_SecurityPolicy_None_URI);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    for (uint32_t nbEpConfigIndex = 1; nbEpConfigIndex <= tConfig.epConfigIdxMax; nbEpConfigIndex++)
+    {
+        pEpConfig = tConfig.epConfigs[nbEpConfigIndex];
+
+        for (uint8_t nbSecuIndex = 0; nbSecuIndex < pEpConfig->nbSecuConfigs; nbSecuIndex++)
+        {
+            pSecurityPolicy = &pEpConfig->secuConfigurations[nbSecuIndex];
+
+            /* Check if SecurityPolicy "security policy URI" is different from "None" AND if SecurityPolicy "security
+            mode" is "None" */
+            if (false == SOPC_String_Equal(&pSecurityPolicy->securityPolicy, &securityPolicyNoneURI) &&
+                0 != (pSecurityPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK))
+            {
+                statusSecurityCheck = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+            else
+            {
+                for (uint8_t nbTokenIndex = 0; nbTokenIndex < pSecurityPolicy->nbOfUserTokenPolicies; nbTokenIndex++)
+                {
+                    pUserTokenPolicies = &pSecurityPolicy->userTokenPolicies[nbTokenIndex];
+
+                    if (OpcUa_UserTokenType_Anonymous != pUserTokenPolicies->TokenType)
+                    {
+                        status = SOPC_SecurityCheck_UserCredentialsEncrypted(pSecurityPolicy, pUserTokenPolicies);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            // Here the logger can be used to find out which UserToken has a wrong configuration
+                            statusSecurityCheck = status;
+                            status = SOPC_STATUS_OK;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return statusSecurityCheck;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
