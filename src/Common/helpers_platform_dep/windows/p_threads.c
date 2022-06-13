@@ -187,7 +187,8 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         /* We need to check if the API is available at execution time */
         HMODULE kernel32 = LoadLibraryW(L"kernel32");
         assert(kernel32 != NULL);
-        pSetThreadDescription funcAddress = (pSetThreadDescription) GetProcAddress(kernel32, "SetThreadDescription");
+        pSetThreadDescription funcAddress =
+            (pSetThreadDescription)(uintptr_t) GetProcAddress(kernel32, "SetThreadDescription");
 
         if (NULL != funcAddress)
         {
