@@ -140,6 +140,29 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_SecurityPolicy* pSecurityPolicy,
                                                                      const OpcUa_UserTokenPolicy* pUserTokenPolicies)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_String securityPolicyNoneURI;
+    SOPC_String_Initialize(&securityPolicyNoneURI);
+    status = SOPC_String_AttachFromCstring(&securityPolicyNoneURI, SOPC_SecurityPolicy_None_URI);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // Check if SecurityPolicy "security mode" is "None" AND if "UserToken security policy" is "empty" (default)
+    if (0 != (pSecurityPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK) &&
+        pUserTokenPolicies->SecurityPolicyUri.Length <= 0)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    // Check if SecurityPolicy "security mode" is "None or Sign" AND if "UserToken security policy" is "None"
+    else if (0 != (pSecurityPolicy->securityModes & (SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_NONE_MASK)) &&
+             true == SOPC_String_Equal(&pUserTokenPolicies->SecurityPolicyUri, &securityPolicyNoneURI))
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return status;
 }
 
 static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
