@@ -164,7 +164,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
  @return
     The operation status. lDataId is only valid when the return status is SOPC_STATUS_OK.
     SOPC_STATUS_TIMEOUT is returned when the timeout expires before receiving a response. */
-SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_ConfigurationId cliId,
+SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_ConnectionId cliId,
                                                       const SOPC_LibSub_CstString* lszNodeId,
                                                       const SOPC_LibSub_AttributeId* lattrId,
                                                       int32_t nElements,
