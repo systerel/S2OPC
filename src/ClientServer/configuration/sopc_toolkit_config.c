@@ -137,6 +137,11 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     return status;
 }
 
+static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_SecurityPolicy* pSecurityPolicy,
+                                                                     const OpcUa_UserTokenPolicy* pUserTokenPolicies)
+{
+}
+
 static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
 {
 }
