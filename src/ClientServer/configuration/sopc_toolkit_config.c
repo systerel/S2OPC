@@ -153,6 +153,9 @@ static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_
     if (0 != (pSecurityPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK) &&
         pUserTokenPolicies->SecurityPolicyUri.Length <= 0)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Security Check UserCredentials: Failed. Combination not allowed : SecurityPolicy "
+                               "security mode is None and UserToken security policy is empty.\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -160,6 +163,9 @@ static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_
     else if (0 != (pSecurityPolicy->securityModes & (SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_NONE_MASK)) &&
              true == SOPC_String_Equal(&pUserTokenPolicies->SecurityPolicyUri, &securityPolicyNoneURI))
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Security Check UserCredentials: Failed. Combination not allowed : SecurityPolicy "
+                               "security mode is None or Sign and UserToken security policy is None.\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return status;
@@ -194,6 +200,9 @@ static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
             if (false == SOPC_String_Equal(&pSecurityPolicy->securityPolicy, &securityPolicyNoneURI) &&
                 0 != (pSecurityPolicy->securityModes & SOPC_SECURITY_MODE_NONE_MASK))
             {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Security Check: Failed. Combination not allowed : SecurityPolicy security "
+                                       "policy URI is different from None and SecurityPolicy security mode is None.\n");
                 statusSecurityCheck = SOPC_STATUS_INVALID_PARAMETERS;
             }
             else
@@ -207,7 +216,6 @@ static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
                         status = SOPC_SecurityCheck_UserCredentialsEncrypted(pSecurityPolicy, pUserTokenPolicies);
                         if (SOPC_STATUS_OK != status)
                         {
-                            // Here the logger can be used to find out which UserToken has a wrong configuration
                             statusSecurityCheck = status;
                             status = SOPC_STATUS_OK;
                         }
