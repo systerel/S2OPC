@@ -650,7 +650,8 @@ int main(int argc, char** argv)
     assert(configIdx != 0);
 
     printf("Connecting to the server...\n");
-    SOPC_ToolkitClient_AsyncActivateSession_Anonymous(configIdx, NULL, (uintptr_t) &ctx, "anonymous");
+    SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
+    SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) &ctx, "anonymous");
 
     mutStatus = Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
     assert(SOPC_STATUS_OK == mutStatus);

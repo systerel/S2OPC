@@ -432,7 +432,9 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // Use 1 as getEndpoints request context
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx3, getGetEndpoints_message(), 1);
+        SOPC_EndpointConnectionCfg endpointConnectionCfg =
+            SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx3);
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
         printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
     }
 
@@ -461,9 +463,11 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // Use 1, 2, 3 as session contexts
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, NULL, sessionContext[0], "anonymous");
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx, NULL, sessionContext[1], "anonymous");
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(channel_config_idx2, NULL, sessionContext[2], "anonymous");
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[0], "anonymous");
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[1], "anonymous");
+        endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx2);
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[2], "anonymous");
         printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
     }
 

@@ -271,8 +271,9 @@ int main(void)
     /* Asynchronous request to connect with invalid user identity */
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "wrongUser",
+            endpointConnectionCfg, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "wrongUser",
             (const uint8_t*) "noPassword", (int32_t) strlen("noPassword"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with invalid user identity\n");
     }
@@ -315,8 +316,9 @@ int main(void)
     {
         SOPC_Atomic_Int_Set(&sessionActivationFault, 0);
         // Use 1, 2, 3 as session contexts
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            channel_config_idx, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "user1",
+            endpointConnectionCfg, NULL, 1, SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID, "user1",
             (const uint8_t*) "password", (int32_t) strlen("password"));
         printf(">>Test_Client_Toolkit: Creating/Activating 1 session with valid user identity\n");
     }
@@ -450,8 +452,8 @@ int main(void)
         /* Create a service request message with nothing to do and send it through session (read service)*/
         OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
         SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
-
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(channel_config_idx, notSupportedServiceReq, 1);
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
+        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, notSupportedServiceReq, 1);
         printf(">>Test_Client_Toolkit: unsupported discovery request sending (using discovery API)\n");
     }
 

@@ -160,15 +160,16 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
         return SOPC_STATUS_NOK;
     }
 
+    SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
     if (activation_parameters.anonymous)
     {
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(pSM->iscConfig, SESSION_NAME, (uintptr_t) pSM->pCtxSession,
-                                                          activation_parameters.policyId);
+        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, SESSION_NAME,
+                                                          (uintptr_t) pSM->pCtxSession, activation_parameters.policyId);
     }
     else
     {
         SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
-            pSM->iscConfig, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
+            endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
             activation_parameters.username, activation_parameters.password, activation_parameters.length);
     }
 
@@ -290,7 +291,8 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
         {
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
             pSM->state = stDiscovering;
         }
     }
@@ -362,7 +364,8 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
         {
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
             pSM->state = stDiscovering;
         }
     }
@@ -484,7 +487,8 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
         {
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(pSM->iscConfig, pReq, (uintptr_t) pSM->pCtxRequest);
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
             pSM->state = stRegister;
         }
     }
