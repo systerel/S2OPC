@@ -28,18 +28,18 @@
 #include "sopc_services_api_internal.h"
 #include "sopc_types.h"
 
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx)
+void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx)
 {
     // TODO: check valid config and return bool
     SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx)
+void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext)
 {
@@ -47,7 +47,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                requestContext);
 }
 
-bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
                                              const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken)
@@ -77,10 +77,11 @@ bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
     return true;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
-                                                                    const char* sessionName,
-                                                                    uintptr_t sessionContext,
-                                                                    const char* policyId)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId)
 {
     if (NULL == policyId || strlen(policyId) == 0)
     {
@@ -117,13 +118,14 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
-                                                                           const char* sessionName,
-                                                                           uintptr_t sessionContext,
-                                                                           const char* policyId,
-                                                                           const char* username,
-                                                                           const uint8_t* password,
-                                                                           int32_t length_password)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId,
+    const char* username,
+    const uint8_t* password,
+    int32_t length_password)
 {
     if (NULL == policyId || strlen(policyId) == 0)
     {
@@ -171,17 +173,19 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
     return status;
 }
 
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext)
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(SOPC_SessionId sessionId,
+                                                  void* requestStruct,
+                                                  uintptr_t requestContext)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_SESSION_REQUEST, sessionId, (uintptr_t) requestStruct, requestContext);
 }
 
-void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId)
+void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, (uintptr_t) NULL, 0);
 }
 
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext)
 {

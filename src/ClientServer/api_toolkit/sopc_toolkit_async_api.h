@@ -35,6 +35,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 
 /**
@@ -44,22 +45,22 @@
  *   otherwise the listener could be considered as opened.
  *
  * \param endpointConfigIdx  Endpoint description configuration index provided by
- *                           SOPC_ToolkitServer_AddEndpointConfig()
+ *                           ::SOPC_ToolkitServer_AddEndpointConfig()
  *
  */
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx);
+void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
  * \brief Request to close a connection listener for the given endpoint description configuration.
  *
- *   In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
+ *   In any case the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct(),
  *   once triggered if the listener was opened it could be now considered closed.
  *
  * \param endpointConfigIdx  Endpoint description configuration index provided to
- *                           SOPC_ToolkitServer_AsyncOpenEndpoint()
+ *                           ::SOPC_ToolkitServer_AsyncOpenEndpoint()
  *
  */
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
+void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
  * \brief Request to execute locally the given service request on server and receive response.
@@ -74,7 +75,7 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
+void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
 
@@ -87,12 +88,12 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
  *   - When session is created, request activation of the session
  *   - When session is activated, notify session is active
  *
- *   In case of failure SE_SESSION_ACTIVATION_FAILURE event will be triggered to SOPC_ComEvent_Fct(),
+ *   In case of failure SE_SESSION_ACTIVATION_FAILURE event will be triggered to ::SOPC_ComEvent_Fct(),
  *   otherwise SE_ACTIVATED_SESSION event will be triggered when session is activated provided the session Id
  *   for other operations on session.
  *
- *   See helper functions SOPC_ToolkitClient_AsyncActivateSession_Anonymous(),
- *   SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword().
+ *   See helper functions ::SOPC_ToolkitClient_AsyncActivateSession_Anonymous(),
+ *   ::SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword().
  *
  * \param endpointConnectionIdx  Endpoint connection configuration index provided by
  *                               SOPC_ToolkitClient_AddSecureChannelConfig()
@@ -107,7 +108,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
  * \return                       true in case of success, false in case of memory allocation issue
  *
  */
-bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
+bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
                                              const char* sessionName,
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken);
@@ -125,10 +126,11 @@ bool SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
-                                                                    const char* sessionName,
-                                                                    uintptr_t sessionContext,
-                                                                    const char* policyId);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId);
 
 /**
  * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
@@ -154,18 +156,19 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t end
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
-                                                                           const char* sessionName,
-                                                                           uintptr_t sessionContext,
-                                                                           const char* policyId,
-                                                                           const char* username,
-                                                                           const uint8_t* password,
-                                                                           int32_t length_password);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId,
+    const char* username,
+    const uint8_t* password,
+    int32_t length_password);
 
 /**
  * \brief Request to send a service request on given active session.
  *
- *   In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
+ *   In case of service response received, the SE_RCV_SESSION_RESPONSE event will be triggered to ::SOPC_ComEvent_Fct().
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  * \param requestStruct  OPC UA message payload structure pointer (OpcUa_<MessageStruct>*). Deallocated by toolkit.
@@ -174,7 +177,9 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint3
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext);
+void SOPC_ToolkitClient_AsyncSendRequestOnSession(SOPC_SessionId sessionId,
+                                                  void* requestStruct,
+                                                  uintptr_t requestContext);
 
 /**
  * \brief Request to close the given session.
@@ -183,7 +188,7 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requ
  *
  * \param sessionId      Session Id (provided by event SE_ACTIVATED_SESSION) on which the service request shall be sent
  */
-void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
+void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId);
 
 /**
  * \brief Request to send a discovery service request without using session.
@@ -198,7 +203,7 @@ void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
+void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext);
 
