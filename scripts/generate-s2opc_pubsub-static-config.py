@@ -92,10 +92,12 @@ class ResultFile:
     def add(self, lines):
         self.data = self.data + lines
 
-class GContext:pass
+# A global context
+class GContext:
+    pubDataSetIndex = 0
+    
 class CnxContext:
-    def __init__(self, gContext : GContext, connection):
-        self.gContext = gContext
+    def __init__(self, connection):
         self.publisherId = None
         self.address = connection.get(ATTRIBUTE_CONNECTION_ADDRESS)
         self.messages = connection.findall("./%s" % TAG_MESSAGE)
@@ -136,8 +138,6 @@ def handleDoc(tree, result):
 
 def handlePubSub(pubSub, result):
     
-    gContext = GContext()
-
     pubConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_PUBLISHER))
     subConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_SUBSCRIBER))
     pubDataSets = pubSub.findall("./%s[@%s='%s']/%s/%s" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_PUBLISHER,
@@ -172,14 +172,14 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     /* %d Published Datasets */
     alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, %d);
     """ % (len(pubDataSets), len(pubDataSets)))
-        gContext.pubDataSetIndex = 0
+        GContext.pubDataSetIndex = 0
 
         cnxIndex = 0
         for connection in pubConnections:
             pubid = int(getOptionalAttribute(connection, ATTRIBUTE_MESSAGE_PUBLISHERID, -1))
             assert pubid > 0
                 
-            handlePubConnection(gContext, pubid, connection, cnxIndex, result)
+            handlePubConnection(pubid, connection, cnxIndex, result)
             cnxIndex += 1
 
     # END len(pubConnections) > 0
@@ -198,7 +198,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
         index = 0
         for connection in subConnections:
-            handleSubConnection(gContext, connection, index, result)
+            handleSubConnection(connection, index, result)
             index += 1
     # END len(pubConnections) > 0
 
@@ -217,8 +217,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 }
     """)
 
-def handlePubConnection(gContext : GContext, publisherId, connection, index, result):
-    cnxContext = CnxContext(gContext, connection)
+def handlePubConnection(publisherId, connection, index, result):
+    cnxContext = CnxContext(connection)
     
     result.add("""
     /** Publisher connection %d **/
@@ -255,7 +255,6 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     global IS_DEFINED_C_GROUP
     
     msgContext = MessageContext(cnxContext, message)
-    msgContext.connection = cnxContext
  
     datasets = message.findall(TAG_DATASET)
      
@@ -318,7 +317,6 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     SOPC_PublishedDataSet* dataset = NULL;""")
             IS_DEFINED_C_DATASET = True
     
-            gContext = msgContext.connection.gContext
             result.add("""
     if (alloc)
     {
@@ -331,8 +329,8 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     if (alloc)
     {""" % (dsIndex,
             writerId,
-            gContext.pubDataSetIndex, writerId, len(variables)))
-            gContext.pubDataSetIndex += 1
+            GContext.pubDataSetIndex, writerId, len(variables)))
+            GContext.pubDataSetIndex += 1
         elif mode == SUB_MODE:
             
             DEFINE_C_SETSUBNBVARIABLES = True;
@@ -396,8 +394,8 @@ def handleVariable(mode, variable, index, result):
         DEFINE_C_SETSUBVARIABLEAT = True
     else: assert(false)
 
-def handleSubConnection(gContext : GContext, connection, index, result):
-    cnxContext = CnxContext(gContext, connection)
+def handleSubConnection(connection, index, result):
+    cnxContext = CnxContext(connection)
     
     nbMsg = len(cnxContext.messages)
     
@@ -436,7 +434,6 @@ def handleSubMessage(cnxContext : CnxContext, message, index, result):
     global DEFINE_C_SETSUBNBVARIABLES
     
     msgContext = MessageContext(cnxContext, message)
-    msgContext.connection = cnxContext
  
     datasets = message.findall(TAG_DATASET)
     
