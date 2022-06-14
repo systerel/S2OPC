@@ -382,7 +382,7 @@ static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChanne
     return result;
 }
 
-SOPC_EndpointConnectionConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
+SOPC_SecureChannelConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     assert(NULL != scConfig);
     uint32_t result = 0;

@@ -96,11 +96,11 @@ static SOPC_SecureChannel_Config* SOPC_Toolkit_GetSecureChannelConfig(SOPC_Secur
 {
     if (scConnection->isServerConnection)
     {
-        return SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        return SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     }
     else
     {
-        return SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        return SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     }
 }
 
@@ -371,7 +371,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
             }
         }
         epConfigIdx = scConnection->serverEndpointConfigIdx;
-        scConfigIdx = scConnection->endpointConnectionConfigIdx;
+        scConfigIdx = scConnection->secureChannelConfigIdx;
     }
     else
     {
@@ -393,7 +393,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 }
             }
         }
-        scConfigIdx = scConnection->endpointConnectionConfigIdx;
+        scConfigIdx = scConnection->secureChannelConfigIdx;
     }
 
     // Retrieve encryption and signature configuration expected if defined
@@ -690,9 +690,9 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
 
     if (!scConnection->isServerConnection)
     {
-        scConfigIdx = scConnection->endpointConnectionConfigIdx;
+        scConfigIdx = scConnection->secureChannelConfigIdx;
         // CLIENT side
-        clientConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        clientConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
         if (NULL == clientConfig)
         {
             result = false;
@@ -708,7 +708,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     {
         // SERVER side
         epConfigIdx = scConnection->serverEndpointConfigIdx;
-        scConfigIdx = scConnection->endpointConnectionConfigIdx;
+        scConfigIdx = scConnection->secureChannelConfigIdx;
         serverConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
         if (NULL == serverConfig)
         {
@@ -719,7 +719,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
             scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
         {
             // A client connection config shall already be defined and contains security expected
-            clientConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            clientConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
             if (NULL == clientConfig)
             {
                 result = false;
@@ -1264,7 +1264,7 @@ static bool SC_Chunks_GetSecurityKeySets(SOPC_SecureConnection* scConnection,
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "ChunksMgr: sign or encrypt message (symm): security key sets missing (scConfigIdx=%" PRIu32 ")",
-            scConnection->endpointConnectionConfigIdx);
+            scConnection->secureChannelConfigIdx);
         return false;
     }
 
@@ -1713,7 +1713,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected HEL message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1728,7 +1728,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected ACK message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1743,7 +1743,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected ERR message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1758,7 +1758,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected RHE message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         // Nothing to do: whole payload to transmit to the secure connection state manager
         break;
@@ -1772,7 +1772,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid OPN message received (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32
                                    ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         else
         {
@@ -1791,7 +1791,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: invalid or unexpected CLO message received (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         else
         {
@@ -1846,7 +1846,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                             SOPC_LOG_MODULE_CLIENTSERVER,
                             "ChunksMgr: server provided invalid initial secure channel Id 0 (epCfgIdx=%" PRIu32
                             ", scCfgIdx=%" PRIu32 ")",
-                            scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                            scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                     }
                 }
                 else
@@ -1867,7 +1867,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                                "ChunksMgr: client provided invalid initial secure channel Id=%" PRIu32
                                                " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                                secureChannelId, scConnection->serverEndpointConfigIdx,
-                                               scConnection->endpointConnectionConfigIdx);
+                                               scConnection->secureChannelConfigIdx);
                     } // else: secure channel Id == 0 from client expected, then new Id set by server in OPN response
                 }
             }
@@ -1881,8 +1881,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                        "ChunksMgr: invalid secure channel Id=%" PRIu32 " expected Id=%" PRIu32
                                        " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        secureChannelId, scConnection->currentSecurityToken.secureChannelId,
-                                       scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                                       scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             }
         }
         else
@@ -1897,8 +1896,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                        "ChunksMgr: invalid secure channel Id=%" PRIu32 " expected Id=%" PRIu32
                                        " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        secureChannelId, scConnection->currentSecurityToken.secureChannelId,
-                                       scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                                       scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             }
         }
     }
@@ -1919,7 +1917,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: asymmetric security header verification failed (epCfgIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
     }
 
@@ -1928,11 +1926,11 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         // CLO or MSG case: symmetric security header
         if (!scConnection->isServerConnection)
         {
-            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
         }
         else
         {
-            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
         }
         // If a symmetric message is received, secure channel should be configured
         if (NULL == scConfig)
@@ -1942,7 +1940,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
 
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: SC configuration not found (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
         else
         {
@@ -1957,8 +1955,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ChunksMgr: symmetric security header verification failed (epCfgIdx=%" PRIu32
                                        ", scCfgIdx=%" PRIu32 ")",
-                                       scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                                       scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             }
         }
     }
@@ -1975,7 +1972,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
 
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: decryption failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 "): %s",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx,
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx,
                                    errorReason);
         }
     }
@@ -2000,7 +1997,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "ChunksMgr: signature verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 "): %s",
-                scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx, errorReason);
+                scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx, errorReason);
         }
     }
 
@@ -2016,19 +2013,18 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                                             requestIdOrHandle, ignoreExpiredMessage, errorStatus);
             if (!result)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ChunksMgr: request Id/Handle=%" PRIu32
-                                       " (or associated type) verification failed (epCfgIdx=%" PRIu32
-                                       ", scCfgIdx=%" PRIu32 ")",
-                                       *requestIdOrHandle, scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "ChunksMgr: request Id/Handle=%" PRIu32
+                    " (or associated type) verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                    *requestIdOrHandle, scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             }
         }
         else
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: SN verification failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
     }
 
@@ -2041,7 +2037,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             *errorStatus = OpcUa_BadDecodingError;
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: padding removal failed (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
     }
 
@@ -2167,7 +2163,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                        "ChunksMgr: TCP UA header decoding failed with statusCode=%" PRIX32
                                        " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        errorStatus, scConnection->serverEndpointConfigIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                                       scConnection->secureChannelConfigIdx);
             }
             // TREATMENT STOPPED HERE
             break;
@@ -2178,7 +2174,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             "ChunksMgr: received TCP UA message type SOPC_Msg_Type=%u SOPC_Msg_IsFinal=%u (epCfgIdx=%" PRIu32
             ", scCfgIdx=%" PRIu32 ")",
             chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal, scConnection->serverEndpointConfigIdx,
-            scConnection->endpointConnectionConfigIdx);
+            scConnection->secureChannelConfigIdx);
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
         if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
@@ -2216,7 +2212,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           "ChunksMgr: ignored response of expired request with requestHandle=%" PRIu32
                                           " (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                           requestIdOrHandle, scConnection->serverEndpointConfigIdx,
-                                          scConnection->endpointConnectionConfigIdx);
+                                          scConnection->secureChannelConfigIdx);
 
                     // Message shall be ignored since it is response to an expired request
                     SOPC_Buffer_Delete(chunkCtx->currentMessageInputBuffer);
@@ -2236,7 +2232,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "ChunksMgr: raised INT_SC_RCV_FAILURE: %" PRIX32 ": (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-            errorStatus, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+            errorStatus, scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
 
         // Treat as prio events
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, scConnectionIdx, (uintptr_t) NULL,
@@ -2336,7 +2332,7 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
             SOPC_LOG_MODULE_CLIENTSERVER,
             "ChunksMgr: treat send buffer: failed to encode message header (msgType=%u, scIdx=%" PRIu32
             ", scCfgIdx=%" PRIu32 ")",
-            sendMsgType, scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+            sendMsgType, scConnectionIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -2426,7 +2422,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ChunksMgr: SC_Chunks_EncodeAsymSecurityHeader: sender certificate "
                                        "missing in Sign mode (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                                       scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                                       scConnectionIdx, scConnection->secureChannelConfigIdx);
             }
             if (SOPC_STATUS_OK == status)
             {
@@ -2533,7 +2529,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
             SOPC_LOG_MODULE_CLIENTSERVER,
             "ChunksMgr: treat send buffer: failed to encode asymmetric security header (scIdx=%" PRIu32
             ", scCfgIdx=%" PRIu32 ")",
-            scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+            scConnectionIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -2885,7 +2881,7 @@ static bool SOPC_Chunks_EncodePadding(uint32_t scConnectionIdx,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ChunksMgr: treat send buffer: padding encoding failed (scIdx=%" PRIu32
                                ", scCfgIdx=%" PRIu32 ")",
-                               scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                               scConnectionIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -2998,7 +2994,7 @@ static bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t scConnectionIdx,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ChunksMgr: treat send buffer: asymmetric max sender certificate size check failed "
                                "(scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
-                               scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                               scConnectionIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -3163,7 +3159,7 @@ static bool SC_Chunks_EncodeSignature(uint32_t scConnectionIdx,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ChunksMgr: treat send buffer: encoding signature failed : (scIdx=%" PRIu32
                                ", scCfgIdx=%" PRIu32 "): %s",
-                               scConnectionIdx, scConnection->endpointConnectionConfigIdx, errorReason);
+                               scConnectionIdx, scConnection->secureChannelConfigIdx, errorReason);
     }
     return result;
 }
@@ -3198,14 +3194,14 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         if (!scConnection->isServerConnection)
         {
             // Client side
-            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
             assert(scConfig != NULL);
             otherAppCertificate = scConnection->serverCertificate;
         }
         else
         {
             // Server side
-            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
             assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no
                                       // sending in wrong state)
             otherAppCertificate = scConnection->clientCertificate;
@@ -3226,7 +3222,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "ChunksMgr: encrypt message (asymm): failed to create public key from certificate (scConfigIdx=%" PRIu32
                 ")",
-                scConnection->endpointConnectionConfigIdx);
+                scConnection->secureChannelConfigIdx);
         }
         else
         {
@@ -3270,7 +3266,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ChunksMgr: encrypt message (asymm): failed to encrypt message "
                                        "(scConfigIdx=%" PRIu32 "): %s",
-                                       scConnection->endpointConnectionConfigIdx, errorReason);
+                                       scConnection->secureChannelConfigIdx, errorReason);
             }
         }
 
@@ -3332,7 +3328,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
                         "ChunksMgr: encrypt message (symm): failed to encrypt message (scConfigIdx=%" PRIu32 ")",
-                        scConnection->endpointConnectionConfigIdx);
+                        scConnection->secureChannelConfigIdx);
                 }
             }
 
@@ -3698,7 +3694,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
                                        "ChunksMgr: treat send buffer: asymmetric max body size check failed : %" PRIu32
                                        " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                        inputBuffer->length, scConnection->asymmSecuMaxBodySize, scConnectionIdx,
-                                       scConnection->endpointConnectionConfigIdx);
+                                       scConnection->secureChannelConfigIdx);
             }
         }
     }
@@ -3899,7 +3895,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
                                    "ChunksMgr: treat send buffer: symmetric max body size check failed : %" PRIu32
                                    " > max = %" PRIu32 " (scIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
                                    bodySize, scConnection->symmSecuMaxBodySize, scConnectionIdx,
-                                   scConnection->endpointConnectionConfigIdx);
+                                   scConnection->secureChannelConfigIdx);
         }
     }
 
@@ -4001,7 +3997,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr: treat send buffer: encoding signature failed : (scIdx=%" PRIu32
                                    ", scCfgIdx=%" PRIu32 ")",
-                                   scConnectionIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnectionIdx, scConnection->secureChannelConfigIdx);
         }
     }
 
@@ -4064,11 +4060,10 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
         {
             SOPC_Buffer_Delete(buffer);
 
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32
-                                   ")",
-                                   OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx,
-                                   scConnection->endpointConnectionConfigIdx);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "ChunksMgr: raised INT_SC_RCV_FAILURE: %X: (epCfgIdx=%" PRIu32 ", scCfgIdx=%" PRIu32 ")",
+                OpcUa_BadInvalidArgument, scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE, eltId, (uintptr_t) NULL,
                                                            OpcUa_BadInvalidArgument);
             return;

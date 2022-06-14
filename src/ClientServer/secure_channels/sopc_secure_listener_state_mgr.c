@@ -243,7 +243,7 @@ static bool SOPC_SecureListenerStateMgr_GetFirstConnection(SOPC_SecureListener* 
             {
                 if (NULL != serverURL)
                 {
-                    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->endpointConnectionConfigIdx);
+                    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
                     if (NULL != scConfig)
                     {
                         // Accept a NULL URL in config to indicate any server endpoint URL is accepted by reverse

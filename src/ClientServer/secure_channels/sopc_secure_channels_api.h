@@ -60,7 +60,7 @@ typedef enum
 typedef enum
 {
     EP_CONNECTED = 0x300,  /* id = endpoint description config index,
-                              params = (uint32_t) endpoint connection config index,
+                              params = (uint32_t) secure channel config index,
                               auxParams = (uint32_t) secure channel connection index */
     EP_CLOSED,             /* id = endpoint description config index,
                                  auxParams = SOPC_ReturnStatus */
@@ -72,7 +72,7 @@ typedef enum
                               params = (uint32_t) secure channel configuration index,
                               auxParams = (uint32) reverse endpoint configuration index
                             */
-    SC_CONNECTION_TIMEOUT, /* id = endpoint connection config index */
+    SC_CONNECTION_TIMEOUT, /* id = secure channel config index */
     SC_DISCONNECTED,       /* id = secure channel connection index
                               auxParam = SOPC_StatusCode
                             */

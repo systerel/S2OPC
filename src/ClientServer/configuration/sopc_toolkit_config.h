@@ -96,9 +96,9 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNotif_Fct* pAddSpaceNotifFct);
 
 /**
- * \brief Index type for client secure channel / endpoint connection configuration
+ * \brief Index type for client secure channel configuration
  */
-typedef uint32_t SOPC_EndpointConnectionConfigIdx;
+typedef uint32_t SOPC_SecureChannelConfigIdx;
 
 /**
  *  \brief Record the given secure channel configuration for endpoint connection in returned index
@@ -108,7 +108,7 @@ typedef uint32_t SOPC_EndpointConnectionConfigIdx;
  *  0 if toolkit is not initialized, already
  *  configured or otherwise
  */
-SOPC_EndpointConnectionConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
+SOPC_SecureChannelConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
 /**
  * \brief Index type for server endpoint configuration

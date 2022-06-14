@@ -44,11 +44,11 @@ typedef enum SOPC_Services_Event
                                                 all SC established as client are closed */
     SE_TO_SE_ACTIVATE_ORPHANED_SESSION,     /* Client side only:
                                                id = session id
-                                               auxParam = (uint32_t) endpoint connection config index
+                                               auxParam = (uint32_t) secure channel config index
                                             */
     SE_TO_SE_CREATE_SESSION,                /* Client side only:
                                                id = session id
-                                               auxParam = (uint32_t) endpoint connection config index
+                                               auxParam = (uint32_t) secure channel config index
                                             */
     SE_TO_SE_ACTIVATE_SESSION,              /* Client side only:
                                              * id = session id
@@ -85,7 +85,7 @@ typedef enum SOPC_Services_Event
                                       */
     APP_TO_SE_CLOSE_ENDPOINT,        /* id = endpoint description config index
                                       */
-    APP_TO_SE_LOCAL_SERVICE_REQUEST, /* id = endpoint connection config index,
+    APP_TO_SE_LOCAL_SERVICE_REQUEST, /* id = secure channel config index,
                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
                                          ignored)
                                         auxParam = user application session context
@@ -95,7 +95,7 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_CLOSE_REVERSE_ENDPOINT, /* id = reverse endpoint description config index
                                        */
     APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
-                                      /* id = endpoint connection config index,
+                                      /* id = secure channel config index,
                                          params = reverse endpoint connection index or 0 if not a reverse connection
                                          auxParam = (SOPC_Internal_SessionAppContext*)
                                        */
@@ -104,7 +104,7 @@ typedef enum SOPC_Services_Event
                                          ignored)
                                          auxParam = user application request context
                                       */
-    APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = endpoint connection config index,
+    APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = secure channel config index,
                                          params = reverse endpoint connection index or 0 if not a reverse connection
                                          auxParam = (SOPC_Internal_DiscoveryContext*)
                                        */

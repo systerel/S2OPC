@@ -48,31 +48,30 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                requestContext);
 }
 
-SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx)
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
-    assert(0 != endpointConnectionConfigIdx && "Invalid secure connection configuration index 0");
-    assert(endpointConnectionConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+    assert(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
+    assert(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
            "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
     return (SOPC_EndpointConnectionCfg){.connectionType = SOPC_EndpointConnectionType_Classic,
-                                        .data.classic = {.endpointConnectionConfigIdx = endpointConnectionConfigIdx}};
+                                        .data.classic = {.secureChannelConfigIdx = secureChannelConfigIdx}};
 }
 
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
     SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx,
-    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx)
+    SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
     assert(0 != reverseEndpointConfigIdx && "Invalid reverse endpoint index 0");
     assert(reverseEndpointConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
            "Invalid reverse endpoint index <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
     assert(reverseEndpointConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
            "Invalid reverse endpoint index > 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
-    assert(0 != endpointConnectionConfigIdx && "Invalid secure connection configuration index 0");
-    assert(endpointConnectionConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+    assert(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
+    assert(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
            "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
     return (SOPC_EndpointConnectionCfg){.connectionType = SOPC_EndpointConnectionType_Reverse,
                                         .data.reverse = {.reverseEndpointConfigIdx = reverseEndpointConfigIdx,
-                                                         .endpointConnectionConfigIdx = endpointConnectionConfigIdx}};
+                                                         .secureChannelConfigIdx = secureChannelConfigIdx}};
 }
 
 bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
@@ -80,15 +79,15 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpoint
                                              uintptr_t sessionContext,
                                              SOPC_ExtensionObject* userToken)
 {
-    uint32_t connectionConfigIdx = 0;
+    uint32_t secureChannelConfigIdx = 0;
     uint32_t reverseEndpointConfigIdx = 0;
     switch (endpointConnectionCfg.connectionType)
     {
     case SOPC_EndpointConnectionType_Classic:
-        connectionConfigIdx = endpointConnectionCfg.data.classic.endpointConnectionConfigIdx;
+        secureChannelConfigIdx = endpointConnectionCfg.data.classic.secureChannelConfigIdx;
         break;
     case SOPC_EndpointConnectionType_Reverse:
-        connectionConfigIdx = endpointConnectionCfg.data.reverse.endpointConnectionConfigIdx;
+        secureChannelConfigIdx = endpointConnectionCfg.data.reverse.secureChannelConfigIdx;
         reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
         if (0 == reverseEndpointConfigIdx)
         {
@@ -98,7 +97,7 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpoint
     default:
         return false;
     }
-    if (0 == connectionConfigIdx)
+    if (0 == secureChannelConfigIdx)
     {
         return false;
     }
@@ -124,7 +123,7 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpoint
         }
     }
     sessionAppContext->userSessionContext = sessionContext;
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, connectionConfigIdx, (uintptr_t) reverseEndpointConfigIdx,
+    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, secureChannelConfigIdx, (uintptr_t) reverseEndpointConfigIdx,
                                (uintptr_t) sessionAppContext);
     return true;
 }
@@ -240,15 +239,15 @@ bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg end
                                                   void* discoveryReqStruct,
                                                   uintptr_t requestContext)
 {
-    uint32_t connectionConfigIdx = 0;
+    uint32_t secureChannelConfigIdx = 0;
     uint32_t reverseEndpointConfigIdx = 0;
     switch (endpointConnectionCfg.connectionType)
     {
     case SOPC_EndpointConnectionType_Classic:
-        connectionConfigIdx = endpointConnectionCfg.data.classic.endpointConnectionConfigIdx;
+        secureChannelConfigIdx = endpointConnectionCfg.data.classic.secureChannelConfigIdx;
         break;
     case SOPC_EndpointConnectionType_Reverse:
-        connectionConfigIdx = endpointConnectionCfg.data.reverse.endpointConnectionConfigIdx;
+        secureChannelConfigIdx = endpointConnectionCfg.data.reverse.secureChannelConfigIdx;
         reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
         if (0 == reverseEndpointConfigIdx)
         {
@@ -258,7 +257,7 @@ bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg end
     default:
         return false;
     }
-    if (0 == connectionConfigIdx)
+    if (0 == secureChannelConfigIdx)
     {
         return false;
     }
@@ -270,7 +269,7 @@ bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg end
     }
     discoveryContext->opcuaMessage = discoveryReqStruct;
     discoveryContext->discoveryAppContext = requestContext;
-    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, connectionConfigIdx,
+    SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, secureChannelConfigIdx,
                                (uintptr_t) reverseEndpointConfigIdx, (uintptr_t) discoveryContext);
     return true;
 }

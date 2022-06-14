@@ -497,7 +497,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
-        // id = endpoint connection config index,
+        // id = secure channel config index,
         // params = reverse endpoint connection index or 0 if not a reverse connection
         // auxParam = (SOPC_Internal_SessionAppContext*)
         assert(id <= constants__t_channel_config_idx_i_max);
@@ -573,7 +573,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     case APP_TO_SE_SEND_DISCOVERY_REQUEST:
-        // id = endpoint connection config index,
+        // id = secure channel config index,
         // params = reverse endpoint connection index or 0 if not a reverse connection
         // auxParam = (SOPC_Internal_DiscoveryContext*)
         assert(id <= constants_bs__t_channel_config_idx_i_max);

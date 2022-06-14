@@ -168,7 +168,7 @@ typedef struct SOPC_SecureConnection
 
     /* Set by SC connection state manager */
     SOPC_SecureConnection_State state;
-    uint32_t endpointConnectionConfigIdx;
+    uint32_t secureChannelConfigIdx;
     // SC reverse connection info
     bool isReverseConnection;          // use ReverseHello mechanism fpr this connection
     uint16_t serverReverseConnIdx;     // reverse connection index in endpoint configuration

@@ -96,7 +96,7 @@ typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
-typedef SOPC_EndpointConnectionConfigIdx constants_bs__t_channel_config_idx_i;
+typedef SOPC_SecureChannelConfigIdx constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;
 typedef uint32_t constants_bs__t_client_handle_i;
 typedef uint32_t constants_bs__t_client_request_handle_i;

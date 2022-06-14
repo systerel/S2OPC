@@ -93,9 +93,9 @@ typedef enum SOPC_EndpointConnectionType
  */
 typedef struct SOPC_EndpointConnection_Classic
 {
-    SOPC_EndpointConnectionConfigIdx
-        endpointConnectionConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
-                                        returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
+    SOPC_SecureChannelConfigIdx
+        secureChannelConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
+                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
 } SOPC_EndpointConnection_Classic;
 
 /**
@@ -106,8 +106,8 @@ typedef struct SOPC_EndpointConnection_Reverse
     SOPC_ReverseEndpointConfigIdx
         reverseEndpointConfigIdx; /*<< Index of the Reverse Endpoint configuration to listen for server connection
                                        returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig() */
-    SOPC_EndpointConnectionConfigIdx
-        endpointConnectionConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
+    SOPC_SecureChannelConfigIdx
+        secureChannelConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
 } SOPC_EndpointConnection_Reverse;
 
@@ -127,23 +127,22 @@ typedef struct SOPC_EndpointConnectionCfg
 /**
  * \brief Create an endpoint connection configuration for a classic connection (initiated by client)
  *
- * \param endpointConnectionConfigIdx  Index of the Secure Channel configuration for endpoint connection
+ * \param secureChannelConfigIdx  Index of the Secure Channel configuration for endpoint connection
  *                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig()
  */
-SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx);
+SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx);
 
 /**
  * \brief Create an endpoint connection configuration for a reverse connection (initiated by server)
  *
  * \param reverseEndpointConfigIdx     Index of the Reverse Endpoint configuration to listen for server connection
  *                                     returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig()
- * \param endpointConnectionConfigIdx  Index of the Secure Channel configuration for endpoint connection returned by
+ * \param secureChannelConfigIdx  Index of the Secure Channel configuration for endpoint connection returned by
  * ::SOPC_ToolkitClient_AddSecureChannelConfig()
  */
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
     SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx,
-    SOPC_EndpointConnectionConfigIdx endpointConnectionConfigIdx);
+    SOPC_SecureChannelConfigIdx secureChannelConfigIdx);
 
 /**
  * \brief Request to activate a new session for the given endpoint connection configuration as client.

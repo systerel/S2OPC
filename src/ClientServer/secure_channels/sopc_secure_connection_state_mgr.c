@@ -202,8 +202,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
             if (scConnection->isServerConnection)
             {
                 // Remove the connection configuration created on connection establishment
-                bool configRes =
-                    SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+                bool configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->secureChannelConfigIdx);
                 if (!configRes && scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT &&
                     scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
                     scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE &&
@@ -212,7 +211,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                     // Note: configuration is only added after treatment of OPN request: do not consider previous states
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                            "ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
-                                           scConnection->endpointConnectionConfigIdx);
+                                           scConnection->secureChannelConfigIdx);
                 }
             }
 
@@ -493,7 +492,7 @@ static void SC_CloseSecureConnection(
     assert((socketFailure && immediateClose) || !socketFailure); // socketFailure == true => immediateClose == true
     assert(scConnection != NULL);
     uint32_t serverEndpointConfigIdx = 0;
-    uint32_t scConfigIdx = scConnection->endpointConnectionConfigIdx;
+    uint32_t scConfigIdx = scConnection->secureChannelConfigIdx;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
     if (!isScConnected)
@@ -709,7 +708,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
@@ -981,7 +980,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     OpcUa_OpenSecureChannelRequest_Initialize(&opnReq);
     const uint8_t* bytes = NULL;
 
-    config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(config != NULL);
 
     result = true;
@@ -1313,7 +1312,7 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     assert(!scConnection->isServerConnection);
     assert(opnRespBuffer != NULL);
     SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(scConfig != NULL);
     bool result = false;
 
@@ -1340,7 +1339,7 @@ static bool SC_ClientTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     assert(!scConnection->isServerConnection);
     assert(opnRespBuffer != NULL);
     SOPC_SecureChannel_Config* scConfig =
-        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(scConfig != NULL);
     bool result = false;
 
@@ -1791,7 +1790,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                    "ScStateMgr OPN: different protocol version expected=%" PRIu32 " received=%" PRIu32
                                    " epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->tcpMsgProperties.protocolVersion, opnReq->ClientProtocolVersion,
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
 
             // Note: since property was already adapted to server on HEL, it shall be the same
             //*errorStatus = OpcUa_BadProtocolVersionUnsupported; => not a TCP error message authorized error
@@ -1802,7 +1801,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ScStateMgr OPN: invalid request type epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             // Cannot renew in SC_Init state
             *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
             result = false;
@@ -1834,7 +1833,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "ScStateMgr OPN: invalid security parameters requested=%u epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
-                opnReq->SecurityMode, scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                opnReq->SecurityMode, scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             result = false;
             //*errorStatus = OpcUa_BadSecurityModeRejected; => not a TCP error message authorized error
             *errorStatus = OpcUa_BadSecurityChecksFailed;
@@ -1844,7 +1843,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ScStateMgr OPN: certificates expected epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
-                                   scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             // Certificates were absent in asym. header and it is not compatible with the security mode requested
             *errorStatus = OpcUa_BadSecurityChecksFailed;
             result = false;
@@ -1870,7 +1869,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                         SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%" PRIu32
                         " scCfgIdx=%" PRIu32,
-                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                        scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                 }
             }
             else
@@ -1890,10 +1889,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 else
                 {
                     // Nonce expected
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "ScStateMgr OPN: unexpected Nonce length=0 epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
-                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "ScStateMgr OPN: unexpected Nonce length=0 epCfgIdx=%" PRIu32
+                                           " scCfgIdx=%" PRIu32,
+                                           scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                     result = false;
                     *errorStatus = OpcUa_BadNonceInvalid;
                 }
@@ -1929,7 +1928,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
         if (result)
         {
-            scConnection->endpointConnectionConfigIdx = idx;
+            scConnection->secureChannelConfigIdx = idx;
             scConnection->clientCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
         }
 
@@ -2117,7 +2116,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     SOPC_SecureChannel_Config* scConfig = NULL;
     const uint8_t* bytes = NULL;
 
-    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN response message
@@ -2166,10 +2165,10 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                 if (!result && OpcUa_BadNonceInvalid == *errorStatus)
                 {
                     // Nonce invalid : security issue shall not report detailed status code
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "ScStateMgr: invalid Nonce in OPN request epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
-                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "ScStateMgr: invalid Nonce in OPN request epCfgIdx=%" PRIu32
+                                           " scCfgIdx=%" PRIu32,
+                                           scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }
             }
@@ -2274,7 +2273,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(scConfig != NULL);
 
     status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
@@ -2347,7 +2346,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                         SOPC_LOG_MODULE_CLIENTSERVER,
                         "ScStateMgr: Nonce unexpected in OPN req for None security mode epCfgIdx=%" PRIu32
                         " scCfgIdx=%" PRIu32,
-                        scConnection->serverEndpointConfigIdx, scConnection->endpointConnectionConfigIdx);
+                        scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                 }
             }
             else
@@ -2412,7 +2411,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     memset(&newSecuKeySets, 0, sizeof(SOPC_SC_SecurityKeySets));
     memset(&newSecuToken, 0, sizeof(SOPC_SecureConnection_SecurityToken));
 
-    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+    scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     assert(scConfig != NULL);
 
     // Write the OPN request message
@@ -2554,8 +2553,7 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     }
     else
     {
-        SOPC_SecureChannel_Config* scConfig =
-            SOPC_ToolkitClient_GetSecureChannelConfig(sc->endpointConnectionConfigIdx);
+        SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
         assert(scConfig != NULL);
         serialized_private_key = scConfig->key_priv_cli;
         cert_data = scConfig->crt_cli;
@@ -2683,13 +2681,13 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         if (scConnection->isReverseConnection)
         {
             SOPC_EventHandler_Post(secureChannelsEventHandler, SC_REVERSE_CONNECTED, scIdx,
-                                   (uintptr_t) scConnection->endpointConnectionConfigIdx,
+                                   (uintptr_t) scConnection->secureChannelConfigIdx,
                                    (uintptr_t) scConnection->serverReverseConnIdx);
         }
         else
         {
             SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTED, scIdx, (uintptr_t) NULL,
-                                   scConnection->endpointConnectionConfigIdx);
+                                   scConnection->secureChannelConfigIdx);
         }
         return;
     }
@@ -2765,7 +2763,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         scConnection->connectionTimeoutTimerId = 0;
 
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CONNECTED, scConnection->serverEndpointConfigIdx,
-                               (uintptr_t) scConnection->endpointConnectionConfigIdx, scIdx);
+                               (uintptr_t) scConnection->secureChannelConfigIdx, scIdx);
 
         // For ReverseConnection, from part 6 v1.05.01 §7.1.3
         // When a SecureChannel is established, the Server shall immediately create a new socket
@@ -3598,7 +3596,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 scConnection = SC_GetConnection(idx);
                 assert(scConnection != NULL);
                 // record the secure channel connection configuration
-                scConnection->endpointConnectionConfigIdx = scCfgIdx;
+                scConnection->secureChannelConfigIdx = scCfgIdx;
 
                 result = sc_init_key_and_certs(scConnection);
                 errorMsg = "Failed to initialize keys and certificates for connection";
