@@ -141,6 +141,14 @@ if(ENABLE_TESTING)
   target_link_libraries(check_sockets PRIVATE Check::check s2opc_clientserver)
   s2opc_unit_test(check_sockets)
 
+  # Security policy configuration tests
+
+  add_executable(check_security_policy_config "unit_tests/secure_channels/check_security_policy_config.c")
+  target_compile_options(check_security_policy_config PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(check_security_policy_config PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(check_security_policy_config PRIVATE Check::check s2opc_clientserver)
+  s2opc_unit_test(check_security_policy_config)
+
   # Secure channels (stubbed on services side) tests
   file(GLOB SECURE_CHANNELS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/configuration/sopc_ieee_check.c"
                                 "${S2OPC_ROOT_PATH}/src/ClientServer/secure_channels/*.c")
