@@ -58,11 +58,17 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
 static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection* connection,
                                                            uint16_t index,
                                                            SOPC_SecurityMode_Type securityMode,
+                                                           uint16_t groupId,
+                                                           uint32_t groupVersion,
+                                                           uint32_t publisherId,
                                                            uint16_t nbDataSets)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     assert(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
+    SOPC_ReaderGroup_Set_GroupVersion(readerGroup, groupVersion);
+    SOPC_ReaderGroup_Set_GroupId(readerGroup, groupId);
+    SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, publisherId);
     assert(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     assert(allocSuccess);
@@ -72,20 +78,14 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
 
 static SOPC_DataSetReader* SOPC_PubSubConfig_SetReaderAt(SOPC_ReaderGroup* readerGroup,
                                                          uint16_t index,
-                                                         uint32_t publisherId,
-                                                         uint16_t messageId,
-                                                         uint32_t version,
                                                          uint16_t writerId,
                                                          double interval)
 {
     assert(index < 0x100);
     SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, (uint8_t) index);
     assert(reader != NULL);
-    SOPC_DataSetReader_Set_WriterGroupVersion(reader, version);
-    SOPC_DataSetReader_Set_WriterGroupId(reader, messageId);
     SOPC_DataSetReader_Set_DataSetWriterId(reader, writerId);
     SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2.0 * interval);
-    SOPC_DataSetReader_Set_PublisherId_UInteger(reader, publisherId);
     return reader;
 }
 
@@ -149,6 +149,10 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
+        // GroupId = 14
+        // GroupVersion = 1
+        // Interval = 100.000000 ms
+
         writerGroup =
             SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 100.000000, SOPC_SecurityMode_SignAndEncrypt);
         alloc = NULL != writerGroup;
@@ -182,6 +186,10 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
+        // GroupId = 15
+        // GroupVersion = 1
+        // Interval = 1000.000000 ms
+
         writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000, SOPC_SecurityMode_None);
         alloc = NULL != writerGroup;
     }
@@ -233,7 +241,10 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         // Allocate 1 datasets
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_SignAndEncrypt, 1);
+        // GroupId = 14
+        // GroupVersion = 1
+        // PubId = 42
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_SignAndEncrypt, 14, 1, 42, 1);
         alloc = NULL != readerGroup;
     }
 
@@ -241,11 +252,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        // PubId = 42
-        // GroupId = 14
-        // GroupVersion = 1
-        // Interval = 100.000000
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 42, 14, 1, 100.000000);
+        // Interval = 100.000000 ms
+        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 100.000000);
         alloc = NULL != dsReader;
     }
 
@@ -265,7 +273,10 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         // Allocate 1 datasets
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 1);
+        // GroupId = 15
+        // GroupVersion = 1
+        // PubId = 42
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1);
         alloc = NULL != readerGroup;
     }
 
@@ -273,11 +284,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        // PubId = 42
-        // GroupId = 15
-        // GroupVersion = 1
-        // Interval = 1000.000000
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 42, 15, 1, 1000.000000);
+        // Interval = 1000.000000 ms
+        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 1000.000000);
         alloc = NULL != dsReader;
     }
 
