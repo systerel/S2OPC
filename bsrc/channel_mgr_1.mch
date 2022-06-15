@@ -30,6 +30,7 @@ DEFINITIONS
     s_channel_connected,
     a_channel_connected_time,
     a_config,
+    a_reverse_endpoint_config,
     a_endpoint
     ;
 
@@ -40,6 +41,7 @@ DEFINITIONS
     a_channel_connected_time     : t_channel +-> t_timeref             &
     dom(a_channel_connected_time) = s_channel_connected                &
     a_config                     : t_channel +-> t_channel_config_idx  &
+    a_reverse_endpoint_config    : t_channel +-> t_reverse_endpoint_config_idx_i &
     a_endpoint                   : t_channel +-> t_endpoint_config_idx
 
 ABSTRACT_VARIABLES
@@ -54,6 +56,7 @@ INITIALISATION
     s_channel_connected         := {} ||
     a_channel_connected_time    := {} ||
     a_config                    := {} ||
+    a_reverse_endpoint_config   := {} ||
     a_endpoint                  := {}
 
 OPERATIONS
@@ -99,6 +102,22 @@ OPERATIONS
             config_idx := c_channel_config_idx_indet
         ELSE
             config_idx := a_config(channel)
+        END
+    END
+    ;
+
+    config_idx, reverse_endpoint_config_idx <-- get_all_channel_info (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        IF channel /: s_channel_connected
+        THEN
+            config_idx := c_channel_config_idx_indet ||
+            reverse_endpoint_config_idx := c_reverse_endpoint_config_idx_indet
+        ELSE
+            config_idx := a_config(channel) ||
+            reverse_endpoint_config_idx := a_reverse_endpoint_config(channel)
         END
     END
     ;
@@ -191,14 +210,16 @@ OPERATIONS
     END
     ;
 
-    set_config(p_channel, p_channel_config_idx) =
+    set_config(p_channel, p_channel_config_idx, p_reverse_endpoint_config_idx) =
     PRE
         p_channel            : t_channel_i            &
         p_channel            : t_channel              &
         p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx
+        p_channel_config_idx : t_channel_config_idx   &
+        p_reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i
     THEN
-        a_config(p_channel) := p_channel_config_idx
+        a_config(p_channel) := p_channel_config_idx ||
+        a_reverse_endpoint_config(p_channel) := p_reverse_endpoint_config_idx
     END
     ;
 

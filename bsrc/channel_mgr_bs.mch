@@ -79,10 +79,11 @@ OPERATIONS
     END
     ;
 
-    prepare_cli_open_secure_channel(p_config_idx) =
+    prepare_cli_open_secure_channel(p_config_idx, p_reverse_endpoint_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i &
-        p_config_idx : t_channel_config_idx
+        p_config_idx : t_channel_config_idx &
+        p_reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i
     THEN
         skip
     END

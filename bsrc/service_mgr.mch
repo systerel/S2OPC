@@ -511,10 +511,11 @@ OPERATIONS
     ;
 
     /* Generates an event to send the discovery request */
-    client_channel_connected_event_discovery (channel_config_idx, channel) =
+    client_channel_connected_event_discovery (channel_config_idx, reverse_endpoint_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i &
         channel : t_channel_i &
         channel : s_channel_connected
     THEN

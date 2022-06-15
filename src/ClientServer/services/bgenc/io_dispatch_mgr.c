@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 05/08/2022 09:11:34
+ Date                 : 24/08/2022 07:50:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -459,17 +459,20 @@ void io_dispatch_mgr__client_request_timeout(
 
 void io_dispatch_mgr__client_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel) {
    {
       t_bool io_dispatch_mgr__l_bres;
       
       channel_mgr__cli_set_connected_channel(io_dispatch_mgr__channel_config_idx,
+         io_dispatch_mgr__reverse_endpoint_config_idx,
          io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_bres);
       if (io_dispatch_mgr__l_bres == true) {
          service_mgr__client_channel_connected_event_session(io_dispatch_mgr__channel_config_idx,
             io_dispatch_mgr__channel);
          service_mgr__client_channel_connected_event_discovery(io_dispatch_mgr__channel_config_idx,
+            io_dispatch_mgr__reverse_endpoint_config_idx,
             io_dispatch_mgr__channel);
       }
    }
@@ -506,6 +509,7 @@ void io_dispatch_mgr__server_channel_connected_event(
 
 void io_dispatch_mgr__client_activate_new_session(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_user_token_i io_dispatch_mgr__p_user_token,
    const constants__t_session_application_context_i io_dispatch_mgr__app_context,
    t_bool * const io_dispatch_mgr__bres) {
@@ -524,6 +528,7 @@ void io_dispatch_mgr__client_activate_new_session(
          if (io_dispatch_mgr__l_connected_channel == false) {
             io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
+               io_dispatch_mgr__reverse_endpoint_config_idx,
                io_dispatch_mgr__l_is_one_sc_closing,
                io_dispatch_mgr__bres);
             if (*io_dispatch_mgr__bres == true) {
@@ -641,6 +646,7 @@ void io_dispatch_mgr__client_send_service_request(
 
 void io_dispatch_mgr__client_send_discovery_request(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    const constants__t_application_context_i io_dispatch_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret) {
@@ -670,6 +676,7 @@ void io_dispatch_mgr__client_send_discovery_request(
          if (io_dispatch_mgr__l_connected_channel == false) {
             io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
             channel_mgr__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
+               io_dispatch_mgr__reverse_endpoint_config_idx,
                io_dispatch_mgr__l_is_one_sc_closing,
                &io_dispatch_mgr__l_bres);
             if (io_dispatch_mgr__l_bres == true) {
@@ -871,6 +878,7 @@ void io_dispatch_mgr__secure_channel_lost(
       t_bool io_dispatch_mgr__l_valid_new_channel;
       t_bool io_dispatch_mgr__l_is_client;
       constants__t_channel_config_idx_i io_dispatch_mgr__l_channel_config_idx;
+      constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__l_reverse_endpoint_config_idx;
       constants__t_channel_i io_dispatch_mgr__l_new_channel;
       t_bool io_dispatch_mgr__l_bres;
       t_bool io_dispatch_mgr__l_is_one_sc_closing;
@@ -881,8 +889,9 @@ void io_dispatch_mgr__secure_channel_lost(
          channel_mgr__is_client_channel(io_dispatch_mgr__channel,
             &io_dispatch_mgr__l_is_client);
          if (io_dispatch_mgr__l_is_client == true) {
-            channel_mgr__get_channel_info(io_dispatch_mgr__channel,
-               &io_dispatch_mgr__l_channel_config_idx);
+            channel_mgr__get_all_channel_info(io_dispatch_mgr__channel,
+               &io_dispatch_mgr__l_channel_config_idx,
+               &io_dispatch_mgr__l_reverse_endpoint_config_idx);
             channel_mgr__is_disconnecting_channel(io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_disconnecting_channel);
             service_mgr__client_secure_channel_lost_session_sm(io_dispatch_mgr__channel,
@@ -893,6 +902,7 @@ void io_dispatch_mgr__secure_channel_lost(
                if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
                   io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
                   channel_mgr__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
+                     io_dispatch_mgr__l_reverse_endpoint_config_idx,
                      io_dispatch_mgr__l_is_one_sc_closing,
                      &io_dispatch_mgr__l_bres);
                }

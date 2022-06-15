@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.h
 
- Date                 : 04/08/2022 14:53:05
+ Date                 : 24/08/2022 07:50:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -47,6 +47,7 @@ extern constants__t_timeref_i channel_mgr_1__a_channel_connected_time_i[constant
 extern constants__t_channel_config_idx_i channel_mgr_1__a_config_i[constants__t_channel_i_max+1];
 extern constants__t_channel_i channel_mgr_1__a_config_inv_i[constants__t_channel_config_idx_i_max+1];
 extern constants__t_endpoint_config_idx_i channel_mgr_1__a_endpoint_i[constants__t_channel_i_max+1];
+extern constants__t_reverse_endpoint_config_idx_i channel_mgr_1__a_reverse_endpoint_config_i[constants__t_channel_i_max+1];
 extern t_entier4 channel_mgr_1__card_channel_connected_i;
 extern t_entier4 channel_mgr_1__card_cli_channel_connecting_i;
 extern t_bool channel_mgr_1__s_channel_connected_i[constants__t_channel_i_max+1];
@@ -68,6 +69,10 @@ extern void channel_mgr_1__add_cli_channel_connecting(
    const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
 extern void channel_mgr_1__add_cli_channel_disconnecting(
    const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
+extern void channel_mgr_1__get_all_channel_info(
+   const constants__t_channel_i channel_mgr_1__channel,
+   constants__t_channel_config_idx_i * const channel_mgr_1__config_idx,
+   constants__t_reverse_endpoint_config_idx_i * const channel_mgr_1__reverse_endpoint_config_idx);
 extern void channel_mgr_1__get_card_channel_connected(
    t_entier4 * const channel_mgr_1__p_card_connected);
 extern void channel_mgr_1__get_card_channel_used(
@@ -121,7 +126,8 @@ extern void channel_mgr_1__server_get_endpoint_config(
    constants__t_endpoint_config_idx_i * const channel_mgr_1__endpoint_config_idx);
 extern void channel_mgr_1__set_config(
    const constants__t_channel_i channel_mgr_1__p_channel,
-   const constants__t_channel_config_idx_i channel_mgr_1__p_channel_config_idx);
+   const constants__t_channel_config_idx_i channel_mgr_1__p_channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i channel_mgr_1__p_reverse_endpoint_config_idx);
 extern void channel_mgr_1__set_endpoint(
    const constants__t_channel_i channel_mgr_1__p_channel,
    const constants__t_endpoint_config_idx_i channel_mgr_1__p_endpoint_config_idx);

@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 05/08/2022 09:23:58
+ Date                 : 24/08/2022 07:50:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -96,6 +96,7 @@
 #define constants_bs__t_opcua_duration_i t_entier4
 #define constants_bs__t_publishReqQueue_i t_entier4
 #define constants_bs__t_request_context_i t_entier4
+#define constants_bs__t_reverse_endpoint_config_idx_i t_entier4
 #define constants_bs__t_server_request_handle_i t_entier4
 #define constants_bs__t_session_application_context_i t_entier4
 #define constants_bs__t_session_i t_entier4
@@ -168,6 +169,7 @@
 #define constants_bs__t_opcua_duration_i_max (-1)
 #define constants_bs__t_publishReqQueue_i_max (-1)
 #define constants_bs__t_request_context_i_max (-1)
+#define constants_bs__t_reverse_endpoint_config_idx_i_max (-1)
 #define constants_bs__t_server_request_handle_i_max (-1)
 #define constants_bs__t_session_application_context_i_max (-1)
 #define constants_bs__t_session_i_max (-1)
@@ -241,6 +243,7 @@
 #define constants_bs__c_opcua_duration_zero 0
 #define constants_bs__c_publishReqQueue_indet 0
 #define constants_bs__c_request_context_indet 0
+#define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0

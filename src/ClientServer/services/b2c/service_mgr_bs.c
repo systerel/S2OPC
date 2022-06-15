@@ -31,6 +31,7 @@
 #include "util_b2c.h"
 
 #include "sopc_internal_app_dispatcher.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
@@ -99,6 +100,7 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
 
 void service_mgr_bs__client_channel_connected_event_discovery(
     const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
+    const constants__t_reverse_endpoint_config_idx_i service_mgr_bs__reverse_endpoint_config_idx,
     const constants__t_channel_i service_mgr_bs__channel)
 {
     SOPC_UNUSED_ARG(service_mgr_bs__channel);
@@ -120,8 +122,32 @@ void service_mgr_bs__client_channel_connected_event_discovery(
                     elt = SOPC_SLinkedList_Next(&listIt);
                     if (elt != NULL)
                     {
-                        SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
-                                                   (uintptr_t) elt->msgToSend, elt->msgAppContext);
+                        SOPC_Internal_DiscoveryContext* discoveryContext = SOPC_Calloc(1, sizeof(*discoveryContext));
+                        if (NULL != discoveryContext)
+                        {
+                            discoveryContext->opcuaMessage = elt->msgToSend;
+                            discoveryContext->discoveryAppContext = elt->msgAppContext;
+                            SOPC_Services_EnqueueEvent(
+                                APP_TO_SE_SEND_DISCOVERY_REQUEST, service_mgr_bs__channel_config_idx,
+                                service_mgr_bs__reverse_endpoint_config_idx, (uintptr_t) discoveryContext);
+                        }
+                        else
+                        {
+                            assert(NULL != elt->msgToSend);
+                            SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) elt->msgToSend;
+                            SOPC_ReturnStatus status =
+                                SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_OUT_OF_MEMORY,
+                                                         (uintptr_t) encType, elt->msgAppContext);
+                            assert(SOPC_STATUS_OK == status);
+
+                            SOPC_Logger_TraceWarning(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "ServicesMgr: APP_TO_SE_SEND_DISCOVERY_REQUEST failed after SC connected" PRIu32
+                                " msgType=%s ctx=%" PRIuPTR,
+                                SOPC_EncodeableType_GetName(encType), elt->msgAppContext);
+                            encType->Clear(elt->msgToSend);
+                            SOPC_Free(elt->msgToSend);
+                        }
                     }
                     SOPC_Free(elt);
                 }

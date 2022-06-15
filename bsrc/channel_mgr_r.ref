@@ -35,6 +35,7 @@ DEFINITIONS
     s_channel_connected,
     a_channel_connected_time,
     a_config,
+    a_reverse_endpoint_config,
     a_endpoint,
     a_SecurityPolicy
 
@@ -47,12 +48,13 @@ INITIALISATION
     s_channel_connected         := {} ||
     a_channel_connected_time    := {} ||
     a_config                    := {} ||
+    a_reverse_endpoint_config   := {} ||
     a_endpoint                  := {} ||
     a_SecurityPolicy            := {}
 
 OPERATIONS
 
-    bres <-- cli_open_secure_channel (config_idx, is_one_sc_auto_closing) =
+    bres <-- cli_open_secure_channel (config_idx, reverse_endpoint_config_idx, is_one_sc_auto_closing) =
     BEGIN
        IF  config_idx /: dom(a_config~) &
            card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel) & /* No slot remaining */
@@ -118,7 +120,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- cli_set_connected_channel (config_idx, channel) =
+    bres <-- cli_set_connected_channel (config_idx, reverse_endpoint_config_idx, channel) =
     BEGIN
         IF  config_idx : s_cli_channel_connecting &
             channel /: s_channel_connected
@@ -126,6 +128,7 @@ OPERATIONS
             s_cli_channel_connecting := s_cli_channel_connecting - {config_idx} ||
             s_channel_connected      := s_channel_connected \/ {channel}        ||
             a_config(channel)        := config_idx                              ||
+            a_reverse_endpoint_config(channel) := reverse_endpoint_config_idx   ||
             /* a_SecurityPolicy(channel) :: t_SecurityPolicy */
             a_SecurityPolicy
             :(

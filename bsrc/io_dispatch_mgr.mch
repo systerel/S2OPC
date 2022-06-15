@@ -93,10 +93,11 @@ OPERATIONS
     END
     ;
 
-    client_channel_connected_event (channel_config_idx, channel) =
+    client_channel_connected_event (channel_config_idx, reverse_endpoint_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i &
         channel : t_channel_i &
         channel : t_channel &
         a_buffer_out_state = c_buffer_out_state_indet &
@@ -132,9 +133,10 @@ OPERATIONS
     ;
 
     /* Only one session could be in activation until the first session is notified as activated */
-    bres <-- client_activate_new_session (channel_config_idx, p_user_token, app_context) =
+    bres <-- client_activate_new_session (channel_config_idx, reverse_endpoint_config_idx, p_user_token, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
         app_context : t_session_application_context_i &
@@ -222,11 +224,12 @@ OPERATIONS
     ;
 
 
-    ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
+    ret <-- client_send_discovery_request (channel_config_idx, reverse_endpoint_config_idx, req_msg, app_context) =
     PRE
-        channel_config_idx : t_channel_config_idx_i &
-        req_msg            : t_msg_i &
-        app_context        : t_application_context_i &
+        channel_config_idx          : t_channel_config_idx_i &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i &
+        req_msg                     : t_msg_i &
+        app_context                 : t_application_context_i &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* message is unkown before call and deallocated after operation */
         c_msg_out = c_msg_indet &

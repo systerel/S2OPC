@@ -53,6 +53,7 @@ PROMOTES
     server_get_endpoint_config,
     is_client_channel,
     get_channel_info,
+    get_all_channel_info,
     get_connected_channel,
     is_disconnecting_channel,
     is_connected_channel,
@@ -184,7 +185,7 @@ OPERATIONS
 
     /* Global operations */
 
-    bres <-- cli_open_secure_channel (config_idx, is_one_sc_auto_closing) =
+    bres <-- cli_open_secure_channel (config_idx, reverse_endpoint_config_idx, is_one_sc_auto_closing) =
     VAR
         l_already_connecting,
         l_dom,
@@ -201,7 +202,7 @@ OPERATIONS
                 IF l_allowed_new_sc = TRUE
                 THEN
                     add_cli_channel_connecting(config_idx);
-                    prepare_cli_open_secure_channel(config_idx);
+                    prepare_cli_open_secure_channel(config_idx, reverse_endpoint_config_idx);
                     bres := TRUE
                 ELSE
                     bres := FALSE
@@ -230,7 +231,7 @@ OPERATIONS
         THEN
             l_current_time <-- get_current_TimerReference;
             add_channel_connected(channel, l_current_time);
-            set_config(channel, channel_config_idx);
+            set_config(channel, channel_config_idx, c_reverse_endpoint_config_idx_indet);
             set_endpoint(channel, endpoint_config_idx);
             define_SecurityPolicy(channel);
             bres := TRUE
@@ -297,7 +298,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- cli_set_connected_channel (config_idx, channel) =
+    bres <-- cli_set_connected_channel (config_idx, reverse_endpoint_config_idx, channel) =
     VAR
         l_is_channel_connecting,
         l_is_channel_connected,
@@ -311,7 +312,7 @@ OPERATIONS
             remove_cli_channel_connecting(config_idx);
             l_current_time <-- get_current_TimerReference;
             add_channel_connected(channel, l_current_time);
-            set_config(channel, config_idx);
+            set_config(channel, config_idx, reverse_endpoint_config_idx);
             define_SecurityPolicy(channel);
             bres := TRUE
         ELSE

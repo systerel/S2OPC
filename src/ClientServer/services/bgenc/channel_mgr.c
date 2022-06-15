@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 04/08/2022 14:53:05
+ Date                 : 24/08/2022 07:50:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -124,6 +124,7 @@ void channel_mgr__l_is_new_sc_connection_allowed(
 
 void channel_mgr__cli_open_secure_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
+   const constants__t_reverse_endpoint_config_idx_i channel_mgr__reverse_endpoint_config_idx,
    const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__bres) {
    {
@@ -146,7 +147,8 @@ void channel_mgr__cli_open_secure_channel(
                &channel_mgr__l_allowed_new_sc);
             if (channel_mgr__l_allowed_new_sc == true) {
                channel_mgr_1__add_cli_channel_connecting(channel_mgr__config_idx);
-               channel_mgr_bs__prepare_cli_open_secure_channel(channel_mgr__config_idx);
+               channel_mgr_bs__prepare_cli_open_secure_channel(channel_mgr__config_idx,
+                  channel_mgr__reverse_endpoint_config_idx);
                *channel_mgr__bres = true;
             }
             else {
@@ -187,7 +189,8 @@ void channel_mgr__srv_new_secure_channel(
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
             channel_mgr__l_current_time);
          channel_mgr_1__set_config(channel_mgr__channel,
-            channel_mgr__channel_config_idx);
+            channel_mgr__channel_config_idx,
+            constants__c_reverse_endpoint_config_idx_indet);
          channel_mgr_1__set_endpoint(channel_mgr__channel,
             channel_mgr__endpoint_config_idx);
          channel_mgr_bs__define_SecurityPolicy(channel_mgr__channel);
@@ -260,6 +263,7 @@ void channel_mgr__channel_lost(
 
 void channel_mgr__cli_set_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
+   const constants__t_reverse_endpoint_config_idx_i channel_mgr__reverse_endpoint_config_idx,
    const constants__t_channel_i channel_mgr__channel,
    t_bool * const channel_mgr__bres) {
    {
@@ -278,7 +282,8 @@ void channel_mgr__cli_set_connected_channel(
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
             channel_mgr__l_current_time);
          channel_mgr_1__set_config(channel_mgr__channel,
-            channel_mgr__config_idx);
+            channel_mgr__config_idx,
+            channel_mgr__reverse_endpoint_config_idx);
          channel_mgr_bs__define_SecurityPolicy(channel_mgr__channel);
          *channel_mgr__bres = true;
       }

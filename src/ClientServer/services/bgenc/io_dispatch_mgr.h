@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 05/08/2022 09:11:34
+ Date                 : 24/08/2022 07:50:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -82,11 +82,13 @@ extern void io_dispatch_mgr__l_set_app_call_context_channel_config(
 extern void io_dispatch_mgr__UNINITIALISATION(void);
 extern void io_dispatch_mgr__client_activate_new_session(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_user_token_i io_dispatch_mgr__p_user_token,
    const constants__t_session_application_context_i io_dispatch_mgr__app_context,
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__client_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__client_reactivate_session_new_user(
    const constants__t_session_i io_dispatch_mgr__session,
@@ -101,6 +103,7 @@ extern void io_dispatch_mgr__client_send_close_session_request(
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__client_send_discovery_request(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__reverse_endpoint_config_idx,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    const constants__t_application_context_i io_dispatch_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret);

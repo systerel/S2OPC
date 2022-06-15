@@ -57,6 +57,7 @@ SETS
     t_server_request_handle_i;
     t_channel_config_idx_i;
     t_endpoint_config_idx_i;
+    t_reverse_endpoint_config_idx_i;
     t_ExpandedNodeId_i;
     t_Reference_i;
     t_LocalizedText_i;
@@ -135,6 +136,7 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_endpoint_config_idx_indet,
+    c_reverse_endpoint_config_idx_indet,
     c_client_request_handle_indet,
     c_server_request_handle_any,
     c_no_application_context,
@@ -212,6 +214,7 @@ ABSTRACT_CONSTANTS
     t_request_context,
     t_channel_config_idx,
     t_endpoint_config_idx,
+    t_reverse_endpoint_config_idx,
     t_client_request_handle,
     t_ExpandedNodeId,
     t_RefIndex,
@@ -416,6 +419,10 @@ PROPERTIES
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet /: t_endpoint_config_idx &
+
+    t_reverse_endpoint_config_idx <: t_reverse_endpoint_config_idx_i &
+    c_reverse_endpoint_config_idx_indet : t_reverse_endpoint_config_idx_i &
+    c_reverse_endpoint_config_idx_indet /: t_reverse_endpoint_config_idx &
 
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &

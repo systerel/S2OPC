@@ -126,6 +126,7 @@ SETS
     t_channel_config_idx_i;
     t_channel_i;
     t_endpoint_config_idx_i;
+    t_reverse_endpoint_config_idx_i;
 
     t_sessionState = {
         e_session_init,
@@ -354,6 +355,7 @@ CONCRETE_CONSTANTS
 
     c_Timestamp_null,
     c_endpoint_config_idx_indet,
+    c_reverse_endpoint_config_idx_indet,
     c_user_indet,
     c_user_token_indet,
     c_session_indet,
@@ -463,6 +465,7 @@ ABSTRACT_CONSTANTS
     cast_t_BrowseValue,
 
     t_endpoint_config_idx,
+    t_reverse_endpoint_config_idx,
     t_session,
     t_BrowsePath,
     t_RelativePath,
@@ -680,6 +683,10 @@ PROPERTIES
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet /: t_endpoint_config_idx &
+
+    t_reverse_endpoint_config_idx <: t_reverse_endpoint_config_idx_i &
+    c_reverse_endpoint_config_idx_indet : t_reverse_endpoint_config_idx_i &
+    c_reverse_endpoint_config_idx_indet /: t_reverse_endpoint_config_idx &
 
     t_session <: t_session_i &
     c_session_indet : t_session_i &

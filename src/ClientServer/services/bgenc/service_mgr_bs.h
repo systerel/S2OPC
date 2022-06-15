@@ -21,7 +21,7 @@
 
  File Name            : service_mgr_bs.h
 
- Date                 : 04/08/2022 14:53:45
+ Date                 : 24/08/2022 07:51:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,7 @@ extern void service_mgr_bs__client_async_discovery_request_without_channel(
    t_bool * const service_mgr_bs__bres);
 extern void service_mgr_bs__client_channel_connected_event_discovery(
    const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
+   const constants__t_reverse_endpoint_config_idx_i service_mgr_bs__reverse_endpoint_config_idx,
    const constants__t_channel_i service_mgr_bs__channel);
 extern void service_mgr_bs__client_discovery_req_failures_on_final_connection_failure(
    const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx);

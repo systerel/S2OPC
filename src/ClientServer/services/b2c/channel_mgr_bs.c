@@ -100,12 +100,22 @@ void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_co
 }
 
 void channel_mgr_bs__prepare_cli_open_secure_channel(
-    const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx)
+    const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx,
+    const constants__t_reverse_endpoint_config_idx_i channel_mgr_bs__p_reverse_endpoint_config_idx)
 {
     SOPC_SecureChannel_Config* config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__p_config_idx);
     if (NULL != config)
     {
-        SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, channel_mgr_bs__p_config_idx, (uintptr_t) NULL, 0);
+        if (constants__c_reverse_endpoint_config_idx_indet == channel_mgr_bs__p_reverse_endpoint_config_idx)
+        {
+            SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, channel_mgr_bs__p_config_idx, (uintptr_t) NULL,
+                                             (uintptr_t) NULL);
+        }
+        else
+        {
+            SOPC_SecureChannels_EnqueueEvent(SC_REVERSE_CONNECT, channel_mgr_bs__p_reverse_endpoint_config_idx,
+                                             (uintptr_t) channel_mgr_bs__p_config_idx, (uintptr_t) NULL);
+        }
     }
     // else: will be checked in B model in next instruction and open avoided
 }

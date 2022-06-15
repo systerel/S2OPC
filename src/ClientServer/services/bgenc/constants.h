@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/08/2022 08:52:37
+ Date                 : 24/08/2022 07:50:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -100,6 +100,7 @@
 #define constants__t_opcua_duration_i constants_bs__t_opcua_duration_i
 #define constants__t_publishReqQueue_i constants_bs__t_publishReqQueue_i
 #define constants__t_request_context_i constants_bs__t_request_context_i
+#define constants__t_reverse_endpoint_config_idx_i constants_bs__t_reverse_endpoint_config_idx_i
 #define constants__t_server_request_handle_i constants_bs__t_server_request_handle_i
 #define constants__t_session_application_context_i constants_bs__t_session_application_context_i
 #define constants__t_session_i constants_bs__t_session_i
@@ -373,6 +374,7 @@ typedef enum {
 #define constants__t_opcua_duration_i_max constants_bs__t_opcua_duration_i_max
 #define constants__t_publishReqQueue_i_max constants_bs__t_publishReqQueue_i_max
 #define constants__t_request_context_i_max constants_bs__t_request_context_i_max
+#define constants__t_reverse_endpoint_config_idx_i_max constants_bs__t_reverse_endpoint_config_idx_i_max
 #define constants__t_server_request_handle_i_max constants_bs__t_server_request_handle_i_max
 #define constants__t_session_application_context_i_max constants_bs__t_session_application_context_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
@@ -450,6 +452,7 @@ typedef enum {
 #define constants__c_opcua_duration_zero constants_bs__c_opcua_duration_zero
 #define constants__c_publishReqQueue_indet constants_bs__c_publishReqQueue_indet
 #define constants__c_request_context_indet constants_bs__c_request_context_indet
+#define constants__c_reverse_endpoint_config_idx_indet constants_bs__c_reverse_endpoint_config_idx_indet
 #define constants__c_server_request_handle_any constants_bs__c_server_request_handle_any
 #define constants__c_session_indet constants_bs__c_session_indet
 #define constants__c_session_token_indet constants_bs__c_session_token_indet

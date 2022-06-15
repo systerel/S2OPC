@@ -31,6 +31,7 @@ DEFINITIONS
     s_channel_connected,
     a_channel_connected_time,
     a_config,
+    a_reverse_endpoint_config,
     a_endpoint,
     a_SecurityPolicy;
 
@@ -42,6 +43,7 @@ DEFINITIONS
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
+    a_reverse_endpoint_config : s_channel_connected >-> t_reverse_endpoint_config_idx_i &
     /* a_endpoint is used to retrieve the endpoint configuration index
        on which channel is connected (server side only):
        channel :  dom(a_endpoint) => channels connected onto current server instance &
@@ -62,10 +64,11 @@ INITIALISATION
 
 OPERATIONS
 
-    bres <-- cli_open_secure_channel (config_idx, is_one_sc_auto_closing) =
+    bres <-- cli_open_secure_channel (config_idx, reverse_endpoint_config_idx, is_one_sc_auto_closing) =
     PRE
         config_idx : t_channel_config_idx_i &
         config_idx : t_channel_config_idx &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i &
         is_one_sc_auto_closing : BOOL /* TRUE => a SC has been closed by auto-close prior to calling this operation */
     THEN
         bres,
@@ -94,6 +97,7 @@ OPERATIONS
        :(bres : BOOL &
          s_channel_connected <: t_channel &
          a_config : s_channel_connected >-> t_channel_config_idx &
+         a_reverse_endpoint_config : s_channel_connected >-> t_reverse_endpoint_config_idx_i &
          a_endpoint : s_channel_connected +-> t_endpoint_config_idx &
          a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy
         )
@@ -128,11 +132,13 @@ OPERATIONS
         s_channel_connected,
         s_cli_channel_disconnecting,
         a_config,
+        a_reverse_endpoint_config,
         a_endpoint,
         a_SecurityPolicy
         :(  s_channel_connected <: t_channel &
             s_cli_channel_disconnecting <: t_channel_config_idx &
             a_config : s_channel_connected >-> t_channel_config_idx &
+            a_reverse_endpoint_config : s_channel_connected >-> t_reverse_endpoint_config_idx_i &
             a_endpoint : s_channel_connected +-> t_endpoint_config_idx &
             a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy
          )
@@ -183,22 +189,25 @@ OPERATIONS
     END
     ;
 
-    bres <-- cli_set_connected_channel (config_idx, channel) =
+    bres <-- cli_set_connected_channel (config_idx, reverse_endpoint_config_idx, channel) =
     PRE
         channel : t_channel_i &
         channel : t_channel &
         config_idx : t_channel_config_idx_i &
-        config_idx : t_channel_config_idx
+        config_idx : t_channel_config_idx &
+        reverse_endpoint_config_idx : t_reverse_endpoint_config_idx_i
     THEN
         bres,
         s_cli_channel_connecting,
         s_channel_connected,  /* TODO FBA invariant sur a_endpoint qui dépend de s_channel_connected non prouvable en l'état */
         a_config,
+        a_reverse_endpoint_config,
         a_SecurityPolicy
         :(  bres : BOOL &
             s_cli_channel_connecting <: t_channel_config_idx &
             s_channel_connected <: t_channel &
             a_config : s_channel_connected >-> t_channel_config_idx &
+            a_reverse_endpoint_config : s_channel_connected >-> t_reverse_endpoint_config_idx_i &
             a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy
          )
     END
@@ -258,6 +267,22 @@ OPERATIONS
             config_idx := c_channel_config_idx_indet
         ELSE
             config_idx := a_config(channel)
+        END
+    END
+    ;
+
+    config_idx, reverse_endpoint_config_idx <-- get_all_channel_info (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        IF channel /: s_channel_connected
+        THEN
+            config_idx := c_channel_config_idx_indet ||
+            reverse_endpoint_config_idx := c_reverse_endpoint_config_idx_indet
+        ELSE
+            config_idx := a_config(channel) ||
+            reverse_endpoint_config_idx := a_reverse_endpoint_config(channel)
         END
     END
     ;

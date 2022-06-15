@@ -486,15 +486,15 @@ OPERATIONS
     END
     ;
 
-    client_channel_connected_event (channel_config_idx, channel) =
+    client_channel_connected_event (channel_config_idx, reverse_endpoint_config_idx, channel) =
     VAR
         l_bres
     IN
-        l_bres <-- cli_set_connected_channel (channel_config_idx, channel);
+        l_bres <-- cli_set_connected_channel (channel_config_idx, reverse_endpoint_config_idx, channel);
         IF l_bres = TRUE
         THEN
             client_channel_connected_event_session (channel_config_idx, channel);
-            client_channel_connected_event_discovery (channel_config_idx, channel)
+            client_channel_connected_event_discovery (channel_config_idx, reverse_endpoint_config_idx, channel)
         END
     END
     ;
@@ -519,7 +519,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- client_activate_new_session (channel_config_idx, p_user_token, app_context) =
+    bres <-- client_activate_new_session (channel_config_idx, reverse_endpoint_config_idx, p_user_token, app_context) =
     VAR
         l_channel,
         l_connected_channel,
@@ -533,7 +533,7 @@ OPERATIONS
             IF l_connected_channel = FALSE
             THEN
                 l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
-                bres <-- cli_open_secure_channel (channel_config_idx, l_is_one_sc_closing);
+                bres <-- cli_open_secure_channel (channel_config_idx, reverse_endpoint_config_idx, l_is_one_sc_closing);
                 IF bres = TRUE
                 THEN
                     /* No connected channel: will trigger create session and then activate session events asynchronously */
@@ -621,7 +621,7 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_send_discovery_request (channel_config_idx, req_msg, app_context) =
+    ret <-- client_send_discovery_request (channel_config_idx, reverse_endpoint_config_idx, req_msg, app_context) =
     VAR
         l_valid_msg,
         l_msg_typ,
@@ -643,7 +643,7 @@ OPERATIONS
             IF l_connected_channel = FALSE
             THEN
                 l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
-                l_bres <-- cli_open_secure_channel (channel_config_idx, l_is_one_sc_closing);
+                l_bres <-- cli_open_secure_channel (channel_config_idx, reverse_endpoint_config_idx, l_is_one_sc_closing);
                 IF l_bres = TRUE
                 THEN
                     /* No connected channel: will trigger to send discovery request on channel connection event */
@@ -800,6 +800,7 @@ OPERATIONS
         l_valid_new_channel,
         l_is_client,
         l_channel_config_idx,
+        l_reverse_endpoint_config_idx,
         l_new_channel,
         l_bres,
         l_is_one_sc_closing
@@ -810,7 +811,7 @@ OPERATIONS
             l_is_client <-- is_client_channel (channel);
             IF l_is_client = TRUE
             THEN
-                l_channel_config_idx <-- get_channel_info (channel);
+                l_channel_config_idx, l_reverse_endpoint_config_idx <-- get_all_channel_info (channel);
                 ASSERT l_channel_config_idx : t_channel_config_idx
                 THEN
                     l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
@@ -822,7 +823,7 @@ OPERATIONS
                         IF l_new_channel = c_channel_indet
                         THEN
                             l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
-                            l_bres <-- cli_open_secure_channel (l_channel_config_idx, l_is_one_sc_closing)
+                            l_bres <-- cli_open_secure_channel (l_channel_config_idx, l_reverse_endpoint_config_idx, l_is_one_sc_closing)
                             // async operation => cannot use channel until connection is effective ?
                         END;
 

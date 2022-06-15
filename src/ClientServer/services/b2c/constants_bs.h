@@ -42,6 +42,7 @@
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
@@ -95,12 +96,12 @@ typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
-typedef uint32_t constants_bs__t_channel_config_idx_i;
+typedef SOPC_EndpointConnectionConfigIdx constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;
 typedef uint32_t constants_bs__t_client_handle_i;
 typedef uint32_t constants_bs__t_client_request_handle_i;
 #define constants_bs__t_counter_i t_entier4
-typedef uint32_t constants_bs__t_endpoint_config_idx_i;
+typedef SOPC_EndpointConfigIdx constants_bs__t_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
 typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
@@ -114,8 +115,9 @@ typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
 typedef uint32_t constants_bs__t_request_context_i;
+typedef SOPC_ReverseEndpointConfigIdx constants_bs__t_reverse_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
-typedef uint32_t constants_bs__t_session_i;
+typedef SOPC_SessionId constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 typedef uint32_t constants_bs__t_sub_seq_num_i;
 typedef uint32_t constants_bs__t_subscription_i;
@@ -201,6 +203,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_opcua_duration_zero 0
 #define constants_bs__c_publishReqQueue_indet 0
 #define constants_bs__c_request_context_indet 0
+#define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0

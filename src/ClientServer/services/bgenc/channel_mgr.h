@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 04/08/2022 14:53:05
+ Date                 : 24/08/2022 07:50:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,6 +65,7 @@ extern void channel_mgr__INITIALISATION(void);
   -------------------------------*/
 #define channel_mgr__channel_do_nothing channel_mgr_bs__channel_do_nothing
 #define channel_mgr__get_SecurityPolicy channel_mgr_bs__get_SecurityPolicy
+#define channel_mgr__get_all_channel_info channel_mgr_1__get_all_channel_info
 #define channel_mgr__get_channel_info channel_mgr_1__get_channel_info
 #define channel_mgr__get_connected_channel channel_mgr_1__get_connected_channel
 #define channel_mgr__get_connection_time channel_mgr_1__get_connection_time
@@ -94,10 +95,12 @@ extern void channel_mgr__channel_lost(
    const constants__t_channel_i channel_mgr__channel);
 extern void channel_mgr__cli_open_secure_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
+   const constants__t_reverse_endpoint_config_idx_i channel_mgr__reverse_endpoint_config_idx,
    const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__cli_set_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr__config_idx,
+   const constants__t_reverse_endpoint_config_idx_i channel_mgr__reverse_endpoint_config_idx,
    const constants__t_channel_i channel_mgr__channel,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__cli_set_connection_timeout_channel(

@@ -35,6 +35,7 @@ CONCRETE_VARIABLES
     a_channel_connected_time_i,
     a_config_i,
     a_config_inv_i,
+    a_reverse_endpoint_config_i,
     a_endpoint_i
 
 INVARIANT
@@ -46,6 +47,7 @@ INVARIANT
     a_channel_connected_time_i    : t_channel_i --> t_timeref_i             &
     a_config_i                    : t_channel_i --> t_channel_config_idx_i  &
     a_config_inv_i                : t_channel_config_idx_i --> t_channel_i  &
+    a_reverse_endpoint_config_i   : t_channel_i --> t_reverse_endpoint_config_idx_i &
     a_endpoint_i                  : t_channel_i --> t_endpoint_config_idx_i &
 
     s_cli_channel_connecting      = s_cli_channel_connecting_i~[{TRUE}] /\ t_channel_config_idx    &
@@ -68,6 +70,7 @@ INITIALISATION
     a_channel_connected_time_i    := t_channel_i            * {c_timeref_indet};
     a_config_i                    := t_channel_i            * {c_channel_config_idx_indet};
     a_config_inv_i                := t_channel_config_idx_i * {c_channel_indet};
+    a_reverse_endpoint_config_i   := t_channel_i * {c_reverse_endpoint_config_idx_indet};
     a_endpoint_i                  := t_channel_i            * {c_endpoint_config_idx_indet}
 
 OPERATIONS
@@ -104,6 +107,20 @@ OPERATIONS
         l_res <-- is_t_channel_config_idx(config_idx);
         IF  l_res = FALSE THEN
             config_idx := c_channel_config_idx_indet
+        END
+    END
+    ;
+
+    config_idx, reverse_endpoint_config_idx <-- get_all_channel_info(channel) =
+    VAR
+        l_res
+    IN
+        config_idx := a_config_i(channel);
+        reverse_endpoint_config_idx := a_reverse_endpoint_config_i(channel);
+        l_res <-- is_t_channel_config_idx(config_idx);
+        IF  l_res = FALSE THEN
+            config_idx := c_channel_config_idx_indet;
+            reverse_endpoint_config_idx := c_reverse_endpoint_config_idx_indet
         END
     END
     ;
@@ -189,10 +206,11 @@ OPERATIONS
     END
     ;
 
-    set_config(p_channel, p_channel_config_idx) =
+    set_config(p_channel, p_channel_config_idx, p_reverse_endpoint_config_idx) =
     BEGIN
         a_config_i    (p_channel)            := p_channel_config_idx;
-        a_config_inv_i(p_channel_config_idx) := p_channel
+        a_config_inv_i(p_channel_config_idx) := p_channel;
+        a_reverse_endpoint_config_i(p_channel) := p_reverse_endpoint_config_idx
     END
     ;
 
@@ -249,7 +267,8 @@ OPERATIONS
     IN
         l_config_idx                 := a_config_i(p_channel);
         a_config_inv_i(l_config_idx) := c_channel_indet;
-        a_config_i    (p_channel)    := c_channel_config_idx_indet
+        a_config_i    (p_channel)    := c_channel_config_idx_indet;
+        a_reverse_endpoint_config_i(p_channel) := c_reverse_endpoint_config_idx_indet
     END
     ;
 
