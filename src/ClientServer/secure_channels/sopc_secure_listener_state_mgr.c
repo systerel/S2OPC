@@ -35,6 +35,8 @@
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
 
+#include "opcua_statuscodes.h"
+
 static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigIdx, bool reverseEndpoint)
 {
     bool result = false;
@@ -124,7 +126,6 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
 static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseEndpointCfgIdx, bool socketFailure)
 {
     SOPC_SecureListener* scListener = NULL;
-    SOPC_SecureConnection* sc = NULL;
     bool result = false;
     uint32_t idx = 0;
     // Note: only for client reverse endpoints (second half of listener array)
@@ -140,13 +141,10 @@ static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseE
             {
                 if (scListener->isUsedConnectionIdxArray[idx])
                 {
-                    // TODO: INT_EP_SC_CLOSE instead to generate event indicating SC establishment failure ?
-                    sc = SC_GetConnection(scListener->connectionIdxArray[idx]);
-                    if (NULL != sc)
-                    {
-                        // Do not keep connection waiting for reverse establishment on this endpoint
-                        memset(sc, 0, sizeof(*sc));
-                    }
+                    SOPC_SecureChannels_EnqueueInternalEvent(
+                        INT_SC_CLOSE, scListener->connectionIdxArray[idx],
+                        (uintptr_t) "Reverse endpoint closing: close waiting SC connections",
+                        OpcUa_BadConnectionClosed);
                     scListener->isUsedConnectionIdxArray[idx] = false;
                     scListener->connectionIdxArray[idx] = 0;
                 }
@@ -367,7 +365,6 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                     // Server endpointURL or serverURI is NULL or no connection compatible
                     // No reverse connection to establish with this server endpoint for now: require socket closure
                     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) sc->socketIndex, (uintptr_t) inScIdx, 0);
-                    // TODO: close client SC with Bad_TcpEndpointUrlInvalid reason
                 }
             }
         }
@@ -409,7 +406,9 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             NULL == sc)
         {
             // Error case: require secure channel closure
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, inScIdx, (uintptr_t) NULL, eltId);
+            SOPC_SecureChannels_EnqueueInternalEvent(
+                INT_SC_CLOSE, inScIdx, (uintptr_t) "Reverse endpoint in incorrect state or invalid parameters",
+                OpcUa_BadInvalidState);
         }
         else
         {
@@ -417,7 +416,9 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             if (!SOPC_SecureListenerStateMgr_AddConnection(scListener, inScIdx))
             {
                 // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, inScIdx, (uintptr_t) NULL, eltId);
+                SOPC_SecureChannels_EnqueueInternalEvent(
+                    INT_SC_CLOSE, inScIdx, (uintptr_t) "Reverse endpoint connection slots full or invalid parameters",
+                    OpcUa_BadOutOfMemory);
             }
         }
         break;

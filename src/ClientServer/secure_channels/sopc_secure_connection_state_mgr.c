@@ -3284,8 +3284,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                "ScStateMgr: INT_EP_SC_CLOSE scIdx=%" PRIu32 " (reverse)EpCfgIdx=%" PRIuPTR, eltId,
                                auxParam);
 
-        /* id = secure channel connection index,
-           auxParam = (reverse) endpoint configuration index */
+        /* id = secure channel connection index */
         scConnection = SC_GetConnection(eltId);
 
         if (scConnection != NULL)
