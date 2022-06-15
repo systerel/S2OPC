@@ -44,6 +44,7 @@
 #include "embedded/sopc_addspace_loader.h"
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define APPLICATION_NAME "S2OPC_TestClient"
 
@@ -52,6 +53,8 @@ static char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 static int32_t sessionsActivated = 0;
 static int32_t sessionsClosed = 0;
 static int32_t sendFailures = 0;
+static int32_t reverseEpClosedRequested = 0;
+static int32_t reverseEpClosed = 0;
 static uint32_t session = 0;
 static uint32_t session2 = 0;
 static uint32_t session3 = 0;
@@ -196,6 +199,13 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
             // OR context is the one associated to the session Id (activated once before failure)
             uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
             assert(session_idx == 0 || session_idx == idOrStatus);
+            int32_t n_sessions_activated = 0;
+            n_sessions_activated = SOPC_Atomic_Int_Get(&sessionsActivated);
+            if (n_sessions_activated > 0)
+            {
+                n_sessions_activated--;
+            }
+            SOPC_Atomic_Int_Set((int32_t*) &sessionsActivated, (int32_t) n_sessions_activated);
         }
         else
         {
@@ -207,6 +217,17 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     else if (event == SE_SND_REQUEST_FAILED)
     {
         SOPC_Atomic_Int_Add(&sendFailures, 1);
+    }
+    else if (event == SE_REVERSE_ENDPOINT_CLOSED)
+    {
+        if (0 == SOPC_Atomic_Int_Get(&reverseEpClosedRequested))
+        {
+            assert(false && "Unexpected reverse endpoint closure");
+        }
+        else
+        {
+            SOPC_Atomic_Int_Add(&reverseEpClosed, 1);
+        }
     }
     else
     {
@@ -253,6 +274,32 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .requestedLifetime = 20000,
                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
 
+static bool lastConnectionTypeIsClassic = false;
+static SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_Create(SOPC_ReverseEndpointConfigIdx reverseEpConfigIdx,
+                                                                    SOPC_SecureChannelConfigIdx configIdx,
+                                                                    SOPC_EndpointConnectionType connectionType)
+{
+    switch (connectionType)
+    {
+    case SOPC_EndpointConnectionType_Classic:
+        return SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
+    case SOPC_EndpointConnectionType_Reverse:
+        return SOPC_EndpointConnectionCfg_CreateReverse(reverseEpConfigIdx, configIdx);
+    default:
+        // Alternate classic and reverse
+        if (lastConnectionTypeIsClassic)
+        {
+            lastConnectionTypeIsClassic = false;
+            return SOPC_EndpointConnectionCfg_CreateReverse(reverseEpConfigIdx, configIdx);
+        }
+        else
+        {
+            lastConnectionTypeIsClassic = true;
+            return SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
+        }
+    }
+}
+
 int main(void)
 {
     // Sleep timeout in milliseconds
@@ -280,9 +327,11 @@ int main(void)
     clientAppConfig->clientLocaleIds = preferred_locale_ids;
     scConfig.clientConfigPtr = clientAppConfig;
 
-    uint32_t channel_config_idx = 0;
-    uint32_t channel_config_idx2 = 0;
-    uint32_t channel_config_idx3 = 0;
+    SOPC_SecureChannelConfigIdx channel_config_idx = 0;
+    SOPC_SecureChannelConfigIdx channel_config_idx2 = 0;
+    SOPC_SecureChannelConfigIdx channel_config_idx3 = 0;
+
+    SOPC_ReverseEndpointConfigIdx reverse_ep_config_idx = 0;
 
     OpcUa_WriteRequest* pWriteReqSent = NULL;
     OpcUa_WriteRequest* pWriteReqCopy = NULL;
@@ -411,221 +460,149 @@ int main(void)
         }
     }
 
-    // Configure the 2 secure channel connections to use and retrieve channel configuration index
-    if (SOPC_STATUS_OK == status)
+    // Test will run 3 times: 1 with classic endpoint connection, 1 with reverse endpoint connection and 1 with both
+    for (unsigned int connectionType = SOPC_EndpointConnectionType_Classic;
+         SOPC_STATUS_OK == status && connectionType <= SOPC_EndpointConnectionType_Reverse + 1; connectionType++)
     {
-        channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        channel_config_idx2 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        channel_config_idx3 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        if (channel_config_idx != 0 && channel_config_idx2 != 0 && channel_config_idx3 != 0)
+        // Configure the 2 secure channel connections to use and retrieve channel configuration index
+        if (SOPC_STATUS_OK == status)
         {
-            printf(">>Test_Client_Toolkit: Client configured\n");
+            channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+            channel_config_idx2 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+            channel_config_idx3 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+            if (channel_config_idx != 0 && channel_config_idx2 != 0 && channel_config_idx3 != 0)
+            {
+                printf(">>Test_Client_Toolkit: Client configured\n");
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+                printf(">>Test_Client_Toolkit: Client configured\n");
+            }
+        }
+
+        /* Create a Reverse Endpoint to create a Secure Channel through a connection initiated by server */
+        if (SOPC_STATUS_OK == status)
+        {
+            reverse_ep_config_idx = SOPC_ToolkitClient_AddReverseEndpointConfig(REVERSE_ENDPOINT_URL);
+            if (0 == reverse_ep_config_idx)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverse_ep_config_idx);
+        }
+
+        /* Asynchronous request to get endpoints */
+        if (SOPC_STATUS_OK == status)
+        {
+            // Use 1 as getEndpoints request context
+            SOPC_EndpointConnectionCfg endpointConnectionCfg =
+                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx3, connectionType);
+            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
+            printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
+        }
+
+        /* Wait until get endpoints response or timeout */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            // Retrieve received messages on socket
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        {
+            printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
+            status = SOPC_STATUS_NOK;
         }
         else
         {
-            status = SOPC_STATUS_NOK;
-            printf(">>Test_Client_Toolkit: Client configured\n");
+            printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
         }
-    }
 
-    /* Asynchronous request to get endpoints */
-    if (SOPC_STATUS_OK == status)
-    {
-        // Use 1 as getEndpoints request context
-        SOPC_EndpointConnectionCfg endpointConnectionCfg =
-            SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx3);
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
-        printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
-    }
-
-    /* Wait until get endpoints response or timeout */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
-    {
-        printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
-        status = SOPC_STATUS_NOK;
-    }
-    else
-    {
-        printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
-    }
-
-    /* Asynchronous request to create 3 sessions on 2 secure channels
-     * (and underlying secure channel connections if necessary). */
-    if (SOPC_STATUS_OK == status)
-    {
-        // Use 1, 2, 3 as session contexts
-        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[0], "anonymous");
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[1], "anonymous");
-        endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx2);
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[2], "anonymous");
-        printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
-    }
-
-    /* Wait until session is activated or timeout */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status &&
-           (SOPC_Atomic_Int_Get(&sessionsActivated) + SOPC_Atomic_Int_Get(&sessionsClosed)) < NB_SESSIONS &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-
-    if (SOPC_Atomic_Int_Get(&sessionsClosed) != 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsActivated) == NB_SESSIONS)
-    {
-        printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
-    }
-    else
-    {
-        printf(">>Test_Client_Toolkit: Sessions activated: NOK'\n");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Create a service request message and send it through session (read service)*/
-        // msg freed when sent
-        // Use 1 as read request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                     getReadRequest_message(), 1);
-        printf(">>Test_Client_Toolkit: read request sending\n");
-    }
-
-    /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Reset expected result
-        test_results_set_service_result(false);
-
-        // Create WriteRequest to be sent (deallocated by toolkit)
-        pWriteReqSent = tlibw_new_WriteRequest(address_space);
-
-        // Create same WriteRequest to check results on response reception
-        pWriteReqCopy = tlibw_new_WriteRequest(address_space);
-
-        test_results_set_WriteRequest(pWriteReqCopy);
-
-        // Use 1 as write request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session), pWriteReqSent,
-                                                     1);
-
-        printf(">>Test_Client_Toolkit: write request sending\n");
-    }
-
-    /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Reset expected result
-        test_results_set_service_result(false);
-        /* Sends another ReadRequest, to verify that the AddS has changed */
-        /* The callback will call the verification */
-        // msg freed when sent
-        // Use 2 as read request context
-        SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                     getReadRequest_verif_message(), 2);
-
-        printf(">>Test_Client_Toolkit: read request sending\n");
-    }
-
-    /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
-    else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-    {
-        status = SOPC_STATUS_NOK;
-    }
-
-    /* Now the request can be freed */
-    test_results_set_WriteRequest(NULL);
-    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
-
-    /* In case the subscription service shall not be supported, check service response is unsupported service*/
-    if (TEST_SUB_SERVICE_UNSUPPORTED)
-    {
+        /* Asynchronous request to create 3 sessions on 2 secure channels
+         * (and underlying secure channel connections if necessary). */
         if (SOPC_STATUS_OK == status)
         {
-            OpcUa_CreateSubscriptionRequest* createSubReq = NULL;
-            status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &createSubReq);
-            assert(SOPC_STATUS_OK == status);
+            // Use 1, 2, 3 as session contexts
+            SOPC_EndpointConnectionCfg endpointConnectionCfg =
+                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx, connectionType);
+            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[0],
+                                                              "anonymous");
+            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[1],
+                                                              "anonymous");
 
-            createSubReq->MaxNotificationsPerPublish = 0;
-            createSubReq->Priority = 0;
-            createSubReq->PublishingEnabled = true;
-            createSubReq->RequestedLifetimeCount = 3;
-            createSubReq->RequestedMaxKeepAliveCount = 1;
-            createSubReq->RequestedPublishingInterval = 1000;
+            endpointConnectionCfg =
+                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx2, connectionType);
+            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[2],
+                                                              "anonymous");
+            printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
+        }
 
-            // Reset expected result
-            test_results_set_service_result(false);
+        /* Wait until session is activated or timeout */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status &&
+               (SOPC_Atomic_Int_Get(&sessionsActivated) + SOPC_Atomic_Int_Get(&sessionsClosed)) < NB_SESSIONS &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            // Retrieve received messages on socket
+            SOPC_Sleep(sleepTimeout);
+        }
 
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+
+        if (SOPC_Atomic_Int_Get(&sessionsClosed) != 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsActivated) == NB_SESSIONS)
+        {
+            printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
+        }
+        else
+        {
+            printf(">>Test_Client_Toolkit: Sessions activated: NOK'\n");
+        }
+
+        /* Close reverse endpoint */
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverse_ep_config_idx);
+            SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 1);
+        }
+
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&reverseEpClosed) &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            // Retrieve received messages on socket
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Create a service request message and send it through session (read service)*/
+            // msg freed when sent
+            // Use 1 as read request context
             SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                         createSubReq, OpcUa_BadServiceUnsupported);
-
-            printf(">>Test_Client_Toolkit: create subscription sending\n");
+                                                         getReadRequest_message(), 1);
+            printf(">>Test_Client_Toolkit: read request sending\n");
         }
 
         /* Wait until service response is received */
@@ -645,36 +622,181 @@ int main(void)
         {
             status = SOPC_STATUS_NOK;
         }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Reset expected result
+            test_results_set_service_result(false);
+
+            // Create WriteRequest to be sent (deallocated by toolkit)
+            pWriteReqSent = tlibw_new_WriteRequest(address_space);
+
+            // Create same WriteRequest to check results on response reception
+            pWriteReqCopy = tlibw_new_WriteRequest(address_space);
+
+            test_results_set_WriteRequest(pWriteReqCopy);
+
+            // Use 1 as write request context
+            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                         pWriteReqSent, 1);
+
+            printf(">>Test_Client_Toolkit: write request sending\n");
+        }
+
+        /* Wait until service response is received */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Reset expected result
+            test_results_set_service_result(false);
+            /* Sends another ReadRequest, to verify that the AddS has changed */
+            /* The callback will call the verification */
+            // msg freed when sent
+            // Use 2 as read request context
+            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                         getReadRequest_verif_message(), 2);
+
+            printf(">>Test_Client_Toolkit: read request sending\n");
+        }
+
+        /* Wait until service response is received */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        /* Now the request can be freed */
+        test_results_set_WriteRequest(NULL);
+        tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
+
+        /* In case the subscription service shall not be supported, check service response is unsupported service*/
+        if (TEST_SUB_SERVICE_UNSUPPORTED)
+        {
+            if (SOPC_STATUS_OK == status)
+            {
+                OpcUa_CreateSubscriptionRequest* createSubReq = NULL;
+                status =
+                    SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &createSubReq);
+                assert(SOPC_STATUS_OK == status);
+
+                createSubReq->MaxNotificationsPerPublish = 0;
+                createSubReq->Priority = 0;
+                createSubReq->PublishingEnabled = true;
+                createSubReq->RequestedLifetimeCount = 3;
+                createSubReq->RequestedMaxKeepAliveCount = 1;
+                createSubReq->RequestedPublishingInterval = 1000;
+
+                // Reset expected result
+                test_results_set_service_result(false);
+
+                SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
+                                                             createSubReq, OpcUa_BadServiceUnsupported);
+
+                printf(">>Test_Client_Toolkit: create subscription sending\n");
+            }
+
+            /* Wait until service response is received */
+            loopCpt = 0;
+            while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+                   loopCpt * sleepTimeout <= loopTimeout)
+            {
+                loopCpt++;
+                SOPC_Sleep(sleepTimeout);
+            }
+
+            if (loopCpt * sleepTimeout > loopTimeout)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+            else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
+        uint32_t session2_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session2);
+        uint32_t session3_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session3);
+
+        /* Close the session */
+        if (0 != session1_idx)
+        {
+            SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
+        }
+
+        if (0 != session2_idx)
+        {
+            SOPC_ToolkitClient_AsyncCloseSession(session2_idx);
+        }
+
+        if (0 != session3_idx)
+        {
+            SOPC_ToolkitClient_AsyncCloseSession(session3_idx);
+        }
+
+        /* Wait until session is closed or timeout */
+        loopCpt = 0;
+        do
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        } while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsClosed) < NB_SESSIONS &&
+                 loopCpt * sleepTimeout <= loopTimeout);
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+
+        // Clear session ids
+        SOPC_Atomic_Int_Set((int32_t*) &session, 0);
+        SOPC_Atomic_Int_Set((int32_t*) &session2, 0);
+        SOPC_Atomic_Int_Set((int32_t*) &session3, 0);
+        // Clear all context to session
+        uintptr_t appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
+        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
+        appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[1]);
+        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
+        appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[2]);
+        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
+        // Clear session closed
+        SOPC_Atomic_Int_Set(&sessionsClosed, 0);
+        // Clear reverse endpoint close variables
+        SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 0);
+        SOPC_Atomic_Int_Set(&reverseEpClosed, 0);
+
+        SOPC_ToolkitClient_ClearAllSCs();
+
+        cptReadResps = 0;
     }
-
-    uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
-    uint32_t session2_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session2);
-    uint32_t session3_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session3);
-
-    /* Close the session */
-    if (0 != session1_idx)
-    {
-        SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
-    }
-
-    if (0 != session2_idx)
-    {
-        SOPC_ToolkitClient_AsyncCloseSession(session2_idx);
-    }
-
-    if (0 != session3_idx)
-    {
-        SOPC_ToolkitClient_AsyncCloseSession(session3_idx);
-    }
-
-    /* Wait until session is closed or timeout */
-    loopCpt = 0;
-    do
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    } while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsClosed) < NB_SESSIONS &&
-             loopCpt * sleepTimeout <= loopTimeout);
 
     SOPC_Toolkit_Clear();
 

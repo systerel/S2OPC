@@ -35,6 +35,8 @@
 #include "testlib_write.h"
 #include "util_variant.h"
 
+extern SOPC_AddressSpace* address_space_bs__nodes;
+
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...) memcpy(SOPC_Malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))
 
@@ -320,6 +322,18 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadRespo
             status = SOPC_Variant_Compare(&pReadResp->Results[i].Value,            /* <-- Variant */
                                           &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
                                           &cmp);
+        }
+        // Update local address space to be the same in case of client only test
+        if (SOPC_STATUS_OK == status && 0 == cmp)
+        {
+            bool found = false;
+            SOPC_AddressSpace_Node* node =
+                SOPC_AddressSpace_Get_Node(address_space_bs__nodes, &pWriteReq->NodesToWrite[i].NodeId, &found);
+            assert(found);
+            SOPC_Variant* variant = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node);
+            SOPC_Variant_Clear(variant);
+            *variant = pReadResp->Results[i].Value;
+            SOPC_Variant_Initialize(&pReadResp->Results[i].Value);
         }
         if (status != SOPC_STATUS_OK || cmp != 0)
         {
