@@ -3436,7 +3436,13 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                                      (uintptr_t) NULL, scConnection->serverReverseConnIdx);
         }
 
-        // TODO: client side reverse connection to remove from reverse EP !
+        // In case of client reverse connection, remove it from reverse endpoint immediately (next event)
+        if (!scConnection->isServerConnection && scConnection->isReverseConnection &&
+            SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == scConnection->state)
+        {
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(
+                INT_EP_SC_DISCONNECTED, scConnection->clientReverseEpConfigIdx, (uintptr_t) NULL, (uintptr_t) eltId);
+        }
 
         // Check SC valid + avoid to close a secure channel established just after timeout
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&

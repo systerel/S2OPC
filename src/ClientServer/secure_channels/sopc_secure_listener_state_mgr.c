@@ -379,7 +379,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                                "ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
                                auxParam);
 
-        /* id = endpoint description configuration index,
+        /* id = (reverse) endpoint description configuration index,
            auxParam = secure channel connection index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
 

@@ -41,7 +41,7 @@ typedef enum
     INT_EP_SC_RHE_DECODED,         /* id = secure channel connection index,
                                       param = (char*) serverURI,
                                       auxParam = (char*) serverEndpointURL */
-    INT_EP_SC_DISCONNECTED,        /* id = endpoint description configuration index,
+    INT_EP_SC_DISCONNECTED,        /* id = (reverse) endpoint description configuration index,
                                       auxParam = (uint32_t) secure channel connection index */
     INT_REVERSE_EP_REQ_CONNECTION, /* Client: a connection is requested through the opened reverse endpoint
                                    id = reverse endpoint configuration index,
