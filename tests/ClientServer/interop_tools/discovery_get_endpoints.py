@@ -18,7 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from common import sUri, securityPolicyNoneURI, securityPolicyBasic256URI, securityPolicyBasic256Sha256URI, securityPolicyAes128Sha256RsaOaep
+from common import sUri, securityPolicyNoneURI, securityPolicyBasic256URI, securityPolicyBasic256Sha256URI, securityPolicyAes128Sha256RsaOaep, securityPolicyAes256Sha256RsaPss
 from opcua import ua
 
 def discovery_get_endpoints_tests(client, logger):
