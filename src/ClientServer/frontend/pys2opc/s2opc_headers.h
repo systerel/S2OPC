@@ -163,6 +163,7 @@ extern const char* SOPC_SecurityPolicy_Basic128Rsa15;
 extern const char* SOPC_SecurityPolicy_Basic256_URI;
 extern const char* SOPC_SecurityPolicy_Basic256Sha256_URI;
 extern const char* SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI;
+extern const char* SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI;
 
 /* Additions for server */
 #include "sopc_secret_buffer.h"

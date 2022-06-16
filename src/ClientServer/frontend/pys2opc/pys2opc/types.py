@@ -1251,6 +1251,7 @@ class SecurityPolicy(NamedMembers):
     Basic256       = libsub.SOPC_SecurityPolicy_Basic256_URI
     Basic256Sha256 = libsub.SOPC_SecurityPolicy_Basic256Sha256_URI
     Aes128Sha256RsaOaep = libsub.SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI
+    Aes256Sha256RsaPss = libsub.SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI
 
 class SecurityMode(NamedMembers):
     """
