@@ -26,9 +26,9 @@ def discovery_get_endpoints_tests(client, logger):
     endPoints = client.get_endpoints()
     #print('endPoints:', endPoints)
 
-    # 7 endpoints are expected: None (1), Basic256 (1 SignOnly and 1 SignAndEncrypt) and Basic256Sha256 (1 SignOnly and 1 SignAndEncrypt)
-    # Aes128Sha256RsaOaep (1 SignOnly and 1 SignAndEncrypt)
-    logger.add_test('Get Endpoints Test - Check number of endpoints', len(endPoints) == 7)
+    # 7 endpoints are expected: None (1), Basic256 (1 SignOnly and 1 SignAndEncrypt), Basic256Sha256 (1 SignOnly and 1 SignAndEncrypt)
+    # Aes128Sha256RsaOaep (1 SignOnly and 1 SignAndEncrypt) and Aes256Sha256RsaPss (1 SignOnly and 1 SignAndEncrypt)
+    logger.add_test('Get Endpoints Test - Check number of endpoints', len(endPoints) == 9)
     # print('number of endPoints:', len(endPoints))
 
     # check endpoints URL
@@ -83,6 +83,18 @@ def discovery_get_endpoints_tests(client, logger):
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint exists', False)
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint security mode', False)
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint security level', False)
+    
+    # Aes256Sha256RsaPss
+    for ep in endPoints:
+        if ep.SecurityPolicyUri == securityPolicyAes256Sha256RsaPss:
+            logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint exists', True)
+            logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint security mode', ep.SecurityMode in (ua.MessageSecurityMode.Sign, ua.MessageSecurityMode.SignAndEncrypt))
+            logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint security level', ep.SecurityLevel > 0)
+            break
+    else:
+        logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint exists', False)
+        logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint security mode', False)
+        logger.add_test('Discovery Get Endpoints Test - Aes256Sha256RsaPss endPoint security level', False)
 
     # TODO: check transportProfileURI
 
