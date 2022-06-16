@@ -371,34 +371,6 @@
      <TestCase name="012.js"/>
     </TestCases>
    </ConformanceUnit>
-   <ConformanceUnit name="Security Certificate Validation">
-    <TestCases>
-     <TestCase name="001.js"/>
-     <TestCase name="002.js"/>
-     <TestCase name="004.js"/>
-     <TestCase name="005.js"/>
-     <TestCase name="007.js"/>
-     <TestCase name="008.js"/>
-     <TestCase name="009.js"/>
-     <TestCase name="010.js"/>
-     <TestCase name="013.js"/>
-     <TestCase name="029.js"/>
-     <TestCase name="033.js"/>
-     <TestCase name="037.js"/>
-     <TestCase name="038.js"/>
-     <TestCase name="042.js"/>
-     <TestCase name="043.js"/>
-     <TestCase name="044.js"/>
-     <TestCase name="045.js"/>
-     <TestCase name="046.js"/>
-     <TestCase name="047.js"/>
-     <TestCase name="048.js"/>
-     <TestCase name="049.js"/>
-     <TestCase name="050.js"/>
-     <TestCase name="051.js"/>
-     <TestCase name="052.js"/>
-    </TestCases>
-   </ConformanceUnit>
    <ConformanceUnit name="Security None CreateSession ActivateSession">
     <TestCases>
      <TestCase name="001.js"/>
@@ -431,6 +403,14 @@
      <TestCase name="005.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Security Aes256-Sha256-RsaPss">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Security Administration">
     <TestCases>
      <TestCase name="manual.js"/>
@@ -447,16 +427,6 @@
      <TestCase name="002.js"/>
      <TestCase name="004.js"/>
      <TestCase name="005.js"/>
-    </TestCases>
-   </ConformanceUnit>
-   <ConformanceUnit name="Security Encryption Required">
-    <TestCases>
-     <TestCase name="manual.js"/>
-    </TestCases>
-   </ConformanceUnit>
-   <ConformanceUnit name="Security Signing Required">
-    <TestCases>
-     <TestCase name="manual.js"/>
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
