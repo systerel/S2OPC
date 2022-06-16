@@ -406,12 +406,40 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
 
         /*
-         * 4rd Security policy is Aes128-Sha256-RsaOaep with anonymous and username (non encrypted) authentication
+         * 4th Security policy is Aes128-Sha256-RsaOaep with anonymous and username (non encrypted) authentication
          * allowed
          */
         if (SOPC_STATUS_OK == status)
         {
             sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Aes128Sha256RsaOaep);
+            if (NULL == sp)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                status = SOPC_SecurityConfig_SetSecurityModes(
+                    sp, SOPC_SecurityModeMask_Sign | SOPC_SecurityModeMask_SignAndEncrypt);
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_Anonymous);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_SecurityConfig_AddUserTokenPolicy(
+                        sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
+                }
+            }
+        }
+
+        /*
+         * 5th Security policy is Aes256-Sha256-RsaPss with anonymous and username (non encrypted) authentication
+         * allowed
+         */
+        if (SOPC_STATUS_OK == status)
+        {
+            sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Aes256Sha256RsaPss);
             if (NULL == sp)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
