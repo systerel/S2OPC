@@ -451,6 +451,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
         default:
             status = SOPC_STATUS_NOK;
             break;
+        case SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID:
         case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
         case SOPC_SecurityPolicy_Basic256Sha256_ID:
         case SOPC_SecurityPolicy_Basic256_ID:

@@ -29,6 +29,21 @@
 #include "crypto_functions_lib.h"
 #include "sopc_crypto_profiles.h"
 
+const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
+    .SecurityPolicyID = SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID,
+    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
+    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
+    .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
+    .pFnGenRnd = &CryptoProvider_GenTrueRnd,
+    .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
+    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256,
+    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256,
+    .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PSS,
+    .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PSS,
+    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
+};
+
 const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
     .SecurityPolicyID = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID,
     .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES128,
