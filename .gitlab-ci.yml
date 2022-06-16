@@ -217,7 +217,6 @@ build-win32:
   variables:
     <<: *build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win32'
-    CMAKE_C_FLAGS: '-D__USE_MINGW_ANSI_STDIO=0'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
   artifacts:
     name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
