@@ -594,11 +594,12 @@ SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenToCiph = 0;
     int res;
+    mbedtls_pk_type_t mbded_res;
     mbedtls_rsa_context* prsa = NULL;
 
     // Verify the type of the key (this is done here because it is more convenient (lib-specific))
-    res = mbedtls_pk_get_type(&pKey->pk);
-    if (MBEDTLS_PK_RSA != res)
+    mbded_res = mbedtls_pk_get_type(&pKey->pk);
+    if (MBEDTLS_PK_RSA != mbded_res)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -659,6 +660,7 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
     size_t lenDeciphed = 0;
     int res;
+    mbedtls_pk_type_t mbded_res;
     mbedtls_rsa_context* prsa = NULL;
 
     if (NULL != pLenWritten)
@@ -667,8 +669,8 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
     }
 
     // Verify the type of the key (this is done here because it is more convenient (lib-specific))
-    res = mbedtls_pk_get_type(&pKey->pk);
-    if (MBEDTLS_PK_RSA != res)
+    mbded_res = mbedtls_pk_get_type(&pKey->pk);
+    if (MBEDTLS_PK_RSA != mbded_res)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
