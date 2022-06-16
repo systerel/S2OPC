@@ -68,11 +68,21 @@ void SOPC_RealTime_Delete(SOPC_RealTime** t);
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t);
 
 /**
- * \brief Adds an offset to a \a SOPC_RealTime object
+ * \brief Adds an offset to a \a SOPC_RealTime object, ensuring a specific time offset towards a
+ *        synchronized clock within a periodic time window .
+ *        The offset is measured regarding the dateTime Clock, thus implying that it
+ *        is synchronized to some external PtP reference.
+ *
+ *        For example, if \a duration_us is 100k (100ms) and \a offset_us is 20k (20 ms), and if we name
+ *        "dtss" the "sub-second part of DateTime corresponding to returned \a t":
+ *
+ *        dtss = k * 100ms + 20ms (with k integer)
  * \param t A Non-null time reference
- * \param duration_ms The offset in milliseconds to apply to \a t
+ * \param duration_us The timeslice period (must be a divisor of 1 second, otherwise result is undefined)
+ *        if offset_us is negative, then no window is used and the function simply adds duration_us to \a t
+ * \param offset_us The offset in microseconds in the time window
  **/
-void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms);
+void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us);
 
 /**
  * \brief Checks is a date is in the future (relatively to another date)

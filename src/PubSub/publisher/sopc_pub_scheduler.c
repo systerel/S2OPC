@@ -97,8 +97,9 @@ typedef struct MessageCtx
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
-    double publishingInterval;
-    bool warned; /**< Have we warned about expired messages yet? */
+    uint64_t publishingIntervalUs;
+    int32_t publishingOffsetUs; /**< Negative = not used */
+    bool warned;                /**< Have we warned about expired messages yet? */
 } MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
@@ -263,7 +264,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
 
     context->transport = ctx;
     context->group = group;
-    context->publishingInterval = SOPC_WriterGroup_Get_PublishingInterval(group);
+    context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
+    context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
 
@@ -282,8 +284,27 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
         return false;
     }
 
-    /* Compute next timeout */
-    SOPC_RealTime_AddDuration(context->next_timeout, context->publishingInterval);
+    /* Compute next timeout.  */
+    if (context->publishingOffsetUs >= 0)
+    {
+        // If publishing offset is not zero, then the publishing period shall be a divisor of 1s (Otherwise,
+        // there will be no way to find a common reference)
+        SOPC_ASSERT(context->publishingIntervalUs > 0);
+
+        if (((1000 * 1000) % context->publishingIntervalUs) != 0)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Publisher: When using PublishingOffset, interval must be a divider of 1000");
+            return false;
+        }
+        else if ((uint32_t) context->publishingOffsetUs >= context->publishingIntervalUs)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Publisher: PublishingOffset cannot be greater than PublishingInterval");
+            return false;
+        }
+    }
+    SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs, context->publishingOffsetUs);
 
     /* Fill in security context */
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
@@ -487,7 +508,8 @@ static void* thread_start_publish(void* arg)
             MessageCtx_send_publish_message(context);
 
             /* Re-schedule this message */
-            SOPC_RealTime_AddDuration(context->next_timeout, context->publishingInterval);
+            SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
+                                             context->publishingOffsetUs);
             if (SOPC_RealTime_IsExpired(context->next_timeout, now) && !context->warned)
             {
                 /* This message next publish cycle was already expired before we encoded the previous one */

@@ -61,6 +61,7 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(14, SOPC_WriterGroup_Get_Id(writerGroup));
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
     ck_assert_double_eq(50., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
+    ck_assert_int_eq(10, SOPC_WriterGroup_Get_PublishingOffset(writerGroup));
     ck_assert_uint_eq(1, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_None, SOPC_WriterGroup_Get_SecurityMode(writerGroup));
     ck_assert_uint_eq(2, SOPC_WriterGroup_Nb_DataSetWriter(writerGroup));
@@ -85,6 +86,7 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_uint_eq(15, SOPC_WriterGroup_Get_Id(writerGroup));
     // TODO: SOPC_WriterGroup_Get_NetworkMessageContentMask() ?
     ck_assert_double_eq(30., SOPC_WriterGroup_Get_PublishingInterval(writerGroup));
+    ck_assert_int_eq(-1, SOPC_WriterGroup_Get_PublishingOffset(writerGroup));
     // Check default value for groupVersion
     ck_assert_uint_eq(0, SOPC_WriterGroup_Get_Version(writerGroup));
     ck_assert_uint_eq(SOPC_SecurityMode_SignAndEncrypt, SOPC_WriterGroup_Get_SecurityMode(writerGroup));

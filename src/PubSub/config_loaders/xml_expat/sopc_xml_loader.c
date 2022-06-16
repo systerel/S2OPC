@@ -42,7 +42,13 @@
  *  It is possible to debug file parsing by defining the flag ::XML_CONFIG_LOADER_LOG
  */
 
-#ifdef XML_CONFIG_LOADER_LOG
+// Default behavior is to show WML parsing errors
+// This can be disabled by setting XML_CONFIG_LOADER_LOG to 0 in build flags
+#ifndef XML_CONFIG_LOADER_LOG
+#define XML_CONFIG_LOADER_LOG 1
+#endif
+
+#if XML_CONFIG_LOADER_LOG
 #define LOG(str) fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
 #define LOG_XML_ERROR(str)                                                                         \
     fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: at line %lu, column %lu: %s\n", __FILE__, __LINE__, \
@@ -76,6 +82,7 @@
 #define ATTR_CONNECTION_IFNAME "interfaceName"
 
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
+#define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
 #define ATTR_MESSAGE_SECURITY "securityMode"
 #define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
@@ -122,6 +129,7 @@ struct sopc_xml_pubsub_dataset_t
 struct sopc_xml_pubsub_message_t
 {
     double publishing_interval;
+    int32_t publishing_offset;
     uint64_t publisher_id;
     uint32_t version;
     SOPC_SecurityMode_Type security_mode;
@@ -434,6 +442,10 @@ static bool parse_message_attributes(const char* attr_name,
         result = SOPC_strtodouble(attr_val, strlen(attr_val), 64, &msg->publishing_interval);
         result &= msg->publishing_interval > 0.;
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHING_OFF, attr_name))
+    {
+        result = SOPC_strtouint(attr_val, strlen(attr_val), 32, &msg->publishing_offset);
+    }
     else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY, attr_name))
     {
         result = true;
@@ -482,6 +494,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     // Security is disabled if it is not configured
     msg->security_mode = SOPC_SecurityMode_None;
     msg->publishing_interval = 0.0;
+    msg->publishing_offset = -1;
 
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
 
@@ -490,6 +503,11 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
         if (msg->publishing_interval <= 0.0)
         {
             LOG_XML_ERROR("Message publishing interval is missing");
+            result = false;
+        }
+        else if (msg->publishing_interval <= msg->publishing_offset)
+        {
+            LOG_XML_ERROR("Message publishOffset cannot be greater than publishInterval");
             result = false;
         }
         else if (msg->groupId == 0)
@@ -952,6 +970,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_Id(writerGroup, msg->groupId);
 
                 SOPC_WriterGroup_Set_PublishingInterval(writerGroup, msg->publishing_interval);
+                SOPC_WriterGroup_Set_PublishingOffset(writerGroup, msg->publishing_offset);
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->groupVersion);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
 

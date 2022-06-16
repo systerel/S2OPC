@@ -117,6 +117,7 @@ struct SOPC_WriterGroup
     SOPC_PubSubConnection* parent;
     uint16_t id;
     double publishingIntervalMs;
+    int32_t publishingOffsetMs;
     SOPC_UadpWriterGroup messageSettings;
 
     uint8_t dataSetWriters_length;
@@ -487,6 +488,8 @@ bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* con
     for (int i = 0; i < nb; i++)
     {
         connection->writerGroups[i].parent = connection;
+        // As publishingOffsetMs is optional, it shall be initialized here
+        connection->writerGroups[i].publishingOffsetMs = -1;
     }
     return true;
 }
@@ -818,10 +821,22 @@ double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group)
     return group->publishingIntervalMs;
 }
 
+int32_t SOPC_WriterGroup_Get_PublishingOffset(const SOPC_WriterGroup* group)
+{
+    assert(NULL != group);
+    return group->publishingOffsetMs;
+}
+
 void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms)
 {
     assert(NULL != group);
     group->publishingIntervalMs = interval_ms;
+}
+
+void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offset_ms)
+{
+    assert(NULL != group);
+    group->publishingOffsetMs = offset_ms;
 }
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group)

@@ -59,6 +59,7 @@
       <xs:element type="dataset" name="dataset" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="publishingInterval" type="xs:double" use="required"/>
+    <xs:attribute name="publishingOffset" type="xs:unsignedLong" use="optional"/>
     <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
     <xs:attribute name="securityMode" type="securityModeType"/>
     <xs:attribute name="groupId" type="xs:unsignedShort" use="optional"/>

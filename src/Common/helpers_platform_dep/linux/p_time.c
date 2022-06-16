@@ -184,13 +184,13 @@ void SOPC_RealTime_Delete(SOPC_RealTime** t)
     *t = NULL;
 }
 
-void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
+static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
 {
     assert(NULL != t);
 
     /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
-    t->tv_sec += (time_t)(duration_ms / 1000);
-    t->tv_nsec += (long) (fmod(duration_ms, 1000.) * 1000000); /* This may add a negative or positive number */
+    t->tv_sec += (time_t)(duration_us / 1000000);
+    t->tv_nsec += (long) ((duration_us % 1000000) * 1000); /* This may add a negative or positive number */
 
     /* Normalize */
     if (t->tv_nsec < 0)
@@ -203,6 +203,49 @@ void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
         t->tv_sec += 1;
         t->tv_nsec -= 1000000000;
     }
+}
+
+/***************************************************/
+void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+{
+    assert(NULL != t);
+    uint64_t increment_us = duration_us;
+
+    if (offset_us >= 0)
+    {
+        const uint64_t minIncrement = duration_us / 5;
+        /**
+         * Window offset principle.
+         * - Find out current position in window [0 .. duration_us -1]
+         * - Add the missing time up to next position "offset_us" in that window
+         * - In the case the current position is close BEFORE "offset_us", then add a full cycle to
+         *      wait time. This case means that this function was called a little too early due to
+         *      clock discrepancies:
+         *       - position in window is given by system DateTime clock (which is continuously
+         *           corrected by PTP/NTP)
+         *       - actual wait times are provided by monotonic realtime clock
+         */
+
+        assert(duration_us > 0);
+        // Current remainder of clock within window given by duration_us
+        uint64_t currentRem_us = (uint64_t)(SOPC_Time_GetCurrentTimeUTC() / 10);
+        currentRem_us %= duration_us;
+        // consider the remainder relatively to a window starting at offset_us rather than 0
+        // windowOffset_us is 0 if current time matches offset_us
+        // windowOffset_us is small positive if current time is past offset_us
+        // windowOffset_us is large positive (from duration_us -1) if current time is right before offset_us
+        const uint64_t windowOffset_us = (duration_us + currentRem_us - (uint32_t) offset_us) % duration_us;
+
+        // reomve the part of the cycle that already elapsed
+        increment_us -= windowOffset_us;
+
+        // Consider that event is in the "past" if windowOffset_us is close to next event (>80% of cycle)
+        if (increment_us < minIncrement)
+        {
+            increment_us += duration_us;
+        }
+    }
+    SOPC_RealTime_AddDuration(t, increment_us);
 }
 
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)

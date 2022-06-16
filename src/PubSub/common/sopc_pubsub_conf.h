@@ -239,6 +239,9 @@ void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version);
 double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms);
 
+int32_t SOPC_WriterGroup_Get_PublishingOffset(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offset_ms);
+
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
                                                     SOPC_UadpNetworkMessageContentMask contentMask);

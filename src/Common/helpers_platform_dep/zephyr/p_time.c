@@ -70,6 +70,7 @@
 #define P_TIME_DEBUG (0)
 
 #define SECOND_TO_100NS (10000000)
+#define SECOND_TO_US (1000 * 1000)
 #define MS_TO_100NS (10000)
 #define US_TO_100NS (10)
 
@@ -106,7 +107,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
  *      - Adjust actual requested ticks in call to SOPC_Sleep
  *      - Adjust actual requested ticks in call to SOPC_RealTime-related features. As they rely on
  *          internal clock, and as the time reference is also used by caller, the correction shall be
- *          applied on SOPC_RealTime operations (SOPC_RealTime_AddDuration).
+ *          applied on SOPC_RealTime operations (SOPC_RealTime_AddSynchedDuration).
  * SOPC_TimeReference-related features are not resynchronized and remain on internal MONOTONIC clock.
  */
 
@@ -125,11 +126,11 @@ static uint64_t gLastLocSyncDate = 0;
  *  */
 static float gLocalClockCorrFactor = 1.0;
 
-/** /brief Get current internal time with 100 ns precision, corrected by PTP */
+/** \brief Get current internal time with 100 ns precision, corrected by PTP */
 static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
 
-/** /brief Get current PTP time with 100 ns precision
- * /return
+/** \brief Get current PTP time with 100 ns precision
+ * \return
  *   - Current time (unit = 100ns, from 1970, Jan. 1st)
  *   - 0 if PtpClock is not ready or provides irrelevant value*/
 static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
@@ -422,18 +423,52 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 }
 
 /***************************************************/
-void SOPC_RealTime_AddDuration(SOPC_RealTime* t, double duration_ms)
+void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
 {
-    GPTP_ASSERT(NULL != t && fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
+    SOPC_ASSERT(NULL != t);
+    uint32_t increment_us = duration_us;
+    GPTP_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
 
-    /* RealTime measures relate to internal clock, which may diverge from real "actual" time
-     By applying correction on time addition here, we ensure that further calls to SleepUntil
-     will continue to provide continuous non-diverging times.
-     Example if local clock is slower by 10%, SOPC_RealTime_AddDuration (100ms) will actually add "110 ms" so that
-     expected local time matches actual time.
-     */
+    if (offset_us >= 0)
+    {
+        const uint64_t minIncrement = duration_us / 5;
+        /**
+         * Window offset principle.
+         * - Find out current position in window [0 .. duration_us -1]
+         * - Add the missing time up to next position "offset_us" in that window
+         * - In the case the current position is close BEFORE "offset_us", then add a full cycle to
+         *      wait time. This case means that this function was called a little too early due to
+         *      clock discrepancies:
+         *       - position in window is given by system DateTime clock (which is continuously
+         *           corrected by PTP/NTP)
+         *       - actual wait times are provided by monotonic realtime clock
+         */
 
-    t->tick100ns += (uint64_t) GPTP_CORRECT(duration_ms * MS_TO_100NS);
+        SOPC_ASSERT(duration_us > 0 && duration_us <= UINT32_MAX);
+
+        uint64_t currentWinTime_us = (SOPC_Time_GetCurrentTimeUTC() / 10);
+        const uint32_t duration32_us = (uint32_t) duration_us;
+        const uint32_t currentWinTime32_us = (uint32_t)(currentWinTime_us % SECOND_TO_US);
+
+        // Current Position of clock within window given by duration_us
+        const uint32_t currentWinPos_us = currentWinTime32_us % duration32_us;
+        // consider the remainder relatively to a window starting at offset_us rather than 0
+        // windowOffset_us is 0 if current time matches offset_us
+        // windowOffset_us is small positive if current time is past offset_us
+        // windowOffset_us is large positive (from duration_us -1) if current time is right before offset_us
+        const uint32_t windowOffset_us = (duration32_us + currentWinPos_us - offset_us) % duration32_us;
+
+        SOPC_ASSERT(increment_us > windowOffset_us);
+        // reomve the part of the cycle that already elapsed
+        increment_us -= windowOffset_us;
+
+        // Consider that event is in the "past" if windowOffset_us is close to next event (>80% of cycle)
+        if (increment_us < minIncrement)
+        {
+            increment_us += duration32_us;
+        }
+    }
+    t->tick100ns += (uint64_t) GPTP_CORRECT(increment_us * US_TO_100NS);
 }
 
 /***************************************************/
