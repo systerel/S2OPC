@@ -163,7 +163,8 @@ typedef enum {
    constants__e_secpol_None,
    constants__e_secpol_B256,
    constants__e_secpol_B256S256,
-   constants__e_secpol_Aes128Sha256RsaOaep
+   constants__e_secpol_Aes128Sha256RsaOaep,
+   constants__e_secpol_Aes256Sha256RsaPss
 } constants__t_SecurityPolicy;
 typedef enum {
    constants__c_TimestampsToReturn_indet,
