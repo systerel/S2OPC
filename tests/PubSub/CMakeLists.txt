@@ -16,13 +16,21 @@ endif()
 
 # options with impact on dependencies
 option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
 
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
 
+# Enable fuzzing if WITH_OSS_FUZZ is ON
+if(WITH_OSS_FUZZ)
+    set(ENABLE_TESTING OFF)
+    set(ENABLE_FUZZING ON)
+endif()
+
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
   find_package(check REQUIRED)
+  set(ENABLE_FUZZING ON)
 endif()
 
 
@@ -284,3 +292,57 @@ if(ENABLE_TESTING)
   endif()
 
 endif(ENABLE_TESTING)
+
+
+## S2OPC fuzzing tests: to be run manually ##
+
+if(ENABLE_FUZZING)
+  set(FUZZING_PATH "fuzzing")
+
+  # Local Fuzzing
+  function(s2opc_fuzzer name src_file)
+    set(standalone_target_name "${name}.standalone")
+    set(fuzz_target_name "${name}.libfuzzer")
+
+    add_executable(${standalone_target_name} "${FUZZING_PATH}/${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
+    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
+    target_link_libraries(udp_pub_conf_test PRIVATE s2opc_pubsub)
+    target_link_libraries(${standalone_target_name} s2opc_clientserver)
+    target_include_directories(${standalone_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers_pubsub ${standalone_target_name})
+
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
+    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver)
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    target_link_libraries(udp_pub_conf_test PRIVATE s2opc_pubsub)
+    add_dependencies(fuzzers_pubsub ${fuzz_target_name})
+  endfunction()
+
+  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
+      # We need at least CLang 6 to get LibFuzzer
+      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
+    else()
+      add_custom_target(fuzzers_pubsub)
+      s2opc_fuzzer(sub_fuzzer "fuzz_sub.c")
+    endif()
+  endif()
+
+  # OSS Fuzzing
+  function(s2opc_oss_fuzzer fuzz_target_name src_file)
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    target_link_libraries(${fuzz_target_name} PRIVATE s2opc_pubsub)
+    target_link_libraries(${fuzz_target_name} s2opc_clientserver $ENV{LIB_FUZZING_ENGINE})
+    target_include_directories(${fuzz_target_name} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  if(WITH_OSS_FUZZ)
+    add_custom_target(fuzzers)
+    s2opc_oss_fuzzer(sub_fuzzer "fuzz_sub.c")
+  endif()
+endif(ENABLE_FUZZING)
+
