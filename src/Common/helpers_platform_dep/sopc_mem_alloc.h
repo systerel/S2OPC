@@ -29,8 +29,9 @@
 
 /** \brief Allocates memory.
  *
- * This function acts as standard 'malloc'. However, if size is passed with the value "0", a non-null
- *      pointer shall be returned.
+ * This function acts as standard 'malloc' except that it ensures that a non-NULL pointer is returned even if the
+ * requested size is zero
+ *
  * \param size The amount of memory requested.
  * \return a pointer to the new allocated area, which has at least the requested size.
  *      The caller is responsible for calling SOPC_Free when the memory is no more required.

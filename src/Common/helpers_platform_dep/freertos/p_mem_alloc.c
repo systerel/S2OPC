@@ -47,6 +47,11 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
         return NULL;
     }
 
+    // Minimum size = 4 to avoid NULL pointer
+    if (0 == nmemb)
+    {
+        nmemb = 4;
+    }
     void* p = SOPC_Malloc(nmemb * size);
     if (NULL == p)
     {
