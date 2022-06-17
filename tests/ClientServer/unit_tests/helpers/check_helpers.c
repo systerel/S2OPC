@@ -56,7 +56,8 @@ int main(void)
     int number_failed;
     SRunner* sr;
 
-    sr = srunner_create(tests_make_suite_crypto_Aes128Sha256RsaOaep());
+    sr = srunner_create(tests_make_suite_crypto_Aes256Sha256RsaPss());
+    srunner_add_suite(sr, tests_make_suite_crypto_Aes128Sha256RsaOaep());
     srunner_add_suite(sr, tests_make_suite_crypto_B256S256());
     srunner_add_suite(sr, tests_make_suite_crypto_B256());
     srunner_add_suite(sr, tests_make_suite_crypto_None());
