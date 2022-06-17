@@ -606,11 +606,12 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
                                                           size_t nbPathElements,
                                                           OpcUa_RelativePathElement* pathElements)
 {
-    const char* startingNodeIdCString = SOPC_NodeId_ToCString(startingNodeId);
+    char* startingNodeIdCString = SOPC_NodeId_ToCString(startingNodeId);
     OpcUa_BrowsePath* browsePath = TranslateBPRequest_InitializeBrowsePathPointer(
         tbpRequest, index, startingNodeIdCString, nbPathElements, pathElements);
     if (NULL == browsePath)
     {
+        SOPC_Free(startingNodeIdCString);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&browsePath->StartingNode, startingNodeId);
@@ -623,6 +624,7 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
     {
         OpcUa_BrowsePath_Clear(browsePath);
     }
+    SOPC_Free(startingNodeIdCString);
     return status;
 }
 
