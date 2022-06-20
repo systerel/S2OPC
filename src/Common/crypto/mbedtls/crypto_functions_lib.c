@@ -743,7 +743,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
     {
         // Sets the appropriate padding mode
         prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, padding, (int)hash_id);
+        mbedtls_rsa_set_padding(prsa, padding, (int) hash_id);
 
         if (true == pss)
         {
@@ -792,7 +792,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
     {
         // Sets the appropriate padding mode
         prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, padding, (int)hash_id);
+        mbedtls_rsa_set_padding(prsa, padding, (int) hash_id);
 
         if (true == pss)
         {
