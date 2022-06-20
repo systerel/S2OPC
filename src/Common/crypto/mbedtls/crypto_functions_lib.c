@@ -708,7 +708,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   const SOPC_AsymmetricKey* pKey,
                                   uint8_t* pSignature,
                                   int padding,
-                                  int hash_id,
+                                  mbedtls_md_type_t hash_id,
                                   int hash_len,
                                   bool pss);
 
@@ -718,7 +718,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     const SOPC_AsymmetricKey* pKey,
                                     const uint8_t* pSignature,
                                     int padding,
-                                    int hash_id,
+                                    mbedtls_md_type_t hash_id,
                                     int hash_len,
                                     bool pss);
 
@@ -728,7 +728,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   const SOPC_AsymmetricKey* pKey,
                                   uint8_t* pSignature,
                                   int padding,
-                                  int hash_id,
+                                  mbedtls_md_type_t hash_id,
                                   int hash_len,
                                   bool pss)
 {
@@ -776,7 +776,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     const SOPC_AsymmetricKey* pKey,
                                     const uint8_t* pSignature,
                                     int padding,
-                                    int hash_id,
+                                    mbedtls_md_type_t hash_id,
                                     int hash_len,
                                     bool pss)
 {
