@@ -74,7 +74,7 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
-#define SOPC_MAX_SECU_POLICIES_CFG 6 /* Maximum number of security policies in a configuration array */
+#define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
 
 /**
  * \brief Endpoint security policy configuration
