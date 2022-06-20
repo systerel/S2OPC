@@ -23,5 +23,5 @@
 set -e
 
 source "$(dirname "$0")/".docker-images.sh
-
-"$(dirname "$0")/".run-in-docker.sh "$MINGW_IMAGE" CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake DOCKER_IMAGE="$MINGW_IMAGE" "$@"
+ # deactivate warnings as errors because of string format issues
+"$(dirname "$0")/".run-in-docker.sh "$MINGW_IMAGE" CMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake DOCKER_IMAGE="$MINGW_IMAGE" -D__USE_MINGW_ANSI_STDIO=0 -DWARNINGS_AS_ERRORS=0 "$@"

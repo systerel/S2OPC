@@ -181,7 +181,7 @@ build-win64: &build_win64
     - 'export WITH_PYS2OPC=OFF'
     - *build_command_line
   variables: &build_win64_variables
-    CMAKE_C_FLAGS: '-D__USE_MINGW_ANSI_STDIO=0'
+    CMAKE_C_FLAGS: '-D__USE_MINGW_ANSI_STDIO=0 -DWARNINGS_AS_ERRORS=0' # deactivate warnings as errors because of string format issues
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
     DOCKER_IMAGE: 'sha256:4edcdfff072522487730fb268bf834438d47a8fc5e662e5ac7868c4ecb367dcb'
     BUILD_DIR: build_toolchain
