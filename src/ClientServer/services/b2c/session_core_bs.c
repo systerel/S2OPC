@@ -202,6 +202,12 @@ void session_core_bs__notify_set_session_state(
 {
     if (session_core_bs__is_client)
     {
+        if (NULL == session_client_app_context[session_core_bs__session])
+        {
+            // Note: this case should be guaranteed by B model but it needs some B model refactoring
+            return;
+        }
+
         /* CLIENT SIDE ONLY */
         if (session_core_bs__state == constants__e_session_userActivated)
         {
