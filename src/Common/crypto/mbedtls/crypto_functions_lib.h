@@ -131,28 +131,11 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
                                                              const SOPC_AsymmetricKey* pKey,
                                                              uint8_t* pOutput,
                                                              uint32_t* pLenWritten);
-
-/**
- *   Although no attacks are known
- *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
- *   RSASSA-PSS is recommended for eventual adoption in new applications.
- *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
- *   applications, and while still appropriate for new applications, a
- *   gradual transition to RSASSA-PSS is encouraged.
- */
 SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
                                                      const uint8_t* pInput,
                                                      uint32_t lenInput,
                                                      const SOPC_AsymmetricKey* pKey,
                                                      uint8_t* pSignature);
-/**
- *   Although no attacks are known
- *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
- *   RSASSA-PSS is recommended for eventual adoption in new applications.
- *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
- *   applications, and while still appropriate for new applications, a
- *   gradual transition to RSASSA-PSS is encouraged.
- */
 SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
                                                        const uint8_t* pInput,
                                                        uint32_t lenInput,
