@@ -254,7 +254,7 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
     return status;
 }
 
-static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t endpointConfigIdx, uint8_t reverseConnIdx)
+static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t endpointConfigIdx, uint16_t reverseConnIdx)
 {
     assert(NULL != timerId);
     assert(endpointConfigIdx > 0);
@@ -272,7 +272,7 @@ static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t end
     {
         // In case of failure we will only stop attempts
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Services: epCfgIdx=%" PRIu32 " reverseConnIdx=%" PRIu8
+                               "Services: epCfgIdx=%" PRIu32 " reverseConnIdx=%" PRIu16
                                " ReverseConnection timer creation failed, no retry will be done for this connection",
                                endpointConfigIdx, reverseConnIdx);
     }
@@ -2548,7 +2548,7 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
 static bool initServerSC(uint32_t socketIndex,
                          uint32_t serverEndpointConfigIdx,
                          bool reverseConn,
-                         uint8_t reverseConnIdx,
+                         uint16_t reverseConnIdx,
                          uint32_t* connIdx)
 {
     if (!SC_InitNewConnection(connIdx))
@@ -2808,7 +2808,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             // Note: we do not know the socket index yet, it will be set by
             // SC_ServerTransition_TcpReverserInit_To_TcpInit after SOCKET_CONNECTION
-            if (initServerSC(0, eltId, true, (uint8_t) auxParam, &connectionIdx))
+            if (initServerSC(0, eltId, true, (uint16_t) auxParam, &connectionIdx))
             {
                 scConnection = SC_GetConnection(connectionIdx);
                 assert(NULL != scConnection);

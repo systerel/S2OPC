@@ -171,7 +171,7 @@ typedef struct SOPC_SecureConnection
     uint32_t endpointConnectionConfigIdx;
     // SC reverse connection info
     bool isReverseConnection; // use ReverseHello mechanism fpr this connection
-    uint8_t
+    uint16_t
         reverseConnIdx; // reverse connection index in endpoint configuration (set only if isReverseConnection is true)
 
     uint32_t socketIndex; // associated TCP socket index (defined when state != TCP_INIT or SC_CLOSED)

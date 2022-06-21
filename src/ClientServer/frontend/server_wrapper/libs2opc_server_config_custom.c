@@ -437,11 +437,13 @@ bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
     {
         return false;
     }
-    destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientApplicationURI = SOPC_strdup(clientAppURI);
-    destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientEndpointURL = SOPC_strdup(clientEndpointURL);
-    if (NULL == destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientEndpointURL)
+    SOPC_Server_ClientToConnect* clientToConnect = &destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect];
+    clientToConnect->clientApplicationURI = SOPC_strdup(clientAppURI);
+    clientToConnect->clientEndpointURL = SOPC_strdup(clientEndpointURL);
+    if (NULL == clientToConnect->clientEndpointURL)
     {
-        SOPC_Free(destEndpoint->clientsToConnect[destEndpoint->nbClientsToConnect].clientApplicationURI);
+        SOPC_Free(clientToConnect->clientApplicationURI);
+        clientToConnect->clientApplicationURI = NULL;
         return false;
     }
 

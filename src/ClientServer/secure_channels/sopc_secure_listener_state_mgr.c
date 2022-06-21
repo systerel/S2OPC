@@ -352,7 +352,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                 // Define a listener
                 result = SOPC_SecureListenerStateMgr_NoListener(eltId);
             }
-            for (uint8_t clientToConnIdx = 0; result && clientToConnIdx < epConfig->nbClientsToConnect;
+            for (uint16_t clientToConnIdx = 0; result && clientToConnIdx < epConfig->nbClientsToConnect;
                  clientToConnIdx++)
             {
                 // Self generate SC_REVERSE_CONNECT events for connection state manager

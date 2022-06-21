@@ -31,7 +31,7 @@ typedef enum
     INT_EP_SC_CLOSE,           /* id = secure channel connection index,
                                   auxParam = (uint32_t) endpoint description configuration index */
     INT_EP_SC_REVERSE_CONNECT, /* id = endpoint description configuration index,
-                                  auxParam = client to connect configuration index in endpoint config */
+                                  auxParam = (uint16_t) client to connect configuration index in endpoint config */
     /* SC connection manager -> SC listener manager */
     INT_EP_SC_CREATED,      /* id = endpoint description configuration index,
                                auxParam = (uint32_t) secure channel connection index */

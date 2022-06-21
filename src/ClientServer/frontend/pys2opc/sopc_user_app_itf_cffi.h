@@ -123,8 +123,8 @@ typedef struct SOPC_Endpoint_Config
         authorizationManager; /**< The user authorization manager: user access level evaluation */
 
     /* Configure reverse connection mechanism */
-    bool noListening;           /**< If Flag is set, the server does not listen connection initiated by clients */
-    uint8_t nbClientsToConnect; /**< Number of clients to connect using reverse connection mechanism */
+    bool noListening;            /**< If Flag is set, the server does not listen connection initiated by clients */
+    uint16_t nbClientsToConnect; /**< Number of clients to connect using reverse connection mechanism */
     SOPC_Server_ClientToConnect
         clientsToConnect[SOPC_MAX_REVERSE_CLIENT_CONNECTIONS]; /**< Array of configuration for reverse connection
                                                                      to clients */

@@ -270,7 +270,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
  * \param clientAppUri       The client ApplicationUri. It might be empty since it is not checked for now.
  * \param clientEndpointUrl  The client endpoint URL to connect to establish the reverse connection.
  *
- * \return True if the client to connect configuration added successfully
+ * \return True if the client to connect configuration was added successfully
  *         or false if ::SOPC_MAX_REVERSE_CLIENT_CONNECTIONS are already defined or invalid parameters are provided.
  */
 bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
