@@ -709,7 +709,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   uint8_t* pSignature,
                                   int padding,
                                   mbedtls_md_type_t hash_id,
-                                  int hash_len,
+                                  unsigned int hash_len,
                                   bool pss);
 
 SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
@@ -719,7 +719,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     const uint8_t* pSignature,
                                     int padding,
                                     mbedtls_md_type_t hash_id,
-                                    int hash_len,
+                                    unsigned int hash_len,
                                     bool pss);
 
 SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
@@ -729,7 +729,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   uint8_t* pSignature,
                                   int padding,
                                   mbedtls_md_type_t hash_id,
-                                  int hash_len,
+                                  unsigned int hash_len,
                                   bool pss)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -748,13 +748,13 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
         if (true == pss)
         {
             res = MBEDTLS_RSA_RSASSA_PSS_SIGN(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                              hash_id, (unsigned int) hash_len, hash, pSignature);
+                                              hash_id, hash_len, hash, pSignature);
         }
         else
         {
             res =
                 MBEDTLS_RSA_RSASSA_PKCS1_V15_SIGN(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg,
-                                                  hash_id, (unsigned int) hash_len, hash, pSignature);
+                                                  hash_id, hash_len, hash, pSignature);
         }
 
         if (0 != res) // signature is as long as the key
@@ -777,7 +777,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     const uint8_t* pSignature,
                                     int padding,
                                     mbedtls_md_type_t hash_id,
-                                    int hash_len,
+                                    unsigned int hash_len,
                                     bool pss)
 {
     SOPC_UNUSED_ARG(pProvider);
@@ -796,11 +796,11 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
 
         if (true == pss)
         {
-            res = MBEDTLS_RSA_RSASSA_PSS_VERIFY(prsa, hash_id, (unsigned int) hash_len, hash, pSignature);
+            res = MBEDTLS_RSA_RSASSA_PSS_VERIFY(prsa, hash_id, hash_len, hash, pSignature);
         }
         else
         {
-            res = MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY(prsa, hash_id, (unsigned int) hash_len, hash, pSignature);
+            res = MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY(prsa, hash_id, hash_len, hash, pSignature);
         }
         if (0 != res) // signature is as long as the key
         {
