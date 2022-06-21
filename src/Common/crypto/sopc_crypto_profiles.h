@@ -63,8 +63,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Signature 32
 #define SOPC_SecurityPolicy_Basic256Sha256_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash \
-    32 /*< RSASS PSS uses SHA-256 in this context (unused, Basic256Sha256 uses PKCS#1, not PSS) */
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
@@ -77,7 +75,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Signature 32
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_PSS_Hash 32
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
@@ -90,7 +87,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_Signature 32
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_OAEP_Hash 32 /*< RSA OAEP uses SHA2-256 */
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_PSS_Hash 32
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI_SignAlgo "http://opcfoundation.org/UA/security/rsa-pss-sha2-256"
@@ -103,8 +99,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256_SymmLen_Signature 20
 #define SOPC_SecurityPolicy_Basic256_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Basic256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Basic256_AsymLen_PSS_Hash \
-    20 /*< RSASS PSS uses SHA-1 in this context (unused, Basic256 uses PKCS#1, not PSS) */
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits 1024
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits 2048
 #define SOPC_SecurityPolicy_Basic256_URI_SignAlgo "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
