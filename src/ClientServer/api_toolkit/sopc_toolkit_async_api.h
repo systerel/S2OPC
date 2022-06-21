@@ -169,13 +169,14 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
  *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
  *
- * \return                       true in case of success, false in case of memory allocation issue
+ * \return                       SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS or
+ *                               SOPC_STATUS_OUT_OF_MEMORY otherwise
  *
  */
-bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
-                                             const char* sessionName,
-                                             uintptr_t sessionContext,
-                                             SOPC_ExtensionObject* userToken);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                          const char* sessionName,
+                                                          uintptr_t sessionContext,
+                                                          SOPC_ExtensionObject* userToken);
 
 /**
  * \brief Request to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()

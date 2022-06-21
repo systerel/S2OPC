@@ -74,10 +74,10 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
                                                          .secureChannelConfigIdx = secureChannelConfigIdx}};
 }
 
-bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
-                                             const char* sessionName,
-                                             uintptr_t sessionContext,
-                                             SOPC_ExtensionObject* userToken)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                          const char* sessionName,
+                                                          uintptr_t sessionContext,
+                                                          SOPC_ExtensionObject* userToken)
 {
     uint32_t secureChannelConfigIdx = 0;
     uint32_t reverseEndpointConfigIdx = 0;
@@ -91,21 +91,21 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpoint
         reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
         if (0 == reverseEndpointConfigIdx)
         {
-            return false;
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
         break;
     default:
-        return false;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (0 == secureChannelConfigIdx)
     {
-        return false;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     SOPC_Internal_SessionAppContext* sessionAppContext = SOPC_Calloc(1, sizeof(*sessionAppContext));
     if (NULL == sessionAppContext)
     {
-        return false;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
     sessionAppContext->userToken = userToken;
     if (NULL != sessionName)
@@ -119,13 +119,13 @@ bool SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpoint
         else
         {
             SOPC_Free(sessionAppContext);
-            return false;
+            return SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     sessionAppContext->userSessionContext = sessionContext;
     SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, secureChannelConfigIdx, (uintptr_t) reverseEndpointConfigIdx,
                                (uintptr_t) sessionAppContext);
-    return true;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_EndpointConnectionCfg endpointConnectionCfg,
@@ -155,8 +155,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
 
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
-        status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -210,8 +209,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
 
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
-        status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
     }
     if (SOPC_STATUS_OK != status)
     {

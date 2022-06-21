@@ -28,21 +28,3 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
 void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
-
-// void SOPC_ToolkitClient_AsyncActivateSession(uint32_t endpointConnectionIdx,
-//                                              uintptr_t sessionContext,
-//                                              SOPC_ExtensionObject* userToken);
-// SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(uint32_t endpointConnectionIdx,
-//                                                                     uintptr_t sessionContext,
-//                                                                     const char* policyId);
-// SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(uint32_t endpointConnectionIdx,
-//                                                                            uintptr_t sessionContext,
-//                                                                            const char* policyId,
-//                                                                            const char* username,
-//                                                                            const uint8_t* password,
-//                                                                            int32_t length_password);
-// void SOPC_ToolkitClient_AsyncSendRequestOnSession(uint32_t sessionId, void* requestStruct, uintptr_t requestContext);
-// void SOPC_ToolkitClient_AsyncCloseSession(uint32_t sessionId);
-// void SOPC_ToolkitClient_AsyncSendDiscoveryRequest(uint32_t endpointConnectionIdx,
-//                                                   void* discoveryReqStruct,
-//                                                   uintptr_t requestContext);
