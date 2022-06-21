@@ -218,47 +218,58 @@ static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* sc
     } while (idx < SOPC_MAX_SOCKETS_CONNECTIONS && !result);
 }
 
-static bool SOPC_SecureListenerStateMgr_GetFirstConnection(SOPC_SecureListener* scListener,
-                                                           const char* serverURL, // if NULL ignored
-                                                           const char* serverURI, // if serverURL is NULL
-                                                           uint32_t* outScIdx)
+static bool SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(uint32_t scIdx,
+                                                                     const char* serverURL, // if NULL ignored
+                                                                     const char* serverURI  // if serverURL is not NULL
+)
+{
+    bool result = false;
+    SOPC_SecureConnection* sc = SC_GetConnection(scIdx);
+    SOPC_SecureChannel_Config* scConfig = NULL;
+    if (NULL != sc)
+    {
+        if (NULL != serverURL)
+        {
+            scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
+            if (NULL != scConfig)
+            {
+                // Accept a NULL URL in config to indicate any server endpoint URL is accepted by reverse
+                // connection Accept a NULL URI in config to indicate not to check the serverURI
+                if ((NULL == scConfig->url || 0 == strcmp(scConfig->url, serverURL)) &&
+                    (NULL == scConfig->serverUri || 0 == strcmp(scConfig->serverUri, serverURI)))
+                {
+                    result = true;
+                }
+            }
+        }
+        else
+        {
+            result = true;
+        }
+    }
+    return result;
+}
+
+static bool SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(SOPC_SecureListener* scListener,
+                                                                     const char* serverURL, // if NULL ignored
+                                                                     const char* serverURI, // if serverURL is not NULL
+                                                                     uint32_t* outScIdx)
 {
     assert(NULL != scListener);
     assert(NULL != outScIdx);
     assert(scListener->reverseEnpoint);
     bool resultFound = false;
     uint32_t scIdx = 0;
-    SOPC_SecureConnection* sc = NULL;
-    SOPC_SecureChannel_Config* scConfig = NULL;
     // Close all active secure connections established on the listener
     for (unsigned int idx = 0; !resultFound && idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++)
     {
         if (scListener->isUsedConnectionIdxArray[idx])
         {
             scIdx = scListener->connectionIdxArray[idx];
-            sc = SC_GetConnection(scIdx);
-            if (NULL != sc)
+            resultFound = SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(scIdx, serverURL, serverURI);
+            if (resultFound)
             {
-                if (NULL != serverURL)
-                {
-                    scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
-                    if (NULL != scConfig)
-                    {
-                        // Accept a NULL URL in config to indicate any server endpoint URL is accepted by reverse
-                        // connection Accept a NULL URI in config to indicate not to check the serverURI
-                        if ((NULL == scConfig->url || 0 == strcmp(scConfig->url, serverURL)) &&
-                            (NULL == scConfig->serverUri || 0 == strcmp(scConfig->serverUri, serverURI)))
-                        {
-                            resultFound = true;
-                            *outScIdx = scIdx;
-                        }
-                    }
-                }
-                else
-                {
-                    resultFound = true;
-                    *outScIdx = scIdx;
-                }
+                *outScIdx = scIdx;
             }
         }
     }
@@ -289,6 +300,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
     SOPC_SecureListener* scListener = NULL;
     SOPC_SecureConnection* sc = NULL;
 
+    bool result = false;
     uint32_t inScIdx = 0;
     uint32_t tmpScIdx = 0;
     char* serverURI = NULL;
@@ -339,21 +351,36 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                                "ScListenerMgr: INT_EP_SC_RHE_DECODED scIdx=%" PRIu32
                                " from server serverURI=%s endpointURL=%s",
                                inScIdx, serverURI, serverEndpointURL);
+        // Retrieve the secure connection initially associated to socket for connection establishment
         sc = SC_GetConnection(inScIdx);
         if (sc != NULL && sc->isReverseConnection &&
             sc->clientReverseEpConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
             sc->clientReverseEpConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
         {
+            // Check listener state
             scListener = SOPC_SecureListenerStateMgr_GetListener(sc->clientReverseEpConfigIdx);
             if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED)
             {
-                if (serverEndpointURL != NULL && serverURI != NULL &&
-                    SOPC_SecureListenerStateMgr_GetFirstConnection(scListener, serverEndpointURL, serverURI, &tmpScIdx))
+                // Retrieve the first compatible secure connection waiting to be established
+                if (serverEndpointURL != NULL && serverURI != NULL)
                 {
-                    if (tmpScIdx != inScIdx)
+                    if (SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(inScIdx, serverEndpointURL, serverURI))
                     {
-                        SOPC_SecureListenerStateMgr_SwitchConnectionsExceptSocket(inScIdx, tmpScIdx);
+                        result = true;
                     }
+                    else if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, serverEndpointURL,
+                                                                                      serverURI, &tmpScIdx))
+                    {
+                        /* Important: we have to switch the two secure connections configurations to keep
+                         * the same secure connection index which is already associated to socket in socket layer.
+                         * We only keep the socket association in secure connection and switch rest of content.
+                         */
+                        SOPC_SecureListenerStateMgr_SwitchConnectionsExceptSocket(inScIdx, tmpScIdx);
+                        result = true;
+                    }
+                }
+                if (result)
+                {
                     // SC is not associated anymore with reverse endpoint
                     SOPC_SecureListenerStateMgr_RemoveConnection(scListener, inScIdx);
                     // Do transition on the selected SC
@@ -362,8 +389,9 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                 }
                 else
                 {
-                    // Server endpointURL or serverURI is NULL or no connection compatible
-                    // No reverse connection to establish with this server endpoint for now: require socket closure
+                    // Server endpointURL or serverURI is NULL
+                    // or No reverse connection to establish with this server endpoint for now
+                    // => require socket closure
                     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) sc->socketIndex, (uintptr_t) inScIdx, 0);
                 }
             }
@@ -486,7 +514,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         {
             if (scListener->reverseEnpoint)
             {
-                if (SOPC_SecureListenerStateMgr_GetFirstConnection(scListener, NULL, NULL, &scIdx))
+                if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, NULL, NULL, &scIdx))
                 {
                     // Temporary assignment of socket to this SC
                     sc = SC_GetConnection(scIdx);
