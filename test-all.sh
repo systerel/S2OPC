@@ -33,6 +33,7 @@ TAP_DIR="${BUILD_DIR}/bin"
 
 CLIENTSERVER_TAP_FILES='check_helpers.tap
 check_libsub.tap
+check_security_policy_config.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
 check_sockets.tap
