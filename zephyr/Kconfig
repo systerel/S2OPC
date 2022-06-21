@@ -79,18 +79,18 @@ config SOPC_PUBSUB_USES_CACHE
 	  This value is used by Server and Client sample
 	  
 config SOPC_USER_STACK_SIZE
-	int 
+	int "Stack size of applicative (in Kb) user tasks if called by P_THREAD_Create or P_THREAD_CreatePrioritized"
 	default 4
 	depends on S2OPC
 	help
 	  Stack size of applicative (in Kb) user tasks if called by P_THREAD_Create or P_THREAD_CreatePrioritized
 
 config SOPC_MAX_USER_TASKS
-	int 
+	int "Maximum number of users threads that can be created by S2OPC"
 	default 1
 	depends on S2OPC
 	help
-	  Stack size of applicative (in Kb) user tasks if called by P_THREAD_Create or P_THREAD_CreatePrioritized
+	  Maximum number of users threads that can be created by S2OPC
 
 config SOPC_PUBLISHER_PRIORITY
 	int "Publisher threads priority"
@@ -109,7 +109,7 @@ config SOPC_SUBSCRIBER_PRIORITY
 	  E.g SOPC_SUBSCRIBER_PRIORITY = 0 => actual priority = -CONFIG_NUM_COOP_PRIORITIES
 
 config SOPC_THREAD_DEFAULT_PRIORITY
-	int 
+	int "Default thread priority for SOPC threads"
 	default 27
 	depends on S2OPC
 	help
