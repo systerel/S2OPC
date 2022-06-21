@@ -236,9 +236,15 @@ void session_core_bs__notify_set_session_state(
             {
                 // If session not in closing state or already activated, it is in activation state regarding user app
                 // => notify activation failed
-                SOPC_App_EnqueueComEvent(SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session, (uintptr_t) scReason,
-                                         session_client_app_context[session_core_bs__session]
-                                             ->userSessionContext); // user application session context
+                // Note: the user application context might be invalid in some cases
+                //       (session closed by application using "invalid" index)
+                if (NULL != session_client_app_context[session_core_bs__session])
+                {
+                    SOPC_App_EnqueueComEvent(SE_SESSION_ACTIVATION_FAILURE, session_core_bs__session,
+                                             (uintptr_t) scReason,
+                                             session_client_app_context[session_core_bs__session]
+                                                 ->userSessionContext); // user application session context
+                }
             }
             else
             {
