@@ -1600,9 +1600,9 @@ static bool get_certificate_der(SOPC_CertificateList* cert, SOPC_Buffer** buffer
     return true;
 }
 
-static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection* scConnection,
-                                                           uint32_t scConnectionIdx,
-                                                           uint32_t socketIdx)
+static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection* scConnection,
+                                                          uint32_t scConnectionIdx,
+                                                          uint32_t socketIdx)
 {
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer = NULL;
@@ -1617,8 +1617,8 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
     int32_t serverUriLen = epConfig->serverConfigPtr->serverDescription.ApplicationUri.Length;
     size_t serverEndpointUrlLen = strlen(epConfig->endpointURL);
 
-    if (serverUriLen <= SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH &&
-        serverEndpointUrlLen <= SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH)
+    if (serverUriLen < SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH &&
+        serverEndpointUrlLen < SOPC_TCP_UA_MAX_URL_AND_REASON_LENGTH)
     {
         // Create OPC UA TCP Reverse Hello message
         // Max size of buffer is message minimum size + URI and URL bytes length
@@ -1629,10 +1629,10 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScStateMgr RHE: serverURI length (%" PRIi32 ") or endpointURL length (%" PRIu32
-                               ") > 4096 for endpointCfgIdx=%" PRIu32 " not found",
+                               ") >= 4096 for endpointCfgIdx=%" PRIu32 " not found",
                                serverUriLen, (uint32_t) serverEndpointUrlLen, scConnection->serverEndpointConfigIdx);
     }
-    if (msgBuffer != NULL && epConfig != NULL)
+    if (msgBuffer != NULL)
     {
         // Let size of the header for the chunk manager
         status = SOPC_Buffer_SetDataLength(msgBuffer, SOPC_TCP_UA_HEADER_LENGTH);
@@ -1646,16 +1646,12 @@ static bool SC_ServerTransition_TcpReverserInit_To_TcpInit(SOPC_SecureConnection
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_Write(&epConfig->serverConfigPtr->serverDescription.ApplicationUri, msgBuffer, 0);
-            SOPC_String_Clear(&urlOrURI);
         }
 
         // Encode clientURL
         if (SOPC_STATUS_OK == status)
         {
-            // TODO: do not use sc config here ?
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            status = SOPC_String_AttachFromCstring(&urlOrURI, (char*) epConfig->endpointURL);
-            SOPC_GCC_DIAGNOSTIC_RESTORE
+            status = SOPC_String_AttachFromCstring(&urlOrURI, epConfig->endpointURL);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -2815,10 +2811,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // Change initial state for a reverse init
                 scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
                 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                 SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT, connectionIdx,
                                           (uintptr_t) epConfig->clientsToConnect[auxParam].clientEndpointURL, 0);
-                SOPC_GCC_DIAGNOSTIC_RESTORE
             }
             else
             {
@@ -3236,7 +3230,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
                                                      (uintptr_t) NULL, (uintptr_t) eltId);
             // Send a Reverse Hello message on TCP connection
-            result = SC_ServerTransition_TcpReverserInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
+            result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
         }
         else
         {

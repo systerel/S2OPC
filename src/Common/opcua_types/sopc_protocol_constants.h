@@ -45,7 +45,7 @@
 /* Minimum length of a TCP UA ERROR message */
 #define SOPC_TCP_UA_ERR_MIN_MSG_LENGTH 16
 /* Minimum length of a TCP UA REVERSE HELLO message (without including URI/URL strings content but only its size)*/
-#define SOPC_TCP_UA_RHE_MIN_MSG_LENGTH 64
+#define SOPC_TCP_UA_RHE_MIN_MSG_LENGTH 16
 
 /* Position of MessageSize header field in a UA message chunk*/
 #define SOPC_UA_HEADER_MESSAGE_SIZE_POSITION 4
