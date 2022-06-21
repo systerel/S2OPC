@@ -204,7 +204,7 @@
   </xs:complexType>
   <xs:complexType name="ReverseConnectionsType">
     <xs:sequence>
-      <xs:element type="ReverseConnectionType" name="ReverseConnection" maxOccurs="5" minOccurs="0">
+      <xs:element type="ReverseConnectionType" name="ReverseConnection" maxOccurs="unbounded" minOccurs="0">
       </xs:element>
     </xs:sequence>
   </xs:complexType>
@@ -221,7 +221,7 @@
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="enableListening" use="optional" default="true">
         <xs:annotation>
-          <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least ReverseConnection is defined.</xs:documentation>
+          <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least one ReverseConnection is defined.</xs:documentation>
         </xs:annotation>
     </xs:attribute>
   </xs:complexType>
