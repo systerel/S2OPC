@@ -484,7 +484,7 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        uint32_t lenPlainText,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
-                                       int hash_id);
+                                       mbedtls_md_type_t hash_id);
 
 SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const uint8_t* pInput,
@@ -492,14 +492,14 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
                                        uint32_t* pLenWritten,
-                                       int hash_id);
+                                       mbedtls_md_type_t hash_id);
 
 SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const uint8_t* pInput,
                                        uint32_t lenPlainText,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
-                                       int hash_id)
+                                       mbedtls_md_type_t hash_id)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenToCiph = 0;
@@ -517,7 +517,7 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
     prsa = mbedtls_pk_rsa(pKey->pk);
 
     // Sets the appropriate padding mode (SHA2-256 for encryption/decryption)
-    mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, hash_id);
+    MBEDTLS_RSA_SET_PADDING(prsa, MBEDTLS_RSA_PKCS_V21, hash_id);
 
     // Input must be split into pieces that can be eaten by a single pass of rsa_*_encrypt
     status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain);
@@ -565,7 +565,7 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
                                        uint32_t* pLenWritten,
-                                       int hash_id)
+                                       mbedtls_md_type_t hash_id)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
@@ -589,7 +589,7 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
     prsa = mbedtls_pk_rsa(pKey->pk);
 
     // Sets the appropriate padding mode (SHA2-256 for encryption/decryption)
-    mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, hash_id);
+    MBEDTLS_RSA_SET_PADDING(prsa, MBEDTLS_RSA_PKCS_V21, hash_id);
 
     // Input must be split into pieces that can be eaten by a single pass of rsa_*_decrypt
     status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain);
@@ -743,7 +743,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
     {
         // Sets the appropriate padding mode
         prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, padding, (int) hash_id);
+        MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id);
 
         if (true == pss)
         {
@@ -792,7 +792,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
     {
         // Sets the appropriate padding mode
         prsa = mbedtls_pk_rsa(pKey->pk);
-        mbedtls_rsa_set_padding(prsa, padding, (int) hash_id);
+        MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id);
 
         if (true == pss)
         {
