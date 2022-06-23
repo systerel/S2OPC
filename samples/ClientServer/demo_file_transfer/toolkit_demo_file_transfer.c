@@ -22,6 +22,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
+#define BUFF_SIZE 100u
+
 /*-----------------------
  * Logger configuration :
  *-----------------------*/
@@ -144,7 +146,7 @@ int main(int argc, char* argv[])
         /* USER CODE BEGING */
         /********************/
 
-        char name[STR_BUFF_SIZE];
+        char name[BUFF_SIZE];
         while (1)
         {
             status = SOPC_FileTransfer_Get_TmpPath(config.fileType_nodeId, name);
