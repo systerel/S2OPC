@@ -450,7 +450,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 return result_code;
             }
         }
-        assert(SOPC_Dict_Insert(g_handle_to_file, &file->handle, file) == true);
+        bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file); 
+        SOPC_ASSERT(true == res);
         file->mode = mode;
         result_code = FileTransfer_FileType_Create_TmpFile(file);
         if (SOPC_GoodGenericStatus == result_code)
@@ -923,9 +924,13 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             /* g_str_objectId_to_file only for debuging with string key */
             char* str_key = SOPC_Malloc(strlen(config.fileType_nodeId));
             memcpy(str_key, config.fileType_nodeId, (size_t) strlen(config.fileType_nodeId));
-            assert(SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file) == true);
-            assert(SOPC_Dict_Insert(g_str_objectId_to_file, str_key, file) == true);
-            assert(SOPC_Dict_Insert(g_handle_to_file, &file->handle, file) == true);
+            bool res;
+            res = SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file);
+            SOPC_ASSERT(true == res);
+            res = SOPC_Dict_Insert(g_str_objectId_to_file, str_key, file);
+            SOPC_ASSERT(true == res);
+            res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
+            SOPC_ASSERT(true == res);
         }
     }
     if (status_nok)
