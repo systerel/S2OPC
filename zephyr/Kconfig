@@ -145,3 +145,12 @@ config SOPC_HELPER_IMPL_INSTRUM
 	help
 	  Set to 1 to allow debug and instrumentations of threading implementation
 	
+config SOPC_PTP_SYNCH_DURATION
+	int  "Duration (s) of one clock synchronization step while PtP SLAVE"
+	default 5
+	depends on S2OPC
+	help
+	  Duration (ms) of one clock synchronization step while PtP SLAVE
+	  This synchronisation starts when remote clock versus local clock
+	  have quite continuous offset.
+		

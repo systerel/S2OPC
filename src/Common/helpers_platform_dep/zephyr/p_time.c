@@ -40,6 +40,9 @@
 #include "toolchain/xcc_missing_defs.h"
 #endif
 
+#define UINT32_SHIFT (1llu << 32)
+#define UINT31_SHIFT (1llu << 31)
+
 #ifndef NULL
 #define NULL ((void*) 0)
 #endif
@@ -52,12 +55,12 @@
 
 /* s2opc includes */
 
-#include "p_time.h"
 #include "sopc_assert.h"
 #include "sopc_enums.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
+#include "zephyr/p_time.h"
 
 /***************************************************
  * DECLARATION OF LOCAL MACROS
@@ -66,8 +69,6 @@
 /***************************************************
  * DECLARATION OF LOCAL TYPES/VARIABLES
  **************************************************/
-
-#define P_TIME_DEBUG (0)
 
 #define SECOND_TO_100NS (10000000)
 #define SECOND_TO_US (1000 * 1000)
@@ -100,7 +101,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
  * - PtP clock is used to read actual time received. This time is used to:
  *   - Compute gPtpSourceSync, which is constantly updated to resynchronize local clock
  *          to PtP time (In calls to ::SOPC_Time_GetCurrentTimeUTC)
- *   - Compute gLocalClockCorrFactor, which is updated every CLOCK_CORRECTION_MEASURE_DURATION seconds
+ *   - Compute gLocalClockCorrFactor, which is updated every CONFIG_SOPC_PTP_SYNCH_DURATION seconds
  *          by measuring the elapsing difference between internal and PtP clocks. If the correction is
  *          lower than CLOCK_CORRECTION_RANGE, then this correction is accepted and applied to :
  *      - Continue the correction of internal clock deviation in the case the PtP is lost.
@@ -113,7 +114,6 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
 
 #define GPTP_ASSERT(x) SOPC_ASSERT(x)
 #define GPTP_CORRECT(x) ((x) *gLocalClockCorrFactor)
-#define CLOCK_CORRECTION_MEASURE_DURATION 10.0
 #define CLOCK_CORRECTION_RANGE 0.1
 
 /** Offset between PtP & internal clock, (or 0 if unknown)*/
@@ -125,6 +125,9 @@ static uint64_t gLastLocSyncDate = 0;
  * Range [1 - CLOCK_CORRECTION_RANGE .. 1 + CLOCK_CORRECTION_RANGE]
  *  */
 static float gLocalClockCorrFactor = 1.0;
+
+/** Next clcock correction synchro point */
+static uint64_t gMeasureNextSynch = 0;
 
 /** \brief Get current internal time with 100 ns precision, corrected by PTP */
 static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
@@ -244,16 +247,20 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
     static const uint64_t tick_to_100ns_d = (SECOND_TO_100NS / tick_reduce_factor);
     static uint64_t tick_to_100ns_n = 0;
     static struct k_mutex monotonicMutex;
+    static int32_t nb_ticks_ovf_in_one_cycle = 0;
+    static int64_t hw_clocks_per_sec = 0;
 
     bool bTransition = __atomic_compare_exchange(&gTimeStatus, &expectedStatus, &desiredStatus, false, __ATOMIC_SEQ_CST,
                                                  __ATOMIC_SEQ_CST);
 
     if (bTransition)
     {
-        tick_to_100ns_n = (sys_clock_hw_cycles_per_sec() / tick_reduce_factor);
+        hw_clocks_per_sec = sys_clock_hw_cycles_per_sec();
+        nb_ticks_ovf_in_one_cycle = (int32_t)((float) UINT32_SHIFT / hw_clocks_per_sec + 0.5);
+        tick_to_100ns_n = (hw_clocks_per_sec / tick_reduce_factor);
         // Check that rounding assumptions for tick_to_100ns_d and tick_to_100ns_n are correct
         SOPC_ASSERT((SECOND_TO_100NS % tick_reduce_factor) == 0);
-        SOPC_ASSERT((sys_clock_hw_cycles_per_sec() % tick_reduce_factor) == 0);
+        SOPC_ASSERT((hw_clocks_per_sec % tick_reduce_factor) == 0);
         SOPC_ASSERT(0 < tick_to_100ns_n);
 
         gUptimeDate_s = P_TIME_GetBuildDateTime();
@@ -272,43 +279,47 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
         __atomic_load(&gTimeStatus, &expectedStatus, __ATOMIC_SEQ_CST);
     }
 
-    static uint64_t overflow_offset = 0;
-    static uint64_t last_kernel_tick = 0;
+    static uint64_t overflow_ticks = 0;
+    static uint32_t last_kernel_tick = 0;
+    static int64_t last_uptime_ms = 0;
 
     k_mutex_lock(&monotonicMutex, K_FOREVER);
-    // Get associated hardware clock counter
-    uint64_t kernel_clock_ticks = k_cycle_get_32();
-    if (kernel_clock_ticks < last_kernel_tick)
-    {
-        // We assume that this function is called with sufficient frequency so
-        //  that there cannot be 2 overflows between 2 successive calls. This could be improved
-        // by comparing the "P_TIME_CurrentTimeMs" evolution
-        overflow_offset += (1llu << 32);
-    }
-    // kernel_clock_ticks now contains the overflow-corrected tick count
 
-    const uint64_t kernel_clock_100ns = ((kernel_clock_ticks + overflow_offset) * tick_to_100ns_d) / tick_to_100ns_n;
+    /**
+     * Note: algorithm principle:
+     * - read hw clock (32 bits, overflows typically every 9 seconds)
+     * - get uptime (64 bits, in ms, imprecise)
+     * - compute the number of full HW cycles missing to match both clocks.
+     * - Add the exact number of ticks to HW clock (now is 64 bits wide)
+     * - Convert the resulting tick counts into 100ns unit for final result.
+     * Note that if \a k_cycle_get_64 is available, all this is not required, however,
+     * this function is typically not available on 32 bits platforms.
+     */
+    // Get associated hardware clock counter
+    uint32_t kernel_clock_ticks = k_cycle_get_32();
+    const int64_t uptime_ms = k_uptime_get();
+
+    if (last_uptime_ms > 0 && last_uptime_ms <= uptime_ms)
+    {
+        // Compute time since last call (approximate in ms)
+        const int64_t delta_uptime_ms = uptime_ms - last_uptime_ms;
+        const int64_t delta_uptime_ticks = delta_uptime_ms * (hw_clocks_per_sec / 1000);
+
+        // Compute time since last call (modulo 32 bits in system TICKS)
+        const int64_t delta_cycle_ticks = ((int64_t) kernel_clock_ticks) - ((int64_t) last_kernel_tick);
+
+        // Compute how many new times the hw clock has made loops
+        const int64_t missing_ticks = (delta_uptime_ticks - delta_cycle_ticks);
+        const int64_t missing_loops = ((missing_ticks + (UINT31_SHIFT)) / UINT32_SHIFT);
+        overflow_ticks += (missing_loops << 32);
+    }
+
+    const uint64_t kernel_clock_100ns = ((kernel_clock_ticks + overflow_ticks) * tick_to_100ns_d) / tick_to_100ns_n;
 
     const uint64_t value_100ns = gUptimeDate_s * SECOND_TO_100NS + kernel_clock_100ns;
 
-#if P_TIME_DEBUG == 1
-    static uint64_t last_date = 0;
-    if (last_date > value_100ns)
-    {
-        printk(
-            "Last_date = %llu > new = %llu\n"
-            "last_kernel_tick=%llu, kernel_clock_ticks=%llu, kernel_clock_100ns=%llu\n",
-            last_date, value_100ns, last_kernel_tick, kernel_clock_ticks, kernel_clock_100ns);
-        printk("\r\n kernel_clock_ticks = %llu", kernel_clock_ticks);
-        printk("\r\n last_kernel_tick = %llu", last_kernel_tick);
-        printk("\r\n overflow_offset = %llu", overflow_offset);
-        printk("\r\n kernel_clock_100ns = %llu", kernel_clock_100ns);
-        printk("\r\n value_100ns = %llu", value_100ns);
-        SOPC_ASSERT(false);
-    }
-    last_date = value_100ns;
-#endif
     last_kernel_tick = kernel_clock_ticks;
+    last_uptime_ms = uptime_ms;
 
     k_mutex_unlock(&monotonicMutex);
 
@@ -555,22 +566,24 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
         }
         else
         {
+            // Measured time on PTP clock (external)
             const float measurePtpDuration = (float) (nowPtpInt - connectionStartPtp);
+            // Measured time on RT clock (internal)
+            const float measureLocDuration = (float) (nowLocInt - connectionStartLoc);
+            // newFactor represents the divergence of RT clock towards PTP clock, which is supposed
+            // of good quality
+            float newFactor = measureLocDuration / measurePtpDuration;
 
-            if (measurePtpDuration / SECOND_TO_100NS > CLOCK_CORRECTION_MEASURE_DURATION)
+            if (fabs(1.0 - newFactor) >= CLOCK_CORRECTION_RANGE)
             {
-                const float measureLocDuration = (float) (nowLocInt - connectionStartLoc);
-                float newFactor = measureLocDuration / measurePtpDuration;
-
-                // Check consistency of correction
-                if (fabs(1.0 - newFactor) < CLOCK_CORRECTION_RANGE)
-                {
-                    // Accept this correction factor
-                    gLocalClockCorrFactor = newFactor;
-                }
-
-                // Restart measure
                 invalidTimes = true;
+            }
+            else if (measurePtpDuration / SECOND_TO_100NS > CONFIG_SOPC_PTP_SYNCH_DURATION + gMeasureNextSynch)
+            {
+                gMeasureNextSynch += CONFIG_SOPC_PTP_SYNCH_DURATION;
+
+                // Accept this correction factor
+                gLocalClockCorrFactor = newFactor;
             }
         }
         // Check if correction measure is ready
@@ -602,6 +615,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
     {
         connectionStartLoc = 0;
         connectionStartPtp = 0;
+        gMeasureNextSynch = 0;
     }
     return nowPtp;
 }
