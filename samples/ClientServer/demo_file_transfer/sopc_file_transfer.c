@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <inttypes.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -11,6 +10,8 @@
 #include <unistd.h>
 
 #include "sopc_file_transfer.h"
+#include "sopc_assert.h"
+#include "sopc_logger.h"
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
@@ -24,21 +25,6 @@
 
 #include "opcua_statuscodes.h"
 
-void ft_assert_fonction(bool exp, const char* file, int line, const char* msg, ...)
-{
-    char error_msg[STR_BUFF_SIZE];
-    va_list ap;
-    va_start(ap, msg);
-    vsnprintf(error_msg, sizeof(error_msg), msg, ap);
-    va_end(ap);
-
-    if (exp == false)
-    {
-        printf("Failed on %s at line %d\n", file, line);
-        printf("Error: %s\n", error_msg);
-        abort();
-    }
-}
 
 static void filetype_free(void* value);
 static void cstring_free(void* value);
@@ -528,7 +514,7 @@ FT_FileType_t* SOPC_FilteTransfer_FileType_Create(void)
 
 void SOPC_FilteTransfer_FileType_Initialize(FT_FileType_t* filetype)
 {
-    FT_ASSERT(filetype != NULL, "FT_FileType_t pointer needs to be initialize", NULL);
+    SOPC_ASSERT(NULL != filetype && "FT_FileType_t pointer needs to be initialize");
     filetype->node_id = NULL;
     filetype->handle = generate_random_handle();
     filetype->path = SOPC_String_Create();
@@ -776,8 +762,19 @@ SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(FT_FileType_t* file)
             sprintf(tmp_file_path, "%s-XXXXXX", SOPC_String_GetCString(file->path));
 
             int filedes = mkstemp(tmp_file_path);
-            FT_ASSERT(filedes >= 1, "creation of tmp file %s failed", file->path);
-            FT_ASSERT(close(filedes) == 0, "closing of tmp file %s failed", file->path);
+            if (1 > filedes)
+            {
+                char *str = SOPC_String_GetCString(file->path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: creation of tmp file %s failed", str);
+                SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
+            }
+            int res = close(filedes);
+            if (0 != res)
+            {
+                char *str = SOPC_String_GetCString(file->path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: closing of tmp file %s failed", str);
+                SOPC_ASSERT(0 == res && "closing of tmp file failed");
+            }
 
             if (SOPC_STATUS_OK == SOPC_String_CopyFromCString(file->tmp_path, (const char*) tmp_file_path))
             {
@@ -803,9 +800,12 @@ SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(FT_FileType_t* file)
                 if (SOPC_GoodGenericStatus == status)
                 {
                     file->fp = fopen(SOPC_String_GetCString(file->tmp_path), Cmode);
-                    FT_ASSERT(file->fp != NULL, "file %s can't be open", SOPC_String_GetCString(file->tmp_path));
-                    FT_ASSERT(flock(fileno(file->fp), LOCK_SH) == 0, "file %s can't be lock",
-                              SOPC_String_GetCString(file->tmp_path));
+                    if (NULL == file->fp)
+                    {
+                        char *str = SOPC_String_GetCString(file->tmp_path);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be open", str);
+                    }
+                    SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
                 }
             }
             else
@@ -840,8 +840,13 @@ SOPC_StatusCode SOPC_FileTransfer_Close_TmpFile(FT_FileHandle handle, const SOPC
                 status = OpcUa_BadOutOfMemory;
                 if ((file->fp != NULL) && (file->tmp_path != NULL))
                 {
-                    FT_ASSERT(flock(fileno(file->fp), LOCK_UN) == 0, "file %s can't be unlock", file->tmp_path);
-                    FT_ASSERT(fclose(file->fp) == 0, "file %s can't be closed", file->tmp_path);
+                    int res = fclose(file->fp);
+                    if (0 != res)
+                    {
+                        char *str = SOPC_String_GetCString(file->tmp_path);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be closed", str);
+                        SOPC_ASSERT(0 == res && "file can't be closed");
+                    }
                     file->fp = NULL;
                     file->is_open = false;
                     SOPC_Dict_Remove(g_handle_to_file, &file->handle);
@@ -864,9 +869,20 @@ SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(FT_FileType_t* file)
     {
         if (file->fp != NULL)
         {
-            FT_ASSERT(flock(fileno(file->fp), LOCK_UN) == 0, "file %s can't be unlock", file->tmp_path);
-            FT_ASSERT(fclose(file->fp) == 0, "file %s can't be closed", file->tmp_path);
-            FT_ASSERT(remove(SOPC_String_GetCString(file->tmp_path)) == 0, "file %s can't be remove", file->tmp_path);
+            int res = fclose(file->fp);
+            if (0 != res)
+            {
+                char *str = SOPC_String_GetCString(file->tmp_path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be closed", str);
+                SOPC_ASSERT(0 == res && "tmp file can't be closed");
+            }
+            res = remove(SOPC_String_GetCString(file->tmp_path));
+            if (0 != res)
+            {
+                char *str = SOPC_String_GetCString(file->tmp_path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be removed", str);
+                SOPC_ASSERT(0 == res && "tmp file can't be remove");
+            }
             file->fp = NULL;
             file->is_open = false;
             /* Free and creat a new tmp_path */
@@ -1108,8 +1124,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
 
 static SOPC_StatusCode local_write_open_count(FT_FileType_t file)
 {
-    FT_ASSERT(file.variableIds[OPEN_COUNT_VAR_IDX] != NULL,
-              "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
+    SOPC_ASSERT(NULL != file.variableIds[OPEN_COUNT_VAR_IDX] &&
+              "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1139,8 +1155,8 @@ static SOPC_StatusCode local_write_open_count(FT_FileType_t file)
 
 static SOPC_StatusCode local_write_size(FT_FileType_t file)
 {
-    FT_ASSERT(file.variableIds[SIZE_VAR_IDX] != NULL,
-              "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>", NULL);
+    SOPC_ASSERT(NULL != file.variableIds[SIZE_VAR_IDX] &&
+              "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1170,8 +1186,8 @@ static SOPC_StatusCode local_write_size(FT_FileType_t file)
 
 static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file)
 {
-    FT_ASSERT(file.variableIds[WRITABLE_VAR_IDX] != NULL,
-              "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
+    SOPC_ASSERT(NULL != file.variableIds[WRITABLE_VAR_IDX] &&
+              "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1201,8 +1217,8 @@ static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file)
 
 static SOPC_StatusCode local_write_default_UserWritable(FT_FileType_t file)
 {
-    FT_ASSERT(file.variableIds[USER_WRITABLE_VAR_IDX] != NULL,
-              "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
+    SOPC_ASSERT(NULL != file.variableIds[USER_WRITABLE_VAR_IDX] &&
+              "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)

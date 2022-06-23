@@ -1,16 +1,5 @@
-#include <stdarg.h>
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
-
-/**
- * \brief File transfer assertion function.
- *
- * \param exp  The expression to evaluate
- * \param file  The file name
- * \param line  The file line
- * \param msg  The diagnostic message
- */
-void ft_assert_fonction(bool exp, const char* file, int line, const char* msg, ...);
 
 /**
  * \brief Number of method per FileType Object
@@ -66,11 +55,6 @@ void ft_assert_fonction(bool exp, const char* file, int line, const char* msg, .
  * \brief Default value for Writable variable of FileType Object
  */
 #define VAR_WRITABLE_DEFAULT true
-
-/**
- * \brief Custom macro assertion with diagnostic message
- */
-#define FT_ASSERT(exp, msg, ...) (ft_assert_fonction(exp, __FILE__, __LINE__, msg, __VA_ARGS__))
 
 /**
  * \brief File handle type

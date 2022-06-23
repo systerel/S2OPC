@@ -17,7 +17,35 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_file_transfer.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
+#include "sopc_assert.h"
+#include "sopc_logger.h"
+
+
+/*-----------------------
+ * Logger configuration :
+ *-----------------------*/
+
+/* Set the log path and set directory path built on executable name prefix */
+static char* Server_ConfigLogPath(const char* logDirName)
+{
+    char* logDirPath = NULL;
+
+    size_t logDirPathSize = strlen(logDirName) + 7; // <logDirName> + "_logs/" + '\0'
+
+    logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
+
+    if (NULL != logDirPath &&
+        (int) (logDirPathSize - 1) != snprintf(logDirPath, logDirPathSize, "%s_logs/", logDirName))
+    {
+        SOPC_Free(logDirPath);
+        logDirPath = NULL;
+    }
+
+    return logDirPath;
+}
+
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
@@ -43,15 +71,21 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
 int main(int argc, char* argv[])
 {
     printf("******* API test\n");
+
     // Note: avoid unused parameter warning from compiler
     (void) argc;
-    (void) argv;
 
-    SOPC_Log_Configuration* log_conf = NULL;
+    /* Configure the server logger:
+     * DEBUG traces generated in ./<argv[0]_logs/ */
+    SOPC_Log_Configuration logConfig = SOPC_Common_GetDefaultLogConfiguration();
+    logConfig.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    char* logDirPath = Server_ConfigLogPath(argv[0]);
+    logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
+
     SOPC_ReturnStatus status;
     SOPC_StatusCode status_code;
     (void) status_code;
-    status = SOPC_CommonHelper_Initialize(log_conf);
+    status = SOPC_CommonHelper_Initialize(&logConfig);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_Initialize();
@@ -69,7 +103,11 @@ int main(int argc, char* argv[])
         printf("******* Code begin ...\n");
 
         status = SOPC_FileTransfer_Initialize();
-        FT_ASSERT(SOPC_STATUS_OK == status, "during file transfer intialization", NULL);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "API: FileTransfer intialization failed");
+            SOPC_ASSERT(SOPC_STATUS_OK == status && "during file transfer intialization");
+        }
 
         const SOPC_FileType_Config config = {.file_path = "/tmp/myfile",
                                              .fileType_nodeId = "ns=1;i=15017",
