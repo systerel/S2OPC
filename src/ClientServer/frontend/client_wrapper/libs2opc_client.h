@@ -289,8 +289,13 @@ typedef struct
  @struct SOPC_LibSub_ConnectionCfg
  @brief
    Connection configuration to a remote OPC server
+ @var SOPC_LibSub_ConnectionCfg::is_reverse_connection
+   If the flag is set, the connection shall be established using reverse connection mechanism.
+   The reverse_config_idx shall be > 0
+ @var SOPC_LibSub_ConnectionCfg::reverse_config_idx
+   Index of the reverse endpoint configuration
  @var SOPC_LibSub_ConnectionCfg::server_url
-   Zero-terminated path to server URL
+   Zero-terminated path to server endpoint URL
  @var SOPC_LibSub_ConnectionCfg::security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
  @var SOPC_LibSub_ConnectionCfg::security_mode
@@ -348,6 +353,10 @@ typedef struct
  */
 typedef struct
 {
+    bool is_reverse_connection;
+    uint32_t reverse_config_idx;
+
+    SOPC_LibSub_CstString server_uri;
     SOPC_LibSub_CstString server_url;
     SOPC_LibSub_CstString security_policy;
     OpcUa_MessageSecurityMode security_mode;

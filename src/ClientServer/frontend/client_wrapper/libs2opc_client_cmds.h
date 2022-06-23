@@ -118,6 +118,29 @@ typedef struct
 } SOPC_ClientHelper_Security;
 
 /**
+ @struct SOPC_ClientHelper_EndpointConnection
+ @brief
+   Connection configuration to a remote OPC server
+ @var SOPC_ClientHelper_EndpointConnection::endpointUrl
+   Zero-terminated server URL
+ @var SOPC_ClientHelper_EndpointConnection::serverUri
+   Zero-terminated server URI (optional).
+   If defined it is checked in case of reverse connection configuration
+ @var SOPC_ClientHelper_EndpointConnection::isReverseConnection
+   Flag to set if the endpoint connection shall be done using reverse connection mechanism,
+   SOPC_ClientHelper_EndpointConnection::reverseConnectionConfigId shall then be set.
+ @var SOPC_ClientHelper_EndpointConnection::reverseConnectionConfigId
+   The reverse connection configuration id configured using ::SOPC_ClientHelper_CreateReverseEndpoint
+ */
+typedef struct
+{
+    const char* endpointUrl;
+    const char* serverUri;
+    bool isReverseConnection;
+    int32_t reverseConnectionConfigId;
+} SOPC_ClientHelper_EndpointConnection;
+
+/**
   @struct SOPC_ClientHelper_WriteValue
   @brief
     Structure defining a node and value to write.
@@ -413,21 +436,25 @@ void SOPC_ClientHelper_Finalize(void);
 /**
  * @brief
  *   Sends a GetEndpoints request to the endpointUrl and provide the results
- * @param endpointUrl
- *   Url of the endpoint
+ *  @param connection
+ *   endpoint connection configuration (Server URL and URI, activation of reverse connection, ...)
+ *   Content is copied and can be cleared after call
  * @param result
  *   result of the request, shall not be used if function result is not 0.
  * @return
  *   multiple error codes:
  *    - (0): everything is OK.
- *    - (-1): endpointUrl is NULL.
- *    - (-2): result is NULL.
+ *    - (-1): connection is NULL.
+ *    - (-2): connection->endpointURL is NULL.
+ *    - (-3): connection reverse endpoint configuration is invalid.
+ *    - (-10): result is NULL.
  *    - (-100): the request failed.
  * @note
  *   results content is dynamically allocated. It is up to the caller to free
  *   this memory.
  */
-int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result);
+int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* connection,
+                                       SOPC_ClientHelper_GetEndpointsResult** result);
 
 /**
  @brief Free the get endpoints result and its content.
@@ -439,24 +466,44 @@ void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsRes
 
 /**
  @brief
+    Creates a new reverse endpoint to be used for reverse connection mechanism
+    Return a reverse endpoint id or error code.
+    All parameters are copied and can be freed by the caller.
+
+ @param reverseEndpointURL
+    reverse endpoint URL created by client for reverse connections
+ @return
+    If this operation succeeded, return a reverse endpoint id \verbatim>\endverbatim 0.
+    If invalid reverseEndpointURL detected, return -1.
+    If configuration failed, return '-100'.
+ */
+int32_t SOPC_ClientHelper_CreateReverseEndpoint(const char* reverseEndpointURL);
+
+/**
+ @brief
     Creates a new configuration to connect to a remote OPC server.
     Return a configuration id or error code.
     All parameters are copied and can be freed by the caller.
- @param endpointUrl
-   Zero-terminated path to server URL
+
+ @param connection
+    endpoint connection configuration (Server URL and URI, activation of reverse connection, ...)
+    Content is deeply copied and can be cleared after call
  @param security
-    security configuration to use (policy, mode, certificates, ...)
+    security configuration to use (policy, mode, certificates, ...).
+    Content is deeply copied and can be cleared after call
  @param expectedEndpoints
     Response returned by prior call to GetEndpoints service
     and checked to be the same during session establishment,
     NULL otherwise (no verification will be done)
  @return
     If this operation succeeded, return a configuration id \verbatim>\endverbatim 0.
-    If invalid endpointUrl detected, return -1.
+    If NULL connection detected, return -1.
+    If invalid endpointUrl detected, return -2.
+    If invalid reverse connection configuration detected (activated with invalid id), return -3
     If invalid security detected, return \verbatim-<10+n>\endverbatim with \verbatim<n>\endverbatim field number
     (starting from 1). If configuration failed, return '-100'.
  */
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
+int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnection* connection,
                                               SOPC_ClientHelper_Security* security,
                                               OpcUa_GetEndpointsResponse* expectedEndpoints);
 

@@ -78,6 +78,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     switch (event)
     {
     /* Client events */
+    case SE_REVERSE_ENDPOINT_CLOSED:
     case SE_SESSION_ACTIVATION_FAILURE:
     case SE_ACTIVATED_SESSION:
     case SE_SESSION_REACTIVATING:

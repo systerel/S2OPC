@@ -309,7 +309,7 @@ static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 /* static functions */
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
-                                                 const char* endpointUrl,
+                                                 SOPC_ClientHelper_EndpointConnection* connection,
                                                  SOPC_ClientHelper_Security* security,
                                                  OpcUa_GetEndpointsResponse* expectedEndpoints);
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
@@ -440,7 +440,8 @@ void SOPC_ClientHelper_Finalize(void)
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
-int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelper_GetEndpointsResult** result)
+int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* connection,
+                                       SOPC_ClientHelper_GetEndpointsResult** result)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -452,13 +453,24 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
     GetEndpointsContext* ctx = NULL;
     int32_t res = 0;
 
-    if (NULL == endpointUrl)
+    if (NULL == connection)
     {
         return -1;
     }
-    else if (NULL == result)
+
+    if (NULL == connection->endpointUrl)
     {
         return -2;
+    }
+
+    if ((connection->isReverseConnection && 0 == connection->reverseConnectionConfigId) ||
+        connection->reverseConnectionConfigId < 0)
+    {
+        return -3;
+    }
+    else if (NULL == result)
+    {
+        return -10;
     }
 
     /* allocate context */
@@ -495,7 +507,10 @@ int32_t SOPC_ClientHelper_GetEndpoints(const char* endpointUrl, SOPC_ClientHelpe
         SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
         assert(SOPC_STATUS_OK == statusMutex);
 
-        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest(endpointUrl, (uintptr_t) genReqCtx);
+        // Note: SOPC_Client*_EndpointConnection shall remain the same, do a minimal check on size
+        assert(sizeof(SOPC_ClientHelper_EndpointConnection) == sizeof(SOPC_ClientCommon_EndpointConnection));
+        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest((SOPC_ClientCommon_EndpointConnection*) connection,
+                                                                (uintptr_t) genReqCtx);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -566,7 +581,7 @@ void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsRes
 }
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
-                                                 const char* endpointUrl,
+                                                 SOPC_ClientHelper_EndpointConnection* connection,
                                                  SOPC_ClientHelper_Security* security,
                                                  OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
@@ -628,7 +643,10 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
                     "No CA (or mandatory CRL) provided, server certificate will be accepted only if it is self-signed");
     }
 
-    cfg_con->server_url = endpointUrl;
+    cfg_con->is_reverse_connection = connection->isReverseConnection;
+    cfg_con->reverse_config_idx = (uint32_t) connection->reverseConnectionConfigId;
+    cfg_con->server_uri = connection->serverUri;
+    cfg_con->server_url = connection->endpointUrl;
     cfg_con->security_policy = security->security_policy;
     cfg_con->security_mode = security->security_mode;
     cfg_con->disable_certificate_verification = false;
@@ -653,9 +671,24 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     return 0;
 }
 
+int32_t SOPC_ClientHelper_CreateReverseEndpoint(const char* reverseEndpointURL)
+{
+    if (NULL == reverseEndpointURL)
+    {
+        return -1;
+    }
+    SOPC_ReverseEndpointConfigIdx result = SOPC_ClientCommon_CreateReverseEndpoint(reverseEndpointURL);
+    if (0 == result)
+    {
+        return -100;
+    }
+    assert(result <= INT32_MAX); // It will never occur since it is an array index
+    return (int32_t) result;
+}
+
 // Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
 // detected or '-100' if configuration failed
-int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
+int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnection* connection,
                                               SOPC_ClientHelper_Security* security,
                                               OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
@@ -665,9 +698,18 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == endpointUrl)
+    if (NULL == connection)
     {
         return -1;
+    }
+    if (NULL == connection->endpointUrl)
+    {
+        return -2;
+    }
+    if ((connection->isReverseConnection && 0 == connection->reverseConnectionConfigId) ||
+        connection->reverseConnectionConfigId < 0)
+    {
+        return -3;
     }
 
     if (NULL == security->security_policy)
@@ -676,7 +718,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(const char* endpointUrl,
     }
 
     SOPC_LibSub_ConnectionCfg cfg_con;
-    int32_t res = ConnectHelper_CreateConfiguration(&cfg_con, endpointUrl, security, expectedEndpoints);
+    int32_t res = ConnectHelper_CreateConfiguration(&cfg_con, connection, security, expectedEndpoints);
 
     if (0 != res)
     {

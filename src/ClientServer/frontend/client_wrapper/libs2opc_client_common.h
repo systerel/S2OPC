@@ -37,6 +37,14 @@
  * ================
  */
 
+typedef struct
+{
+    const char* endpointUrl;
+    const char* serverUri;
+    bool isReverseConnection;
+    int32_t reverseConnectionConfigId;
+} SOPC_ClientCommon_EndpointConnection;
+
 /**
  * @brief
  *   Callback type for discovery events
@@ -82,6 +90,20 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
  @warning
     As this function should be called only once, it is not threadsafe. */
 void SOPC_ClientCommon_Clear(void);
+
+/**
+ @brief
+    Creates a new reverse endpoint to be used for reverse connection mechanism
+    Return a reverse endpoint id or error code.
+    All parameters are copied and can be freed by the caller.
+
+ @param reverseEndpointURL
+    reverse endpoint URL created by client for reverse connections
+ @return
+    If this operation succeeded, returns a reverse endpoint configuration index \verbatim>\endverbatim 0.
+    Otherwise returns 0.
+ */
+uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL);
 
 /**
  @brief
@@ -200,14 +222,16 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
 /**
  * @brief
  *    sends a GetEndpoints request
- * @param endpointUrl
- *    url of the endpoint
+ *  @param connection
+ *   endpoint connection configuration (Server URL and URI, activation of reverse connection, ...)
+ *   Content is copied and can be cleared after call
  * @param requestContext
  *    context of the request. It will be passed alongside the response.
  * @return
  *    the operation status
  */
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* endpointUrl, uintptr_t requestContext);
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCommon_EndpointConnection* connection,
+                                                                 uintptr_t requestContext);
 
 /**
  @brief

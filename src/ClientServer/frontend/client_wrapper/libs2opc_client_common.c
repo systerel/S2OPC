@@ -45,6 +45,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_helper_string.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
 #define SKIP_S2OPC_DEFINITIONS
@@ -73,6 +74,8 @@ static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
 static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to be freed them in SOPC_LibSub_Clear() */
+static SOPC_ReverseEndpointConfigIdx reverseEpConfigsIds[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+static char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
 
 /* Event callback */
 static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
@@ -96,6 +99,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
 
     SOPC_ReturnStatus status = Mutex_Initialization(&mutex);
 
+    SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != appConfig);
+    appConfig->clientConfig.freeCstringsFlag = true;
+
     if (SOPC_STATUS_OK == status)
     {
         pListConfig = SOPC_SLinkedList_Create(0);
@@ -107,6 +114,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
+
+        nCreatedClient = 0;
+        memset(reverseEpConfigsIds, 0, sizeof(reverseEpConfigsIds));
+        memset(reverseEpConfigs, 0, sizeof(reverseEpConfigs));
     }
 
     /* Initialize SOPC_Common */
@@ -155,6 +166,18 @@ void SOPC_ClientCommon_Clear(void)
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
+    SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
+    // Close all reverse endpoints and free URLs
+    for (int i = 0; NULL != appConfig && i < appConfig->clientConfig.nbReverseEndpoints; i++)
+    {
+        SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEpConfigsIds[i]);
+        reverseEpConfigsIds[i] = 0;
+        SOPC_Free(reverseEpConfigs[i]);
+        reverseEpConfigs[i] = NULL;
+    }
+    appConfig->clientConfig.nbReverseEndpoints = 0;
+    appConfig->clientConfig.reverseEndpoints = NULL;
+
     // Close all secure channels that might be opened synchonously
     // and clear all toolkit client SC configurations
     SOPC_ToolkitClient_ClearAllSCs();
@@ -181,6 +204,7 @@ void SOPC_ClientCommon_Clear(void)
         if (NULL != pCfg)
         {
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((void*) pCfg->server_uri);
             SOPC_Free((void*) pCfg->server_url);
             SOPC_Free((void*) pCfg->security_policy);
             SOPC_Free((void*) pCfg->path_cert_auth);
@@ -206,6 +230,45 @@ void SOPC_ClientCommon_Clear(void)
     mutStatus = Mutex_Unlock(&mutex);
     assert(SOPC_STATUS_OK == mutStatus);
     Mutex_Clear(&mutex);
+}
+
+uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
+{
+    SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
+    assert(NULL != appConfig);
+    // Configure the reverse endpoint
+    SOPC_ReverseEndpointConfigIdx reverseEpIdx = 0;
+    uint16_t nbReverseEndpoints = appConfig->clientConfig.nbReverseEndpoints;
+    if (nbReverseEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    {
+        return 0;
+    }
+    if (NULL == appConfig->clientConfig.reverseEndpoints)
+    {
+        appConfig->clientConfig.reverseEndpoints = reverseEpConfigs;
+    }
+
+    appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints] = SOPC_strdup(reverseEndpointURL);
+    if (NULL == appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints])
+    {
+        return 0;
+    }
+    reverseEpIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(reverseEndpointURL);
+
+    if (0 != reverseEpIdx)
+    {
+        reverseEpConfigsIds[nbReverseEndpoints] = reverseEpIdx;
+        // Open the reverse endpoint
+        SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseEpIdx);
+    }
+    else
+    {
+        SOPC_Free(appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints]);
+        return 0;
+    }
+    appConfig->clientConfig.nbReverseEndpoints++;
+
+    return reverseEpIdx;
 }
 
 SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_ConnectionCfg* pCfg,
@@ -241,10 +304,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
         SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
 
         status = Helpers_NewSCConfigFromLibSubCfg(
-            pCfg->server_url, pCfg->security_policy, pCfg->security_mode, pCfg->disable_certificate_verification,
-            pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli, pCfg->path_key_cli, pCfg->path_crl,
-            pCfg->sc_lifetime, (const OpcUa_GetEndpointsResponse*) pCfg->expected_endpoints, &appConfig->clientConfig,
-            &pscConfig);
+            pCfg->server_url, pCfg->server_uri, pCfg->security_policy, pCfg->security_mode,
+            pCfg->disable_certificate_verification, pCfg->path_cert_auth, pCfg->path_cert_srv, pCfg->path_cert_cli,
+            pCfg->path_key_cli, pCfg->path_crl, pCfg->sc_lifetime,
+            (const OpcUa_GetEndpointsResponse*) pCfg->expected_endpoints, &appConfig->clientConfig, &pscConfig);
     }
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
@@ -288,13 +351,22 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
             pCfgCpy->token_target = pCfg->token_target;
             pCfgCpy->generic_response_callback = pCfg->generic_response_callback;
 
-            /* These 3 strings are verified non NULL */
-            pCfgCpy->server_url = SOPC_Malloc(strlen(pCfg->server_url) + 1);
-            pCfgCpy->security_policy = SOPC_Malloc(strlen(pCfg->security_policy) + 1);
-            pCfgCpy->policyId = SOPC_Malloc(strlen(pCfg->policyId) + 1);
-            if (NULL == pCfgCpy->server_url || NULL == pCfgCpy->security_policy || NULL == pCfgCpy->policyId)
+            pCfgCpy->is_reverse_connection = pCfg->is_reverse_connection;
+            pCfgCpy->reverse_config_idx = pCfg->reverse_config_idx;
+            if (NULL != pCfg->server_uri)
             {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
+                pCfgCpy->server_uri = SOPC_Malloc(strlen(pCfg->server_uri) + 1);
+            }
+            /* These 3 strings are verified non NULL */
+            if (SOPC_STATUS_OK == status)
+            {
+                pCfgCpy->server_url = SOPC_Malloc(strlen(pCfg->server_url) + 1);
+                pCfgCpy->security_policy = SOPC_Malloc(strlen(pCfg->security_policy) + 1);
+                pCfgCpy->policyId = SOPC_Malloc(strlen(pCfg->policyId) + 1);
+                if (NULL == pCfgCpy->server_url || NULL == pCfgCpy->security_policy || NULL == pCfgCpy->policyId)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
 
             if (NULL != pCfg->path_cert_auth)
@@ -357,6 +429,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                if (NULL != pCfgCpy->server_uri)
+                {
+                    strcpy((char*) pCfgCpy->server_uri, pCfg->server_uri);
+                }
                 strcpy((char*) pCfgCpy->server_url, pCfg->server_url);
                 strcpy((char*) pCfgCpy->security_policy, pCfg->security_policy);
                 strcpy((char*) pCfgCpy->policyId, pCfg->policyId);
@@ -410,6 +486,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     else if (NULL != pCfgCpy)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_Free((void*) pCfgCpy->server_uri);
         SOPC_Free((void*) pCfgCpy->server_url);
         SOPC_Free((void*) pCfgCpy->security_policy);
         SOPC_Free((void*) pCfgCpy->path_cert_auth);
@@ -472,10 +549,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     {
         ++nCreatedClient;
         clientId = nCreatedClient;
-        status = SOPC_StaMac_Create(cfgId, clientId, pCfg->policyId, pCfg->username, pCfg->password,
-                                    pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
-                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
-                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
+        status = SOPC_StaMac_Create(cfgId, pCfg->is_reverse_connection, pCfg->reverse_config_idx, clientId,
+                                    pCfg->policyId, pCfg->username, pCfg->password, pCfg->data_change_callback,
+                                    (double) pCfg->publish_period_ms, pCfg->n_max_keepalive, pCfg->n_max_lifetime,
+                                    pCfg->token_target, pCfg->timeout_ms, pCfg->generic_response_callback,
+                                    (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */
@@ -670,7 +748,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* endpointUrl, uintptr_t requestContext)
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCommon_EndpointConnection* connection,
+                                                                 uintptr_t requestContext)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
@@ -687,9 +766,9 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     const char* security_policy = SOPC_SecurityPolicy_None_URI;
     const int32_t security_mode = OpcUa_MessageSecurityMode_None;
 
-    status = Helpers_NewSCConfigFromLibSubCfg(endpointUrl, security_policy, security_mode, false, NULL, NULL, NULL,
-                                              NULL, NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, NULL,
-                                              &appConfig->clientConfig, &pscConfig);
+    status = Helpers_NewSCConfigFromLibSubCfg(
+        connection->endpointUrl, connection->serverUri, security_policy, security_mode, false, NULL, NULL, NULL, NULL,
+        NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, NULL, &appConfig->clientConfig, &pscConfig);
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
     if (SOPC_STATUS_OK == status)
@@ -722,7 +801,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
         status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pReq);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_String_CopyFromCString(&pReq->EndpointUrl, endpointUrl);
+            status = SOPC_String_CopyFromCString(&pReq->EndpointUrl, connection->endpointUrl);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -751,7 +830,17 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(const char* end
     /* send the request */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(iscConfig);
+        SOPC_EndpointConnectionCfg endpointConnectionCfg;
+        if (connection->isReverseConnection)
+        {
+            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateReverse(
+                (SOPC_ReverseEndpointConfigIdx) connection->reverseConnectionConfigId, iscConfig);
+        }
+        else
+        {
+            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(iscConfig);
+        }
+
         SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);
     }
 
@@ -998,6 +1087,7 @@ static bool LibCommon_IsDiscoveryEvent(SOPC_App_Com_Event event, uintptr_t appCt
     case SE_ACTIVATED_SESSION:
     case SE_SESSION_REACTIVATING:
     case SE_CLOSED_SESSION:
+    case SE_REVERSE_ENDPOINT_CLOSED:
         bDiscovery = false;
         break;
     default:
@@ -1069,6 +1159,10 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
                         }
                     }
                 }
+                else if (SE_REVERSE_ENDPOINT_CLOSED == event)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Reverse endpoint closed reverseEpIdx=%" PRIu32, IdOrStatus);
+                }
             }
         }
         if (false == bProcessed && SE_SND_REQUEST_FAILED == event)
@@ -1110,7 +1204,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, char** locale
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     pConfig->clientConfig.clientLocaleIds = SOPC_CommonHelper_Copy_Char_Array(nbLocales, localeIds);
-    pConfig->clientConfig.freeCstringsFlag = true;
+    assert(pConfig->clientConfig.freeCstringsFlag);
 
     if (NULL == pConfig->clientConfig.clientLocaleIds)
     {

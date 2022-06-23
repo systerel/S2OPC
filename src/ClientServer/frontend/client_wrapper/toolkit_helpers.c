@@ -41,6 +41,7 @@
 static SOPC_LibSub_LogCbk* cbkLog = &Helpers_LoggerStdout;
 
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
+                                                   const char* szServerUri,
                                                    const char* szSecuPolicy,
                                                    OpcUa_MessageSecurityMode msgSecurityMode,
                                                    bool bDisablePKI,
@@ -177,25 +178,43 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->msgSecurityMode = msgSecurityMode;
             pscConfig->expectedEndpoints = expectedEndpoints;
             pscConfig->clientConfigPtr = clientAppCfg;
+            if (szServerUri != NULL)
+            {
+                pscConfig->serverUri = SOPC_Malloc(strlen(szServerUri) + 1);
+                if (NULL != pscConfig->serverUri)
+                {
+                    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                    strcpy((char*) pscConfig->serverUri, szServerUri);
+                    SOPC_GCC_DIAGNOSTIC_RESTORE
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
 
-            /* These input strings are verified non NULL */
-            pscConfig->url = SOPC_Malloc(strlen(szServerUrl) + 1);
-            pscConfig->reqSecuPolicyUri = SOPC_Malloc(strlen(szSecuPolicy) + 1);
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            if (NULL != pscConfig->url && NULL != pscConfig->reqSecuPolicyUri)
+            if (SOPC_STATUS_OK == status)
             {
-                strcpy((char*) pscConfig->url, szServerUrl);
-                strcpy((char*) pscConfig->reqSecuPolicyUri, szSecuPolicy);
-                /* Handles the config to the caller */
-                *ppNewCfg = pscConfig;
+                /* These input strings are verified non NULL */
+                pscConfig->url = SOPC_Malloc(strlen(szServerUrl) + 1);
+                pscConfig->reqSecuPolicyUri = SOPC_Malloc(strlen(szSecuPolicy) + 1);
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                if (NULL != pscConfig->url && NULL != pscConfig->reqSecuPolicyUri)
+                {
+                    strcpy((char*) pscConfig->url, szServerUrl);
+                    strcpy((char*) pscConfig->reqSecuPolicyUri, szSecuPolicy);
+                    /* Handles the config to the caller */
+                    *ppNewCfg = pscConfig;
+                }
+                else
+                {
+                    SOPC_Free((void*) pscConfig->serverUri);
+                    SOPC_Free((void*) pscConfig->url);
+                    SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+                SOPC_GCC_DIAGNOSTIC_RESTORE
             }
-            else
-            {
-                SOPC_Free((void*) pscConfig->url);
-                SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            SOPC_GCC_DIAGNOSTIC_RESTORE
         }
         else
         {
@@ -229,6 +248,7 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
     SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
     SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
+    SOPC_Free((void*) pscConfig->serverUri);
     SOPC_Free((void*) pscConfig->url);
     SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
     pscConfig->clientConfigPtr = NULL;
