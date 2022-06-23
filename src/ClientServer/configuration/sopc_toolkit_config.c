@@ -452,6 +452,7 @@ static bool SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(SOPC_
             // No user token policy defined to forbid any session to be activated on discovery endpoint only
             secuPolicy->nbOfUserTokenPolicies = 0;
             secuPolicy->securityModes = SOPC_SECURITY_MODE_NONE_MASK;
+            SOPC_String_Initialize(&secuPolicy->securityPolicy);
             SOPC_ReturnStatus status =
                 SOPC_String_AttachFromCstring(&secuPolicy->securityPolicy, SOPC_SecurityPolicy_None_URI);
             if (SOPC_STATUS_OK == status)
