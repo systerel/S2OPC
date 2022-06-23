@@ -233,9 +233,9 @@ static bool SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(uint32_t sc
             scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
             if (NULL != scConfig)
             {
-                // Accept a NULL URL in config to indicate any server endpoint URL is accepted by reverse
-                // connection Accept a NULL URI in config to indicate not to check the serverURI
-                if ((NULL == scConfig->url || 0 == strcmp(scConfig->url, serverURL)) &&
+                // Accept only correct endpoint URL
+                // Accept a NULL URI in config to indicate not to check the serverURI
+                if ((NULL != scConfig->url && 0 == strcmp(scConfig->url, serverURL)) &&
                     (NULL == scConfig->serverUri || 0 == strcmp(scConfig->serverUri, serverURI)))
                 {
                     result = true;
