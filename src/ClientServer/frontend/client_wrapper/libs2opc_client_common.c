@@ -356,6 +356,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
             if (NULL != pCfg->server_uri)
             {
                 pCfgCpy->server_uri = SOPC_Malloc(strlen(pCfg->server_uri) + 1);
+                if (NULL == pCfgCpy->server_uri)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
             /* These 3 strings are verified non NULL */
             if (SOPC_STATUS_OK == status)
@@ -429,7 +433,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-                if (NULL != pCfgCpy->server_uri)
+                if (NULL != pCfg->server_uri)
                 {
                     strcpy((char*) pCfgCpy->server_uri, pCfg->server_uri);
                 }

@@ -93,13 +93,18 @@ int main(int argc, char* const argv[])
         }
     }
 
-    const char* endpoint_url = "opc.tcp://localhost:4841";
+    SOPC_ClientHelper_EndpointConnection endpoint = {
+        .endpointUrl = "opc.tcp://localhost:4841",
+        .serverUri = NULL,
+        .isReverseConnection = false,
+        .reverseConnectionConfigId = 0,
+    };
 
     /* GetEndpoints */
     SOPC_ClientHelper_GetEndpointsResult* getEndpointResult = NULL;
     if (0 == res)
     {
-        res = SOPC_ClientHelper_GetEndpoints(endpoint_url, &getEndpointResult);
+        res = SOPC_ClientHelper_GetEndpoints(&endpoint, &getEndpointResult);
     }
 
     if (0 == res)

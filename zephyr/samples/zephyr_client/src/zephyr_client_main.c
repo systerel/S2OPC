@@ -257,8 +257,14 @@ static int cmd_demo_configure(const struct shell* shell, size_t argc, char** arg
     }
     SOPC_ASSERT(epURL != NULL);
 
+    SOPC_ClientHelper_EndpointConnection endpoint = {
+        .endpointUrl = epURL,
+        .serverUri = NULL,
+        .reverseConnectionConfigId = 0,
+    };
+
     /* connect to the endpoint */
-    gConfigurationId = SOPC_ClientHelper_CreateConfiguration(epURL, &security, NULL);
+    gConfigurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
     if (gConfigurationId <= 0)
     {
         printk("\nSOPC_ClientHelper_CreateConfiguration failed with code %d\r\n", gConfigurationId);

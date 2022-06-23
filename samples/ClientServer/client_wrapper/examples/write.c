@@ -81,14 +81,19 @@ int main(int argc, char* const argv[])
         .password = NULL,
     };
 
-    const char* endpoint_url = "opc.tcp://localhost:4841";
+    SOPC_ClientHelper_EndpointConnection endpoint = {
+        .endpointUrl = "opc.tcp://localhost:4841",
+        .serverUri = NULL,
+        .isReverseConnection = false,
+        .reverseConnectionConfigId = 0,
+    };
     char* node_id = "ns=1;i=1012";
 
     /* connect to the endpoint */
     int32_t configurationId = 0;
     if (0 == res)
     {
-        configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
+        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
         if (configurationId <= 0)
         {
             res = -1;

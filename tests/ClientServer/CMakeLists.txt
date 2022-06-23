@@ -445,6 +445,19 @@ if(ENABLE_TESTING)
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
   endfunction()
 
+  # Function to run a validation of the given S2OPC client scenario with S2OPC server
+  function(s2opc_client_self_validation_test name)
+    set(test_name "validation::${name}")
+    add_test(NAME "${test_name}"
+             WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+             COMMAND
+             "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+             "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+             "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+             "./${name}")
+    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
+  endfunction()
+
   s2opc_server_validation_test("client.py")
   s2opc_server_validation_test("client_sc_renew.py")
   s2opc_server_validation_test("client_session_timeout.py")
@@ -474,7 +487,7 @@ if(ENABLE_TESTING)
   s2opc_sc_level_test("SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client" "4096" "encrypt" "B256Sha256" "2048" "4096")
   s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client" "2048" "encrypt" "B256Sha256" "4096" "2048")
 
-## S2OPC subscription client library validation tests ##
+## S2OPC wrapper client library validation tests ##
 
   # Helpers unit tests
   add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c")
@@ -488,6 +501,12 @@ if(ENABLE_TESTING)
   target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper Check::check)
   s2opc_client_validation_test(check_wrapper)
+
+  add_executable(check_wrapper_reverse_connection "validation_tests/client_wrapper/check_wrapper_reverse_connection.c")
+  target_compile_options(check_wrapper_reverse_connection PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(check_wrapper_reverse_connection PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(check_wrapper_reverse_connection PRIVATE s2opc_clientwrapper Check::check)
+  s2opc_client_self_validation_test(check_wrapper_reverse_connection)
 
 ## PyS2OPC library validation tests ##
 
