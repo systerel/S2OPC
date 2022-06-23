@@ -276,6 +276,12 @@ if(ENABLE_TESTING)
   target_compile_definitions(toolkit_test_client_service_faults PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(toolkit_test_client_service_faults PRIVATE s2opc_clientserver)
 
+  # Client scenario with ReverseConnection faults
+  add_executable(toolkit_test_client_rhe_faults "validation_tests/client/toolkit_test_client_rhe_faults.c")
+  target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(toolkit_test_client_rhe_faults PRIVATE s2opc_clientserver)
+
   # Client services scenarii
 
   # Reuse code of demo client
@@ -401,6 +407,17 @@ if(ENABLE_TESTING)
            "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
            $<TARGET_FILE:toolkit_test_client_service_faults>)
   set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
+
+  add_test(NAME "validation::client_RHE_faults_test"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+           "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+           "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+           $<TARGET_FILE:toolkit_test_client_rhe_faults>)
+  set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_RHE_faults_test.tap")
+
 
   # Function to run a validation of the S2OPC server scenario with given client scenario test
   function(s2opc_server_validation_test name)
