@@ -9,8 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sopc_file_transfer.h"
 #include "sopc_assert.h"
+#include "sopc_file_transfer.h"
 #include "sopc_logger.h"
 
 #include "libs2opc_common_config.h"
@@ -25,6 +25,23 @@
 
 #include "opcua_statuscodes.h"
 
+/**
+ * \brief structure to manage FileType object
+ */
+struct SOPC_FileType
+{
+    SOPC_NodeId* node_id;
+    FT_FileHandle handle;                        // The handle of the file send to the client
+    SOPC_String* path;                           // the file path
+    SOPC_NodeId* methodIds[NB_FILE_TYPE_METHOD]; // list of method associeted
+    FT_OpenMode mode;
+    bool is_open;
+    SOPC_String* tmp_path; // The path with the ramdom tmp name created
+    FILE* fp;
+    SOPC_NodeId* variableIds[NB_VARIABLE];
+    uint16_t open_count;
+    uint64_t size_in_byte;
+};
 
 static void filetype_free(void* value);
 static void cstring_free(void* value);
@@ -35,10 +52,10 @@ static uint64_t handle_hash(const void* handle);
 static FT_FileHandle generate_random_handle(void);
 static bool check_openModeArg(FT_OpenMode mode);
 static SOPC_StatusCode opcuaMode_to_CMode(FT_OpenMode mode, char* Cmode);
-static SOPC_StatusCode local_write_open_count(FT_FileType_t file);
-static SOPC_StatusCode local_write_size(FT_FileType_t file);
-static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file);
-static SOPC_StatusCode local_write_default_UserWritable(FT_FileType_t file);
+static SOPC_StatusCode local_write_open_count(SOPC_FileType file);
+static SOPC_StatusCode local_write_size(SOPC_FileType file);
+static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file);
+static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file);
 static void local_write_init(const void* key, const void* value, void* user_data);
 
 static SOPC_StatusCode SOPC_FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
@@ -122,7 +139,7 @@ static void filetype_free(void* value)
 {
     if (value != NULL)
     {
-        SOPC_FileTransfer_FileType_Delete((FT_FileType_t**) &value);
+        SOPC_FileTransfer_FileType_Delete((SOPC_FileType**) &value);
     }
 }
 
@@ -234,7 +251,7 @@ static SOPC_StatusCode SOPC_FileTransfer_Method_Open(const SOPC_CallContext* cal
     }
 
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         if (file->is_open)
@@ -385,7 +402,7 @@ static SOPC_StatusCode SOPC_FileTransfer_Method_Read(const SOPC_CallContext* cal
     *outputArgs = v;
 
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         struct stat sb;
@@ -501,10 +518,10 @@ static SOPC_StatusCode SOPC_FileTransfer_Method_SetPos(const SOPC_CallContext* c
     return result_code;
 }
 
-FT_FileType_t* SOPC_FilteTransfer_FileType_Create(void)
+SOPC_FileType* SOPC_FilteTransfer_FileType_Create(void)
 {
-    FT_FileType_t* filetype = NULL;
-    filetype = SOPC_Malloc(sizeof(FT_FileType_t));
+    SOPC_FileType* filetype = NULL;
+    filetype = SOPC_Malloc(sizeof(SOPC_FileType));
     if (NULL != filetype)
     {
         SOPC_FilteTransfer_FileType_Initialize(filetype);
@@ -512,9 +529,9 @@ FT_FileType_t* SOPC_FilteTransfer_FileType_Create(void)
     return filetype;
 }
 
-void SOPC_FilteTransfer_FileType_Initialize(FT_FileType_t* filetype)
+void SOPC_FilteTransfer_FileType_Initialize(SOPC_FileType* filetype)
 {
-    SOPC_ASSERT(NULL != filetype && "FT_FileType_t pointer needs to be initialize");
+    SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer needs to be initialize");
     filetype->node_id = NULL;
     filetype->handle = generate_random_handle();
     filetype->path = SOPC_String_Create();
@@ -534,7 +551,7 @@ void SOPC_FilteTransfer_FileType_Initialize(FT_FileType_t* filetype)
     filetype->size_in_byte = 0;
 }
 
-void SOPC_FileTransfer_FileType_Clear(FT_FileType_t* filetype)
+void SOPC_FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 {
     SOPC_NodeId_Clear(filetype->node_id);
     if (filetype != NULL)
@@ -562,7 +579,7 @@ void SOPC_FileTransfer_FileType_Clear(FT_FileType_t* filetype)
     }
 }
 
-void SOPC_FileTransfer_FileType_Delete(FT_FileType_t** filetype)
+void SOPC_FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 {
     if (filetype != NULL && NULL != *filetype)
     {
@@ -626,7 +643,7 @@ void SOPC_FileTransfer_Clear(void)
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    FT_FileType_t* file;
+    SOPC_FileType* file;
     bool status_nok = false;
 
     if (NULL != config.fileType_nodeId && NULL != config.file_path && NULL != config.met_openId &&
@@ -748,7 +765,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
     return status;
 }
 
-SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(FT_FileType_t* file)
+SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;
     if (file != NULL)
@@ -764,15 +781,17 @@ SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(FT_FileType_t* file)
             int filedes = mkstemp(tmp_file_path);
             if (1 > filedes)
             {
-                char *str = SOPC_String_GetCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: creation of tmp file %s failed", str);
+                char* str = SOPC_String_GetCString(file->path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: creation of tmp file %s failed",
+                                       str);
                 SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
             }
             int res = close(filedes);
             if (0 != res)
             {
-                char *str = SOPC_String_GetCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: closing of tmp file %s failed", str);
+                char* str = SOPC_String_GetCString(file->path);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: closing of tmp file %s failed",
+                                       str);
                 SOPC_ASSERT(0 == res && "closing of tmp file failed");
             }
 
@@ -785,7 +804,7 @@ SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(FT_FileType_t* file)
     return status;
 }
 
-SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(FT_FileType_t* file)
+SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status;
     char Cmode[5] = {0};
@@ -802,8 +821,9 @@ SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(FT_FileType_t* file)
                     file->fp = fopen(SOPC_String_GetCString(file->tmp_path), Cmode);
                     if (NULL == file->fp)
                     {
-                        char *str = SOPC_String_GetCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be open", str);
+                        char* str = SOPC_String_GetCString(file->tmp_path);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be open",
+                                               str);
                     }
                     SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
                 }
@@ -829,7 +849,7 @@ SOPC_StatusCode SOPC_FileTransfer_Close_TmpFile(FT_FileHandle handle, const SOPC
 {
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         if (file->handle == handle)
@@ -843,8 +863,9 @@ SOPC_StatusCode SOPC_FileTransfer_Close_TmpFile(FT_FileHandle handle, const SOPC
                     int res = fclose(file->fp);
                     if (0 != res)
                     {
-                        char *str = SOPC_String_GetCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be closed", str);
+                        char* str = SOPC_String_GetCString(file->tmp_path);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be closed",
+                                               str);
                         SOPC_ASSERT(0 == res && "file can't be closed");
                     }
                     file->fp = NULL;
@@ -862,7 +883,7 @@ SOPC_StatusCode SOPC_FileTransfer_Close_TmpFile(FT_FileHandle handle, const SOPC
     return status;
 }
 
-SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(FT_FileType_t* file)
+SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;
     if (file != NULL)
@@ -872,14 +893,14 @@ SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(FT_FileType_t* file)
             int res = fclose(file->fp);
             if (0 != res)
             {
-                char *str = SOPC_String_GetCString(file->tmp_path);
+                char* str = SOPC_String_GetCString(file->tmp_path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be closed", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be closed");
             }
             res = remove(SOPC_String_GetCString(file->tmp_path));
             if (0 != res)
             {
-                char *str = SOPC_String_GetCString(file->tmp_path);
+                char* str = SOPC_String_GetCString(file->tmp_path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be removed", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be remove");
             }
@@ -905,7 +926,7 @@ SOPC_StatusCode SOPC_FileTransfer_Read_TmpFile(FT_FileHandle handle,
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
     bool found = false;
     size_t read_count;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found && (length > 0))
     {
         if (file->handle == handle)
@@ -949,7 +970,7 @@ SOPC_StatusCode SOPC_FileTransfer_Write_TmpFile(FT_FileHandle handle, SOPC_ByteS
 {
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         if (file->handle == handle)
@@ -985,7 +1006,7 @@ SOPC_StatusCode SOPC_FileTransfer_GetPos_TmpFile(FT_FileHandle handle, const SOP
 {
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         if (file->handle == handle)
@@ -1014,7 +1035,7 @@ SOPC_StatusCode SOPC_FileTransfer_SetPos_TmpFile(FT_FileHandle handle, const SOP
 {
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
     bool found = false;
-    FT_FileType_t* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
         if (file->handle == handle)
@@ -1044,7 +1065,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
         return status;
     }
     status = SOPC_STATUS_NOK;
-    FT_FileType_t* file = SOPC_Dict_Get(g_str_objectId_to_file, node_id, &found);
+    SOPC_FileType* file = SOPC_Dict_Get(g_str_objectId_to_file, node_id, &found);
     if (!found)
     {
         printf("<FileTransfer_Get_TmpPath> Unable to retrieve the file object '%s'\n", node_id);
@@ -1085,7 +1106,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
 static void local_write_init(const void* key, const void* value, void* user_data)
 {
     (void) key;
-    const FT_FileType_t* file = value;
+    const SOPC_FileType* file = value;
     SOPC_ReturnStatus* status = user_data;
     SOPC_StatusCode res;
     res = local_write_default_UserWritable(*file);
@@ -1122,10 +1143,10 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
     return status;
 }
 
-static SOPC_StatusCode local_write_open_count(FT_FileType_t file)
+static SOPC_StatusCode local_write_open_count(SOPC_FileType file)
 {
     SOPC_ASSERT(NULL != file.variableIds[OPEN_COUNT_VAR_IDX] &&
-              "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
+                "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1153,10 +1174,10 @@ static SOPC_StatusCode local_write_open_count(FT_FileType_t file)
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode local_write_size(FT_FileType_t file)
+static SOPC_StatusCode local_write_size(SOPC_FileType file)
 {
     SOPC_ASSERT(NULL != file.variableIds[SIZE_VAR_IDX] &&
-              "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>");
+                "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1184,10 +1205,10 @@ static SOPC_StatusCode local_write_size(FT_FileType_t file)
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file)
+static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file)
 {
     SOPC_ASSERT(NULL != file.variableIds[WRITABLE_VAR_IDX] &&
-              "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
+                "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
@@ -1215,10 +1236,10 @@ static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file)
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode local_write_default_UserWritable(FT_FileType_t file)
+static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file)
 {
     SOPC_ASSERT(NULL != file.variableIds[USER_WRITABLE_VAR_IDX] &&
-              "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
+                "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)

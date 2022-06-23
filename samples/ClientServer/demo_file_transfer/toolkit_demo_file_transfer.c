@@ -16,12 +16,11 @@
 #include "libs2opc_server_config.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_file_transfer.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
-#include "sopc_assert.h"
-#include "sopc_logger.h"
-
 
 /*-----------------------
  * Logger configuration :
@@ -45,7 +44,6 @@ static char* Server_ConfigLogPath(const char* logDirName)
 
     return logDirPath;
 }
-
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {

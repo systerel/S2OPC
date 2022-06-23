@@ -69,20 +69,7 @@ typedef SOPC_Byte FT_OpenMode;
 /**
  * \brief structure to manage FileType object
  */
-typedef struct FT_FileType_t
-{
-    SOPC_NodeId* node_id;
-    FT_FileHandle handle;                        // The handle of the file
-    SOPC_String* path;                           // the file path
-    SOPC_NodeId* methodIds[NB_FILE_TYPE_METHOD]; // list of method associeted
-    FT_OpenMode mode;
-    bool is_open;
-    SOPC_String* tmp_path; // The path with the ramdom tmp name created
-    FILE* fp;
-    SOPC_NodeId* variableIds[NB_VARIABLE];
-    uint16_t open_count;
-    uint64_t size_in_byte;
-} FT_FileType_t;
+typedef struct SOPC_FileType SOPC_FileType;
 
 /**
  * \brief Structure to gather FilType configuration data
@@ -109,26 +96,26 @@ typedef struct SOPC_FileType_Config
  * \note Memory allocation, need to call SOPC_FileTransfer_FileType_Delete after use.
  * \return The FileType object structure allocated
  */
-FT_FileType_t* SOPC_FilteTransfer_FileType_Create(void);
+SOPC_FileType* SOPC_FilteTransfer_FileType_Create(void);
 
 /**
  * \brief Initialize a FileType object with its default value.
  * \note Random value is use to generate the file handle.
  * \param filetype The pointer on the FileType object structure to initialize.
  */
-void SOPC_FilteTransfer_FileType_Initialize(FT_FileType_t* filetype);
+void SOPC_FilteTransfer_FileType_Initialize(SOPC_FileType* filetype);
 
 /**
  * \brief Clear the FileType structure fields.
  * \param filetype The pointer on the FileType object structure to clear.
  */
-void SOPC_FileTransfer_FileType_Clear(FT_FileType_t* filetype);
+void SOPC_FileTransfer_FileType_Clear(SOPC_FileType* filetype);
 
 /**
  * \brief Delete the FileType structure (clear and free).
  * \param filetype Pointer on the FileType object structure to delete.
  */
-void SOPC_FileTransfer_FileType_Delete(FT_FileType_t** filetype);
+void SOPC_FileTransfer_FileType_Delete(SOPC_FileType** filetype);
 
 /**
  * \brief Create a temporary file at the path location (path is the field of the FileType structure)
@@ -136,14 +123,14 @@ void SOPC_FileTransfer_FileType_Delete(FT_FileType_t** filetype);
  * \param file Pointer on the FileType object structure.
  * \return SOPC_GoodGenericStatus if no error
  */
-SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(FT_FileType_t* file);
+SOPC_StatusCode SOPC_FileTransfer_Create_TmpFile(SOPC_FileType* file);
 
 /**
  * \brief Open the temporary file and lock it.
  * \param file Pointer on the FileType object structure.
  * \return SOPC_GoodGenericStatus if no error
  */
-SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(FT_FileType_t* file);
+SOPC_StatusCode SOPC_FileTransfer_Open_TmpFile(SOPC_FileType* file);
 
 /**
  * \brief Close the temporary file and unlock it.
@@ -159,7 +146,7 @@ SOPC_StatusCode SOPC_FileTransfer_Close_TmpFile(FT_FileHandle handle, const SOPC
  * \param file Pointer on the FileType object structure.
  * \return SOPC_GoodGenericStatus if no error
  */
-SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(FT_FileType_t* file);
+SOPC_StatusCode SOPC_FileTransfer_Delete_TmpFile(SOPC_FileType* file);
 
 /**
  * \brief Read into the temporary file (from the current position).
