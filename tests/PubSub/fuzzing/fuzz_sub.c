@@ -25,11 +25,15 @@
 #include "sopc_reader_layer.h"
 #include "sopc_helper_endianness_cfg.h"
 
+#define MAX_LEN 4096
+
 static const uint32_t subGroupVersion = 963852;
 static const uint32_t subGroupId = 1245;
 
 static SOPC_PubSubConfiguration* configuration = NULL;
 static SOPC_PubSubConnection* subConnection = NULL;
+
+static SOPC_Buffer* sopc_buffer = NULL;
 
 static void setupConnection(void)
 {
@@ -116,6 +120,18 @@ static void setupConnection(void)
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
 }
 
+int LLVMFuzzerInitialize(int *argc, char ***argv)
+{
+    (void) argc;
+    (void) argv;
+    setupConnection();
+    SOPC_Helper_EndiannessCfg_Initialize();
+    sopc_buffer = SOPC_Buffer_Create(MAX_LEN);
+    assert(sopc_buffer != NULL);
+
+    return 0;
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) 
 {
     if (len == 0 || len > UINT32_MAX)
@@ -123,25 +139,24 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
         return 0;
     }
 
-    setupConnection();
+    if((len >= 2) && (buf[0] & 0x80) && ((buf[1] & 0x07) == DataSet_LL_PubId_String_Id))
+    {
+        return 0;
+    }
 
-    SOPC_Helper_EndiannessCfg_Initialize();
-
-    SOPC_Buffer* sopc_buffer = SOPC_Buffer_Create((uint32_t) len);
-    assert(sopc_buffer != NULL);
+    SOPC_Buffer_SetPosition(sopc_buffer, 0);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(sopc_buffer, buf, (uint32_t) len);
     assert(SOPC_STATUS_OK == status);
+    sopc_buffer->length = sopc_buffer->position;
     SOPC_Buffer_SetPosition(sopc_buffer, 0);
 
     assert(NULL != subConnection);
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .getSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
-    
-    SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
 
-    
-    SOPC_Buffer_Delete(sopc_buffer);
-    SOPC_PubSubConfiguration_Delete(configuration);
+    SOPC_UADP_NetworkMessage *uadp_nm = SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
+    if (NULL != uadp_nm)
+        SOPC_UADP_NetworkMessage_Delete(uadp_nm);
 
     return 0;
 }
