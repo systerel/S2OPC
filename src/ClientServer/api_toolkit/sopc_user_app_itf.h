@@ -46,24 +46,26 @@ typedef struct SOPC_Client_Config SOPC_Client_Config;
  */
 typedef struct SOPC_SecureChannel_Config
 {
-    uint8_t isClientSc;
-    const SOPC_Client_Config*
-        clientConfigPtr; /**< Pointer to the client configuration containing this secure channel. */
+    uint8_t isClientSc; /**< Flag to indicate if this secure channel configuration is on client side.
+                             It shall always be true if not created internally. */
+    const SOPC_Client_Config* clientConfigPtr; /**< Pointer to the client configuration containing this secure channel.
+                                                    It should be defined to provide client application information
+                                                    (locales, description, etc.) for session establishment. */
 
     const OpcUa_GetEndpointsResponse* expectedEndpoints; /**< Response returned by prior call to GetEndpoints service
                                                              and checked to be the same during session establishment,
                                                              NULL otherwise (no verification will be done).*/
     const char* serverUri; /**< This value shall only be specified if the server is accessed through a gateway server.
                                 In this case this value is the applicationUri for the underlying Server. */
-    const char* url;       /**< The endpoint URL used for connection. */
+    const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;
     const SOPC_PKIProvider*
         pki; /**< PKI shall not be shared between several configurations except if it is thread-safe */
-    const char* reqSecuPolicyUri;
-    uint32_t requestedLifetime;
-    OpcUa_MessageSecurityMode msgSecurityMode;
+    const char* reqSecuPolicyUri;              /**< Requested Security Policy URI */
+    uint32_t requestedLifetime;                /**< Requested Secure channel lifetime */
+    OpcUa_MessageSecurityMode msgSecurityMode; /**< Requested Security Mode */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
                                        connecting phase) */

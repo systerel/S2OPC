@@ -25,6 +25,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_enum_types.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -311,13 +312,75 @@ void SOPC_Toolkit_Clear(void)
     SOPC_Common_Clear();
 }
 
+static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChannel_Config* scConfig)
+{
+    bool result = true;
+    if (!scConfig->isClientSc)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "AddSecureChannelConfig check: isClientSc flag not set");
+        result = false;
+    }
+    if (NULL == scConfig->url)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddSecureChannelConfig check: server endpoint URL not set");
+        result = false;
+    }
+    if (NULL == scConfig->reqSecuPolicyUri)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddSecureChannelConfig check: Security Policy URI not set");
+        result = false;
+    }
+    if (scConfig->msgSecurityMode <= OpcUa_MessageSecurityMode_Invalid ||
+        scConfig->msgSecurityMode >= OpcUa_MessageSecurityMode_SizeOf)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "AddSecureChannelConfig check: Security Mode not set");
+        result = false;
+    }
+    if (scConfig->requestedLifetime < SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddSecureChannelConfig check: requested lifetime is less than minimum defined: %" PRIu32
+                               " < %" PRIu32,
+                               scConfig->requestedLifetime, (uint32_t) SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME);
+        result = false;
+    }
+    if ((NULL != scConfig->reqSecuPolicyUri &&
+         (0 != strcmp(scConfig->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI))) ||
+        scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
+    {
+        if (NULL == scConfig->pki)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "AddSecureChannelConfig check: PKI is not defined but is required due to Security policy / mode");
+            result = false;
+        }
+        if (NULL == scConfig->crt_cli || NULL == scConfig->key_priv_cli)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "AddSecureChannelConfig check: Client certificate or key is not defined but is "
+                                   "required due to Security policy / mode");
+            result = false;
+        }
+        if (NULL == scConfig->crt_srv)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "AddSecureChannelConfig check: Server certificate is not defined but is required "
+                                   "due to Security policy / mode");
+            result = false;
+        }
+    }
+    return result;
+}
+
 uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     assert(NULL != scConfig);
     uint32_t result = 0;
 
-    // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
-    if (tConfig.initDone)
+    if (tConfig.initDone && SOPC_Internal_CheckClientSecureChannelConfig(scConfig))
     {
         Mutex_Lock(&tConfig.mut);
         if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
