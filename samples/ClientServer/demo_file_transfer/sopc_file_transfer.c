@@ -49,9 +49,11 @@ static uint64_t handle_hash(const void* handle);
 static FT_FileHandle generate_random_handle(void);
 static bool check_openModeArg(FT_OpenMode mode);
 static SOPC_StatusCode opcuaMode_to_CMode(FT_OpenMode mode, char* Cmode);
-static SOPC_StatusCode local_write_open_count(void);
-static SOPC_StatusCode local_write_size(uint64_t file_size);
-static SOPC_StatusCode local_browse(void);
+static SOPC_StatusCode local_write_open_count(FT_FileType_t file);
+static SOPC_StatusCode local_write_size(FT_FileType_t file);
+static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file);
+static SOPC_StatusCode local_write_default_UserWritable(FT_FileType_t file);
+static void local_write_init(const void* key, const void* value, void* user_data);
 
 static SOPC_StatusCode SOPC_FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                      const SOPC_NodeId* objectId,
@@ -109,9 +111,6 @@ static SOPC_Dict* g_str_objectId_to_file = NULL;
 static SOPC_Dict* g_handle_to_file = NULL;
 static int32_t g_tombstone_key = -1;
 static SOPC_MethodCallManager* g_method_call_manager = NULL;
-static uint16_t g_open_count = 0;
-static uint32_t g_numeric_open_count_id = 0;
-static uint32_t g_numeric_size_id;
 
 static bool check_openModeArg(FT_OpenMode mode)
 {
@@ -278,22 +277,24 @@ static SOPC_StatusCode SOPC_FileTransfer_Method_Open(const SOPC_CallContext* cal
                 return result_code;
             }
         }
-        file->handle = file->handle + 1;
         assert(SOPC_Dict_Insert(g_handle_to_file, &file->handle, file) == true);
         file->mode = mode;
-        file->is_open = true;
         result_code = SOPC_FileTransfer_Create_TmpFile(file);
         if (SOPC_GoodGenericStatus == result_code)
         {
             result_code = SOPC_FileTransfer_Open_TmpFile(file);
             if (SOPC_GoodGenericStatus == result_code)
             {
+                file->handle = file->handle + 1;
+                file->is_open = true;
+                file->open_count++;
                 /* Start local service on variables */
-                result_code = local_write_open_count();
+                result_code = local_write_open_count(*file);
                 struct stat sb;
                 if (fstat(fileno(file->fp), &sb) != -1)
                 {
-                    result_code = local_write_size((uint64_t) sb.st_size);
+                    file->size_in_byte = (uint64_t) sb.st_size;
+                    result_code = local_write_size(*file);
                 }
                 /* End local service on variables */
                 if (SOPC_GoodGenericStatus == result_code)
@@ -404,7 +405,8 @@ static SOPC_StatusCode SOPC_FileTransfer_Method_Read(const SOPC_CallContext* cal
         struct stat sb;
         if (fstat(fileno(file->fp), &sb) != -1)
         {
-            result_code = local_write_size((uint64_t) sb.st_size);
+            file->size_in_byte = (uint64_t) sb.st_size;
+            result_code = local_write_size(*file);
         }
     }
     return result_code;
@@ -535,9 +537,15 @@ void SOPC_FilteTransfer_FileType_Initialize(FT_FileType_t* filetype)
     {
         filetype->methodIds[i] = NULL;
     }
+    for (int i = 0; i < NB_VARIABLE; i++)
+    {
+        filetype->variableIds[i] = NULL;
+    }
     filetype->mode = FileTransfer_UnknownMode;
     filetype->is_open = false;
     filetype->fp = NULL;
+    filetype->open_count = 0;
+    filetype->size_in_byte = 0;
 }
 
 void SOPC_FileTransfer_FileType_Clear(FT_FileType_t* filetype)
@@ -555,9 +563,16 @@ void SOPC_FileTransfer_FileType_Clear(FT_FileType_t* filetype)
             SOPC_NodeId_Clear(filetype->methodIds[i]);
             filetype->methodIds[i] = NULL;
         }
+        for (int i = 0; i < NB_VARIABLE; i++)
+        {
+            SOPC_NodeId_Clear(filetype->variableIds[i]);
+            filetype->variableIds[i] = NULL;
+        }
         filetype->mode = FileTransfer_UnknownMode;
         filetype->is_open = false;
         filetype->fp = NULL;
+        filetype->open_count = 0;
+        filetype->size_in_byte = 0;
     }
 }
 
@@ -612,7 +627,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 
 void SOPC_FileTransfer_Clear(void)
 {
-    g_open_count = 0;
     SOPC_Dict_Delete(g_objectId_to_file);
     g_objectId_to_file = NULL;
     SOPC_Dict_Delete(g_str_objectId_to_file);
@@ -623,29 +637,25 @@ void SOPC_FileTransfer_Clear(void)
     SOPC_CommonHelper_Clear();
 }
 
-SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
-                                             const char* path,
-                                             const char* openId,
-                                             const char* closeId,
-                                             const char* readId,
-                                             const char* writeId,
-                                             const char* getposId,
-                                             const char* setposId)
+SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     FT_FileType_t* file;
     bool status_nok = false;
 
-    if (NULL != nodeId && NULL != path && NULL != openId && NULL != closeId && NULL != readId && NULL != writeId &&
-        NULL != getposId && NULL != setposId)
+    if (NULL != config.fileType_nodeId && NULL != config.file_path && NULL != config.met_openId &&
+        NULL != config.met_closeId && NULL != config.met_readId && NULL != config.met_writeId &&
+        NULL != config.met_getposId && NULL != config.met_setposId && NULL != config.var_openCountId &&
+        NULL != config.var_sizeId && NULL != config.var_userWritableId && NULL != config.var_writableId)
     {
         file = SOPC_FilteTransfer_FileType_Create();
-        file->node_id = SOPC_NodeId_FromCString(nodeId, (int32_t) strlen(nodeId));
+        file->node_id = SOPC_NodeId_FromCString(config.fileType_nodeId, (int32_t) strlen(config.fileType_nodeId));
         file->mode = FileTransfer_UnknownMode;
-        status = SOPC_String_CopyFromCString(file->path, path);
+        status = SOPC_String_CopyFromCString(file->path, config.file_path);
         if (SOPC_STATUS_OK == status)
         {
-            file->methodIds[OPEN_METHOD_IDX] = SOPC_NodeId_FromCString(openId, (int32_t) strlen(openId));
+            file->methodIds[OPEN_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_openId, (int32_t) strlen(config.met_openId));
             if (NULL != file->methodIds[OPEN_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[OPEN_METHOD_IDX],
@@ -655,7 +665,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
             {
                 status_nok = true;
             }
-            file->methodIds[CLOSE_METHOD_IDX] = SOPC_NodeId_FromCString(closeId, (int32_t) strlen(closeId));
+            file->methodIds[CLOSE_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_closeId, (int32_t) strlen(config.met_closeId));
             if (NULL != file->methodIds[CLOSE_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[CLOSE_METHOD_IDX],
@@ -665,7 +676,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
             {
                 status_nok = true;
             }
-            file->methodIds[READ_METHOD_IDX] = SOPC_NodeId_FromCString(readId, (int32_t) strlen(readId));
+            file->methodIds[READ_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_readId, (int32_t) strlen(config.met_readId));
             if (NULL != file->methodIds[READ_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[READ_METHOD_IDX],
@@ -675,7 +687,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
             {
                 status_nok = true;
             }
-            file->methodIds[WRITE_METHOD_IDX] = SOPC_NodeId_FromCString(writeId, (int32_t) strlen(writeId));
+            file->methodIds[WRITE_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_writeId, (int32_t) strlen(config.met_writeId));
             if (NULL != file->methodIds[WRITE_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[WRITE_METHOD_IDX],
@@ -685,7 +698,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
             {
                 status_nok = true;
             }
-            file->methodIds[GETPOS_METHOD_IDX] = SOPC_NodeId_FromCString(getposId, (int32_t) strlen(getposId));
+            file->methodIds[GETPOS_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_getposId, (int32_t) strlen(config.met_getposId));
             if (NULL != file->methodIds[GETPOS_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[GETPOS_METHOD_IDX],
@@ -696,7 +710,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
                 status_nok = true;
             }
 
-            file->methodIds[SETPOS_METHOD_IDX] = SOPC_NodeId_FromCString(setposId, (int32_t) strlen(setposId));
+            file->methodIds[SETPOS_METHOD_IDX] =
+                SOPC_NodeId_FromCString(config.met_setposId, (int32_t) strlen(config.met_setposId));
             if (NULL != file->methodIds[SETPOS_METHOD_IDX])
             {
                 status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[SETPOS_METHOD_IDX],
@@ -707,9 +722,34 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const char* nodeId,
                 status_nok = true;
             }
 
+            file->variableIds[SIZE_VAR_IDX] =
+                SOPC_NodeId_FromCString(config.var_sizeId, (int32_t) strlen(config.var_sizeId));
+            if (NULL == file->variableIds[SIZE_VAR_IDX])
+            {
+                status_nok = true;
+            }
+            file->variableIds[OPEN_COUNT_VAR_IDX] =
+                SOPC_NodeId_FromCString(config.var_openCountId, (int32_t) strlen(config.var_openCountId));
+            if (NULL == file->variableIds[OPEN_COUNT_VAR_IDX])
+            {
+                status_nok = true;
+            }
+            file->variableIds[WRITABLE_VAR_IDX] =
+                SOPC_NodeId_FromCString(config.var_writableId, (int32_t) strlen(config.var_writableId));
+            if (NULL == file->variableIds[WRITABLE_VAR_IDX])
+            {
+                status_nok = true;
+            }
+            file->variableIds[USER_WRITABLE_VAR_IDX] =
+                SOPC_NodeId_FromCString(config.var_userWritableId, (int32_t) strlen(config.var_userWritableId));
+            if (NULL == file->variableIds[USER_WRITABLE_VAR_IDX])
+            {
+                status_nok = true;
+            }
+
             /* g_str_objectId_to_file only for debuging with string key */
-            char* str_key = SOPC_Malloc(strlen(nodeId));
-            memcpy(str_key, nodeId, (size_t) strlen(nodeId));
+            char* str_key = SOPC_Malloc(strlen(config.fileType_nodeId));
+            memcpy(str_key, config.fileType_nodeId, (size_t) strlen(config.fileType_nodeId));
             assert(SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file) == true);
             assert(SOPC_Dict_Insert(g_str_objectId_to_file, str_key, file) == true);
             assert(SOPC_Dict_Insert(g_handle_to_file, &file->handle, file) == true);
@@ -978,11 +1018,11 @@ SOPC_StatusCode SOPC_FileTransfer_SetPos_TmpFile(FT_FileHandle handle, const SOP
     return status;
 }
 
-SOPC_StatusCode SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
+SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
 {
     (void) name;
     bool found = false;
-    SOPC_StatusCode status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == node_id)
     {
         return status;
@@ -991,7 +1031,7 @@ SOPC_StatusCode SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
     FT_FileType_t* file = SOPC_Dict_Get(g_str_objectId_to_file, node_id, &found);
     if (!found)
     {
-        printf("<FileTransfer_Get_TmpPath> Imposible to retrieve the file object '%s'\n", node_id);
+        printf("<FileTransfer_Get_TmpPath> Unable to retrieve the file object '%s'\n", node_id);
         return status;
     }
     if (false == file->is_open)
@@ -1026,29 +1066,63 @@ SOPC_StatusCode SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
     return status;
 }
 
-static SOPC_StatusCode local_write_open_count(void)
+static void local_write_init(const void* key, const void* value, void* user_data)
 {
-    g_open_count++;
-
-    if (g_numeric_open_count_id == 0)
+    (void) key;
+    const FT_FileType_t* file = value;
+    SOPC_ReturnStatus* status = user_data;
+    SOPC_StatusCode res;
+    res = local_write_default_UserWritable(*file);
+    if (SOPC_GoodGenericStatus != res)
     {
-        local_browse();
+        *status = SOPC_STATUS_NOK;
     }
+    res = local_write_default_Writable(*file);
+    if (SOPC_GoodGenericStatus != res)
+    {
+        *status = SOPC_STATUS_NOK;
+    }
+    res = local_write_open_count(*file);
+    if (SOPC_GoodGenericStatus != res)
+    {
+        *status = SOPC_STATUS_NOK;
+    }
+    res = local_write_size(*file);
+    if (SOPC_GoodGenericStatus != res)
+    {
+        *status = SOPC_STATUS_NOK;
+    }
+}
 
+SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback)
+{
+    SOPC_ReturnStatus status;
+    status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Initialize each variables for each each FileType added into the API */
+        SOPC_Dict_ForEach(g_objectId_to_file, &local_write_init, &status);
+    }
+    return status;
+}
+
+static SOPC_StatusCode local_write_open_count(FT_FileType_t file)
+{
+    FT_ASSERT(file.variableIds[OPEN_COUNT_VAR_IDX] != NULL,
+              "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
     {
         return OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId nodeId = {
-        .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = g_numeric_open_count_id, .Namespace = 1};
+    SOPC_NodeId* nodeId = file.variableIds[OPEN_COUNT_VAR_IDX];
     SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt16_Id,
                                           .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Uint16 = g_open_count},
+                                          .Value.Uint16 = file.open_count},
                                 .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, &nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
     if (SOPC_STATUS_OK != status)
     {
         return OpcUa_BadUnexpectedError;
@@ -1063,29 +1137,23 @@ static SOPC_StatusCode local_write_open_count(void)
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode local_write_size(uint64_t file_size)
+static SOPC_StatusCode local_write_size(FT_FileType_t file)
 {
-    g_open_count++;
-
-    if (g_numeric_size_id == 0)
-    {
-        local_browse();
-    }
-
+    FT_ASSERT(file.variableIds[SIZE_VAR_IDX] != NULL,
+              "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>", NULL);
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (pReq == NULL)
     {
         return OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId nodeId = {
-        .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = g_numeric_size_id, .Namespace = 1};
+    SOPC_NodeId* nodeId = file.variableIds[SIZE_VAR_IDX];
     SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt64_Id,
                                           .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Uint64 = file_size},
+                                          .Value.Uint64 = file.size_in_byte},
                                 .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, &nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
     if (SOPC_STATUS_OK != status)
     {
         return OpcUa_BadUnexpectedError;
@@ -1100,10 +1168,64 @@ static SOPC_StatusCode local_write_size(uint64_t file_size)
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode local_browse(void)
+static SOPC_StatusCode local_write_default_Writable(FT_FileType_t file)
 {
-    // TODO: faire un browse local et obtenir le NodeID ?? ou passer par de la configuration
-    g_numeric_open_count_id = 15021;
-    g_numeric_size_id = 15018;
+    FT_ASSERT(file.variableIds[WRITABLE_VAR_IDX] != NULL,
+              "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
+    SOPC_ReturnStatus status;
+    OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
+    if (pReq == NULL)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    SOPC_NodeId* nodeId = file.variableIds[WRITABLE_VAR_IDX];
+    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
+                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                          .Value.Boolean = VAR_WRITABLE_DEFAULT},
+                                .Status = SOPC_GoodGenericStatus};
+
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+
+    return SOPC_GoodGenericStatus;
+}
+
+static SOPC_StatusCode local_write_default_UserWritable(FT_FileType_t file)
+{
+    FT_ASSERT(file.variableIds[USER_WRITABLE_VAR_IDX] != NULL,
+              "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>", NULL);
+    SOPC_ReturnStatus status;
+    OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
+    if (pReq == NULL)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    SOPC_NodeId* nodeId = file.variableIds[USER_WRITABLE_VAR_IDX];
+    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
+                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                          .Value.Boolean = VAR_USER_WRITABLE_DEFAULT},
+                                .Status = SOPC_GoodGenericStatus};
+
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+
     return SOPC_GoodGenericStatus;
 }

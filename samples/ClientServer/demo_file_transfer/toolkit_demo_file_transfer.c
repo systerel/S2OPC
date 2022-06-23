@@ -71,19 +71,29 @@ int main(int argc, char* argv[])
         status = SOPC_FileTransfer_Initialize();
         FT_ASSERT(SOPC_STATUS_OK == status, "during file transfer intialization", NULL);
 
-        const char* file_id = "ns=1;i=15017";
-        const char* path = "/tmp/myfile";
-        const char* open_id = "ns=1;i=15048";
-        const char* close_id = "ns=1;i=15051";
-        const char* read_id = "ns=1;i=15053";
-        const char* write_id = "ns=1;i=15056";
-        const char* getPos_id = "ns=1;i=15058";
-        const char* setPos_id = "ns=1;i=15061";
+        const SOPC_FileType_Config config = {.file_path = "/tmp/myfile",
+                                             .fileType_nodeId = "ns=1;i=15017",
+                                             .met_openId = "ns=1;i=15048",
+                                             .met_closeId = "ns=1;i=15051",
+                                             .met_readId = "ns=1;i=15053",
+                                             .met_writeId = "ns=1;i=15056",
+                                             .met_getposId = "ns=1;i=15058",
+                                             .met_setposId = "ns=1;i=15061",
+                                             .var_sizeId = "ns=1;i=15018",
+                                             .var_openCountId = "ns=1;i=15021",
+                                             .var_userWritableId = "ns=1;i=15020",
+                                             .var_writableId = "ns=1;i=15019"};
 
         printf("******* File added ...\n");
-        SOPC_FileTransfer_Add_File(file_id, path, open_id, close_id, read_id, write_id, getPos_id, setPos_id);
-        // status = SOPC_ServerHelper_Serve(true);
-        status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);
+        status = SOPC_FileTransfer_Add_File(config);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to add file into server\n");
+            SOPC_FileTransfer_Clear();
+            return 1;
+        }
+
+        status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -101,7 +111,7 @@ int main(int argc, char* argv[])
         char name[STR_BUFF_SIZE];
         while (1)
         {
-            status = SOPC_FileTransfer_Get_TmpPath(file_id, name);
+            status = SOPC_FileTransfer_Get_TmpPath(config.fileType_nodeId, name);
             if (SOPC_STATUS_OK == status)
             {
                 printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", name);
