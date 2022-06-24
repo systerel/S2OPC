@@ -81,7 +81,7 @@
 #define VAR_WRITABLE_DEFAULT true
 
 /**
- * \brief File handle type (send to send client)
+ * \brief File handle type (to send to client)
  */
 typedef uint32_t SOPC_FileHandle;
 
@@ -96,7 +96,7 @@ typedef SOPC_Byte SOPC_OpenMode;
 
 typedef struct SOPC_FileType
 {
-    SOPC_NodeId* node_id;
+    SOPC_NodeId* node_id;   /*!< The nodeId of the FileType object into the adress space. */
     SOPC_FileHandle handle; /*!< The handle of the file send to the client. */
     SOPC_String* path;      /*!< the file path where the tmp file will created (shall include the prefix name, example:
                                /tmp/my_file). */
@@ -109,6 +109,7 @@ typedef struct SOPC_FileType
     SOPC_NodeId* variableIds[NB_VARIABLE]; /*!< list of variable nodeId associated at the FileType object. */
     uint16_t open_count;   /*!< The number of times the Open method has been called since the server started. */
     uint64_t size_in_byte; /*!< The size in byte of the file, updated after a read operation from the client. */
+
 } SOPC_FileType;
 
 /**
@@ -230,6 +231,7 @@ static SOPC_StatusCode local_write_size(SOPC_FileType file);
 static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file);
 static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file);
 static void local_write_init(const void* key, const void* value, void* user_data);
+
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
                                                 uint32_t nbInputArgs,
@@ -299,7 +301,7 @@ static bool check_openModeArg(SOPC_OpenMode mode)
     //  EraseExisting bit can only be set if the file is opened for writing
     if (mode & ERASE_EXISTING_MASK)
     {
-        if (mode != (ERASE_EXISTING_MASK + WRITE_MASK))
+        if ((ERASE_EXISTING_MASK + WRITE_MASK) != mode)
         {
             ok2 = false;
         }
@@ -309,7 +311,7 @@ static bool check_openModeArg(SOPC_OpenMode mode)
 
 static void filetype_free(void* value)
 {
-    if (value != NULL)
+    if (NULL != value)
     {
         FileTransfer_FileType_Delete((SOPC_FileType**) &value);
     }
@@ -317,7 +319,7 @@ static void filetype_free(void* value)
 
 static void cstring_free(void* value)
 {
-    if (value != NULL)
+    if (NULL != value)
     {
         SOPC_Free(value);
     }
@@ -356,7 +358,7 @@ static SOPC_FileHandle generate_random_handle(void)
 static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode)
 {
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
-    if (Cmode != NULL)
+    if (NULL != Cmode)
     {
         switch (mode)
         {
@@ -430,16 +432,16 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
         {
             /* Clients can open the same file several times for read */
             /* A request to open for writing shall return Bad_NotWritable when the file is already opened */
-            if ((file->mode == READ_MASK) && (mode != READ_MASK))
+            if ((READ_MASK == file->mode) && (READ_MASK != mode))
             {
                 /* avoid hard indentation level */
                 return OpcUa_BadNotWritable;
             }
             /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.
              */
-            if ((file->mode == WRITE_MASK) || (file->mode == APPEND_MASK) || (file->mode == (APPEND_MASK + WRITE_MASK)))
+            if ((WRITE_MASK == file->mode) || (APPEND_MASK == file->mode) || ((APPEND_MASK + WRITE_MASK) == file->mode))
             {
-                if ((mode != WRITE_MASK) && (mode != APPEND_MASK) && (mode != (APPEND_MASK + WRITE_MASK)))
+                if ((WRITE_MASK != mode) && (APPEND_MASK != mode) && ((APPEND_MASK + WRITE_MASK) != mode))
                 {
                     /* avoid hard indentation level */
                     return OpcUa_BadNotReadable;
@@ -467,7 +469,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 /* Start local service on variables */
                 result_code = local_write_open_count(*file);
                 struct stat sb;
-                if (fstat(fileno(file->fp), &sb) != -1)
+                res = fstat(fileno(file->fp), &sb);
+                if (-1 != res)
                 {
                     file->size_in_byte = (uint64_t) sb.st_size;
                     result_code = local_write_size(*file);
@@ -521,7 +524,7 @@ static SOPC_StatusCode FileTransfer_Method_Close(const SOPC_CallContext* callCon
         return result_code;
     }
 
-    if ((inputArgs->BuiltInTypeId != SOPC_UInt32_Id))
+    if ((SOPC_UInt32_Id != inputArgs->BuiltInTypeId))
     {
         /* avoid hard indentation level */
         return result_code;
@@ -550,7 +553,7 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
         return result_code;
     }
 
-    if ((inputArgs[0].BuiltInTypeId != SOPC_UInt32_Id) || (inputArgs[1].BuiltInTypeId != SOPC_Int32_Id))
+    if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_Int32_Id != inputArgs[1].BuiltInTypeId))
     {
         /* avoid hard indentation level */
         return result_code;
@@ -579,7 +582,8 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     if (found)
     {
         struct stat sb;
-        if (fstat(fileno(file->fp), &sb) != -1)
+        int res = fstat(fileno(file->fp), &sb);
+        if (-1 != res)
         {
             file->size_in_byte = (uint64_t) sb.st_size;
             result_code = local_write_size(*file);
@@ -607,7 +611,7 @@ static SOPC_StatusCode FileTransfer_Method_Write(const SOPC_CallContext* callCon
         /* avoid hard indentation level */
         return result_code;
     }
-    if ((inputArgs[0].BuiltInTypeId != SOPC_UInt32_Id) || (inputArgs[1].BuiltInTypeId != SOPC_ByteString_Id))
+    if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
     {
         /* avoid hard indentation level */
         return result_code;
@@ -637,7 +641,7 @@ static SOPC_StatusCode FileTransfer_Method_GetPos(const SOPC_CallContext* callCo
         /* avoid hard indentation level */
         return result_code;
     }
-    if ((inputArgs->BuiltInTypeId != SOPC_UInt32_Id))
+    if (SOPC_UInt32_Id != inputArgs->BuiltInTypeId)
     {
         /* avoid hard indentation level */
         return result_code;
@@ -680,7 +684,7 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
         /* avoid hard indentation level */
         return result_code;
     }
-    if ((inputArgs[0].BuiltInTypeId != SOPC_UInt32_Id) || (inputArgs[1].BuiltInTypeId != SOPC_UInt64_Id))
+    if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_UInt64_Id != inputArgs[1].BuiltInTypeId))
     {
         /* avoid hard indentation level */
         return result_code;
@@ -727,7 +731,7 @@ static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
 static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 {
     SOPC_NodeId_Clear(filetype->node_id);
-    if (filetype != NULL)
+    if (NULL != filetype)
     {
         filetype->handle = 0;
         SOPC_String_Clear(filetype->path);
@@ -754,7 +758,7 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 
 static void FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 {
-    if (filetype != NULL && NULL != *filetype)
+    if (NULL != filetype && NULL != *filetype)
     {
         FileTransfer_FileType_Clear(*filetype);
         SOPC_Free(*filetype);
@@ -765,7 +769,7 @@ static void FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (g_objectId_to_file != NULL || g_str_objectId_to_file != NULL || g_method_call_manager != NULL)
+    if (NULL != g_objectId_to_file || NULL != g_str_objectId_to_file || NULL != g_method_call_manager)
     {
         // Protection of double init
         status = OpcUa_BadInvalidState;
@@ -773,22 +777,22 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
     else
     {
         g_objectId_to_file = SOPC_NodeId_Dict_Create(true, filetype_free);
-        if (g_objectId_to_file == NULL)
+        if (NULL == g_objectId_to_file)
         {
             status = OpcUa_BadOutOfMemory;
         }
         g_str_objectId_to_file = SOPC_Dict_Create(NULL, cstring_hash, cstring_equal, cstring_free, NULL);
-        if (g_str_objectId_to_file == NULL)
+        if (NULL == g_str_objectId_to_file)
         {
             status = OpcUa_BadOutOfMemory;
         }
         g_method_call_manager = SOPC_MethodCallManager_Create();
-        if (g_method_call_manager == NULL)
+        if (NULL == g_method_call_manager)
         {
             status = OpcUa_BadOutOfMemory;
         }
         g_handle_to_file = SOPC_Dict_Create(NULL, handle_hash, handle_equal, NULL, NULL);
-        if (g_handle_to_file == NULL)
+        if (NULL == g_handle_to_file)
         {
             status = OpcUa_BadOutOfMemory;
         }
@@ -945,9 +949,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
 static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;
-    if (file != NULL)
+    if (NULL != file)
     {
-        if ((file->node_id != NULL) && (file->path != NULL) && (file->tmp_path != NULL))
+        if ((NULL != file->node_id) && (NULL != file->path) && (NULL != file->tmp_path))
         {
             char tmp_file_path[STR_BUFF_SIZE];
 
@@ -988,9 +992,9 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
     bool mode_is_ok = check_openModeArg(file->mode);
     if (mode_is_ok)
     {
-        if (file != NULL)
+        if (NULL != file)
         {
-            if (file->fp == NULL)
+            if (NULL == file->fp)
             {
                 status = opcuaMode_to_CMode(file->mode, Cmode);
                 if (SOPC_GoodGenericStatus == status)
@@ -1029,13 +1033,13 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (file->handle == handle)
+        if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
             if (file->is_open)
             {
                 status = OpcUa_BadOutOfMemory;
-                if ((file->fp != NULL) && (file->tmp_path != NULL))
+                if ((NULL != file->fp) && (NULL != file->tmp_path))
                 {
                     int res = fclose(file->fp);
                     if (0 != res)
@@ -1063,9 +1067,9 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
 static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;
-    if (file != NULL)
+    if (NULL != file)
     {
-        if (file->fp != NULL)
+        if (NULL != file->fp)
         {
             int res = fclose(file->fp);
             if (0 != res)
@@ -1106,7 +1110,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found && (length > 0))
     {
-        if (file->handle == handle)
+        if (handle == file->handle)
         {
             /* check if File was not opened for read access */
             if ((file->is_open == true) && ((file->mode == WRITE_MASK) || (file->mode == APPEND_MASK) ||
@@ -1116,12 +1120,13 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                 return OpcUa_BadInvalidState;
             }
             status = OpcUa_BadOutOfMemory;
-            if (msg != NULL)
+            if (NULL != msg)
             {
-                if (file->fp != NULL)
+                if (NULL != file->fp)
                 {
                     read_count = fread(buffer, 1, (size_t) length, file->fp);
-                    if ((read_count < (size_t) length) && (feof(file->fp) == 0))
+                    int end_of_file = feof(file->fp);
+                    if ((read_count < (size_t) length) && (0 == end_of_file))
                     {
                         status = OpcUa_BadUnexpectedError;
                     }
@@ -1152,16 +1157,16 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (file->handle == handle)
+        if (handle == file->handle)
         {
             status = OpcUa_BadInvalidState;
             /* check if File was not opened for write access */
-            if ((file->is_open == true) && (file->mode != READ_MASK))
+            if ((file->is_open) && (READ_MASK != file->mode))
             {
                 status = OpcUa_BadOutOfMemory;
-                if (msg != NULL)
+                if (NULL != msg)
                 {
-                    if ((file->fp != NULL) && (msg->Length != -1))
+                    if ((NULL != file->fp) && (-1 != msg->Length))
                     {
                         size_t ret;
                         char buffer[msg->Length];
@@ -1169,7 +1174,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                         /* If ret != masg->Length then file might be locked and thus not writable */
                         status = OpcUa_BadNotWritable;
                         ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
-                        if (ret == (size_t) msg->Length)
+                        if ((size_t) msg->Length == ret)
                         {
                             status = SOPC_GoodGenericStatus;
                         }
@@ -1188,15 +1193,15 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (file->handle == handle)
+        if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
             *pos = 0;
-            if (file->fp != NULL)
+            if (NULL != file->fp)
             {
                 long int ret;
                 ret = ftell(file->fp);
-                if (ret == -1L)
+                if (-1L == ret)
                 {
                     status = OpcUa_BadUnexpectedError;
                 }
@@ -1217,14 +1222,14 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (file->handle == handle)
+        if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
-            if (file->fp != NULL)
+            if (NULL != file->fp)
             {
                 int ret;
                 ret = fseek(file->fp, (long int) posOff, SEEK_SET);
-                if (ret != 0)
+                if (0 != ret)
                 {
                     status = OpcUa_BadUnexpectedError;
                 }
@@ -1264,7 +1269,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
 
     if (NULL != file->tmp_path)
     {
-        if (file->tmp_path->Length < 0)
+        if (0 > file->tmp_path->Length)
         {
             printf("<FileTransfer_Get_TmpPath> File object '%s' is not created yet\n", node_id);
             return status;
@@ -1328,7 +1333,7 @@ static SOPC_StatusCode local_write_open_count(SOPC_FileType file)
                 "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
-    if (pReq == NULL)
+    if (NULL == pReq)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -1359,7 +1364,7 @@ static SOPC_StatusCode local_write_size(SOPC_FileType file)
                 "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
-    if (pReq == NULL)
+    if (NULL == pReq)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -1390,7 +1395,7 @@ static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file)
                 "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
-    if (pReq == NULL)
+    if (NULL == pReq)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -1421,7 +1426,7 @@ static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file)
                 "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
     SOPC_ReturnStatus status;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
-    if (pReq == NULL)
+    if (NULL == pReq)
     {
         return OpcUa_BadUnexpectedError;
     }
