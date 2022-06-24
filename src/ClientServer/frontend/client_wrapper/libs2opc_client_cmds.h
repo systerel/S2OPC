@@ -396,7 +396,9 @@ typedef struct
     Optional, can be NULL. Callback called when a connection is disconnected.
  @return
    '0' if operation succeed
+   '-1' if allocation / local init failure
    '-2' if toolkit not initialized
+   '-100' if toolkit already initialized
  */
 int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
 

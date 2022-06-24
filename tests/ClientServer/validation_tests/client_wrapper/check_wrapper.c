@@ -120,7 +120,7 @@ START_TEST(test_wrapper_initialize_finalize)
 
     /* double initialization shall fail */
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
-    ck_assert_int_eq(-2, SOPC_ClientHelper_Initialize(NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Initialize(NULL));
 
     SOPC_ClientHelper_Finalize();
 }
@@ -267,7 +267,7 @@ END_TEST
 START_TEST(test_wrapper_disconnect)
 {
     /* disconnect before wrapper has been initialized */
-    ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Disconnect(1));
 
     ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
@@ -292,7 +292,7 @@ START_TEST(test_wrapper_disconnect)
     SOPC_ClientHelper_Finalize();
 
     /* disconnect after wrapper has been closed */
-    ck_assert_int_eq(-2, SOPC_ClientHelper_Disconnect(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Disconnect(1));
 }
 END_TEST
 
@@ -1168,7 +1168,7 @@ static Suite* tests_make_suite_wrapper(void)
     Suite* s = NULL;
     TCase* tc_wrapper;
 
-    s = suite_create("Client subscription library");
+    s = suite_create("Client wrapper library");
 
     tc_wrapper = tcase_create("WrapperC");
     // Add a teardown to guarantee the call to SOPC_ClientHelper_Finalize after each test
