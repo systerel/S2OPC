@@ -217,20 +217,106 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle,
  */
 static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId, uint64_t* pos);
 
+/**
+ * \brief Function to free SOPC_FileType object structure (used for dictionary management purposes).
+ * \param value The FileType object
+ */
 static void filetype_free(void* value);
+
+/**
+ * \brief Function to free a C string (used for dictionary management purposes).
+ * \param value The C string
+ */
 static void cstring_free(void* value);
+
+/**
+ * \brief Function to compare two C string (used for dictionary management purposes).
+ * \param a first C string
+ * \param b second C string
+ * \return true if equal else false
+ */
 static bool cstring_equal(const void* a, const void* b);
+
+/**
+ * \brief Function to hash a C string (used for dictionary management purposes).
+ * \param cstring the C string to hash
+ * \return the hash result
+ */
 static uint64_t cstring_hash(const void* cstring);
+
+/**
+ * \brief Function to compare two SOPC_FileHandle (used for dictionary management purposes).
+ * \param a first SOPC_FileHandle
+ * \param b second SOPC_FileHandle
+ * \return true if equal else false
+ */
 static bool handle_equal(const void* a, const void* b);
+
+/**
+ * \brief Function to hash a SOPC_FileHandle (used for dictionary management purposes).
+ * \param handle the SOPC_FileHandle to hash
+ * \return the hash result
+ */
 static uint64_t handle_hash(const void* handle);
+
+/**
+ * \brief Function to generate a random SOPC_FileHandle (current time is used as seed).
+ * \return the SOPC_FileHandle generate
+ */
 static SOPC_FileHandle generate_random_handle(void);
+
+/**
+ * \brief Function to check if the opening file mode bit mask receive from the client is valid.
+ * \param mode The SOPC_OpenMode (bit mask)
+ * \return true if valid else false
+ */
 static bool check_openModeArg(SOPC_OpenMode mode);
+
+/**
+ * \brief Function to convert the opening file mode bit mask into a C string mode compatible with fopen function
+ * \param mode The SOPC_OpenMode (bit mask)
+ * \param Cmode The C string result
+ * \return SOPC_GoodGenericStatus if no error
+ */
 static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode);
+
+/**
+ * \brief Function to update the OpenCount variable of a FileType object on the address space (local write request) 
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
+ */
 static SOPC_StatusCode local_write_open_count(SOPC_FileType file);
+
+/**
+ * \brief Function to update the Size variable of a FileType object on the address space (local write request) 
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
+ */
 static SOPC_StatusCode local_write_size(SOPC_FileType file);
+
+/**
+ * \brief Function to write the default value of Writable variable for a FileType object on the address space (local write request) 
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
+ */
 static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file);
+
+/**
+ * \brief Function to write the default value of UserWritable variable for a FileType object on the address space (local write request) 
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
+ */
 static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file);
+
+/**
+ * \brief Function used with SOPC_Dict_ForEach
+ * \note Purpose: For each FileType registered into the API, intialized each variable of the object on the address space.
+ * \param key not used here
+ * \param value the pointer on the SOPC_FileType
+ * \param user_data use to get SOPC_StatusCode (SOPC_STATUT_OK if no error)
+ */
 static void local_write_init(const void* key, const void* value, void* user_data);
+
 
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
