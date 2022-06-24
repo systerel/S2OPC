@@ -195,6 +195,21 @@ static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
         {
             pSecurityPolicy = &pEpConfig->secuConfigurations[nbSecuIndex];
 
+            for (uint8_t nbTokenIndex = 0; nbTokenIndex < pSecurityPolicy->nbOfUserTokenPolicies; nbTokenIndex++)
+            {
+                pUserTokenPolicies = &pSecurityPolicy->userTokenPolicies[nbTokenIndex];
+
+                if (OpcUa_UserTokenType_Anonymous != pUserTokenPolicies->TokenType)
+                {
+                    status = SOPC_SecurityCheck_UserCredentialsEncrypted(pSecurityPolicy, pUserTokenPolicies);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        statusSecurityCheck = status;
+                        status = SOPC_STATUS_OK;
+                    }
+                }
+            }
+
             /* Check if SecurityPolicy "security policy URI" is different from "None" AND if SecurityPolicy "security
             mode" is "None" */
             if (false == SOPC_String_Equal(&pSecurityPolicy->securityPolicy, &securityPolicyNoneURI) &&
@@ -204,23 +219,6 @@ static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
                                        "Security Check: Failed. Combination not allowed : SecurityPolicy security "
                                        "policy URI is different from None and SecurityPolicy security mode is None.\n");
                 statusSecurityCheck = SOPC_STATUS_INVALID_PARAMETERS;
-            }
-            else
-            {
-                for (uint8_t nbTokenIndex = 0; nbTokenIndex < pSecurityPolicy->nbOfUserTokenPolicies; nbTokenIndex++)
-                {
-                    pUserTokenPolicies = &pSecurityPolicy->userTokenPolicies[nbTokenIndex];
-
-                    if (OpcUa_UserTokenType_Anonymous != pUserTokenPolicies->TokenType)
-                    {
-                        status = SOPC_SecurityCheck_UserCredentialsEncrypted(pSecurityPolicy, pUserTokenPolicies);
-                        if (SOPC_STATUS_OK != status)
-                        {
-                            statusSecurityCheck = status;
-                            status = SOPC_STATUS_OK;
-                        }
-                    }
-                }
             }
         }
     }
