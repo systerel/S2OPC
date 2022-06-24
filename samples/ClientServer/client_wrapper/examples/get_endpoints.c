@@ -64,37 +64,6 @@ static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
     }
 }
 
-static void free_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
-{
-    if (NULL != result)
-    {
-        if (NULL != result->endpoints)
-        {
-            for (int32_t i = 0; i < result->nbOfEndpoints; i++)
-            {
-                const SOPC_ClientHelper_EndpointDescription* ep = &result->endpoints[i];
-                free(ep->endpointUrl);
-                free(ep->security_policyUri);
-                free(ep->transportProfileUri);
-                if (NULL != ep->userIdentityTokens)
-                {
-                    for (int32_t j = 0; j < ep->nbOfUserIdentityTokens; j++)
-                    {
-                        const SOPC_ClientHelper_UserIdentityToken* token = &ep->userIdentityTokens[j];
-                        free(token->policyId);
-                        free(token->issuedTokenType);
-                        free(token->issuerEndpointUrl);
-                        free(token->securityPolicyUri);
-                    }
-                    free(ep->userIdentityTokens);
-                }
-            }
-            free(result->endpoints);
-        }
-        free(result);
-    }
-}
-
 int main(int argc, char* const argv[])
 {
     SOPC_UNUSED_ARG(argc);
@@ -118,7 +87,7 @@ int main(int argc, char* const argv[])
     if (0 == res)
     {
         int32_t init = SOPC_ClientHelper_Initialize(NULL);
-        if (init <= 0)
+        if (init < 0)
         {
             res = -1;
         }
@@ -136,7 +105,7 @@ int main(int argc, char* const argv[])
     if (0 == res)
     {
         print_endpoints(getEndpointResult);
-        free_endpoints(getEndpointResult);
+        SOPC_ClientHelper_GetEndpointsResult_Free(&getEndpointResult);
     }
     else
     {

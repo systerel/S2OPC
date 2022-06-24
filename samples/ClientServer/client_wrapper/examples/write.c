@@ -62,7 +62,7 @@ int main(int argc, char* const argv[])
     if (0 == res)
     {
         int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
-        if (init <= 0)
+        if (init < 0)
         {
             res = -1;
         }
