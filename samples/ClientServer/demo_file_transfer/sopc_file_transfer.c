@@ -555,8 +555,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 /* Start local service on variables */
                 result_code = local_write_open_count(*file);
                 struct stat sb;
-                res = fstat(fileno(file->fp), &sb);
-                if (-1 != res)
+                int ret = fstat(fileno(file->fp), &sb);
+                if (-1 != ret)
                 {
                     file->size_in_byte = (uint64_t) sb.st_size;
                     result_code = local_write_size(*file);
