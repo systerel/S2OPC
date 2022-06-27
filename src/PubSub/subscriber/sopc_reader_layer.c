@@ -193,7 +193,7 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
 
     if (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm))
     {
-        bool write_succes = targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm);
+        bool write_succes = (targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm));
         if (write_succes)
         {
             result = SOPC_STATUS_OK;

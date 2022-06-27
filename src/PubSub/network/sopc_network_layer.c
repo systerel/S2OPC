@@ -903,7 +903,7 @@ static inline SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffe
     SOPC_ReturnStatus status;
     SOPC_Boolean flags1_enabled = false;
     SOPC_Boolean flags2_enabled = false;
-    SOPC_Byte data;
+    SOPC_Byte data = 0;
     SOPC_Byte version = 0;
     SOPC_UADP_Configuration* conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
     // Publisher Id Type. Read in Extended flags1 or Byte if no flags1

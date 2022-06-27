@@ -388,7 +388,7 @@ XML_PUBSUB_NO_SUB_WRITER_ID = """<PubSub>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
-            <dataset writerId="4">
+            <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
