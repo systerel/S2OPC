@@ -453,7 +453,7 @@ int main(void)
         OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
         SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
         SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, notSupportedServiceReq, 1);
+        status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, notSupportedServiceReq, 1);
         printf(">>Test_Client_Toolkit: unsupported discovery request sending (using discovery API)\n");
     }
 

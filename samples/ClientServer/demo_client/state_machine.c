@@ -292,8 +292,12 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
             SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
-            pSM->state = stDiscovering;
+            status =
+                SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
+            if (SOPC_STATUS_OK == status)
+            {
+                pSM->state = stDiscovering;
+            }
         }
     }
 
@@ -365,8 +369,12 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
             SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
-            pSM->state = stDiscovering;
+            status =
+                SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
+            if (SOPC_STATUS_OK == status)
+            {
+                pSM->state = stDiscovering;
+            }
         }
     }
 
@@ -488,8 +496,12 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
             pSM->pCtxRequest->uid = nDiscovery;
             pSM->pCtxRequest->appCtx = 0;
             SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
-            pSM->state = stRegister;
+            status =
+                SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pSM->pCtxRequest);
+            if (SOPC_STATUS_OK == status)
+            {
+                pSM->state = stRegister;
+            }
         }
     }
 

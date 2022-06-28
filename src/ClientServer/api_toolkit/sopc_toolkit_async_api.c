@@ -233,10 +233,14 @@ void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId)
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SESSION, sessionId, (uintptr_t) NULL, 0);
 }
 
-bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
-                                                  void* discoveryReqStruct,
-                                                  uintptr_t requestContext)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                               void* discoveryReqStruct,
+                                                               uintptr_t requestContext)
 {
+    if (NULL == discoveryReqStruct)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     uint32_t secureChannelConfigIdx = 0;
     uint32_t reverseEndpointConfigIdx = 0;
     switch (endpointConnectionCfg.connectionType)
@@ -249,27 +253,27 @@ bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg end
         reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
         if (0 == reverseEndpointConfigIdx)
         {
-            return false;
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
         break;
     default:
-        return false;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (0 == secureChannelConfigIdx)
     {
-        return false;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     SOPC_Internal_DiscoveryContext* discoveryContext = SOPC_Calloc(1, sizeof(*discoveryContext));
     if (NULL == discoveryContext)
     {
-        return false;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
     discoveryContext->opcuaMessage = discoveryReqStruct;
     discoveryContext->discoveryAppContext = requestContext;
     SOPC_Services_EnqueueEvent(APP_TO_SE_SEND_DISCOVERY_REQUEST, secureChannelConfigIdx,
                                (uintptr_t) reverseEndpointConfigIdx, (uintptr_t) discoveryContext);
-    return true;
+    return SOPC_STATUS_OK;
 }
 
 void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx)

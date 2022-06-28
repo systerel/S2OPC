@@ -263,13 +263,13 @@ void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId);
  * \param requestContext         A context value, it will be provided with corresponding response or in case of sending
  *                               error notification
  *
- * \return true in case of success, false otherwise
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_OUT_OF_MEMORY otherwise
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  */
-bool SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
-                                                  void* discoveryReqStruct,
-                                                  uintptr_t requestContext);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                               void* discoveryReqStruct,
+                                                               uintptr_t requestContext);
 /**
  * \brief Request to open a connection listener for the given reverse endpoint description configuration as a client.
  *

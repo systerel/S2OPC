@@ -501,7 +501,7 @@ int main(void)
             // Use 1 as getEndpoints request context
             SOPC_EndpointConnectionCfg endpointConnectionCfg =
                 SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx3, connectionType);
-            SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
+            status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
             printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
         }
 

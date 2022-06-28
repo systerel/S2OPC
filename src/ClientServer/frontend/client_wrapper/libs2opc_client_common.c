@@ -845,7 +845,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientComm
             endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(iscConfig);
         }
 
-        SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);
+        status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);
     }
 
     /* free if needed */
