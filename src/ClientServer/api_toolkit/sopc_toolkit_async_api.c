@@ -74,32 +74,55 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
                                                          .secureChannelConfigIdx = secureChannelConfigIdx}};
 }
 
+static SOPC_ReturnStatus SOPC_ToolkitClientInternal_GetEndpointConnectionConfigIndexes(
+    const SOPC_EndpointConnectionCfg* endpointConnectionCfg,
+    SOPC_SecureChannelConfigIdx* secureChannelConfigIdx,
+    SOPC_ReverseEndpointConfigIdx* reverseEndpointConfigIdx)
+{
+    assert(NULL != endpointConnectionCfg);
+    assert(NULL != secureChannelConfigIdx);
+    assert(NULL != reverseEndpointConfigIdx);
+    switch (endpointConnectionCfg->connectionType)
+    {
+    case SOPC_EndpointConnectionType_Classic:
+        if (0 == endpointConnectionCfg->data.classic.secureChannelConfigIdx)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        *secureChannelConfigIdx = endpointConnectionCfg->data.classic.secureChannelConfigIdx;
+        *reverseEndpointConfigIdx = 0;
+        break;
+    case SOPC_EndpointConnectionType_Reverse:
+        if (0 == endpointConnectionCfg->data.reverse.secureChannelConfigIdx)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        if (0 == endpointConnectionCfg->data.reverse.reverseEndpointConfigIdx)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        *secureChannelConfigIdx = endpointConnectionCfg->data.reverse.secureChannelConfigIdx;
+        *reverseEndpointConfigIdx = endpointConnectionCfg->data.reverse.reverseEndpointConfigIdx;
+        break;
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                           const char* sessionName,
                                                           uintptr_t sessionContext,
                                                           SOPC_ExtensionObject* userToken)
 {
-    uint32_t secureChannelConfigIdx = 0;
-    uint32_t reverseEndpointConfigIdx = 0;
-    switch (endpointConnectionCfg.connectionType)
+    SOPC_SecureChannelConfigIdx secureChannelConfigIdx = 0;
+    SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx = 0;
+
+    SOPC_ReturnStatus status = SOPC_ToolkitClientInternal_GetEndpointConnectionConfigIndexes(
+        &endpointConnectionCfg, &secureChannelConfigIdx, &reverseEndpointConfigIdx);
+    if (SOPC_STATUS_OK != status)
     {
-    case SOPC_EndpointConnectionType_Classic:
-        secureChannelConfigIdx = endpointConnectionCfg.data.classic.secureChannelConfigIdx;
-        break;
-    case SOPC_EndpointConnectionType_Reverse:
-        secureChannelConfigIdx = endpointConnectionCfg.data.reverse.secureChannelConfigIdx;
-        reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
-        if (0 == reverseEndpointConfigIdx)
-        {
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        break;
-    default:
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (0 == secureChannelConfigIdx)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
     SOPC_Internal_SessionAppContext* sessionAppContext = SOPC_Calloc(1, sizeof(*sessionAppContext));
@@ -241,27 +264,14 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConn
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint32_t secureChannelConfigIdx = 0;
-    uint32_t reverseEndpointConfigIdx = 0;
-    switch (endpointConnectionCfg.connectionType)
+    SOPC_SecureChannelConfigIdx secureChannelConfigIdx = 0;
+    SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx = 0;
+
+    SOPC_ReturnStatus status = SOPC_ToolkitClientInternal_GetEndpointConnectionConfigIndexes(
+        &endpointConnectionCfg, &secureChannelConfigIdx, &reverseEndpointConfigIdx);
+    if (SOPC_STATUS_OK != status)
     {
-    case SOPC_EndpointConnectionType_Classic:
-        secureChannelConfigIdx = endpointConnectionCfg.data.classic.secureChannelConfigIdx;
-        break;
-    case SOPC_EndpointConnectionType_Reverse:
-        secureChannelConfigIdx = endpointConnectionCfg.data.reverse.secureChannelConfigIdx;
-        reverseEndpointConfigIdx = endpointConnectionCfg.data.reverse.reverseEndpointConfigIdx;
-        if (0 == reverseEndpointConfigIdx)
-        {
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        break;
-    default:
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (0 == secureChannelConfigIdx)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
     SOPC_Internal_DiscoveryContext* discoveryContext = SOPC_Calloc(1, sizeof(*discoveryContext));
