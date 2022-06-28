@@ -281,42 +281,38 @@ static bool check_openModeArg(SOPC_OpenMode mode);
 static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode);
 
 /**
- * \brief Function to update the OpenCount variable of a FileType object on the address space (local write request) 
+ * \brief Function to update the OpenCount variable of a FileType object on the address space (local write request)
  * \param file The FileType structure object
  * \return SOPC_GoodGenericStatus if no error
  */
 static SOPC_StatusCode local_write_open_count(SOPC_FileType file);
 
 /**
- * \brief Function to update the Size variable of a FileType object on the address space (local write request) 
+ * \brief Function to update the Size variable of a FileType object on the address space (local write request)
  * \param file The FileType structure object
  * \return SOPC_GoodGenericStatus if no error
  */
 static SOPC_StatusCode local_write_size(SOPC_FileType file);
 
 /**
- * \brief Function to write the default value of Writable variable for a FileType object on the address space (local write request) 
- * \param file The FileType structure object
- * \return SOPC_GoodGenericStatus if no error
+ * \brief Function to write the default value of Writable variable for a FileType object on the address space (local
+ * write request) \param file The FileType structure object \return SOPC_GoodGenericStatus if no error
  */
 static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file);
 
 /**
- * \brief Function to write the default value of UserWritable variable for a FileType object on the address space (local write request) 
- * \param file The FileType structure object
- * \return SOPC_GoodGenericStatus if no error
+ * \brief Function to write the default value of UserWritable variable for a FileType object on the address space (local
+ * write request) \param file The FileType structure object \return SOPC_GoodGenericStatus if no error
  */
 static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file);
 
 /**
  * \brief Function used with SOPC_Dict_ForEach
- * \note Purpose: For each FileType registered into the API, intialized each variable of the object on the address space.
- * \param key not used here
- * \param value the pointer on the SOPC_FileType
- * \param user_data use to get SOPC_StatusCode (SOPC_STATUT_OK if no error)
+ * \note Purpose: For each FileType registered into the API, intialized each variable of the object on the address
+ * space. \param key not used here \param value the pointer on the SOPC_FileType \param user_data use to get
+ * SOPC_StatusCode (SOPC_STATUT_OK if no error)
  */
 static void local_write_init(const void* key, const void* value, void* user_data);
-
 
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
@@ -517,7 +513,9 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             /* A request to open for writing shall return Bad_NotWritable when the file is already opened */
             if ((READ_MASK == file->mode) && (READ_MASK != mode))
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: file is open into reading mode, can't open for writing");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:Method_Open: file is open into reading mode, can't open for writing");
                 /* avoid hard indentation level */
                 return OpcUa_BadNotWritable;
             }
@@ -527,7 +525,9 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             {
                 if ((WRITE_MASK != mode) && (APPEND_MASK != mode) && ((APPEND_MASK + WRITE_MASK) != mode))
                 {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: file is open into writing mode, can't open for reading");
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "FileTransfer:Method_Open: file is open into writing mode, can't open for reading");
                     /* avoid hard indentation level */
                     return OpcUa_BadNotReadable;
                 }
@@ -535,7 +535,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             result_code = FileTransfer_Delete_TmpFile(file);
             if (SOPC_GoodGenericStatus != result_code)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to deleted tmp file");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:Method_Open: unable to deleted tmp file");
                 /* avoid hard indentation level */
                 return result_code;
             }
@@ -556,7 +557,9 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 result_code = local_write_open_count(*file);
                 if (SOPC_GoodGenericStatus != result_code)
                 {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to make a local write request for OpenCount variable");
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "FileTransfer:Method_Open: unable to make a local write request for OpenCount variable");
                 }
                 struct stat sb;
                 int ret = fstat(fileno(file->fp), &sb);
@@ -566,12 +569,15 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                     result_code = local_write_size(*file);
                     if (SOPC_GoodGenericStatus != result_code)
                     {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to make a local write request for Size variable");
+                        SOPC_Logger_TraceError(
+                            SOPC_LOG_MODULE_CLIENTSERVER,
+                            "FileTransfer:Method_Open: unable to make a local write request for Size variable");
                     }
                 }
                 else
                 {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to get stat on the tmp file");
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:Method_Open: unable to get stat on the tmp file");
                 }
                 /* End local service on variables */
                 if (SOPC_GoodGenericStatus == result_code)
@@ -589,24 +595,28 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                     }
                     else
                     {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to create a variant");
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:Method_Open: unable to create a variant");
                         result_code = OpcUa_BadOutOfMemory;
                     }
                 }
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to open the tmp file");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:Method_Open: unable to open the tmp file");
             }
         }
         else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to create the tmp file");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Open: unable to create the tmp file");
         }
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to retieve the tmp file in the API");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: unable to retieve the tmp file in the API");
         result_code = OpcUa_BadNotFound;
     }
     return result_code;
@@ -644,7 +654,7 @@ static SOPC_StatusCode FileTransfer_Method_Close(const SOPC_CallContext* callCon
     result_code = FileTransfer_Close_TmpFile(handle, objectId);
     if (SOPC_GoodGenericStatus != result_code)
     {
-         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: error while closing tmp file");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: error while closing tmp file");
     }
     return result_code;
 }
@@ -687,7 +697,8 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
         result_code = FileTransfer_Read_TmpFile(handle, length, &(v->Value.Bstring), objectId);
         if (SOPC_GoodGenericStatus != result_code)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: error while reading tmp file");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Read: error while reading tmp file");
         }
     }
     else
@@ -710,17 +721,21 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
             result_code = local_write_size(*file);
             if (SOPC_GoodGenericStatus != result_code)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: unable to make a local write request for Size variable");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:Method_Read: unable to make a local write request for Size variable");
             }
         }
         else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: unable to get stat on the tmp file");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Read: unable to get stat on the tmp file");
         }
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: unable to retrieve FileType in the API");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Read: unable to retrieve FileType in the API");
     }
     return result_code;
 }
@@ -798,7 +813,8 @@ static SOPC_StatusCode FileTransfer_Method_GetPos(const SOPC_CallContext* callCo
         result_code = FileTransfer_GetPos_TmpFile(handle, objectId, &(v->Value.Uint64));
         if (SOPC_GoodGenericStatus != result_code)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: error while retrieving the position of the tmp file");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_GetPos: error while retrieving the position of the tmp file");
         }
     }
     else
@@ -842,7 +858,8 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
     result_code = FileTransfer_SetPos_TmpFile(handle, objectId, pos);
     if (SOPC_GoodGenericStatus != result_code)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_SetPos: error while setting the position of the tmp file");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_SetPos: error while setting the position of the tmp file");
     }
     return result_code;
 }
@@ -923,7 +940,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL != g_objectId_to_file || NULL != g_str_objectId_to_file || NULL != g_method_call_manager)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: The FileTransfer API is already initialized.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Init: The FileTransfer API is already initialized.");
         status = SOPC_STATUS_INVALID_STATE;
     }
     else
@@ -931,25 +949,29 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
         g_objectId_to_file = SOPC_NodeId_Dict_Create(true, filetype_free);
         if (NULL == g_objectId_to_file)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: unable to create dictionary <g_objectId_to_file>");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Init: unable to create dictionary <g_objectId_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         g_str_objectId_to_file = SOPC_Dict_Create(NULL, cstring_hash, cstring_equal, cstring_free, NULL);
         if (NULL == g_str_objectId_to_file)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: unable to create dictionary <g_str_objectId_to_file>");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Init: unable to create dictionary <g_str_objectId_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         g_method_call_manager = SOPC_MethodCallManager_Create();
         if (NULL == g_method_call_manager)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: unable to create the MethodCallManager");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Init: unable to create the MethodCallManager");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         g_handle_to_file = SOPC_Dict_Create(NULL, handle_hash, handle_equal, NULL, NULL);
         if (NULL == g_handle_to_file)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: unable to create dictionary <g_handle_to_file>");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Init: unable to create dictionary <g_handle_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
@@ -957,7 +979,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
             status = SOPC_HelperConfigServer_SetMethodCallManager(g_method_call_manager);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Init: error while configuring the MethodCallManager");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:Init: error while configuring the MethodCallManager");
             }
             SOPC_Dict_SetTombstoneKey(g_handle_to_file, &g_tombstone_key);
         }
@@ -991,15 +1014,17 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
         file = FileTransfer_FileType_Create();
         if (NULL == file)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create FileType structure");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create FileType structure");
             status_nok = true;
         }
         file->mode = FileTransfer_UnknownMode;
         file->node_id = SOPC_NodeId_FromCString(config.fileType_nodeId, (int32_t) strlen(config.fileType_nodeId));
         if (NULL == file->node_id)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
-            status_nok = true; 
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
+            status_nok = true;
         }
         status = SOPC_String_CopyFromCString(file->path, config.file_path);
         if (SOPC_STATUS_OK == status)
@@ -1013,7 +1038,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Open method");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to create NodeId from a C string for Open method");
                 status_nok = true;
             }
             file->methodIds[CLOSE_METHOD_IDX] =
@@ -1025,7 +1051,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Close method");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for Close method");
                 status_nok = true;
             }
             file->methodIds[READ_METHOD_IDX] =
@@ -1037,7 +1065,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Read method");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to create NodeId from a C string for Read method");
                 status_nok = true;
             }
             file->methodIds[WRITE_METHOD_IDX] =
@@ -1049,7 +1078,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Write method");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for Write method");
                 status_nok = true;
             }
             file->methodIds[GETPOS_METHOD_IDX] =
@@ -1061,7 +1092,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for GetPosition method");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for GetPosition method");
                 status_nok = true;
             }
 
@@ -1074,7 +1107,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for SetPosition method");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for SetPosition method");
                 status_nok = true;
             }
 
@@ -1082,28 +1117,36 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
                 SOPC_NodeId_FromCString(config.var_sizeId, (int32_t) strlen(config.var_sizeId));
             if (NULL == file->variableIds[SIZE_VAR_IDX])
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Size variable");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for Size variable");
                 status_nok = true;
             }
             file->variableIds[OPEN_COUNT_VAR_IDX] =
                 SOPC_NodeId_FromCString(config.var_openCountId, (int32_t) strlen(config.var_openCountId));
             if (NULL == file->variableIds[OPEN_COUNT_VAR_IDX])
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for OpenCount variable");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for OpenCount variable");
                 status_nok = true;
             }
             file->variableIds[WRITABLE_VAR_IDX] =
                 SOPC_NodeId_FromCString(config.var_writableId, (int32_t) strlen(config.var_writableId));
             if (NULL == file->variableIds[WRITABLE_VAR_IDX])
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for Writable variable");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for Writable variable");
                 status_nok = true;
             }
             file->variableIds[USER_WRITABLE_VAR_IDX] =
                 SOPC_NodeId_FromCString(config.var_userWritableId, (int32_t) strlen(config.var_userWritableId));
             if (NULL == file->variableIds[USER_WRITABLE_VAR_IDX])
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
                 status_nok = true;
             }
 
@@ -1120,12 +1163,14 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
         }
         else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to set file path from a C string");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to set file path from a C string");
         }
     }
     if (status_nok)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: The fields of the config argument must be initialized");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: The fields of the config argument must be initialized");
         status = SOPC_STATUS_NOK;
     }
     return status;

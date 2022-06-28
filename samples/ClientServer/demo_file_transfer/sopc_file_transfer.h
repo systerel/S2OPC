@@ -6,19 +6,19 @@
  */
 typedef struct SOPC_FileType_Config
 {
-    const char* file_path; /*!< The path to store the temporary file. This one has to include the prefix name of the
-                              temporary file. */
-    const char* fileType_nodeId;    /*!< The nodeId of the FileType object. */
-    const char* met_openId;         /*!< The nodeId of the Open method. */
-    const char* met_closeId;        /*!< The nodeId of the Close method. */
-    const char* met_readId;         /*!< The nodeId of the Read method. */
-    const char* met_writeId;        /*!< The nodeId of the Write method. */
-    const char* met_getposId;       /*!< The nodeId of the GetPosistion method. */
-    const char* met_setposId;       /*!< The nodeId of the SetPosition method. */
-    const char* var_sizeId;         /*!< The nodeId of the Size variable. */
-    const char* var_openCountId;    /*!< The nodeId of the OpenCount variable. */
-    const char* var_userWritableId; /*!< The nodeId of the UserWritable variable. */
-    const char* var_writableId;     /*!< The nodeId of the Writable variable. */
+    char* file_path;          /*!< The path to store the temporary file. This one has to include the prefix name of the
+                                 temporary file. */
+    char* fileType_nodeId;    /*!< The nodeId of the FileType object. */
+    char* met_openId;         /*!< The nodeId of the Open method. */
+    char* met_closeId;        /*!< The nodeId of the Close method. */
+    char* met_readId;         /*!< The nodeId of the Read method. */
+    char* met_writeId;        /*!< The nodeId of the Write method. */
+    char* met_getposId;       /*!< The nodeId of the GetPosistion method. */
+    char* met_setposId;       /*!< The nodeId of the SetPosition method. */
+    char* var_sizeId;         /*!< The nodeId of the Size variable. */
+    char* var_openCountId;    /*!< The nodeId of the OpenCount variable. */
+    char* var_userWritableId; /*!< The nodeId of the UserWritable variable. */
+    char* var_writableId;     /*!< The nodeId of the Writable variable. */
 } SOPC_FileType_Config;
 
 /**

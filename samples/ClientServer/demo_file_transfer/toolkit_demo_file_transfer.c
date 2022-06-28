@@ -55,7 +55,8 @@ static char* Server_ConfigLogPath(const char* logDirName)
 //     // Server address space configuration
 //     const char* xml_address_space_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_address_space.xml";
 //     // User credentials and authorizations
-//     const char* xml_users_cfg_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_S2OPC_Users_Demo_Config.xml";
+//     const char* xml_users_cfg_path =
+//     "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_S2OPC_Users_Demo_Config.xml";
 
 //     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
 //                                                     NULL);
@@ -65,7 +66,7 @@ static char* Server_ConfigLogPath(const char* logDirName)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
+static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
      * TEST_SERVER_XML_ADDRESS_SPACE and TEST_USERS_XML_CONFIG.
@@ -79,12 +80,7 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
 
     if (NULL == xml_server_config_path || NULL == xml_address_space_config_path || NULL == xml_users_config_path)
     {
-        const char* server_config_missing = (NULL == xml_server_config_path ? "TEST_SERVER_XML_CONFIG, " : "");
-        const char* addspace_config_missing =
-            (NULL == xml_address_space_config_path ? "TEST_SERVER_XML_ADDRESS_SPACE, " : "");
-        const char* users_config_missing = (NULL == xml_users_config_path ? "TEST_USERS_XML_CONFIG" : "");
-
-        printf("Error: an XML server configuration file path shall be provided\n")
+        printf("Error: an XML server configuration file path shall be provided\n");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -124,8 +120,8 @@ int main(int argc, char* argv[])
     assert(SOPC_STATUS_OK == status);
     if (SOPC_STATUS_OK == status)
     {
-       /* status = Server_LoadServerConfigurationFromPaths(); */
-       status = Server_LoadServerConfigurationFromFiles(argv[0]);
+        /* status = Server_LoadServerConfigurationFromPaths(); */
+        status = Server_LoadServerConfigurationFromFiles();
     }
     assert(SOPC_STATUS_OK == status);
 
