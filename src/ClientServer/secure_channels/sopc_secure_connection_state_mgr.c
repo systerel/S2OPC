@@ -2928,7 +2928,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             // Jump to the end of the if
         }
-        else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || scConnection->isServerConnection)
+        else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN || scConnection->isServerConnection)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
                                      "ReverseHello message received not expected");

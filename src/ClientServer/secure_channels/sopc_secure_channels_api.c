@@ -129,7 +129,24 @@ void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
                                       uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(handler);
-    SOPC_SecureConnectionStateMgr_OnTimerEvent((SOPC_SecureChannels_TimerEvent) event, id, params, auxParam);
+
+    SOPC_SecureChannels_TimerEvent timerEvent = (SOPC_SecureChannels_TimerEvent) event;
+    switch (timerEvent)
+    {
+    /* Secure connection state manager */
+    case TIMER_SC_CONNECTION_TIMEOUT:
+    case TIMER_SC_SERVER_REVERSE_CONN_RETRY:
+    case TIMER_SC_CLIENT_OPN_RENEW:
+    case TIMER_SC_REQUEST_TIMEOUT:
+        SOPC_SecureConnectionStateMgr_OnTimerEvent(timerEvent, id, params, auxParam);
+        break;
+    /* Secure listener state manager */
+    case TIMER_SC_RHE_RECEPTION_TIMEOUT:
+        SOPC_SecureListenerStateMgr_OnTimerEvent(timerEvent, id, params, auxParam);
+        break;
+    default:
+        assert(false && "Unknown timer event.");
+    }
 }
 
 void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,

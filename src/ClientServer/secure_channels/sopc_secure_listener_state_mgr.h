@@ -41,4 +41,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                                             uintptr_t params,
                                             uintptr_t auxParam);
 
+void SOPC_SecureListenerStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent event,
+                                              uint32_t eltId,
+                                              uintptr_t params,
+                                              uintptr_t auxParam);
+
 #endif /* SOPC_SECURE_LISTENER_STATE_MGR_H_ */

@@ -92,6 +92,7 @@ typedef enum
 
 typedef enum
 {
+    /* SC connection manager */
     TIMER_SC_CONNECTION_TIMEOUT = 0x500, /* id = secure channel connection index */
     TIMER_SC_SERVER_REVERSE_CONN_RETRY,  /* id = endpoint configuration index
                                           * params = reverse connection index in endpoint
@@ -100,6 +101,9 @@ typedef enum
     TIMER_SC_REQUEST_TIMEOUT,            /* id = secure channel connection index
                                             params = (uint32_t) requestHandle // Debug purpose only
                                             auxParam = (uint32_t) requestId */
+    /* SC listener manager */
+    TIMER_SC_RHE_RECEPTION_TIMEOUT, /* Timeout for reception of RHE message after server socket connection
+                                       id = secure channel connection index */
 } SOPC_SecureChannels_TimerEvent;
 
 // Secure channel internal event enqueue function

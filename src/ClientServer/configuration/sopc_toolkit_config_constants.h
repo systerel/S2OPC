@@ -116,6 +116,11 @@
 #define SOPC_REVERSE_CONNECTION_RETRY_DELAY_MS 1000
 #endif
 
+/** @brief Delay for reception of reverse hello message after server socket connection */
+#ifndef SOPC_REVERSE_CONNECTION_RECEIVE_RHE_DELAY_MS
+#define SOPC_REVERSE_CONNECTION_RECEIVE_RHE_DELAY_MS 1000
+#endif
+
 /* SESSION CONFIGURATION */
 
 /** @brief Maximum number of sessions (and subscriptions: 1 per session) established */

@@ -32,6 +32,7 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
+#include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
 
@@ -226,7 +227,8 @@ static bool SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(uint32_t sc
     bool result = false;
     SOPC_SecureConnection* sc = SC_GetConnection(scIdx);
     SOPC_SecureChannel_Config* scConfig = NULL;
-    if (NULL != sc)
+    // Only applies to reverse connection in init state
+    if (NULL != sc && SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == sc->state)
     {
         if (NULL != serverURL)
         {
@@ -276,19 +278,49 @@ static bool SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(SOPC_Secure
     return resultFound;
 }
 
-static void SOPC_SecureListenerStateMgr_SwitchConnectionsExceptSocket(uint32_t leftScIndex, uint32_t rightScIndex)
+static void SOPC_SecureListenerStateMgr_SwitchWaitingConnectionWithToken(uint32_t waitingScIndex, uint32_t tokenScIndex)
 {
-    SOPC_SecureConnection* leftSc = SC_GetConnection(leftScIndex);
-    SOPC_SecureConnection* rightSc = SC_GetConnection(rightScIndex);
-    assert(leftSc != NULL);
-    assert(rightSc != NULL);
-    uint32_t leftSocketIdx = leftSc->socketIndex;
-    uint32_t rightSocketIdx = rightSc->socketIndex;
-    SOPC_SecureConnection bufferSc = *leftSc;
-    *leftSc = *rightSc;
-    *rightSc = bufferSc;
-    leftSc->socketIndex = leftSocketIdx;
-    rightSc->socketIndex = rightSocketIdx;
+    SOPC_SecureConnection* waitingSc = SC_GetConnection(waitingScIndex);
+    SOPC_SecureConnection* tokenSc = SC_GetConnection(tokenScIndex);
+    assert(waitingSc != NULL);
+    assert(SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == waitingSc->state);
+    assert(tokenSc != NULL);
+    assert(SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == tokenSc->state);
+    uint32_t tokenSocketIdx = tokenSc->socketIndex;
+    SOPC_SecureConnection bufferSc = *waitingSc;
+    *waitingSc = *tokenSc;
+    *tokenSc = bufferSc;
+    // Keep socket associated to token connection
+    tokenSc->socketIndex = tokenSocketIdx;
+}
+
+static SOPC_ReturnStatus SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(uint32_t* timerId,
+                                                                                uint32_t connectionIdx,
+                                                                                uint32_t timeoutMs)
+{
+    assert(NULL != timerId);
+    assert(connectionIdx > 0);
+    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
+    SOPC_Event event;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    event.eltId = connectionIdx;
+    event.event = TIMER_SC_RHE_RECEPTION_TIMEOUT;
+    event.params = (uintptr_t) NULL;
+    event.auxParam = 0;
+
+    *timerId = SOPC_EventTimer_Create(secureChannelsTimerEventHandler, event, timeoutMs);
+
+    if (0 == *timerId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: connection=%" PRIu32 " REH reception timer creation failed", connectionIdx);
+    }
+    else
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    return status;
 }
 
 void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
@@ -302,7 +334,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
 
     bool result = false;
     uint32_t inScIdx = 0;
-    uint32_t tmpScIdx = 0;
+    uint32_t waitingScIdx = 0;
     char* serverURI = NULL;
     char* serverEndpointURL = NULL;
 
@@ -353,7 +385,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                                inScIdx, serverURI, serverEndpointURL);
         // Retrieve the secure connection initially associated to socket for connection establishment
         sc = SC_GetConnection(inScIdx);
-        if (sc != NULL && sc->isReverseConnection &&
+        if (sc != NULL && sc->isReverseConnection && SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == sc->state &&
             sc->clientReverseEpConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
             sc->clientReverseEpConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
         {
@@ -361,28 +393,35 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             scListener = SOPC_SecureListenerStateMgr_GetListener(sc->clientReverseEpConfigIdx);
             if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED)
             {
+                // Stop RHE reception timer
+                SOPC_EventTimer_Cancel(sc->connectionTimeoutTimerId);
+                sc->connectionTimeoutTimerId = 0;
                 // Retrieve the first compatible secure connection waiting to be established
                 if (serverEndpointURL != NULL && serverURI != NULL)
                 {
-                    if (SOPC_SecureListenerStateMgr_IsSecureConnectionCompatible(inScIdx, serverEndpointURL, serverURI))
+                    if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, serverEndpointURL,
+                                                                                 serverURI, &waitingScIdx))
                     {
-                        result = true;
-                    }
-                    else if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, serverEndpointURL,
-                                                                                      serverURI, &tmpScIdx))
-                    {
-                        /* Important: we have to switch the two secure connections configurations to keep
-                         * the same secure connection index which is already associated to socket in socket layer.
-                         * We only keep the socket association in secure connection and switch rest of content.
+                        /* Important: we have to switch the waiting secure connection compatible with token connection
+                         * to keep the same secure connection index which is already associated to socket in socket
+                         * layer. We only keep the socket association in secure connection and switch rest of content.
                          */
-                        SOPC_SecureListenerStateMgr_SwitchConnectionsExceptSocket(inScIdx, tmpScIdx);
+                        SOPC_SecureListenerStateMgr_SwitchWaitingConnectionWithToken(waitingScIdx, inScIdx);
+                        /*
+                         * Secure connection waiting connection index is now unused (it used token connection).
+                         * Clear it and remove association of both token and waiting connection from listener.
+                         */
+                        // Remove SC token content
+                        SC_CloseConnection(waitingScIdx, true); // no socket to close
+                        // Remove SC token association with listener
+                        SOPC_SecureListenerStateMgr_RemoveConnection(scListener, waitingScIdx);
+                        // SC is not associated anymore with reverse endpoint, lifecycle is now independent
+                        SOPC_SecureListenerStateMgr_RemoveConnection(scListener, inScIdx);
                         result = true;
                     }
                 }
                 if (result)
                 {
-                    // SC is not associated anymore with reverse endpoint
-                    SOPC_SecureListenerStateMgr_RemoveConnection(scListener, inScIdx);
                     // Do transition on the selected SC
                     SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_RCV_RHE_TRANSITION, inScIdx, (uintptr_t) NULL,
                                                              (uintptr_t) NULL);
@@ -465,8 +504,9 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     SOPC_UNUSED_ARG(params);
     SOPC_SecureListener* scListener = NULL;
     SOPC_SecureConnection* sc = NULL;
-
+    bool result = false;
     uint32_t scIdx = 0;
+    uint32_t newScIdx = 0;
 
     switch (event)
     {
@@ -514,24 +554,39 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         {
             if (scListener->reverseEnpoint)
             {
-                if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, NULL, NULL, &scIdx))
+                // Check if at least 1 client connection is waiting for a server reverse socket connection
+                // (do not keep index found).
+                // And create a connection token for this server socket connection: we need RHE to know if a waiting
+                // connection will match the endpoint URL (and server URI if defined in configuration)
+                if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, NULL, NULL, &scIdx) &&
+                    SC_InitNewConnection(&newScIdx) && SOPC_SecureListenerStateMgr_AddConnection(scListener, newScIdx))
                 {
-                    // Temporary assignment of socket to this SC
-                    sc = SC_GetConnection(scIdx);
+                    sc = SC_GetConnection(newScIdx);
                     assert(NULL != sc);
+                    sc->isReverseConnection = true;
+                    sc->clientReverseEpConfigIdx = eltId;
                     sc->socketIndex = (uint32_t) auxParam;
-                    // Notify socket that connection is accepted and assign first secure connection found.
-                    // We have to wait the RHE message to assign a reverse connection
-                    // that uses the server endpoint URL (or ignore it). It might be this one.
-                    // In the case this connection is not compatible we will switch content with one
-                    // compatible if available in order to keep the associated index in socket the same.
+                    sc->state = SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN;
+
+                    SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(
+                        &sc->connectionTimeoutTimerId, newScIdx, SOPC_REVERSE_CONNECTION_RECEIVE_RHE_DELAY_MS);
+
                     SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL,
-                                              (uintptr_t) scIdx);
+                                              (uintptr_t) newScIdx);
                 }
                 else
                 {
-                    // No reverse connection to establish for now: require socket closure
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
+                    if (0 != newScIdx)
+                    {
+                        // No more connections slot to add to listener for now
+                        result = SC_CloseConnection(newScIdx, false); // clears SC and closes socket
+                        assert(result);
+                    }
+                    else
+                    {
+                        // No reverse connection to establish for now: require socket closure
+                        SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
+                    }
                 }
             }
             else
@@ -705,5 +760,33 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     default:
         // Already filtered by secure channels API module
         assert(false);
+    }
+}
+
+void SOPC_SecureListenerStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent event,
+                                              uint32_t eltId,
+                                              uintptr_t params,
+                                              uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    SOPC_SecureConnection* sc = NULL;
+    SOPC_SecureListener* scListener = NULL;
+    bool result = false;
+    switch (event)
+    {
+    case TIMER_SC_RHE_RECEPTION_TIMEOUT:
+        sc = SC_GetConnection(eltId);
+        if (NULL != sc && SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == sc->state)
+        {
+            scListener = SOPC_SecureListenerStateMgr_GetListener(sc->clientReverseEpConfigIdx);
+            assert(NULL != scListener);
+            SOPC_SecureListenerStateMgr_RemoveConnection(scListener, eltId);
+            result = SC_CloseConnection(eltId, false); // clears SC and closes the socket
+            assert(result);
+        }
+        break;
+    default:
+        assert(false && "Unknown SOPC_SecureChannels_TimerEvent for secure listener state manager");
     }
 }
