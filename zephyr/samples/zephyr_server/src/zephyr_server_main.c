@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     logConfig.logLevel = SOPC_LOG_LEVEL_WARNING;
     logConfig.logSysConfig.userSystemLogConfig.doLog = &log_UserCallback;
 
-    bool netInit = Network_Initialize();
+    bool netInit = Network_Initialize(NULL);
     assert(netInit == true);
 
     /* Initialize MbedTLS */

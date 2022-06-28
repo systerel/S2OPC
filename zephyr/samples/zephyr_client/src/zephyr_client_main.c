@@ -181,7 +181,7 @@ int main(int argc, char* const argv[])
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
 
     int res = 0;
-    bool netInit = Network_Initialize();
+    bool netInit = Network_Initialize(NULL);
     SOPC_ReturnStatus status;
     SOPC_Log_Configuration logCfg = {
             .logLevel = SOPC_LOG_LEVEL_WARNING,

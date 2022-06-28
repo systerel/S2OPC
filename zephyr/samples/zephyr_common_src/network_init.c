@@ -123,7 +123,7 @@ static bool configure_interface(const NetItf* itf, const char* ipAddr, const cha
     return true;
 }
 
-bool Network_Initialize(void)
+bool Network_Initialize(const char* overrideEthAddr)
 {
     if (!priv_P_SOCKET_networkConfigStatus)
     {
@@ -132,7 +132,8 @@ bool Network_Initialize(void)
             printk("Initialization of LOOPBACK failed\n");
             return false;
         }
-        if (!configure_interface(&netl2ethernet, CONFIG_SOPC_ETH_ADDRESS, CONFIG_SOPC_ETH_NETMASK, CONFIG_SOPC_ETH_GW))
+        const char* ethAddr = (overrideEthAddr ? overrideEthAddr : CONFIG_SOPC_ETH_ADDRESS);
+        if (!configure_interface(&netl2ethernet, ethAddr, CONFIG_SOPC_ETH_NETMASK, CONFIG_SOPC_ETH_GW))
         {
             printk("Initialization of ETH failed\n");
             return false;

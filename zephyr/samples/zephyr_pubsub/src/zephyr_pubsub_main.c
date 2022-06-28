@@ -94,7 +94,7 @@ int main(int argc, char* const argv[])
 
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
 
-    bool netInit = Network_Initialize();
+    bool netInit = Network_Initialize(NULL);
     SOPC_ASSERT(netInit == true);
 
     /* Initialize MbedTLS */
