@@ -626,7 +626,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             {
                 SOPC_SecureListenerStateMgr_CloseReverseEpListener(eltId, true);
                 // Notify Services layer that EP_OPEN failed
-                SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, (uintptr_t) NULL,
+                SOPC_EventHandler_Post(secureChannelsEventHandler, EP_REVERSE_CLOSED, eltId, (uintptr_t) NULL,
                                        SOPC_STATUS_CLOSED);
             }
             else
