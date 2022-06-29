@@ -63,8 +63,14 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SOPC_SECURITY_MODE_ANY_MASK 0x07
 
+/* Maximum number of security policies in a configuration array */
 #ifndef SOPC_MAX_SECU_POLICIES_CFG
-#define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
+#define SOPC_MAX_SECU_POLICIES_CFG 5
+#endif
+
+/* Maximum number of configured reverse connection from a server endpoint to clients */
+#ifndef SOPC_MAX_REVERSE_CLIENT_CONNECTIONS
+#define SOPC_MAX_REVERSE_CLIENT_CONNECTIONS 5
 #endif
 
 typedef struct SOPC_SecurityPolicy
@@ -83,15 +89,6 @@ typedef struct SOPC_SecurityPolicy
 
 typedef struct SOPC_Server_Config SOPC_Server_Config;
 
-/**
- * \brief OPC UA server client to reverse connect configuration type.
- *        From specification part 6 (v1.05.01):
- *        "For each Client, the administrator shall provide
- *         an ApplicationUri and an EndpointUrl for the Client."
- *
- * \note There is no indication to validate the ApplicationUri in specification.
- *       It might be checked in the future using the CreateSessionRequest content .
- */
 typedef struct SOPC_Server_ClientToConnect
 {
     char* clientApplicationURI; /**< The client application URI.
