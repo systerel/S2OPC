@@ -2596,7 +2596,8 @@ static bool initServerSC(uint32_t socketIndex,
                          uint16_t reverseConnIdx,
                          uint32_t* connIdx)
 {
-    if (!SC_InitNewConnection(connIdx))
+    bool result = SC_InitNewConnection(connIdx);
+    if (!result)
     {
         return false;
     }
@@ -2614,7 +2615,8 @@ static bool initServerSC(uint32_t socketIndex,
     // set connection as a server side connection
     scConnection->isServerConnection = true;
 
-    if (!sc_init_key_and_certs(scConnection))
+    result = sc_init_key_and_certs(scConnection);
+    if (!result)
     {
         return false;
     }
@@ -2830,7 +2832,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                "ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
                                auxParam);
 
-        if (initServerSC((uint32_t) auxParam, eltId, false, 0, &connectionIdx))
+        result = initServerSC((uint32_t) auxParam, eltId, false, 0, &connectionIdx);
+        if (result)
         {
             // notify socket that connection is accepted
             SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL, connectionIdx);
@@ -2865,7 +2868,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             // Note: we do not know the socket index yet, it will be set by
             // SC_ServerTransition_TcpReverserInit_To_TcpInit after SOCKET_CONNECTION
-            if (initServerSC(0, eltId, true, (uint16_t) auxParam, &connectionIdx))
+            result = initServerSC(0, eltId, true, (uint16_t) auxParam, &connectionIdx);
+            if (result)
             {
                 scConnection = SC_GetConnection(connectionIdx);
                 assert(NULL != scConnection);

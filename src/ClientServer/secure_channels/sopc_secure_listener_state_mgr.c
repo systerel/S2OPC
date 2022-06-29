@@ -369,8 +369,9 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         }
         else
         {
+            result = SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam);
             // Associates the secure channel connection to the secure listener
-            if (!SOPC_SecureListenerStateMgr_AddConnection(scListener, (uint32_t) auxParam))
+            if (!result)
             {
                 // Error case: require secure channel closure
                 SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
@@ -476,9 +477,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         inScIdx = (uint32_t) auxParam;
         sc = SC_GetConnection(inScIdx);
 
-        if (NULL == scListener ||
-            (SECURE_LISTENER_STATE_OPENING != scListener->state && SECURE_LISTENER_STATE_OPENED != scListener->state) ||
-            NULL == sc)
+        if (NULL == sc || NULL == scListener ||
+            (SECURE_LISTENER_STATE_OPENING != scListener->state && SECURE_LISTENER_STATE_OPENED != scListener->state))
         {
             // Error case: require secure channel closure
             SOPC_SecureChannels_EnqueueInternalEvent(
@@ -488,7 +488,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         else
         {
             // Associates the secure channel connection to the secure listener
-            if (!SOPC_SecureListenerStateMgr_AddConnection(scListener, inScIdx))
+            result = SOPC_SecureListenerStateMgr_AddConnection(scListener, inScIdx);
+            if (!result)
             {
                 // Error case: require secure channel closure
                 SOPC_SecureChannels_EnqueueInternalEvent(
@@ -564,10 +565,17 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             {
                 // Check if at least 1 client connection is waiting for a server reverse socket connection
                 // (do not keep index found).
-                // And create a connection token for this server socket connection: we need RHE to know if a waiting
-                // connection will match the endpoint URL (and server URI if defined in configuration)
-                if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, NULL, NULL, &scIdx) &&
-                    SC_InitNewConnection(&newScIdx) && SOPC_SecureListenerStateMgr_AddConnection(scListener, newScIdx))
+                if (SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(scListener, NULL, NULL, &scIdx))
+                {
+                    // Create a connection token for this server socket connection: we need RHE to know if a waiting
+                    // connection will match the endpoint URL (and server URI if defined in configuration)
+                    result = SC_InitNewConnection(&newScIdx);
+                    if (result)
+                    {
+                        result = SOPC_SecureListenerStateMgr_AddConnection(scListener, newScIdx);
+                    }
+                }
+                if (result)
                 {
                     sc = SC_GetConnection(newScIdx);
                     assert(NULL != sc);
