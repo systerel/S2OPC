@@ -396,13 +396,14 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             sc->clientReverseEpConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
             sc->clientReverseEpConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
         {
+            // Stop RHE reception timer
+            SOPC_EventTimer_Cancel(sc->connectionTimeoutTimerId);
+            sc->connectionTimeoutTimerId = 0;
+
             // Check listener state
             scListener = SOPC_SecureListenerStateMgr_GetListener(sc->clientReverseEpConfigIdx);
             if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED)
             {
-                // Stop RHE reception timer
-                SOPC_EventTimer_Cancel(sc->connectionTimeoutTimerId);
-                sc->connectionTimeoutTimerId = 0;
                 // Retrieve the first compatible secure connection waiting to be established
                 if (serverEndpointURL != NULL && serverURI != NULL)
                 {

@@ -2938,9 +2938,9 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         }
         else
         {
-            // notify secure listener that connection is accepted
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_RHE_DECODED, eltId, (uintptr_t) serverURI,
-                                                     (uintptr_t) serverURL);
+            // notify secure listener that connection is accepted (as next since timer deactivated in listener)
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_RHE_DECODED, eltId, (uintptr_t) serverURI,
+                                                           (uintptr_t) serverURL);
         }
         // Note: check serverURI compared to connection configuration ? (not defined in configuration for now)
         SOPC_Buffer_Delete(buffer);
