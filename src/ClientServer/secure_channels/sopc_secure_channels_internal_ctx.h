@@ -45,8 +45,8 @@ typedef enum
 typedef enum
 {
     SECURE_CONNECTION_STATE_SC_CLOSED = 0,
-    SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN, /*<< This state is used to keep a SC as token waiting for RHE to know if
-                                                    it might be used as REVERSE_INIT of a waiting SC. */
+    SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN, /*<< Client: this state is used to keep a SC as token waiting for RHE
+                                                    to know if it might be used as REVERSE_INIT of a waiting SC. */
     SECURE_CONNECTION_STATE_TCP_REVERSE_INIT,
     SECURE_CONNECTION_STATE_TCP_INIT,
     SECURE_CONNECTION_STATE_TCP_NEGOTIATE,

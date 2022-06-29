@@ -39,10 +39,12 @@ typedef enum
 {
     EP_OPEN = 0x200,    /* id = endpoint description configuration index */
     EP_CLOSE,           /* id = endpoint description configuration index */
-    REVERSE_EP_OPEN,    /* id = reverse endpoint configuration index */
-    REVERSE_EP_CLOSE,   /* id = reverse endpoint configuration index */
+    REVERSE_EP_OPEN,    /* Client: open a reverse endpoint
+                           id = reverse endpoint configuration index */
+    REVERSE_EP_CLOSE,   /* Client: close a reverse endpoint
+                           id = reverse endpoint configuration index */
     SC_CONNECT,         /* id = secure channel configuration index */
-    SC_REVERSE_CONNECT, /* Activate the connection on next available server reverse connection
+    SC_REVERSE_CONNECT, /* Client: Activate the connection on next available server reverse connection
                            id = reverse endpoint configuration index
                            params = (uint32_t) secure channel configuration index */
     SC_DISCONNECT,      /* id = secure channel connection index */
@@ -63,7 +65,7 @@ typedef enum
                               params = (uint32_t) secure channel config index,
                               auxParams = (uint32_t) secure channel connection index */
     EP_CLOSED,             /* id = endpoint description config index,
-                                 auxParams = SOPC_ReturnStatus */
+                              auxParams = SOPC_ReturnStatus */
     EP_REVERSE_CLOSED,     /* id = reverse endpoint config index,
                               auxParams = SOPC_ReturnStatus */
     SC_CONNECTED,          /* id = secure channel connection index,

@@ -30,10 +30,12 @@ typedef enum
                                   auxParam = socket index */
     INT_EP_SC_CLOSE,           /* id = secure channel connection index,
                                   (auxParam = (reverse) endpoint configuration index) */
-    INT_EP_SC_REVERSE_CONNECT, /* Server:
+    INT_EP_SC_REVERSE_CONNECT, /* Server: start reverse connection to a client reverse endpoint
                                   id = endpoint description configuration index,
                                   auxParam = (uint16_t) client to connect configuration index in endpoint config */
-    INT_SC_RCV_RHE_TRANSITION, // id = secure channel connection index,
+    INT_SC_RCV_RHE_TRANSITION, /* Client: RHE associated to a waiting SC connection => transition validated for SC
+                                  id = secure channel connection index
+                                */
 
     /* SC connection manager -> SC listener manager */
     INT_EP_SC_CREATED,             /* id = endpoint description configuration index,
@@ -44,8 +46,9 @@ typedef enum
     INT_EP_SC_DISCONNECTED,        /* id = (reverse) endpoint description configuration index,
                                       auxParam = (uint32_t) secure channel connection index */
     INT_REVERSE_EP_REQ_CONNECTION, /* Client: a connection is requested through the opened reverse endpoint
-                                   id = reverse endpoint configuration index,
-                                   auxParam = (uint32_t) secure channel connection index */
+                                      id = reverse endpoint configuration index,
+                                      auxParam = (uint32_t) secure channel connection index
+                                    */
 
     /* OPC UA chunks message manager -> SC connection manager */
     INT_SC_RCV_HEL, /* >------------------------- */
@@ -60,7 +63,7 @@ typedef enum
                     //                       / requestHandle if response (client side)
     INT_SC_RCV_RHE, // id = secure channel connection index,
                     // params = (SOPC_Buffer*) buffer positioned to message payload,
-                    // INT_SC_RCV_RHE_TRANSITION is the final step in listener => connection manage
+                    // INT_SC_RCV_RHE_TRANSITION is the final step in listener => connection manager
     INT_SC_RCV_MSG_CHUNKS,
     INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
 
@@ -102,7 +105,7 @@ typedef enum
                                             params = (uint32_t) requestHandle // Debug purpose only
                                             auxParam = (uint32_t) requestId */
     /* SC listener manager */
-    TIMER_SC_RHE_RECEPTION_TIMEOUT, /* Timeout for reception of RHE message after server socket connection
+    TIMER_SC_RHE_RECEPTION_TIMEOUT, /* Timeout for reception of RHE message after socket connection from server
                                        id = secure channel connection index */
 } SOPC_SecureChannels_TimerEvent;
 

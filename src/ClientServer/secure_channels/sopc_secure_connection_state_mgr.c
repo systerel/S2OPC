@@ -809,8 +809,6 @@ static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rh
 
     // Read the ReverseHello message content
 
-    // Read Reverse Hello message body
-
     // Read serverURI
     status = SOPC_String_Read(&sopcServerURI, rheMsgBuffer, 0);
 
@@ -2966,7 +2964,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         }
         else
         {
-            // Do REVERSE_INIT -> INIT transition now we choose the secure connection to use
+            // Do REVERSE_INIT -> INIT transition now we found a secure connection to use
             scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
             // Do INIT -> NEGOTIATE transition
             result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, scConnection->socketIndex);
@@ -3559,6 +3557,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     SOPC_SecureConnection* scConnection = NULL;
     uint32_t reverseEpCfgIdx = 0;
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
+    const char* eventString = NULL;
     switch (event)
     {
     /* Sockets events: */
@@ -3570,12 +3569,14 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     case SC_REVERSE_CONNECT:
         if (SC_CONNECT == event)
         {
+            eventString = "SC_CONNECT";
             // id = secure channel configuration index
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32, eltId);
             scCfgIdx = eltId;
         }
         else if (SC_REVERSE_CONNECT == event)
         {
+            eventString = "SC_REVERSE_CONNECT";
             // id = reverse endpoint configuration index
             // params = (uint32_t) secure channel configuration index
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -3595,8 +3596,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             if (result)
             {
                 SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, scCfgIdx,
-                                       idx);
+                                       "ScStateMgr: %s scCfgIdx=%" PRIu32 " => new scIdx=%" PRIu32, eventString,
+                                       scCfgIdx, idx);
 
                 scConnection = SC_GetConnection(idx);
                 assert(scConnection != NULL);
@@ -3611,8 +3612,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 // Error case: notify services that it failed
                 // TODO: add a connection failure ? (with config idx + (optional) connection id)
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScStateMgr: SC_CONNECT scCfgIdx=%" PRIu32 " failed to create new connection",
-                                       scCfgIdx);
+                                       "ScStateMgr: %s scCfgIdx=%" PRIu32 " failed to create new connection",
+                                       eventString, scCfgIdx);
                 SOPC_EventHandler_Post(secureChannelsEventHandler, SC_CONNECTION_TIMEOUT, scCfgIdx, (uintptr_t) NULL,
                                        0);
                 return;
@@ -3648,9 +3649,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 result = false;
                 errorMsg = "Failed to create a timer for connection establishment timeout";
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "ScStateMgr: SC_CONNECT/SC_REVERSE_CONNECT scCfgIdx=%" PRIu32
-                                       " failed to activate SC time out",
-                                       scCfgIdx);
+                                       "ScStateMgr: %s scCfgIdx=%" PRIu32 " failed to activate SC time out",
+                                       eventString, scCfgIdx);
             }
         }
         if (!result)
