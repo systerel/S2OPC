@@ -88,7 +88,7 @@
             </SecurityModes>
             <UserPolicies>
               <UserPolicy policyId="anonymous" tokenType="anonymous"/>
-              <UserPolicy policyId="username_None" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+              <UserPolicy policyId="username_Basic256Sha256" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
             </UserPolicies>
           </SecurityPolicy>
         </SecurityPolicies>
