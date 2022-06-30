@@ -366,6 +366,7 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
 /************************************/
 static SOPC_Dict* g_objectId_to_file = NULL;
 static SOPC_Dict* g_str_objectId_to_file = NULL;
+/* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support multiple handles for the same file)*/
 static SOPC_Dict* g_handle_to_file = NULL;
 static int32_t g_tombstone_key = -1;
 static SOPC_MethodCallManager* g_method_call_manager = NULL;
@@ -540,6 +541,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 return result_code;
             }
         }
+        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support multiple handles for the same file)*/
+        file->handle = file->handle + 1;
         bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
         SOPC_ASSERT(true == res);
         file->mode = mode;
@@ -549,9 +552,10 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             result_code = FileTransfer_Open_TmpFile(file);
             if (SOPC_GoodGenericStatus == result_code)
             {
-                file->handle = file->handle + 1;
                 file->is_open = true;
-                file->open_count++;
+                /* OpenCount indicates the number of currently valid file handles on the file.
+                as we do not support multiple handlers, this one is maintained at 1 */
+                file->open_count = 1;
                 /* Start local service on variables */
                 result_code = local_write_open_count(*file);
                 if (SOPC_GoodGenericStatus != result_code)
@@ -1160,8 +1164,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             SOPC_ASSERT(true == res);
             res = SOPC_Dict_Insert(g_str_objectId_to_file, str_key, file);
             SOPC_ASSERT(true == res);
-            res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
-            SOPC_ASSERT(true == res);
         }
         else
         {
@@ -1287,6 +1289,9 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     }
                     file->fp = NULL;
                     file->is_open = false;
+                    file->size_in_byte = 0; 
+                    file->open_count = 0;
+                    local_write_open_count(*file);
                     SOPC_Dict_Remove(g_handle_to_file, &file->handle);
                     /* Free and creat a new tmp_path */
                     SOPC_String_Clear(file->tmp_path);
@@ -1323,6 +1328,8 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             }
             file->fp = NULL;
             file->is_open = false;
+            file->size_in_byte = 0;
+            file->open_count = 0;  
             /* Free and creat a new tmp_path */
             SOPC_String_Clear(file->tmp_path);
             file->tmp_path = NULL;
