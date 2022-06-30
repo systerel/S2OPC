@@ -94,16 +94,19 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(securityPolicyAddressSpace);
     }
 
-    // Assign input parameters :
-    pSecurityPolicy->securityModes = securityModes;
-    pSecurityPolicy->nbOfUserTokenPolicies = 1;
-    pUserTokenPolicies->TokenType = TokenType;
-    SOPC_String_Initialize(&pSecurityPolicy->securityPolicy);
-    status = SOPC_String_AttachFromCstring(&pSecurityPolicy->securityPolicy, securityPolicy);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Initialize(&pUserTokenPolicies->SecurityPolicyUri);
-        status = SOPC_String_AttachFromCstring(&pUserTokenPolicies->SecurityPolicyUri, userTokenPolicies);
+        // Assign input parameters :
+        pSecurityPolicy->securityModes = securityModes;
+        pSecurityPolicy->nbOfUserTokenPolicies = 1;
+        pUserTokenPolicies->TokenType = TokenType;
+        SOPC_String_Initialize(&pSecurityPolicy->securityPolicy);
+        status = SOPC_String_AttachFromCstring(&pSecurityPolicy->securityPolicy, securityPolicy);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_String_Initialize(&pUserTokenPolicies->SecurityPolicyUri);
+            status = SOPC_String_AttachFromCstring(&pUserTokenPolicies->SecurityPolicyUri, userTokenPolicies);
+        }
     }
 
     // Start the server code
