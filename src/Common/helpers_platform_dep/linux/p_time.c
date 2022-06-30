@@ -23,7 +23,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "p_time.h"
+#include "linux/p_time.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -36,11 +36,6 @@
 #define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
 #define SOPC_MICROSECOND_TO_SECONDS 1000000
 #define SOPC_MICROSECOND_TO_NANOSECONDS 1000
-
-SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
-{
-    return SOPC_TIME_TIMESOURCE_INTERNAL;
-}
 
 int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {

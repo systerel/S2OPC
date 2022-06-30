@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "p_time.h"
+#include "freertos/p_time.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -40,11 +40,6 @@
  * There are configTICK_RATE_HZ per second.
  */
 static uint64_t gGlobalTimeReference = 0;
-
-SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
-{
-    return SOPC_TIME_TIMESOURCE_INTERNAL;
-}
 
 // Called if reference tick = 0
 void P_TIME_SetInitialDateToBuildTime(void)

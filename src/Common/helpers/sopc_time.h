@@ -28,30 +28,6 @@
 #include <stddef.h>
 
 /**
- * \brief Possible time sources
- */
-typedef enum
-{
-    SOPC_TIME_TIMESOURCE_INTERNAL,  /**< Local system time, non-ptp synchronized */
-    SOPC_TIME_TIMESOURCE_PTP_SLAVE, /**< PtP time (acting as SLAVE device) */
-    SOPC_TIME_TIMESOURCE_PTP_MASTER /**< PtP time (acting as MASTER device) */
-} SOPC_Time_TimeSource;
-
-/**
- * \brief returns the current time source used for time-related operations
- * (including timestamping)
- */
-SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void);
-
-/**
- * \brief Provides the information about clock discrepancy towards a PtP master
- * \return clock ratio discrepancy:
- *  < 1.0 when local clock is faster than actual (PtP) time
- *  > 1.0 when local clock is slower than actual (PtP) time
- */
-float SOPC_RealTime_GetClockCorrection(void);
-
-/**
  * \brief returns a C string representation of the given time in DateTime format
  * E.g.:
  * - compact == false: "2018/01/30 13:15:52.694\0"

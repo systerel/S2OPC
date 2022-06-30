@@ -50,7 +50,7 @@
 #include "sopc_async_queue.h"
 #include "sopc_mem_alloc.h"
 
-#include "p_time.h"
+#include "sopc_zephyr_time.h"
 #include "sopc_udp_sockets.h"
 
 #include <net/net_core.h>

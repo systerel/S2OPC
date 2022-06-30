@@ -61,6 +61,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "zephyr/p_time.h"
+#include "zephyr/sopc_zephyr_time.h"
 
 /***************************************************
  * DECLARATION OF LOCAL MACROS
