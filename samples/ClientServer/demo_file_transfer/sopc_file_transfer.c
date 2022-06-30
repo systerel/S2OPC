@@ -36,6 +36,16 @@
 #define NB_VARIABLE 4
 
 /**
+ * \brief File handle type (to send to client)
+ */
+typedef uint32_t SOPC_FileHandle;
+
+/**
+ * \brief Open mode type (receive from the client, bit mask)
+ */
+typedef SOPC_Byte SOPC_OpenMode;
+
+/**
  * \brief A buffer size to manage C string
  */
 #define STR_BUFF_SIZE 100
@@ -81,20 +91,9 @@
 #define VAR_WRITABLE_DEFAULT true
 
 /**
- * \brief File handle type (to send to client)
- */
-typedef uint32_t SOPC_FileHandle;
-
-/**
- * \brief Open mode type (receive from the client, bit mask)
- */
-typedef SOPC_Byte SOPC_OpenMode;
-
-/**
  * \brief structure to manage FileType object
  */
-
-typedef struct SOPC_FileType
+struct SOPC_FileType
 {
     SOPC_NodeId* node_id;   /*!< The nodeId of the FileType object into the adress space. */
     SOPC_FileHandle handle; /*!< The handle of the file send to the client. */
@@ -109,8 +108,8 @@ typedef struct SOPC_FileType
     SOPC_NodeId* variableIds[NB_VARIABLE]; /*!< list of variable nodeId associated at the FileType object. */
     uint16_t open_count;   /*!< The number of times the Open method has been called since the server started. */
     uint64_t size_in_byte; /*!< The size in byte of the file, updated after a read operation from the client. */
-
-} SOPC_FileType;
+    SOPC_FileTransfer_UserClose_Callback pFunc_UserCloseCallback; /*!< The Method Close Callback */
+};
 
 /**
  * \brief Create a FileType object.
@@ -895,6 +894,7 @@ static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
     filetype->fp = NULL;
     filetype->open_count = 0;
     filetype->size_in_byte = 0;
+    filetype->pFunc_UserCloseCallback = NULL;
 }
 
 static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
@@ -922,6 +922,7 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
         filetype->fp = NULL;
         filetype->open_count = 0;
         filetype->size_in_byte = 0;
+        filetype->pFunc_UserCloseCallback = NULL;
     }
 }
 
@@ -1019,6 +1020,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
             status_nok = true;
         }
         file->mode = FileTransfer_UnknownMode;
+        file->pFunc_UserCloseCallback = config.pFunc_UserCloseCallback;
         file->node_id = SOPC_NodeId_FromCString(config.fileType_nodeId, (int32_t) strlen(config.fileType_nodeId));
         if (NULL == file->node_id)
         {
@@ -1193,16 +1195,16 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
             if (1 > filedes)
             {
                 char* str = SOPC_String_GetCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: creation of tmp file %s failed",
-                                       str);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:CreateTmpFile: creation of tmp file %s failed", str);
                 SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
             }
             int res = close(filedes);
             if (0 != res)
             {
                 char* str = SOPC_String_GetCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: closing of tmp file %s failed",
-                                       str);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:CreateTmpFile: closing of tmp file %s failed", str);
                 SOPC_ASSERT(0 == res && "closing of tmp file failed");
             }
 
@@ -1233,8 +1235,8 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                     if (NULL == file->fp)
                     {
                         char* str = SOPC_String_GetCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be open",
-                                               str);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:OpenTmpFile: file %s can't be open", str);
                     }
                     SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
                 }
@@ -1275,9 +1277,13 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     if (0 != res)
                     {
                         char* str = SOPC_String_GetCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: file %s can't be closed",
-                                               str);
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:CloseTmpFile: file %s can't be closed", str);
                         SOPC_ASSERT(0 == res && "file can't be closed");
+                    }
+                    if (NULL != file->pFunc_UserCloseCallback)
+                    {
+                        file->pFunc_UserCloseCallback(file);
                     }
                     file->fp = NULL;
                     file->is_open = false;
@@ -1469,51 +1475,50 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     return status;
 }
 
-SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name)
+SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name)
 {
     (void) name;
-    bool found = false;
+    char* node_id;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == node_id)
+    if (NULL != file)
     {
-        return status;
-    }
-    status = SOPC_STATUS_NOK;
-    SOPC_FileType* file = SOPC_Dict_Get(g_str_objectId_to_file, node_id, &found);
-    if (!found)
-    {
-        printf("<FileTransfer_Get_TmpPath> Unable to retrieve the file object '%s'\n", node_id);
-        return status;
-    }
-    if (false == file->is_open)
-    {
-        printf("<FileTransfer_Get_TmpPath> File object '%s' is not open yet\n", node_id);
-        return status;
-    }
-
-    if (NULL == file->fp)
-    {
-        printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialize yet\n", node_id);
-        return status;
-    }
-
-    if (NULL != file->tmp_path)
-    {
-        if (0 > file->tmp_path->Length)
+        node_id = SOPC_NodeId_ToCString(file->node_id);
+        status = SOPC_STATUS_OK;
+        if (NULL == node_id)
         {
-            printf("<FileTransfer_Get_TmpPath> File object '%s' is not created yet\n", node_id);
-            return status;
+            printf("<FileTransfer_Get_TmpPath> Unable to retrieve the nodeId of the file\n");
+            status = SOPC_STATUS_NOK;
+        }
+        if (false == file->is_open)
+        {
+            printf("<FileTransfer_Get_TmpPath> File object '%s' is not open yet\n", node_id);
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (NULL == file->fp)
+        {
+            printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialize yet\n", node_id);
+            status = SOPC_STATUS_NOK;
+        }
+        if (NULL != file->tmp_path)
+        {
+            if (0 > file->tmp_path->Length)
+            {
+                printf("<FileTransfer_Get_TmpPath> File object '%s' is not created yet\n", node_id);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            printf("<FileTransfer_Get_TmpPath> Unexpected error\n");
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            memcpy(name, SOPC_String_GetCString(file->tmp_path), (size_t) file->tmp_path->Length + 1);
         }
     }
-    else
-    {
-        printf("<FileTransfer_Get_TmpPath> Unexpected error\n");
-        return status;
-    }
-
-    status = SOPC_STATUS_OK;
-    memcpy(name, SOPC_String_GetCString(file->tmp_path), (size_t) file->tmp_path->Length + 1);
-    name = SOPC_String_GetCString(file->tmp_path);
     return status;
 }
 

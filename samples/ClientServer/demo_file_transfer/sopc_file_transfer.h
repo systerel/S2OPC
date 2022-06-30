@@ -1,6 +1,16 @@
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
 
+typedef struct SOPC_FileType SOPC_FileType;
+
+/**
+ * \brief User callback for the closing processing
+ * \param file The pointer to the structure of the FileType object that gathers the file data. This parameter is
+ * optional and may not be used by the user. \return In the function code, the user must return SOPC_STATUT_OK if no
+ * error otherwise SOPC_STATUT_NOK.
+ */
+typedef SOPC_ReturnStatus (*SOPC_FileTransfer_UserClose_Callback)(SOPC_FileType* file);
+
 /**
  * \brief Structure to gather FilType configuration data
  */
@@ -19,6 +29,7 @@ typedef struct SOPC_FileType_Config
     char* var_openCountId;    /*!< The nodeId of the OpenCount variable. */
     char* var_userWritableId; /*!< The nodeId of the UserWritable variable. */
     char* var_writableId;     /*!< The nodeId of the Writable variable. */
+    SOPC_FileTransfer_UserClose_Callback pFunc_UserCloseCallback; /*!< The Method Close Callback */
 } SOPC_FileType_Config;
 
 /**
@@ -47,11 +58,11 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
 
 /**
  * \brief Function to get the temporary file path name created by the API.
- * \param node_id The nodeId of the file object.
+ * \param file A pointer to the structure of the FileType object.
  * \param name The output name of the temporary file path.
- * \return SOPC_STATUS_OK if no error
+ * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
  */
-SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(const char* node_id, char* name);
+SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name);
 
 /**
  * \brief Uninitialize the API (Free the memory)
