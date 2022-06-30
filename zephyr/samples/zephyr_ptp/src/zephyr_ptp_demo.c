@@ -20,16 +20,13 @@
 /**
  * \brief
  *  This file provides a small demo of PtP feature on ZEPHYR.
- *  - The current PTP status (internal/MASTER/SLAVE) is automatically shown when updated
- *  - The current clock correction detected using PtP is automatically shown when updated
- *  - Different tests may be launched manually using console to start some chronometer tests,
+ *  - The current PTP status (internal/MASTER/SLAVE) is automatically shown when updated.
+ *  - The current clock correction detected using PtP is automatically shown when updated.
+ *  - Different tests may be launched manually using console to start some time tests,
  *      or periodic events.
  *  - Periodic event tests send multicast messages which aims at providing easy TCPDUMP analysis of
- *      results. The Multicast address output is "232.1.3.4:12345"
- */
-
-/** TODO :
- * - Show precision factor on PtP clock
+ *      results. The multicast address output is "232.1.3.4:12345" and the data contains the local clock
+ *      value as a string.
  */
 
 #include <logging/log.h>
@@ -94,15 +91,14 @@ static const char* sourceToString(const SOPC_Time_TimeSource source)
 typedef struct
 {
     const uint8_t* serialNumber;
-    const size_t serialNumberLen;
     const char*  ipAddr;
     const char*  deviceName;
 } DeviceIdentifier;
 static const DeviceIdentifier gDevices[]=
 {
         // Note: Example to be adapted for each device/configuration!
-        {"624248Q", 7, "192.168.42.111", "N.144/A"},
-        {"652248Q", 7, "192.168.42.112", "N.144/B"},
+        {"624248Q", "192.168.42.111", "N.144/A"},
+        {"652248Q", "192.168.42.112", "N.144/B"},
 };
 
 
@@ -286,6 +282,9 @@ static void test_infos(void)
         const int corrPrecent = -(int)(10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
         synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent /100, abs(corrPrecent %100));
     }
+    const int clockPrec = (int)(10000 * (SOPC_RealTime_GetClockPrecision()));
+    synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec /100, abs(clockPrec %100));
+
     synch_printf("- IP ADDR = %s\n", getDefaultIp());
     const DeviceIdentifier* dev = getDevice();
     if (NULL != dev)
@@ -310,6 +309,7 @@ static void test_help(void)
     synch_printf(" - 'o[msPeriod] [ms offset=25]' to start 'SLEEP_UNTIL/Offset' test\n");
     synch_printf(" - 'u' to start 'SLEEP_UNTIL' test\n");
     synch_printf(" - 'c' to start 'CHRONOMETER' test\n");
+    synch_printf(" - 'w' to wait for PtP synchro\n");
     synch_printf(" - 'r' to reboot\n");
     synch_printf(" - '+' to set ETH UP\n");
     synch_printf(" - '-' to set ETH DOWN\n");
@@ -465,6 +465,35 @@ static void* test_thread(void* context)
             synch_printf("Event woken Drt=(%u us)", dt);
             synch_printf(" at DT=(%s)\n",DateToTimeString(dt2));
         }
+        else if (testId == 5)
+        {
+            static const unsigned int thresholdPer10000 = 9980;
+            if (newTest)
+            {
+                synch_printf("\n");
+                synch_printf("========================================\n");
+                synch_printf("Test #5: WAITING FOR PTP SYNCHRO, thr = %03d.%02u%%'\n\n", thresholdPer10000/100, thresholdPer10000%100);
+                synch_printf("----------------------------------------\n");
+            }
+
+            // Reading SOPC_Time_GetCurrentTimeUTC forces PtP clock synchronization protocol.
+            // See details in "opc_zephyr_time.h"
+            dt1 = SOPC_Time_GetCurrentTimeUTC();
+            (void)dt1;
+            SOPC_Sleep(1000);
+
+            const int clockPrec = (int)(10000 * (SOPC_RealTime_GetClockPrecision()));
+            const int corrPrecent = -(int)(10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+            synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent /100, abs(corrPrecent %100));
+            synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec /100, abs(clockPrec %100));
+
+            if (clockPrec >= thresholdPer10000)
+            {
+                synch_printf("DONE!\n");
+                gSubTestId  = 0;
+                gTestId = 0;
+            }
+        }
         else
         {
             SOPC_Sleep(10);
@@ -486,7 +515,13 @@ static const DeviceIdentifier* getDevice(void)
             for (size_t i = 0 ; i < sizeof(gDevices)/sizeof(*gDevices) ; i++)
             {
                 const DeviceIdentifier* dev = &gDevices[i];
-                if (0 == memcmp(dev->serialNumber, buffer, dev->serialNumberLen))
+                SOPC_ASSERT(NULL != dev->serialNumber);
+                size_t len = strlen(dev->serialNumber);
+                if (len > sizeof(buffer))
+                {
+                    len = sizeof(buffer);
+                }
+                if (0 == memcmp(dev->serialNumber, buffer, len))
                 {
                     printf("Identified device '%s'\n", dev->deviceName);
                     result = dev;
@@ -525,7 +560,7 @@ void main(void)
     SOPC_ASSERT(thread != NULL);
     SOPC_ASSERT(threadPrint != NULL);
 
-    test_help();
+    printk("Type 'h' for help\n");
 
 	for (;;)
 	{
@@ -571,6 +606,11 @@ void main(void)
         else if (line[0] == 'i')
         {
             test_infos();
+        }
+        else if (line[0] == 'w')
+        {
+            gSubTestId  = 0;
+            gTestId = 5;
         }
         else if (line[0] == 'o') // Sleep until test
         {

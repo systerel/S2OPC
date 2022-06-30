@@ -33,12 +33,12 @@
  * \brief This file provides time related ZEPHYR-specific implementations which are not directly required by
  *          SOPC core.
  *          This file may be included by ZEPHYR applications that need these services.
- * \note The ZEPHYR PtP time correction is realized while processing specific time events (\a SOPC_Time_GetCurrentTimeUTC).
- *          Natively, in S2OPC core, these functions may not be called as long as no PubSub is started.
- *          As a consequence, in the case an application waits for a PtP synchronization before activating this service,
- *          it is mandatory to firstly force this synchronization by calling one of these functions explicitly.
- *          A simple way to do that could be calling \a SOPC_Time_GetCurrentTimeUTC function as long as the expected clock
- *          precision is not reached.
+ * \note The ZEPHYR PtP time correction is realized while processing specific time events (\a
+ *          SOPC_Time_GetCurrentTimeUTC). Natively, in S2OPC core, these functions may not be called as long as no
+ *          PubSub is started. As a consequence, in the case an application waits for a PtP synchronization before
+ *          activating this service, it is mandatory to firstly force this synchronization by calling one of these
+ *          functions explicitly. A simple way to do that could be calling \a SOPC_Time_GetCurrentTimeUTC function
+ *          as long as the expected clock precision is not reached.
  */
 
 #ifndef SOPC_ZEPHYR_TIME_H_
@@ -66,12 +66,23 @@ typedef enum
 SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void);
 
 /**
+ * \brief returns an evaluation of the system clock precision (relatively to a remote PtP MASTER)
+ *      This value can be used to check that PtP clock is sufficiently synchronized before allowing
+ *      some time-related events, typically like sending Publisher messages with PublishOffset constraints.
+ *      The threshold value may clearly be determined experimentally depending on expected precision.
+ * \return A value between 0.0 and 1.0:
+ *  - 1.0 for a perfectly synchronized PtP SLAVE (typically, current time source is \a SOPC_TIME_TIMESOURCE_PTP_SLAVE
+ *          and remote PtP time is perfectly synchronized and stable with S2OPC internal clock)
+ *  - 0.0 if there is no PtP synchronization (not PtP SLAVE or SLAVE but with clock failed to stabilize)
+ */
+float SOPC_RealTime_GetClockPrecision(void);
+
+/**
  * \brief Provides the information about clock discrepancy towards a PtP master
  * \return clock ratio discrepancy:
  *  < 1.0 when local clock is faster than actual (PtP) time
  *  > 1.0 when local clock is slower than actual (PtP) time
  */
 float SOPC_RealTime_GetClockCorrection(void);
-
 
 #endif /* SOPC_ZEPHYR_TIME_H_ */

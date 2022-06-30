@@ -76,6 +76,8 @@
 #define MS_TO_100NS (10000)
 #define US_TO_100NS (10)
 
+#define CLOCK_IS_IMPRECISE 0.0f
+
 typedef enum P_TIME_STATUS
 {
     P_TIME_STATUS_NOT_INITIALIZED,
@@ -126,6 +128,9 @@ static uint64_t gLastLocSyncDate = 0;
  * Range [1 - CLOCK_CORRECTION_RANGE .. 1 + CLOCK_CORRECTION_RANGE]
  *  */
 static float gLocalClockCorrFactor = 1.0;
+
+/** See \SOPC_RealTime_GetClockImprecision */
+static float gLocalClockPrecision = 0.0;
 
 /** Next clcock correction synchro point */
 static uint64_t gMeasureNextSynch = 0;
@@ -583,6 +588,8 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
             {
                 gMeasureNextSynch += CONFIG_SOPC_PTP_SYNCH_DURATION;
 
+                // Compute precision, based on difference between current and new correction
+                gLocalClockPrecision = 1.0 - fabs((newFactor - gLocalClockCorrFactor) / CLOCK_CORRECTION_RANGE);
                 // Accept this correction factor
                 gLocalClockCorrFactor = newFactor;
             }
@@ -617,6 +624,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
         connectionStartLoc = 0;
         connectionStartPtp = 0;
         gMeasureNextSynch = 0;
+        gLocalClockPrecision = CLOCK_IS_IMPRECISE;
     }
     return nowPtp;
 }
@@ -652,6 +660,12 @@ static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
 float SOPC_RealTime_GetClockCorrection(void)
 {
     return gLocalClockCorrFactor;
+}
+
+/***************************************************/
+float SOPC_RealTime_GetClockPrecision(void)
+{
+    return gLocalClockPrecision;
 }
 
 /***************************************************/
