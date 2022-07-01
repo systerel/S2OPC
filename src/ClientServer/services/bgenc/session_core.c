@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/06/2022 15:59:56
+ Date                 : 01/07/2022 12:36:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -165,6 +165,7 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_session_token_i session_core__l_nsession_token;
       t_bool session_core__l_valid_session_token;
       constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
+      t_bool session_core__l_valid_server_cert;
       constants_statuscodes_bs__t_StatusCode_i session_core__l_crypto_status;
       constants__t_SignatureData_i session_core__l_signature;
       constants__t_Nonce_i session_core__l_nonce;
@@ -186,12 +187,16 @@ void session_core__server_create_session_req_and_resp_sm(
             false);
          channel_mgr__get_channel_info(session_core__channel,
             &session_core__l_channel_config_idx);
+         msg_session_bs__create_session_req_check_client_certificate(session_core__create_req_msg,
+            session_core__l_channel_config_idx,
+            &session_core__l_valid_server_cert);
          session_core_1__server_get_fresh_session_token(session_core__l_channel_config_idx,
             session_core__l_nsession,
             &session_core__l_nsession_token);
          session_core_1__server_is_valid_session_token(session_core__l_nsession_token,
             &session_core__l_valid_session_token);
-         if (session_core__l_valid_session_token == true) {
+         if ((session_core__l_valid_session_token == true) &&
+            (session_core__l_valid_server_cert == true)) {
             channel_mgr__server_get_endpoint_config(session_core__channel,
                &session_core__l_endpoint_config_idx);
             msg_session_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
@@ -267,7 +272,12 @@ void session_core__server_create_session_req_and_resp_sm(
             }
          }
          else {
-            *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
+            if (session_core__l_valid_server_cert == true) {
+               *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
+            }
+            else {
+               *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
+            }
             session_core_1__set_session_state_closed(session_core__l_nsession,
                constants_statuscodes_bs__e_sc_bad_session_id_invalid,
                false);

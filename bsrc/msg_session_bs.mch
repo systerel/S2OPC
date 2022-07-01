@@ -264,6 +264,19 @@ OPERATIONS
     END
     ;
 
+    valid <-- create_session_req_check_client_certificate (p_req_msg, p_channel_config_idx) =
+    PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_req
+    THEN
+        valid :: BOOL
+    END
+    ;
+
     valid <-- create_session_resp_check_server_certificate (p_resp_msg, p_channel_config_idx) =
     PRE
         p_channel_config_idx : t_channel_config_idx_i &

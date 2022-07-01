@@ -373,7 +373,7 @@ OPERATIONS
         l_nsession_token,
         l_valid_session_token,
         l_endpoint_config_idx,
-        /*l_valid_req,*/
+        l_valid_server_cert,
         l_crypto_status,
         l_signature,
         l_nonce,
@@ -388,12 +388,11 @@ OPERATIONS
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created, FALSE);
-            /* TODO: check request parameters: client certificate */
-            /*l_valid_req <-- server_create_session_valid_req(create_req_msg) */
             l_channel_config_idx <-- get_channel_info (channel);
+            l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
             l_nsession_token <-- server_get_fresh_session_token (l_channel_config_idx, l_nsession);
             l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
-            IF l_valid_session_token = TRUE /*& l_valid_req = TRUE */
+            IF  l_valid_session_token = TRUE & l_valid_server_cert = TRUE
             THEN
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                 write_create_session_msg_session_token (create_resp_msg, l_nsession, l_nsession_token);
@@ -455,7 +454,12 @@ OPERATIONS
                     create_session_req_export_maxResponseMessageSize (l_channel_config_idx, create_req_msg)
                 END
             ELSE
-                service_ret := e_sc_bad_too_many_sessions;
+                IF l_valid_server_cert = TRUE
+                THEN
+                    service_ret := e_sc_bad_too_many_sessions
+                ELSE
+                    service_ret := e_sc_bad_security_checks_failed
+                END;
                 set_session_state_closed (l_nsession, e_sc_bad_session_id_invalid, FALSE);
                 l_nsession := c_session_indet
             END
