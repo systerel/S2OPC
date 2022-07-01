@@ -70,8 +70,11 @@ if [[ $? != 0 ]]; then
     echo "ERROR: generating C source files from B model" | tee -a $LOGPATH
     EXITCODE=1
 fi
-# Remove pre-build directory in any case
-rm -rf $CURDIR/$PREBUILD
+# NO_PREBUILD_RM might be used during B model development to keep pre-build directory and use incremental build
+if [[ -z $NO_PREBUILD_RM ]]; then
+    # Remove pre-build directory
+    rm -rf $CURDIR/$PREBUILD
+fi
 
 if [[ $EXITCODE -eq 0 ]]; then
     echo "Completed with SUCCESS" | tee -a $LOGPATH
