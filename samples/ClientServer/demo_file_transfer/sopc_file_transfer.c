@@ -361,6 +361,11 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
                                                   SOPC_Variant** outputArgs,
                                                   void* param);
 
+/**
+ * \brief The asynchronous local service response callback
+ */
+static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext);
+
 /************************************/
 /* STATIC VARIABLE */
 /************************************/
@@ -1590,13 +1595,24 @@ static void local_write_init(const void* key, const void* value, void* user_data
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback)
 {
     SOPC_ReturnStatus status;
-    status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);
+    status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(&AsyncRespCb_Fct);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);
+    }
     if (SOPC_STATUS_OK == status)
     {
         /* Initialize each variables for each each FileType added into the API */
         SOPC_Dict_ForEach(g_objectId_to_file, &local_write_init, &status);
     }
     return status;
+}
+
+static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext)
+{
+    (void) type;
+    (void) response;
+    (void) userContext;
 }
 
 static SOPC_StatusCode local_write_open_count(SOPC_FileType file)
