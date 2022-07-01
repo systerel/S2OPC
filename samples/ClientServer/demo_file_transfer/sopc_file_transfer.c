@@ -1182,6 +1182,34 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
     return status;
 }
 
+SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr methodFunc,
+                                                    char* methodName,
+                                                    const char* CnodeId)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_NodeId* node_id;
+    if (NULL != methodFunc || NULL != CnodeId || NULL != methodName)
+    {
+        node_id = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
+        if (NULL == node_id)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Add_MethodItems: unable to create NodeId from a C string");
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, node_id, methodFunc, methodName, NULL);
+            if (SOPC_STATUS_NOK == status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:Add_MethodItems: unable to register method '%s'", methodName);
+            }
+        }
+    }
+    return status;
+}
+
 static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;

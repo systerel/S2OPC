@@ -41,11 +41,23 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
 
 /**
  * \brief Adding a FileType object to the API from the address space information.
- * \note This function shall be call after <SOPC_FileTransfer_Initialize>.
+ * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>
  * \param config The structure which gather FileType configuration data
  * \return SOPC_STATUS_OK if no error
  */
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config);
+
+/**
+ * \brief Adding a FileType object to the API from the address space information.
+ * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>.
+ * \param methodFunc Pointer to the method function.
+ * \param methodName A string to register the name of the method.
+ * \param CnodeId The nodeId of the Method in the address space (C string).
+ * \return SOPC_STATUS_OK if no error
+ */
+SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr methodFunc,
+                                                    char* methodName,
+                                                    const char* CnodeId);
 
 /**
  * \brief Start the server asynchronously

@@ -87,6 +87,31 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 //                                                     xml_users_config_path, NULL);
 // }
 
+static SOPC_StatusCode UserMethod_Test(const SOPC_CallContext* callContextPtr,
+                                       const SOPC_NodeId* objectId,
+                                       uint32_t nbInputArgs,
+                                       const SOPC_Variant* inputArgs,
+                                       uint32_t* nbOutputArgs,
+                                       SOPC_Variant** outputArgs,
+                                       void* param)
+{
+    /* avoid unused parameter compiler warning */
+    (void) callContextPtr;
+    (void) objectId;
+    (void) param;
+    (void) nbInputArgs;
+    (void) inputArgs;
+    (void) nbOutputArgs;
+    (void) outputArgs;
+    (void) param;
+
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+
+    printf("Test of the user method: successful!\n");
+
+    return status;
+}
+
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     (void) status;
@@ -149,17 +174,17 @@ int main(int argc, char* argv[])
         }
 
         const SOPC_FileType_Config config = {.file_path = "/tmp/myfile",
-                                             .fileType_nodeId = "ns=1;i=15017",
-                                             .met_openId = "ns=1;i=15048",
-                                             .met_closeId = "ns=1;i=15051",
-                                             .met_readId = "ns=1;i=15053",
-                                             .met_writeId = "ns=1;i=15056",
-                                             .met_getposId = "ns=1;i=15058",
-                                             .met_setposId = "ns=1;i=15061",
-                                             .var_sizeId = "ns=1;i=15018",
-                                             .var_openCountId = "ns=1;i=15021",
-                                             .var_userWritableId = "ns=1;i=15020",
-                                             .var_writableId = "ns=1;i=15019",
+                                             .fileType_nodeId = "ns=1;i=15042",
+                                             .met_openId = "ns=1;i=15049",
+                                             .met_closeId = "ns=1;i=15052",
+                                             .met_readId = "ns=1;i=15054",
+                                             .met_writeId = "ns=1;i=15138",
+                                             .met_getposId = "ns=1;i=15140",
+                                             .met_setposId = "ns=1;i=15143",
+                                             .var_sizeId = "ns=1;i=15043",
+                                             .var_openCountId = "ns=1;i=15047",
+                                             .var_userWritableId = "ns=1;i=15045",
+                                             .var_writableId = "ns=1;i=15044",
                                              .pFunc_UserCloseCallback = &UserCloseCallback};
 
         printf("******* File added ...\n");
@@ -169,6 +194,12 @@ int main(int argc, char* argv[])
             printf("******* Failed to add file into server\n");
             SOPC_FileTransfer_Clear();
             return 1;
+        }
+
+        status = SOPC_FileTransfer_Add_MethodItems(&UserMethod_Test, "UserMethod_Test", "ns=1;i=15002");
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to add UserMethod_Test to the server ...\n");
         }
 
         status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
