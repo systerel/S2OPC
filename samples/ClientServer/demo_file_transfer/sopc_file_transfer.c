@@ -366,7 +366,8 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
 /************************************/
 static SOPC_Dict* g_objectId_to_file = NULL;
 static SOPC_Dict* g_str_objectId_to_file = NULL;
-/* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support multiple handles for the same file)*/
+/* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
+ * multiple handles for the same file)*/
 static SOPC_Dict* g_handle_to_file = NULL;
 static int32_t g_tombstone_key = -1;
 static SOPC_MethodCallManager* g_method_call_manager = NULL;
@@ -541,7 +542,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 return result_code;
             }
         }
-        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support multiple handles for the same file)*/
+        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
+         * support multiple handles for the same file)*/
         file->handle = file->handle + 1;
         bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
         SOPC_ASSERT(true == res);
@@ -1289,7 +1291,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     }
                     file->fp = NULL;
                     file->is_open = false;
-                    file->size_in_byte = 0; 
+                    file->size_in_byte = 0;
                     file->open_count = 0;
                     local_write_open_count(*file);
                     SOPC_Dict_Remove(g_handle_to_file, &file->handle);
@@ -1329,7 +1331,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             file->fp = NULL;
             file->is_open = false;
             file->size_in_byte = 0;
-            file->open_count = 0;  
+            file->open_count = 0;
             /* Free and creat a new tmp_path */
             SOPC_String_Clear(file->tmp_path);
             file->tmp_path = NULL;
