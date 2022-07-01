@@ -47,10 +47,10 @@
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
 
 // Function to clear a transport context. To be implemented for each protocol
-typedef void (*SOPC_PubScheduler_TransportCtx_Clear)(SOPC_PubScheduler_TransportCtx*);
+typedef void SOPC_PubScheduler_TransportCtx_Clear(SOPC_PubScheduler_TransportCtx*);
 
 // Function to send a message. To be implemented for each protocol
-typedef void (*SOPC_PubScheduler_TransportCtx_Send)(SOPC_PubScheduler_TransportCtx*, SOPC_Buffer*);
+typedef void SOPC_PubScheduler_TransportCtx_Send(SOPC_PubScheduler_TransportCtx*, SOPC_Buffer*);
 
 // Clear a Transport UDP context. Implements SOPC_PubScheduler_TransportCtx_Clear
 static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx);
@@ -83,8 +83,8 @@ struct SOPC_PubScheduler_TransportCtx
     SOPC_ETH_Socket_SendAddressInfo* ethAddr;
     Socket sock;
 
-    SOPC_PubScheduler_TransportCtx_Clear fctClear;
-    SOPC_PubScheduler_TransportCtx_Send fctSend;
+    SOPC_PubScheduler_TransportCtx_Clear* pFctClear;
+    SOPC_PubScheduler_TransportCtx_Send* pFctSend;
 
     // specific to SOPC_PubSubProtocol_MQTT
     MqttTransportHandle* mqttHandle;
@@ -194,9 +194,9 @@ static void SOPC_PubScheduler_Context_Clear(void)
     {
         for (uint32_t i = 0; i < pubSchedulerCtx.nbConnection; i++)
         {
-            if (pubSchedulerCtx.transport[i].fctClear != NULL)
+            if (pubSchedulerCtx.transport[i].pFctClear != NULL)
             {
-                pubSchedulerCtx.transport[i].fctClear(&pubSchedulerCtx.transport[i]);
+                pubSchedulerCtx.transport[i].pFctClear(&pubSchedulerCtx.transport[i]);
                 SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Transport context freed for connection #%u (publisher).",
                                       pubSchedulerCtx.nbConnection);
             }
@@ -458,7 +458,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             security->msgNonceRandom = NULL;
         }
 
-        context->transport->fctSend(context->transport, buffer);
+        context->transport->pFctSend(context->transport, buffer);
         SOPC_Buffer_Delete(buffer);
         buffer = NULL;
     }
@@ -675,8 +675,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             return false;
         }
         pubSchedulerCtx.transport[index].sock = outSock;
-        pubSchedulerCtx.transport[index].fctClear = &SOPC_PubScheduler_CtxUdp_Clear;
-        pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxUdp_Send;
+        pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxUdp_Clear;
+        pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxUdp_Send;
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }
@@ -699,8 +699,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             return false;
         }
 
-        pubSchedulerCtx.transport[index].fctClear = SOPC_PubScheduler_CtxMqtt_Clear;
-        pubSchedulerCtx.transport[index].fctSend = SOPC_PubScheduler_CtxMqtt_Send;
+        pubSchedulerCtx.transport[index].pFctClear = SOPC_PubScheduler_CtxMqtt_Clear;
+        pubSchedulerCtx.transport[index].pFctSend = SOPC_PubScheduler_CtxMqtt_Send;
         pubSchedulerCtx.transport[index].udpAddr = NULL;
         pubSchedulerCtx.transport[index].sock = -1;
         *ctx = &pubSchedulerCtx.transport[index];
@@ -729,8 +729,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         }
 
         pubSchedulerCtx.transport[index].sock = outSock;
-        pubSchedulerCtx.transport[index].fctClear = &SOPC_PubScheduler_CtxEth_Clear;
-        pubSchedulerCtx.transport[index].fctSend = &SOPC_PubScheduler_CtxEth_Send;
+        pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxEth_Clear;
+        pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxEth_Send;
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }

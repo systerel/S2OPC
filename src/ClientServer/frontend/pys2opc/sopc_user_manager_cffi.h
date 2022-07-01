@@ -44,14 +44,14 @@ typedef enum
     SOPC_USER_AUTHENTICATION_OK
 } SOPC_UserAuthentication_Status;
 
-typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* authenticationManager);
-typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
+typedef void SOPC_UserAuthentication_Free_Func(SOPC_UserAuthentication_Manager* authenticationManager);
+typedef SOPC_ReturnStatus SOPC_UserAuthentication_ValidateUserIdentity_Func(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
     SOPC_UserAuthentication_Status* pUserAuthenticated);
 
-typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* authorizationManager);
-typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
+typedef void SOPC_UserAuthorization_Free_Func(SOPC_UserAuthorization_Manager* authorizationManager);
+typedef SOPC_ReturnStatus SOPC_UserAuthorization_AuthorizeOperation_Func(
     SOPC_UserAuthorization_Manager* authorizationManager,
     SOPC_UserAuthorization_OperationType operationType,
     const SOPC_NodeId* nodeId,
@@ -68,14 +68,14 @@ SOPC_UserAuthorization_Manager* SOPC_UserAuthorization_CreateManager_AllowAll(vo
 /* These structures are required to create one's own managers */
 typedef struct SOPC_UserAuthentication_Functions
 {
-    SOPC_UserAuthentication_Free_Func pFuncFree;
-    SOPC_UserAuthentication_ValidateUserIdentity_Func pFuncValidateUserIdentity;
+    SOPC_UserAuthentication_Free_Func* pFuncFree;
+    SOPC_UserAuthentication_ValidateUserIdentity_Func* pFuncValidateUserIdentity;
 } SOPC_UserAuthentication_Functions;
 
 typedef struct SOPC_UserAuthorization_Functions
 {
-    SOPC_UserAuthorization_Free_Func pFuncFree;
-    SOPC_UserAuthorization_AuthorizeOperation_Func pFuncAuthorizeOperation;
+    SOPC_UserAuthorization_Free_Func* pFuncFree;
+    SOPC_UserAuthorization_AuthorizeOperation_Func* pFuncAuthorizeOperation;
 } SOPC_UserAuthorization_Functions;
 
 struct SOPC_UserAuthentication_Manager

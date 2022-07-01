@@ -30,7 +30,7 @@
 #define REAL_ASSERT assert
 #define MAX_CONTEXT_LEN 80u
 
-static SOPC_Assert_UserCallback gUserCallback = NULL;
+static SOPC_Assert_UserCallback* gUserCallback = NULL;
 
 void SOPC_Assert_Failure(const char* context)
 {
@@ -74,7 +74,7 @@ void SOPC_Assert_Failure(const char* context)
     REAL_ASSERT(false);
 }
 
-void SOPC_Assert_Set_UserCallback(SOPC_Assert_UserCallback callback)
+void SOPC_Assert_Set_UserCallback(SOPC_Assert_UserCallback* callback)
 {
     gUserCallback = callback;
 }

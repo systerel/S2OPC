@@ -1230,7 +1230,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
                                                   const SOPC_ReaderGroup* group)
 {
     assert(NULL != header && NULL != nm && NULL != group && NULL != readerConf &&
-           NULL != readerConf->callbacks.getReader_Func && NULL != readerConf->callbacks.setDsm_Func);
+           NULL != readerConf->callbacks.pGetReader_Func && NULL != readerConf->callbacks.pSetDsm_Func);
 
     const uint16_t group_id = SOPC_ReaderGroup_Get_GroupId(group);
     const SOPC_DataSetReader** dsmReaders = NULL;
@@ -1281,7 +1281,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
                 SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
             }
 
-            dsmReaders[i] = readerConf->callbacks.getReader_Func(group, conf, writer_id, (uint8_t) i);
+            dsmReaders[i] = readerConf->callbacks.pGetReader_Func(group, conf, writer_id, (uint8_t) i);
 
             // Check if there is at last one DSM to read, otherwise decoding can be canceled
             if (dsmReaders[i] != NULL)
@@ -1320,14 +1320,14 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
     if (conf->SecurityFlag && SOPC_STATUS_OK == status)
     {
         status = Decode_SecurityHeader(buffer, &buffer_payload, payload_sign_position, group_id,
-                                       readerConf->getSecurity_Func, header, conf);
+                                       readerConf->pGetSecurity_Func, header, conf);
     }
     else
     {
         // check that subscriber expects security mode is none
-        if (NULL != readerConf->getSecurity_Func && SOPC_STATUS_OK == status) // if NULL, security mode is None
+        if (NULL != readerConf->pGetSecurity_Func && SOPC_STATUS_OK == status) // if NULL, security mode is None
         {
-            SOPC_PubSub_SecurityType* security = readerConf->getSecurity_Func(
+            SOPC_PubSub_SecurityType* security = readerConf->pGetSecurity_Func(
                 SOPC_PUBSUB_SKS_DEFAULT_TOKENID,
                 Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
             // if security is NULL, there is no reader configured with security sign or encrypt/sign
@@ -1382,7 +1382,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
             status = decode_dataSetMessage(dsm, buffer_payload, size);
             if (SOPC_STATUS_OK == status)
             {
-                status = readerConf->callbacks.setDsm_Func(dsm, readerConf->targetConfig, reader);
+                status = readerConf->callbacks.pSetDsm_Func(dsm, readerConf->targetConfig, reader);
                 check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
             }
         }
@@ -1434,7 +1434,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
 
     SOPC_UADP_Configuration* conf = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
-    assert(NULL != header && NULL != reader_config && NULL != reader_config->callbacks.getGroup_Func && NULL != conf);
+    assert(NULL != header && NULL != reader_config && NULL != reader_config->callbacks.pGetGroup_Func && NULL != conf);
 
     // Decode Message Header, and determine message version
     status = SOPC_UADP_NetworkMessageHeader_Decode(buffer, header);
@@ -1451,7 +1451,7 @@ SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(
         const uint32_t rcvGroupVersion = SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm);
         const uint32_t rcvGroupId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
         const SOPC_Dataset_LL_PublisherId* pubid = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
-        group = reader_config->callbacks.getGroup_Func(connection, conf, pubid, rcvGroupVersion, rcvGroupId);
+        group = reader_config->callbacks.pGetGroup_Func(connection, conf, pubid, rcvGroupVersion, rcvGroupId);
 
         if (group == NULL)
         {

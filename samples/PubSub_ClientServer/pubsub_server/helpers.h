@@ -22,7 +22,7 @@
 
 #include "sopc_builtintypes.h"
 
-typedef void (*Helpers_WriteValue_Callback)(OpcUa_WriteValue* pwv);
+typedef void Helpers_WriteValue_Callback(OpcUa_WriteValue* pwv);
 
 /**
  * Copy the NodeIds, the AttributeIds, and the DataValues in an array of WriteValues,
@@ -38,6 +38,6 @@ SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
                                           uint32_t* lAttrId,
                                           SOPC_DataValue** lpDv,
                                           size_t nItems,
-                                          Helpers_WriteValue_Callback wvNotifier);
+                                          Helpers_WriteValue_Callback* wvNotifier);
 
 #endif /* HELPERS_H_ */

@@ -30,7 +30,7 @@
 /*****Private threads api*****/
 
 typedef struct tThreadHandle tThreadHandle; // Thread handle
-typedef void* (*ptrFct)(void* pCtx);        // Thread callback
+typedef void* ptrFct(void* pCtx);           // Thread callback
 
 /** @brief
  *   Create an handle of a thread and initialize it.
@@ -40,7 +40,7 @@ typedef void* (*ptrFct)(void* pCtx);        // Thread callback
  *  @param priority The ZEPHYR priority of the new thread.
  *  @param isSOPCThread True for SOPC internal thread. User-defined thread shall use "false" value
  */
-tThreadHandle* P_THREAD_Create(ptrFct callback,          // Callback
+tThreadHandle* P_THREAD_Create(ptrFct* callback,         // Callback
                                void* pCtx,               // Context
                                const char* taskName,     // Thread name
                                const int priority,       // Priority

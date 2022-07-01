@@ -30,7 +30,7 @@ SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
                                           uint32_t* lAttrId,
                                           SOPC_DataValue** lpDv,
                                           size_t nItems,
-                                          Helpers_WriteValue_Callback wvNotifier)
+                                          Helpers_WriteValue_Callback* wvNotifier)
 {
     if (NULL == lpNid || NULL == lAttrId || NULL == lpDv || INT32_MAX < nItems)
     {

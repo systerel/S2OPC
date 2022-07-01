@@ -76,9 +76,9 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
                                              const SOPC_DataSetReader* reader);
 
 const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Default_Readers = {
-    .getGroup_Func = &SOPC_Sub_GetReaderGroup,
-    .getReader_Func = &SOPC_Sub_GetReader,
-    .setDsm_Func = &SOPC_Sub_ReceiveDsm};
+    .pGetGroup_Func = &SOPC_Sub_GetReaderGroup,
+    .pGetReader_Func = &SOPC_Sub_GetReader,
+    .pSetDsm_Func = &SOPC_Sub_ReceiveDsm};
 
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
@@ -87,7 +87,7 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .getSecurity_Func = securityCBck,
+        .pGetSecurity_Func = securityCBck,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .targetConfig = config};
     SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);

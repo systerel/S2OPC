@@ -110,9 +110,9 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
 
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    SOPC_NodeId* methodId,
-                                                   SOPC_MethodCallFunc_Ptr methodFunc,
+                                                   SOPC_MethodCallFunc_Ptr* methodFunc,
                                                    void* param,
-                                                   SOPC_MethodCallFunc_Free_Func fnFree)
+                                                   SOPC_MethodCallFunc_Free_Func* fnFree)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;

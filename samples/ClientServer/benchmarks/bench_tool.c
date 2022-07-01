@@ -56,7 +56,7 @@ typedef enum
     BENCH_FINISHED_ERROR,
 } bench_status_t;
 
-typedef void* (*bench_func_t)(size_t request_size, size_t bench_offset, size_t addspace_size);
+typedef void* bench_func_t(size_t request_size, size_t bench_offset, size_t addspace_size);
 
 // See https://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
 static const double T_TABLE[] = {0,     12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228,
@@ -72,7 +72,7 @@ struct app_ctx_t
     size_t address_space_size;
     size_t request_size;
     size_t address_space_offset;
-    bench_func_t bench_func;
+    bench_func_t* bench_func;
     uint32_t session_id;
     uint64_t n_total_requests;
     uint64_t n_sent_requests;
@@ -367,7 +367,7 @@ static struct
 {
     const char* name;
     const char* desc;
-    bench_func_t func;
+    bench_func_t* func;
 } BENCH_FUNCS[] = {
     {
         "read",
@@ -443,7 +443,7 @@ static void usage(char** argv)
         DEFAULT_SERVER_URL);
 }
 
-static bench_func_t bench_func_by_name(const char* name)
+static bench_func_t* bench_func_by_name(const char* name)
 {
     for (size_t i = 0; BENCH_FUNCS[i].name != NULL; ++i)
     {
@@ -551,7 +551,7 @@ int main(int argc, char** argv)
     const char* arg_as_size = argv[3];
     const char* arg_request_size = argv[4];
 
-    bench_func_t bench_func = bench_func_by_name(arg_bench_type);
+    bench_func_t* bench_func = bench_func_by_name(arg_bench_type);
 
     if (bench_func == NULL)
     {

@@ -171,7 +171,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     }
 
     thread->args = startArgs;
-    thread->startFct = startFct;
+    thread->startFct = (SOPCThreadStartFct*) startFct;
     thread->thread = CreateThread(NULL, // default security attributes
                                   0,    // use default stack size
                                   SOPC_Thread_StartFct, thread,

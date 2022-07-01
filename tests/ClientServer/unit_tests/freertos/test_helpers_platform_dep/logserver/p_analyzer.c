@@ -29,7 +29,7 @@ typedef enum E_ANALYZER_EVENT
     ANALYZER_EVENT_SIZEOF = UINT32_MAX
 } eAnalyzerEvent;
 
-typedef eAnalyzerStatus (*ptrCbAnalyzer)(tAnalyzerWks* pCtx, eAnalyzerEvent event, uint8_t value);
+typedef eAnalyzerStatus ptrCbAnalyzer(tAnalyzerWks* pCtx, eAnalyzerEvent event, uint8_t value);
 
 static eAnalyzerStatus cbFsmReceiveSOF(tAnalyzerWks* pCtx, eAnalyzerEvent event, uint8_t value);
 static eAnalyzerStatus cbFsmReceiveTAG(tAnalyzerWks* pCtx, eAnalyzerEvent event, uint8_t value);

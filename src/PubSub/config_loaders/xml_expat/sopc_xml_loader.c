@@ -295,10 +295,10 @@ static bool copy_any_string_attribute_value(char** to, const char* from)
  * /param user_param A user defined parameter
  * /return true if the parameter is correct and expected
  */
-typedef bool (*attribute_parser_cb)(const char* attr_name,
-                                    const char* attr_val,
-                                    struct parse_context_t* ctx,
-                                    void* user_param);
+typedef bool attribute_parser_cb(const char* attr_name,
+                                 const char* attr_val,
+                                 struct parse_context_t* ctx,
+                                 void* user_param);
 
 /**
  * /brief Parse all attributes and calls the user callback for every valid attribute.
@@ -309,7 +309,7 @@ typedef bool (*attribute_parser_cb)(const char* attr_name,
  * /return true if the parsing is successful
  */
 static bool parse_attributes(const XML_Char** attrs,
-                             attribute_parser_cb callback,
+                             attribute_parser_cb* callback,
                              struct parse_context_t* ctx,
                              void* user_param)
 {

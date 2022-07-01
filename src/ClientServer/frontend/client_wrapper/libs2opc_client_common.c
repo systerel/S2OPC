@@ -67,7 +67,7 @@
 /* Global library variables */
 static int32_t libInitialized = 0;
 static Mutex mutex; /* Mutex which protects global variables except libInitialized */
-static SOPC_LibSub_DisconnectCbk cbkDisco = NULL;
+static SOPC_LibSub_DisconnectCbk* cbkDisco = NULL;
 static SOPC_ClientCommon_DiscoveryCbk getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
@@ -102,7 +102,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         pListClient = SOPC_SLinkedList_Create(0);
 
         pArrScConfig = SOPC_Array_Create(sizeof(SOPC_SecureChannel_Config*), 0,
-                                         (SOPC_Array_Free_Func) Helpers_SecureChannel_Config_Free);
+                                         (SOPC_Array_Free_Func*) Helpers_SecureChannel_Config_Free);
         if (NULL == pListConfig || NULL == pListClient || NULL == pArrScConfig)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;

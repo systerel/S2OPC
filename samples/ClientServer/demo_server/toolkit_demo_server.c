@@ -161,7 +161,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 {
     char* sNodeId;
     SOPC_NodeId* methodId;
-    SOPC_MethodCallFunc_Ptr methodFunc;
+    SOPC_MethodCallFunc_Ptr* methodFunc;
     /* Create and define the method call manager the server will use*/
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
     SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;

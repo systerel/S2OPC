@@ -34,26 +34,26 @@ typedef struct _SOPC_Dict SOPC_Dict;
 /**
  * \brief Type of functions used to free keys and values.
  */
-typedef void (*SOPC_Dict_Free_Fct)(void* data);
+typedef void SOPC_Dict_Free_Fct(void* data);
 
 /**
  * \brief Type of hash functions.
  */
-typedef uint64_t (*SOPC_Dict_KeyHash_Fct)(const void* data);
+typedef uint64_t SOPC_Dict_KeyHash_Fct(const void* data);
 
 /**
  * \brief Type of functions used when checking two keys for equality. The
  * function should return \c TRUE if and only if both keys are equal, \c FALSE
  * otherwise.
  */
-typedef bool (*SOPC_Dict_KeyEqual_Fct)(const void* a, const void* b);
+typedef bool SOPC_Dict_KeyEqual_Fct(const void* a, const void* b);
 
 /**
  * \brief Type of callback functions for \ref SOPC_Dict_ForEach. Both the key and
  * value belong to the dictionary and shall not be modified. The value of
  * \p user_data is set when calling \ref SOPC_Dict_ForEach.
  */
-typedef void (*SOPC_Dict_ForEach_Fct)(const void* key, const void* value, void* user_data);
+typedef void SOPC_Dict_ForEach_Fct(const void* key, const void* value, void* user_data);
 
 /**
  * \brief Creates a new, empty dictionary.
@@ -73,10 +73,10 @@ typedef void (*SOPC_Dict_ForEach_Fct)(const void* key, const void* value, void* 
  * the dictionary, set a tombstone key using \ref SOPC_Dict_SetTombstoneKey.
  */
 SOPC_Dict* SOPC_Dict_Create(void* empty_key,
-                            SOPC_Dict_KeyHash_Fct key_hash,
-                            SOPC_Dict_KeyEqual_Fct key_equal,
-                            SOPC_Dict_Free_Fct key_free,
-                            SOPC_Dict_Free_Fct value_free);
+                            SOPC_Dict_KeyHash_Fct* key_hash,
+                            SOPC_Dict_KeyEqual_Fct* key_equal,
+                            SOPC_Dict_Free_Fct* key_free,
+                            SOPC_Dict_Free_Fct* value_free);
 
 /**
  * \brief Deletes a dictionary.
@@ -172,14 +172,14 @@ void SOPC_Dict_Remove(SOPC_Dict* d, const void* key);
  * \return The function used to free the keys, or NULL if no such function was
  *         set.
  */
-SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d);
+SOPC_Dict_Free_Fct* SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d);
 
 /**
  * \brief Sets the free function for this dictionary's keys.
  * \param d     The dictionary.
  * \param func  The function to use when freeing keys.
  */
-void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
+void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func);
 
 /**
  * \brief Retrieves the free function for this dictionary's values.
@@ -187,14 +187,14 @@ void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
  * \return The function used to free the values, or NULL if no such function was
  *         set.
  */
-SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d);
+SOPC_Dict_Free_Fct* SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d);
 
 /**
  * \brief Sets the free function for this dictionary's values.
  * \param d     The dictionary.
  * \param func  The function to use when freeing values.
  */
-void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func);
+void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func);
 
 /**
  * \brief Returns the number of items in this dictionary.
@@ -225,6 +225,6 @@ size_t SOPC_Dict_Capacity(const SOPC_Dict* d);
  * The order of the iteration is implementation defined, and should not be relied
  * on.
  */
-void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct func, void* user_data);
+void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, void* user_data);
 
 #endif /* SOPC_DICT_H_ */

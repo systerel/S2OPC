@@ -248,7 +248,7 @@ static void readyToReceive(void* sockContext, Socket sock)
     }
 
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .getSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
+        .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
 
     SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, buffer);
     if (SOPC_STATUS_OK == status && buffer->length > 1)

@@ -38,9 +38,9 @@ static struct
     size_t sizeOfSockContextElt;
     Socket* socketArray;
     uint16_t nbSockets;
-    SOPC_ReadyToReceive callback;
+    SOPC_ReadyToReceive* pCallback;
     void* callbackCtx;
-    SOPC_PeriodicTick tickCb;
+    SOPC_PeriodicTick* pTickCb;
     void* tickCbCtx;
 
 } receptionThread = {.initDone = false,
@@ -49,8 +49,8 @@ static struct
                      .sizeOfSockContextElt = 0,
                      .socketArray = NULL,
                      .nbSockets = 0,
-                     .callback = NULL,
-                     .tickCb = NULL,
+                     .pCallback = NULL,
+                     .pTickCb = NULL,
                      .tickCbCtx = NULL,
                      .thread = 0};
 
@@ -82,22 +82,22 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
         else if (nbReady == 0)
         {
             // Timeout: tick shall be called
-            if (receptionThread.tickCb != NULL)
+            if (receptionThread.pTickCb != NULL)
             {
                 lastTick = SOPC_TimeReference_GetCurrent();
-                receptionThread.tickCb(receptionThread.tickCbCtx);
+                (*receptionThread.pTickCb)(receptionThread.tickCbCtx);
             }
         }
         else
         {
-            if (receptionThread.tickCb != NULL)
+            if (receptionThread.pTickCb != NULL)
             {
                 // Evaluate if tick shall be called regarding time elapsed since last call
                 SOPC_TimeReference current = SOPC_TimeReference_GetCurrent();
                 if (current - lastTick >= TIMEOUT_MS)
                 {
                     lastTick = current;
-                    receptionThread.tickCb(receptionThread.tickCbCtx);
+                    (*receptionThread.pTickCb)(receptionThread.tickCbCtx);
                 }
             }
 
@@ -105,7 +105,7 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             {
                 if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], &readSet) != false)
                 {
-                    if (receptionThread.callback != NULL)
+                    if (receptionThread.pCallback != NULL)
                     {
                         void* sockContext = NULL;
                         if (receptionThread.sockContextArray != NULL)
@@ -113,7 +113,7 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
                             sockContext = (void*) ((char*) receptionThread.sockContextArray +
                                                    i * receptionThread.sizeOfSockContextElt);
                         }
-                        receptionThread.callback(sockContext, receptionThread.socketArray[i]);
+                        (*receptionThread.pCallback)(sockContext, receptionThread.socketArray[i]);
                     }
                 }
             }
@@ -126,8 +126,8 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
                                                 size_t sizeOfSockContextElt,
                                                 Socket* socketArray,
                                                 uint16_t nbSockets,
-                                                SOPC_ReadyToReceive callback,
-                                                SOPC_PeriodicTick tickCb,
+                                                SOPC_ReadyToReceive* pCallback,
+                                                SOPC_PeriodicTick* pTickCb,
                                                 void* tickCbCtx,
                                                 int threadPriority)
 {
@@ -140,8 +140,8 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
     receptionThread.sizeOfSockContextElt = sizeOfSockContextElt;
     receptionThread.socketArray = socketArray;
     receptionThread.nbSockets = nbSockets;
-    receptionThread.callback = callback;
-    receptionThread.tickCb = tickCb;
+    receptionThread.pCallback = pCallback;
+    receptionThread.pTickCb = pTickCb;
     receptionThread.tickCbCtx = tickCbCtx;
 
     receptionThread.stopFlag = 0;
@@ -189,15 +189,15 @@ void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     size_t sizeOfSockContextElt,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
-                                    SOPC_ReadyToReceive callback,
-                                    SOPC_PeriodicTick tickCb,
+                                    SOPC_ReadyToReceive* pCallback,
+                                    SOPC_PeriodicTick* pTickCb,
                                     void* tickCbCtx,
                                     int threadPriority)
 {
     assert(NULL != socketArray);
-    assert(NULL != callback);
+    assert(NULL != pCallback);
     bool result = SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, sizeOfSockContextElt, socketArray, nbSockets,
-                                                      callback, tickCb, tickCbCtx, threadPriority);
+                                                      pCallback, pTickCb, tickCbCtx, threadPriority);
     SOPC_ASSERT(result);
 }
 

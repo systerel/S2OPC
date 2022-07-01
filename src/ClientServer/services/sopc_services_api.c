@@ -530,7 +530,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintpt
     SOPC_EventHandler_Post(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
 }
 
-void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener)
+void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 

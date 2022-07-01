@@ -22,8 +22,8 @@
 
 #include "sopc_raw_sockets.h"
 
-typedef void (*SOPC_ReadyToReceive)(void* sockContext, Socket sock);
-typedef void (*SOPC_PeriodicTick)(void* ctx);
+typedef void SOPC_ReadyToReceive(void* sockContext, Socket sock);
+typedef void SOPC_PeriodicTick(void* ctx);
 
 /**
  * Initialize the sockets manager for the given sockets (with custom context), the data received callback and tick

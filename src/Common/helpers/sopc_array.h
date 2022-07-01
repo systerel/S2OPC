@@ -37,7 +37,7 @@ typedef struct _SOPC_Array SOPC_Array;
  * that if your array holds pointers, the free function will be passed a pointer
  * to the pointer held in the array.
  */
-typedef void (*SOPC_Array_Free_Func)(void* data);
+typedef void SOPC_Array_Free_Func(void* data);
 
 /**
  * \brief Type of functions used to compare items when sorting an array.
@@ -49,7 +49,7 @@ typedef void (*SOPC_Array_Free_Func)(void* data);
  * that if your array holds pointers, the compare function will be passed
  * pointers to the pointers held in the array.
  */
-typedef int (*SOPC_Array_Compare_Func)(const void* a, const void* b);
+typedef int SOPC_Array_Compare_Func(const void* a, const void* b);
 
 /**
  * \brief Creates a new array with a given capacity.
@@ -63,7 +63,7 @@ typedef int (*SOPC_Array_Compare_Func)(const void* a, const void* b);
  *
  * The actual allocated size might be greater than the requested capacity.
  */
-SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC_Array_Free_Func free_func);
+SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC_Array_Free_Func* free_func);
 
 /**
  * \brief Makes a copy of an array.
@@ -145,7 +145,7 @@ size_t SOPC_Array_Size(const SOPC_Array* array);
  *
  * The sort is not guaranteed to be stable.
  */
-void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func compare_func);
+void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func* compare_func);
 
 /**
  * \brief Converts a SOPC_Array into a raw C array.
@@ -169,7 +169,7 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array);
  * \return  The function used to clear the elements when the array is deleted,
  *          or \c NULL if no such function is defined.
  */
-SOPC_Array_Free_Func SOPC_Array_Get_Free_Func(SOPC_Array* array);
+SOPC_Array_Free_Func* SOPC_Array_Get_Free_Func(SOPC_Array* array);
 
 /**
  * \brief Sets the function used to clear the array elements when it is deleted.
@@ -179,6 +179,6 @@ SOPC_Array_Free_Func SOPC_Array_Get_Free_Func(SOPC_Array* array);
  * \param func  The function to use for clearing elements, or \c NULL if no such
  *              function should be called.
  */
-void SOPC_Array_Set_Free_Func(SOPC_Array* array, SOPC_Array_Free_Func func);
+void SOPC_Array_Set_Free_Func(SOPC_Array* array, SOPC_Array_Free_Func* func);
 
 #endif /* SOPC_ARRAY_H_ */

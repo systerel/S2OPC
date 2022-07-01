@@ -38,7 +38,7 @@
 #include "toolkit_helpers.h"
 
 /* LibSub logger callback, wrapped by a variadic printf-like */
-static SOPC_LibSub_LogCbk cbkLog = Helpers_LoggerStdout;
+static SOPC_LibSub_LogCbk* cbkLog = &Helpers_LoggerStdout;
 
 SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                                                    const char* szSecuPolicy,

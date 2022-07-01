@@ -185,7 +185,7 @@ static struct
     /* Input parameters */
     SOPC_PubSubConfiguration* config;
     SOPC_SubTargetVariableConfig* targetConfig;
-    SOPC_SubscriberStateChanged_Func stateCallback;
+    SOPC_SubscriberStateChanged_Func* pStateCallback;
 
     /* Internal context */
     SOPC_PubSubState state;
@@ -211,7 +211,7 @@ static struct
 
                   .config = NULL,
                   .targetConfig = NULL,
-                  .stateCallback = NULL,
+                  .pStateCallback = NULL,
 
                   .state = SOPC_PubSubState_Disabled,
 
@@ -230,9 +230,9 @@ static struct
 static void set_new_state(SOPC_PubSubState new)
 {
     SOPC_PubSubState prev = schedulerCtx.state;
-    if ((prev != new) && (NULL != schedulerCtx.stateCallback))
+    if ((prev != new) && (NULL != schedulerCtx.pStateCallback))
     {
-        schedulerCtx.stateCallback(new);
+        schedulerCtx.pStateCallback(new);
     }
     schedulerCtx.state = new;
 }
@@ -349,7 +349,7 @@ static void uninit_sub_scheduler_ctx(void)
 {
     schedulerCtx.config = NULL;
     schedulerCtx.targetConfig = NULL;
-    schedulerCtx.stateCallback = NULL;
+    schedulerCtx.pStateCallback = NULL;
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stop Subscriber thread");
     for (uint32_t i = 0; i < schedulerCtx.nbConnections; i++)
@@ -393,7 +393,7 @@ static void uninit_sub_scheduler_ctx(void)
 
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
                                                 SOPC_SubTargetVariableConfig* targetConfig,
-                                                SOPC_SubscriberStateChanged_Func stateChangedCb)
+                                                SOPC_SubscriberStateChanged_Func* pStateChangedCb)
 {
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
     assert(nb_connections > 0);
@@ -403,7 +403,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
     schedulerCtx.config = config;
     schedulerCtx.targetConfig = targetConfig;
-    schedulerCtx.stateCallback = stateChangedCb;
+    schedulerCtx.pStateCallback = pStateChangedCb;
 
     schedulerCtx.receptionBufferSockets = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
     result = (NULL != schedulerCtx.receptionBufferSockets);
@@ -616,7 +616,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
-                             SOPC_SubscriberStateChanged_Func stateChangedCb,
+                             SOPC_SubscriberStateChanged_Func* pStateChangedCb,
                              int threadPriority)
 {
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
@@ -643,7 +643,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
     if (result)
     {
         // Prepare connections context: socket creation & connection config context
-        SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, stateChangedCb);
+        SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb);
         if (SOPC_STATUS_OK == status)
         {
             assert(schedulerCtx.nbConnections <= UINT16_MAX);

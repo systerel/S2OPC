@@ -41,15 +41,15 @@
 
 typedef struct T_THREAD_ARGS
 {
-    tPtrFct cbExternalCallback; // External user callback
-    void* ptrStartArgs;         // External user callback parameters
+    tPtrFct* pCbExternalCallback; // External user callback
+    void* ptrStartArgs;           // External user callback parameters
 } tThreadArgs;
 
 typedef struct T_THREAD_WKS
 {
     tUtilsList taskList;                  // Task list joining this task
-    tPtrFct cbWaitingForJoin;             // Debug callback
-    tPtrFct cbReadyToSignal;              // Debug callback
+    tPtrFct* pCbWaitingForJoin;           // Debug callback
+    tPtrFct* pCbReadyToSignal;            // Debug callback
     TaskHandle_t handleTask;              // Handle freeRtos task
     SemaphoreHandle_t lockRecHandle;      // Critical section
     SemaphoreHandle_t signalReadyToWait;  // Task wait for at least one join call
@@ -76,14 +76,14 @@ static void cbInternalCallback(void* ptr)
             xSemaphoreTake(ptrArgs->signalReadyToStart, portMAX_DELAY);
         }
 
-        if (NULL != ptrArgs->args.cbExternalCallback)
+        if (NULL != ptrArgs->args.pCbExternalCallback)
         {
-            ptrArgs->args.cbExternalCallback(ptrArgs->args.ptrStartArgs);
+            (*ptrArgs->args.pCbExternalCallback)(ptrArgs->args.ptrStartArgs);
         }
 
-        if (NULL != ptrArgs->cbWaitingForJoin)
+        if (NULL != ptrArgs->pCbWaitingForJoin)
         {
-            ptrArgs->cbWaitingForJoin(ptrArgs->args.ptrStartArgs);
+            (*ptrArgs->pCbWaitingForJoin)(ptrArgs->args.ptrStartArgs);
         }
 
         if (NULL != ptrArgs->signalReadyToWait)
@@ -91,9 +91,9 @@ static void cbInternalCallback(void* ptr)
             xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
         }
 
-        if (NULL != ptrArgs->cbReadyToSignal)
+        if (NULL != ptrArgs->pCbReadyToSignal)
         {
-            ptrArgs->cbReadyToSignal(ptrArgs->args.ptrStartArgs);
+            (*ptrArgs->pCbReadyToSignal)(ptrArgs->args.ptrStartArgs);
         }
 
         // At this level, wait for release mutex by condition variable called from join function
@@ -114,12 +114,12 @@ static void cbInternalCallback(void* ptr)
 // Initializes created thread then launches it.
 SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
                                 uint16_t wMaxRDV, // Max join
-                                tPtrFct fct,      // Callback
+                                tPtrFct* pFct,    // Callback
                                 void* args,       // Args
                                 int priority,
-                                const char* taskName,      // Name of the task
-                                tPtrFct fctWaitingForJoin, // Debug wait for join
-                                tPtrFct fctReadyToSignal)  // Debug wait for
+                                const char* taskName,       // Name of the task
+                                tPtrFct* fctWaitingForJoin, // Debug wait for join
+                                tPtrFct* fctReadyToSignal)  // Debug wait for
 {
     SOPC_ReturnStatus resPTHR = SOPC_STATUS_OK;
     SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
@@ -170,9 +170,9 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
 
     memset(handleWks, 0, sizeof(tThreadWks));
 
-    handleWks->args.cbExternalCallback = fct;
-    handleWks->cbReadyToSignal = fctReadyToSignal;
-    handleWks->cbWaitingForJoin = fctWaitingForJoin;
+    handleWks->args.pCbExternalCallback = &fct;
+    handleWks->pCbReadyToSignal = &fctReadyToSignal;
+    handleWks->pCbWaitingForJoin = &fctWaitingForJoin;
     handleWks->args.ptrStartArgs = args;
     handleWks->handleTask = NULL;
 

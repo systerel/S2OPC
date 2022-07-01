@@ -207,14 +207,14 @@ typedef enum SOPC_LibSub_ApplicativeEvent
     The Log level (SOPC_Log_Level). Note: SOPC_log_error shall be non-returning.
   @param text
     The text string to log (shall not be null) */
-typedef void (*SOPC_LibSub_LogCbk)(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
+typedef void SOPC_LibSub_LogCbk(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 
 /**
   @brief
     Callback type for disconnect event
   @param c_id
     The connection id that has been disconnected */
-typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
+typedef void SOPC_LibSub_DisconnectCbk(const SOPC_LibSub_ConnectionId c_id);
 
 /**
   @brief
@@ -228,9 +228,9 @@ typedef void (*SOPC_LibSub_DisconnectCbk)(const SOPC_LibSub_ConnectionId c_id);
     hence the callback must copy it if it should be used outside the callback.
     The NULL pointer is given to the callback when the SOPC_DataValue could not be converted
     to a SOPC_LibSub_Value, or the malloc failed. */
-typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
-                                          const SOPC_LibSub_DataId d_id,
-                                          const SOPC_LibSub_Value* value);
+typedef void SOPC_LibSub_DataChangeCbk(const SOPC_LibSub_ConnectionId c_id,
+                                       const SOPC_LibSub_DataId d_id,
+                                       const SOPC_LibSub_Value* value);
 
 /**
   @brief
@@ -252,11 +252,11 @@ typedef void (*SOPC_LibSub_DataChangeCbk)(const SOPC_LibSub_ConnectionId c_id,
   @param responseContext
     The requestContext given in SOPC_LibSub_AsyncSendRequestOnSession().
 */
-typedef void (*SOPC_LibSub_EventCbk)(SOPC_LibSub_ConnectionId c_id,
-                                     SOPC_LibSub_ApplicativeEvent event,
-                                     SOPC_StatusCode status,
-                                     const void* response,
-                                     uintptr_t responseContext);
+typedef void SOPC_LibSub_EventCbk(SOPC_LibSub_ConnectionId c_id,
+                                  SOPC_LibSub_ApplicativeEvent event,
+                                  SOPC_StatusCode status,
+                                  const void* response,
+                                  uintptr_t responseContext);
 // TODO: the const constraint on response should be released since it is not necessary and by-passed
 
 /*
@@ -274,8 +274,8 @@ typedef void (*SOPC_LibSub_EventCbk)(SOPC_LibSub_ConnectionId c_id,
    Notification event for disconnection from server */
 typedef struct
 {
-    SOPC_LibSub_LogCbk host_log_callback;
-    SOPC_LibSub_DisconnectCbk disconnect_callback;
+    SOPC_LibSub_LogCbk* host_log_callback;
+    SOPC_LibSub_DisconnectCbk* disconnect_callback;
     struct
     {
         SOPC_Log_Level level;
@@ -363,11 +363,11 @@ typedef struct
     int64_t publish_period_ms;
     uint32_t n_max_keepalive;
     uint32_t n_max_lifetime;
-    SOPC_LibSub_DataChangeCbk data_change_callback;
+    SOPC_LibSub_DataChangeCbk* data_change_callback;
     int64_t timeout_ms;
     uint32_t sc_lifetime;
     uint16_t token_target;
-    SOPC_LibSub_EventCbk generic_response_callback;
+    SOPC_LibSub_EventCbk* generic_response_callback;
     const void* expected_endpoints;
 } SOPC_LibSub_ConnectionCfg;
 

@@ -51,9 +51,9 @@
   @param value
     The new value of the Attribute 'Value'. Its content is freed by the LibSub after this function has been called,
     hence the callback must copy it if it should be used outside the callback. */
-typedef void (*SOPC_ClientHelper_DataChangeCbk)(const int32_t connectionId,
-                                                const char* nodeId,
-                                                const SOPC_DataValue* value);
+typedef void SOPC_ClientHelper_DataChangeCbk(const int32_t connectionId,
+                                             const char* nodeId,
+                                             const SOPC_DataValue* value);
 
 /**
  * @brief
@@ -496,7 +496,7 @@ int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id);
    '-2' if the data change callback associated to connectionId is NULL
    '-100' if operation failed
 */
-int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback);
+int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk* callback);
 
 /**
  @brief

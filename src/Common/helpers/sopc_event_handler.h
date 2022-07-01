@@ -56,7 +56,7 @@ typedef struct
 /**
  * \brief Function prototype for connecting an event emitter to a listener.
  */
-typedef void (*SOPC_SetListenerFunc)(SOPC_EventHandler* handler);
+typedef void SOPC_SetListenerFunc(SOPC_EventHandler* handler);
 
 /**
  * \brief Function prototype for message processing callbacks.
@@ -64,11 +64,11 @@ typedef void (*SOPC_SetListenerFunc)(SOPC_EventHandler* handler);
  * \p handler is a pointer to the \c SOPC_EventHandler invoking this callback,
  * the other parameters (and their lifetime) are specific to the event invoked.
  */
-typedef void (*SOPC_EventHandler_Callback)(SOPC_EventHandler* handler,
-                                           int32_t event,
-                                           uint32_t eltId,
-                                           uintptr_t params,
-                                           uintptr_t auxParam);
+typedef void SOPC_EventHandler_Callback(SOPC_EventHandler* handler,
+                                        int32_t event,
+                                        uint32_t eltId,
+                                        uintptr_t params,
+                                        uintptr_t auxParam);
 
 /**
  * \brief Creates a new event handler and attaches it to an existing looper.
@@ -80,7 +80,7 @@ typedef void (*SOPC_EventHandler_Callback)(SOPC_EventHandler* handler,
  *
  * \return The created event handler, or \c NULL on memory allocation failure.
  */
-SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback callback);
+SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback* callback);
 
 /**
  * \brief Posts an event to the back of the event handler's message queue.

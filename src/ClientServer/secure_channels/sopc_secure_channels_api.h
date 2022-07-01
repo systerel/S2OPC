@@ -82,7 +82,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
                                                    uintptr_t params,
                                                    uintptr_t auxParam);
 
-void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener);
+void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener);
 
 void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler);
 

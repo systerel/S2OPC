@@ -40,7 +40,7 @@ typedef enum E_MQTT_ID_FSM /* Destination of the decision table for an event */
 /* Callback used by an event to free an allocated data field. This callback is used by the mgr scheduler after event
  * treatment */
 
-typedef void (*pEventClearFct)(void* ptr);
+typedef void EventClearFct(void* ptr);
 
 /* Event definition used by mqtt manager */
 
@@ -51,7 +51,7 @@ typedef struct T_MQTT_EVENT
     uint16_t event;                              /* Event identifier. Can be transport context or manager event */
     uint16_t size;                               /* Size of raw data pointed by eventd data */
     void* pEventData;                            /* Data linked to the event */
-    pEventClearFct clearCallback;                /* Callback used by manager scheduler to free pEventData */
+    EventClearFct* pClearCallback;               /* Callback used by manager scheduler to free pEventData */
 } tMqttEvent;
 
 /* Message queue used by manager event scheduler */
@@ -126,12 +126,12 @@ typedef struct T_MQTT_TRANSPORT_CONTEXT_CONNEXION_CONFIGURATION
 
 typedef struct T_MQTT_TRANSPORT_CONTEXT_CALLBACKS_CONFIG
 {
-    pFctGetHandleResponse cbGetHandleSuccess; /* On get handle request success */
-    pFctGetHandleResponse cbGetHandleFailure; /* On get handle request failure */
-    pFctClientStatus cbClientReady;           /* On transport context ready (connection established and subscribed) */
-    pFctClientStatus cbClientNotReady;        /* On transport context not ready, after a conection lost by example. */
-    pFctMessageReceived cbMessageReceived;    /* On message reception on topic name set by hard coded configuration */
-    pFctReleaseHandleResponse cbReleaseHandleResponse;
+    FctGetHandleResponse* pCbGetHandleSuccess; /* On get handle request success */
+    FctGetHandleResponse* pCbGetHandleFailure; /* On get handle request failure */
+    FctClientStatus* pCbClientReady;           /* On transport context ready (connection established and subscribed) */
+    FctClientStatus* pCbClientNotReady;        /* On transport context not ready, after a conection lost by example. */
+    FctMessageReceived* pCbMessageReceived;    /* On message reception on topic name set by hard coded configuration */
+    FctReleaseHandleResponse* pCbReleaseHandleResponse;
 } tMqttTransportContextCallbacksConfig;
 
 /* Transport context internal workspace. One by connexion defined by MQTT_MAX_CLIENT. Statically allocated by set to NOT
@@ -225,7 +225,7 @@ struct T_MQTT_TRANSPORT_HANDLE
 
     /* -- or -- */
 
-    pFctMessageSyncReceived cbMessageReceived; /* Callback of message reception */
+    FctMessageSyncReceived* pCbMessageReceived; /* Callback of message reception */
 
     /* Context of this sync context : associated mqtt manager and associated asynch transport handle */
 
@@ -612,9 +612,9 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
 #endif
                 //***************CALLBACK GET HANDLE SUCCESS ***********************
 
-                if (NULL != pGetHandleRequest->callbacksConf.cbGetHandleSuccess)
+                if (NULL != pGetHandleRequest->callbacksConf.pCbGetHandleSuccess)
                 {
-                    pGetHandleRequest->callbacksConf.cbGetHandleSuccess(
+                    (*pGetHandleRequest->callbacksConf.pCbGetHandleSuccess)(
                         idxClient,                        /* Transport context async handle */
                         pGetHandleRequest->pUserContext); /* User context */
                 }
@@ -632,10 +632,10 @@ static eMqttManagerStatus cbNewHdl(MqttManagerHandle* pWks,
                 SOPC_CONSOLE_PRINTF("\n cbNewHdl entry : no slot found\n");
 #endif
                 //***************CALLBACK GET HANDLE ERROR ***********************
-                if (NULL != pGetHandleRequest->callbacksConf.cbGetHandleFailure)
+                if (NULL != pGetHandleRequest->callbacksConf.pCbGetHandleFailure)
                 {
-                    pGetHandleRequest->callbacksConf.cbGetHandleFailure(MQTT_INVALID_TRANSPORT_ASYNC_HANDLE,
-                                                                        pGetHandleRequest->pUserContext);
+                    (*pGetHandleRequest->callbacksConf.pCbGetHandleFailure)(MQTT_INVALID_TRANSPORT_ASYNC_HANDLE,
+                                                                            pGetHandleRequest->pUserContext);
                 }
             }
         }
@@ -719,9 +719,9 @@ static eMqttManagerStatus cbRcv(
 
         //***************CALLBACK RECEPTION ***********************
 
-        if (NULL != pCtx->callbacksConfig.cbMessageReceived)
+        if (NULL != pCtx->callbacksConfig.pCbMessageReceived)
         {
-            pCtx->callbacksConfig.cbMessageReceived(cltId, bufferData, dataSize, pCtx->pUserContext);
+            (*pCtx->callbacksConfig.pCbMessageReceived)(cltId, bufferData, dataSize, pCtx->pUserContext);
         }
         return pWks->status;
     }
@@ -754,9 +754,9 @@ static eMqttManagerStatus cbCltRdy(
 
         //***************CALLBACK READY ***********************
 
-        if (NULL != pCtx->callbacksConfig.cbClientReady)
+        if (NULL != pCtx->callbacksConfig.pCbClientReady)
         {
-            pCtx->callbacksConfig.cbClientReady(cltId, pCtx->pUserContext);
+            (*pCtx->callbacksConfig.pCbClientReady)(cltId, pCtx->pUserContext);
         }
         return pWks->status;
     }
@@ -789,9 +789,9 @@ static eMqttManagerStatus cbCltNotRdy(
 
         //***************CALLBACK NOT READY ***********************
 
-        if (NULL != pCtx->callbacksConfig.cbClientNotReady)
+        if (NULL != pCtx->callbacksConfig.pCbClientNotReady)
         {
-            pCtx->callbacksConfig.cbClientNotReady(cltId, pCtx->pUserContext);
+            (*pCtx->callbacksConfig.pCbClientNotReady)(cltId, pCtx->pUserContext);
         }
         return pWks->status;
     }
@@ -838,9 +838,9 @@ static eMqttManagerStatus cbCltRmv(MqttManagerHandle* pWks,
 
         //***************CALLBACK REMOVE***********************
 
-        if (NULL != pCtx->callbacksConfig.cbReleaseHandleResponse)
+        if (NULL != pCtx->callbacksConfig.pCbReleaseHandleResponse)
         {
-            pCtx->callbacksConfig.cbReleaseHandleResponse(cltId, pCtx->pUserContext);
+            (*pCtx->callbacksConfig.pCbReleaseHandleResponse)(cltId, pCtx->pUserContext);
         }
 
         /* RAZ callbacks configuration and user context pointer */
@@ -1592,9 +1592,9 @@ static SOPC_ReturnStatus EVENT_CHANNEL_push(tMqttEventChannel* pChannel, /* Even
             /* Fifo full, free current event */
             if (NULL != pEvent->pEventData)
             {
-                if (NULL != pEvent->clearCallback)
+                if (NULL != pEvent->pClearCallback)
                 {
-                    pEvent->clearCallback(pEvent->pEventData);
+                    (*pEvent->pClearCallback)(pEvent->pEventData);
                     pEvent->pEventData = NULL;
                 }
             }
@@ -1626,11 +1626,11 @@ static SOPC_ReturnStatus EVENT_CHANNEL_flush(tMqttEventChannel* pChannel) /* Eve
         while (pChannel->nbEvents > 0)
         {
             /* If data exists and clear callback exist, call clear callback on data. */
-            if (NULL != pChannel->bufferEvents[pChannel->idxRdEvent].clearCallback)
+            if (NULL != pChannel->bufferEvents[pChannel->idxRdEvent].pClearCallback)
             {
                 if (NULL != pChannel->bufferEvents[pChannel->idxRdEvent].pEventData)
                 {
-                    pChannel->bufferEvents[pChannel->idxRdEvent].clearCallback(
+                    (*pChannel->bufferEvents[pChannel->idxRdEvent].pClearCallback)(
                         pChannel->bufferEvents[pChannel->idxRdEvent].pEventData);
                 }
             }
@@ -1730,7 +1730,7 @@ static SOPC_ReturnStatus MGR_EvtQuitScheduler(MqttManagerHandle* pWks)
     event.idTransportContext = 0;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
 
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
@@ -1754,7 +1754,7 @@ static SOPC_ReturnStatus MGR_EvtCltRemoved(MqttManagerHandle* pWks, MqttTranspor
     event.pEventData = NULL;
     event.idTransportContext = idx;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1777,7 +1777,7 @@ static SOPC_ReturnStatus MGR_EvtCltRdy(MqttManagerHandle* pWks, MqttTransportAsy
     event.pEventData = NULL;
     event.idTransportContext = idx;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1800,7 +1800,7 @@ static SOPC_ReturnStatus MGR_EvtCltNotReady(MqttManagerHandle* pWks, MqttTranspo
     event.pEventData = NULL;
     event.idTransportContext = idx;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1828,7 +1828,7 @@ static SOPC_ReturnStatus MGR_EvtMsgRcv(MqttManagerHandle* pWks,
     {
         memcpy(event.pEventData, bufferData, size);
         event.size = size;
-        event.clearCallback = SOPC_Free;
+        event.pClearCallback = &SOPC_Free;
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1865,7 +1865,7 @@ static SOPC_ReturnStatus MGR_EvtSendMsg(MqttManagerHandle* pWks,
     {
         memcpy(event.pEventData, bufferData, size);
         event.size = size;
-        event.clearCallback = SOPC_Free;
+        event.pClearCallback = &SOPC_Free;
 
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
@@ -1897,7 +1897,7 @@ static SOPC_ReturnStatus MGR_EvtReleaseHdl(MqttManagerHandle* pWks, MqttTranspor
     event.pEventData = NULL;
     event.idTransportContext = idx;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1929,7 +1929,7 @@ SOPC_ReturnStatus CLT_EvtConnReq(MqttManagerHandle* pWks,
             memcpy(event.pEventData, pConfig, sizeof(tMqttTransportContextConnexionConfig));
             event.idTransportContext = idx;
             event.size = sizeof(tMqttTransportContextConnexionConfig);
-            event.clearCallback = SOPC_Free;
+            event.pClearCallback = &SOPC_Free;
             if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1952,7 +1952,7 @@ SOPC_ReturnStatus CLT_EvtConnReq(MqttManagerHandle* pWks,
         event.pEventData = NULL;
         event.idTransportContext = idx;
         event.size = 0;
-        event.clearCallback = NULL;
+        event.pClearCallback = NULL;
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -1983,7 +1983,7 @@ SOPC_ReturnStatus CLT_EvtSendMsgReq(MqttManagerHandle* pWks,
     {
         memcpy(event.pEventData, bufferData, size);
         event.size = size;
-        event.clearCallback = SOPC_Free;
+        event.pClearCallback = &SOPC_Free;
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2014,7 +2014,7 @@ SOPC_ReturnStatus CLT_EvtDiscReq(MqttManagerHandle* pWks, MqttTransportAsyncHand
     event.pEventData = NULL;
     event.idTransportContext = idx;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2037,7 +2037,7 @@ SOPC_ReturnStatus CLT_EvtConnLost(MqttManagerHandle* pWks, MqttTransportAsyncHan
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2060,7 +2060,7 @@ SOPC_ReturnStatus CLT_EvtDisc(MqttManagerHandle* pWks, MqttTransportAsyncHandle 
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2083,7 +2083,7 @@ SOPC_ReturnStatus CLT_EvtConnError(MqttManagerHandle* pWks, MqttTransportAsyncHa
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2106,7 +2106,7 @@ SOPC_ReturnStatus CLT_EvtConnSuccess(MqttManagerHandle* pWks, MqttTransportAsync
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2130,7 +2130,7 @@ SOPC_ReturnStatus CLT_EvtSubFailed(MqttManagerHandle* pWks, MqttTransportAsyncHa
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2154,7 +2154,7 @@ SOPC_ReturnStatus CLT_EvtSubSuccess(MqttManagerHandle* pWks, MqttTransportAsyncH
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2177,7 +2177,7 @@ SOPC_ReturnStatus CLT_EvtMsgSent(MqttManagerHandle* pWks, MqttTransportAsyncHand
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2200,7 +2200,7 @@ SOPC_ReturnStatus CLT_EvtMsgSentError(MqttManagerHandle* pWks, MqttTransportAsyn
     event.idTransportContext = idx;
     event.pEventData = NULL;
     event.size = 0;
-    event.clearCallback = NULL;
+    event.pClearCallback = NULL;
     if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
     {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2226,7 +2226,7 @@ SOPC_ReturnStatus CLT_EvtMsgRcv(MqttManagerHandle* pWks, MqttTransportAsyncHandl
     {
         memcpy(event.pEventData, msgData, msgLen);
         event.size = msgLen;
-        event.clearCallback = SOPC_Free;
+        event.pClearCallback = &SOPC_Free;
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pWks->schedulerChannel, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2261,7 +2261,7 @@ static void TransportContext_AddPendingMsg(tMqttTransportContext* pClt, char* ms
     {
         memcpy(event.pEventData, msgData, msgLen);
         event.size = msgLen;
-        event.clearCallback = SOPC_Free;
+        event.pClearCallback = &SOPC_Free;
         if (SOPC_STATUS_OK != EVENT_CHANNEL_push(&pClt->pendingsMessagesToSend, &event))
         {
 #if DEBUG_SCHEDULER == 1 && DEBUG_CHANNEL_UNAVAILABLE_ERROR == 1
@@ -2926,7 +2926,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 
             /* Execute clear callback associated to the last event if exists. */
 
-            if (NULL != currentEvent.clearCallback)
+            if (NULL != currentEvent.pClearCallback)
             {
 #if DEBUG_SCHEDULER == 1 && DEBUG_LOOP_ALIVE == 1
                 SOPC_CONSOLE_PRINTF(
@@ -2934,7 +2934,7 @@ static void* cbTask_MqttManagerScheduler(void* pArg)
 #endif
                 if (NULL != currentEvent.pEventData)
                 {
-                    currentEvent.clearCallback(currentEvent.pEventData);
+                    (*currentEvent.pClearCallback)(currentEvent.pEventData);
                 }
             }
 
@@ -3198,17 +3198,17 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
 static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHandleRequest* pGetHandleRequest,
                                                                      const char* sUri,
                                                                      const char* sTopicName,
-                                                                     pFctGetHandleResponse cbGetHandleSuccess,
-                                                                     pFctGetHandleResponse cbGetHandleFailure,
-                                                                     pFctClientStatus cbClientReady,
-                                                                     pFctClientStatus cbClientNotReady,
-                                                                     pFctMessageReceived cbMessageReceived,
-                                                                     pFctReleaseHandleResponse cbReleaseHandleResponse,
+                                                                     FctGetHandleResponse* pCbGetHandleSuccess,
+                                                                     FctGetHandleResponse pCbGetHandleFailure,
+                                                                     FctClientStatus* pCbClientReady,
+                                                                     FctClientStatus* pCbClientNotReady,
+                                                                     FctMessageReceived* pCbMessageReceived,
+                                                                     FctReleaseHandleResponse* pCbReleaseHandleResponse,
                                                                      void* pUserContext)
 {
-    if (NULL == pGetHandleRequest || NULL == sUri || NULL == sTopicName || NULL == cbGetHandleSuccess ||
-        NULL == cbGetHandleFailure || NULL == cbClientReady || NULL == cbClientNotReady || NULL == cbMessageReceived ||
-        NULL == cbReleaseHandleResponse)
+    if (NULL == pGetHandleRequest || NULL == sUri || NULL == sTopicName || NULL == pCbGetHandleSuccess ||
+        NULL == pCbGetHandleFailure || NULL == pCbClientReady || NULL == pCbClientNotReady ||
+        NULL == pCbMessageReceived || NULL == pCbReleaseHandleResponse)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3226,12 +3226,12 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     snprintf(pGetHandleRequest->connectionConf.topicname, sizeof(pGetHandleRequest->connectionConf.topicname) - 1, "%s",
              sTopicName);
 
-    pGetHandleRequest->callbacksConf.cbGetHandleSuccess = cbGetHandleSuccess;
-    pGetHandleRequest->callbacksConf.cbGetHandleFailure = cbGetHandleFailure;
-    pGetHandleRequest->callbacksConf.cbClientReady = cbClientReady;
-    pGetHandleRequest->callbacksConf.cbClientNotReady = cbClientNotReady;
-    pGetHandleRequest->callbacksConf.cbMessageReceived = cbMessageReceived;
-    pGetHandleRequest->callbacksConf.cbReleaseHandleResponse = cbReleaseHandleResponse;
+    pGetHandleRequest->callbacksConf.pCbGetHandleSuccess = pCbGetHandleSuccess;
+    pGetHandleRequest->callbacksConf.pCbGetHandleFailure = pCbGetHandleFailure;
+    pGetHandleRequest->callbacksConf.pCbClientReady = pCbClientReady;
+    pGetHandleRequest->callbacksConf.pCbClientNotReady = pCbClientNotReady;
+    pGetHandleRequest->callbacksConf.pCbMessageReceived = pCbMessageReceived;
+    pGetHandleRequest->callbacksConf.pCbReleaseHandleResponse = pCbReleaseHandleResponse;
     pGetHandleRequest->pUserContext = pUserContext;
 
     return result;
@@ -3287,15 +3287,16 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
                                                       void* pUserContext,
                                                       const char* uri,
                                                       const char* topicName,
-                                                      pFctGetHandleResponse cbGetHandleSuccess,
-                                                      pFctGetHandleResponse cbGetHandleFailure,
-                                                      pFctClientStatus cbClientReady,
-                                                      pFctClientStatus cbClientNotReady,
-                                                      pFctMessageReceived cbMessageReceived,
-                                                      pFctReleaseHandleResponse cbReleaseHandle)
+                                                      FctGetHandleResponse* pCbGetHandleSuccess,
+                                                      FctGetHandleResponse* pCbGetHandleFailure,
+                                                      FctClientStatus* pCbClientReady,
+                                                      FctClientStatus* pCbClientNotReady,
+                                                      FctMessageReceived* pCbMessageReceived,
+                                                      FctReleaseHandleResponse* pCbReleaseHandle)
 {
-    if (NULL == pWks || NULL == uri || NULL == topicName || NULL == cbGetHandleSuccess || NULL == cbClientReady ||
-        NULL == cbMessageReceived || NULL == cbReleaseHandle || NULL == cbClientNotReady || NULL == cbGetHandleFailure)
+    if (NULL == pWks || NULL == uri || NULL == topicName || NULL == pCbGetHandleSuccess || NULL == pCbClientReady ||
+        NULL == pCbMessageReceived || NULL == pCbReleaseHandle || NULL == pCbClientNotReady ||
+        NULL == pCbGetHandleFailure)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3325,11 +3326,11 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
 
     /* Get handle request data initialization */
     SOPC_MQTT_MGR_InitializeGetNewHandleRequest((tMqttGetHandleRequest*) event.pEventData, uri, topicName,
-                                                cbGetHandleSuccess, cbGetHandleFailure, cbClientReady, cbClientNotReady,
-                                                cbMessageReceived, cbReleaseHandle, pUserContext);
+                                                pCbGetHandleSuccess, pCbGetHandleFailure, pCbClientReady,
+                                                pCbClientNotReady, pCbMessageReceived, pCbReleaseHandle, pUserContext);
 
     event.size = sizeof(tMqttGetHandleRequest);
-    event.clearCallback = SOPC_Free;
+    event.pClearCallback = &SOPC_Free;
 
     result = EVENT_CHANNEL_push(&pWks->schedulerChannel, &event);
 
@@ -3560,9 +3561,9 @@ static void SYNCH_msgReceived(MqttTransportAsyncHandle idx, uint8_t* bufferData,
 
         if (MQTT_INVALID_TRANSPORT_ASYNC_HANDLE != ctx->transportId && ctx->transportId == idx)
         {
-            if (NULL != ctx->cbMessageReceived)
+            if (NULL != ctx->pCbMessageReceived)
             {
-                ctx->cbMessageReceived(ctx, bufferData, dataSize, ctx->pUserContext);
+                (*ctx->pCbMessageReceived)(ctx, bufferData, dataSize, ctx->pUserContext);
             }
             else
             {
@@ -3846,7 +3847,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
 MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
                                                          const char* uri,
                                                          const char* topicName,
-                                                         pFctMessageSyncReceived cbMessageReceived,
+                                                         FctMessageSyncReceived* pCbMessageReceived,
                                                          void* pUserContext)
 {
     if (NULL == pWks || NULL == uri)
@@ -3906,7 +3907,7 @@ MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks
     }
 
     pCtx->transportId = MQTT_INVALID_TRANSPORT_ASYNC_HANDLE;
-    pCtx->cbMessageReceived = cbMessageReceived;
+    pCtx->pCbMessageReceived = pCbMessageReceived;
     pCtx->pUserContext = pUserContext;
     memset(pCtx->fifo, 0, MQTT_MAX_BUFFER_RCV_MSG * sizeof(SOPC_Buffer*));
     pCtx->iRd = 0;

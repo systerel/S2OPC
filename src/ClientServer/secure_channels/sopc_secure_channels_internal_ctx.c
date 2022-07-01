@@ -36,7 +36,7 @@ SOPC_EventHandler* secureChannelsSocketsEventHandler = NULL;
 SOPC_EventHandler* secureChannelsTimerEventHandler = NULL;
 SOPC_EventHandler* secureChannelsEventHandler = NULL;
 
-void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc setSocketsListener)
+void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc* setSocketsListener)
 {
     memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * (SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1));
     memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1));

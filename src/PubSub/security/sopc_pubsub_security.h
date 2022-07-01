@@ -46,9 +46,9 @@ typedef struct SOPC_PubSub_SecurityType
  *
  * \return a SOPC_PubSub_SecurityType object or NULL is not found
  */
-typedef SOPC_PubSub_SecurityType* (*SOPC_UADP_GetSecurity_Func)(uint32_t tokenId,
-                                                                SOPC_Conf_PublisherId pub_id,
-                                                                uint16_t writerGroupId);
+typedef SOPC_PubSub_SecurityType* SOPC_UADP_GetSecurity_Func(uint32_t tokenId,
+                                                             SOPC_Conf_PublisherId pub_id,
+                                                             uint16_t writerGroupId);
 
 /**
  * \brief clear a SOPC_PubSub_SecurityType object

@@ -488,19 +488,19 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, con
     }
 }
 
-void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data)
+void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data)
 {
     assert(space != NULL);
 
     if (!space->readOnlyNodes)
     {
-        SOPC_Dict_ForEach(space->dict_nodes, func, user_data);
+        SOPC_Dict_ForEach(space->dict_nodes, pFunc, user_data);
     }
     else
     {
         for (uint32_t i = 0; i < space->nb_nodes; i++)
         {
-            func(SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]), &space->const_nodes[i], user_data);
+            (*pFunc)(SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]), &space->const_nodes[i], user_data);
         }
     }
 }

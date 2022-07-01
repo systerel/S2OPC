@@ -50,20 +50,20 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  *
  * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */
-typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_CallContext* callContextPtr,
-                                                   const SOPC_NodeId* objectId,
-                                                   uint32_t nbInputArgs,
-                                                   const SOPC_Variant* inputArgs,
-                                                   uint32_t* nbOutputArgs,
-                                                   SOPC_Variant** outputArgs,
-                                                   void* param);
+typedef SOPC_StatusCode SOPC_MethodCallFunc_Ptr(const SOPC_CallContext* callContextPtr,
+                                                const SOPC_NodeId* objectId,
+                                                uint32_t nbInputArgs,
+                                                const SOPC_Variant* inputArgs,
+                                                uint32_t* nbOutputArgs,
+                                                SOPC_Variant** outputArgs,
+                                                void* param);
 
 /**
  * \brief  Type of the function to free param of SOPC_MethodCallFunc.
  *
  * \param data           a pointer to the object to free. Can be NULL
  */
-typedef void (*SOPC_MethodCallFunc_Free_Func)(void* data);
+typedef void SOPC_MethodCallFunc_Free_Func(void* data);
 
 /**
  * \brief  Object to describe of function associated to a method and user parameter
@@ -73,12 +73,12 @@ struct SOPC_MethodCallFunc
     /**
      * \brief a pointer on a function to clear pParam. Can be NULL
      */
-    SOPC_MethodCallFunc_Free_Func pFnFree;
+    SOPC_MethodCallFunc_Free_Func* pFnFree;
 
     /**
      * \brief a valid pointer on the function to call
      */
-    SOPC_MethodCallFunc_Ptr pMethodFunc;
+    SOPC_MethodCallFunc_Ptr* pMethodFunc;
 
     /**
      * \brief parameter to give when call pMethodFunc. Can be NULL
@@ -156,8 +156,8 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
  */
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    SOPC_NodeId* methodId,
-                                                   SOPC_MethodCallFunc_Ptr methodFunc,
+                                                   SOPC_MethodCallFunc_Ptr* methodFunc,
                                                    void* param,
-                                                   SOPC_MethodCallFunc_Free_Func fnFree);
+                                                   SOPC_MethodCallFunc_Free_Func* fnFree);
 
 #endif /* SOPC_CALL_METHOD_MANAGER_H_ */

@@ -47,10 +47,10 @@ struct _SOPC_Dict
     size_t n_busy;   // Number of buckets where the key is not the empty key
     void* empty_key;
     void* tombstone_key;
-    SOPC_Dict_KeyHash_Fct hash_func;
-    SOPC_Dict_KeyEqual_Fct equal_func;
-    SOPC_Dict_Free_Fct key_free;
-    SOPC_Dict_Free_Fct value_free;
+    SOPC_Dict_KeyHash_Fct* hash_func;
+    SOPC_Dict_KeyEqual_Fct* equal_func;
+    SOPC_Dict_Free_Fct* key_free;
+    SOPC_Dict_Free_Fct* value_free;
 };
 
 static const size_t DICT_INITIAL_SIZE = 16;
@@ -67,7 +67,7 @@ static void set_empty_keys(SOPC_DictBucket* buckets, size_t n_buckets, void* emp
     }
 }
 
-static void free_bucket(SOPC_DictBucket* b, SOPC_Dict_Free_Fct key_free, SOPC_Dict_Free_Fct value_free)
+static void free_bucket(SOPC_DictBucket* b, SOPC_Dict_Free_Fct* key_free, SOPC_Dict_Free_Fct* value_free)
 {
     if (key_free != NULL)
     {
@@ -171,10 +171,10 @@ static bool dict_resize(SOPC_Dict* d, size_t size)
 }
 
 SOPC_Dict* SOPC_Dict_Create(void* empty_key,
-                            SOPC_Dict_KeyHash_Fct key_hash,
-                            SOPC_Dict_KeyEqual_Fct key_equal,
-                            SOPC_Dict_Free_Fct key_free,
-                            SOPC_Dict_Free_Fct value_free)
+                            SOPC_Dict_KeyHash_Fct* key_hash,
+                            SOPC_Dict_KeyEqual_Fct* key_equal,
+                            SOPC_Dict_Free_Fct* key_free,
+                            SOPC_Dict_Free_Fct* value_free)
 {
     SOPC_Dict* d = SOPC_Calloc(1, sizeof(SOPC_Dict));
 
@@ -389,25 +389,25 @@ void SOPC_Dict_Remove(SOPC_Dict* d, const void* key)
     maybe_resize(d, 0);
 }
 
-SOPC_Dict_Free_Fct SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
+SOPC_Dict_Free_Fct* SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
 {
     assert(d != NULL);
     return d->key_free;
 }
 
-void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
+void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func)
 {
     assert(d != NULL);
     d->key_free = func;
 }
 
-SOPC_Dict_Free_Fct SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
+SOPC_Dict_Free_Fct* SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
 {
     assert(d != NULL);
     return d->value_free;
 }
 
-void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct func)
+void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func)
 {
     assert(d != NULL);
     d->value_free = func;
@@ -423,7 +423,7 @@ size_t SOPC_Dict_Capacity(const SOPC_Dict* d)
     return d->size / 2;
 }
 
-void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct func, void* user_data)
+void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, void* user_data)
 {
     for (size_t i = 0; i < d->size; ++i)
     {

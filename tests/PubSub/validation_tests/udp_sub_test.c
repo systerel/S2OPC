@@ -139,7 +139,7 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuff
 {
     assert(NULL != subConnection);
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .getSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
+        .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
 
     return SOPC_UADP_NetworkMessage_Decode(pBuffer, &readerConf, subConnection);
 }

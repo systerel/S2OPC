@@ -31,7 +31,7 @@ static void* POISON_PILL = (void*) 0x01;
 struct _SOPC_EventHandler
 {
     SOPC_Looper* looper;
-    SOPC_EventHandler_Callback callback;
+    SOPC_EventHandler_Callback* callback;
 };
 
 struct _SOPC_Looper
@@ -109,7 +109,7 @@ static void* looper_loop(void* user_data)
     return NULL;
 }
 
-SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback callback)
+SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback* callback)
 {
     SOPC_EventHandler* handler = SOPC_Calloc(1, sizeof(SOPC_EventHandler));
 
@@ -153,7 +153,7 @@ SOPC_Looper* SOPC_Looper_Create(const char* threadName)
     SOPC_Looper* looper = SOPC_Calloc(1, sizeof(SOPC_Looper));
     SOPC_AsyncQueue* queue = NULL;
     SOPC_Array* handlers =
-        SOPC_Array_Create(sizeof(SOPC_EventHandler*), 0, (SOPC_Array_Free_Func) event_handler_delete);
+        SOPC_Array_Create(sizeof(SOPC_EventHandler*), 0, (SOPC_Array_Free_Func*) event_handler_delete);
 
     if (looper == NULL || handlers == NULL || SOPC_AsyncQueue_Init(&queue, threadName) != SOPC_STATUS_OK ||
         SOPC_Thread_Create(&looper->thread, looper_loop, queue, threadName) != SOPC_STATUS_OK)

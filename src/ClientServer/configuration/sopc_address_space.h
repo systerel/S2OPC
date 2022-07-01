@@ -78,9 +78,9 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, con
  * Note: \p value actual type is const SOPC_AddressSpace_Node* but shall remain void in declaration for generic data
  * structure usage
  */
-typedef void (*SOPC_AddressSpace_ForEach_Fct)(const void* key, const void* value, void* user_data);
+typedef void SOPC_AddressSpace_ForEach_Fct(const void* key, const void* value, void* user_data);
 
-void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct func, void* user_data);
+void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data);
 
 /* Common attributes */
 OpcUa_NodeClass* SOPC_AddressSpace_Get_NodeClass(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);

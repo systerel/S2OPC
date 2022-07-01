@@ -200,7 +200,7 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_Internal
     SOPC_EventHandler_PostAsNext(secureChannelsInternalEventHandler, (int32_t) event, id, params, auxParam);
 }
 
-void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc setSocketsListener)
+void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener)
 {
     SOPC_SecureChannelsInternalContext_Initialize(setSocketsListener);
 }

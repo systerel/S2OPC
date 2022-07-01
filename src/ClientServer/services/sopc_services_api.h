@@ -116,7 +116,7 @@ void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintpt
 /**
  *  \brief Initializes the services and application event dispatcher threads
  */
-void SOPC_Services_Initialize(SOPC_SetListenerFunc setSecureChannelsListener);
+void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener);
 
 /**
  *  \brief Close all SecureChannels (established as client or both) in a synchronous way.

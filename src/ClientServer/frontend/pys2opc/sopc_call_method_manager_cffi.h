@@ -27,19 +27,19 @@ typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
 typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
 typedef struct SOPC_CallContext SOPC_CallContext;
 
-typedef SOPC_StatusCode (*SOPC_MethodCallFunc_Ptr)(const SOPC_CallContext* callContextPtr,
-                                                   const SOPC_NodeId* objectId,
-                                                   uint32_t nbInputArgs,
-                                                   const SOPC_Variant* inputArgs,
-                                                   uint32_t* nbOutputArgs,
-                                                   SOPC_Variant** outputArgs,
-                                                   void* param);
-typedef void (*SOPC_MethodCallFunc_Free_Func)(void* data);
+typedef SOPC_StatusCode SOPC_MethodCallFunc_Ptr(const SOPC_CallContext* callContextPtr,
+                                                const SOPC_NodeId* objectId,
+                                                uint32_t nbInputArgs,
+                                                const SOPC_Variant* inputArgs,
+                                                uint32_t* nbOutputArgs,
+                                                SOPC_Variant** outputArgs,
+                                                void* param);
+typedef void SOPC_MethodCallFunc_Free_Func(void* data);
 
 SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void);
 void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    SOPC_NodeId* methodId,
-                                                   SOPC_MethodCallFunc_Ptr methodFunc,
+                                                   SOPC_MethodCallFunc_Ptr* methodFunc,
                                                    void* param,
-                                                   SOPC_MethodCallFunc_Free_Func fnFree);
+                                                   SOPC_MethodCallFunc_Free_Func* fnFree);

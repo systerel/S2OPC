@@ -1234,7 +1234,7 @@ void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue* value
     }
 }
 
-int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk callback)
+int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk* callback)
 {
     int32_t res = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

@@ -58,11 +58,11 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
  *
  * \return A ::SOPC_ReaderGroup matching the received message or NULL if no configured connection matches.
  */
-typedef const SOPC_ReaderGroup* (*SOPC_UADP_NetworkMessage_GetReaderGroup)(const SOPC_PubSubConnection* connection,
-                                                                           const SOPC_UADP_Configuration* uadp_conf,
-                                                                           const SOPC_Dataset_LL_PublisherId* pubid,
-                                                                           const uint32_t groupVersion,
-                                                                           const uint32_t groupId);
+typedef const SOPC_ReaderGroup* SOPC_UADP_NetworkMessage_GetReaderGroup(const SOPC_PubSubConnection* connection,
+                                                                        const SOPC_UADP_Configuration* uadp_conf,
+                                                                        const SOPC_Dataset_LL_PublisherId* pubid,
+                                                                        const uint32_t groupVersion,
+                                                                        const uint32_t groupId);
 
 /**
  * \brief A callback for DataSetReader identification. When a DataSet content is received, this
@@ -77,10 +77,10 @@ typedef const SOPC_ReaderGroup* (*SOPC_UADP_NetworkMessage_GetReaderGroup)(const
  * \return A ::SOPC_DataSetReader matching the received DataSet or \c NULL if no matching Reader is configured for the
  * given group.
  */
-typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SOPC_ReaderGroup* group,
-                                                                        const SOPC_UADP_Configuration* uadp_conf,
-                                                                        const uint16_t dataSetWriterId,
-                                                                        const uint8_t dataSetIndex);
+typedef const SOPC_DataSetReader* SOPC_UADP_NetworkMessage_GetReader(const SOPC_ReaderGroup* group,
+                                                                     const SOPC_UADP_Configuration* uadp_conf,
+                                                                     const uint16_t dataSetWriterId,
+                                                                     const uint8_t dataSetIndex);
 
 /**
  * \brief A callback for DataSet message application. When a compliant DataSet is received, this
@@ -96,21 +96,21 @@ typedef const SOPC_DataSetReader* (*SOPC_UADP_NetworkMessage_GetReader)(const SO
  * configuration.
  *         - ::SOPC_STATUS_ENCODING_ERROR if the user-level ::SOPC_SubTargetVariable_SetVariables fails.
  */
-typedef SOPC_ReturnStatus (*SOPC_UADP_NetworkMessage_SetDsm)(const SOPC_Dataset_LL_DataSetMessage* dsm,
-                                                             SOPC_SubTargetVariableConfig* targetConfig,
-                                                             const SOPC_DataSetReader* reader);
+typedef SOPC_ReturnStatus SOPC_UADP_NetworkMessage_SetDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                          SOPC_SubTargetVariableConfig* targetConfig,
+                                                          const SOPC_DataSetReader* reader);
 
 typedef struct
 {
-    SOPC_UADP_NetworkMessage_GetReaderGroup getGroup_Func;
-    SOPC_UADP_NetworkMessage_GetReader getReader_Func;
-    SOPC_UADP_NetworkMessage_SetDsm setDsm_Func;
+    SOPC_UADP_NetworkMessage_GetReaderGroup* pGetGroup_Func;
+    SOPC_UADP_NetworkMessage_GetReader* pGetReader_Func;
+    SOPC_UADP_NetworkMessage_SetDsm* pSetDsm_Func;
 } SOPC_UADP_NetworkMessage_Reader_Callbacks;
 
 typedef struct
 {
     SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
-    SOPC_UADP_GetSecurity_Func getSecurity_Func;
+    SOPC_UADP_GetSecurity_Func* pGetSecurity_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 

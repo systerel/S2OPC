@@ -559,7 +559,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 }
 
 static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func) SOPC_Free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func*) &SOPC_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
 static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
@@ -631,7 +631,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 {
     char* sNodeId;
     SOPC_NodeId* methodId;
-    SOPC_MethodCallFunc_Ptr methodFunc;
+    SOPC_MethodCallFunc_Ptr* methodFunc;
     /* Create and define the method call manager the server will use*/
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
     SOPC_StatusCode status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;

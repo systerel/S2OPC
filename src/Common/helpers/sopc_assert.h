@@ -91,14 +91,14 @@
  *      always be empty.
  * \post This function has no constraint return (may return or not).
  */
-typedef void (*SOPC_Assert_UserCallback)(const char* context);
+typedef void SOPC_Assert_UserCallback(const char* context);
 
 /**
  * \brief
  *  Define the user event to call in case of Assert failure.
  * \param callback Callback event.
  */
-void SOPC_Assert_Set_UserCallback(SOPC_Assert_UserCallback callback);
+void SOPC_Assert_Set_UserCallback(SOPC_Assert_UserCallback* callback);
 
 /**
  * \brief

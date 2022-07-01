@@ -590,7 +590,7 @@ static bool start_node_value_array(struct parse_context_t* ctx)
     assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
     assert(ctx->list_nodes == NULL);
 
-    ctx->list_nodes = SOPC_Array_Create(sizeof(SOPC_Variant), 0, (SOPC_Array_Free_Func) SOPC_Variant_ClearAux);
+    ctx->list_nodes = SOPC_Array_Create(sizeof(SOPC_Variant), 0, (SOPC_Array_Free_Func*) SOPC_Variant_ClearAux);
 
     if (ctx->list_nodes == NULL)
     {

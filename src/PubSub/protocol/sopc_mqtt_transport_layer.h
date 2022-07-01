@@ -105,32 +105,32 @@ typedef uint16_t MqttTransportAsyncHandle;                  /* Mqtt transport as
 
 /* Callback called to notify a client status change event (ready, not ready) */
 
-typedef void (*pFctClientStatus)(MqttTransportAsyncHandle idx, /* Transport context async handle */
-                                 void* pCtx);                  /* User context */
+typedef void FctClientStatus(MqttTransportAsyncHandle idx, /* Transport context async handle */
+                             void* pCtx);                  /* User context */
 
 /* Callback called to notify a get transport context async handle response */
 
-typedef void (*pFctGetHandleResponse)(MqttTransportAsyncHandle idx, /* Transport context async handle */
-                                      void* pCtx);                  /* User context */
+typedef void FctGetHandleResponse(MqttTransportAsyncHandle idx, /* Transport context async handle */
+                                  void* pCtx);                  /* User context */
 
 /* Callback called to notify a message reception. */
 
-typedef void (*pFctMessageReceived)(MqttTransportAsyncHandle idx, /* Transport context async handle */
-                                    uint8_t* data,                /* Data received */
-                                    uint16_t size,                /* Size of data received in bytes */
-                                    void* pCtx);                  /* User context */
+typedef void FctMessageReceived(MqttTransportAsyncHandle idx, /* Transport context async handle */
+                                uint8_t* data,                /* Data received */
+                                uint16_t size,                /* Size of data received in bytes */
+                                void* pCtx);                  /* User context */
 
 /* Callback called to notify a release transport context handle response */
 
-typedef void (*pFctReleaseHandleResponse)(MqttTransportAsyncHandle idx, /* Transport context async handle*/
-                                          void* pCtx);                  /* User context */
+typedef void FctReleaseHandleResponse(MqttTransportAsyncHandle idx, /* Transport context async handle*/
+                                      void* pCtx);                  /* User context */
 
 /* Callback called to notify a message reception. This callback is used by synchrone API.*/
 
-typedef void (*pFctMessageSyncReceived)(MqttTransportHandle* pCtx, /* Transport context handle */
-                                        uint8_t* data,             /* Data received */
-                                        uint16_t size,             /* Size of data received, in bytes. */
-                                        void* pUserContext);       /* User context */
+typedef void FctMessageSyncReceived(MqttTransportHandle* pCtx, /* Transport context handle */
+                                    uint8_t* data,             /* Data received */
+                                    uint16_t size,             /* Size of data received, in bytes. */
+                                    void* pUserContext);       /* User context */
 
 /*** MQTT Manager API ***/
 
@@ -162,12 +162,12 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
                                                       void* pUserContext,
                                                       const char* uri,
                                                       const char* topicname,
-                                                      pFctGetHandleResponse cbGetHandleSuccess,
-                                                      pFctGetHandleResponse cbGetHandleFailure,
-                                                      pFctClientStatus cbClientReady,
-                                                      pFctClientStatus cbClientNotReady,
-                                                      pFctMessageReceived cbMessageReceived,
-                                                      pFctReleaseHandleResponse cbReleaseHandle);
+                                                      FctGetHandleResponse* cbGetHandleSuccess,
+                                                      FctGetHandleResponse* cbGetHandleFailure,
+                                                      FctClientStatus* cbClientReady,
+                                                      FctClientStatus* cbClientNotReady,
+                                                      FctMessageReceived* cbMessageReceived,
+                                                      FctReleaseHandleResponse* cbReleaseHandle);
 
 /** \brief Release transport async handle
  *
@@ -205,8 +205,7 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,
 MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
                                                          const char* uri,
                                                          const char* topicName,
-                                                         pFctMessageSyncReceived getMsg,
-
+                                                         FctMessageSyncReceived getMsg,
                                                          void* pUserContext);
 
 /** \brief Release a transport synchrone handle */

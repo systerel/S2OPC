@@ -70,14 +70,14 @@ typedef enum
     SOPC_USER_AUTHENTICATION_OK
 } SOPC_UserAuthentication_Status;
 
-typedef void (*SOPC_UserAuthentication_Free_Func)(SOPC_UserAuthentication_Manager* authenticationManager);
-typedef SOPC_ReturnStatus (*SOPC_UserAuthentication_ValidateUserIdentity_Func)(
+typedef void SOPC_UserAuthentication_Free_Func(SOPC_UserAuthentication_Manager* authenticationManager);
+typedef SOPC_ReturnStatus SOPC_UserAuthentication_ValidateUserIdentity_Func(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
     SOPC_UserAuthentication_Status* pUserAuthenticated);
 
-typedef void (*SOPC_UserAuthorization_Free_Func)(SOPC_UserAuthorization_Manager* authorizationManager);
-typedef SOPC_ReturnStatus (*SOPC_UserAuthorization_AuthorizeOperation_Func)(
+typedef void SOPC_UserAuthorization_Free_Func(SOPC_UserAuthorization_Manager* authorizationManager);
+typedef SOPC_ReturnStatus SOPC_UserAuthorization_AuthorizeOperation_Func(
     SOPC_UserAuthorization_Manager* authorizationManager,
     SOPC_UserAuthorization_OperationType operationType,
     const SOPC_NodeId* nodeId,
@@ -92,7 +92,7 @@ typedef struct SOPC_UserAuthentication_Functions
      *
      * This function can be the standard \p free function if nothing is stored in \p pData.
      */
-    SOPC_UserAuthentication_Free_Func pFuncFree;
+    SOPC_UserAuthentication_Free_Func* pFuncFree;
 
     /**
      * \brief Called to authorize a user connection, when receiving an ActivateSession request.
@@ -111,7 +111,7 @@ typedef struct SOPC_UserAuthentication_Functions
      *
      * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
      */
-    SOPC_UserAuthentication_ValidateUserIdentity_Func pFuncValidateUserIdentity;
+    SOPC_UserAuthentication_ValidateUserIdentity_Func* pFuncValidateUserIdentity;
 } SOPC_UserAuthentication_Functions;
 
 typedef struct SOPC_UserAuthorization_Functions
@@ -121,7 +121,7 @@ typedef struct SOPC_UserAuthorization_Functions
      *
      * This function can be the standard \p free function if nothing is stored in \p pData.
      */
-    SOPC_UserAuthorization_Free_Func pFuncFree;
+    SOPC_UserAuthorization_Free_Func* pFuncFree;
 
     /**
      * \brief Called to authorize a read or a write operation in the address space.
@@ -140,7 +140,7 @@ typedef struct SOPC_UserAuthorization_Functions
      *
      * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
      */
-    SOPC_UserAuthorization_AuthorizeOperation_Func pFuncAuthorizeOperation;
+    SOPC_UserAuthorization_AuthorizeOperation_Func* pFuncAuthorizeOperation;
 } SOPC_UserAuthorization_Functions;
 
 struct SOPC_UserAuthentication_Manager

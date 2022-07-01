@@ -74,7 +74,7 @@ typedef struct T_THREAD_WKS
     struct k_thread threadControlBlock;
     k_tid_t threadHandle;
     struct k_sem kSemThreadEnded;
-    ptrFct userCallback;
+    ptrFct* userCallback;
     const char* taskName;
     bool joined;
     int priority;
@@ -300,7 +300,7 @@ static const sopcThreadConfig* P_THREAD_GetStackCfg(const char* taskName, const 
 
 // Thread initialization. Called from P_THREAD_Create
 static bool P_THREAD_Init(tThreadHandle* pHandle,
-                          ptrFct callback,
+                          ptrFct* callback,
                           void* pCtx,
                           const char* taskName,
                           const sopcThreadConfig* pCfg,
@@ -330,7 +330,7 @@ static void P_THREAD_InternalCallback(void* pContext, void* pCtx, void* pNotUsed
 
 // Thread initialization
 static bool P_THREAD_Init(tThreadHandle* pHandle,
-                          ptrFct callback,
+                          ptrFct* callback,
                           void* pCtx,
                           const char* taskName,
                           const sopcThreadConfig* pCfg,
@@ -389,7 +389,7 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
 }
 
 // Thread creation
-tThreadHandle* P_THREAD_Create(ptrFct callback,
+tThreadHandle* P_THREAD_Create(ptrFct* callback,
                                void* pCtx,
                                const char* taskName,
                                const int priority,

@@ -66,17 +66,17 @@ typedef struct T_LOG_SERVER_WORKSPACE
 
     // Optional common callback associated to clients
 
-    ptrFct_AnalyzerContextCreation cbClientAnalyzerContextCreation;       // Context creation callback
-    ptrFct_AnalyzerContextDestruction cbClientAnalyzerContextDestruction; // Context destruction callback.
-    ptrFct_AnalyzerCallback cbClientAnalyzer;                             // Input Frame decoder
-    ptrFct_AnalyzerPeriodic cbClientAnalyzerPeriodic;                     // Input frame periodic tick timeout.
+    ptrFct_AnalyzerContextCreation* cbClientAnalyzerContextCreation;       // Context creation callback
+    ptrFct_AnalyzerContextDestruction* cbClientAnalyzerContextDestruction; // Context destruction callback.
+    ptrFct_AnalyzerCallback* cbClientAnalyzer;                             // Input Frame decoder
+    ptrFct_AnalyzerPeriodic* cbClientAnalyzerPeriodic;                     // Input frame periodic tick timeout.
 
-    ptrFct_EncoderContextCreation cbClientEncoderContextCreation;       // Output frame context creation
-    ptrFct_EncoderContextDestruction cbClientEncoderContextDestruction; // Output frame encoder context destruction
-    ptrFct_EncoderCallback cbClientEncoder;                             // Output frame encoder.
-    ptrFct_EncoderPeriodicCallback cbClientEncoderPeriodic;             // Output frame encoder periodic timeout tick.
+    ptrFct_EncoderContextCreation* cbClientEncoderContextCreation;       // Output frame context creation
+    ptrFct_EncoderContextDestruction* cbClientEncoderContextDestruction; // Output frame encoder context destruction
+    ptrFct_EncoderCallback* cbClientEncoder;                             // Output frame encoder.
+    ptrFct_EncoderPeriodicCallback* cbClientEncoderPeriodic;             // Output frame encoder periodic timeout tick.
 
-    ptrFct_EncoderTransmitHelloCallback cbEncoderTransmitHello; // Hello callback.
+    ptrFct_EncoderTransmitHelloCallback* cbEncoderTransmitHello; // Hello callback.
 
 } tLogSrvWks;
 
@@ -126,15 +126,15 @@ typedef struct T_LOG_CLIENT_WORKSPACE
 
     // See server workspace description
 
-    ptrFct_AnalyzerContextCreation cbAnalyzerContextCreation;
-    ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestruction;
-    ptrFct_AnalyzerCallback cbAnalyzer;
-    ptrFct_AnalyzerPeriodic cbAnalyzerPeriodic;
+    ptrFct_AnalyzerContextCreation* cbAnalyzerContextCreation;
+    ptrFct_AnalyzerContextDestruction* cbAnalyzerContextDestruction;
+    ptrFct_AnalyzerCallback* cbAnalyzer;
+    ptrFct_AnalyzerPeriodic* cbAnalyzerPeriodic;
 
-    ptrFct_EncoderContextCreation cbEncoderContextCreation;
-    ptrFct_EncoderContextDestruction cbEncoderContextDestruction;
-    ptrFct_EncoderCallback cbEncoder;
-    ptrFct_EncoderPeriodicCallback cbEncoderPeriodic;
+    ptrFct_EncoderContextCreation* cbEncoderContextCreation;
+    ptrFct_EncoderContextDestruction* cbEncoderContextDestruction;
+    ptrFct_EncoderCallback* cbEncoder;
+    ptrFct_EncoderPeriodicCallback* cbEncoderPeriodic;
 
     void* ptrAnalyzerContext; // Optional context for analyzer
     void* ptrEncoderContext;  // Optional context for encoder
@@ -155,15 +155,15 @@ static tLogClientWks* ClientCreateThenStart(
     tLogSrvWks* pServ, // attached server
     uint32_t timeoutS, // timeout connexion
 
-    ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,       // analyzer context creation
-    ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback, // analyzer context destruction
-    ptrFct_AnalyzerCallback cbAnalyzerCallback,                             // analyzer
-    ptrFct_AnalyzerPeriodic cbAnalyzerTimeOutCallback,                      // analyzer tick timeout
+    ptrFct_AnalyzerContextCreation* cbAnalyzerContextCreationCallback,       // analyzer context creation
+    ptrFct_AnalyzerContextDestruction* cbAnalyzerContextDestructionCallback, // analyzer context destruction
+    ptrFct_AnalyzerCallback* cbAnalyzerCallback,                             // analyzer
+    ptrFct_AnalyzerPeriodic* cbAnalyzerTimeOutCallback,                      // analyzer tick timeout
 
-    ptrFct_EncoderContextCreation cbClientSenderContextCreation,       // encoder context creation
-    ptrFct_EncoderContextDestruction cbClientSenderContextDestruction, // encoder context destruction
-    ptrFct_EncoderCallback cbClientSenderCallback,                     // encoder
-    ptrFct_EncoderPeriodicCallback cbClientSenderTimeoutCallback);     // tick timeout
+    ptrFct_EncoderContextCreation* cbClientSenderContextCreation,       // encoder context creation
+    ptrFct_EncoderContextDestruction* cbClientSenderContextDestruction, // encoder context destruction
+    ptrFct_EncoderCallback* cbClientSenderCallback,                     // encoder
+    ptrFct_EncoderPeriodicCallback* cbClientSenderTimeoutCallback);     // tick timeout
 
 static void ClientStopThenDestroy(tLogClientWks** p);
 
@@ -702,15 +702,15 @@ static void ClientStopThenDestroy(tLogClientWks** p)
 static tLogClientWks* ClientCreateThenStart(int32_t socket,
                                             tLogSrvWks* pServ,
                                             uint32_t timeoutS,
-                                            ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
-                                            ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
-                                            ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                            ptrFct_AnalyzerPeriodic cbAnalyzerTimeOutCallback,
+                                            ptrFct_AnalyzerContextCreation* cbAnalyzerContextCreationCallback,
+                                            ptrFct_AnalyzerContextDestruction* cbAnalyzerContextDestructionCallback,
+                                            ptrFct_AnalyzerCallback* cbAnalyzerCallback,
+                                            ptrFct_AnalyzerPeriodic* cbAnalyzerTimeOutCallback,
 
-                                            ptrFct_EncoderContextCreation cbSenderContextCreation,
-                                            ptrFct_EncoderContextDestruction cbSenderContextDestruction,
-                                            ptrFct_EncoderCallback cbSenderCallback,
-                                            ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback)
+                                            ptrFct_EncoderContextCreation* cbSenderContextCreation,
+                                            ptrFct_EncoderContextDestruction* cbSenderContextDestruction,
+                                            ptrFct_EncoderCallback* cbSenderCallback,
+                                            ptrFct_EncoderPeriodicCallback* cbSenderTimeoutCallback)
 {
     tLogClientWks* pClt = NULL;
     eChannelResult resFifo = E_CHANNEL_RESULT_NOK;
@@ -1436,17 +1436,16 @@ tLogSrvWks* P_LOG_SRV_CreateAndStart(uint16_t port,
                                      uint32_t timeoutS,
                                      uint32_t periodeHelloS,
 
-                                     ptrFct_AnalyzerContextCreation cbAnalyzerContextCreationCallback,
-                                     ptrFct_AnalyzerContextDestruction cbAnalyzerContextDestructionCallback,
-                                     ptrFct_AnalyzerCallback cbAnalyzerCallback,
-                                     ptrFct_AnalyzerPeriodic cbAnalyzerTimeOutCallback,
+                                     ptrFct_AnalyzerContextCreation* cbAnalyzerContextCreationCallback,
+                                     ptrFct_AnalyzerContextDestruction* cbAnalyzerContextDestructionCallback,
+                                     ptrFct_AnalyzerCallback* cbAnalyzerCallback,
+                                     ptrFct_AnalyzerPeriodic* cbAnalyzerTimeOutCallback,
+                                     ptrFct_EncoderContextCreation* cbSenderContextCreation,
+                                     ptrFct_EncoderContextDestruction* cbSenderContextDestruction,
+                                     ptrFct_EncoderCallback* cbSenderCallback,
+                                     ptrFct_EncoderPeriodicCallback* cbSenderTimeoutCallback,
 
-                                     ptrFct_EncoderContextCreation cbSenderContextCreation,
-                                     ptrFct_EncoderContextDestruction cbSenderContextDestruction,
-                                     ptrFct_EncoderCallback cbSenderCallback,
-                                     ptrFct_EncoderPeriodicCallback cbSenderTimeoutCallback,
-
-                                     ptrFct_EncoderTransmitHelloCallback cbSenderHelloCallback)
+                                     ptrFct_EncoderTransmitHelloCallback* cbSenderHelloCallback)
 {
     tLogSrvWks* p = (tLogSrvWks*) pvPortMalloc(sizeof(tLogSrvWks));
     eChannelResult resFifo = E_CHANNEL_RESULT_NOK;

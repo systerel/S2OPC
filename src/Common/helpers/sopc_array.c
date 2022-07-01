@@ -33,7 +33,7 @@ struct _SOPC_Array
     size_t element_size;
     size_t sz;
     size_t cap;
-    SOPC_Array_Free_Func free_func;
+    SOPC_Array_Free_Func* free_func;
 };
 
 static bool array_grow(SOPC_Array* a, size_t min_size)
@@ -65,7 +65,7 @@ static bool array_grow(SOPC_Array* a, size_t min_size)
     return true;
 }
 
-SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC_Array_Free_Func free_func)
+SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC_Array_Free_Func* free_func)
 {
     SOPC_Array* a = SOPC_Calloc(1, sizeof(SOPC_Array));
 
@@ -168,7 +168,7 @@ size_t SOPC_Array_Size(const SOPC_Array* array)
     return array->sz;
 }
 
-void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func compare_func)
+void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func* compare_func)
 {
     assert(array != NULL);
     qsort(array->data, array->sz, array->element_size, compare_func);
@@ -190,13 +190,13 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array)
     return data;
 }
 
-SOPC_Array_Free_Func SOPC_Array_Get_Free_Func(SOPC_Array* array)
+SOPC_Array_Free_Func* SOPC_Array_Get_Free_Func(SOPC_Array* array)
 {
     assert(array != NULL);
     return array->free_func;
 }
 
-void SOPC_Array_Set_Free_Func(SOPC_Array* array, SOPC_Array_Free_Func func)
+void SOPC_Array_Set_Free_Func(SOPC_Array* array, SOPC_Array_Free_Func* func)
 {
     assert(array != NULL);
     array->free_func = func;
