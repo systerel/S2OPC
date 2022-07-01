@@ -114,11 +114,11 @@ generation:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:98f07fa6f80d769c7d26520003b1404b6a527d528603850f189a5156a1b96b66 # digest of build:1.27
+  image: docker.aix.systerel.fr/c838/build@sha256:0f38c91390138ec7da5e1878b72ad6ca1fb306300bb9a5f838a16a45ef52d65a # digest of build:1.28
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_IMAGE: 'sha256:01589086151582e8d410aa71cc775890a7521804207af16825c506f406472d02'
+    DOCKER_IMAGE: 'sha256:12eae257acf165e632233b1903ac84e8236c050be032b7e84b14f1f8344d0119'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
