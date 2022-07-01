@@ -37,10 +37,13 @@
 static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
 static SOPC_NodeId Byte_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Byte};
 static SOPC_NodeId Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
+static SOPC_NodeId HierarchicalReferences_Type = {SOPC_IdentifierType_Numeric, 0,
+                                                  .Data.Numeric = OpcUaId_HierarchicalReferences};
 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
+const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId = &HierarchicalReferences_Type;
 
 static char* EmptyLocaleIds[] = {NULL};
 constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;

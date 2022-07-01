@@ -106,6 +106,7 @@ SETS
     t_RelativePathElt_i;
     t_CallMethod_i;
     t_Argument_i;
+    t_NodeAttributes_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
     t_user_token_i; /* Raw OPC UA user token */
@@ -325,9 +326,13 @@ CONCRETE_CONSTANTS
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
 
+    k_n_nodesToAdd_max,
+
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
+
+    c_HierarchicalReferences_Type_NodeId,
 
     c_Variant_indet,
     c_DataValue_indet,
@@ -356,6 +361,7 @@ CONCRETE_CONSTANTS
     c_RelativePathElt_indet,
     c_CallMethod_indet,
     c_Argument_indet,
+    c_NodeAttributes_indet,
     c_session_token_indet,
     c_Nonce_indet,
     c_SignatureData_indet,
@@ -461,6 +467,7 @@ ABSTRACT_CONSTANTS
     t_RelativePathElt,
     t_CallMethod,
     t_Argument,
+    t_NodeAttributes,
     t_session_token,
     t_user,
     t_user_token,
@@ -497,6 +504,7 @@ ABSTRACT_CONSTANTS
     t_operation_type,
     t_registerNodesReqIndex,
     t_unregisterNodesReqIndex,
+    t_nodeToAddReqIndex,
     t_ContinuationPoint,
     t_ContinuationPointId,
     t_ArrayDimensions,
@@ -547,9 +555,16 @@ PROPERTIES
     c_Byte_Type_NodeId : t_NodeId_i &
     c_Byte_Type_NodeId : t_NodeId &
 
+    c_HierarchicalReferences_Type_NodeId : t_NodeId_i &
+    c_HierarchicalReferences_Type_NodeId : t_NodeId &
+
     c_Null_Type_NodeId       /= c_ByteString_Type_NodeId &
     c_ByteString_Type_NodeId /= c_Byte_Type_NodeId &
     c_Byte_Type_NodeId       /= c_Null_Type_NodeId &
+
+    c_HierarchicalReferences_Type_NodeId /= c_Null_Type_NodeId &
+    c_HierarchicalReferences_Type_NodeId /= c_ByteString_Type_NodeId &
+    c_HierarchicalReferences_Type_NodeId /= c_Byte_Type_NodeId &
 
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
@@ -591,6 +606,8 @@ PROPERTIES
     k_n_noRemainingPathIndex : NAT &
     k_n_noRemainingPathIndex > k_n_genericOperationPerReq_max &
 
+    k_n_nodesToAdd_max : NAT &
+
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
     c_Node_indet /: t_Node &
@@ -631,6 +648,8 @@ PROPERTIES
 
     t_registerNodesReqIndex <: NAT &
     t_unregisterNodesReqIndex <: NAT &
+
+    t_nodeToAddReqIndex <: NAT &
 
     t_RefIndex <: NAT &
 
@@ -691,6 +710,10 @@ PROPERTIES
     t_Argument <: t_Argument_i &
     c_Argument_indet : t_Argument_i &
     c_Argument_indet /: t_Argument &
+
+    t_NodeAttributes <: t_NodeAttributes_i &
+    c_NodeAttributes_indet : t_NodeAttributes_i &
+    c_NodeAttributes_indet /: t_NodeAttributes &
 
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
@@ -994,7 +1017,9 @@ PROPERTIES
     1..k_n_monitoredItem_max <: t_monitoredItemReqIndex &
     1..k_n_monitoredItemNotif_max <: t_monitoredItemNotifIndex &
     1..k_n_registerNodes_max <: t_registerNodesReqIndex &
-    1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex
+    1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex &
+
+    1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex
 
 OPERATIONS
 

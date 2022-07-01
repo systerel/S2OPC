@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 04/08/2022 14:53:31
+ Date                 : 05/08/2022 09:01:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -123,7 +123,15 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_security_mode_insufficient,
    constants_statuscodes_bs__e_sc_bad_no_communication,
    constants_statuscodes_bs__e_sc_bad_resource_unavailable,
-   constants_statuscodes_bs__e_sc_bad_out_of_range
+   constants_statuscodes_bs__e_sc_bad_out_of_range,
+   constants_statuscodes_bs__e_sc_bad_parent_node_id_invalid,
+   constants_statuscodes_bs__e_sc_bad_reference_not_allowed,
+   constants_statuscodes_bs__e_sc_bad_node_id_rejected,
+   constants_statuscodes_bs__e_sc_bad_node_id_exists,
+   constants_statuscodes_bs__e_sc_bad_node_class_invalid,
+   constants_statuscodes_bs__e_sc_bad_browse_name_duplicated,
+   constants_statuscodes_bs__e_sc_bad_node_attributes_invalid,
+   constants_statuscodes_bs__e_sc_bad_type_definition_invalid
 } constants_statuscodes_bs__t_StatusCode_i;
 
 /*------------------------

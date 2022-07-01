@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 04/08/2022 14:53:30
+ Date                 : 05/08/2022 09:01:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,7 @@
 #define constants_bs__t_LocaleIds_i t_entier4
 #define constants_bs__t_LocalizedText_i t_entier4
 #define constants_bs__t_MdnsDiscoveryConfig_i t_entier4
+#define constants_bs__t_NodeAttributes_i t_entier4
 #define constants_bs__t_NodeId_i t_entier4
 #define constants_bs__t_Node_i t_entier4
 #define constants_bs__t_Nonce_i t_entier4
@@ -127,6 +128,7 @@
 #define constants_bs__t_LocaleIds_i_max (-1)
 #define constants_bs__t_LocalizedText_i_max (-1)
 #define constants_bs__t_MdnsDiscoveryConfig_i_max (-1)
+#define constants_bs__t_NodeAttributes_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_Nonce_i_max (-1)
@@ -194,11 +196,13 @@
 #define constants_bs__c_ContinuationPoint_indet 0
 #define constants_bs__c_DataValue_indet 0
 #define constants_bs__c_ExpandedNodeId_indet 0
+#define constants_bs__c_HierarchicalReferences_Type_NodeId 0
 #define constants_bs__c_IndexRange_indet 0
 #define constants_bs__c_LocaleIds_empty 0
 #define constants_bs__c_LocaleIds_indet 0
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_MdnsDiscoveryConfig_indet 0
+#define constants_bs__c_NodeAttributes_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
@@ -256,6 +260,7 @@
 #define constants_bs__k_n_genericOperationPerReq_max 0
 #define constants_bs__k_n_monitoredItemNotif_max 0
 #define constants_bs__k_n_monitoredItem_max 0
+#define constants_bs__k_n_nodesToAdd_max 0
 #define constants_bs__k_n_publishRequestPerSub_max 0
 #define constants_bs__k_n_read_resp_max 0
 #define constants_bs__k_n_registerNodes_max 0

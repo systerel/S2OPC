@@ -102,7 +102,16 @@ SETS
                       e_sc_bad_security_mode_insufficient,
                       e_sc_bad_no_communication,
                       e_sc_bad_resource_unavailable,
-                      e_sc_bad_out_of_range}
+                      e_sc_bad_out_of_range,
+                      e_sc_bad_parent_node_id_invalid,
+                      e_sc_bad_reference_not_allowed,
+                      e_sc_bad_node_id_rejected,
+                      e_sc_bad_node_id_exists,
+                      e_sc_bad_node_class_invalid,
+                      e_sc_bad_browse_name_duplicated,
+                      e_sc_bad_node_attributes_invalid,
+                      e_sc_bad_type_definition_invalid
+                  }
 
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,

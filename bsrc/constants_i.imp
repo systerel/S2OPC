@@ -41,7 +41,9 @@ PROPERTIES
     t_monitoredItemNotifIndex = 1..k_n_monitoredItemNotif_max &
 
     t_registerNodesReqIndex = 1..k_n_registerNodes_max &
-    t_unregisterNodesReqIndex = 1..k_n_unregisterNodes_max
+    t_unregisterNodesReqIndex = 1..k_n_unregisterNodes_max &
+
+    t_nodeToAddReqIndex = 1..k_n_nodesToAdd_max
 
 VALUES
 

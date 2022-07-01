@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 05/08/2022 15:45:54
+ Date                 : 08/08/2022 08:43:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -61,6 +61,7 @@
 #define constants__t_LocaleIds_i constants_bs__t_LocaleIds_i
 #define constants__t_LocalizedText_i constants_bs__t_LocalizedText_i
 #define constants__t_MdnsDiscoveryConfig_i constants_bs__t_MdnsDiscoveryConfig_i
+#define constants__t_NodeAttributes_i constants_bs__t_NodeAttributes_i
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
 #define constants__t_Nonce_i constants_bs__t_Nonce_i
@@ -332,6 +333,7 @@ typedef enum {
 #define constants__t_LocaleIds_i_max constants_bs__t_LocaleIds_i_max
 #define constants__t_LocalizedText_i_max constants_bs__t_LocalizedText_i_max
 #define constants__t_MdnsDiscoveryConfig_i_max constants_bs__t_MdnsDiscoveryConfig_i_max
+#define constants__t_NodeAttributes_i_max constants_bs__t_NodeAttributes_i_max
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
 #define constants__t_Nonce_i_max constants_bs__t_Nonce_i_max
@@ -402,11 +404,13 @@ typedef enum {
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
+#define constants__c_HierarchicalReferences_Type_NodeId constants_bs__c_HierarchicalReferences_Type_NodeId
 #define constants__c_IndexRange_indet constants_bs__c_IndexRange_indet
 #define constants__c_LocaleIds_empty constants_bs__c_LocaleIds_empty
 #define constants__c_LocaleIds_indet constants_bs__c_LocaleIds_indet
 #define constants__c_LocalizedText_indet constants_bs__c_LocalizedText_indet
 #define constants__c_MdnsDiscoveryConfig_indet constants_bs__c_MdnsDiscoveryConfig_indet
+#define constants__c_NodeAttributes_indet constants_bs__c_NodeAttributes_indet
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
 #define constants__c_Nonce_indet constants_bs__c_Nonce_indet
@@ -464,6 +468,7 @@ typedef enum {
 #define constants__k_n_genericOperationPerReq_max constants_bs__k_n_genericOperationPerReq_max
 #define constants__k_n_monitoredItemNotif_max constants_bs__k_n_monitoredItemNotif_max
 #define constants__k_n_monitoredItem_max constants_bs__k_n_monitoredItem_max
+#define constants__k_n_nodesToAdd_max constants_bs__k_n_nodesToAdd_max
 #define constants__k_n_publishRequestPerSub_max constants_bs__k_n_publishRequestPerSub_max
 #define constants__k_n_read_resp_max constants_bs__k_n_read_resp_max
 #define constants__k_n_registerNodes_max constants_bs__k_n_registerNodes_max

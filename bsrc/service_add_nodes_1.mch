@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    address_space_itf
+    service_add_nodes_1
 
 SEES
     constants,
@@ -27,10 +27,6 @@ SEES
     message_out_bs
 
 DEFINITIONS
-    /* The following file defines the actual state of the address space,
-       together with all read operations.  It has been created so that we can
-       repeat this information in several machines, until the final address
-       space module which contains the actual implementation. */
     "address_space.def"
 
 ABSTRACT_VARIABLES
@@ -44,7 +40,6 @@ INITIALISATION
     :(
         d_adsp_invariant
     )
-
 OPERATIONS
 
     d_adsp_operations;
@@ -75,25 +70,41 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service <-- treat_add_nodes_request(p_user, p_req_msg, p_resp_msg) =
+    sc_operation, new_nodeId
+      <-- treat_add_nodes_item (p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
-        p_user : t_user_i        &
-        p_user : t_user          &
-        p_req_msg : t_msg_i  &
-        p_req_msg = c_msg_in &
-        c_msg_in : t_msg         &
-        a_msg_in_type = e_msg_node_add_nodes_req &
-        p_resp_msg : t_msg_i   &
-        p_resp_msg = c_msg_out &
-        c_msg_out : t_msg &
-        a_msg_out_type = e_msg_node_add_nodes_resp
+        p_parentExpNid : t_ExpandedNodeId_i &
+        p_parentExpNid : t_ExpandedNodeId &
+        p_refTypeId : t_NodeId_i &
+        p_refTypeId : t_NodeId &
+        p_reqExpNodeId : t_ExpandedNodeId_i &
+        p_browseName : t_QualifiedName_i &
+        p_browseName : t_QualifiedName &
+        p_nodeClass : t_NodeClass_i &
+        p_nodeClass : t_NodeClass &
+        p_nodeAttributes : t_NodeAttributes_i &
+        p_nodeAttributes : t_NodeAttributes &
+        p_typeDefId : t_ExpandedNodeId_i &
+        (p_nodeClass :{e_ncl_Object, e_ncl_Variable} => p_typeDefId : t_ExpandedNodeId)
     THEN
-        StatusCode_service,
+        sc_operation,
+        new_nodeId,
         d_adsp_nodes_variables
         :(
-            StatusCode_service       : t_StatusCode_i &
-            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            d_adsp_nodes_invariant
+            d_adsp_nodes_invariant &
+            sc_operation : t_StatusCode_i &
+            sc_operation : {e_sc_ok,
+                            // temporary to indicate unsupported node classes
+                            e_sc_bad_node_class_invalid,
+                            e_sc_bad_out_of_memory }  &
+            new_nodeId : t_NodeId_i &
+            (sc_operation = e_sc_ok =>
+                new_nodeId : t_NodeId &
+                new_nodeId : ran(a_NodeId) &
+                (p_reqExpNodeId : t_ExpandedNodeId =>
+                    p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) &
+                    new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId))
+          )
         )
     END
 

@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    address_space_itf
+    service_add_nodes
 
 SEES
     constants,
@@ -27,10 +27,6 @@ SEES
     message_out_bs
 
 DEFINITIONS
-    /* The following file defines the actual state of the address space,
-       together with all read operations.  It has been created so that we can
-       repeat this information in several machines, until the final address
-       space module which contains the actual implementation. */
     "address_space.def"
 
 ABSTRACT_VARIABLES

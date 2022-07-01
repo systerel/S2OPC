@@ -44,6 +44,7 @@ SETS
     t_RelativePathElt_i;
     t_CallMethod_i;
     t_Argument_i;
+    t_NodeAttributes_i;
     t_session_token_i;
     t_user_i;
     t_user_token_i;
@@ -108,10 +109,12 @@ CONCRETE_CONSTANTS
     k_n_IndexRange_max,
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
+    k_n_nodesToAdd_max,
 
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
+    c_HierarchicalReferences_Type_NodeId,
 
     c_Variant_indet,
     c_DataValue_indet,
@@ -172,6 +175,7 @@ CONCRETE_CONSTANTS
     c_RelativePathElt_indet,
     c_CallMethod_indet,
     c_Argument_indet,
+    c_NodeAttributes_indet,
     c_RegisteredServer_indet,
     c_ApplicationDescription_indet,
     c_MdnsDiscoveryConfig_indet,
@@ -197,6 +201,7 @@ ABSTRACT_CONSTANTS
     t_CallMethod,
     cast_t_CallMethod,
     t_Argument,
+    t_NodeAttributes,
     t_session_token,
     t_user,
     t_user_token,
@@ -260,6 +265,7 @@ PROPERTIES
     k_n_IndexRange_max : NAT &
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
+    k_n_nodesToAdd_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -284,6 +290,9 @@ PROPERTIES
 
     c_Byte_Type_NodeId : t_NodeId_i &
     c_Byte_Type_NodeId : t_NodeId &
+
+    c_HierarchicalReferences_Type_NodeId : t_NodeId_i &
+    c_HierarchicalReferences_Type_NodeId : t_NodeId &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
@@ -502,7 +511,11 @@ PROPERTIES
 
     t_Argument <: t_Argument_i &
     c_Argument_indet : t_Argument_i &
-    c_Argument_indet /: t_Argument
+    c_Argument_indet /: t_Argument &
+
+    t_NodeAttributes <: t_NodeAttributes_i &
+    c_NodeAttributes_indet : t_NodeAttributes_i &
+    c_NodeAttributes_indet /: t_NodeAttributes
 
 OPERATIONS
 

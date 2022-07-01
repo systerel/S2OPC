@@ -73,6 +73,7 @@ typedef int32_t constants_bs__t_Int32;
 typedef char** constants_bs__t_LocaleIds_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef OpcUa_MdnsDiscoveryConfiguration* constants_bs__t_MdnsDiscoveryConfig_i;
+typedef SOPC_ExtensionObject* constants_bs__t_NodeAttributes_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Node* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
@@ -136,8 +137,8 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
 #define constants_bs__c_ApplicationDescription_indet NULL
-#define constants_bs__c_ArrayDimensions_indet 0
 #define constants_bs__c_Argument_indet NULL
+#define constants_bs__c_ArrayDimensions_indet 0
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0
@@ -149,11 +150,13 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
 #define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
+extern const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId;
 #define constants_bs__c_IndexRange_indet 0
 extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
 #define constants_bs__c_LocaleIds_indet NULL
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_MdnsDiscoveryConfig_indet NULL
+#define constants_bs__c_NodeAttributes_indet NULL
 #define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
@@ -217,6 +220,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_genericOperationPerReq_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItemNotif_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItem_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_nodesToAdd_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG

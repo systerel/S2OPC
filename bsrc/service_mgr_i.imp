@@ -464,6 +464,9 @@ OPERATIONS
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, l_user, req_msg, resp_msg)
             OR e_msg_method_call_req THEN
                 StatusCode_service <-- treat_method_call_request (session, req_msg, resp_msg)
+            OR e_msg_node_add_nodes_req THEN
+                l_user <-- get_session_user_server(session);
+                StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg)
             ELSE
                 /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */

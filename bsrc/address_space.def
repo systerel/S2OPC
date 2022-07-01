@@ -53,7 +53,7 @@ DEFINITIONS
         (dvAid = e_aid_EventNotifier or dvAid = e_aid_ContainsNoLoops))
     ;
 
-    d_adsp_variables ==
+    d_adsp_nodes_variables ==
         /* Attributes (mandatory) */
         a_NodeId,
         a_NodeClass,
@@ -96,7 +96,11 @@ DEFINITIONS
 
         Node_Reference,
         Node_RefIndexEnd,
-        RefIndex_Reference,
+        RefIndex_Reference
+        ;
+
+    d_adsp_variables ==
+        d_adsp_nodes_variables,
 
         IsRangeDefined,
         IsValid_VariantIndex,
@@ -113,7 +117,7 @@ DEFINITIONS
         s_AuthorizedOperations
     ;
 
-    d_adsp_invariant ==
+    d_adsp_nodes_invariant ==
     (
         /* Node attributes */
         a_NodeId      : t_Node >-> t_NodeId        &
@@ -180,8 +184,12 @@ DEFINITIONS
 
         Node_Reference          : t_Node     <-> t_Reference &
         Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
-        RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference &
+        RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference
+    );
 
+    d_adsp_invariant ==
+    (
+        d_adsp_nodes_invariant &
         IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &

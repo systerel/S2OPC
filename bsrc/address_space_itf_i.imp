@@ -30,7 +30,7 @@ SEES
     message_out_bs
 
 IMPORTS
-    service_write
+    service_add_nodes
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
    but it would trigger a bug in the project check. */
@@ -65,6 +65,8 @@ PROMOTES
     check_object_has_method,
     check_nodeId_isValid,
     is_IndexRangeDefined,
-    treat_write_request
+
+    treat_write_request,
+    treat_add_nodes_request
 
 END

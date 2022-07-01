@@ -861,6 +861,30 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_resource_unavailable:
         *status = OpcUa_BadResourceUnavailable;
         break;
+    case constants_statuscodes_bs__e_sc_bad_parent_node_id_invalid:
+        *status = OpcUa_BadParentNodeIdInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_reference_not_allowed:
+        *status = OpcUa_BadReferenceNotAllowed;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_node_id_rejected:
+        *status = OpcUa_BadNodeIdRejected;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_node_id_exists:
+        *status = OpcUa_BadNodeIdExists;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_node_class_invalid:
+        *status = OpcUa_BadNodeClassInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_browse_name_duplicated:
+        *status = OpcUa_BadBrowseNameDuplicated;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_node_attributes_invalid:
+        *status = OpcUa_BadNodeAttributesInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_type_definition_invalid:
+        *status = OpcUa_BadTypeDefinitionInvalid;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1188,6 +1212,30 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadResourceUnavailable:
         *bstatus = constants_statuscodes_bs__e_sc_bad_resource_unavailable;
+        break;
+    case OpcUa_BadParentNodeIdInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_parent_node_id_invalid;
+        break;
+    case OpcUa_BadReferenceNotAllowed:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_reference_not_allowed;
+        break;
+    case OpcUa_BadNodeIdRejected:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_id_rejected;
+        break;
+    case OpcUa_BadNodeIdExists:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_id_exists;
+        break;
+    case OpcUa_BadNodeClassInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
+        break;
+    case OpcUa_BadBrowseNameDuplicated:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_browse_name_duplicated;
+        break;
+    case OpcUa_BadNodeAttributesInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
+        break;
+    case OpcUa_BadTypeDefinitionInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
