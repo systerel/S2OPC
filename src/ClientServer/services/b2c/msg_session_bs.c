@@ -544,6 +544,7 @@ static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i
                                          const SOPC_SerializedCertificate* scCertificate,
                                          const SOPC_ByteString* pCreateSessionCert)
 {
+    bool result = false;
     bool sameCertificate = false;
 
     constants__t_SecurityPolicy SCsecPol = constants__e_secpol_B256S256;
@@ -564,7 +565,7 @@ static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i
 
     if (sameCertificate)
     {
-        return true;
+        result = true;
     }
     else if (scHasCertificate)
     {
@@ -577,37 +578,35 @@ static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i
             "msg_session_bs__create_session_req/resp_check_client/server_certificate: certificate not the same "
             "as the one provided for SecureChanel establishement in channel config %" PRIu32,
             p_channel_config_idx);
-        return false;
-    }
-
-    /* Certificate is absent, check if it can be ignored (only when SC security policy == NONE) */
-    bool validSecPolicy = util_channel__SecurityPolicy_C_to_B(scSecurityPolicy, &SCsecPol);
-
-    if (!validSecPolicy)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "msg_session_bs__create_session_req/resp_check_client/server_certificate: invalid "
-                               "security policy %s in channel "
-                               "config %" PRIu32,
-                               scSecurityPolicy, p_channel_config_idx);
-        return false;
-    }
-
-    if (constants__e_secpol_None == SCsecPol) // Check current SC security policy is None
-    {
-        // The certificate will be validated during activate session in case it is necessary for user encryption
-        // otherwise it can be ignored (see From OPC UA part 4, CreateSession Service Parameters table)
-        return true;
     }
     else
     {
-        // Unexpected error
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "msg_session_bs__create_session_req/resp_check_client/server_certificate: "
-                               "Certificate missing in SC config %" PRIu32 " whereas policy is not None",
-                               p_channel_config_idx);
-        return false;
+        /* Certificate is absent, check if it can be ignored (only when SC security policy == NONE) */
+        bool validSecPolicy = util_channel__SecurityPolicy_C_to_B(scSecurityPolicy, &SCsecPol);
+        if (!validSecPolicy)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "msg_session_bs__create_session_req/resp_check_client/server_certificate: invalid "
+                                   "security policy %s in channel "
+                                   "config %" PRIu32,
+                                   scSecurityPolicy, p_channel_config_idx);
+        }
+        else if (constants__e_secpol_None == SCsecPol) // Check current SC security policy is None
+        {
+            // The certificate will be validated during activate session in case it is necessary for user encryption
+            // otherwise it can be ignored (see From OPC UA part 4, CreateSession Service Parameters table)
+            result = true;
+        }
+        else
+        {
+            // Unexpected error: no certificate with a non-None policy
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "msg_session_bs__create_session_req/resp_check_client/server_certificate: "
+                                   "Certificate missing in SC config %" PRIu32 " whereas policy is not None",
+                                   p_channel_config_idx);
+        }
     }
+    return result;
 }
 
 void msg_session_bs__create_session_req_check_client_certificate(
