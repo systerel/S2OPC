@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 21/07/2022 15:59:41
+ Date                 : 25/07/2022 12:16:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -635,7 +635,7 @@ void service_mgr__server_receive_session_treatment_req(
                message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
                   &service_mgr__l_valid_buffer);
                if (service_mgr__l_valid_buffer == false) {
-                  session_mgr__server_close_session_sm(service_mgr__l_session,
+                  session_mgr__server_close_session(service_mgr__l_session,
                      constants_statuscodes_bs__e_sc_bad_encoding_error);
                }
                message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);

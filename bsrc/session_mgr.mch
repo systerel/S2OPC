@@ -337,8 +337,17 @@ OPERATIONS
 
     server_evaluate_session_timeout (session) =
     PRE
+        session : t_session_i
+    THEN
+        skip
+    END
+    ;
+
+    server_close_session (session, sc_reason) =
+    PRE
         session : t_session_i &
-        session : t_session
+        sc_reason : t_StatusCode_i &
+        sc_reason : t_StatusCode
     THEN
         skip
     END
@@ -367,16 +376,6 @@ OPERATIONS
     PRE
         p_lost_channel : t_channel_i &
         p_lost_channel : s_channel_connected
-    THEN
-        skip
-    END
-    ;
-
-    server_close_session_sm (session, sc_reason) =
-    PRE
-        session : t_session_i &
-        sc_reason : t_StatusCode_i &
-        sc_reason : t_StatusCode
     THEN
         skip
     END

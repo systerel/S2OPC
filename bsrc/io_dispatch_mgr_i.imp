@@ -788,14 +788,8 @@ OPERATIONS
     ;
 
     internal_server_evaluate_session_timeout (session) =
-    VAR
-        l_valid_session
-    IN
-        l_valid_session <-- is_valid_session (session);
-        IF l_valid_session = TRUE
-        THEN
-            server_evaluate_session_timeout (session)
-        END
+    BEGIN
+        server_evaluate_session_timeout (session)
     END
     ;
 

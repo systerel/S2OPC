@@ -40,7 +40,6 @@ PROMOTES
     is_valid_session,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
-    server_close_session_sm,
     get_session_user_server,
     get_local_user,
     get_server_session_preferred_locales,
@@ -807,19 +806,42 @@ OPERATIONS
     ;
 
     client_close_session (session, sc_reason) =
-    BEGIN
-        local_client_close_session (session, sc_reason)
+    VAR
+        l_valid_session
+    IN
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            local_client_close_session (session, sc_reason)
+        END // ELSE: ignore close
     END
     ;
 
     server_evaluate_session_timeout (session) =
     VAR
+        l_valid_session,
         l_session_expired
     IN
-        l_session_expired <-- server_session_timeout_evaluation (session);
-        IF l_session_expired = TRUE
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
         THEN
-            server_close_session_sm (session, e_sc_bad_timeout)
+            l_session_expired <-- server_session_timeout_evaluation (session);
+            IF l_session_expired = TRUE
+            THEN
+                server_close_session_sm (session, e_sc_bad_timeout)
+            END
+        END
+    END
+    ;
+
+    server_close_session (session, sc_reason) =
+    VAR
+        l_valid_session
+    IN
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            server_close_session_sm (session, sc_reason)
         END
     END
     ;

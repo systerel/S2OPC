@@ -59,6 +59,7 @@ DEFINITIONS
     a_NonceClient : s_session +-> t_Nonce;
 
     d_close_session (session) ==
+    s_session := s_session - {session}                   || // If session was valid session, remove it
     a_channel := {session} <<| a_channel                 || // If session had a channel, remove this relation
     a_client_orphaned := {session} <<| a_client_orphaned || // If session was orphaned, remove this relation
     a_user_server := {session} <<| a_user_server         || // If session had a user, remove this relation
@@ -810,7 +811,7 @@ OPERATIONS
     expired <-- server_session_timeout_evaluation (session) =
     PRE
         session : t_session_i &
-        session : t_session
+        session : s_session
     THEN
         expired :: BOOL
     END

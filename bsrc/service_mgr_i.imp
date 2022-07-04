@@ -646,7 +646,7 @@ OPERATIONS
                     IF l_valid_buffer = FALSE
                     THEN
                         /* invalid encoding => close session */
-                        server_close_session_sm (l_session, e_sc_bad_encoding_error)
+                        server_close_session (l_session, e_sc_bad_encoding_error)
                     END;
 
                     /* response message structures not necessary anymore */

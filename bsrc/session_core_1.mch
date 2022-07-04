@@ -872,7 +872,7 @@ OPERATIONS
     expired <-- server_session_timeout_evaluation (session) =
     PRE
         session : t_session_i &
-        session : t_session
+        session : s_session
     THEN
         expired :: BOOL
     END

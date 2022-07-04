@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 05/01/2022 17:34:03
+ Date                 : 04/07/2022 15:42:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -835,20 +835,48 @@ void session_mgr__client_close_sessions_on_final_connection_failure(
 void session_mgr__client_close_session(
    const constants__t_session_i session_mgr__session,
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason) {
-   session_mgr__local_client_close_session(session_mgr__session,
-      session_mgr__sc_reason);
+   {
+      t_bool session_mgr__l_valid_session;
+      
+      session_core__is_valid_session(session_mgr__session,
+         &session_mgr__l_valid_session);
+      if (session_mgr__l_valid_session == true) {
+         session_mgr__local_client_close_session(session_mgr__session,
+            session_mgr__sc_reason);
+      }
+   }
 }
 
 void session_mgr__server_evaluate_session_timeout(
    const constants__t_session_i session_mgr__session) {
    {
+      t_bool session_mgr__l_valid_session;
       t_bool session_mgr__l_session_expired;
       
-      session_core__server_session_timeout_evaluation(session_mgr__session,
-         &session_mgr__l_session_expired);
-      if (session_mgr__l_session_expired == true) {
+      session_core__is_valid_session(session_mgr__session,
+         &session_mgr__l_valid_session);
+      if (session_mgr__l_valid_session == true) {
+         session_core__server_session_timeout_evaluation(session_mgr__session,
+            &session_mgr__l_session_expired);
+         if (session_mgr__l_session_expired == true) {
+            session_core__server_close_session_sm(session_mgr__session,
+               constants_statuscodes_bs__e_sc_bad_timeout);
+         }
+      }
+   }
+}
+
+void session_mgr__server_close_session(
+   const constants__t_session_i session_mgr__session,
+   const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason) {
+   {
+      t_bool session_mgr__l_valid_session;
+      
+      session_core__is_valid_session(session_mgr__session,
+         &session_mgr__l_valid_session);
+      if (session_mgr__l_valid_session == true) {
          session_core__server_close_session_sm(session_mgr__session,
-            constants_statuscodes_bs__e_sc_bad_timeout);
+            session_mgr__sc_reason);
       }
    }
 }

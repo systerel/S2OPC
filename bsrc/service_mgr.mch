@@ -459,8 +459,7 @@ OPERATIONS
 
     server_evaluate_session_timeout (session) =
     PRE
-        session : t_session_i &
-        session : t_session
+        session : t_session_i
     THEN
         skip
     END
