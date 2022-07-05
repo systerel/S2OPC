@@ -716,36 +716,39 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: unable to create a variant");
         result_code = OpcUa_BadOutOfMemory;
     }
-    *nbOutputArgs = 1;
-    *outputArgs = v;
-
-    bool found = false;
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (SOPC_GoodGenericStatus == result_code)
     {
-        struct stat sb;
-        int res = fstat(fileno(file->fp), &sb);
-        if (-1 != res)
+        *nbOutputArgs = 1;
+        *outputArgs = v;
+
+        bool found = false;
+        SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+        if (found)
         {
-            file->size_in_byte = (uint64_t) sb.st_size;
-            result_code = local_write_size(*file);
-            if (SOPC_GoodGenericStatus != result_code)
+            struct stat sb;
+            int res = fstat(fileno(file->fp), &sb);
+            if (-1 != res)
             {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:Method_Read: unable to make a local write request for Size variable");
+                file->size_in_byte = (uint64_t) sb.st_size;
+                result_code = local_write_size(*file);
+                if (SOPC_GoodGenericStatus != result_code)
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "FileTransfer:Method_Read: unable to make a local write request for Size variable");
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:Method_Read: unable to get stat on the tmp file");
             }
         }
         else
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Read: unable to get stat on the tmp file");
+                                   "FileTransfer:Method_Read: unable to retrieve FileType in the API");
         }
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:Method_Read: unable to retrieve FileType in the API");
     }
     return result_code;
 }
@@ -1313,11 +1316,12 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
 
 static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId)
 {
-    SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode status = OpcUa_BadUnexpectedError;
     bool found = false;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
+        status = OpcUa_BadInvalidArgument;
         if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
@@ -1426,13 +1430,22 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
 {
     char buffer[length];
     memset(buffer, 0, sizeof(buffer));
-    SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode status = OpcUa_BadUnexpectedError;
     SOPC_ReturnStatus sopc_status;
     bool found = false;
     size_t read_count;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found && (length > 0))
+    if (found)
     {
+        status = OpcUa_BadInvalidArgument;
+        if (0 >= length)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument");
+            /* avoid hard indentation level */
+            return status;
+        }
         if (handle == file->handle)
         {
             /* check if File was not opened for read access */
@@ -1501,11 +1514,12 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                                                   SOPC_ByteString* msg,
                                                   const SOPC_NodeId* objectId)
 {
-    SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode status = OpcUa_BadUnexpectedError;
     bool found = false;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
+        status = OpcUa_BadInvalidArgument;
         if (handle == file->handle)
         {
             status = OpcUa_BadInvalidState;
@@ -1515,8 +1529,15 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                 status = OpcUa_BadOutOfMemory;
                 if (NULL != msg)
                 {
-                    if ((NULL != file->fp) && (-1 != msg->Length))
+                    if (NULL != file->fp)
                     {
+                        /* Writing an empty or null ByteString returns a Good result code without any affect on the
+                         * file. */
+                        if (-1 == msg->Length)
+                        {
+                            /* avoid hard indentation level */
+                            return SOPC_GoodGenericStatus;
+                        }
                         size_t ret;
                         char buffer[msg->Length];
                         memcpy(buffer, msg->Data, (size_t) msg->Length);
@@ -1566,11 +1587,12 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
 
 static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId, uint64_t* pos)
 {
-    SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode status = OpcUa_BadUnexpectedError;
     bool found = false;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
+        status = OpcUa_BadInvalidArgument;
         if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
@@ -1611,11 +1633,12 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
 
 static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId, uint64_t posOff)
 {
-    SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode status = OpcUa_BadUnexpectedError;
     bool found = false;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
+        status = OpcUa_BadInvalidArgument;
         if (handle == file->handle)
         {
             status = SOPC_GoodGenericStatus;
