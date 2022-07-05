@@ -1454,8 +1454,6 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                                                  SOPC_ByteString* msg,
                                                  const SOPC_NodeId* objectId)
 {
-    char buffer[length];
-    memset(buffer, 0, sizeof(buffer));
     SOPC_StatusCode status;
     SOPC_ReturnStatus sopc_status;
     bool found = false;
@@ -1471,6 +1469,9 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             /* avoid hard indentation level */
             return OpcUa_BadInvalidArgument;
         }
+        char buffer[length];
+        memset(buffer, 0, sizeof(buffer));
+
         if (handle == file->handle)
         {
             /* check if File was not opened for read access */
