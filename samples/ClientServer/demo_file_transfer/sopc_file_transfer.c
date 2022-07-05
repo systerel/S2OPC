@@ -521,7 +521,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             {
                 SOPC_Logger_TraceError(
                     SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:Method_Open: file is open into reading mode, can't open for writing");
+                    "FileTransfer:Method_Open: file is open in read mode, it cannot be opened in write mode");
                 /* avoid hard indentation level */
                 return OpcUa_BadNotWritable;
             }
@@ -533,7 +533,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 {
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:Method_Open: file is open into writing mode, can't open for reading");
+                        "FileTransfer:Method_Open: file is open in write mode, it cannot be opened in read mode");
                     /* avoid hard indentation level */
                     return OpcUa_BadNotReadable;
                 }
@@ -569,7 +569,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 {
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:Method_Open: unable to make a local write request for OpenCount variable");
+                        "FileTransfer:Method_Open: unable to make a local write request for the OpenCount variable");
                 }
                 struct stat sb;
                 int ret = fstat(fileno(file->fp), &sb);
@@ -581,7 +581,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                     {
                         SOPC_Logger_TraceError(
                             SOPC_LOG_MODULE_CLIENTSERVER,
-                            "FileTransfer:Method_Open: unable to make a local write request for Size variable");
+                            "FileTransfer:Method_Open: unable to make a local write request for the Size variable");
                     }
                 }
                 else
@@ -1233,7 +1233,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
             {
                 char* str = SOPC_String_GetCString(file->path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:CreateTmpFile: creation of tmp file %s failed", str);
+                                       "FileTransfer:CreateTmpFile: the mkstemp function has failed (file '%s')", str);
                 SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
             }
             int res = close(filedes);
@@ -1241,7 +1241,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
             {
                 char* str = SOPC_String_GetCString(file->path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:CreateTmpFile: closing of tmp file %s failed", str);
+                                       "FileTransfer:CreateTmpFile: the close function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "closing of tmp file failed");
             }
 
@@ -1249,6 +1249,11 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
             {
                 status = SOPC_GoodGenericStatus;
             }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:CreateTmpFile: the FileType object is not initialize in the API");
         }
     }
     return status;
@@ -1273,23 +1278,34 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                     {
                         char* str = SOPC_String_GetCString(file->tmp_path);
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:OpenTmpFile: file %s can't be open", str);
+                                               "FileTransfer:OpenTmpFile: the fopen function has failed (file '%s')",
+                                               str);
                     }
                     SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:OpenTmpFile: unable to decode mode to fopen function");
                 }
             }
             else
             {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:OpenTmpFile: the file pointer is not initialized");
                 status = OpcUa_BadOutOfMemory;
             }
         }
         else
         {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
             status = OpcUa_BadOutOfMemory;
         }
     }
     else
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:OpenTmpFile: bad openning mode");
         status = OpcUa_BadInvalidArgument;
     }
     return status;
@@ -1315,7 +1331,8 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     {
                         char* str = SOPC_String_GetCString(file->tmp_path);
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:CloseTmpFile: file %s can't be closed", str);
+                                               "FileTransfer:CloseTmpFile: the fclose function has failed (file '%s')",
+                                               str);
                         SOPC_ASSERT(0 == res && "file can't be closed");
                     }
                     if (NULL != file->pFunc_UserCloseCallback)
@@ -1334,8 +1351,23 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     file->tmp_path = SOPC_String_Create();
                     status = SOPC_GoodGenericStatus;
                 }
+                else
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "FileTransfer:CloseTmpFile: the file pointer or the file path are not initialized");
+                }
             }
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:CloseTmpFile: unexpected file handle");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:CloseTmpFile: unable to retrieve file in the API");
     }
     return status;
 }
@@ -1351,14 +1383,16 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             if (0 != res)
             {
                 char* str = SOPC_String_GetCString(file->tmp_path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be closed", str);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:DeleteTmpFile: the fclose function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be closed");
             }
             res = remove(SOPC_String_GetCString(file->tmp_path));
             if (0 != res)
             {
                 char* str = SOPC_String_GetCString(file->tmp_path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: tmp file %s can't be removed", str);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:DeleteTmpFile: the remove function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be remove");
             }
             file->fp = NULL;
@@ -1371,6 +1405,16 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             file->tmp_path = SOPC_String_Create();
             status = SOPC_GoodGenericStatus;
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:DeleteTmpFile: the file pointer is not initialized");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:DeleteTmpFile: the FileType object is not initialized in the API");
     }
     return status;
 }
@@ -1383,6 +1427,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     char buffer[length];
     memset(buffer, 0, sizeof(buffer));
     SOPC_StatusCode status = OpcUa_BadInvalidArgument;
+    SOPC_ReturnStatus sopc_status;
     bool found = false;
     size_t read_count;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
@@ -1394,6 +1439,8 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             if ((file->is_open == true) && ((file->mode == WRITE_MASK) || (file->mode == APPEND_MASK) ||
                                             (file->mode == (APPEND_MASK + WRITE_MASK))))
             {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:ReadTmpFile: file has not been opened for read access");
                 /* avoid hard indentation level */
                 return OpcUa_BadInvalidState;
             }
@@ -1402,17 +1449,22 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             {
                 if (NULL != file->fp)
                 {
+                    status = OpcUa_BadUnexpectedError;
                     read_count = fread(buffer, 1, (size_t) length, file->fp);
                     int end_of_file = feof(file->fp);
                     if ((read_count < (size_t) length) && (0 == end_of_file))
                     {
-                        status = OpcUa_BadUnexpectedError;
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:ReadTmpFile: the fread function has failed");
                     }
                     else
                     {
-                        if (SOPC_STATUS_OK != SOPC_String_CopyFromCString(msg, (const char*) buffer))
+                        sopc_status = SOPC_String_CopyFromCString(msg, (const char*) buffer);
+                        if (SOPC_STATUS_OK != sopc_status)
                         {
-                            status = OpcUa_BadUnexpectedError;
+                            SOPC_Logger_TraceError(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "FileTransfer:ReadTmpFile: the SOPC_String_CopyFromCString function has failed");
                         }
                         else
                         {
@@ -1420,8 +1472,27 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                         }
                     }
                 }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:ReadTmpFile: the file pointer is not initialized");
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:ReadTmpFile: ByteString msg has not been allocated");
             }
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: unexpected file handle");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ReadTmpFile: unable to retrieve file in the API");
     }
     return status;
 }
@@ -1449,17 +1520,46 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                         size_t ret;
                         char buffer[msg->Length];
                         memcpy(buffer, msg->Data, (size_t) msg->Length);
-                        /* If ret != masg->Length then file might be locked and thus not writable */
+                        /* If ret != msg->Length then file might be locked and thus not writable */
                         status = OpcUa_BadNotWritable;
                         ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
                         if ((size_t) msg->Length == ret)
                         {
                             status = SOPC_GoodGenericStatus;
                         }
+                        else
+                        {
+                            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                   "FileTransfer:WriteTmpFile: the fwrite function has failed");
+                        }
+                    }
+                    else
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:WriteTmpFile: the file pointer is not initialized");
                     }
                 }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:WriteTmpFile: ByteString msg has not been allocated");
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:WriteTmpFile: file has not been opened for write access");
             }
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:WriteTmpFile: unexpected file handle");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: unable to retrieve file in the API");
     }
     return status;
 }
@@ -1482,13 +1582,29 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
                 if (-1L == ret)
                 {
                     status = OpcUa_BadUnexpectedError;
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:GetPosTmpFile: the ftell function has failed");
                 }
                 else
                 {
                     *pos = (uint64_t) ret;
                 }
             }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:GetPosTmpFile: the file pointer is not initialized");
+            }
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:GetPosTmpFile: unexpected file handle");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:GetPosTmpFile: unable to retrieve file in the API");
     }
     return status;
 }
@@ -1510,9 +1626,25 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
                 if (0 != ret)
                 {
                     status = OpcUa_BadUnexpectedError;
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "FileTransfer:SetPosTmpFile: the fseek function has failed");
                 }
             }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:SetPosTmpFile: The file pointer is not initialized");
+            }
         }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:SetPosTmpFile: unexpected file handle");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:SetPosTmpFile: unable to retrieve file in the API");
     }
     return status;
 }
