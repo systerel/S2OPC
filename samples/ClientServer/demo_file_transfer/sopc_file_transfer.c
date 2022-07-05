@@ -538,7 +538,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                     return OpcUa_BadNotReadable;
                 }
             }
-            /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted */
+            /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted
+             */
             result_code = FileTransfer_Delete_TmpFile(file);
             if (SOPC_GoodGenericStatus != result_code)
             {
@@ -1265,6 +1266,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status;
+    int res;
     char Cmode[5] = {0};
     bool mode_is_ok = check_openModeArg(file->mode);
     if (mode_is_ok)
@@ -1283,8 +1285,15 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                                "FileTransfer:OpenTmpFile: the fopen function has failed (file '%s')",
                                                str);
+                        SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
                     }
-                    SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
+                    res = flock(fileno(file->fp), LOCK_SH);
+                    if (0 != res)
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:OpenTmpFile: unable to lock the file");
+                        SOPC_ASSERT(0 == res && "the tmp file can't be locked");
+                    }
                 }
                 else
                 {
@@ -1295,7 +1304,7 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
             else
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:OpenTmpFile: the file pointer is not initialized");
+                                       "FileTransfer:OpenTmpFile: the file pointer is already initialized");
                 status = OpcUa_BadOutOfMemory;
             }
         }
@@ -1317,6 +1326,7 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
 static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId)
 {
     SOPC_StatusCode status;
+    int res;
     bool found = false;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
@@ -1328,7 +1338,14 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
             {
                 if ((NULL != file->fp) && (NULL != file->tmp_path))
                 {
-                    int res = fclose(file->fp);
+                    res = flock(fileno(file->fp), LOCK_UN);
+                    if (0 != res)
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "FileTransfer:CloseTmpFile: unable to unlock the file");
+                        SOPC_ASSERT(0 == res && "the tmp file can't be unlocked");
+                    }
+                    res = fclose(file->fp);
                     if (0 != res)
                     {
                         char* str = SOPC_String_GetCString(file->tmp_path);
@@ -1337,6 +1354,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                                                str);
                         SOPC_ASSERT(0 == res && "file can't be closed");
                     }
+                    /* User close callback */
                     if (NULL != file->pFunc_UserCloseCallback)
                     {
                         file->pFunc_UserCloseCallback(file);
@@ -1379,11 +1397,19 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
 static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
 {
     SOPC_StatusCode status = OpcUa_BadOutOfMemory;
+    int res;
     if (NULL != file)
     {
         if (NULL != file->fp)
         {
-            int res = fclose(file->fp);
+            res = flock(fileno(file->fp), LOCK_UN);
+            if (0 != res)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:DeleteTmpFile: unable to unlock the file");
+                SOPC_ASSERT(0 == res && "the tmp file can't be unlocked");
+            }
+            res = fclose(file->fp);
             if (0 != res)
             {
                 char* str = SOPC_String_GetCString(file->tmp_path);
