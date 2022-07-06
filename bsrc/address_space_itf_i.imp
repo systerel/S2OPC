@@ -37,6 +37,7 @@ IMPORTS
 
 PROMOTES
     is_mandatory_attribute,
+    is_AddressSpace_constant,
     read_Node_Attribute,
     readall_AddressSpace_Node,
     get_NodeClass,

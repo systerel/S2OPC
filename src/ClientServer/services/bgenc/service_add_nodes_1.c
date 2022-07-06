@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 05/08/2022 09:01:23
+ Date                 : 05/08/2022 09:03:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -45,11 +45,9 @@ void service_add_nodes_1__check_add_nodes_item_params(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_parentNid,
    const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_reqNodeId,
-   const constants__t_QualifiedName_i service_add_nodes_1__p_browseName,
    const constants__t_NodeClass_i service_add_nodes_1__p_nodeClass,
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
    constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation,
-   constants__t_NodeId_i * const service_add_nodes_1__parent_nid,
    constants__t_NodeId_i * const service_add_nodes_1__new_nid) {
    {
       t_bool service_add_nodes_1__l_bres;
@@ -59,10 +57,9 @@ void service_add_nodes_1__check_add_nodes_item_params(
       constants__t_Node_i service_add_nodes_1__l_node;
       constants__t_NodeClass_i service_add_nodes_1__l_node_class;
       
-      *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-      *service_add_nodes_1__parent_nid = constants__c_NodeId_indet;
       *service_add_nodes_1__new_nid = constants__c_NodeId_indet;
       service_add_nodes_1__l_bres = false;
+      *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_unexpected_error;
       constants__getall_conv_ExpandedNodeId_NodeId(service_add_nodes_1__p_parentNid,
          &service_add_nodes_1__l_local_server_exp_node_id,
          &service_add_nodes_1__l_node_id);
@@ -72,7 +69,6 @@ void service_add_nodes_1__check_add_nodes_item_params(
             &service_add_nodes_1__l_node);
          if (service_add_nodes_1__l_node_exists == true) {
             service_add_nodes_1__l_bres = true;
-            *service_add_nodes_1__parent_nid = service_add_nodes_1__l_node_id;
          }
          else {
             *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_parent_node_id_invalid;
@@ -105,7 +101,7 @@ void service_add_nodes_1__check_add_nodes_item_params(
                service_write__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
                   &service_add_nodes_1__l_node_exists,
                   &service_add_nodes_1__l_node);
-               if (service_add_nodes_1__l_node_exists == true) {
+               if (service_add_nodes_1__l_node_exists == false) {
                   *service_add_nodes_1__new_nid = service_add_nodes_1__l_node_id;
                }
                else {
@@ -123,8 +119,9 @@ void service_add_nodes_1__check_add_nodes_item_params(
             *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_node_id_rejected;
          }
       }
-      if (service_add_nodes_1__p_typeDefId != constants__c_ExpandedNodeId_indet) {
-         constants__getall_conv_ExpandedNodeId_NodeId(service_add_nodes_1__p_reqNodeId,
+      if ((service_add_nodes_1__l_bres == true) &&
+         (service_add_nodes_1__p_typeDefId != constants__c_ExpandedNodeId_indet)) {
+         constants__getall_conv_ExpandedNodeId_NodeId(service_add_nodes_1__p_typeDefId,
             &service_add_nodes_1__l_local_server_exp_node_id,
             &service_add_nodes_1__l_node_id);
          if (service_add_nodes_1__l_local_server_exp_node_id == true) {
@@ -159,18 +156,6 @@ void service_add_nodes_1__check_add_nodes_item_params(
    }
 }
 
-void service_add_nodes_1__local_treat_add_nodes_item(
-   const constants__t_NodeId_i service_add_nodes_1__p_parentNid,
-   const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
-   const constants__t_NodeId_i service_add_nodes_1__p_newNodeId,
-   const constants__t_QualifiedName_i service_add_nodes_1__p_browseName,
-   const constants__t_NodeClass_i service_add_nodes_1__p_nodeClass,
-   const constants__t_NodeAttributes_i service_add_nodes_1__p_nodeAttributes,
-   const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
-   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation) {
-   *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_ok;
-}
-
 void service_add_nodes_1__treat_add_nodes_item(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_parentExpNid,
    const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
@@ -183,23 +168,20 @@ void service_add_nodes_1__treat_add_nodes_item(
    constants__t_NodeId_i * const service_add_nodes_1__new_nodeId) {
    {
       constants_statuscodes_bs__t_StatusCode_i service_add_nodes_1__l_sc;
-      constants__t_NodeId_i service_add_nodes_1__l_parent_nid;
       constants__t_NodeId_i service_add_nodes_1__l_new_nid;
       
       service_add_nodes_1__check_add_nodes_item_params(service_add_nodes_1__p_parentExpNid,
          service_add_nodes_1__p_refTypeId,
          service_add_nodes_1__p_reqExpNodeId,
-         service_add_nodes_1__p_browseName,
          service_add_nodes_1__p_nodeClass,
          service_add_nodes_1__p_typeDefId,
          &service_add_nodes_1__l_sc,
-         &service_add_nodes_1__l_parent_nid,
          &service_add_nodes_1__l_new_nid);
       if (service_add_nodes_1__l_sc == constants_statuscodes_bs__e_sc_ok) {
          ;
       }
       if (service_add_nodes_1__l_sc == constants_statuscodes_bs__e_sc_ok) {
-         service_add_nodes_1__local_treat_add_nodes_item(service_add_nodes_1__l_parent_nid,
+         service_write__addNode_AddressSpace(service_add_nodes_1__p_parentExpNid,
             service_add_nodes_1__p_refTypeId,
             service_add_nodes_1__l_new_nid,
             service_add_nodes_1__p_browseName,

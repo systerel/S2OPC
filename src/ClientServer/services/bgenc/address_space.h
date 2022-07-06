@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 05/08/2022 08:40:20
+ Date                 : 05/08/2022 09:02:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -78,6 +78,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_conv_Variant_Type address_space_bs__get_conv_Variant_Type
 #define address_space__get_conv_Variant_ValueRank address_space_bs__get_conv_Variant_ValueRank
 #define address_space__get_user_authorization user_authorization_bs__get_user_authorization
+#define address_space__is_AddressSpace_constant address_space_bs__is_AddressSpace_constant
 #define address_space__is_IndexRangeDefined address_space_bs__is_IndexRangeDefined
 #define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
 #define address_space__is_local_service_treatment address_space_local__is_local_service_treatment
@@ -130,6 +131,15 @@ extern void address_space__treat_write_1(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space__addNode_AddressSpace(
+   const constants__t_ExpandedNodeId_i address_space__p_parentNid,
+   const constants__t_NodeId_i address_space__p_refTypeId,
+   const constants__t_NodeId_i address_space__p_newNodeId,
+   const constants__t_QualifiedName_i address_space__p_browseName,
+   const constants__t_NodeClass_i address_space__p_nodeClass,
+   const constants__t_NodeAttributes_i address_space__p_nodeAttributes,
+   const constants__t_ExpandedNodeId_i address_space__p_typeDefId,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__sc_addnode);
 extern void address_space__check_nodeId_isValid(
    const constants__t_NodeId_i address_space__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,

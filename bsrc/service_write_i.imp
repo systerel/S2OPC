@@ -38,6 +38,7 @@ IMPORTS
 
 PROMOTES
     is_mandatory_attribute,
+    is_AddressSpace_constant,
     read_Node_Attribute,
     readall_AddressSpace_Node,
     get_NodeClass,
@@ -65,7 +66,9 @@ PROMOTES
     read_variable_compat_type,
     check_object_has_method,
     check_nodeId_isValid,
-    is_IndexRangeDefined
+    is_IndexRangeDefined,
+
+    addNode_AddressSpace
 
 OPERATIONS
 

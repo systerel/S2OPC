@@ -339,6 +339,7 @@ bool SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_
 
 static void SOPC_AddressSpace_Node_Clear_Local(SOPC_AddressSpace_Node* node)
 {
+    assert(NULL != node);
     assert(node->node_class > 0);
 
     switch (node->node_class)

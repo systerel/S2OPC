@@ -48,6 +48,7 @@ typedef struct user_rights
     bool read;
     bool write;
     bool exec;
+    bool addnode;
 } user_rights;
 
 typedef struct user_password
@@ -253,6 +254,9 @@ static bool start_authorization(struct parse_context_t* ctx, const XML_Char** at
 
     attr_val = get_attr(ctx, "execute", attrs);
     rights->exec = attr_val != NULL && 0 == strcmp(attr_val, "true");
+
+    attr_val = get_attr(ctx, "addnode", attrs);
+    rights->addnode = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     return true;
 }
@@ -513,6 +517,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
                 *pbOperationAuthorized = up->rights.exec;
                 break;
+            case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
+                *pbOperationAuthorized = up->rights.addnode;
+                break;
             default:
                 assert(false && "Unknown operation type.");
                 break;
@@ -531,6 +538,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             break;
         case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
             *pbOperationAuthorized = config->anonRights.exec;
+            break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
+            *pbOperationAuthorized = config->anonRights.addnode;
             break;
         default:
             assert(false && "Unknown operation type.");
@@ -591,7 +601,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     ctx.users = users;
     ctx.currentAnonymous = false;
     ctx.hasAnonymous = false;
-    ctx.anonymousRights = (user_rights){false, false, false};
+    ctx.anonymousRights = (user_rights){false, false, false, false};
     ctx.currentUserPassword = NULL;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);

@@ -197,6 +197,11 @@
 #define SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION false
 #endif
 
+/** @brief Node management services activation (AddNodes only for now) */
+#ifndef SOPC_HAS_NODE_MANAGEMENT_SERVICES
+#define SOPC_HAS_NODE_MANAGEMENT_SERVICES true
+#endif
+
 #include "sopc_config_constants_check.h"
 
 #endif /* SOPC_TOOLKIT_CONFIG_CONSTANTS_H_ */

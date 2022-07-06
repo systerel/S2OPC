@@ -84,13 +84,17 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_node_add_nodes_resp
     THEN
-        StatusCode_service,
-        d_adsp_nodes_variables
-        :(
-            StatusCode_service       : t_StatusCode_i &
-            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            d_adsp_nodes_invariant
-        )
+        IF ConstantAddressSpace = TRUE THEN
+            StatusCode_service := e_sc_bad_service_unsupported
+        ELSE
+            StatusCode_service,
+            d_adsp_nodes_variables
+            :(
+                StatusCode_service       : t_StatusCode_i &
+                StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
+                d_adsp_nodes_invariant
+            )
+        END
     END
 
 END

@@ -35,12 +35,9 @@ DEFINITIONS
         AddNodeItemReq_ReferenceTypeId    : t_nodeToAddReqIndex +-> t_NodeId &
         AddNodeItemReq_RequestedNewNodeId : t_nodeToAddReqIndex +-> t_ExpandedNodeId_i & // Might be NULL ExpandedNodeId if server assigns a fresh one
         AddNodeItemReq_BrowseName         : t_nodeToAddReqIndex +-> t_QualifiedName &
-        AddNodeItemReq_NodeClass          : t_nodeToAddReqIndex +-> t_NodeClass &
+        AddNodeItemReq_NodeClass          : t_nodeToAddReqIndex +-> t_NodeClass_i & // Validity not guaranteed by message decoding
         AddNodeItemReq_NodeAttributes     : t_nodeToAddReqIndex +-> t_NodeAttributes &
         AddNodeItemReq_TypeDefinition     : t_nodeToAddReqIndex +-> t_ExpandedNodeId_i &
-
-        /* Relation used to check nodes attributes are well typed regarding the NodeClass */
-        NodeAttributesType : t_NodeAttributes --> t_NodeClass &
 
         /* Response content */
 
@@ -59,8 +56,6 @@ ABSTRACT_VARIABLES
     AddNodeItemReq_NodeAttributes,
     AddNodeItemReq_TypeDefinition,
 
-    NodeAttributesType,
-
     AddNodeItemResp_Allocated,
     AddNodeItemResp_AddedNodeId,
     AddNodeItemResp_StatusCode
@@ -77,8 +72,6 @@ INITIALISATION
     AddNodeItemReq_NodeClass := {}          ||
     AddNodeItemReq_NodeAttributes := {}     ||
     AddNodeItemReq_TypeDefinition := {}     ||
-
-    NodeAttributesType :(NodeAttributesType : t_NodeAttributes --> t_NodeClass) ||
 
     AddNodeItemResp_Allocated := FALSE ||
     AddNodeItemResp_AddedNodeId := {}  ||
@@ -114,7 +107,7 @@ OPERATIONS
                 AddNodeItemReq_ReferenceTypeId    : 1..nb_nodes_to_add --> t_NodeId &
                 AddNodeItemReq_RequestedNewNodeId : 1..nb_nodes_to_add --> t_ExpandedNodeId_i &
                 AddNodeItemReq_BrowseName         : 1..nb_nodes_to_add --> t_QualifiedName &
-                AddNodeItemReq_NodeClass          : 1..nb_nodes_to_add --> t_NodeClass &
+                AddNodeItemReq_NodeClass          : 1..nb_nodes_to_add --> t_NodeClass_i &
                 AddNodeItemReq_NodeAttributes     : 1..nb_nodes_to_add --> t_NodeAttributes &
                 AddNodeItemReq_TypeDefinition     : 1..nb_nodes_to_add --> t_ExpandedNodeId_i
             ) &
@@ -163,13 +156,10 @@ OPERATIONS
             p_nodeAttributes = AddNodeItemReq_NodeAttributes(p_index) &
             p_typeDefId : t_ExpandedNodeId_i &
             p_typeDefId = AddNodeItemReq_TypeDefinition(p_index) &
-            ((/* We only check for NodeClass related properties and local constraint on requested NodeId (serverIndex == 0) and
-                 BrowseName (not empty).
-                 NodesIds validity is checked in AddNode item treatment using address space. */
-              p_sc = e_sc_ok =>
-                /* NodeAttributes type complies with the node NodeClass requested to be added */
-                !ani.(ani : t_nodeToAddReqIndex & ani : dom(AddNodeItemReq_NodeClass) =>
-                    AddNodeItemReq_NodeClass(ani) = NodeAttributesType(AddNodeItemReq_NodeAttributes(ani))) &
+            ((/* We only check local constraint on requested NodeId (serverIndex == 0), BrowseName (not empty), NodeClass (valid) and NodeAttributes (decoded object).
+                 The rest is checked in AddNode item treatment using address space. */
+                p_sc = e_sc_ok =>
+                p_nodeClass : t_NodeClass &
                 /* for indexes of objects and variables: TypeDefinition is always defined */
                 AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] <: t_ExpandedNodeId &
                 /* for indexes of objects and variables: TypeDefinition is never defined */

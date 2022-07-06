@@ -72,46 +72,32 @@ void msg_node_management_add_nodes_bs__get_msg_create_add_nodes_req_nb_add_nodes
     *msg_node_management_add_nodes_bs__p_nb_add_nodes = addNodesReq->NoOfNodesToAdd;
 }
 
-static bool check_node_class_properties(const SOPC_EncodeableType* actualNodeAttrsType,
-                                        const SOPC_EncodeableType* expectedNodeAttrsType,
-                                        const SOPC_ExpandedNodeId* typeDefinition,
-                                        const bool typeDefExpected,
-                                        constants_statuscodes_bs__t_StatusCode_i* outBadStatusCode)
+static bool check_node_class_type_definition_constraint(constants__t_NodeClass_i p_nodeClass,
+                                                        const SOPC_ExpandedNodeId* typeDefinition)
 {
-    bool result = false;
     bool typeDefPresent = false;
-    if (&OpcUa_NodeAttributes_EncodeableType == actualNodeAttrsType || expectedNodeAttrsType == actualNodeAttrsType)
+    bool typeDefExpected = false;
+    switch (p_nodeClass)
     {
-        result = true;
+    case constants__e_ncl_Object:
+    case constants__e_ncl_Variable:
+        typeDefExpected = true;
+        break;
+    default:
+        typeDefExpected = false;
+    }
+    // TODO: replace by call to constants_bs__getall_conv_ExpandedNodeId_NodeId (make it an util in b2c ?)
+    // Note: we should accept an URI defined here but it means we have to translate URI to index in NodeId
+    if (0 == typeDefinition->ServerIndex && typeDefinition->NamespaceUri.Length <= 0 &&
+        SOPC_NodeId_IsNull(&typeDefinition->NodeId))
+    {
+        typeDefPresent = false;
     }
     else
     {
-        // NodesAttributes invalid for the NodeClass requested
-        *outBadStatusCode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
+        typeDefPresent = true;
     }
-    if (result)
-    {
-        if (0 == typeDefinition->ServerIndex && typeDefinition->NamespaceUri.Length <= 0 &&
-            SOPC_NodeId_IsNull(&typeDefinition->NodeId))
-        {
-            typeDefPresent = false;
-        }
-        else
-        {
-            typeDefPresent = true;
-        }
-        if (typeDefExpected == typeDefPresent)
-        {
-            result = true;
-        }
-        else
-        {
-            // TypeDefinition shall be defined only for Object and Variable
-            *outBadStatusCode = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
-        }
-    }
-
-    return result;
+    return (typeDefExpected == typeDefPresent);
 }
 
 void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
@@ -132,63 +118,9 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
     OpcUa_AddNodesItem* addNodesItem = &addNodesReq->NodesToAdd[msg_node_management_add_nodes_bs__p_index - 1];
     const SOPC_ExpandedNodeId* typeDefinition = &addNodesItem->TypeDefinition;
 
-    // Check NodeAttributes is well decoded as an OPC UA object
-    if (SOPC_ExtObjBodyEncoding_Object != addNodesItem->NodeAttributes.Encoding)
-    {
-        // We do not succeeded to decode NodesAttributes as an object => consider it invalid
-        *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
-        result = false;
-        ;
-    }
-
-    if (result)
-    {
-        // Check properties on NodeClass
-        bool expectedTypeDefinition = false;
-        const SOPC_EncodeableType* expectedNodeAttrsType = NULL;
-        switch (addNodesItem->NodeClass)
-        {
-        case OpcUa_NodeClass_Object:
-            expectedTypeDefinition = true;
-            expectedNodeAttrsType = &OpcUa_ObjectAttributes_EncodeableType;
-            break;
-        case constants__e_ncl_Variable:
-            expectedTypeDefinition = true;
-            expectedNodeAttrsType = &OpcUa_VariableAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_Method:
-            expectedNodeAttrsType = &OpcUa_MethodAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_ObjectType:
-            expectedNodeAttrsType = &OpcUa_ObjectTypeAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_VariableType:
-            expectedNodeAttrsType = &OpcUa_VariableTypeAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_ReferenceType:
-            expectedNodeAttrsType = &OpcUa_ReferenceTypeAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_DataType:
-            expectedNodeAttrsType = &OpcUa_DataTypeAttributes_EncodeableType;
-            break;
-        case OpcUa_NodeClass_View:
-            expectedNodeAttrsType = &OpcUa_ViewAttributes_EncodeableType;
-            break;
-        default:
-            *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
-            result = false;
-        }
-
-        const SOPC_EncodeableType* actualNodeAttrsType = addNodesItem->NodeAttributes.Body.Object.ObjType;
-        if (result && !check_node_class_properties(actualNodeAttrsType, expectedNodeAttrsType, typeDefinition,
-                                                   expectedTypeDefinition, msg_node_management_add_nodes_bs__p_sc))
-        {
-            result = false;
-        }
-    }
-
+    // TODO: replace by call to constants_bs__getall_conv_ExpandedNodeId_NodeId (make it an util in b2c ?)
     // Check local constraint on requested NodeId: "the serverIndex in the expanded NodeId shall be 0."
-    if (result && 0 != addNodesItem->RequestedNewNodeId.ServerIndex)
+    if (0 != addNodesItem->RequestedNewNodeId.ServerIndex)
     {
         *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_node_id_rejected;
         result = false;
@@ -198,6 +130,32 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
     if (result && addNodesItem->BrowseName.Name.Length <= 0)
     {
         *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_browse_name_invalid;
+        result = false;
+    }
+
+    // Check NodeClass validity
+    if (result)
+    {
+        result = util_NodeClass__C_to_B(addNodesItem->NodeClass, msg_node_management_add_nodes_bs__p_nodeClass);
+        if (!result)
+        {
+            *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
+        }
+    }
+
+    // Check NodeAttributes is well decoded as an OPC UA object
+    if (result && SOPC_ExtObjBodyEncoding_Object != addNodesItem->NodeAttributes.Encoding)
+    {
+        // We do not succeeded to decode NodesAttributes as an object => consider it invalid
+        *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
+        result = false;
+    }
+
+    // Check TypeDefinition validity depending on NodeClass
+    if (result && !check_node_class_type_definition_constraint(*msg_node_management_add_nodes_bs__p_nodeClass,
+                                                               &addNodesItem->TypeDefinition))
+    {
+        *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
         result = false;
     }
 
@@ -217,8 +175,6 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
             *msg_node_management_add_nodes_bs__p_reqNodeId = &addNodesItem->RequestedNewNodeId;
         }
         *msg_node_management_add_nodes_bs__p_browseName = &addNodesItem->BrowseName;
-        result = util_NodeClass__C_to_B(addNodesItem->NodeClass, msg_node_management_add_nodes_bs__p_nodeClass);
-        SOPC_ASSERT(result); // Guaranteed by previous switch case
         *msg_node_management_add_nodes_bs__p_nodeAttributes = &addNodesItem->NodeAttributes;
         if (typeDefinition)
         {

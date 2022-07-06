@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.h
 
- Date                 : 05/08/2022 08:40:42
+ Date                 : 05/08/2022 09:03:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,6 +65,7 @@ extern void service_write_1__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define service_write_1__addNode_AddressSpace address_space__addNode_AddressSpace
 #define service_write_1__check_nodeId_isValid address_space__check_nodeId_isValid
 #define service_write_1__check_object_has_method address_space__check_object_has_method
 #define service_write_1__get_BrowseName address_space__get_BrowseName
@@ -82,6 +83,7 @@ extern void service_write_1__INITIALISATION(void);
 #define service_write_1__get_conv_Variant_Type address_space__get_conv_Variant_Type
 #define service_write_1__get_conv_Variant_ValueRank address_space__get_conv_Variant_ValueRank
 #define service_write_1__get_user_authorization address_space__get_user_authorization
+#define service_write_1__is_AddressSpace_constant address_space__is_AddressSpace_constant
 #define service_write_1__is_IndexRangeDefined address_space__is_IndexRangeDefined
 #define service_write_1__is_NodeId_equal address_space__is_NodeId_equal
 #define service_write_1__is_local_service_treatment address_space__is_local_service_treatment

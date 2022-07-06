@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 05/08/2022 09:01:23
+ Date                 : 05/08/2022 09:03:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -47,6 +47,7 @@
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "msg_node_management_add_nodes.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -73,6 +74,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__get_conv_Variant_Type service_write__get_conv_Variant_Type
 #define service_add_nodes_1__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
 #define service_add_nodes_1__get_user_authorization service_write__get_user_authorization
+#define service_add_nodes_1__is_AddressSpace_constant service_write__is_AddressSpace_constant
 #define service_add_nodes_1__is_IndexRangeDefined service_write__is_IndexRangeDefined
 #define service_add_nodes_1__is_NodeId_equal service_write__is_NodeId_equal
 #define service_add_nodes_1__is_local_service_treatment service_write__is_local_service_treatment
@@ -94,21 +96,10 @@ extern void service_add_nodes_1__check_add_nodes_item_params(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_parentNid,
    const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_reqNodeId,
-   const constants__t_QualifiedName_i service_add_nodes_1__p_browseName,
    const constants__t_NodeClass_i service_add_nodes_1__p_nodeClass,
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
    constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation,
-   constants__t_NodeId_i * const service_add_nodes_1__parent_nid,
    constants__t_NodeId_i * const service_add_nodes_1__new_nid);
-extern void service_add_nodes_1__local_treat_add_nodes_item(
-   const constants__t_NodeId_i service_add_nodes_1__p_parentNid,
-   const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
-   const constants__t_NodeId_i service_add_nodes_1__p_newNodeId,
-   const constants__t_QualifiedName_i service_add_nodes_1__p_browseName,
-   const constants__t_NodeClass_i service_add_nodes_1__p_nodeClass,
-   const constants__t_NodeAttributes_i service_add_nodes_1__p_nodeAttributes,
-   const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
-   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation);
 
 /*--------------------
    OPERATIONS Clause

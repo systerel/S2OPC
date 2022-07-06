@@ -5,6 +5,7 @@
     <xs:attribute type="xs:boolean" name="read" default="false"/>
     <xs:attribute type="xs:boolean" name="write" default="false"/>
     <xs:attribute type="xs:boolean" name="execute" default="false"/>
+    <xs:attribute type="xs:boolean" name="addnode" default="false"/>
   </xs:complexType>
   <xs:complexType name="AnonymousType">
     <xs:sequence>

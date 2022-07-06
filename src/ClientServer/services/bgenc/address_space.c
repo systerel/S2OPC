@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 05/08/2022 08:40:20
+ Date                 : 05/08/2022 09:02:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -723,5 +723,41 @@ void address_space__read_variable_compat_type(
       address_space__p_var_vr,
       address_space__btyp_ok,
       address_space__btyp_need_conv);
+}
+
+void address_space__addNode_AddressSpace(
+   const constants__t_ExpandedNodeId_i address_space__p_parentNid,
+   const constants__t_NodeId_i address_space__p_refTypeId,
+   const constants__t_NodeId_i address_space__p_newNodeId,
+   const constants__t_QualifiedName_i address_space__p_browseName,
+   const constants__t_NodeClass_i address_space__p_nodeClass,
+   const constants__t_NodeAttributes_i address_space__p_nodeAttributes,
+   const constants__t_ExpandedNodeId_i address_space__p_typeDefId,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__sc_addnode) {
+   {
+      t_bool address_space__l_bres;
+      
+      address_space_bs__addNode_check_valid_node_attributes_type(address_space__p_nodeClass,
+         address_space__p_nodeAttributes,
+         &address_space__l_bres);
+      if (address_space__l_bres == true) {
+         if (address_space__p_nodeClass == constants__e_ncl_Variable) {
+            address_space_bs__addNode_AddressSpace_Variable(address_space__p_parentNid,
+               address_space__p_refTypeId,
+               address_space__p_newNodeId,
+               address_space__p_browseName,
+               address_space__p_nodeClass,
+               address_space__p_nodeAttributes,
+               address_space__p_typeDefId,
+               address_space__sc_addnode);
+         }
+         else {
+            *address_space__sc_addnode = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
+         }
+      }
+      else {
+         *address_space__sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
+      }
+   }
 }
 

@@ -292,7 +292,8 @@ SETS
     t_operation_type_i = {c_operation_type_indet,
                           e_operation_type_read,
                           e_operation_type_write,
-                          e_operation_type_executable};
+                          e_operation_type_executable,
+                          e_operation_type_addnode};
 
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
@@ -430,6 +431,7 @@ ABSTRACT_CONSTANTS
     conv_AccessLevel_TimestampWrite,
 
     conv_ExpandedNodeId_NodeId,
+    conv_NodeId_ExpandedNodeId,
 
     t_BrowseDirection,
     t_TimestampsToReturn,
@@ -1009,6 +1011,7 @@ PROPERTIES
     conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
+    conv_NodeId_ExpandedNodeId : t_NodeId >-> t_ExpandedNodeId &
 
     k_n_read_resp_max <= card(t_ReadValue) &
     k_n_WriteResponse_max <= card(t_WriteValue) &

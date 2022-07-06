@@ -97,13 +97,15 @@ DEFINITIONS
         Reference_TargetNode,
         Reference_IsForward,
 
-        Node_Reference,
         Node_RefIndexEnd,
         RefIndex_Reference
         ;
 
     d_adsp_variables ==
+
         d_adsp_nodes_variables,
+
+        ConstantAddressSpace,
 
         IsRangeDefined,
         IsValid_VariantIndex,
@@ -187,7 +189,6 @@ DEFINITIONS
         Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
         Reference_IsForward     : t_Reference --> BOOL             &
 
-        Node_Reference          : s_Node     <-> t_Reference &
         Node_RefIndexEnd        : s_Node     --> t_RefIndex  &
         RefIndex_Reference      : s_Node * t_RefIndex --> t_Reference
     );
@@ -195,6 +196,9 @@ DEFINITIONS
     d_adsp_invariant ==
     (
         d_adsp_nodes_invariant &
+
+        ConstantAddressSpace : BOOL &
+
         IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange_i --> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange_i --> BOOL &
@@ -218,6 +222,12 @@ DEFINITIONS
                 a_NodeClass_Attribute(p_ncl |-> p_aid) = bool(d_Mandatory_Attribute(p_ncl, p_aid)) &
                 bres = bool(d_Mandatory_Attribute(p_ncl, p_aid))
             )
+    END
+    ;
+
+    bres <-- is_AddressSpace_constant =
+    BEGIN
+        bres := ConstantAddressSpace
     END
     ;
 

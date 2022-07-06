@@ -28,6 +28,8 @@ SEES
 
 DEFINITIONS
     d_variables ==
+        ConstantAddressSpace, /* In constant address space only Value attribute might be modified, no node can be added / removed */
+
         s_Node,
 
         a_NodeId,
@@ -65,12 +67,16 @@ DEFINITIONS
         HasRange_VariantIndex, /* Valid index range but has no range in  Variant */
 
         /* LocalizedText supported locales */
-        IsSupportedLocales_Variant
+        IsSupportedLocales_Variant,
+
+        NodeAttributesType
 
     ;
 
     d_inv ==
     (
+        ConstantAddressSpace : BOOL &
+
         /* Address Space nodes */
         s_Node <: t_Node &
 
@@ -140,7 +146,10 @@ DEFINITIONS
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
         HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL &
 
-        IsSupportedLocales_Variant : t_Variant * t_LocaleIds --> BOOL
+        IsSupportedLocales_Variant : t_Variant * t_LocaleIds --> BOOL &
+
+        /* Relation used to check nodes attributes are well typed regarding the NodeClass */
+        NodeAttributesType : t_NodeAttributes --> t_NodeClass
     );
 
     d_init ==
@@ -157,6 +166,12 @@ INITIALISATION
     d_variables :( d_init )
 
 OPERATIONS
+
+    bres <-- is_AddressSpace_constant =
+    BEGIN
+        bres := ConstantAddressSpace
+    END
+    ;
 
     bres <-- is_NodeId_equal(nid1, nid2) =
     PRE
@@ -851,5 +866,204 @@ OPERATIONS
     THEN
         p_type :: t_NodeId_i
     END
+    ;
 
+    /* Node Management operations */
+    bres <-- addNode_check_valid_node_attributes_type(p_nodeClass, p_nodeAttributes) =
+    PRE
+        p_nodeClass : t_NodeClass_i &
+        p_nodeClass : t_NodeClass   &
+        p_nodeAttributes : t_NodeAttributes_i &
+        p_nodeAttributes : t_NodeAttributes
+    THEN
+        bres := bool(NodeAttributesType(p_nodeAttributes) = p_nodeClass)
+    END
+    ;
+
+    sc_addnode <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
+    PRE
+        p_parentNid : t_ExpandedNodeId_i &
+        p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
+        conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
+        p_refTypeId : t_NodeId_i &
+        p_refTypeId : t_NodeId &
+        p_newNodeId : t_NodeId_i &
+        p_newNodeId : t_NodeId &
+        p_newNodeId /: ran(a_NodeId) &
+        p_browseName : t_QualifiedName_i &
+        p_browseName : t_QualifiedName &
+        p_nodeClass : t_NodeClass_i &
+        p_nodeClass = e_ncl_Variable &
+        p_nodeAttributes : t_NodeAttributes_i &
+        p_nodeAttributes : t_NodeAttributes &
+        NodeAttributesType(p_nodeAttributes) = e_ncl_Variable &
+        p_typeDefId : t_ExpandedNodeId_i &
+        p_typeDefId : t_ExpandedNodeId &
+        p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
+        conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)
+    THEN
+        sc_addnode,
+
+        s_Node,
+        a_NodeId,
+        a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
+        a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_DataType,
+        a_ValueRank,
+        a_ArrayDimensions,
+        a_AccessLevel,
+        a_UserAccessLevel,
+        a_Historizing,
+        Ref_HasTypeDefinition,
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+        Node_RefIndexEnd,
+        RefIndex_Reference
+        :(
+            sc_addnode : t_StatusCode_i &
+            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory} &
+            s_Node <: t_Node &
+
+            /* Attributes */
+            a_NodeId      : s_Node >-> t_NodeId        &
+            a_NodeClass   : s_Node --> t_NodeClass     &
+            a_BrowseName  : s_Node --> t_QualifiedName &
+            a_DisplayName : s_Node --> t_LocalizedText &
+            a_Value       : s_Node +-> t_Variant   &
+            a_Value_StatusCode : s_Node +-> t_RawStatusCode &
+            a_Value_SourceTimestamp : s_Node +-> t_Timestamp &
+            a_DataType : s_Node +-> t_NodeId &
+            a_ValueRank : s_Node +-> t_ValueRank &
+            a_ArrayDimensions : s_Node +-> t_ArrayDimensions &
+            a_AccessLevel : s_Node +-> t_access_level &
+            a_UserAccessLevel : s_Node +-> t_access_level &
+            a_Historizing : s_Node +-> BOOL &
+
+            Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
+
+            Reference_SourceNode    : t_Reference +-> t_NodeId         &
+            Reference_ReferenceType : t_Reference +-> t_NodeId         &
+            Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
+            Reference_IsForward     : t_Reference +-> BOOL             &
+
+            Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
+            RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
+
+            (sc_addnode = e_sc_ok =>
+                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                s_Node$0 <: s_Node &
+                a_NodeId$0 <: a_NodeId &
+                a_NodeClass$0 <: a_NodeClass &
+                a_BrowseName$0 <: a_BrowseName &
+                a_DisplayName$0 <: a_DisplayName &
+                a_Value$0 <: a_Value &
+                a_Value_StatusCode$0 <: a_Value_StatusCode &
+                a_Value_SourceTimestamp$0 <: a_Value_SourceTimestamp &
+                a_DataType$0 <: a_DataType &
+                a_ValueRank$0 <: a_ValueRank &
+                a_ArrayDimensions$0 <: a_ArrayDimensions &
+                a_AccessLevel$0 <: a_AccessLevel &
+                a_UserAccessLevel$0 <: a_UserAccessLevel &
+                a_Historizing$0 <: a_Historizing &
+
+                Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
+
+                Reference_SourceNode$0    <: Reference_SourceNode &
+                Reference_ReferenceType$0 <: Reference_ReferenceType &
+                Reference_TargetNode$0    <: Reference_TargetNode &
+                Reference_IsForward$0     <: Reference_IsForward &
+
+                Node_RefIndexEnd$0        <: Node_RefIndexEnd &
+                RefIndex_Reference$0      <: RefIndex_Reference &
+                /* Minimal added references is 2 references for parent / child relationship */
+                #(l_node, l_refIndex, l_ref, l_parentNode, l_refParentIndex, l_refParent).(
+                    (l_node : s_Node & l_node /: s_Node$0 &
+                        l_refIndex : t_RefIndex &
+                        l_ref = RefIndex_Reference(l_node |-> l_refIndex) & l_ref /: ran(RefIndex_Reference$0) &
+                        l_ref /: dom(Reference_SourceNode$0)    & l_ref : dom(Reference_SourceNode) &
+                        l_ref /: dom(Reference_ReferenceType$0) & l_ref : dom(Reference_ReferenceType) &
+                        l_ref /: dom(Reference_TargetNode$0)    & l_ref : dom(Reference_TargetNode) &
+                        l_ref /: dom(Reference_IsForward$0)     & l_ref : dom(Reference_IsForward)) &
+                    (
+                        (l_node |-> p_newNodeId) : a_NodeId &
+                        (l_node |-> p_nodeClass) : a_NodeClass &
+                        (l_node |-> p_browseName) : a_BrowseName &
+                        l_node : dom(a_Value) &
+                        l_node : dom(a_Value_StatusCode) &
+                        l_node : dom(a_Value_SourceTimestamp) &
+                        l_node : dom(a_DataType) &
+                        l_node : dom(a_ValueRank) &
+                        l_node : dom(a_ArrayDimensions) &
+                        l_node : dom(a_AccessLevel) &
+                        l_node : dom(a_UserAccessLevel) &
+                        l_node : dom(a_Historizing) &
+
+                        (l_ref |-> p_newNodeId) : Reference_SourceNode &
+                        (l_ref |-> p_refTypeId) : Reference_ReferenceType &
+                        (l_ref |-> p_parentNid) : Reference_TargetNode &
+                        (l_ref |-> FALSE) : Reference_IsForward
+                    ) &
+                    (l_parentNode : s_Node$0 & a_NodeId(l_parentNode) = conv_ExpandedNodeId_NodeId(p_parentNid) &
+                        l_refParentIndex : t_RefIndex &
+                        l_refParent = RefIndex_Reference$0(l_parentNode |-> l_refParentIndex) &
+                        l_refParent /: ran(RefIndex_Reference$0) &
+                        l_refParent /: dom(Reference_SourceNode$0)    & l_refParent : dom(Reference_SourceNode) &
+                        l_refParent /: dom(Reference_ReferenceType$0) & l_refParent : dom(Reference_ReferenceType) &
+                        l_refParent /: dom(Reference_TargetNode$0)    & l_refParent : dom(Reference_TargetNode) &
+                        l_refParent /: dom(Reference_IsForward$0)     & l_refParent : dom(Reference_IsForward)) &
+                    (
+                        (l_refParent |-> conv_ExpandedNodeId_NodeId(p_parentNid)) : Reference_SourceNode &
+                        (l_refParent |-> p_refTypeId) : Reference_ReferenceType &
+                        (l_refParent |-> conv_NodeId_ExpandedNodeId(p_newNodeId)) : Reference_TargetNode &
+                        (l_refParent |-> TRUE) : Reference_IsForward
+                    )
+                )
+            ) &
+            (not (sc_addnode = e_sc_ok) =>
+                s_Node = s_Node$0 &
+
+                /* Attributes */
+                a_NodeId = a_NodeId$0 &
+                a_NodeClass = a_NodeClass$0 &
+                a_BrowseName = a_BrowseName$0 &
+                a_DisplayName = a_DisplayName$0 &
+                a_Value = a_Value$0 &
+                a_Value_StatusCode = a_Value_StatusCode$0 &
+                a_Value_SourceTimestamp = a_Value_SourceTimestamp$0 &
+                a_DataType = a_DataType$0 &
+                a_ValueRank = a_ValueRank$0 &
+                a_ArrayDimensions = a_ArrayDimensions$0 &
+                a_AccessLevel = a_AccessLevel$0 &
+                a_UserAccessLevel = a_UserAccessLevel$0 &
+                a_Historizing = a_Historizing$0 &
+
+                Ref_HasTypeDefinition = Ref_HasTypeDefinition$0 &
+
+                Reference_SourceNode    = Reference_SourceNode$0 &
+                Reference_ReferenceType = Reference_ReferenceType$0 &
+                Reference_TargetNode    = Reference_TargetNode$0 &
+                Reference_IsForward     = Reference_IsForward$0 &
+
+                Node_RefIndexEnd        = Node_RefIndexEnd$0 &
+                RefIndex_Reference      = RefIndex_Reference$0
+            )
+        )
+    END
+    ;
+
+    /* Generates an internal event for subscriptions */
+    gen_addNode_event(p_newNodeId) =
+    PRE
+        p_newNodeId : t_NodeId_i &
+        p_newNodeId : t_NodeId &
+        p_newNodeId : ran(a_NodeId)
+    THEN
+        skip
+    END
 END

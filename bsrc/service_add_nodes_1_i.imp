@@ -27,10 +27,8 @@ SEES
     constants,
     constants_statuscodes_bs,
     message_in_bs,
-    message_out_bs
-
-DEFINITIONS
-    "address_space.def"
+    message_out_bs,
+    msg_node_management_add_nodes
 
 IMPORTS
     service_write
@@ -42,6 +40,7 @@ PROMOTES
     treat_write_request,
 
     is_mandatory_attribute,
+    is_AddressSpace_constant,
     read_Node_Attribute,
     readall_AddressSpace_Node,
     get_NodeClass,
@@ -73,24 +72,24 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    sc_operation, parent_nid, new_nid
+    /* TODO: make browse service accessible to check browse name properties ? */
+    sc_operation, new_nid
       <-- check_add_nodes_item_params
-        (p_parentNid, p_refTypeId, p_reqNodeId, p_browseName, p_nodeClass, p_typeDefId) =
+        (p_parentNid, p_refTypeId, p_reqNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId) =
     PRE
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : t_ExpandedNodeId &
         p_refTypeId : t_NodeId_i &
         p_refTypeId : t_NodeId &
         p_reqNodeId : t_ExpandedNodeId_i &
-        p_browseName : t_QualifiedName_i &
-        p_browseName : t_QualifiedName &
+        /*p_browseName : t_QualifiedName_i &
+        p_browseName : t_QualifiedName &*/
         p_nodeClass : t_NodeClass_i &
         p_nodeClass : t_NodeClass &
         p_typeDefId : t_ExpandedNodeId_i &
         (p_nodeClass :{e_ncl_Object, e_ncl_Variable} => p_typeDefId : t_ExpandedNodeId)
     THEN
         sc_operation,
-        parent_nid,
         new_nid
         :(
             sc_operation : t_StatusCode_i &
@@ -100,19 +99,17 @@ LOCAL_OPERATIONS
                             e_sc_bad_reference_not_allowed,
                             e_sc_bad_node_id_rejected,
                             e_sc_bad_node_id_exists,
-                            // bad_node_class_invalid => already checked
-                            // e_sc_bad_browse_name_invalid => already checked
-                            e_sc_bad_browse_name_duplicated,
-                            //bad_node_attributes_invalid => already checked
+                            /* bad_node_class_invalid => already checked */
+                            /* e_sc_bad_browse_name_invalid => already checked */
+                            /* e_sc_bad_browse_name_duplicated, => we should use browse service here but it is not possible  */
+                            /* bad_node_attributes_invalid => already checked */
                             e_sc_bad_type_definition_invalid,
                             e_sc_bad_out_of_memory }  &
-            parent_nid : t_NodeId_i &
             new_nid : t_NodeId_i &
             (sc_operation = e_sc_ok =>
                 /* Parent node is valid */
                 p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
-                parent_nid = conv_ExpandedNodeId_NodeId(p_parentNid) &
-                parent_nid : ran(a_NodeId) &
+                conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
                 /* Reference type is valid */
                 p_refTypeId : Type_IsReferenceTypeIdValid &
                 new_nid : t_NodeId &
@@ -121,41 +118,12 @@ LOCAL_OPERATIONS
                     p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & new_nid = conv_ExpandedNodeId_NodeId(p_reqNodeId)) &
                 /* Type definition is valid if node is an object or variable */
                 (p_nodeClass = e_ncl_Object or p_nodeClass = e_ncl_Variable =>
-                 p_typeDefId : t_ExpandedNodeId)
+                    p_typeDefId : t_ExpandedNodeId &
+                    p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
+                    conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)
+                )
             ) &
             (not(sc_operation = e_sc_ok) => new_nid = c_NodeId_indet)
-        )
-    END
-    ;
-
-    sc_operation
-      <-- local_treat_add_nodes_item (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
-    PRE
-        p_parentNid : t_NodeId_i &
-        p_parentNid : t_NodeId &
-        p_refTypeId : t_NodeId_i &
-        p_refTypeId : t_NodeId &
-        p_newNodeId : t_NodeId_i &
-        p_newNodeId : t_NodeId &
-        p_newNodeId /: ran(a_NodeId) &
-        p_browseName : t_QualifiedName_i &
-        p_browseName : t_QualifiedName &
-        p_nodeClass : t_NodeClass_i &
-        p_nodeClass : t_NodeClass &
-        p_nodeAttributes : t_NodeAttributes_i &
-        p_nodeAttributes : t_NodeAttributes &
-        p_typeDefId : t_ExpandedNodeId_i
-    THEN
-        sc_operation,
-        d_adsp_nodes_variables
-        :(
-            d_adsp_nodes_invariant &
-            sc_operation : t_StatusCode_i &
-            sc_operation : {e_sc_ok,
-                            // temporary to indicate unsupported node classes
-                            e_sc_bad_node_class_invalid,
-                            e_sc_bad_out_of_memory }  &
-            (sc_operation = e_sc_ok => p_newNodeId : ran(a_NodeId))
         )
     END
 
@@ -164,9 +132,9 @@ OPERATIONS
     /* LOCAL_OPERATIONS */
 
 
-    sc_operation, parent_nid, new_nid
+    sc_operation, new_nid
       <-- check_add_nodes_item_params
-        (p_parentNid, p_refTypeId, p_reqNodeId, p_browseName, p_nodeClass, p_typeDefId) =
+        (p_parentNid, p_refTypeId, p_reqNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId) =
     VAR
         l_bres,
         l_local_server_exp_node_id,
@@ -175,10 +143,9 @@ OPERATIONS
         l_node,
         l_node_class
     IN
-        sc_operation := e_sc_bad_unexpected_error;
-        parent_nid := c_NodeId_indet;
         new_nid := c_NodeId_indet;
         l_bres := FALSE;
+        sc_operation := e_sc_bad_unexpected_error;
         /* Validate parent node */
         l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(p_parentNid);
         IF l_local_server_exp_node_id = TRUE
@@ -186,12 +153,12 @@ OPERATIONS
             l_node_exists, l_node <-- readall_AddressSpace_Node(l_node_id);
             IF l_node_exists = TRUE
             THEN
-                l_bres := TRUE;
-                parent_nid := l_node_id
+                l_bres := TRUE
             ELSE
                 sc_operation := e_sc_bad_parent_node_id_invalid
             END
         ELSE
+            /* Note: unless we are able to find it in another server, it seems not ok to accept this parent node id */
             sc_operation := e_sc_bad_parent_node_id_invalid
         END
         ;
@@ -213,7 +180,8 @@ OPERATIONS
             THEN
                 sc_operation := e_sc_bad_reference_type_id_invalid
             END
-            /* TODO: check reference type allowed given parent node class and new node class: only possible for "known" semantic */
+            /* TODO: check reference type allowed given parent node class and new node class:
+                     only possible for "known" semantic and to be done in address_space_bs when node available ? */
         END
         ;
         /* Validates requested NodeId (or Generates a fresh one if not defined) */
@@ -225,7 +193,7 @@ OPERATIONS
                 IF l_local_server_exp_node_id = TRUE
                 THEN
                     l_node_exists, l_node <-- readall_AddressSpace_Node(l_node_id);
-                    IF l_node_exists = TRUE
+                    IF l_node_exists = FALSE
                     THEN
                         new_nid := l_node_id
                     ELSE
@@ -238,6 +206,7 @@ OPERATIONS
                 END
             ELSE
                 /* TODO: generate a fresh node id */
+                /* Note: set the generated NodeId in request requested NodeId for deallocation management */
                 l_bres := FALSE;
                 sc_operation := e_sc_bad_node_id_rejected
             END
@@ -247,10 +216,10 @@ OPERATIONS
            Or for all "same relationship with the parent" as stated by bad status code ?
            Note: it should use browse service / ref iterator which is in another branch or C implem only.
         */
-        /* Validtes TypeDefinition if defined (mandatory for nodes of class Object or Variable) */
-        IF p_typeDefId /= c_ExpandedNodeId_indet
+        /* Validates TypeDefinition if defined (mandatory for nodes of class Object or Variable) */
+        IF l_bres = TRUE & p_typeDefId /= c_ExpandedNodeId_indet
         THEN
-            l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(p_reqNodeId);
+            l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(p_typeDefId);
             IF l_local_server_exp_node_id = TRUE
             THEN
                 l_node_exists, l_node <-- readall_AddressSpace_Node(l_node_id);
@@ -281,24 +250,16 @@ OPERATIONS
     END
     ;
 
-    sc_operation
-    <-- local_treat_add_nodes_item (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
-    BEGIN
-        sc_operation := e_sc_ok
-    END
-    ;
-
     /* OPERATIONS */
     sc_operation, new_nodeId
       <-- treat_add_nodes_item (p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     VAR
         l_sc,
-        l_parent_nid,
         l_new_nid
     IN
-        l_sc, l_parent_nid, l_new_nid
+        l_sc, l_new_nid
           <-- check_add_nodes_item_params
-            (p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_browseName, p_nodeClass, p_typeDefId);
+            (p_parentExpNid, p_refTypeId, p_reqExpNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId);
         IF l_sc = e_sc_ok
         THEN
             /* Check user right ? Or before ? */
@@ -307,7 +268,7 @@ OPERATIONS
         ;
         IF l_sc = e_sc_ok
         THEN
-            l_sc <-- local_treat_add_nodes_item(l_parent_nid, p_refTypeId, l_new_nid, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
+            l_sc <-- addNode_AddressSpace(p_parentExpNid, p_refTypeId, l_new_nid, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
         END
         ;
         sc_operation := l_sc;

@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 05/08/2022 09:01:23
+ Date                 : 05/08/2022 09:03:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -75,6 +75,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__get_conv_Variant_Type service_add_nodes_1__get_conv_Variant_Type
 #define service_add_nodes__get_conv_Variant_ValueRank service_add_nodes_1__get_conv_Variant_ValueRank
 #define service_add_nodes__get_user_authorization service_add_nodes_1__get_user_authorization
+#define service_add_nodes__is_AddressSpace_constant service_add_nodes_1__is_AddressSpace_constant
 #define service_add_nodes__is_IndexRangeDefined service_add_nodes_1__is_IndexRangeDefined
 #define service_add_nodes__is_NodeId_equal service_add_nodes_1__is_NodeId_equal
 #define service_add_nodes__is_local_service_treatment service_add_nodes_1__is_local_service_treatment

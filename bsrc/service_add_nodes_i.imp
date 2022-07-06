@@ -44,6 +44,7 @@ PROMOTES
     treat_write_request,
 
     is_mandatory_attribute,
+    is_AddressSpace_constant,
     read_Node_Attribute,
     readall_AddressSpace_Node,
     get_NodeClass,
@@ -63,7 +64,7 @@ PROMOTES
     read_AddressSpace_free_variant,
     is_local_service_treatment,
     set_local_service_treatment,
-    get_user_authorization ,
+    get_user_authorization,
     get_Executable,
     get_InputArguments,
     get_conv_Variant_ValueRank,
@@ -117,6 +118,10 @@ OPERATIONS
         l_nodeClass,
         l_nodeAttributes,
         l_typeDefId,
+        l_local_treatment,
+        l_local_server_exp_node_id,
+        l_node_id,
+        l_authorized_add_node,
         l_new_nid
     IN
         /* Check global user rights ? */
@@ -128,8 +133,19 @@ OPERATIONS
               <-- getall_add_node_item_req_params (p_req_msg, l_index);
             IF l_sc = e_sc_ok
             THEN
-                /* Check user rights ? (what if no requested node id) ? */
-                l_sc := e_sc_ok
+                l_local_treatment <-- is_local_service_treatment;
+                IF l_local_treatment = FALSE THEN
+                    l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(l_reqExpNodeId);
+                    IF l_local_server_exp_node_id = TRUE
+                    THEN
+                        /* TODO: add node class ? Or aux parameter ? */
+                        l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user);
+                        IF l_authorized_add_node = FALSE
+                        THEN
+                            l_sc := e_sc_bad_user_access_denied
+                        END
+                    END // ELSE will be rejected due to nodeId param in next step
+                END // ELSE always authorized
             END
             ;
             IF l_sc = e_sc_ok
@@ -161,20 +177,25 @@ OPERATIONS
     IN
         StatusCode_service := e_sc_ok;
         l_bres := FALSE;
-        l_sc, l_nb_nodes_to_add <-- getall_msg_add_nodes_req_params (p_req_msg);
-        IF l_sc = e_sc_ok
+        l_bres <-- is_AddressSpace_constant;
+        IF l_bres = FALSE
         THEN
-            l_bres <-- alloc_msg_add_nodes_resp_results (p_resp_msg, l_nb_nodes_to_add);
-            IF l_bres = TRUE
+            l_sc, l_nb_nodes_to_add <-- getall_msg_add_nodes_req_params (p_req_msg);
+            IF l_sc = e_sc_ok
             THEN
-                StatusCode_service := e_sc_ok;
-                treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, l_nb_nodes_to_add)
+                l_bres <-- alloc_msg_add_nodes_resp_results (p_resp_msg, l_nb_nodes_to_add);
+                IF l_bres = TRUE
+                THEN
+                    StatusCode_service := e_sc_ok;
+                    treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, l_nb_nodes_to_add)
+                ELSE
+                    StatusCode_service := e_sc_bad_out_of_memory
+                END
             ELSE
-                StatusCode_service := e_sc_bad_out_of_memory
+                StatusCode_service := l_sc
             END
         ELSE
-            StatusCode_service := l_sc
+            StatusCode_service := e_sc_bad_service_unsupported
         END
     END
-
 END

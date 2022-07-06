@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 04/08/2022 14:53:27
+ Date                 : 05/08/2022 09:03:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,6 +51,21 @@ extern void address_space_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space_bs__addNode_AddressSpace_Variable(
+   const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
+   const constants__t_NodeId_i address_space_bs__p_refTypeId,
+   const constants__t_NodeId_i address_space_bs__p_newNodeId,
+   const constants__t_QualifiedName_i address_space_bs__p_browseName,
+   const constants__t_NodeClass_i address_space_bs__p_nodeClass,
+   const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
+   const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc_addnode);
+extern void address_space_bs__addNode_check_valid_node_attributes_type(
+   const constants__t_NodeClass_i address_space_bs__p_nodeClass,
+   const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
+   t_bool * const address_space_bs__bres);
+extern void address_space_bs__gen_addNode_event(
+   const constants__t_NodeId_i address_space_bs__p_newNodeId);
 extern void address_space_bs__get_AccessLevel(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_access_level * const address_space_bs__p_access_level);
@@ -104,6 +119,8 @@ extern void address_space_bs__get_conv_Variant_Type(
 extern void address_space_bs__get_conv_Variant_ValueRank(
    const constants__t_Variant_i address_space_bs__p_variant,
    t_entier4 * const address_space_bs__p_valueRank);
+extern void address_space_bs__is_AddressSpace_constant(
+   t_bool * const address_space_bs__bres);
 extern void address_space_bs__is_IndexRangeDefined(
    const constants__t_IndexRange_i address_space_bs__p_index_range,
    t_bool * const address_space_bs__bres);

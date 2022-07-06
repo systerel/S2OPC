@@ -47,7 +47,8 @@ typedef enum
     SOPC_USER_AUTHORIZATION_OPERATION_READ,
     SOPC_USER_AUTHORIZATION_OPERATION_WRITE, /*!< includes CurrentWrite, StatusWrite, TimestampWrite in UserAccessLevel
                                               */
-    SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE
+    SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+    SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE
 } SOPC_UserAuthorization_OperationType;
 
 /**
