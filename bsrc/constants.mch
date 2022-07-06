@@ -530,7 +530,6 @@ ABSTRACT_CONSTANTS
 PROPERTIES
     c_Server_Nano_Extended : BOOL &
 
-    /*AddS <: t_Node &*/
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &

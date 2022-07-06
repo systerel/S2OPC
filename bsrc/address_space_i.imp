@@ -145,8 +145,8 @@ LOCAL_OPERATIONS
         (isvalid = FALSE
             =>
          status : {e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid}) &
-        a_NodeId : t_Node >-> t_NodeId &
-        a_Value : t_Node +-> t_Variant &
+        a_NodeId : s_Node >-> t_NodeId &
+        a_Value : s_Node +-> t_Variant &
         index_range : t_IndexRange_i
     THEN
         serviceStatusCode,

@@ -68,7 +68,7 @@ OPERATIONS
         :(
             StatusCode_service       : t_StatusCode_i &
             StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            a_Value                  : t_Node +-> t_Variant &
+            a_Value                  : s_Node +-> t_Variant &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
         )

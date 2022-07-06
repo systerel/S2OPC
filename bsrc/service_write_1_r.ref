@@ -96,7 +96,7 @@ OPERATIONS
                possible values. */
 
             /* At most one value should be written for each node */
-            a_Value : t_Node +-> t_Variant &
+            a_Value : s_Node +-> t_Variant &
 
             /* The value requested to be written should be contained in the requested values */
             a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &

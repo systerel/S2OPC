@@ -48,7 +48,7 @@ OPERATIONS
     p_continue <-- init_iter_reference(p_node, p_startIndex) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_startIndex : NAT &
         p_startIndex : t_RefIndex &
         p_startIndex > 0

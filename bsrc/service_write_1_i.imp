@@ -123,7 +123,7 @@ OPERATIONS
             wreqs_to_iterate \/ wreqs_iterated = cast_t_WriteValue[1..nb_WriteValue] &
             l_continue = bool(wreqs_to_iterate /= {}) &
 
-            a_Value : t_Node +-> t_Variant &
+            a_Value : s_Node +-> t_Variant &
 
             a_Value <: a_Value$0 <+ (d_a_DataValue_requested;DataValue_Variant) &
             a_Value_StatusCode <: a_Value_StatusCode$0 <+ (d_a_DataValue_requested;DataValue_StatusCode) &

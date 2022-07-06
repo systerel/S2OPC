@@ -89,10 +89,9 @@ DEFINITIONS
         a_Value,
         StatusCode_service
         :(
-            a_Value                  : t_Node +-> t_Variant          &
+            a_Value                  : s_Node +-> t_Variant          &
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
-            a_Value                  : t_Node +-> t_Variant          &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
         )

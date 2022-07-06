@@ -29,7 +29,7 @@ OPERATIONS
        p_src_nodeid : current node ID to process (in t_NodeId)
        p_isvalid    : indicates whether the node ID is associated to a node
        p_nb_ref     : number of references starting from this source node
-       p_src_node   : source node associated to the node ID (in t_Node if such an association exists)
+       p_src_node   : source node associated to the node ID (in s_Node if such an association exists)
     */
     p_isvalid, p_nb_ref, p_src_node <-- getall_SourceNode_NbRef(p_src_nodeid) =
     PRE

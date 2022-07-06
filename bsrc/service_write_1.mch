@@ -79,13 +79,13 @@ OPERATIONS
             StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode &
 
-            a_Value : t_Node +-> t_Variant &
+            a_Value : s_Node +-> t_Variant &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
             dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
             dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            a_Value_StatusCode : t_Node +-> t_RawStatusCode &
+            a_Value_StatusCode : s_Node +-> t_RawStatusCode &
             dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-            a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
+            a_Value_SourceTimestamp : s_Node +-> t_Timestamp &
             dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
         )

@@ -177,7 +177,7 @@ LOCAL_OPERATIONS
         p_callMethod : t_CallMethod_i &
         p_callMethod : CallMethods &
         p_method_node : t_Node_i &
-        p_method_node : t_Node &
+        p_method_node : s_Node &
         p_req_msg = CallMethod_Msg &
         p_res_msg : t_msg_i &
         p_res_msg : t_msg   &

@@ -28,6 +28,8 @@ SEES
 
 DEFINITIONS
     d_variables ==
+        s_Node,
+
         a_NodeId,
         a_NodeClass,
         a_BrowseName,
@@ -69,67 +71,70 @@ DEFINITIONS
 
     d_inv ==
     (
-        /* Attributes */
-        a_NodeId      : t_Node >-> t_NodeId        &
-        a_NodeClass   : t_Node --> t_NodeClass     &
-        a_BrowseName  : t_Node --> t_QualifiedName &
-        a_DisplayName : t_Node --> t_LocalizedText &
+        /* Address Space nodes */
+        s_Node <: t_Node &
 
-        a_Value       : t_Node +-> t_Variant   &
+        /* Attributes */
+        a_NodeId      : s_Node >-> t_NodeId        &
+        a_NodeClass   : s_Node --> t_NodeClass     &
+        a_BrowseName  : s_Node --> t_QualifiedName &
+        a_DisplayName : s_Node --> t_LocalizedText &
+
+        a_Value       : s_Node +-> t_Variant   &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         /* + Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_RawStatusCode &
+        a_Value_StatusCode : s_Node +-> t_RawStatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_SourceTimestamp : t_Node +-> t_Timestamp &
+        a_Value_SourceTimestamp : s_Node +-> t_Timestamp &
         dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        a_IsAbstract : t_Node +-> BOOL &
+        a_IsAbstract : s_Node +-> BOOL &
         dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
 
-        a_EventNotifier : t_Node +-> t_Byte &
+        a_EventNotifier : s_Node +-> t_Byte &
         dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
 
-        a_DataType : t_Node +-> t_NodeId &
+        a_DataType : s_Node +-> t_NodeId &
         dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_ValueRank : t_Node +-> t_ValueRank &
+        a_ValueRank : s_Node +-> t_ValueRank &
         dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_ArrayDimensions : t_Node +-> t_ArrayDimensions &
+        a_ArrayDimensions : s_Node +-> t_ArrayDimensions &
         dom(a_ArrayDimensions) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        a_AccessLevel : t_Node +-> t_access_level &
+        a_AccessLevel : s_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        a_UserAccessLevel : t_Node +-> t_access_level &
+        a_UserAccessLevel : s_Node +-> t_access_level &
         dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
 
-        a_Historizing : t_Node +-> BOOL &
+        a_Historizing : s_Node +-> BOOL &
         dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        a_Executable : t_Node +-> BOOL &
+        a_Executable : s_Node +-> BOOL &
         dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
 
-        a_UserExecutable : t_Node +-> BOOL &
+        a_UserExecutable : s_Node +-> BOOL &
         dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
 
-        a_ContainsNoLoops : t_Node +-> BOOL &
+        a_ContainsNoLoops : s_Node +-> BOOL &
         dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
 
-        a_Symmetric : t_Node +-> BOOL &
+        a_Symmetric : s_Node +-> BOOL &
         dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
 
-        Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
+        Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
 
         Reference_SourceNode    : t_Reference +-> t_NodeId         &
         Reference_ReferenceType : t_Reference +-> t_NodeId         &
         Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
         Reference_IsForward     : t_Reference +-> BOOL             &
 
-        Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
-        RefIndex_Reference      : t_Node * t_RefIndex +-> t_Reference &
+        Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
+        RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
         IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
@@ -182,7 +187,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_AccessLevel_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_AccessLevel)
@@ -202,7 +207,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_BrowseName_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_BrowseName)
@@ -222,7 +227,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_ContainsNoLoops_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_ContainsNoLoops)
@@ -242,7 +247,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_DataType_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_DataType)
@@ -264,7 +269,7 @@ OPERATIONS
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_DisplayName)
@@ -284,7 +289,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_EventNotifier_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_EventNotifier)
@@ -304,7 +309,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_Executable_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_Executable)
@@ -324,7 +329,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_Historizing_value(p_node) =
     PRE
         p_node : t_Node_i          &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_Historizing)
@@ -344,7 +349,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_IsAbstract_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom((a_IsAbstract))
@@ -364,7 +369,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_NodeClass_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass)
     THEN
@@ -383,7 +388,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_NodeId_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)
     THEN
         CHOICE
@@ -401,7 +406,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_Symmetric_value(p_node) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_Symmetric)
@@ -421,7 +426,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_UserAccessLevel_value(p_node, p_is_user_read_auth, p_is_user_write_auth) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_UserAccessLevel) &
@@ -444,7 +449,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_UserExecutable_value(p_node, p_is_user_executable_auth) =
     PRE
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_UserExecutable) &
@@ -467,7 +472,7 @@ OPERATIONS
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
         p_node : t_Node_i         &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_Value) &
@@ -511,7 +516,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_ValueRank_value(p_node) =
     PRE
         p_node : t_Node_i          &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_ValueRank)
@@ -531,7 +536,7 @@ OPERATIONS
     sc, variant <-- read_AddressSpace_ArrayDimensions_value(p_node) =
     PRE
         p_node : t_Node_i          &
-        p_node : t_Node           &
+        p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_ArrayDimensions)
@@ -556,7 +561,7 @@ OPERATIONS
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
         node  : t_Node_i    &
-        node  : t_Node      &
+        node  : s_Node      &
         a_NodeClass(node) = e_ncl_Variable &
         node : dom(a_Value) &
         node : dom(a_Value_StatusCode) &
@@ -604,7 +609,7 @@ OPERATIONS
         p_user : t_user_i   &
         p_user : t_user     &
         p_node  : t_Node_i    &
-        p_node  : t_Node      &
+        p_node  : s_Node      &
         p_node : dom(a_Value_StatusCode) &
         p_sc : t_RawStatusCode &
         e_operation_type_write |-> a_NodeId(p_node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
@@ -618,7 +623,7 @@ OPERATIONS
         p_user : t_user_i   &
         p_user : t_user     &
         p_node  : t_Node_i    &
-        p_node  : t_Node      &
+        p_node  : s_Node      &
         p_node : dom(a_Value_StatusCode) &
         p_ts : t_Timestamp &
         e_operation_type_write |-> a_NodeId(p_node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
@@ -633,7 +638,7 @@ OPERATIONS
         p_user : t_user_i &
         p_user : t_user   &
         node : t_Node_i &
-        node : t_Node   &
+        node : s_Node   &
         node : dom(a_Value_StatusCode) &
         e_operation_type_read |-> a_NodeId(node) |-> e_aid_Value |-> p_user : s_AuthorizedOperations
     THEN
@@ -670,7 +675,7 @@ OPERATIONS
     p_browse_name <-- get_BrowseName(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_BrowseName)
     THEN
         p_browse_name :(p_browse_name : t_QualifiedName_i &
@@ -681,7 +686,7 @@ OPERATIONS
     p_display_name <-- get_DisplayName(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_DisplayName)
     THEN
         p_display_name :(p_display_name : t_LocalizedText_i &
@@ -692,7 +697,7 @@ OPERATIONS
     p_node_class <-- get_NodeClass(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_NodeClass)
     THEN
         p_node_class :(p_node_class : t_NodeClass_i &
@@ -703,7 +708,7 @@ OPERATIONS
     p_data_type <-- get_DataType(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_DataType)
     THEN
         p_data_type :(p_data_type : t_NodeId_i &
@@ -714,7 +719,7 @@ OPERATIONS
     p_value_rank <-- get_ValueRank(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_ValueRank)
     THEN
         p_value_rank :(p_value_rank = a_ValueRank(p_node))
@@ -724,7 +729,7 @@ OPERATIONS
     p_access_level <-- get_AccessLevel(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(a_AccessLevel)
     THEN
         p_access_level :(p_access_level : t_access_level &
@@ -744,7 +749,7 @@ OPERATIONS
     p_type_def <-- get_TypeDefinition(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(Ref_HasTypeDefinition)
     THEN
         p_type_def :(p_type_def : t_ExpandedNodeId_i &
@@ -802,7 +807,7 @@ OPERATIONS
     p_ref <-- get_RefIndex_Reference(p_node, p_ref_index) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node &
+        p_node : s_Node &
         p_ref_index : NAT &
         p_ref_index : t_RefIndex &
         Node_RefIndexEnd(p_node) >= p_ref_index

@@ -54,6 +54,9 @@ DEFINITIONS
     ;
 
     d_adsp_nodes_variables ==
+        /* Address Space nodes */
+        s_Node,
+
         /* Attributes (mandatory) */
         a_NodeId,
         a_NodeClass,
@@ -119,13 +122,15 @@ DEFINITIONS
 
     d_adsp_nodes_invariant ==
     (
-        /* Node attributes */
-        a_NodeId      : t_Node >-> t_NodeId        &
-        a_NodeClass   : t_Node --> t_NodeClass     &
-        a_BrowseName  : t_Node --> t_QualifiedName &
-        a_DisplayName : t_Node --> t_LocalizedText &
+        s_Node <: t_Node &
 
-        a_Value : t_Node +-> t_Variant &
+        /* Node attributes */
+        a_NodeId      : s_Node >-> t_NodeId        &
+        a_NodeClass   : s_Node --> t_NodeClass     &
+        a_BrowseName  : s_Node --> t_QualifiedName &
+        a_DisplayName : s_Node --> t_LocalizedText &
+
+        a_Value : s_Node +-> t_Variant &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
@@ -173,7 +178,7 @@ DEFINITIONS
         Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 
         /* Special reference (see def) */
-        Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
+        Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
         dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
 
         /* References */
@@ -182,9 +187,9 @@ DEFINITIONS
         Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
         Reference_IsForward     : t_Reference --> BOOL             &
 
-        Node_Reference          : t_Node     <-> t_Reference &
-        Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
-        RefIndex_Reference      : t_Node * t_RefIndex --> t_Reference
+        Node_Reference          : s_Node     <-> t_Reference &
+        Node_RefIndexEnd        : s_Node     --> t_RefIndex  &
+        RefIndex_Reference      : s_Node * t_RefIndex --> t_Reference
     );
 
     d_adsp_invariant ==
@@ -224,7 +229,7 @@ DEFINITIONS
         p_locales  : t_LocaleIds_i &
         p_locales  : t_LocaleIds   &
         p_node : t_Node_i &
-        p_node : t_Node &
+        p_node : s_Node &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
         p_nid = a_NodeId(p_node) &
@@ -646,7 +651,7 @@ DEFINITIONS
     p_type_def <-- get_TypeDefinition(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node   &
+        p_node : s_Node   &
         p_node : dom(Ref_HasTypeDefinition)
     THEN
         p_type_def :(p_type_def : t_ExpandedNodeId_i &
@@ -703,7 +708,7 @@ DEFINITIONS
     p_ref <-- get_RefIndex_Reference(p_node, p_ref_index) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node &
+        p_node : s_Node &
         p_ref_index : NAT1 &
         p_ref_index : t_RefIndex &
         Node_RefIndexEnd(p_node) >= p_ref_index
@@ -719,7 +724,7 @@ DEFINITIONS
         p_user : t_user_i &
         p_user : t_user   &
         node : t_Node_i &
-        node : t_Node &
+        node : s_Node &
         a_NodeClass(node) = e_ncl_Variable
     THEN
         sc := a_Value_StatusCode(node)

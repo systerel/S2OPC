@@ -159,7 +159,7 @@ LOCAL_OPERATIONS
         p_max_nb_results  <= k_n_BrowseTarget_max    &
         p_browseView      : t_NodeId_i               &
         p_src_node        : t_Node_i                 &
-        p_src_node        : t_Node                   &
+        p_src_node        : s_Node                   &
         p_browseDirection : t_BrowseDirection_i      &
         p_browseDirection : t_BrowseDirection        &
         p_refType_defined : BOOL                     &
