@@ -447,3 +447,54 @@ function(s2opc_expand_header h_input context_targets h_expanded)
                      COMMAND_EXPAND_LISTS
                      )
 endfunction()
+
+## S2OPC fuzzing tests: to be run manually ##
+
+# options with impact on dependencies
+option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
+
+# Enable fuzzing if WITH_OSS_FUZZ is ON
+if(WITH_OSS_FUZZ)
+    set(ENABLE_TESTING OFF)
+    set(ENABLE_FUZZING ON)
+endif()
+
+# We always link check statically, so that our test binaries are standalone
+if(ENABLE_TESTING)
+  find_package(check REQUIRED)
+  set(ENABLE_FUZZING ON)
+endif()
+
+if(ENABLE_FUZZING)
+
+  add_custom_target(fuzzers)
+
+  # Local fuzzing
+  function(s2opc_fuzzer name src_file fuzzing_path library includes)
+    set(standalone_target_name "${name}.standalone")
+    set(fuzz_target_name "${name}.libfuzzer")
+
+    add_executable(${standalone_target_name} "${fuzzing_path}/${src_file}" "${FUZZING_PATH}/standalone_fuzzer.c")
+    target_compile_options(${standalone_target_name} PRIVATE ${S2OPC_COMPILER_FLAGS})
+    target_compile_definitions(${standalone_target_name} PRIVATE ${S2OPC_DEFINITIONS})
+    target_link_libraries(${standalone_target_name} ${library})
+    target_include_directories(${standalone_target_name} PRIVATE ${includes})
+    add_dependencies(fuzzers ${standalone_target_name})
+
+    add_executable(${fuzz_target_name} "${FUZZING_PATH}/${src_file}")
+    set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
+    set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
+    target_link_libraries(${fuzz_target_name} ${library})
+    target_include_directories(${fuzz_target_name} PRIVATE ${includes})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+
+  # OSS Fuzzing
+  function(s2opc_oss_fuzzer fuzz_target_name src_file fuzzing_path library includes)
+    add_executable(${fuzz_target_name} "${fuzzing_path}/${src_file}")
+    target_link_libraries(${fuzz_target_name} library $ENV{LIB_FUZZING_ENGINE})
+    target_include_directories(${fuzz_target_name} PRIVATE ${includes})
+    add_dependencies(fuzzers ${fuzz_target_name})
+  endfunction()
+endif(ENABLE_FUZZING)
