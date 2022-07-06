@@ -1483,7 +1483,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             /* avoid hard indentation level */
             return OpcUa_BadInvalidArgument;
         }
-        char buffer[length];
+        char buffer[length + 1];
         memset(buffer, 0, sizeof(buffer));
 
         if (handle == file->handle)
