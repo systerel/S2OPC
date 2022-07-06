@@ -493,7 +493,7 @@ if(ENABLE_FUZZING)
   # OSS Fuzzing
   function(s2opc_oss_fuzzer fuzz_target_name src_file fuzzing_path library includes)
     add_executable(${fuzz_target_name} "${fuzzing_path}/${src_file}")
-    target_link_libraries(${fuzz_target_name} library $ENV{LIB_FUZZING_ENGINE})
+    target_link_libraries(${fuzz_target_name} "${library}" $ENV{LIB_FUZZING_ENGINE})
     target_include_directories(${fuzz_target_name} PRIVATE ${includes})
     add_dependencies(fuzzers ${fuzz_target_name})
   endfunction()
