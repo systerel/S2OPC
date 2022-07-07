@@ -152,7 +152,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
 
     assert(NULL != subConnection);
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .getSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
+        .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
 
     SOPC_UADP_NetworkMessage *uadp_nm = SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
     if (NULL != uadp_nm)
