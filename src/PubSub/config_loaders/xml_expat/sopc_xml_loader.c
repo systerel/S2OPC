@@ -416,7 +416,7 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
             ctx->state = PARSE_CONNECTION;
         }
     }
-    return true;
+    return result;
 }
 
 static bool parse_message_attributes(const char* attr_name,
@@ -667,7 +667,7 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
             ctx->state = PARSE_VARIABLE;
         }
     }
-    return true;
+    return result;
 }
 
 static void start_element_handler(void* user_data, const XML_Char* name, const XML_Char** attrs)
