@@ -502,6 +502,10 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     (void) callContextPtr;
     (void) param;
     SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
+    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
+     * / spec V1.05)*/
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
 
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
