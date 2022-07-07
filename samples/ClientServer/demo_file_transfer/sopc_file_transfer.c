@@ -36,6 +36,11 @@
 #define NB_VARIABLE 4
 
 /**
+ * \brief The invalid internal value for the file handle
+ */
+#define INVALID_HANDLE_VALUE 0
+
+/**
  * \brief File handle type (to send to client)
  */
 typedef uint32_t SOPC_FileHandle;
@@ -260,6 +265,7 @@ static uint64_t handle_hash(const void* handle);
 
 /**
  * \brief Function to generate a random SOPC_FileHandle (current time is used as seed).
+ * \note The handle generated is different form 0 which is the invalid internal value.
  * \return the SOPC_FileHandle generate
  */
 static SOPC_FileHandle generate_random_handle(void);
@@ -440,6 +446,10 @@ static SOPC_FileHandle generate_random_handle(void)
     /* Initialisation of the seed to generate random handle */
     srand((unsigned int) time(NULL));
     SOPC_FileHandle gen = (uint32_t) rand();
+    while (INVALID_HANDLE_VALUE == gen)
+    {
+        gen = (uint32_t) rand();
+    }
     return gen;
 }
 
@@ -551,7 +561,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
         }
         /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
          * support multiple handles for the same file)*/
-        file->handle = file->handle + 1;
+        file->handle = generate_random_handle();
         bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
         SOPC_ASSERT(true == res);
         file->mode = mode;
@@ -907,7 +917,7 @@ static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
 {
     SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer needs to be initialize");
     filetype->node_id = NULL;
-    filetype->handle = generate_random_handle();
+    filetype->handle = INVALID_HANDLE_VALUE;
     filetype->path = SOPC_String_Create();
     filetype->tmp_path = SOPC_String_Create();
     for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
@@ -1345,7 +1355,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (handle == file->handle)
+        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             status = SOPC_GoodGenericStatus;
             if (file->is_open)
@@ -1378,7 +1388,11 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     file->size_in_byte = 0;
                     file->open_count = 0;
                     local_write_open_count(*file);
+                    /* Remove the file handle in the API and invalid it */
+                    /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently
+                     * we don't support multiple handles for the same file)*/
                     SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+                    file->handle = INVALID_HANDLE_VALUE;
                     /* Free and creat a new tmp_path */
                     SOPC_String_Clear(file->tmp_path);
                     file->tmp_path = NULL;
@@ -1443,6 +1457,11 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             file->is_open = false;
             file->size_in_byte = 0;
             file->open_count = 0;
+            /* Remove the file handle in the API and invalid it */
+            /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
+             * support multiple handles for the same file)*/
+            SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+            file->handle = INVALID_HANDLE_VALUE;
             /* Free and creat a new tmp_path */
             SOPC_String_Clear(file->tmp_path);
             file->tmp_path = NULL;
@@ -1486,7 +1505,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
         char buffer[length + 1];
         memset(buffer, 0, sizeof(buffer));
 
-        if (handle == file->handle)
+        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             /* check if File was not opened for read access */
             if ((file->is_open == true) && ((file->mode == WRITE_MASK) || (file->mode == APPEND_MASK) ||
@@ -1563,7 +1582,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (handle == file->handle)
+        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             /* check if File was not opened for write access */
             if ((file->is_open) && (READ_MASK != file->mode))
@@ -1639,7 +1658,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
     if (found)
     {
         status = OpcUa_BadInvalidArgument;
-        if (handle == file->handle)
+        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             *pos = 0;
             if (NULL != file->fp)
@@ -1687,7 +1706,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
-        if (handle == file->handle)
+        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             status = SOPC_GoodGenericStatus;
             if (NULL != file->fp)
