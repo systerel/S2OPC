@@ -40,7 +40,8 @@ typedef struct SOPC_Server_RuntimeVariables
     OpcUa_BuildInfo build_info;
     SOPC_Byte service_level;
     bool auditing;
-    uint32_t maximum_operation_per_request;
+    uint32_t maximum_operations_per_request;
+    uint32_t maximum_heavy_operations_per_request;
 } SOPC_Server_RuntimeVariables;
 
 /**

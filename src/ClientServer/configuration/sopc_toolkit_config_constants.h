@@ -37,6 +37,11 @@
 #define SOPC_MAX_OPERATIONS_PER_MSG 5000
 #endif /* SOPC_MAX_OPERATIONS_PER_MSG */
 
+/** @brief Maximum number of heavy operations in a request accepted by server (AddNodes) */
+#ifndef SOPC_MAX_HEAVY_OPERATIONS_PER_MSG
+#define SOPC_MAX_HEAVY_OPERATIONS_PER_MSG 1000
+#endif /* SOPC_MAX_OPERATIONS_PER_MSG */
+
 /* TCP SOCKETS CONFIGURATION */
 
 /** @brief Maximum number of TCP sockets (listeners and connections) */

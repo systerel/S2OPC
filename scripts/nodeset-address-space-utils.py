@@ -171,6 +171,14 @@ def remove_max_monit(tree, namespaces):
     #  as there may exist references to unknown nodes in an address space.
     _remove_refs_to_nids(tree, ['i=11714'], namespaces)
 
+def remove_max_node_mgt(tree, namespaces):
+    # Delete MaxNodesPerNodeManagemeent
+    _remove_nids(tree, ['i=11713'])
+
+    # We have to remove references to MaxNodesPerNodeManagemeent manually,
+    #  as there may exist references to unknown nodes in an address space.
+    _remove_refs_to_nids(tree, ['i=11713'], namespaces)
+    
 def remove_methods(tree, namespaces):
     # Delete methods that are instances of other methods.
     # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
@@ -329,6 +337,8 @@ if __name__ == '__main__':
                         help='Remove the MaxMonitoredItems node and references to it')
     parser.add_argument('--remove-methods', action='store_true', dest='remove_methods',
                         help='Remove nodes and references that enable the use of methods')
+    parser.add_argument('--remove-max-node-management', action='store_true', dest='remove_max_node_mgt',
+                        help='Remove the MaxNodesPerNodeManagement node and references to it')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''
             Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
@@ -369,6 +379,9 @@ if __name__ == '__main__':
 
     if args.remove_methods:
         remove_methods(tree, namespaces)
+
+    if args.remove_max_node_mgt:
+        remove_max_node_mgt(tree, namespaces)
 
     if args.sanitize:
         res = sanitize(tree, namespaces)
