@@ -119,8 +119,14 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
     printf("******* Server stopped\n");
 }
 
-static SOPC_ReturnStatus(UserCloseCallback)(SOPC_FileType* file)
+/*
+ * User Close method callback definition.
+ */
+static SOPC_ReturnStatus UserCloseCallback(SOPC_FileType* file)
 {
+    /********************/
+    /* USER CODE BEGING */
+    /********************/
     SOPC_ReturnStatus status;
     char name[BUFF_SIZE];
     status = SOPC_FileTransfer_Get_TmpPath(file, name);
@@ -129,6 +135,30 @@ static SOPC_ReturnStatus(UserCloseCallback)(SOPC_FileType* file)
         printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", name);
     }
     return status;
+    /********************/
+    /* END USER CODE   */
+    /********************/
+}
+
+/*
+ * User Server callback definition used for address space modification by client.
+ */
+static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr,
+                                          OpcUa_WriteValue* writeValue,
+                                          SOPC_StatusCode writeStatus)
+{
+    /********************/
+    /* USER CODE BEGING */
+    /********************/
+    const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
+    const char* writeSuccess = (SOPC_STATUS_OK == writeStatus ? "success" : "failure");
+    char* sNodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
+
+    printf("Write notification (%s) on node '%s' by user '%s'\n", writeSuccess, sNodeId, SOPC_User_ToCString(user));
+    SOPC_Free(sNodeId);
+    /********************/
+    /* END USER CODE   */
+    /********************/
 }
 
 int main(int argc, char* argv[])
@@ -153,13 +183,20 @@ int main(int argc, char* argv[])
     {
         status = SOPC_HelperConfigServer_Initialize();
     }
-    assert(SOPC_STATUS_OK == status);
     if (SOPC_STATUS_OK == status)
     {
         /* status = Server_LoadServerConfigurationFromFiles(); */
         status = Server_LoadServerConfigurationFromPaths();
     }
-    assert(SOPC_STATUS_OK == status);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetWriteNotifCallback(&UserWriteNotificationCallback);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to configure the @ space modification notification callback\n");
+        }
+    }
 
     /* Finalize the server configuration */
     if (SOPC_STATUS_OK == status)
@@ -187,44 +224,59 @@ int main(int argc, char* argv[])
                                              .var_writableId = "ns=1;i=15044",
                                              .pFunc_UserCloseCallback = &UserCloseCallback};
 
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_FileTransfer_Add_File(config);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("******* Failed to add file into server\n");
+                SOPC_FileTransfer_Clear();
+                return 1;
+            }
+        }
         printf("******* File added ...\n");
-        status = SOPC_FileTransfer_Add_File(config);
-        if (SOPC_STATUS_OK != status)
+
+        if (SOPC_STATUS_OK == status)
         {
-            printf("******* Failed to add file into server\n");
-            SOPC_FileTransfer_Clear();
-            return 1;
+            status = SOPC_FileTransfer_Add_MethodItems(&UserMethod_Test, "UserMethod_Test", "ns=1;i=15002");
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("******* Failed to add UserMethod_Test to the server ...\n");
+            }
         }
 
-        status = SOPC_FileTransfer_Add_MethodItems(&UserMethod_Test, "UserMethod_Test", "ns=1;i=15002");
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK == status)
         {
-            printf("******* Failed to add UserMethod_Test to the server ...\n");
+            status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
         }
-
-        status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
-
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to start server ...\n");
             SOPC_FileTransfer_Clear();
             return 1;
         }
-
         printf("******* Start server ...\n");
+    }
 
-        /********************/
-        /* USER CODE BEGING */
-        /********************/
+    /********************/
+    /* USER CODE BEGING */
+    /********************/
 
-        SOPC_Boolean var_executable = true;
+    SOPC_Boolean var_executable = true;
+
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_FileTransfer_WriteVariable("ns=1;i=15792", SOPC_Boolean_Id, &var_executable);
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to write Executable variable (RemoteReset node)\n");
         }
+    }
 
-        SOPC_String* var_operationState = SOPC_String_Create();
+    SOPC_String* var_operationState = SOPC_String_Create();
+
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_String_CopyFromCString(var_operationState, "This is a test");
         if (SOPC_STATUS_OK == status)
         {
@@ -234,16 +286,16 @@ int main(int argc, char* argv[])
         {
             printf("******* Failed to write OperationState variable (Items node)\n");
         }
-        SOPC_String_Delete(var_operationState);
-        while (1)
-        {
-            SOPC_Sleep(500);
-        }
+    }
+    SOPC_String_Delete(var_operationState);
 
-        /********************/
-        /* END USER CODE   */
-        /********************/
+    while (1)
+    {
+        SOPC_Sleep(500);
     }
 
+    /********************/
+    /* END USER CODE   */
+    /********************/
     return 0;
 }
