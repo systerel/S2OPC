@@ -323,7 +323,8 @@ int main(int argc, char* argv[])
     }
     else
     {
-        printf("******* ReadBack on OperationState (success): %s\n", SOPC_String_GetCString(var_operationState_readback));
+        printf("******* ReadBack on OperationState (success): %s\n",
+               SOPC_String_GetCString(var_operationState_readback));
     }
 
     SOPC_String_Delete(var_operationState);
