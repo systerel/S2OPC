@@ -216,6 +216,25 @@ int main(int argc, char* argv[])
         /********************/
         /* USER CODE BEGING */
         /********************/
+
+        SOPC_Boolean var_executable = true;
+        status = SOPC_FileTransfer_WriteVariable("ns=1;i=15792", SOPC_Boolean_Id, &var_executable);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to write Executable variable (RemoteReset node)\n");
+        }
+
+        SOPC_String* var_operationState = SOPC_String_Create();
+        status = SOPC_String_CopyFromCString(var_operationState, "This is a test");
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_FileTransfer_WriteVariable("ns=1;i=15626", SOPC_String_Id, var_operationState);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to write OperationState variable (Items node)\n");
+        }
+        SOPC_String_Delete(var_operationState);
         while (1)
         {
             SOPC_Sleep(500);

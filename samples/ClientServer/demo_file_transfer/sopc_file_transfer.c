@@ -1757,30 +1757,39 @@ SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name)
         status = SOPC_STATUS_OK;
         if (NULL == node_id)
         {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:GetTmpPath: Unable to retrieve the nodeId of the file");
             printf("<FileTransfer_Get_TmpPath> Unable to retrieve the nodeId of the file\n");
             status = SOPC_STATUS_NOK;
         }
         if (false == file->is_open)
         {
-            printf("<FileTransfer_Get_TmpPath> File object '%s' is not open yet\n", node_id);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:GetTmpPath: file object '%s' is not openned", node_id);
+            printf("<FileTransfer_Get_TmpPath> File object '%s' is not openned\n", node_id);
             status = SOPC_STATUS_NOK;
         }
 
         if (NULL == file->fp)
         {
-            printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialize yet\n", node_id);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:GetTmpPath: file object '%s' is not initialized", node_id);
+            printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialized\n", node_id);
             status = SOPC_STATUS_NOK;
         }
         if (NULL != file->tmp_path)
         {
             if (0 > file->tmp_path->Length)
             {
-                printf("<FileTransfer_Get_TmpPath> File object '%s' is not created yet\n", node_id);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:GetTmpPath: file object '%s' is not created", node_id);
+                printf("<FileTransfer_Get_TmpPath> File object '%s' is not created\n", node_id);
                 status = SOPC_STATUS_NOK;
             }
         }
         else
         {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:GetTmpPath: unexpected error");
             printf("<FileTransfer_Get_TmpPath> Unexpected error\n");
             status = SOPC_STATUS_NOK;
         }
@@ -1966,4 +1975,131 @@ static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file)
     }
 
     return SOPC_GoodGenericStatus;
+}
+
+SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* UserValue)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
+    if (NULL == pReq)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
+    if (NULL == nodeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteVariable: unable to create SOPC_NodeId from C string");
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_DataValue dataValue;
+    dataValue.Value.BuiltInTypeId = UserBuiltInId;
+    dataValue.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dataValue.Status = SOPC_GoodGenericStatus;
+
+    switch (UserBuiltInId)
+    {
+    case SOPC_Null_Id:
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteVariable: SOPC_Null_Id is not supported");
+        status = SOPC_STATUS_NOK;
+        break;
+    case SOPC_Boolean_Id:
+        dataValue.Value.Value.Boolean = *(SOPC_Boolean*) UserValue;
+        break;
+    case SOPC_SByte_Id:
+        dataValue.Value.Value.Sbyte = *(SOPC_SByte*) UserValue;
+        break;
+    case SOPC_Byte_Id:
+        dataValue.Value.Value.Byte = *(SOPC_Byte*) UserValue;
+        break;
+    case SOPC_Int16_Id:
+        dataValue.Value.Value.Int16 = *(int16_t*) UserValue;
+        break;
+    case SOPC_UInt16_Id:
+        dataValue.Value.Value.Uint16 = *(uint16_t*) UserValue;
+        break;
+    case SOPC_Int32_Id:
+        dataValue.Value.Value.Int32 = *(int32_t*) UserValue;
+        break;
+    case SOPC_UInt32_Id:
+        dataValue.Value.Value.Uint32 = *(uint32_t*) UserValue;
+        break;
+    case SOPC_Int64_Id:
+        dataValue.Value.Value.Int64 = *(int64_t*) UserValue;
+        break;
+    case SOPC_UInt64_Id:
+        dataValue.Value.Value.Uint64 = *(uint64_t*) UserValue;
+        break;
+    case SOPC_Float_Id:
+        dataValue.Value.Value.Floatv = *(float*) UserValue;
+        break;
+    case SOPC_Double_Id:
+        dataValue.Value.Value.Doublev = *(double*) UserValue;
+        break;
+    case SOPC_String_Id:
+        dataValue.Value.Value.String = *(SOPC_String*) UserValue;
+        break;
+    case SOPC_DateTime_Id:
+        dataValue.Value.Value.Date = *(SOPC_DateTime*) UserValue;
+        break;
+    case SOPC_Guid_Id:
+        dataValue.Value.Value.Guid = (SOPC_Guid*) UserValue;
+        break;
+    case SOPC_ByteString_Id:
+        dataValue.Value.Value.Bstring = *(SOPC_ByteString*) UserValue;
+        break;
+    case SOPC_XmlElement_Id:
+        dataValue.Value.Value.XmlElt = *(SOPC_XmlElement*) UserValue;
+        break;
+    case SOPC_NodeId_Id:
+        dataValue.Value.Value.NodeId = (SOPC_NodeId*) UserValue;
+        break;
+    case SOPC_ExpandedNodeId_Id:
+        dataValue.Value.Value.ExpNodeId = (SOPC_ExpandedNodeId*) UserValue;
+        break;
+    case SOPC_StatusCode_Id:
+        dataValue.Value.Value.Status = *(SOPC_StatusCode*) UserValue;
+        break;
+    case SOPC_QualifiedName_Id:
+        dataValue.Value.Value.Qname = (SOPC_QualifiedName*) UserValue;
+        break;
+    case SOPC_LocalizedText_Id:
+        dataValue.Value.Value.LocalizedText = (SOPC_LocalizedText*) UserValue;
+        break;
+    case SOPC_ExtensionObject_Id:
+        dataValue.Value.Value.ExtObject = (SOPC_ExtensionObject*) UserValue;
+        break;
+    case SOPC_DataValue_Id:
+        dataValue.Value.Value.DataValue = (SOPC_DataValue*) UserValue;
+        break;
+    case SOPC_Variant_Id:
+        // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+        // but it could be an array of Variants."
+        // Note: Variant is not encoded in S2OPC stack for this case
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteVariable: SOPC_Variant_Id is not supported");
+        status = SOPC_STATUS_NOK;
+        break;
+    case SOPC_DiagnosticInfo_Id:
+        dataValue.Value.Value.DiagInfo = (SOPC_DiagnosticInfo*) UserValue;
+        break;
+    default:
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteVariable: UserBuiltInId value is not supported");
+        status = SOPC_STATUS_NOK;
+        break;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        }
+    }
+
+    return status;
 }

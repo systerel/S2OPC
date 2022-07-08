@@ -77,6 +77,15 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
 SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name);
 
 /**
+ * \brief Function to write a single value of variable (array are not supported).
+ * \param CnodeId The nodeId of the variable to write.
+ * \param UserBuiltInId The type of the variable.
+ * \param UserValue A pointer to the instantiated value to be written with the same type as the UserBuiltInId parameter.
+ * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
+ */
+SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* UserValue);
+
+/**
  * \brief Uninitialize the API (Free the memory)
  */
 void SOPC_FileTransfer_Clear(void);
