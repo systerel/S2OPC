@@ -87,29 +87,56 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 //                                                     xml_users_config_path, NULL);
 // }
 
-static SOPC_StatusCode UserMethod_Test(const SOPC_CallContext* callContextPtr,
-                                       const SOPC_NodeId* objectId,
-                                       uint32_t nbInputArgs,
-                                       const SOPC_Variant* inputArgs,
-                                       uint32_t* nbOutputArgs,
-                                       SOPC_Variant** outputArgs,
-                                       void* param)
+static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callContextPtr,
+                                                   const SOPC_NodeId* objectId,
+                                                   uint32_t nbInputArgs,
+                                                   const SOPC_Variant* inputArgs,
+                                                   uint32_t* nbOutputArgs,
+                                                   SOPC_Variant** outputArgs,
+                                                   void* param)
 {
+    /********************/
+    /* USER CODE BEGING */
+    /********************/
+
     /* avoid unused parameter compiler warning */
     (void) callContextPtr;
     (void) objectId;
     (void) param;
     (void) nbInputArgs;
     (void) inputArgs;
-    (void) nbOutputArgs;
-    (void) outputArgs;
     (void) param;
+    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
+     * / spec V1.05)*/
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
 
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
+
+    SOPC_Variant* v = SOPC_Variant_Create(); // Free by the Method Call Manager
+    if (NULL != v)
+    {
+        v->ArrayType = SOPC_VariantArrayType_SingleValue;
+        v->BuiltInTypeId = SOPC_Boolean_Id;
+        v->Value.Boolean = true;
+
+        *nbOutputArgs = 1;
+        *outputArgs = v;
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:UserMethod_Test: unable to create a variant");
+        status = OpcUa_BadUnexpectedError;
+    }
 
     printf("Test of the user method: successful!\n");
 
     return status;
+
+    /********************/
+    /* END USER CODE   */
+    /********************/
 }
 
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
@@ -238,7 +265,8 @@ int main(int argc, char* argv[])
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_FileTransfer_Add_MethodItems(&UserMethod_Test, "UserMethod_Test", "ns=1;i=15002");
+            status = SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test",
+                                                       "ns=1;i=15790");
             if (SOPC_STATUS_OK != status)
             {
                 printf("******* Failed to add UserMethod_Test to the server ...\n");
