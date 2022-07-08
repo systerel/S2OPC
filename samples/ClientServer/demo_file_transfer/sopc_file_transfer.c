@@ -22,7 +22,8 @@
 #include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_mem_alloc.h"
-
+#include "sopc_atomic.h"
+#include "sopc_platform_time.h"
 #include "opcua_statuscodes.h"
 
 /**
@@ -367,6 +368,11 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
                                                   SOPC_Variant** outputArgs,
                                                   void* param);
 
+static void filetransfer_results_set_service_result(SOPC_Boolean res);
+static SOPC_Boolean filetransfer_results_get_service_result(void);
+static void filetransfer_results_set_service_status(SOPC_Boolean res);
+static SOPC_Boolean filetransfer_results_get_service_status(void);
+
 /**
  * \brief The asynchronous local service response callback
  */
@@ -382,6 +388,8 @@ static SOPC_Dict* g_str_objectId_to_file = NULL;
 static SOPC_Dict* g_handle_to_file = NULL;
 static int32_t g_tombstone_key = -1;
 static SOPC_MethodCallManager* g_method_call_manager = NULL;
+static int32_t g_valid_service_result = false;
+static int32_t g_service_status = false;
 
 static bool check_openModeArg(SOPC_OpenMode mode)
 {
@@ -1848,9 +1856,111 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
 
 static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext)
 {
-    (void) type;
-    (void) response;
-    (void) userContext;
+    if (type == &OpcUa_ReadResponse_EncodeableType)
+    {
+        SOPC_ReturnStatus status = SOPC_STATUS_OK; 
+        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+        SOPC_VariantValue value = readResp->Results->Value.Value;
+        switch(readResp->Results->Value.BuiltInTypeId)
+        {
+            case SOPC_Null_Id:
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: SOPC_Null_Id is not supported");
+                status = SOPC_STATUS_NOK;
+                break;
+            case SOPC_Boolean_Id:
+                *(SOPC_Boolean*)userContext = value.Boolean;
+                break;
+            case SOPC_SByte_Id:
+                *(SOPC_SByte*)userContext = value.Sbyte;
+                break;
+            case SOPC_Byte_Id:
+                *(SOPC_Byte*)userContext = value.Byte;
+                break;
+            case SOPC_Int16_Id:
+                *(int16_t*)userContext = value.Int16;
+                break;
+            case SOPC_UInt16_Id:
+                *(uint16_t*)userContext = value.Uint16;
+                break;
+            case SOPC_Int32_Id:
+                *(int32_t*)userContext = value.Int32;
+                break;
+            case SOPC_UInt32_Id:
+                *(uint32_t*)userContext = value.Uint32;
+                break;
+            case SOPC_Int64_Id:
+                *(int64_t*)userContext = value.Int64;
+                break;
+            case SOPC_UInt64_Id:
+                *(uint64_t*)userContext = value.Uint64;
+                break;
+            case SOPC_Float_Id:
+                *(float*)userContext = value.Floatv;
+                break;
+            case SOPC_Double_Id:
+                *(double*)userContext = value.Doublev;
+                break;
+            case SOPC_String_Id:
+                status = SOPC_String_Copy((SOPC_String*)userContext, &value.String);
+                break;
+            case SOPC_DateTime_Id:
+                status = SOPC_DateTime_CopyAux((SOPC_DateTime*)userContext, &value.Date);
+                break;
+            case SOPC_Guid_Id:
+                status = SOPC_Guid_Copy((SOPC_Guid*)userContext, value.Guid);
+                break;
+            case SOPC_ByteString_Id:
+                status = SOPC_ByteString_Copy((SOPC_ByteString*)userContext, &value.Bstring);
+                break;
+            case SOPC_XmlElement_Id:
+                status = SOPC_XmlElement_Copy((SOPC_XmlElement*)userContext, &value.XmlElt);
+                break;
+            case SOPC_NodeId_Id:
+                status = SOPC_NodeId_Copy((SOPC_NodeId*)userContext, value.NodeId);
+                break;
+            case SOPC_ExpandedNodeId_Id:
+                status = SOPC_ExpandedNodeId_Copy((SOPC_ExpandedNodeId*)userContext, value.ExpNodeId);
+                break;
+            case SOPC_StatusCode_Id:
+                status = SOPC_StatusCode_CopyAux((SOPC_StatusCode*)userContext, &value.Status);
+                break;
+            case SOPC_QualifiedName_Id:
+                status = SOPC_QualifiedName_Copy((SOPC_QualifiedName*)userContext, value.Qname);
+                break;
+            case SOPC_LocalizedText_Id:
+                status = SOPC_LocalizedText_Copy((SOPC_LocalizedText*)userContext, value.LocalizedText);
+                break;
+            case SOPC_ExtensionObject_Id:
+                status = SOPC_ExtensionObject_Copy((SOPC_ExtensionObject*)userContext, value.ExtObject);
+                break;
+            case SOPC_DataValue_Id:
+                status = SOPC_DataValue_Copy((SOPC_DataValue*)userContext, value.DataValue);
+                break;
+            case SOPC_Variant_Id:
+                // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+                // but it could be an array of Variants."
+                // Note: Variant is not encoded in S2OPC stack for this case
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: SOPC_Variant_Id is not supported");
+                status = SOPC_STATUS_NOK;
+                break;
+            case SOPC_DiagnosticInfo_Id:
+                status = SOPC_DiagnosticInfo_Copy((SOPC_DiagnosticInfo*)userContext, value.DiagInfo);
+                break;
+            default:
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: UserBuiltInId value is not supported");
+                status = SOPC_STATUS_NOK;
+                break;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            filetransfer_results_set_service_status(true);
+        }
+        else
+        {
+            filetransfer_results_set_service_status(false);
+        }
+        filetransfer_results_set_service_result(true);
+    }
 }
 
 static SOPC_StatusCode local_write_open_count(SOPC_FileType file)
@@ -1983,6 +2093,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_Buil
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:WriteVariable: unable to create WriteRequest");
         return SOPC_STATUS_NOK;
     }
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
@@ -2100,6 +2211,85 @@ SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_Buil
             status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
         }
     }
+
+    SOPC_NodeId_Clear(nodeId);
+    nodeId = NULL;
+    return status;
+}
+
+static void filetransfer_results_set_service_result(SOPC_Boolean res)
+{
+    SOPC_Atomic_Int_Set(&g_valid_service_result, res ? true : false);
+}
+
+static SOPC_Boolean filetransfer_results_get_service_result(void)
+{
+    return SOPC_Atomic_Int_Get(&g_valid_service_result) == 1;
+}
+
+static void filetransfer_results_set_service_status(SOPC_Boolean res)
+{
+    SOPC_Atomic_Int_Set(&g_service_status, res ? true : false);
+}
+
+static SOPC_Boolean filetransfer_results_get_service_status(void)
+{
+    return SOPC_Atomic_Int_Get(&g_service_status) == 1;
+}
+
+SOPC_ReturnStatus SOPC_FileTransfer_ReadVariable(const char* CnodeId, void* pUserValue, uint32_t timeout)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_ReadRequest* pReq = SOPC_ReadRequest_Create(1u, OpcUa_TimestampsToReturn_Neither);
+    const uint32_t sleepTimeout = 50;
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    if (NULL == pReq)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: unable to create ReadRequest");
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
+    if (NULL == nodeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: unable to create SOPC_NodeId from C string");
+        return SOPC_STATUS_NOK;
+    }
+
+    status = SOPC_ReadRequest_SetReadValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceAsync(pReq, (uintptr_t)pUserValue);
+
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadVariable: local read asynchronous request: NOK");
+    }
+
+    /* Wait until service response is received */
+    loopCpt = 0;
+    while (SOPC_STATUS_OK == status && filetransfer_results_get_service_result() == false &&
+           loopCpt * sleepTimeout <= timeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    SOPC_Boolean res = filetransfer_results_get_service_status();
+    if (false == res)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    // Reset expected status
+    filetransfer_results_set_service_status(true);
+    // Reset expected result
+    filetransfer_results_set_service_result(false);
+
+    SOPC_NodeId_Clear(nodeId);
+    nodeId = NULL;
 
     return status;
 }

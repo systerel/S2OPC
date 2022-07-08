@@ -130,7 +130,7 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
         status = OpcUa_BadUnexpectedError;
     }
 
-    printf("Test of the user method: successful!\n");
+    printf("<toolkit_demo_file_transfer> Test of the user method: successful!\n");
 
     return status;
 
@@ -302,6 +302,7 @@ int main(int argc, char* argv[])
     }
 
     SOPC_String* var_operationState = SOPC_String_Create();
+    SOPC_String* var_operationState_readback = SOPC_String_Create();
 
     if (SOPC_STATUS_OK == status)
     {
@@ -315,7 +316,20 @@ int main(int argc, char* argv[])
             printf("******* Failed to write OperationState variable (Items node)\n");
         }
     }
+    status = SOPC_FileTransfer_ReadVariable("ns=1;i=15626", var_operationState_readback, 5000u);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("******* ReadBack OperationState variable (failure)\n");
+    }
+    else
+    {
+        printf("******* ReadBack on OperationState (success): %s\n", SOPC_String_GetCString(var_operationState_readback));
+    }
+
     SOPC_String_Delete(var_operationState);
+    SOPC_String_Delete(var_operationState_readback);
+    var_operationState = NULL;
+    var_operationState_readback = NULL;
 
     while (1)
     {

@@ -48,7 +48,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config);
 
 /**
- * \brief Adding a FileType object to the API from the address space information.
+ * \brief Adding a user method into the Server.
  * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>.
  * \param methodFunc Pointer to the method function.
  * \param methodName A string to register the name of the method.
@@ -80,11 +80,21 @@ SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name)
  * \brief Function to write a single value of variable (array are not supported).
  * \param CnodeId The nodeId of the variable to write.
  * \param UserBuiltInId The type of the variable.
- * \param UserValue A pointer to the instantiated value to be written with the same type as the UserBuiltInId parameter.
+ * \param pUserValue A pointer allocated to write the value with the same type as the UserBuiltInId parameter.
  * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
  */
-SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* UserValue);
+SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* pUserValue);
 
+/**
+ * \brief Function to read a single value of variable (array are not supported).
+ * \note This is a blocking function.
+ * \param CnodeId The nodeId of the variable to write.
+ * \param UserBuiltInId The type of the variable.
+ * \param pUserValue A pointer allocated to read the value.
+ * \param timeout Timeout in milliseconds (wait until service response is received)
+ * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
+ */
+SOPC_ReturnStatus SOPC_FileTransfer_ReadVariable(const char* CnodeId, void* pUserValue, uint32_t timeout);
 /**
  * \brief Uninitialize the API (Free the memory)
  */
