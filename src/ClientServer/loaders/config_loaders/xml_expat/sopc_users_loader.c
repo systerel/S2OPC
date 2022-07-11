@@ -26,6 +26,7 @@
 
 #include "expat.h"
 
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_helper_expat.h"
@@ -397,6 +398,39 @@ static void userpassword_free(void* up)
     }
 }
 
+/**
+ * @brief compares two strings, using a constant number of iterations
+ * based on \a sCmp length, whatever the result is
+ * @param sRef The reference string to compare
+ * @param sCmp The string to compare with.
+ */
+static bool secure_password_compare(const user_password* sRef, const SOPC_ByteString* sCmp)
+{
+    SOPC_ASSERT(NULL != sCmp);
+    const SOPC_Byte* bCmp = sCmp->Data;
+    const int32_t lCmp = sCmp->Length;
+    const SOPC_Byte* bRef = (NULL != sRef ? sRef->password.Data : NULL);
+    const int32_t lRef = (NULL != sRef ? sRef->password.Length : -1);
+
+    // Using volatile aspect to avoid compiler optimizations and make iteration time
+    // most constant as possible for every cases.
+
+    // note : comparing length first would allow compiler to optimize and remove loop.
+    // check is done at the end
+    volatile bool result = true;
+
+    for (int32_t i = 0; i < lCmp; i++)
+    {
+        SOPC_Byte b2 = bCmp[i];
+        SOPC_Byte b1 = (i < lRef ? bRef[i] : 0);
+        if (b1 != b2)
+        {
+            result = false;
+        }
+    }
+    return result && (lRef == lCmp);
+}
+
 static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* authn,
                                             const SOPC_ExtensionObject* token,
                                             SOPC_UserAuthentication_Status* authenticated)
@@ -411,31 +445,32 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
-        bool found = false;
-        user_password* up = SOPC_Dict_Get(config->users, username, &found);
+        user_password* up = SOPC_Dict_Get(config->users, username, NULL);
 
-        if (found)
+        // Note: do not use SOPC_ByteString_Equal for PWD checking, because this may allow an attacker to
+        // find expected PWD length, or beginning based on timed attacks.
+        // Moreover, the comparison is also done if user does not match, to avoid possible detection of usernames.
+
+        const bool pwd_match = secure_password_compare(up, &userToken->Password);
+
+        // Check password
+        if (pwd_match)
         {
-            SOPC_ByteString* pwd = &userToken->Password;
-
-            // Check password
-            if (SOPC_ByteString_Equal(&up->password, pwd))
+            SOPC_ASSERT(NULL != up);
+            // Check user access
+            if (up->rights.read || up->rights.write || up->rights.exec)
             {
-                // Check user acces
-                if (up->rights.read || up->rights.write || up->rights.exec)
-                {
-                    // At least 1 type of access authorized
-                    *authenticated = SOPC_USER_AUTHENTICATION_OK;
-                }
-                else
-                {
-                    // No user access authorized
+                // At least 1 type of access authorized
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+            else
+            {
+                // No user access authorized
 
-                    /* This value is described by OPC UA part 4 and tested by UACTT
-                     * but access evaluation shall be enforced on other services calls
-                     * (read, write, callmethod, etc.) */
-                    *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
-                }
+                /* This value is described by OPC UA part 4 and tested by UACTT
+                 * but access evaluation shall be enforced on other services calls
+                 * (read, write, callmethod, etc.) */
+                *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
             }
         }
     }
