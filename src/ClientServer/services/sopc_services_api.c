@@ -210,6 +210,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     OpcUa_WriteValue* old_value = NULL;
     OpcUa_WriteValue* new_value = NULL;
     SOPC_Internal_AsyncSendMsgData* msg_data;
+    SOPC_NodeId* nodeId = NULL;
+    char* nodeIdStr = NULL;
 
     switch (event)
     {
@@ -254,8 +256,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         break;
     case SE_TO_SE_SERVER_DATA_CHANGED:
         /* Server side only:
-           id = session id
-           auxParam = (int32_t) session state
+           params = (OpcUa_WriteValue*) old data value
+           auxParam = (OpcUa_WriteValue*) new data value
          */
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
@@ -276,6 +278,22 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                    "ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
                                    id);
         }
+        break;
+    case SE_TO_SE_SERVER_NODE_CHANGED:
+        /* Server side only:
+           params = (bool) true if node added, false if node deleted
+           auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
+         */
+        assert(NULL != (void*) auxParam);
+        nodeId = (SOPC_NodeId*) auxParam;
+        nodeIdStr = SOPC_NodeId_ToCString(nodeId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED added=%" PRIuPTR " nodeId: %s", params,
+                               nodeIdStr);
+        SOPC_Free(nodeIdStr);
+        io_dispatch_mgr__internal_server_node_changed((bool) params, (SOPC_NodeId*) auxParam);
+        SOPC_NodeId_Clear(nodeId);
+        SOPC_Free(nodeId);
         break;
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
         /* Server side only:

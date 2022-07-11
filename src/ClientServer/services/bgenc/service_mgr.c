@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/08/2022 09:03:08
+ Date                 : 05/08/2022 09:11:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -171,7 +171,9 @@ void service_mgr__treat_session_local_service_req(
    {
       constants__t_user_i service_mgr__l_user;
       constants__t_LocaleIds_i service_mgr__l_supported_locales;
+      t_bool service_mgr__l_node_management_done;
       
+      service_mgr__l_node_management_done = false;
       switch (service_mgr__req_typ) {
       case constants__e_msg_attribute_read_req:
          session_mgr__get_local_user(service_mgr__endpoint_config_idx,
@@ -213,10 +215,14 @@ void service_mgr__treat_session_local_service_req(
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
+         service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
          break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          break;
+      }
+      if (service_mgr__l_node_management_done == true) {
+         service_set_view__service_set_view_service_node_management_used();
       }
    }
 }
@@ -301,7 +307,9 @@ void service_mgr__treat_session_nano_extended_service_req(
    t_bool * const service_mgr__async_resp_msg) {
    {
       constants__t_user_i service_mgr__l_user;
+      t_bool service_mgr__l_node_management_done;
       
+      service_mgr__l_node_management_done = false;
       *service_mgr__async_resp_msg = false;
       switch (service_mgr__req_typ) {
       case constants__e_msg_attribute_read_req:
@@ -380,10 +388,14 @@ void service_mgr__treat_session_nano_extended_service_req(
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
+         service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
          break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          break;
+      }
+      if (service_mgr__l_node_management_done == true) {
+         service_set_view__service_set_view_service_node_management_used();
       }
    }
 }

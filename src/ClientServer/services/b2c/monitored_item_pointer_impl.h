@@ -29,6 +29,7 @@ typedef struct SOPC_InternalMontitoredItem
     constants__t_subscription_i subId;
     constants__t_NodeId_i nid;
     constants__t_AttributeId_i aid;
+    constants__t_IndexRange_i indexRangeString;
     constants__t_TimestampsToReturn_i timestampToReturn;
     constants__t_monitoringMode_i monitoringMode;
     constants__t_client_handle_i clientHandle;

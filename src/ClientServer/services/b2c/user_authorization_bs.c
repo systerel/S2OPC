@@ -72,14 +72,17 @@ void user_authorization_bs__get_user_authorization(
         case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
             operation = "executable";
             break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
+            operation = "addNode";
+            break;
         default:
             operation = "unknown";
             break;
         }
         SOPC_Logger_TraceWarning(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation on value \"%s\"\n", operation,
-            s_node_id);
+            "SOPC_UserAuthorization_IsAuthorizedOperation did not authorize %s operation for the node \"%s\"\n",
+            operation, s_node_id);
         SOPC_Free(s_node_id);
     }
 }

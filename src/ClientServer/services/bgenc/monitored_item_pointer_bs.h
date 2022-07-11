@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 04/08/2022 14:53:33
+ Date                 : 05/08/2022 09:12:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,6 +68,7 @@ extern void monitored_item_pointer_bs__getall_monitoredItemPointer(
    constants__t_subscription_i * const monitored_item_pointer_bs__p_subscription,
    constants__t_NodeId_i * const monitored_item_pointer_bs__p_nid,
    constants__t_AttributeId_i * const monitored_item_pointer_bs__p_aid,
+   constants__t_IndexRange_i * const monitored_item_pointer_bs__p_indexRange,
    constants__t_TimestampsToReturn_i * const monitored_item_pointer_bs__p_timestampToReturn,
    constants__t_monitoringMode_i * const monitored_item_pointer_bs__p_monitoringMode,
    constants__t_client_handle_i * const monitored_item_pointer_bs__p_clientHandle);

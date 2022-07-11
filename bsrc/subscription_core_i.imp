@@ -354,6 +354,7 @@ OPERATIONS
         l_subscription,
         l_nid,
         l_aid,
+        l_indexRange,
         l_timestampToReturn,
         l_monitoringMode,
         l_clientHandle
@@ -366,6 +367,7 @@ OPERATIONS
             l_subscription,
             l_nid,
             l_aid,
+            l_indexRange,
             l_timestampToReturn,
             l_monitoringMode,
             l_clientHandle
@@ -405,6 +407,7 @@ OPERATIONS
         l_subscription,
         l_nid,
         l_aid,
+        l_indexRange,
         l_timestampToReturn,
         l_monitoringMode,
         l_clientHandle,
@@ -441,6 +444,7 @@ OPERATIONS
             l_subscription,
             l_nid,
             l_aid,
+            l_indexRange,
             l_timestampToReturn,
             l_monitoringMode,
             l_clientHandle
@@ -1105,7 +1109,7 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
+    server_subscription_add_notification_on_value_change (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     VAR
         l_notif_queue,
         l_res
@@ -1115,6 +1119,32 @@ OPERATIONS
         l_res <-- add_monitored_item_notification_to_queue
           (l_notif_queue, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer)
         /* TODO: manage l_res == FALSE*/
+    END
+    ;
+
+    bres <-- server_subscription_add_notification_on_node_change
+       (p_subscription,
+        p_monitoredItemPointer,
+        p_nid,
+        p_aid,
+        p_VariantValuePointer,
+        p_ValueSc,
+        p_val_ts_src,
+        p_val_ts_srv) =
+    VAR
+        l_notif_queue
+    IN
+        l_notif_queue <-- get_subscription_notificationQueue (p_subscription);
+        /* Generate a notification for monitored item concerned by the added / removed node */
+        bres <-- add_first_monitored_item_notification_to_queue
+           (l_notif_queue,
+            p_monitoredItemPointer,
+            p_nid,
+            p_aid,
+            p_VariantValuePointer,
+            p_ValueSc,
+            p_val_ts_src,
+            p_val_ts_srv)
     END
     ;
 

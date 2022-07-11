@@ -37,6 +37,8 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
         SOPC_NumericRange_Delete(mi->indexRange);
         SOPC_NodeId_Clear(mi->nid);
         SOPC_Free(mi->nid);
+        SOPC_String_Clear(mi->indexRangeString);
+        SOPC_Free(mi->indexRangeString);
         SOPC_Free(mi);
     }
 }
@@ -113,20 +115,31 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     uintptr_t freshId = 0;
     SOPC_InternalMontitoredItem* monitItem = SOPC_Malloc(sizeof(SOPC_InternalMontitoredItem));
-    SOPC_NodeId* nid = SOPC_Malloc(sizeof(SOPC_NodeId));
+    SOPC_NodeId* nid = SOPC_Malloc(sizeof(*nid));
+    SOPC_String* rangeStr = NULL;
+    if (NULL != monitored_item_pointer_bs__p_indexRange)
+    {
+        rangeStr = SOPC_Malloc(sizeof(*rangeStr));
+    }
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
 
-    if (NULL == monitItem || NULL == nid)
+    if (NULL == monitItem || NULL == nid || (NULL == rangeStr && NULL != monitored_item_pointer_bs__p_indexRange))
     {
         SOPC_Free(monitItem);
         SOPC_Free(nid);
+        SOPC_Free(rangeStr);
         return;
     }
 
     SOPC_NodeId_Initialize(nid);
     retStatus = SOPC_NodeId_Copy(nid, monitored_item_pointer_bs__p_nid);
 
+    if (SOPC_STATUS_OK == retStatus && monitored_item_pointer_bs__p_indexRange != NULL)
+    {
+        SOPC_String_Initialize(rangeStr);
+        retStatus = SOPC_String_Copy(rangeStr, monitored_item_pointer_bs__p_indexRange);
+    }
     if (SOPC_STATUS_OK == retStatus && monitored_item_pointer_bs__p_indexRange != NULL)
     {
         retStatus = SOPC_NumericRange_Parse(SOPC_String_GetRawCString(monitored_item_pointer_bs__p_indexRange), &range);
@@ -144,10 +157,11 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->subId = monitored_item_pointer_bs__p_subscription;
         monitItem->nid = nid;
         monitItem->aid = monitored_item_pointer_bs__p_aid;
-        monitItem->indexRange = range;
+        monitItem->indexRangeString = rangeStr;
         monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
+        monitItem->indexRange = range;
 
         if (0 == SOPC_SLinkedList_GetLength(monitoredItemIdFreed))
         {
@@ -186,7 +200,10 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     {
         SOPC_NumericRange_Delete(range);
         SOPC_Free(monitItem);
+        SOPC_NodeId_Clear(nid);
         SOPC_Free(nid);
+        SOPC_String_Clear(rangeStr);
+        SOPC_Free(rangeStr);
     }
 }
 
@@ -225,6 +242,7 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     constants__t_subscription_i* const monitored_item_pointer_bs__p_subscription,
     constants__t_NodeId_i* const monitored_item_pointer_bs__p_nid,
     constants__t_AttributeId_i* const monitored_item_pointer_bs__p_aid,
+    constants__t_IndexRange_i* const monitored_item_pointer_bs__p_indexRange,
     constants__t_TimestampsToReturn_i* const monitored_item_pointer_bs__p_timestampToReturn,
     constants__t_monitoringMode_i* const monitored_item_pointer_bs__p_monitoringMode,
     constants__t_client_handle_i* const monitored_item_pointer_bs__p_clientHandle)
@@ -236,6 +254,7 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     *monitored_item_pointer_bs__p_subscription = monitItem->subId;
     *monitored_item_pointer_bs__p_nid = monitItem->nid;
     *monitored_item_pointer_bs__p_aid = monitItem->aid;
+    *monitored_item_pointer_bs__p_indexRange = monitItem->indexRangeString;
     *monitored_item_pointer_bs__p_timestampToReturn = monitItem->timestampToReturn;
     *monitored_item_pointer_bs__p_monitoringMode = monitItem->monitoringMode;
     *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;

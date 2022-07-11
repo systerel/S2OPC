@@ -492,6 +492,32 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
     }
 }
 
+void address_space_bs__gen_addNode_event(const constants__t_NodeId_i address_space_bs__p_newNodeId)
+{
+    assert(NULL != address_space_bs__p_newNodeId);
+    SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(*nodeIdCopy));
+    if (NULL != nodeIdCopy)
+    {
+        SOPC_NodeId_Initialize(nodeIdCopy);
+        SOPC_ReturnStatus status = SOPC_NodeId_Copy(nodeIdCopy, address_space_bs__p_newNodeId);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0, (uintptr_t) true,
+                                   (uintptr_t) nodeIdCopy);
+        }
+        else
+        {
+            SOPC_Free(nodeIdCopy);
+            nodeIdCopy = NULL;
+        }
+    }
+    if (NULL == nodeIdCopy)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "address_space_bs__gen_addNode_event: NodeId allocation or copy issue");
+    }
+}
+
 /* This is a_NodeId~ */
 void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i address_space_bs__nid,
                                                  t_bool* const address_space_bs__nid_valid,

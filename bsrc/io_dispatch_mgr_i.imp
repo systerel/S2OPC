@@ -858,6 +858,11 @@ OPERATIONS
         END
     END;
 
+    internal_server_node_changed (p_node_added, p_nid) =
+    BEGIN
+        server_subscription_node_changed (p_node_added, p_nid)
+    END;
+
     bres <-- internal_server_subscription_publish_timeout (p_subscription) =
     VAR
         l_valid_subscription

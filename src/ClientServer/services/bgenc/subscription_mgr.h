@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 05/08/2022 08:40:52
+ Date                 : 05/08/2022 09:11:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -76,6 +76,10 @@ extern void subscription_mgr__create_notification_on_monitored_items_if_data_cha
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
    const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
+extern void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
+   const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
+   const t_bool subscription_mgr__p_added,
+   const constants__t_NodeId_i subscription_mgr__p_nid);
 extern void subscription_mgr__fill_delete_subscriptions_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -118,6 +122,9 @@ extern void subscription_mgr__fill_set_publishing_mode_response(
 extern void subscription_mgr__server_subscription_data_changed(
    const constants__t_WriteValuePointer_i subscription_mgr__p_old_write_value_pointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_new_write_value_pointer);
+extern void subscription_mgr__server_subscription_node_changed(
+   const t_bool subscription_mgr__p_node_added,
+   const constants__t_NodeId_i subscription_mgr__p_nid);
 extern void subscription_mgr__server_subscription_publish_timeout(
    const constants__t_subscription_i subscription_mgr__p_subscription);
 extern void subscription_mgr__server_subscription_session_inactive(

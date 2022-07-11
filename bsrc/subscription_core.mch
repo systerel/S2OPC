@@ -1103,7 +1103,7 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
+    server_subscription_add_notification_on_value_change (p_subscription, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
@@ -1117,6 +1117,40 @@ OPERATIONS
         /* a notification is enqueued with current value of monitored item */
         a_monitored_item_notifications :=
           a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItemPointer}
+    END
+    ;
+
+    bres <-- server_subscription_add_notification_on_node_change
+       (p_subscription,
+        p_monitoredItemPointer,
+        p_nid,
+        p_aid,
+        p_VariantValuePointer,
+        p_ValueSc,
+        p_val_ts_src,
+        p_val_ts_srv) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : t_monitoredItemPointer &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
+        p_VariantValuePointer : t_Variant_i & /* value may be indet if status code /= Good */
+        p_ValueSc : t_RawStatusCode &
+        p_val_ts_src : t_Timestamp &
+        p_val_ts_srv : t_Timestamp
+    THEN
+        CHOICE
+            bres := FALSE
+        OR
+            bres := TRUE ||
+            /* a notification is enqueued with current value of monitored item */
+            a_monitored_item_notifications :=
+               a_monitored_item_notifications \/ {a_pendingNotificationQueue(p_subscription) |-> p_monitoredItemPointer}
+        END
     END
     ;
 
@@ -1140,6 +1174,7 @@ OPERATIONS
     p_subscription,
     p_nid,
     p_aid,
+    p_indexRange,
     p_timestampToReturn,
     p_monitoringMode,
     p_clientHandle
@@ -1152,6 +1187,7 @@ OPERATIONS
         p_subscription,
         p_nid,
         p_aid,
+        p_indexRange,
         p_timestampToReturn,
         p_monitoringMode,
         p_clientHandle
@@ -1163,6 +1199,7 @@ OPERATIONS
           p_nid : t_NodeId &
           p_aid : t_AttributeId_i &
           p_aid : t_AttributeId &
+          p_indexRange : t_IndexRange_i &
           p_timestampToReturn : t_TimestampsToReturn_i &
           p_timestampToReturn : t_TimestampsToReturn &
           p_monitoringMode : t_monitoringMode_i &

@@ -316,6 +316,20 @@ LOCAL_OPERATIONS
     END
     ;
 
+    create_notification_on_monitored_items_if_node_changed (p_monitoredItemQueue, p_added, p_nid) =
+    PRE
+        p_monitoredItemQueue : t_monitoredItemQueue_i &
+        p_monitoredItemQueue : t_monitoredItemQueue &
+        p_added : BOOL &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
+    THEN
+        /* notifications may have been triggered */
+        a_monitored_item_notifications
+        :(a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+    END
+    ;
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -663,6 +677,7 @@ OPERATIONS
         l_valid_user_access,
         l_nid,
         l_aid,
+        l_indexRange,
         l_timestampToReturn,
         l_monitoringMode,
         l_clientHandle
@@ -676,12 +691,13 @@ OPERATIONS
             l_subscription,
             l_nid,
             l_aid,
+            l_indexRange,
             l_timestampToReturn,
             l_monitoringMode,
             l_clientHandle <--getall_monitoredItemPointer (l_monitoredItemPointer);
             l_valid_subscription <-- is_valid_subscription (l_subscription);
             l_valid_user_access := FALSE;
-            IF l_valid_subscription = TRUE
+            IF l_valid_subscription = TRUE & l_notification_triggered = TRUE
             THEN
                 /* Note: AccessLevel not checked here, it shall be a condition to generate a DataChange event (inhibition if read forbidden)*/
                 l_session <-- getall_session (l_subscription);
@@ -701,7 +717,115 @@ OPERATIONS
             IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
             THEN
                 /* Note: indexRange filtering on value done in C implementation for now */
-                server_subscription_add_notification (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
+                server_subscription_add_notification_on_value_change (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
+            END
+        INVARIANT
+            s_mi_to_iterate_it <: t_monitoredItemPointer &
+            s_mi_iterated_it   <: t_monitoredItemPointer &
+
+            s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+            card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
+            l_continue = bool(s_mi_to_iterate_it /= {})
+
+        VARIANT
+            card(s_mi_to_iterate_it)
+        END;
+        clear_iter_monitored_item (l_iterator)
+    END
+    ;
+
+    create_notification_on_monitored_items_if_node_changed (p_monitoredItemQueue, p_added, p_nid) =
+    VAR
+        l_continue,
+        l_iterator,
+        l_monitoredItemPointer,
+
+        l_monitoredItemId,
+        l_subscription,
+        l_session,
+        l_session_valid,
+        l_user,
+        l_locales,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle,
+        l_valid_subscription,
+        l_bres,
+        l_node,
+        l_sc,
+        l_value,
+        l_valueSc,
+        l_val_ts_src,
+        l_val_ts_srv
+    IN
+        l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
+        WHILE l_continue = TRUE DO
+            l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_indexRange,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            l_valid_subscription <-- is_valid_subscription (l_subscription);
+            l_bres <-- is_NodeId_equal(l_nid, p_nid);
+            IF l_valid_subscription = TRUE & l_bres = TRUE
+            THEN
+                l_session <-- getall_session (l_subscription);
+                l_session_valid <-- is_valid_session (l_session);
+                IF l_session_valid = TRUE
+                THEN
+                    l_value := c_Variant_indet;
+                    l_val_ts_src := c_Timestamp_null;
+                    l_val_ts_srv := c_Timestamp_null;
+                    l_sc := e_sc_bad_unexpected_error;
+                    l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
+                    IF p_added = TRUE
+                    THEN
+                        l_user <-- get_session_user_server(l_session);
+                        l_locales <-- get_server_session_preferred_locales(l_session);
+                        l_bres, l_node <-- readall_AddressSpace_Node (l_nid);
+                        IF l_bres = TRUE
+                        THEN
+                            /* Read monitored item value */
+                            l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv
+                              <-- read_Node_Attribute(l_user, l_locales, l_node, l_nid, l_aid, l_indexRange);
+                            /* Evaluate added mode for monitored item,
+                               access level and user access levels are evaluated for first time */
+                            IF l_sc /= e_sc_ok & (l_sc = e_sc_bad_not_readable or
+                                    l_sc = e_sc_bad_user_access_denied or
+                                    l_sc = e_sc_bad_index_range_no_data)
+                            THEN
+                                /* Set notification bad status but operation result is successful */
+                                l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
+                                l_sc := e_sc_ok
+                            END
+                        END
+                    ELSE
+                        /* Node has been deleted */
+                        l_sc := e_sc_bad_node_id_unknown;
+                        l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc)
+                    END
+                    ;
+                    IF l_bres = TRUE
+                    THEN
+                        l_bres <-- server_subscription_add_notification_on_node_change
+                        (l_subscription,
+                            l_monitoredItemPointer,
+                            l_nid,
+                            l_aid,
+                            l_value,
+                            l_valueSc,
+                            l_val_ts_src,
+                            l_val_ts_srv);
+                        read_AddressSpace_free_variant(l_value)
+                    END
+                END
             END
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
@@ -1079,6 +1203,20 @@ OPERATIONS
         END;
         free_write_value_pointer (p_old_write_value_pointer);
         free_write_value_pointer (p_new_write_value_pointer)
+    END
+    ;
+
+    server_subscription_node_changed (p_node_added, p_nid) =
+    VAR
+        l_bres,
+        l_monitoredItemQueue
+    IN
+        l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid);
+        IF l_bres = TRUE
+        THEN
+            create_notification_on_monitored_items_if_node_changed(l_monitoredItemQueue, p_node_added, p_nid)
+        END // TODO: log error
+
     END
     ;
 

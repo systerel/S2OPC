@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 04/08/2022 14:53:10
+ Date                 : 05/08/2022 09:11:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -96,6 +96,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__server_evaluate_session_timeout session_mgr__server_evaluate_session_timeout
 #define service_mgr__server_secure_channel_lost_session_sm session_mgr__server_secure_channel_lost_session_sm
 #define service_mgr__server_subscription_data_changed subscription_mgr__server_subscription_data_changed
+#define service_mgr__server_subscription_node_changed subscription_mgr__server_subscription_node_changed
 #define service_mgr__server_subscription_publish_timeout subscription_mgr__server_subscription_publish_timeout
 
 /*--------------------------

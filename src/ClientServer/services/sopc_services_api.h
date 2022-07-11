@@ -56,9 +56,14 @@ typedef enum SOPC_Services_Event
                                              */
 
     SE_TO_SE_SERVER_DATA_CHANGED, /* Server side only:
-                                    id = session id
-                                    auxParam = (int32_t) session state
+                                    params = (OpcUa_WriteValue*) old data value
+                                    auxParam = (OpcUa_WriteValue*) new data value
                                   */
+
+    SE_TO_SE_SERVER_NODE_CHANGED, /* Server side only:
+                                     params = (bool) true if node added, false if node deleted
+                                     auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
+                                   */
 
     SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /* Server side only:
                                                  id = session id

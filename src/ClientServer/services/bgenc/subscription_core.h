@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 04/08/2022 14:53:21
+ Date                 : 05/08/2022 09:11:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -163,7 +163,17 @@ extern void subscription_core__receive_publish_request(
    t_bool * const subscription_core__async_resp_msg,
    constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs);
-extern void subscription_core__server_subscription_add_notification(
+extern void subscription_core__server_subscription_add_notification_on_node_change(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const constants__t_NodeId_i subscription_core__p_nid,
+   const constants__t_AttributeId_i subscription_core__p_aid,
+   const constants__t_Variant_i subscription_core__p_VariantValuePointer,
+   const constants__t_RawStatusCode subscription_core__p_ValueSc,
+   const constants__t_Timestamp subscription_core__p_val_ts_src,
+   const constants__t_Timestamp subscription_core__p_val_ts_srv,
+   t_bool * const subscription_core__bres);
+extern void subscription_core__server_subscription_add_notification_on_value_change(
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,

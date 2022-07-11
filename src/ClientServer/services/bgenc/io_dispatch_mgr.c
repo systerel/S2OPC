@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 04/08/2022 14:53:07
+ Date                 : 05/08/2022 09:11:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -934,6 +934,13 @@ void io_dispatch_mgr__internal_server_data_changed(
          *io_dispatch_mgr__bres = false;
       }
    }
+}
+
+void io_dispatch_mgr__internal_server_node_changed(
+   const t_bool io_dispatch_mgr__p_node_added,
+   const constants__t_NodeId_i io_dispatch_mgr__p_nid) {
+   service_mgr__server_subscription_node_changed(io_dispatch_mgr__p_node_added,
+      io_dispatch_mgr__p_nid);
 }
 
 void io_dispatch_mgr__internal_server_subscription_publish_timeout(

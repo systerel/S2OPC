@@ -797,6 +797,16 @@ OPERATIONS
     END
     ;
 
+    server_subscription_node_changed (p_node_added, p_nid) =
+    PRE
+        p_node_added : BOOL & /* TRUE => added , FALSE => deleted */
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
+    THEN
+        skip
+    END
+    ;
+
     server_subscription_publish_timeout (p_subscription) =
     PRE
         p_subscription : t_subscription_i &

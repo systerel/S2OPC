@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 04/08/2022 14:53:21
+ Date                 : 05/08/2022 09:11:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -133,6 +133,7 @@ void subscription_core__fill_notification_message(
       constants__t_subscription_i subscription_core__l_subscription;
       constants__t_NodeId_i subscription_core__l_nid;
       constants__t_AttributeId_i subscription_core__l_aid;
+      constants__t_IndexRange_i subscription_core__l_indexRange;
       constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_core__l_monitoringMode;
       constants__t_client_handle_i subscription_core__l_clientHandle;
@@ -148,6 +149,7 @@ void subscription_core__fill_notification_message(
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
             &subscription_core__l_aid,
+            &subscription_core__l_indexRange,
             &subscription_core__l_timestampToReturn,
             &subscription_core__l_monitoringMode,
             &subscription_core__l_clientHandle);
@@ -183,6 +185,7 @@ void subscription_core__local_close_subscription(
       constants__t_subscription_i subscription_core__l_subscription;
       constants__t_NodeId_i subscription_core__l_nid;
       constants__t_AttributeId_i subscription_core__l_aid;
+      constants__t_IndexRange_i subscription_core__l_indexRange;
       constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_core__l_monitoringMode;
       constants__t_client_handle_i subscription_core__l_clientHandle;
@@ -229,6 +232,7 @@ void subscription_core__local_close_subscription(
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
             &subscription_core__l_aid,
+            &subscription_core__l_indexRange,
             &subscription_core__l_timestampToReturn,
             &subscription_core__l_monitoringMode,
             &subscription_core__l_clientHandle);
@@ -1170,7 +1174,7 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
    }
 }
 
-void subscription_core__server_subscription_add_notification(
+void subscription_core__server_subscription_add_notification_on_value_change(
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
@@ -1186,6 +1190,33 @@ void subscription_core__server_subscription_add_notification(
          subscription_core__p_timestampToReturn,
          subscription_core__p_writeValuePointer,
          &subscription_core__l_res);
+   }
+}
+
+void subscription_core__server_subscription_add_notification_on_node_change(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const constants__t_NodeId_i subscription_core__p_nid,
+   const constants__t_AttributeId_i subscription_core__p_aid,
+   const constants__t_Variant_i subscription_core__p_VariantValuePointer,
+   const constants__t_RawStatusCode subscription_core__p_ValueSc,
+   const constants__t_Timestamp subscription_core__p_val_ts_src,
+   const constants__t_Timestamp subscription_core__p_val_ts_srv,
+   t_bool * const subscription_core__bres) {
+   {
+      constants__t_notificationQueue_i subscription_core__l_notif_queue;
+      
+      subscription_core_1__get_subscription_notificationQueue(subscription_core__p_subscription,
+         &subscription_core__l_notif_queue);
+      monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(subscription_core__l_notif_queue,
+         subscription_core__p_monitoredItemPointer,
+         subscription_core__p_nid,
+         subscription_core__p_aid,
+         subscription_core__p_VariantValuePointer,
+         subscription_core__p_ValueSc,
+         subscription_core__p_val_ts_src,
+         subscription_core__p_val_ts_srv,
+         subscription_core__bres);
    }
 }
 

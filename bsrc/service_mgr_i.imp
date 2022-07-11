@@ -81,6 +81,7 @@ PROMOTES
     /* subscription_mgr */
     is_valid_subscription,
     server_subscription_data_changed,
+    server_subscription_node_changed,
     server_subscription_publish_timeout
 
 DEFINITIONS
@@ -371,8 +372,10 @@ OPERATIONS
     StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
         l_user,
-        l_supported_locales
+        l_supported_locales,
+        l_node_management_done
     IN
+        l_node_management_done := FALSE;
         CASE req_typ OF
             EITHER e_msg_attribute_read_req THEN
                 l_user <-- get_local_user (endpoint_config_idx);
@@ -389,12 +392,18 @@ OPERATIONS
                 StatusCode_service <-- treat_translate_browse_paths_request(req_msg, resp_msg)
             OR e_msg_node_add_nodes_req THEN
                 l_user <-- get_local_user (endpoint_config_idx);
-                StatusCode_service <-- treat_add_nodes_request(l_user, req_msg, resp_msg)
+                StatusCode_service <-- treat_add_nodes_request(l_user, req_msg, resp_msg);
+                l_node_management_done := bool(StatusCode_service = e_sc_ok)
             ELSE
-                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
+        END
+        ;
+        IF l_node_management_done = TRUE
+        THEN
+            /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
+            service_set_view_service_node_management_used
         END
     END
     ;
@@ -425,7 +434,6 @@ OPERATIONS
             OR e_msg_view_unregister_nodes_req THEN
                 StatusCode_service <-- treat_unregister_nodes_request (req_msg)
             ELSE
-                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
@@ -437,8 +445,10 @@ OPERATIONS
                                                                                     req_typ, req_handle, req_ctx,
                                                                                     req_header, req_msg, resp_msg) =
     VAR
-        l_user
+        l_user,
+        l_node_management_done
     IN
+        l_node_management_done := FALSE;
         async_resp_msg := FALSE;
         CASE req_typ OF
             EITHER e_msg_attribute_read_req, e_msg_attribute_write_req, e_msg_view_browse_req,
@@ -468,12 +478,18 @@ OPERATIONS
                 StatusCode_service <-- treat_method_call_request (session, req_msg, resp_msg)
             OR e_msg_node_add_nodes_req THEN
                 l_user <-- get_session_user_server(session);
-                StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg)
+                StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg);
+                l_node_management_done := bool(StatusCode_service = e_sc_ok)
             ELSE
-                /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
             END
+        END
+        ;
+        IF l_node_management_done = TRUE
+        THEN
+            /* NOTE: when implementing Node Management service set, service_set_view_service_node_management_used shall be called on success */
+            service_set_view_service_node_management_used
         END
     END
     ;
