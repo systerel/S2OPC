@@ -178,10 +178,10 @@ void SOPC_Looper_Delete(SOPC_Looper* looper)
     }
 
     SOPC_ReturnStatus status = SOPC_AsyncQueue_BlockingEnqueue(looper->queue, POISON_PILL);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     status = SOPC_Thread_Join(looper->thread);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     SOPC_AsyncQueue_Free(&looper->queue);
     SOPC_Array_Delete(looper->handlers);

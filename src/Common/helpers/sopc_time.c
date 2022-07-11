@@ -18,8 +18,8 @@
  */
 
 #include "sopc_time.h"
+#include "sopc_assert.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdint.h>
@@ -44,7 +44,7 @@ char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
 
     time_t seconds = 0;
     SOPC_ReturnStatus status = SOPC_Time_ToTimeT(time, &seconds);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     uint32_t milliseconds = (uint32_t)((time / 10000) % 1000);
     struct tm tm;
@@ -79,7 +79,7 @@ char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
     }
 
     int res2 = sprintf(buf + 19, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
-    assert(res2 > 0);
+    SOPC_ASSERT(res2 > 0);
 
     return buf;
 }
@@ -132,7 +132,7 @@ int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference ri
 
 SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res)
 {
-    assert(time >= 0);
+    SOPC_ASSERT(time >= 0);
 
 #if (SOPC_TIME_T_SIZE > 4)
     if (time > INT64_MAX)
@@ -189,8 +189,8 @@ SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dateTime, time_t* res)
 
 static bool parseTwoDigitsUint8(const char* startPointer, size_t len, const char endChar, uint8_t* pOut)
 {
-    assert(NULL != startPointer);
-    assert(NULL != pOut);
+    SOPC_ASSERT(NULL != startPointer);
+    SOPC_ASSERT(NULL != pOut);
 
     if ((len > 2 && startPointer[2] != endChar) || len < 2)
     {
@@ -257,7 +257,7 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
         return false;
     }
     endPointer++; // remove '-' end separator
-    assert(endPointer > currentPointer);
+    SOPC_ASSERT(endPointer > currentPointer);
     remainingLength -= (size_t)(endPointer - currentPointer);
     currentPointer = endPointer;
 
@@ -470,8 +470,8 @@ bool SOPC_tm_FromXsdDateTime(const char* datetime, size_t len, SOPC_tm* tm)
 
 static int64_t daysSince1601(int16_t year, uint8_t month, uint8_t day)
 {
-    assert(year >= 1601);
-    assert(year <= 10000);
+    SOPC_ASSERT(year >= 1601);
+    SOPC_ASSERT(year <= 10000);
 
     // Years since 1601
     int16_t elapsedYearsSince1601 = (int16_t)(year - 1601);
@@ -495,8 +495,8 @@ static int64_t daysSince1601(int16_t year, uint8_t month, uint8_t day)
 
 static int64_t secondsSince1601(int16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
 {
-    assert(year >= 1601 || (year == 1600 && month == 12 && day == 31));
-    assert(year <= 10000);
+    SOPC_ASSERT(year >= 1601 || (year == 1600 && month == 12 && day == 31));
+    SOPC_ASSERT(year <= 10000);
 
     if (year >= 1601) // number of seconds since 1601
     {

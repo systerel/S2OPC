@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_hash.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
@@ -1001,7 +1002,7 @@ SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src)
     size_t stringLength = 0;
     if (dest != NULL && NULL == dest->Data && src != NULL)
     {
-        assert(CHAR_BIT == 8);
+        SOPC_ASSERT(CHAR_BIT == 8);
         stringLength = strlen(src);
         if (stringLength <= INT32_MAX)
         {
@@ -1475,7 +1476,7 @@ static void SOPC_Guid_IntoCString(const SOPC_Guid* guid, char* dest)
                       "%02" PRIX8 "%02" PRIX8 "%02" PRIX8 "%02" PRIX8,
                       guid->Data1, guid->Data2, guid->Data3, guid->Data4[0], guid->Data4[1], guid->Data4[2],
                       guid->Data4[3], guid->Data4[4], guid->Data4[5], guid->Data4[6], guid->Data4[7]);
-    assert(res > 0);
+    SOPC_ASSERT(res > 0);
 }
 
 char* SOPC_Guid_ToCString(const SOPC_Guid* guid)
@@ -2130,7 +2131,7 @@ static bool nodeid_equal(const void* a, const void* b)
     int32_t cmp = 0;
 
     SOPC_ReturnStatus status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     return cmp == 0;
 }

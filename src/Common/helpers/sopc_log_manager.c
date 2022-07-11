@@ -388,7 +388,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             {
                 res = sprintf(filePath, "%s%s_%s_%05u.log", logDirPath, SOPC_CSTRING_UNIQUE_LOG_PREFIX, logFileName,
                               file->nbFiles);
-                assert(res > 0);
+                SOPC_ASSERT(res > 0);
                 hFile = SOPC_Log_InstanceFileOpen(filePath);
             }
             if (NULL == hFile)
@@ -595,7 +595,7 @@ char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst)
 static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
 {
 #if SOPC_HAS_FILESYSTEM
-    assert(pLogInst != NULL);
+    SOPC_ASSERT(pLogInst != NULL);
     int res = 0;
     /* Note : for USER-defined logs, maxBytes is set to 0 */
     if (pLogInst->file->maxBytes > 0 && pLogInst->file->nbBytes >= pLogInst->file->maxBytes)
@@ -612,7 +612,7 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             }
             res = sprintf(&(pLogInst->file->filePath[pLogInst->file->fileNumberPos]), "%05u.log",
                           pLogInst->file->nbFiles);
-            assert(res > 0);
+            SOPC_ASSERT(res > 0);
             // Display that next file will be opened
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, false, true);
             SOPC_Log_PutLogLine(pLogInst, true, true, "LOG CONTINUE IN NEXT FILE: %s", pLogInst->file->filePath);

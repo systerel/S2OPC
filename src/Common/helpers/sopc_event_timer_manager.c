@@ -210,6 +210,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
         timerId = timer->id;
         SOPC_ReturnStatus status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
                                                           timer->event.params, timer->event.auxParam);
+        SOPC_UNUSED_RESULT(status);
         SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         if (timer->isPeriodicTimer)
