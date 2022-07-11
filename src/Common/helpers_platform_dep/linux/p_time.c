@@ -32,8 +32,10 @@
  * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
  * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
  * */
-static const uint64_t SOPC_SECOND_TO_NANOSECONDS = 1000000000;   // 10^9
-static const uint64_t SOPC_MILLISECOND_TO_NANOSECONDS = 1000000; // 10^6
+#define SOPC_SECOND_TO_NANOSECONDS 1000000000
+#define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
+#define SOPC_MICROSECOND_TO_SECONDS 1000000
+#define SOPC_MICROSECOND_TO_NANOSECONDS 1000
 
 SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void)
 {
@@ -189,19 +191,21 @@ static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
     assert(NULL != t);
 
     /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
-    t->tv_sec += (time_t)(duration_us / 1000000);
-    t->tv_nsec += (long) ((duration_us % 1000000) * 1000); /* This may add a negative or positive number */
+    t->tv_sec += (time_t)(duration_us / SOPC_MICROSECOND_TO_SECONDS);
+    /* This may add a negative or positive number */
+    t->tv_nsec += (long) ((duration_us % SOPC_MICROSECOND_TO_SECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
 
     /* Normalize */
     if (t->tv_nsec < 0)
     {
+        /* This case is technically impossible but makes code robust to invalid inputs */
         t->tv_sec -= 1;
-        t->tv_nsec += 1000000000;
+        t->tv_nsec += SOPC_SECOND_TO_NANOSECONDS;
     }
-    else if (t->tv_nsec > 1000000000)
+    else if (t->tv_nsec > SOPC_SECOND_TO_NANOSECONDS)
     {
         t->tv_sec += 1;
-        t->tv_nsec -= 1000000000;
+        t->tv_nsec -= SOPC_SECOND_TO_NANOSECONDS;
     }
 }
 
@@ -213,7 +217,6 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
 
     if (offset_us >= 0)
     {
-        const uint64_t minIncrement = duration_us / 5;
         /**
          * Window offset principle.
          * - Find out current position in window [0 .. duration_us -1]
@@ -236,9 +239,10 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
         // windowOffset_us is large positive (from duration_us -1) if current time is right before offset_us
         const uint64_t windowOffset_us = (duration_us + currentRem_us - (uint32_t) offset_us) % duration_us;
 
-        // reomve the part of the cycle that already elapsed
+        // remove the part of the cycle that already elapsed
         increment_us -= windowOffset_us;
 
+        const uint64_t minIncrement = duration_us / 5;
         // Consider that event is in the "past" if windowOffset_us is close to next event (>80% of cycle)
         if (increment_us < minIncrement)
         {
