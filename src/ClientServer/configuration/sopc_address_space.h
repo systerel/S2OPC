@@ -59,13 +59,71 @@ typedef struct
 /* Address space structure */
 typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
 
+/**
+ * \brief Create an empty AddressSpace to fill with nodes with ::SOPC_AddressSpace_Append
+ *
+ * \warning The NodeManagement services are incompatible with an AddressSpace created with parameter free_nodes = false
+ *
+ * \param free_nodes indicates if the nodes shall be freed on call to ::SOPC_AddressSpace_Delete.
+ *                   In order to have NodeManagement services enabled, this parameter shall be set to true.
+ *
+ * \return the created AddressSpace to fill with nodes
+ */
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes);
+
+/**
+ * \brief Create an AddressSpace filled with given nodes and variants for variables values.
+ *        The nodes are read only and cannot be modified and only the given variables values
+ *        can be changed after AddresSpace creation.
+ *        The Variable nodes values shall contain the index in the variants array as an UInt32 single value.
+ *
+ * \note  This functionality allows to have a constant nodes array that can be stored in ROM
+ *        on device with limited memory resources.
+ *
+ * \warning The NodeManagement services are incompatible with an AddressSpace created with this function
+ *
+ * \param nb_nodes      the number of nodes in the nodes array
+ * \param nodes         the array of nodes contained by this constant AddressSpace,
+ *                      the Variable(/VariableType) nodes Value field shall contain
+ *                      the index in the variables array containing the actual value as a single UInt32 value.
+ *                      And the nodes array shall be constant to be stored in ROM.
+ * \param nb_variables  the number of variants in the variables array
+ * \param variables     the array containing the actual Variable nodes Value field.
+ *
+ * \return the created read only nodes AddressSpace
+ */
 SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
                                                          SOPC_AddressSpace_Node* nodes,
                                                          uint32_t nb_variables,
                                                          SOPC_Variant* variables);
+
+/**
+ * \brief Returns true if the AddressSpace has been created using ::SOPC_AddressSpace_CreateReadOnlyNodes
+ *
+ * \param space  the AddressSpace to be evaluated
+ *
+ * \return       true if the AddressSpace nodes are read only, false otherwise
+ */
 bool SOPC_AddressSpace_AreReadOnlyNodes(const SOPC_AddressSpace* space);
+
+/**
+ * \brief Appends a new node to the AddressSpace
+ *
+ * \param space  the AddressSpace to which the node will be appended
+ * \param node   the node to append
+ *
+ * \return       SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE if the AddressSpace nodes are read only
+ *               and SOPC_STATUS_NOK in other cases of failure.
+ */
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+
+/**
+ * \brief Deletes the AddressSpace content.
+ *        It clears the Variable / VariableType nodes values and clear/free each node when
+ *        AddressSpace was created using ::SOPC_AddressSpace_Create with (free_nodes=true) configuration.
+ *
+ * \param space  the AddressSpace to delete
+ */
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
 
 SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found);
