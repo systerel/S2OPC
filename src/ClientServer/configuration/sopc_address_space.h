@@ -72,6 +72,15 @@ typedef struct _SOPC_AddressSpace SOPC_AddressSpace;
 SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes);
 
 /**
+ * \brief Returns true if the AddressSpace has been created using ::SOPC_AddressSpace_Create with (free_nodes=true)
+ *
+ * \param space  the AddressSpace to be evaluated
+ *
+ * \return       true if the AddressSpace nodes will be freed on call to ::SOPC_AddressSpace_Delete, false otherwise
+ */
+bool SOPC_AddressSpace_AreNodesFreed(const SOPC_AddressSpace* space);
+
+/**
  * \brief Create an AddressSpace filled with given nodes and variants for variables values.
  *        The nodes are read only and cannot be modified and only the given variables values
  *        can be changed after AddresSpace creation.

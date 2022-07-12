@@ -42,6 +42,7 @@ struct _SOPC_AddressSpace
 {
     /* Maps NodeId to SOPC_AddressSpace_Node */
     SOPC_Dict* dict_nodes;
+    bool free_nodes;
     /* Set to true if the NodeId and SOPC_AddressSpace_Node are const */
     bool readOnlyNodes;
     /* Defined only if readOnlyNodes is true:
@@ -382,6 +383,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
         return NULL;
     }
     result->readOnlyNodes = false;
+    result->free_nodes = free_nodes;
     result->dict_nodes =
         SOPC_NodeId_Dict_Create(false, free_nodes ? free_description_node : clear_description_node_value);
     if (NULL == result->dict_nodes)
@@ -390,6 +392,13 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
         return NULL;
     }
     return result;
+}
+
+bool SOPC_AddressSpace_AreNodesFreed(const SOPC_AddressSpace* space)
+{
+    assert(space != NULL);
+
+    return space->free_nodes;
 }
 
 SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
@@ -403,6 +412,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
         return NULL;
     }
     result->readOnlyNodes = true;
+    result->free_nodes = false;
 
     result->nb_nodes = nb_nodes;
     result->const_nodes = nodes;
