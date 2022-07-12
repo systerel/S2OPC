@@ -150,6 +150,7 @@ int main(int argc, char* argv[])
     /* Finish it */
     if (NULL != g_pNid)
     {
+        SOPC_NodeId_Clear(g_pNid);
         SOPC_Free(g_pNid);
     }
     SOPC_Toolkit_Clear();

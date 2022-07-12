@@ -28,8 +28,8 @@
 #include "config.h"
 
 char* ENDPOINT_URL = "opc.tcp://localhost:4841";
-bool NONE = false;
-bool ENCRYPT = false;
+int NONE = false;
+int ENCRYPT = false;
 uint32_t SC_LIFETIME = 60000;
 
 char* APPLICATION_NAME = "S2OPC_DemoClient";
@@ -132,14 +132,14 @@ struct argparse_option CONN_OPTIONS[15] = {
     OPT_STRING('u',
                "username",
                &USER_NAME,
-               "(if not set anonymous mode is active) the username of the user used to establish session",
+               "(if anonymous mode is not active) the username of the user used to establish session",
                NULL,
                0,
                0),
     OPT_STRING('p',
                "password",
                &USER_PWD,
-               "(if not set anonymous mode is active) the username of the user used to establish session",
+               "(if anonymous mode is not active) the password of the user used to establish session",
                NULL,
                0,
                0),

@@ -37,8 +37,8 @@
 
 /* Secure Channel configuration */
 extern char* ENDPOINT_URL;
-extern bool NONE;
-extern bool ENCRYPT;
+extern int NONE;
+extern int ENCRYPT;
 
 /* Secure Channel lifetime */
 extern uint32_t SC_LIFETIME;

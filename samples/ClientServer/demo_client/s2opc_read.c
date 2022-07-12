@@ -177,9 +177,17 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != USER_NAME)
+        if (NULL != USER_NAME || NULL != USER_PWD)
         {
-            status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+            if (NULL == USER_NAME || NULL == USER_PWD)
+            {
+                printf("# Error: username AND password must be either both or none set\n");
+                status = SOPC_STATUS_NOK;
+            }
+            else
+            {
+                status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+            }
         }
         else
         {
@@ -197,6 +205,7 @@ int main(int argc, char* argv[])
     /* Finish it */
     if (NULL != g_pNid)
     {
+        SOPC_NodeId_Clear(g_pNid);
         SOPC_Free(g_pNid);
     }
     SOPC_Toolkit_Clear();
