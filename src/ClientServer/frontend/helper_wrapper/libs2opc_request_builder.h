@@ -589,4 +589,73 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequ
  */
 OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfiguration(void);
 
+/**
+ * \brief Create an add nodes request
+ *
+ * \param nbAddNodes  Number of nodes to add with this request.
+ *                      \p nbAddNodes <= INT32_MAX.
+ *                      ::SOPC_AddNodeRequest_SetVariableAttributes shall be called for each add node item index.
+ *                      Otherwise empty add node item is sent for the index not configured.
+ *
+ * \return allocated read request in case of success, NULL in case of failure (out of memory)
+ */
+OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes);
+
+/**
+ * \brief Set the attributes values requested for the Variable node to add.
+ *        Optional parameters are prefixed by "opt" and shall be NULL if not defined.
+ *        If optional parameters are not defined the server will choose values for this attributes.
+ *
+ * \param addNodesRequest             The add nodes request to configure.
+ * \param index                       Index of the add nodes items to configure in the request.
+ *                                    \p index < number of add nodes configured in ::SOPC_AddNodesRequest_Create.
+ * \param parentNodeId                Parent NodeId of the node to add, it should be an Object or Variable node.
+ * \param referenceTypeId             Reference type of the relation between parent node and added node.
+ * \param optRequestedNodeId          Requested NodeId for the node to add (optional).
+ * \param browseName                  BrowseName for the node to add, it should be unique in the parent node context.
+ * \param typeDefinition              TypeDefinition for the Variable node to add
+ *                                    (BaseDataVariableType, PropertyType, etc.).
+ * \param optDisplayName              DisplayName for the node to add (optional).
+ * \param optDescription              Description for the node to add (optional).
+ * \param optWriteMask                WriteMask for the node to add (optional).
+ * \param optUserWriteMask            UserWriteMask for the node to add (optional).
+ *                                    It should not be defined since it depends on the user.
+ * \param optValue                    Value for the Variable node to add (optional).
+ * \param optDataType                 DataType for the Variable node to add (optional).
+ * \param optValueRank                ValueRank for the Variable node to add (optional).
+ * \param noOfArrayDimensions         Number of array dimensions for the Value of Variable node to add, if
+ *                                    \p optArrayDimensions not defined it shall be 0.
+ * \param optArrayDimensions          Array of dimensions for the Value of Variable node to add (optional).
+ *                                    If defined \p noOfArrayDimensions shall be greater than 0.
+ * \param optAccessLevel              AccessLevel for the Value of Variable node to add (optional).
+ * \param optUserAccessLevel          UserAccessLevel for the Value of Variable node to add (optional).
+ *                                    It should not be defined since it depends on the user.
+ * \param optMinimumSamplingInterval  MinimumSamplingInterval (ms) for the Value of Variable node
+ *                                    in a subscription (optional)
+ * \param optHistorizing              Historizing flag for the Value of Variable node (optional).
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid read request, index, nodeId or attribute.
+ */
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                            size_t index,
+                                                            const SOPC_ExpandedNodeId* parentNodeId,
+                                                            const SOPC_NodeId* referenceTypeId,
+                                                            const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                            const SOPC_QualifiedName* browseName,
+                                                            const SOPC_ExpandedNodeId* typeDefinition,
+                                                            const SOPC_LocalizedText* optDisplayName,
+                                                            const SOPC_LocalizedText* optDescription,
+                                                            const uint32_t* optWriteMask,
+                                                            const uint32_t* optUserWriteMask,
+                                                            const SOPC_Variant* optValue,
+                                                            const SOPC_NodeId* optDataType,
+                                                            const int32_t* optValueRank,
+                                                            int32_t noOfArrayDimensions,
+                                                            const uint32_t* optArrayDimensions,
+                                                            const SOPC_Byte* optAccessLevel,
+                                                            const SOPC_Byte* optUserAccessLevel,
+                                                            const double* optMinimumSamplingInterval,
+                                                            SOPC_Boolean* optHistorizing);
+
 #endif /* SOPC_TYPE_HELPER_H_ */

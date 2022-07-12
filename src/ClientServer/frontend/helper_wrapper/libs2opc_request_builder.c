@@ -866,4 +866,175 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
     return request;
 }
 
+OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes)
+{
+    OpcUa_AddNodesRequest* req = NULL;
+    if (nbAddNodes > INT32_MAX)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->NodesToAdd = SOPC_Calloc(nbAddNodes, sizeof(*req->NodesToAdd));
+    if (NULL != req->NodesToAdd)
+    {
+        req->NoOfNodesToAdd = (int32_t) nbAddNodes;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Initialize elements
+        for (int32_t i = 0; i < req->NoOfNodesToAdd; i++)
+        {
+            OpcUa_AddNodesItem_Initialize(&req->NodesToAdd[i]);
+        }
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
+    }
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                            size_t index,
+                                                            const SOPC_ExpandedNodeId* parentNodeId,
+                                                            const SOPC_NodeId* referenceTypeId,
+                                                            const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                            const SOPC_QualifiedName* browseName,
+                                                            const SOPC_ExpandedNodeId* typeDefinition,
+                                                            const SOPC_LocalizedText* optDisplayName,
+                                                            const SOPC_LocalizedText* optDescription,
+                                                            const uint32_t* optWriteMask,
+                                                            const uint32_t* optUserWriteMask,
+                                                            const SOPC_Variant* optValue,
+                                                            const SOPC_NodeId* optDataType,
+                                                            const int32_t* optValueRank,
+                                                            int32_t noOfArrayDimensions,
+                                                            const uint32_t* optArrayDimensions,
+                                                            const SOPC_Byte* optAccessLevel,
+                                                            const SOPC_Byte* optUserAccessLevel,
+                                                            const double* optMinimumSamplingInterval,
+                                                            SOPC_Boolean* optHistorizing)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(addNodesRequest, NoOfNodesToAdd, index) || NULL == parentNodeId ||
+        NULL == referenceTypeId || (NULL != optRequestedNodeId && 0 != optRequestedNodeId->ServerIndex) ||
+        NULL == browseName || NULL == typeDefinition || (noOfArrayDimensions > 0 && NULL != optArrayDimensions))
+    {
+        return status;
+    }
+    OpcUa_AddNodesItem* item = &addNodesRequest->NodesToAdd[index];
+    OpcUa_VariableAttributes* varAttrs = NULL;
+
+    // item is a Variable node
+    item->NodeClass = OpcUa_NodeClass_Variable;
+
+    status = SOPC_Encodeable_CreateExtension(&item->NodeAttributes, &OpcUa_VariableAttributes_EncodeableType,
+                                             (void**) &varAttrs);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->ParentNodeId, parentNodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(&item->ReferenceTypeId, referenceTypeId);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optRequestedNodeId)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->RequestedNewNodeId, optRequestedNodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_QualifiedName_Copy(&item->BrowseName, browseName);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->TypeDefinition, typeDefinition);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optDisplayName)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_DisplayName;
+        status = SOPC_LocalizedText_Copy(&varAttrs->DisplayName, optDisplayName);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optDescription)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Description;
+        status = SOPC_LocalizedText_Copy(&varAttrs->Description, optDescription);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optWriteMask)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_WriteMask;
+        varAttrs->WriteMask = *optWriteMask;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optUserWriteMask)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_UserWriteMask;
+        varAttrs->UserWriteMask = *optUserWriteMask;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optValue)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Value;
+        status = SOPC_Variant_Copy(&varAttrs->Value, optValue);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optDataType)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_DataType;
+        status = SOPC_NodeId_Copy(&varAttrs->DataType, optDataType);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optValueRank)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_ValueRank;
+        varAttrs->ValueRank = *optValueRank;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optArrayDimensions)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_ArrayDimensions;
+        varAttrs->ArrayDimensions = SOPC_Calloc((size_t) noOfArrayDimensions, sizeof(*varAttrs->ArrayDimensions));
+        if (NULL == varAttrs->ArrayDimensions)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            for (int32_t i = 0; i < noOfArrayDimensions; i++)
+            {
+                varAttrs->ArrayDimensions[i] = optArrayDimensions[i];
+            }
+        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != optAccessLevel)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_AccessLevel;
+        varAttrs->AccessLevel = *optAccessLevel;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optUserAccessLevel)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_UserAccessLevel;
+        varAttrs->UserAccessLevel = *optUserAccessLevel;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optMinimumSamplingInterval)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_MinimumSamplingInterval;
+        varAttrs->MinimumSamplingInterval = *optMinimumSamplingInterval;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optHistorizing)
+    {
+        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Historizing;
+        varAttrs->Historizing = *optHistorizing;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_AddNodesItem_Clear(item);
+    }
+    return status;
+}
+
 #undef CHECK_ELEMENT_EXISTS
