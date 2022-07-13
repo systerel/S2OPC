@@ -114,10 +114,14 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-Wno-reserved-macro-identifier -Wim
 list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},6>>:-Wduplicated-cond -Wnull-dereference >)
 
 # Add security hardening compilation options
+option(SECURITY_HARDENING "Harden compilation options" OFF)
 if (SECURITY_HARDENING)
   list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-fcf-protection -fstack-clash-protection -fstack-protector-strong>)
   # Set GNU definitions for security hardening
   list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
+  # Force symbol stripping (only available for GNU compatible compilers)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-s>)
+  list(APPEND S2OPC_LINKER_FLAGS $<${IS_GNU}:-s>)
 endif()
 # Set GNU linker flags
 list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wl,-z,relro,-z,now>)
@@ -160,12 +164,10 @@ list(APPEND S2OPC_LINKER_FLAGS $<${IS_MINGW}:-static-libgcc>)
 # Add -fno-omit-frame-pointer when build type is RelWithDebInfo or Debug
 list(APPEND S2OPC_COMPILER_FLAGS $<$<STREQUAL:"${CMAKE_BUILD_TYPE}","RelWithDebInfo">:-fno-omit-frame-pointer>)
 list(APPEND S2OPC_COMPILER_FLAGS $<$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">:-fno-omit-frame-pointer>)
-list(APPEND CMAKE_C_FLAGS_RELEASE "-s")
 
 # TODO: avoid modifying CMAKE_CFLAGS_* variables ? create new CMAKE_CONFIGURATION_TYPES equivalent to the 2 following but without DNDEBUG ?
 # Re-enable asserts for Release and RelWithDebInfo builds
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-string(REGEX REPLACE "[-/]g" "" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 string(REGEX REPLACE "[-/]DNDEBUG" "" CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
 
 
@@ -274,6 +276,7 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 print_if_activated("WITH_NANO_EXTENDED")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
+print_if_activated("SECURITY_HARDENING")
 
 # Check specific options constraints and set necessary compilation flags
 
