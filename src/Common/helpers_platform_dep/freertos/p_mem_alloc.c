@@ -48,17 +48,18 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
     }
 
     // Minimum size = 4 to avoid NULL pointer
-    if (0 == nmemb)
+    size_t total_size = nmemb * size;
+    if (0 == total_size)
     {
-        nmemb = 4;
+        total_size = 4;
     }
-    void* p = SOPC_Malloc(nmemb * size);
+    void* p = SOPC_Malloc(total_size);
     if (NULL == p)
     {
         return NULL;
     }
 
-    return memset(p, 0, nmemb * size);
+    return memset(p, 0, total_size);
 }
 
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)

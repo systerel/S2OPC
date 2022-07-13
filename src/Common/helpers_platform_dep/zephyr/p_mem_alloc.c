@@ -58,6 +58,11 @@ const size_t SOPC_MemAlloc_Nb_Allocs(void)
 
 void* SOPC_Malloc(size_t size)
 {
+    // Minimum size = 4 to avoid NULL pointer
+    if (0 == size)
+    {
+        size = 4;
+    }
     void* result = malloc(size);
     CHECK_ALLOC_RESULT(result, size);
     INCREASE_NB_ALLOCS(result, 1);
@@ -72,7 +77,17 @@ void SOPC_Free(void* ptr)
 
 void* SOPC_Calloc(size_t nmemb, size_t size)
 {
-    void* result = calloc(nmemb, size);
+    if (nmemb > SIZE_MAX / size)
+    {
+        return NULL;
+    }
+    // Minimum size = 4 to avoid NULL pointer
+    size_t total_size = nmemb * size;
+    if (0 == total_size)
+    {
+        total_size = 4;
+    }
+    void* result = calloc(total_size, 1);
     CHECK_ALLOC_RESULT(result, size);
     INCREASE_NB_ALLOCS(result, 1);
     return result;
