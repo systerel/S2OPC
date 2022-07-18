@@ -254,23 +254,23 @@ int main(int argc, char* argv[])
             SOPC_ASSERT(SOPC_STATUS_OK == status && "during file transfer intialization");
         }
 
-        const SOPC_FileType_Config config = {.file_path = "/tmp/myfile",
-                                             .fileType_nodeId = "ns=1;i=15042",
-                                             .met_openId = "ns=1;i=15049",
-                                             .met_closeId = "ns=1;i=15052",
-                                             .met_readId = "ns=1;i=15054",
-                                             .met_writeId = "ns=1;i=15138",
-                                             .met_getposId = "ns=1;i=15140",
-                                             .met_setposId = "ns=1;i=15143",
-                                             .var_sizeId = "ns=1;i=15043",
-                                             .var_openCountId = "ns=1;i=15047",
-                                             .var_userWritableId = "ns=1;i=15045",
-                                             .var_writableId = "ns=1;i=15044",
-                                             .pFunc_UserCloseCallback = &UserCloseCallback};
+        const SOPC_FileType_Config config_Item1_PreloadFile = {.file_path = "/tmp/Item1_preloadFile",
+                                                               .fileType_nodeId = "ns=1;i=15478",
+                                                               .met_openId = "ns=1;i=15484",
+                                                               .met_closeId = "ns=1;i=15487",
+                                                               .met_readId = "ns=1;i=15489",
+                                                               .met_writeId = "ns=1;i=15492",
+                                                               .met_getposId = "ns=1;i=15494",
+                                                               .met_setposId = "ns=1;i=15497",
+                                                               .var_sizeId = "ns=1;i=15479",
+                                                               .var_openCountId = "ns=1;i=15482",
+                                                               .var_userWritableId = "ns=1;i=15481",
+                                                               .var_writableId = "ns=1;i=15480",
+                                                               .pFunc_UserCloseCallback = &UserCloseCallback};
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_FileTransfer_Add_File(config);
+            status = SOPC_FileTransfer_Add_File(config_Item1_PreloadFile);
             if (SOPC_STATUS_OK != status)
             {
                 printf("******* Failed to add file into server\n");
