@@ -17,6 +17,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_common_constants.h"
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -203,8 +204,24 @@ int main(int argc, char* argv[])
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
     SOPC_ReturnStatus status;
-    SOPC_StatusCode status_code;
-    (void) status_code;
+
+    /* Configure the server to support message size of 128 Mo */
+    SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
+    encConf.buffer_size = 1000000;
+    encConf.receive_max_nb_chunks = 128;
+    /* receive_max_msg_size = buffer_size * receive_max_nb_chunks */
+    encConf.receive_max_msg_size = 128000000; // 128 Mo
+    encConf.send_max_nb_chunks = 128;
+    /* send_max_msg_size = buffer_size  * send_max_nb_chunks */
+    encConf.send_max_msg_size = 128000000; // 128 Mo
+    encConf.max_string_length = 128000000; // 128 Mo
+
+    bool res = SOPC_Common_SetEncodingConstants(encConf);
+    if (false == res)
+    {
+        printf("******* Failed to configure message size of S2OPC\n");
+    }
+
     status = SOPC_CommonHelper_Initialize(&logConfig);
     if (SOPC_STATUS_OK == status)
     {
