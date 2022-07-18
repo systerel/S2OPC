@@ -1,6 +1,4 @@
-/../zephyr_common_src# HowTo : Develop a  ZEPHYR S2OPC application (PubSub + Server)
-
-An example of a such application is provided in `samples/PubSub_ClientServer/zephyr/pubsub_server`
+# HowTo : Develop a  ZEPHYR S2OPC application (PubSub + Server)
 
 ## Prerequisite
 It is mandatory to have first ZEPHYR and S2OPC installed and configured properly.
@@ -9,11 +7,28 @@ See [WIKI](https://trac.aix.systerel.fr/ingopcs/wiki/ZephyrGetStarted)
 ## Configuration
 ### ZEPHYR configuration
 
-The configuration is provided in `s2opc/zephyr/Kconfig`. The default configuration is provided for a PubSub + OPC UA server application, and already meets expected constraints (except network configuration : `SOPC_ETH_ADDRESS`,  `SOPC_ENDPOINT_ADDRESS` …)
+The configuration is provided in `s2opc/zephyr/Kconfig`. The default configuration is provided for a PubSub + OPC UA server application, and already meets expected constraints (except network configuration : `SOPC_ETH_ADDRESS`,  `SOPC_ENDPOINT_ADDRESS`, ...)
 Note: This configuration is based on a Hardware design with a single Ethernet interface. In case several interfaces exist, this may have to be reworked.
 
 ### S2OPC configuration
-The configuration is provided in `s2opc/zephyr/CMakelist.txt`. The default configuration is provided for a PubSub + OPC UA server application with constant address space (RAM–optimized). Note that when using the constant Address Space, only the DataValue of the nodes can be modified (not the META DATA like status or timestamps)
+The configuration is provided in `s2opc/zephyr/CMakelist.txt`. The default configuration is provided for a PubSub + OPC UA server application with constant address space (RAM-optimized). Note that when using the constant Address Space, only the DataValue of the nodes can be modified (not the META DATA like status or timestamps)
+
+## Using S2OPC
+
+Adding S2OPC in an external ZEPHYR project requires to:
+- include s2opc module in ZEPHYR workspace. If not already included, this can be done by adding the following lines to `west.yml`:
+
+```yaml
+    - name: s2opc
+      revision: zephyr
+      path: modules/lib/s2opc
+      url: https://gitlab.com/systerel/S2OPC.git
+```
+
+- check that s2opc is up to date (`west update s2opc`)
+- In `prj.conf`, ensure to have `CONFIG_S2OPC=y`
+- Check the specific configuration in `$ZEPHYR_BASE/modules/lib/s2opc/zephyr/Kconfig` and modify the `prj.conf` accordingly to project needs
+- In `CMakeLists.txt`, add the s2opc build options (e.g. `add_definitions (-DWITH_STATIC_SECURITY_DATA=1)`, `add_definitions (-DWITH_USER_ASSERT=1)`, ...). Refer to the [WIKI](https://gitlab.com/systerel/S2OPC/-/wikis/compilation) for all possible options.
 
 ## Examples
 
@@ -22,9 +37,10 @@ Common files to several examples are locarted in subfolder `zephyr_common_src`
 
 - `static_security_data` provides a hard-coded example of Pubsub symmetric keys
 - `pubsub_config_static` provides a hard-coded example of PubSub configuration
-- `network_init` provides a example of network configuration (tested on STM32H7)
+- `network_init` provides a example of network configuration (tested on STM32H7 and IMX1064RT)
 - `cache` provides a basic cache for PubSub communication
 - `tls_config` provides the MdebTLS required parameters for its integration into S2OPC
+- `server` provides a basic OPC server implementation
 
 Note: a 'cache' can be simply seen as a basic dictionnary containing both variables to be read by "Pub" and writton to by "Sub".
 
@@ -37,30 +53,30 @@ Simply type `make` in current folder
 
 `zephyr_pubsub` provides an example of S2OPC PubSub demo over Zephyr.
 
-The demo runs a cache-based S2OPC PubSub (Not based on an OPC addresse space).
+The demo runs a cache-based S2OPC PubSub (Not based on an OPC address space).
 
 ### ZEPHYR S2OPC Client demo
 
 `zephyr_client` provides an example of S2OPC Client demo over Zephyr.
 
-The demo runs a cache-based S2OPC Client (Not based on an OPC addresse space).
+The demo runs a cache-based S2OPC Client (Not based on an OPC address space).
 
+### ZEPHYR S2OPC PtP demo
 
+`zephyr_ptp` provides an example of PtP clock synchronisation on Zephyr.
 
+The demo requires an hardware PtP-capable device to run successfully. It has been tested on STM NUCLEO-144 series.
+This demo is interactive and allows the user to start/stop specific clock-related measurement tests.
+
+### ZEPHYR S2OPC server demo
+
+`zephyr_server` provides an example of S2OPC server.
+
+The addresss space can be manually edited:
+- update the `xml/pubsub_server.xml` file
+- start `make regen` command to regenerate the `test_address_space.c` file
 
 ## Main design
-### Project
-One possible way to develop over S2OPC is to update an existing demo application provided in the repository. (`s2opc/samples/`)
-
-**TODO** : make a project from scratch out of s2opc folder ?
-
-This howto takes the example of `s2opc/samples/PubSub_ClientSerevr/zephyr/pubsub_test_server`
-The configuration files overload/complete the default configuration parameters:
-- `CMakelist.txt`
-- `prj.conf` + `boards/*.conf`
-
-All build requirements are resolved automatically by west and CMake. There is no additional configuration to be done.
-
 ### Code design - Server
 The main entry is in `pubsub_test_server.c`
 Hereunder is the typical sequence to create and start an OPC server:
