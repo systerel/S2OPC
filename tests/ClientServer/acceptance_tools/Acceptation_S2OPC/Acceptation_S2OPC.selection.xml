@@ -1,5 +1,5 @@
 <UaTestCaseSelection xsi:noNamespaceSchemaLocation="testcaseselection.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
- <ProjectInfo ProjectType="ServerProject" Version="1.3.341.390"/>
+ <ProjectInfo ProjectType="ServerProject" Version="1.3.341.385"/>
  <ConformanceGroups>
   <ConformanceGroup name="Address Space Model">
    <ConformanceUnit name="Address Space Base">
@@ -416,22 +416,6 @@
     </TestCases>
    </ConformanceUnit>
    <ConformanceUnit name="Security Basic 256Sha256">
-    <TestCases>
-     <TestCase name="001.js"/>
-     <TestCase name="002.js"/>
-     <TestCase name="004.js"/>
-     <TestCase name="005.js"/>
-    </TestCases>
-   </ConformanceUnit>
-   <ConformanceUnit name="Security Aes128-Sha256-RsaOaep">
-    <TestCases>
-     <TestCase name="001.js"/>
-     <TestCase name="002.js"/>
-     <TestCase name="004.js"/>
-     <TestCase name="005.js"/>
-    </TestCases>
-   </ConformanceUnit>
-   <ConformanceUnit name="Security Aes256-Sha256-RsaPss">
     <TestCases>
      <TestCase name="001.js"/>
      <TestCase name="002.js"/>

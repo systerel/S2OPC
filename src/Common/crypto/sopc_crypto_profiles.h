@@ -51,10 +51,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256_ID 2
 #define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SOPC_SecurityPolicy_None_ID 3
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI "http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep"
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID 5
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI "http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss"
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID 6
 
 // Basic256Sha256, sizes in bytes
 #define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block 16
@@ -63,34 +59,12 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Signature 32
 #define SOPC_SecurityPolicy_Basic256Sha256_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
+#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash \
+    32 /*< RSASS PSS uses SHA-256 in this context (unused, Basic256Sha256 uses PKCS#1, not PSS) */
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits 2048
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
 #define SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength 32
-
-// Aes128-Sha256-RsaOaep, sizes in bytes
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey 16
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMinBits 2048
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMaxBits 4096
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SecureChannelNonceLength 32
-
-// Aes256-Sha256-RsaPss, sizes in bytes
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_CryptoKey 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_OAEP_Hash 32 /*< RSA OAEP uses SHA2-256 */
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMinBits 2048
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMaxBits 4096
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI_SignAlgo "http://opcfoundation.org/UA/security/rsa-pss-sha2-256"
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SecureChannelNonceLength 32
 
 // Basic256, sizes in bytes
 #define SOPC_SecurityPolicy_Basic256_SymmLen_Block 16
@@ -99,14 +73,14 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 #define SOPC_SecurityPolicy_Basic256_SymmLen_Signature 20
 #define SOPC_SecurityPolicy_Basic256_CertLen_Thumbprint 20
 #define SOPC_SecurityPolicy_Basic256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
+#define SOPC_SecurityPolicy_Basic256_AsymLen_PSS_Hash \
+    20 /*< RSASS PSS uses SHA-1 in this context (unused, Basic256 uses PKCS#1, not PSS) */
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits 1024
 #define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits 2048
 #define SOPC_SecurityPolicy_Basic256_URI_SignAlgo "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
 #define SOPC_SecurityPolicy_Basic256_SecureChannelNonceLength 32
 
 // CryptoProfiles instances
-S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss;
-S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpBasic256Sha256;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpBasic256;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpNone;

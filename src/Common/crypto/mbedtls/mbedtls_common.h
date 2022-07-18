@@ -38,12 +38,7 @@
     mbedtls_rsa_rsassa_pkcs1_v15_sign(ctx, f_rng, p_rng, MBEDTLS_RSA_PRIVATE, md_alg, hashlen, hash, sig)
 #define MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY(ctx, md_alg, hashlen, hash, sig) \
     mbedtls_rsa_rsassa_pkcs1_v15_verify(ctx, NULL, NULL, MBEDTLS_RSA_PUBLIC, md_alg, hashlen, hash, sig)
-#define MBEDTLS_RSA_RSASSA_PSS_SIGN(ctx, f_rng, p_rng, md_alg, hashlen, hash, sig) \
-    mbedtls_rsa_rsassa_pss_sign(ctx, f_rng, p_rng, MBEDTLS_RSA_PRIVATE, md_alg, hashlen, hash, sig)
-#define MBEDTLS_RSA_RSASSA_PSS_VERIFY(ctx, md_alg, hashlen, hash, sig) \
-    mbedtls_rsa_rsassa_pss_verify(ctx, NULL, NULL, MBEDTLS_RSA_PUBLIC, md_alg, hashlen, hash, sig)
 #define MBEDTLS_PK_PARSE_KEY mbedtls_pk_parse_key
-#define MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id) mbedtls_rsa_set_padding(prsa, padding, (int) hash_id)
 
 #elif MBEDTLS_VERSION_MAJOR == 3
 /* MBEDTLS V3 */
@@ -51,9 +46,6 @@
 #define MBEDTLS_RSA_RSAES_OAEP_DECRYPT mbedtls_rsa_rsaes_oaep_decrypt
 #define MBEDTLS_RSA_RSASSA_PKCS1_V15_SIGN mbedtls_rsa_rsassa_pkcs1_v15_sign
 #define MBEDTLS_RSA_RSASSA_PKCS1_V15_VERIFY mbedtls_rsa_rsassa_pkcs1_v15_verify
-#define MBEDTLS_RSA_RSASSA_PSS_SIGN mbedtls_rsa_rsassa_pss_sign
-#define MBEDTLS_RSA_RSASSA_PSS_VERIFY mbedtls_rsa_rsassa_pss_verify
-#define MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id) mbedtls_rsa_set_padding(prsa, padding, hash_id)
 
 // Note: f_rng is set to NULL. mbedtls_pk_parse_key documentation states that it must not be NULL.
 // However, this rng parameters are only used in scope of Elliptic curves.

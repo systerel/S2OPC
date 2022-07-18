@@ -32,16 +32,6 @@ const SOPC_CryptoProfile* SOPC_CryptoProfile_Get(const char* uri)
 
     /* Compares len+1 to include the trailing \0 of the zero-terminated #defined URI.
      * This avoids false positives with strings prefixed by a valid security policy. */
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
-    {
-        return &sopc_g_cpAes256Sha256RsaPss;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
-    {
-        return &sopc_g_cpAes128Sha256RsaOaep;
-    }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
                                  strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
     {

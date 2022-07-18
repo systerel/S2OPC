@@ -204,16 +204,10 @@ static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_S
 
     switch (secPolicy->SecurityPolicyID)
     {
-    case SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID:
-        secuPolicyWeight = 4;
-        break;
     case SOPC_SecurityPolicy_Basic256Sha256_ID:
-        secuPolicyWeight = 3;
-        break;
-    case SOPC_SecurityPolicy_Basic256_ID:
         secuPolicyWeight = 2;
         break;
-    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
+    case SOPC_SecurityPolicy_Basic256_ID:
         secuPolicyWeight = 1;
         break;
     default:

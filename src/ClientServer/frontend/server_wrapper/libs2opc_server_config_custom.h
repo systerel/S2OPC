@@ -186,11 +186,9 @@ SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bo
  */
 typedef enum
 {
-    SOPC_SecurityPolicy_None,                /*!< http://opcfoundation.org/UA/SecurityPolicy#None */
-    SOPC_SecurityPolicy_Basic256,            /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256 */
-    SOPC_SecurityPolicy_Basic256Sha256,      /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256 */
-    SOPC_SecurityPolicy_Aes128Sha256RsaOaep, /*!< http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep */
-    SOPC_SecurityPolicy_Aes256Sha256RsaPss   /*!< http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss */
+    SOPC_SecurityPolicy_None,           /*!< http://opcfoundation.org/UA/SecurityPolicy#None */
+    SOPC_SecurityPolicy_Basic256,       /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256 */
+    SOPC_SecurityPolicy_Basic256Sha256, /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256 */
 } SOPC_SecurityPolicy_URI;
 
 /**

@@ -177,9 +177,7 @@ SETS
     t_SecurityPolicy = {
         e_secpol_None,
         e_secpol_B256,
-        e_secpol_B256S256,
-        e_secpol_Aes128Sha256RsaOaep,
-        e_secpol_Aes256Sha256RsaPss};
+        e_secpol_B256S256};
 
     t_buffer_in_state_i = {c_buffer_in_state_indet,
         e_buffer_in_msg_not_read,
