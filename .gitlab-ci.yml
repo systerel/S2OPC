@@ -68,6 +68,7 @@ stages:
   - build-others
   - analyses
   - doc
+  - tag-artifacts
 
 # Avoid to run 2 pipelines in case of MR
 # (1 for branch and 1 for MR)
@@ -497,3 +498,34 @@ check_doc:
   rules:
    - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always # run even if previous job in pipeline failed
+     
+persist-tag-artifacts:
+  # Use this job to specify artifacts that should never expire for tag pipelines.
+  stage: tag-artifacts
+  rules:
+    - if: '$CI_COMMIT_TAG != null'
+  script:
+    - echo "Persisting artifacts for tag pipelines"
+  artifacts:
+    # Specify artifacts from previous jobs to be persisted indefinitely
+    paths:
+      # from generation:
+      - 'pre-build.log'
+      # from build-linux64-ASan:
+      - 'install_linux64/'
+      # from test-unit:
+      - 'build/bin/**/*.tap'
+      - 'build/bin/**/*.log'
+      - 'build/tests/**/Testing'
+      - 'build/**/*.*.gcda' # coverage analysis
+      - 'build/**/*.*.gcno' # coverage analysis
+      # from build-rpi:
+      - 'install_rpi/'
+      # from build-win64:
+      - 'install_win64/'
+      # from build-zephyr:
+      - 'build_zephyr/'
+      # from build-win32:
+      - 'install_win32/'
+    expire_in: never
+
