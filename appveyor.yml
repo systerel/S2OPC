@@ -29,7 +29,7 @@ test_script:
     - set CHECK_DIR_NAME=check-0.14.0
     - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
     - set CHECK_BUILD_DIR=%CHECK_DIR%\build
-    - set MBEDTLS_VERSION=2.16.12
+    - set MBEDTLS_VERSION=2.28.0
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
@@ -51,7 +51,7 @@ test_script:
 
     # download and extract mbedtls
     - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/ARMmbed/mbedtls/archive/v%MBEDTLS_VERSION%.tar.gz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
+    - "appveyor.exe DownloadFile https://github.com/Mbed-TLS/mbedtls/archive/v%MBEDTLS_VERSION%.tar.gz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
     - tar xvf "%MBEDTLS_DIR_NAME%-apache.tgz"
 
     # download and extractbuild expat

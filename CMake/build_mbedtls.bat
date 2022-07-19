@@ -1,5 +1,5 @@
 @REM Uncomment to use without build_s2opc
-@REM set MBEDTLS_DIR=%~dp0..\mbedtls-2.16.12
+@REM set MBEDTLS_DIR=%~dp0..\mbedtls-2.28.0
 @REM set VS_VERSION="Visual Studio 15 2017 Win64"
 @REM set CONFIG="Release"
 @
