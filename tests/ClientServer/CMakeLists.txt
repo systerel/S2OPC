@@ -511,7 +511,7 @@ endif(ENABLE_TESTING)
 
 if(ENABLE_FUZZING)
   set(FUZZING_PATH "unit_tests/fuzzing")
-  
+
   if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
     if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
       # We need at least CLang 6 to get LibFuzzer

@@ -17,13 +17,13 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <assert.h>
 
+#include "sopc_helper_endianness_cfg.h"
 #include "sopc_network_layer.h"
 #include "sopc_reader_layer.h"
-#include "sopc_helper_endianness_cfg.h"
 
 #define MAX_LEN 4096
 
@@ -120,7 +120,7 @@ static void setupConnection(void)
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
 }
 
-int LLVMFuzzerInitialize(int *argc, char ***argv)
+int LLVMFuzzerInitialize(int* argc, char*** argv)
 {
     (void) argc;
     (void) argv;
@@ -132,14 +132,14 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
     return 0;
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len) 
+int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
     if (len == 0 || len > UINT32_MAX)
     {
         return 0;
     }
 
-    if((len >= 2) && (buf[0] & 0x80) && ((buf[1] & 0x07) == DataSet_LL_PubId_String_Id))
+    if ((len >= 2) && (buf[0] & 0x80) && ((buf[1] & 0x07) == DataSet_LL_PubId_String_Id))
     {
         return 0;
     }
@@ -154,7 +154,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *buf, size_t len)
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
 
-    SOPC_UADP_NetworkMessage *uadp_nm = SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
+    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
     if (NULL != uadp_nm)
         SOPC_UADP_NetworkMessage_Delete(uadp_nm);
 
