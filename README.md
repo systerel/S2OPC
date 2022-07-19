@@ -83,6 +83,9 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - RegisterNodes service
   - Only if compiled with WITH_NANO_EXTENDED set to 1:
     - Subscription services (simplified: no monitoredItems filters or deletion, no subscription transfer)
+  - Only if compiled with WITH_NANO_EXTENDED and SOPC_HAS_NODE_MANAGEMENT_SERVICES set to 1:
+    - AddNodes service (simplified: variable node only, no NodeId generation, simplified checks on ReferenceType/Type definition,
+                                    single node added only without automated generation based on type)
 
 ### Current status
 

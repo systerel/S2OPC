@@ -71,6 +71,7 @@ else
     append_cmake_option WITH_PYS2OPC
     append_cmake_option WITH_CONST_ADDSPACE
     append_cmake_option WITH_STATIC_SECURITY_DATA
+    append_cmake_option SOPC_HAS_NODE_MANAGEMENT_SERVICES
     append_cmake_option WITH_NANO_EXTENDED
     append_cmake_option WITH_NO_ASSERT
     append_cmake_option WITH_USER_ASSERT
