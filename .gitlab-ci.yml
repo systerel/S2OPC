@@ -68,6 +68,7 @@ stages:
   - build-others
   - analyses
   - doc
+  - tag-artifacts
 
 # Avoid to run 2 pipelines in case of MR
 # (1 for branch and 1 for MR)
@@ -80,6 +81,7 @@ workflow:
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
     - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
 
 .docker-job: &docker_job
   tags:
@@ -209,7 +211,8 @@ build-win64: &build_win64
       - 'install_win64/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || \
+          $CI_COMMIT_TAG != null"
      when: always # run even if previous job in pipeline failed
 
 build-win32:
@@ -225,7 +228,8 @@ build-win32:
       - 'install_win32/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || \
+          $CI_COMMIT_TAG != null"
      when: always # run even if previous job in pipeline failed
 
 build-rpi:
@@ -247,7 +251,8 @@ build-rpi:
       - 'install_rpi/'
     expire_in: '1 month'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || \
+          $CI_COMMIT_TAG != null"
      when: always # run even if previous job in pipeline failed
 
 # Used by coverity, also starts the analysis
@@ -278,7 +283,8 @@ build-zephyr:
       - 'build_zephyr/'
     expire_in: '1 month'
   rules:
-    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master' || \
+          $CI_COMMIT_TAG != null"
       when: always
      
 ###
@@ -495,5 +501,37 @@ check_doc:
     expire_in: '1 month'
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || \
+          $CI_COMMIT_TAG != null"
      when: always # run even if previous job in pipeline failed
+     
+persist-tag-artifacts:
+  # Use this job to specify artifacts that should never expire for tag pipelines.
+  stage: tag-artifacts
+  rules:
+    - if: '$CI_COMMIT_TAG != null'
+  script:
+    - echo "Persisting artifacts for tag pipelines"
+  artifacts:
+    # Specify artifacts from previous jobs to be persisted indefinitely
+    paths:
+      # from generation:
+      - 'pre-build.log'
+      # from build-linux64-ASan:
+      - 'install_linux64/'
+      # from test-unit:
+      - 'build/bin/**/*.tap'
+      - 'build/bin/**/*.log'
+      - 'build/tests/**/Testing'
+      - 'build/**/*.*.gcda' # coverage analysis
+      - 'build/**/*.*.gcno' # coverage analysis
+      # from build-rpi:
+      - 'install_rpi/'
+      # from build-win64:
+      - 'install_win64/'
+      # from build-zephyr:
+      - 'build_zephyr/'
+      # from build-win32:
+      - 'install_win32/'
+    expire_in: never
+
