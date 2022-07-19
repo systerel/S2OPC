@@ -446,7 +446,8 @@ OPERATIONS
                                                                                     req_header, req_msg, resp_msg) =
     VAR
         l_user,
-        l_node_management_done
+        l_node_management_done,
+        l_bres
     IN
         l_node_management_done := FALSE;
         async_resp_msg := FALSE;
@@ -477,9 +478,16 @@ OPERATIONS
             OR e_msg_method_call_req THEN
                 StatusCode_service <-- treat_method_call_request (session, req_msg, resp_msg)
             OR e_msg_node_add_nodes_req THEN
-                l_user <-- get_session_user_server(session);
-                StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg);
-                l_node_management_done := bool(StatusCode_service = e_sc_ok)
+                l_bres <-- is_ClientNodeManagementActive;
+                IF l_bres = TRUE
+                THEN
+                    l_user <-- get_session_user_server(session);
+                    StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg);
+                    l_node_management_done := bool(StatusCode_service = e_sc_ok)
+                ELSE
+                    /* service not supported for clients (only as a local service) */
+                    StatusCode_service := e_sc_bad_service_unsupported
+                END
             ELSE
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported

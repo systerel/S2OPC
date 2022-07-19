@@ -1312,9 +1312,8 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
 
 void address_space_bs__is_AddressSpace_constant(t_bool* const address_space_bs__bres)
 {
-    *address_space_bs__bres =
-        (!SOPC_HAS_NODE_MANAGEMENT_SERVICES || !SOPC_AddressSpace_AreNodesFreed(address_space_bs__nodes) ||
-         SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes));
+    *address_space_bs__bres = (!SOPC_AddressSpace_AreNodesFreed(address_space_bs__nodes) ||
+                               SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes));
 }
 
 void address_space_bs__is_IndexRangeDefined(const constants__t_IndexRange_i address_space_bs__p_index_range,

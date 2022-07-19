@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/08/2022 08:51:08
+ Date                 : 08/08/2022 08:52:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -506,6 +506,7 @@ extern void constants__INITIALISATION(void);
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription
 #define constants__get_copy_ExpandedNodeId constants_bs__get_copy_ExpandedNodeId
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
+#define constants__is_ClientNodeManagementActive constants_bs__is_ClientNodeManagementActive
 #define constants__is_QualifiedNames_Empty constants_bs__is_QualifiedNames_Empty
 #define constants__is_QualifiedNames_Equal constants_bs__is_QualifiedNames_Equal
 #define constants__is_t_access_level_currentRead constants_bs__is_t_access_level_currentRead

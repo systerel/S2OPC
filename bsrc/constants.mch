@@ -1260,5 +1260,12 @@ OPERATIONS
     BEGIN
         p_currentTs :(p_currentTs : t_Timestamp & p_currentTs /= c_Timestamp_null)
     END
+    ;
+
+    /* Returns true if clients are allowed to use NodeManagement service set, false otherwise */
+    bres <-- is_ClientNodeManagementActive =
+    BEGIN
+        bres :: BOOL
+    END
 
 END

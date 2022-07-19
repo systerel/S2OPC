@@ -260,6 +260,7 @@ extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
+extern void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bres);
 extern void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_QualifiedName_i constants_bs__name,
                                                   t_bool* const constants_bs__p_bool);
 extern void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i constants_bs__name1,

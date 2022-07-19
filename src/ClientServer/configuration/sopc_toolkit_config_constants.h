@@ -197,9 +197,11 @@
 #define SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION false
 #endif
 
-/** @brief Node management services activation (AddNodes only for now) */
+/** @brief Node management services activation for clients (AddNodes only for now)
+ * Note: the services are accessible as server local service if address space is not constant nor statically defined.
+ * */
 #ifndef SOPC_HAS_NODE_MANAGEMENT_SERVICES
-#define SOPC_HAS_NODE_MANAGEMENT_SERVICES true
+#define SOPC_HAS_NODE_MANAGEMENT_SERVICES false
 #endif
 
 #include "sopc_config_constants_check.h"

@@ -82,6 +82,11 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
     }
 }
 
+void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = SOPC_HAS_NODE_MANAGEMENT_SERVICES;
+}
+
 void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                  t_bool* const constants_bs__bres)
 {
