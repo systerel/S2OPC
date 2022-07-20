@@ -135,11 +135,14 @@ static void gptp_phase_dis_cb(uint8_t *gm_identity,
      * but may be used to correct/smooth time corrections
      * For example:
      */
+    /*
     const uint64_t discontinuity = ((uint64_t)last_gm_ph_change->high) << 32 | last_gm_ph_change->low;
     if (discontinuity > 0)
     {
         synch_printf("[II] PTP time discontinuity: %u\n", (uint32_t) (discontinuity));
+        ... take into account discontinuity ...
     }
+    */
 }
 
 /***************************************************/

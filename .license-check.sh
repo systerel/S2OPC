@@ -170,7 +170,7 @@ for f in $exclusions; do
     mv $f $f"_"
 done
 
-find src tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find src tests zephyr/samples -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 
 for f in $exclusions; do
     mv $f"_" $f

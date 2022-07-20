@@ -253,7 +253,6 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
     static const uint64_t tick_to_100ns_d = (SECOND_TO_100NS / tick_reduce_factor);
     static uint64_t tick_to_100ns_n = 0;
     static struct k_mutex monotonicMutex;
-    static int32_t nb_ticks_ovf_in_one_cycle = 0;
     static int64_t hw_clocks_per_sec = 0;
 
     bool bTransition = __atomic_compare_exchange(&gTimeStatus, &expectedStatus, &desiredStatus, false, __ATOMIC_SEQ_CST,
@@ -262,7 +261,6 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
     if (bTransition)
     {
         hw_clocks_per_sec = sys_clock_hw_cycles_per_sec();
-        nb_ticks_ovf_in_one_cycle = (int32_t)((float) UINT32_SHIFT / hw_clocks_per_sec + 0.5);
         tick_to_100ns_n = (hw_clocks_per_sec / tick_reduce_factor);
         // Check that rounding assumptions for tick_to_100ns_d and tick_to_100ns_n are correct
         SOPC_ASSERT((SECOND_TO_100NS % tick_reduce_factor) == 0);

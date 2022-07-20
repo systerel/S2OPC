@@ -34,11 +34,12 @@
  *          SOPC core.
  *          This file may be included by ZEPHYR applications that need these services.
  * \note The ZEPHYR PtP time correction is realized while processing specific time events (\a
- *          SOPC_Time_GetCurrentTimeUTC). Natively, in S2OPC core, these functions may not be called as long as no
+ *          SOPC_Time_GetCurrentTimeUTC). Natively, in S2OPC core, this function may not be called as long as no
  *          PubSub is started. As a consequence, in the case an application waits for a PtP synchronization before
- *          activating this service, it is mandatory to firstly force this synchronization by calling one of these
- *          functions explicitly. A simple way to do that could be calling \a SOPC_Time_GetCurrentTimeUTC function
- *          as long as the expected clock precision is not reached.
+ *          activating this service, it is mandatory to firstly force this synchronization by calling this
+ *          functions explicitly until synchronization is good enough.
+ *          A simple way to do that could be calling \a SOPC_Time_GetCurrentTimeUTC function
+ *          as long as \a SOPC_RealTime_GetClockPrecision does not return sufficient precision.
  */
 
 #ifndef SOPC_ZEPHYR_TIME_H_
