@@ -242,6 +242,20 @@ static uint64_t P_TIME_GetBuildDateTime(void)
 }
 
 /***************************************************/
+static uint64_t uint64_gcd(uint64_t a, uint64_t b)
+{
+    uint64_t temp;
+    while (b != 0)
+    {
+        temp = a % b;
+
+        a = b;
+        b = temp;
+    }
+    return a;
+}
+
+/***************************************************/
 static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
 {
     SOPC_RealTime result;
@@ -249,9 +263,8 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
     ePTimeStatus desiredStatus = P_TIME_STATUS_INITIALIZING;
 
     // Note: avoid u64 overflow by reducing factors
-    static const uint64_t tick_reduce_factor = 10e5;
-    static const uint64_t tick_to_100ns_d = (SECOND_TO_100NS / tick_reduce_factor);
     static uint64_t tick_to_100ns_n = 0;
+    static uint64_t tick_to_100ns_d = 0;
     static struct k_mutex monotonicMutex;
     static int64_t hw_clocks_per_sec = 0;
 
@@ -261,11 +274,14 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
     if (bTransition)
     {
         hw_clocks_per_sec = sys_clock_hw_cycles_per_sec();
-        tick_to_100ns_n = (hw_clocks_per_sec / tick_reduce_factor);
-        // Check that rounding assumptions for tick_to_100ns_d and tick_to_100ns_n are correct
-        SOPC_ASSERT((SECOND_TO_100NS % tick_reduce_factor) == 0);
-        SOPC_ASSERT((hw_clocks_per_sec % tick_reduce_factor) == 0);
-        SOPC_ASSERT(0 < tick_to_100ns_n);
+        const uint64_t tick_reduce_factor = uint64_gcd(SECOND_TO_100NS, hw_clocks_per_sec);
+
+        // tick_to_100ns_n and tick_to_100nsdn are numerator and denominator of (hw_clocks_per_sec / SECOND_TO_100NS)
+        // So as to avoid overflows, they are reduced using their GCD
+        tick_to_100ns_d = (hw_clocks_per_sec / tick_reduce_factor);
+        tick_to_100ns_n = (SECOND_TO_100NS / tick_reduce_factor);
+
+        SOPC_ASSERT(0 < tick_to_100ns_d);
 
         gUptimeDate_s = P_TIME_GetBuildDateTime();
 
@@ -318,7 +334,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
         overflow_ticks += (missing_loops << 32);
     }
 
-    const uint64_t kernel_clock_100ns = ((kernel_clock_ticks + overflow_ticks) * tick_to_100ns_d) / tick_to_100ns_n;
+    const uint64_t kernel_clock_100ns = ((kernel_clock_ticks + overflow_ticks) * tick_to_100ns_n) / tick_to_100ns_d;
 
     const uint64_t value_100ns = gUptimeDate_s * SECOND_TO_100NS + kernel_clock_100ns;
 
