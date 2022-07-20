@@ -304,7 +304,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/test@sha256:c8dc587888ca258206baaca8eed113b65e47560ed9aa808a8002931cd0f58293  # digest of test:2.12
+  image: docker.aix.systerel.fr/c838/test@sha256:996e2bd7a493117e07fd967d18f20872abc86508acff7b94347108e4a13b7114 # digest of test:2.13
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -383,7 +383,7 @@ test-uactt:
 
 coverage-analysis:
   stage: analyses
-  image: docker.aix.systerel.fr/c838/test@sha256:ff5e7d299ba26e58f798427a55abef3760457a749032dfd71d227651458026bd  # digest of test:2.10
+  image: docker.aix.systerel.fr/c838/test@sha256:996e2bd7a493117e07fd967d18f20872abc86508acff7b94347108e4a13b7114  # digest of test:2.13
   script:
     - ./.gen_coverage.sh
   artifacts:
