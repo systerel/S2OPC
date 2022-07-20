@@ -203,7 +203,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
             SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         pEpConfig->secuConfigurations[1].nbOfUserTokenPolicies = 2;
         pEpConfig->secuConfigurations[1].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[1].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
+        pEpConfig->secuConfigurations[1].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
     }
 
     /* 3rd Security policy is Basic256Sha256 with anonymous or username authentication allowed
@@ -216,7 +216,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
         pEpConfig->secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
         pEpConfig->secuConfigurations[2].nbOfUserTokenPolicies = 2;
         pEpConfig->secuConfigurations[2].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[2].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy;
+        pEpConfig->secuConfigurations[2].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
     }
 
     /* User authentication and authorization */
