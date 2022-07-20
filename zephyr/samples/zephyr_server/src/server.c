@@ -317,6 +317,11 @@ SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
     return status;
 }
 
+void Server_Interrupt(void)
+{
+    SOPC_Atomic_Int_Set(&serverOnline, 0);
+}
+
 bool Server_IsRunning(void)
 {
     return SOPC_Atomic_Int_Get(&serverOnline);

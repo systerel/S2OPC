@@ -47,6 +47,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
 SOPC_ReturnStatus Server_LoadAddressSpace(void);
 /** Calls Toolkit_Configured(), starts the server */
 SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig);
+void Server_Interrupt(void);
 bool Server_IsRunning(void);
 void Server_StopAndClear(SOPC_S2OPC_Config* pConfig);
 

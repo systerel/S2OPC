@@ -4,6 +4,25 @@
 It is mandatory to have first ZEPHYR and S2OPC installed and configured properly.
 See [WIKI](https://trac.aix.systerel.fr/ingopcs/wiki/ZephyrGetStarted)
 
+These samples were tested under Zephyr v3.0.0 (4f8d78ceeb436e82f528511998515f6fc137c6cd) with the following additionnal patches:
+- add s2opc in west.yaml (see below)
+- change STM32 default network device to `ok`status. Hereunder is the applied patch
+
+```diff
+diff --git a/boards/arm/stm32h735g_disco/stm32h735g_disco.dts b/boards/arm/stm32h735g_disco/stm32h735g_disco.dts
+index 1867493182..424cc96926 100644
+--- a/boards/arm/stm32h735g_disco/stm32h735g_disco.dts
++++ b/boards/arm/stm32h735g_disco/stm32h735g_disco.dts
+@@ -105,6 +105,7 @@
+                     &eth_txd0_pb12
+                     &eth_txd1_pb13>;
+        pinctrl-names = "default";
++       status = "okay";
+ };
+
+ &sdmmc1 {
+```
+
 ## Configuration
 ### ZEPHYR configuration
 
@@ -44,111 +63,101 @@ Common files to several examples are locarted in subfolder `zephyr_common_src`
 
 Note: a 'cache' can be simply seen as a basic dictionnary containing both variables to be read by "Pub" and writton to by "Sub".
 
-### Building
-Enter the chosen test folder.
-Edit the `Makefile` to set-up local parameters and constants (BOARD, ZEPHYR_BASE)
-Simply type `make` in current folder
+### Building the examples
+Using the usual ZEPHYR environment, simply use `west build .` from each folder to compile samples.
+A sample `Makefile` is provided as helper, but is not mandatory.
 
-### ZEPHYR S2OPC PubSub demo
 
-`zephyr_pubsub` provides an example of S2OPC PubSub demo over Zephyr.
+### Testing the examples : Server/client
+Note:
+- The default IP of demo server is `192.168.42.21/24`
+- The default IP of demo client is `192.168.42.22/24`
+- It is advised to clean fully the build folders when changing BOARDS. (`west build -t pristine`)
+- The native ZEPHYR `NET_SHELL` tools can be used on both cards. (e.g. type `net iface` to show network configuration). Additionnal command `demo` is also available, for the test purpose. Type `demo` in the console to get help.
 
-The demo runs a cache-based S2OPC PubSub (Not based on an OPC address space).
+It is possible to modify the content of the addresss space. Follow these steps before compilation to test different possibilies:
+- update the `xml/pubsub_server.xml` file
+- start `make regen` command to regenerate the `test_address_space.c` file
 
-### ZEPHYR S2OPC Client demo
+Steps:
+- Build the server : `cd zephyr/samples/zephyr_server && west build`
+- Install the server on first target (`TARG_SRV`). For example, installing an STM32 target on Windows can be done using the command `copy build\zephyr\zephyr.bin E:` (assuming that `E:` is the mount point of `TARG_SERV`)
+- Build the client : `cd zephyr/samples/zephyr_clientr && west build`
+- Install the client on secong target (`TARG_CLI`).
+- Ensure both cards are connected on the same network.
+- Open serial monitor (`COM_SRV`) of `TARG_SRV`
+- Open serial monitor (`COM_CLI`) of `TARG_CLI`
+- (Note: This can be done, for example, using `putty`on windows or `minicom` on linux.)
+- Reboot `TARG_SRV` and check output on `COM_SRV`. The output should show something like:
 
-`zephyr_client` provides an example of S2OPC Client demo over Zephyr.
+```
+# Info: Server initialized.
+# Initializing server at EP: opc.tcp://192.168.42.21:4841
+# Address space loaded
+# Info: Endpoint and Toolkit configured.
+# Info: Server started.
+# Server started on <opc.tcp://192.168.42.21:4841>
+```
 
-The demo runs a cache-based S2OPC Client (Not based on an OPC address space).
+- Reboot `TARG_CLI` and check output on `COM_CLI`.
+- On `COM_CLI`, create a configuration to the server using the command ` demo conf  opc.tcp://192.168.42.21:4841`
+- Launch the browse demo on server using the command `demo conn` on `COM_CLI`
+- In case of success, `COM_CLI` will display browse result of `root.Objects` node.
 
-### ZEPHYR S2OPC PtP demo
+### Testing the examples : ZEPHYR S2OPC PubSub demo
+
+Notes:
+- This demo was checked on `mimxrt1064_evk` and `nucleo_h745zi_q_m7` targets
+- `zephyr_pubsub` provides an example of cache-based S2OPC PubSub demo over Zephyr (Not based on an OPC address space). The same executable can be deployed over different targets. As the communication is Multicast, there is no issue in the fact that all targets use the same IP address.
+- The same MC address is used for both Pub & Sub, so that the same binary can be used for the demo. Feel free to change `CONFIG_SOPC_PUBLISHER_ADDRESS` and `CONFIG_SOPC_SUBSCRIBER_ADDRESS` to test different configurations.
+- The native ZEPHYR `NET_SHELL` tools can be used on both cards. (e.g. type `net iface` to show network configuration). Additionnal command `demo` is also available, for the test purpose. Type `demo` in the console to get help.
+Steps:
+- Install the demo on (at least) 2 targets (`TARG_PUB` and `TARG_SUB`)
+
+- Type the command `demo info` on both targets. This should output the global configuration and status (by default, both Pub and Sub are not started)
+- Type `demo print` to show the content of Cache. By default all values are set to 0/empty
+- Start the publisher on `TARG_PUB` with the command `demo start pub`
+- Start the subscriber on `TARG_SUB` with the command `demo start sub`
+- Update any value on `TARG_PUB` (for example with the command `demo set ns=1;s=aString "Hello World!"`)
+- Check that the content has been updated on `TARG_SUB` (for example with `demo print ns=1;s=aString`)
+
+
+### Testing the examples : ZEPHYR S2OPC PtP demo
 
 `zephyr_ptp` provides an example of PtP clock synchronisation on Zephyr.
 
 The demo requires an hardware PtP-capable device to run successfully. It has been tested on STM NUCLEO-144 series.
 This demo is interactive and allows the user to start/stop specific clock-related measurement tests.
+When connected to a Grand Master clock on a TSN-capable network, the terminal will show every PtP state transition (SLAVE/MASTER/NotConnected).
+Use the different commands of the terminal to check PtP precision.
 
-### ZEPHYR S2OPC server demo
+Notes:
+- Before compiling, check in `zephyr_ptp_demo`, update the following part to add your device serial number and link a user name and IP:
 
-`zephyr_server` provides an example of S2OPC server.
+```c
+static const DeviceIdentifier gDevices[]=
+{
+        // Note: Example to be adapted for each device/configuration!
+        {"624248Q", "192.168.42.111", "N.144/A"},
+        {"652248Q", "192.168.42.112", "N.144/B"},
+};
+```
+- When the device is not registered, its Id will be displayed on demo start output. Starting the demo once thus permits to get the device ID.
+- The device Id will be accepted by matching the beginning of the provided identifier (for example "652248Q" actually matches `652248Q\x13\x00F\x00/`)
+- Check the PtP parameters relatively to the remote NTP switch configuration in `prj.conf`
 
-The addresss space can be manually edited:
-- update the `xml/pubsub_server.xml` file
-- start `make regen` command to regenerate the `test_address_space.c` file
-
-## Main design
-### Code design - Server
-The main entry is in `pubsub_test_server.c`
-Hereunder is the typical sequence to create and start an OPC server:
-
-- `SOPC_Assert_Set_UserCallback`
-  - Defines the behavior in case of assertion failure.
-See also S2OPC configuration:
-     -	`WITH_USER_ASSERT`
-     -	`WITH_NO_ASSERT`
-     -	`WITH_MINIMAL_FOOTPRINT`
-See also `sopc_assert.h`
-- `Network_Initialize`
-    - See details in `network_init.c`.
-This is an example of implementation of network configuration for a project with a single ETHERNET interface. It might have to be adapted depending on actual application needs
-- `tls_threading_initialize`
-    - Initialize MBEDTLS library. 
-- `Server_Initialize`
-    - Initialize the OPC server. Provides the logging callback mechanism. This examples just prints out logs onto the console, but it can be reworked depending on project requirements.
-- `SOPC_S2OPC_Config_Initialize`
-    - Initialize an empty configuration
-- `Server_CreateServerConfig`
-    - Creates the configuration. Provides examples for static security data (typically when no file system is present) or dynamic (reading keys from files) 
-- `Server_LoadAddressSpace`
-    - Set-up the address space using generated file `test_address_space.c`.
-The file is generated using the xml file `pubsub_server_perf_zephyr.xml` and python tool `s2opc/scripts/generate-s2opc-address-space.py`
-- `SOPC_ToolkitServer_AddEndpointConfig`
-    - Create the endpoint.
-- `SOPC_Toolkit_Configured`
-    - Set the Server as configured.
-- `SOPC_ToolkitServer_AsyncOpenEndpoint`
-    - Start the server
-
-The server Address Space is manager by a dedicated component that ensures its integrity. Thus, no direct access to any content is possible. The user application must send requests to the S2OPC core and wait for the answer.
-See `Server_LocalWriteSingleNode` for an example of how the server can update a DataValue of a specific node. 
-
-### Code design – PubSub
-The PubSub can simply be seen as a periodic event to send/receive some couples (NodeId / DataValue). So as to integrate the PubSub in a user application, 2 callbacks have to be provided:
--	The “GetSource” callback. It is called by Publisher when a message has to be sent, and the call must provide all the DataValue required for message emission.
--	The “SetTarget” callback. It is called by “Subscriber” when a message has been received, and requests the user application to store the received values.
-
-The PubSub is thus uncorrelated from the server address space. Of course, the “GetSource” and “SetTarget” can be defined to read/write into the address space, however, this method is discouraged, in particular in the case of high frequency messages. The reason is that accessing the address space is not direct (The address space is managed by “B” layer and all exchanges use queued requests). This is typically inefficient when the Publishing interval of the PubSub is low. See example in `pubsub.c`, with `CONFIG_SOPC_PUBSUB_USES_CACHE` equal to 0.
-Otherwise, one simple possibility is to use a `SOPC_Dict` object (hashed map with O(1) lookup time) to store/read values in those both events. See example in `pubsub.c`, with `CONFIG_SOPC_PUBSUB_USES_CACHE` equal to 1.
-Of course, an application is free to use any other methods in "GetSource"/"SetTarget" events.
-
-Hereunder is the typical sequence to create and start the PubSub:
-- `SOPC_PubSubConfig_ParseXML` Or `SOPC_PubSubConfig_GetStatic` (see `PubSub_Configure`)
-- Choose where to read/write variables (see `PubSub_Configure`)
-- (If using Cache)
-    - `Cache_Initialize`
-- Initialize SKS
-    - `SOPC_LocalSKS_init` (with Filesystem)
-    - `SOPC_LocalSKS_init_static` (without filesystem)
-- Start Subscriber
-    - `SOPC_SubScheduler_Start`
-- Start Publisher
-    - `SOPC_PubScheduler_Start`
-- Stop Subscriber
-    - `SOPC_SubScheduler_Stop`
-    - `SOPC_SubTargetVariableConfig_Delete`
-- Stop Publisher
-    - `SOPC_PubScheduler_Stop`
-    - `SOPC_PubSourceVariableConfig_Delete`
-- Clear PubSub
-    - `SOPC_PubSubConfiguration_Delete`
-- (If using Cache)
-    -   `Cache_Clear()`
-
-All unlisted features are for demo purpose, and thus are not relevant in typical sequence.
+Steps:
+- Install on `demo_zephyr_ptp` on a PtP compatible ZEPHYR device. (Tested on NUCLEO 144 with STM32H745ZI_Q-m7)
+- Connect the target to a PtP-capable switch.
+- Enter `demo info` to show current status.
+- Enter `demo wait` to wait for the PtP synchronization
+- Type `demo help` to li=st all available tests. For example, the PtP time synchronization can be checked with the command `demo date`
 
 ## Attention points
 ### Address Space
-When using the Cache (read/write), it is mandatory to enclose uses by calls to `Cache_Lock` and `Cache_Unlock` to ensure integrity of content. Thus, any user-defined tasks that accesses the cache  will prevent the PubSub events to occure in time if the cache locking time is not the shortest possible. Typically, if a value received on the Subscriber must be repeated onto the OPC server, it is important to first read the `DataValue` into a local variable, then release the cache, and then update the OPC server using the local variable.
+When using the Cache (read/write), it is mandatory to enclose uses by calls to `Cache_Lock` and `Cache_Unlock` to ensure integrity of content. Thus, any user-defined tasks that accesses the cache will prevent the PubSub events to occure in time if the cache locking time is not the shortest possible. Typically, if a value received on the Subscriber must be repeated onto the OPC server, it is important to first read the `DataValue` into a local variable, then release the cache, and then update the OPC server using the local variable.
+(Note that the cache could be updated with a double-buffer so as to ensure non blocking accesses)
+
 Example:
 
 ```c
@@ -180,7 +189,7 @@ The ZEPHYR HAL for S2OPC provides an instrumentation of stacks and memory alloca
 `CONFIG_SOPC_HELPER_IMPL_INSTRUM`
 - 0 (default): Release build without instrumentation.
 - 1 Instrumentation is active. This allows :
-    -	Dumping current stacks usages (see `SOPC_Thread_GetAllThreadsInfo`)
+    - Dumping current stacks usages (see `SOPC_Thread_GetAllThreadsInfo`)
     -	Checking memory leaks (see `SOPC_MemAlloc_Nb_Allocs`)
 
 

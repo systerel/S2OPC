@@ -22,14 +22,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <kernel.h>
+#include <shell/shell.h>
 
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 
+#include "sopc_assert.h"
 #include "sopc_address_space.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_time.h"
+#include "sopc_threads.h"
 #include "sopc_toolkit_config.h"
 
 #include "server.h"
@@ -40,6 +44,7 @@
 static SOPC_S2OPC_Config s2opcConfig;
 
 static void log_UserCallback(const char* context, const char* text);
+static int cmd_demo_info(const struct shell *shell, size_t argc, char **argv);
 
 /***************************************************/
 SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
@@ -80,6 +85,10 @@ static void log_UserCallback(const char* context, const char* text)
     if (NULL != text)
     {
         printk("%s\n", text);
+        if (strlen(text) > 80)
+        {
+            printf("%s\n", text + 80);
+        }
     }
 }
 /*---------------------------------------------------------------------------
@@ -88,6 +97,7 @@ static void log_UserCallback(const char* context, const char* text)
 
 int main(int argc, char* argv[])
 {
+    printk("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
     // Note: avoid unused parameter warning from compiler
     (void) argc;
     (void) argv;
@@ -150,3 +160,89 @@ int main(int argc, char* argv[])
     printf("# Info: Server closed.\n");
     return 0;
 }
+
+/*---------------------------------------------------------------------------
+ *                             NET SHELL CONFIGURATION
+ *---------------------------------------------------------------------------*/
+/***************************************************/
+static int cmd_demo_info(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    printk("Zephyr S2OPC Server demo status\n");
+    printk("Server endpoint       : %s\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
+    printk("Server running        : %s\n", (Server_IsRunning() ? "YES" : "NO"));
+    printk("Server toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_write(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    if (argc < 3)
+    {
+        printk("usage: demo write <nodeid> <value>\n");
+        printk("<value> must be prefixed by b for a BOOL s for a String.\n");
+        printk("Other formats not implemented here.\n");
+        return 0;
+    }
+
+    const char* nodeIdC = argv[1];
+    const char* dvC = argv[2];
+
+    SOPC_NodeId nid;
+    SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, strlen(nodeIdC));
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
+
+    dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv.Value.DoNotClear = false;
+    if (dvC[0] == 's')
+    {
+        dv.Value.BuiltInTypeId = SOPC_String_Id;
+        SOPC_String_InitializeFromCString(&dv.Value.Value.String, dvC + 1);
+    }
+    else if (dvC[0] == 'b')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Boolean_Id;
+
+        dv.Value.Value.Boolean = atoi(dvC + 1);
+    }
+    else
+    {
+        printk("Invalid format for <value>\n");
+        return 0;
+    }
+
+    Server_LocalWriteSingleNode(&nid, &dv);
+
+    SOPC_NodeId_Clear(&nid);
+    SOPC_DataValue_Clear(&dv);
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_kill(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    Server_Interrupt();
+
+    return 0;
+}
+
+/* Creating subcommands (level 1 command) array for command "demo". */
+SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
+        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+        SHELL_CMD(kill, NULL, "Kill server", cmd_demo_kill),
+        SHELL_CMD(write, NULL, "Write value to server", cmd_demo_write),
+        SHELL_SUBCMD_SET_END
+);
+
+/* Creating root (level 0) command "demo" */
+SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

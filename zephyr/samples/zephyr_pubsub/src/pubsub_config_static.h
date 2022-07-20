@@ -22,14 +22,6 @@
 
 #include "sopc_pubsub_conf.h"
 
-#define SERVER_CMD_PUBSUB_PERIOD_MS "ns=1;s=PubPeriodMs"
-#define SERVER_CMD_PUBSUB_START_STOP "ns=1;s=PubSubStartStop"
-#define SERVER_CMD_PUBSUB_SIGN_ENCRYPT "ns=1;s=PubSignAndEncypt"
-#define SERVER_STATUS_SUB_VAR_INFO "ns=1;s=SubVarInfo"
-#define SERVER_STATUS_SUB_VAR_RESULT "ns=1;s=SubVarResult"
-#define SERVER_STATUS_PUB_VAR_LOOP "ns=1;s=PubVarLoops"
-#define SERVER_STATUS_SUB_VAR_UPTIME "ns=1;s=SubVarUpTime"
-
 SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void);
 void SOPC_PubSubConfig_Clear(void);
 

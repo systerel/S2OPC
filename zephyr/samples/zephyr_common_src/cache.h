@@ -96,4 +96,9 @@ typedef void(Cache_SourceVarListener)(SOPC_DataValue* pDv);
  */
 void Cache_SetSourceVarListener(SOPC_NodeId* nid, Cache_SourceVarListener* listener);
 
+/**
+ * Update a variant using a string. The string will be converted to matching type if possible
+ */
+bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const char* value);
+
 #endif /* CACHE_H_ */

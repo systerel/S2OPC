@@ -18,11 +18,11 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel.h>
 #include <limits.h>
 #include <signal.h>
-
-#include <stdlib.h>
+#include <shell/shell.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -32,6 +32,7 @@
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_sub_scheduler.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_user_manager.h"
@@ -41,11 +42,13 @@
 
 #include "cache.h"
 #include "network_init.h"
-#include "pubsub_config_static.h"
 #include "static_security_data.h"
 #include "threading_alt.h"
 
 volatile int stopSignal = 0;
+static int32_t gConfigurationId = -1;
+static const char* epURL = CONFIG_SOPC_ENDPOINT_ADDRESS;
+
 /***************************************************/
 static void signal_stop_server(int sig)
 {
@@ -171,6 +174,7 @@ static void client_tester(int connectionId)
 /***************************************************/
 int main(int argc, char* const argv[])
 {
+    printk("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
     signal(SIGTERM, signal_stop_server);
@@ -180,8 +184,7 @@ int main(int argc, char* const argv[])
     (void) argv;
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
 
-    int res = 0;
-    bool netInit = Network_Initialize(NULL);
+    bool netInit = Network_Initialize("192.168.42.22");
     SOPC_ReturnStatus status;
     SOPC_Log_Configuration logCfg = {
             .logLevel = SOPC_LOG_LEVEL_WARNING,
@@ -203,6 +206,42 @@ int main(int argc, char* const argv[])
 
     SOPC_ClientHelper_Initialize(disconnect_callback);
 
+    while (stopSignal == 0)
+    {
+        SOPC_Sleep(10);
+    }
+    printk("TEST ended\r\n");
+    printk("==========\r\n");
+
+    /* Close the toolkit */
+    SOPC_ClientHelper_Finalize();
+    return 0;
+}
+
+/*---------------------------------------------------------------------------
+ *                             NET SHELL CONFIGURATION
+ *---------------------------------------------------------------------------*/
+#define BOOL_TO_TEXT(b) ((b) ? "YES" : "NO")
+
+/***************************************************/
+static int cmd_demo_info(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    printk("\nZephyr S2OPC client demo status\n");
+    printk("Server endpoint       : %s\n", epURL);
+    printk("Client toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+    printk("Client configured     : %s\n", BOOL_TO_TEXT(gConfigurationId > 0));
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_configure(const struct shell *shell, size_t argc,
+        char **argv)
+{
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,
         .security_mode = OpcUa_MessageSecurityMode_None,
@@ -216,43 +255,74 @@ int main(int argc, char* const argv[])
         .password = NULL,
     }; // TODO !! no FS
 
-    const char* endpoint_url = CONFIG_SOPC_ENDPOINT_ADDRESS;
+    if (gConfigurationId > 0)
+    {
+        printk("\nClient already configured!\n");
+        return 0;
+    }
+
+    if (argc > 1)
+    {
+        epURL = argv[1];
+    }
+    SOPC_ASSERT(epURL != NULL);
 
     /* connect to the endpoint */
-    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(endpoint_url, &security, NULL);
-    if (configurationId <= 0)
+    gConfigurationId = SOPC_ClientHelper_CreateConfiguration(epURL, &security, NULL);
+    if (gConfigurationId <= 0)
     {
-        printk("SOPC_ClientHelper_CreateConfiguration failed with code %d\r\n", configurationId);
+        printk("\nSOPC_ClientHelper_CreateConfiguration failed with code %d\r\n", gConfigurationId);
     }
     else
     {
-        int32_t connectionId;
-
-        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
-
-        if (connectionId <= 0)
-        {
-            printk("SOPC_ClientHelper_CreateConnection failed with code %d\r\n", connectionId);
-        }
-        else
-        {
-            printk("SOPC_ClientHelper_CreateConnection OK. Id= %d\r\n", connectionId);
-            client_tester(connectionId);
-
-            if (connectionId > 0)
-            {
-                int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
-                res = res != 0 ? res : discoRes;
-            }
-        }
+        printk("\nCreated connection to %s\n", epURL);
     }
-
-
-    printk("TEST ended\r\n");
-    printk("==========\r\n");
-
-    /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
     return 0;
 }
 
+/***************************************************/
+static int cmd_demo_connect(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    int32_t connectionId = SOPC_ClientHelper_CreateConnection(gConfigurationId);
+
+    if (connectionId <= 0)
+    {
+        printk("\nSOPC_ClientHelper_CreateConnection failed with code %d\r\n", connectionId);
+    }
+    else
+    {
+        client_tester(connectionId);
+        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        if (discoRes != 0)
+        {
+            printk("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", discoRes);
+        }
+    }
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_kill(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    stopSignal = 1;
+
+    return 0;
+}
+/* Creating subcommands (level 1 command) array for command "demo". */
+SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
+        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+        SHELL_CMD(conf, NULL, "Configure client [<endpoint>]", cmd_demo_configure),
+        SHELL_CMD(conn, NULL, "Connect client", cmd_demo_connect),
+        SHELL_CMD(kill, NULL, "Quit", cmd_demo_kill),
+        SHELL_SUBCMD_SET_END
+);
+
+/* Creating root (level 0) command "demo" */
+SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

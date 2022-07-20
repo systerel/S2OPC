@@ -19,8 +19,11 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -28,6 +31,7 @@
 
 #include "cache.h"
 
+#define SAFE_STRING(s) ((NULL == (s)) ? "<NULL>" : (s))
 /**
  * The cache is a simple dictionnary { SOPC_NodeId* : SOPC_DataValue*}
  * The elements and keys are not referenced anywhere else, thus references must be cleared
@@ -75,57 +79,76 @@ static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
     return result;
 }
 
-static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* variant)
+bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const char* value)
 {
-    SOPC_ASSERT(NULL != variant);
+    SOPC_ASSERT(NULL != variant && NULL != value);
+
+    bool result = true;
+    int64_t iValue;
+    if (value[0] == 0)
+    {
+        iValue = 0;
+    }
+    else if (SOPC_strncmp_ignore_case(value, "0x", 2) == 0)
+    {
+        iValue = (int64_t) strtoll(value+2, NULL, 0x10);
+    }
+    else
+    {
+        iValue = (int64_t) strtoll(value, NULL, 10);
+    }
+    const float fValue = atof(value);
+
     switch (type)
     {
     case SOPC_Null_Id:
+        result = false;
         break;
     case SOPC_Boolean_Id:
-        variant->Boolean = false;
+        variant->Boolean = (SOPC_Boolean)iValue;
         break;
     case SOPC_SByte_Id:
-        variant->Sbyte = 0;
+        variant->Sbyte = (SOPC_SByte)iValue;
         break;
     case SOPC_Byte_Id:
-        variant->Byte = 0;
+        variant->Byte = (SOPC_Byte)iValue;
         break;
     case SOPC_Int16_Id:
-        variant->Int16 = 0;
+        variant->Int16 = (int16_t)iValue;
         break;
     case SOPC_UInt16_Id:
-        variant->Uint16 = 0;
+        variant->Uint16 = (uint16_t)iValue;
         break;
     case SOPC_Int32_Id:
-        variant->Int32 = 0;
+        variant->Int32 = (int32_t)iValue;
         break;
     case SOPC_UInt32_Id:
-        variant->Uint32 = 0;
+        variant->Uint32 = (uint32_t)iValue;
         break;
     case SOPC_Int64_Id:
-        variant->Int64 = 0;
+        variant->Int64 = (int64_t)iValue;
         break;
     case SOPC_UInt64_Id:
-        variant->Uint64 = 0;
+        variant->Uint64 = (uint64_t)iValue;
         break;
     case SOPC_Float_Id:
-        variant->Floatv = 0.f;
+        variant->Floatv = (float)fValue;
         break;
     case SOPC_Double_Id:
-        variant->Doublev = 0.;
+        variant->Doublev = (double)fValue;
         break;
     case SOPC_String_Id:
-        SOPC_String_Initialize(&variant->String);
+        SOPC_String_InitializeFromCString(&variant->String, value);
         break;
     case SOPC_DateTime_Id:
         variant->Date = SOPC_Time_GetCurrentTimeUTC();
         break;
     case SOPC_ByteString_Id:
-        SOPC_ByteString_Initialize(&variant->Bstring);
+        SOPC_ByteString_InitializeFixedSize(&variant->Bstring, strlen(value));
+        SOPC_ByteString_CopyFromBytes(&variant->Bstring, value, strlen(value));
         break;
     case SOPC_StatusCode_Id:
-        variant->Status = SOPC_GoodGenericStatus;
+        variant->Status = (SOPC_StatusCode)iValue;
         break;
     case SOPC_Guid_Id:
     case SOPC_XmlElement_Id:
@@ -138,9 +161,11 @@ static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* varian
     case SOPC_DiagnosticInfo_Id:
     case SOPC_Variant_Id:
     default:
-        SOPC_ASSERT(false && "Cannot create default empty value for complex types");
+        result = false;
         break;
     }
+
+    return result;
 }
 
 /* Create a new datavalue with a default false/0/now/empty value of given scalar built-in type */
@@ -162,7 +187,7 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArra
     switch (arrayType)
     {
     case SOPC_VariantArrayType_SingleValue:
-        initializeSingleValue(type, &var->Value);
+        Cache_UpdateVariant(type, &var->Value, "");
         break;
 
     case SOPC_VariantArrayType_Array:
@@ -457,18 +482,18 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
     char* nidStr = SOPC_NodeId_ToCString(nid);
     SOPC_ASSERT(NULL != nid && NULL != nidStr);
 
-    printk("- %.25s", nidStr);
+    printf("- %.25s", nidStr);
 
     if (NULL != dv)
     {
         static char status[22];
         if (dv->Status & SOPC_BadStatusMask)
         {
-            sprintf(status, "BAD 0x%08X", dv->Status);
+            sprintf(status, "BAD 0x%08" PRIX32, dv->Status);
         }
         else if (dv->Status & SOPC_UncertainStatusMask)
         {
-            sprintf(status, "UNCERTAIN 0x%08X", dv->Status);
+            sprintf(status, "UNCERTAIN 0x%08" PRIX32, dv->Status);
         }
         else
         {
@@ -487,7 +512,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
         case SOPC_VariantArrayType_SingleValue:
             break;
         }
-        printk(" ; Status = %s%s", status, type);
+        printf(" ; Status = %s%s", status, type);
         if (type[0] == 0)
         {
             static const char* typeName[] = {
@@ -499,57 +524,60 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
 
             const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
             SOPC_ASSERT(typeId <= SOPC_DiagnosticInfo_Id);
-            printk(" ; Type=%.12s ; Val = ", typeName[typeId]);
+            printf(" ; Type=%.12s ; Val = ", typeName[typeId]);
 
             switch (typeId)
             {
             case SOPC_Boolean_Id:
-                printk("%d", (int) dv->Value.Value.Boolean);
+                printf("%" PRId32, (int32_t) dv->Value.Value.Boolean);
                 break;
             case SOPC_SByte_Id:
-                printk("%d", (int) dv->Value.Value.Sbyte);
+                printf("%" PRId32, (uint32_t) dv->Value.Value.Sbyte);
                 break;
             case SOPC_Byte_Id:
-                printk("%d", (int) dv->Value.Value.Byte);
+                printf("%" PRId32, (int32_t) dv->Value.Value.Byte);
                 break;
             case SOPC_UInt16_Id:
-                printk("%d", (int) dv->Value.Value.Uint16);
+                printf("%" PRIu16, dv->Value.Value.Uint16);
                 break;
             case SOPC_Int16_Id:
-                printk("%d", (int) dv->Value.Value.Int16);
+                printf("%" PRId16, dv->Value.Value.Int16);
                 break;
             case SOPC_Int32_Id:
-                printk("%d", (int) dv->Value.Value.Int32);
+                printf("%" PRId32, dv->Value.Value.Int32);
                 break;
             case SOPC_UInt32_Id:
-                printk("%lu", (unsigned long) dv->Value.Value.Uint32);
+                printf("%" PRIu32,  dv->Value.Value.Uint32);
                 break;
             case SOPC_Int64_Id:
-                printk("%lld", (long long) dv->Value.Value.Int64);
+                printf("%" PRId64, dv->Value.Value.Int64);
                 break;
             case SOPC_UInt64_Id:
-                printk("%llu", (unsigned long long) dv->Value.Value.Uint64);
+                printf("%" PRIu64, dv->Value.Value.Uint64);
                 break;
             case SOPC_Float_Id:
-                printk("%f", dv->Value.Value.Floatv);
+                printf("%f", dv->Value.Value.Floatv);
                 break;
             case SOPC_Double_Id:
-                printk("%f", (float) dv->Value.Value.Doublev);
+                printf("%f", (float) dv->Value.Value.Doublev);
                 break;
             case SOPC_String_Id:
-                printk("<%s>", SOPC_String_GetRawCString(&dv->Value.Value.String));
+                printf("<%s>", SAFE_STRING(SOPC_String_GetRawCString(&dv->Value.Value.String)));
+                break;
+            case SOPC_StatusCode_Id:
+                printf("0x%08" PRIX32, dv->Value.Value.Status);
                 break;
             default:
-                printk("(...)");
+                printf("(...)");
                 break;
             }
         }
     }
     else
     {
-        printk("<no value>");
+        printf("<no value>");
     }
-    printk("\n");
+    printf("\n");
 
     SOPC_Free(nidStr);
 }

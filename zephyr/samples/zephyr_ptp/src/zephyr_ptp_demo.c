@@ -38,6 +38,7 @@
 #include <console/console.h>
 #include <sys/reboot.h>
 #include <drivers/hwinfo.h>
+#include <shell/shell.h>
 
 #include "sopc_macros.h"
 #include "sopc_mutexes.h"
@@ -46,13 +47,18 @@
 #include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_version.h"
 
 #include "sopc_zephyr_time.h"
 #include "sopc_udp_sockets.h"
 
 #include <net/net_core.h>
+
+// Note: spaces required because the order is mandatory for dependancies
 #include <net/gptp.h>
+
 #include "ethernet/gptp/gptp_messages.h"
+
 #include "ethernet/gptp/gptp_data_set.h"
 
 #include "network_init.h"
@@ -67,6 +73,14 @@
 
 #ifndef CONFIG_NET_L2_ETHERNET
 #error 'CONFIG_NET_L2_ETHERNET is required for this demo'
+#endif
+
+// use USE_ASYNCH_PRINTF to ensure that no print operation is executed during measurements tests.
+#define USE_ASYNCH_PRINTF 1
+#if USE_ASYNCH_PRINTF
+static void synch_printf(const char* format, ...);
+#else
+#define synch_printf printf
 #endif
 
 static int gSubTestId = 0;
@@ -94,17 +108,19 @@ typedef struct
     const char*  ipAddr;
     const char*  deviceName;
 } DeviceIdentifier;
-static const DeviceIdentifier gDevices[]=
-{
-        // Note: Example to be adapted for each device/configuration!
-        {"624248Q", "192.168.42.111", "N.144/A"},
-        {"652248Q", "192.168.42.112", "N.144/B"},
+
+static const DeviceIdentifier gDevices[] = {
+    // Note: Example to be adapted for each device/configuration!
+    {"624248Q", "192.168.42.111", "N.144/A"},
+    {"652248Q", "192.168.42.112", "N.144/B"},
+    // Last element will match all devices (default)
+    {"", "192.168.42.110", "Unknown device"},
 };
 
 
 /***************************************************/
 /***************************************************/
-static void synch_printf(const char* format, ...);
+
 static const char* getDefaultIp(void);
 static const DeviceIdentifier* getDevice(void);
 static const char* DateToTimeString(const SOPC_DateTime dt);
@@ -191,31 +207,6 @@ static void net_send(void)
     }
 }
 
-/***************************************************/
-static void net_set(bool up)
-{
-    struct net_if* ptrNetIf = NULL;
-
-    ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));
-    SOPC_ASSERT(NULL != ptrNetIf);
-    int res = 0;
-
-    if (up)
-    {
-        synch_printf("Starting interface (%s)\n", ptrNetIf->if_dev->dev->name);
-        res = net_if_up(ptrNetIf);
-    }
-    else
-    {
-        synch_printf("Stopping interface (%s)\n", ptrNetIf->if_dev->dev->name);
-        res = net_if_down(ptrNetIf);
-    }
-    if (res != 0)
-    {
-        synch_printf(".. FAILED (%d)!\n", res);
-    }
-}
-
 static const char* DateToTimeString(const SOPC_DateTime dt)
 {
     static char dateOnce [60];
@@ -238,6 +229,7 @@ static const char* DateToTimeString(const SOPC_DateTime dt)
     return dateOnce;
 }
 
+#if USE_ASYNCH_PRINTF
 static SOPC_AsyncQueue* printQueue;
 
 static void* print_thread(void* context)
@@ -265,6 +257,7 @@ static void synch_printf(const char* format, ...)
     va_end(args);
     SOPC_AsyncQueue_BlockingEnqueue(printQueue, (void**)buffer);
 }
+#endif
 
 static void test_print_DateTime(void)
 {
@@ -288,7 +281,8 @@ static void test_infos(void)
     const int clockPrec = (int)(10000 * (SOPC_RealTime_GetClockPrecision()));
     synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec /100, abs(clockPrec %100));
 
-    synch_printf("- IP ADDR = %s\n", getDefaultIp());
+    const char* const ip = getDefaultIp();
+    synch_printf("- IP ADDR = %s\n", (ip != NULL ? ip : "<NULL>"));
     const DeviceIdentifier* dev = getDevice();
     if (NULL != dev)
     {
@@ -299,24 +293,6 @@ static void test_infos(void)
                 gLastGmId[0], gLastGmId[1], gLastGmId[2], gLastGmId[3],
                 gLastGmId[4], gLastGmId[5], gLastGmId[6], gLastGmId[7]);
     }
-}
-
-static void test_help(void)
-{
-    synch_printf("\nZephyr PtP demo running\n\n");
-    synch_printf("Enter command:\n");
-    synch_printf(" - 'h' show help\n");
-    synch_printf(" - 'i' show infos\n");
-    synch_printf(" - 'd' print datetime\n");
-    synch_printf(" - 's' to start 'SLEEP' test\n");
-    synch_printf(" - 'o[msPeriod] [ms offset=25]' to start 'SLEEP_UNTIL/Offset' test\n");
-    synch_printf(" - 'u' to start 'SLEEP_UNTIL' test\n");
-    synch_printf(" - 'c' to start 'CHRONOMETER' test\n");
-    synch_printf(" - 'w' to wait for PtP synchro\n");
-    synch_printf(" - 'r' to reboot\n");
-    synch_printf(" - '+' to set ETH UP\n");
-    synch_printf(" - '-' to set ETH DOWN\n");
-    synch_printf(" - ' ' to stop current test\n");
 }
 
 static void* test_thread(void* context)
@@ -515,7 +491,7 @@ static const DeviceIdentifier* getDevice(void)
         const ssize_t len = hwinfo_get_device_id(buffer, sizeof(buffer) - 1);
         if (len > 0)
         {
-            for (size_t i = 0 ; i < sizeof(gDevices)/sizeof(*gDevices) ; i++)
+            for (size_t i = 0; result == NULL && i < sizeof(gDevices) / sizeof(*gDevices); i++)
             {
                 const DeviceIdentifier* dev = &gDevices[i];
                 SOPC_ASSERT(NULL != dev->serialNumber);
@@ -530,6 +506,28 @@ static const DeviceIdentifier* getDevice(void)
                     result = dev;
                 }
             }
+        }
+        if (NULL == result)
+        {
+            printf("Unidentified device : [");
+            for (size_t i = 0 ; i < len ; i++)
+            {
+                const uint8_t c = buffer[i];
+                if (c =='\\')
+                {
+                    printf("\\");
+                }
+                if (c >= 0x20 && c < 0x7F)
+                {
+                    // Displayable char
+                    printf("%c", (char) c);
+                }
+                else
+                {
+                    printf("\\x%02X", (int) c);
+                }
+            }
+            printf("]\n");
         }
     }
     return result;
@@ -553,102 +551,137 @@ void main(void)
 	static struct gptp_phase_dis_cb phase_dis;
 	gptp_register_phase_dis_cb(&phase_dis, gptp_phase_dis_cb);
 
-	SOPC_ReturnStatus result = SOPC_AsyncQueue_Init(&printQueue, "PRINT");
-	SOPC_ASSERT(SOPC_STATUS_OK == result);
-
-    console_getline_init();
     Thread thread = P_THREAD_Create(&test_thread, NULL, "demo", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
-    Thread threadPrint = P_THREAD_Create(&print_thread, NULL, "print", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
-
     SOPC_ASSERT(thread != NULL);
+
+#if USE_ASYNCH_PRINTF
+    SOPC_ReturnStatus result = SOPC_AsyncQueue_Init(&printQueue, "PRINT");
+    SOPC_ASSERT(SOPC_STATUS_OK == result);
+
+    Thread threadPrint = P_THREAD_Create(&print_thread, NULL, "print", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
     SOPC_ASSERT(threadPrint != NULL);
-
-    printk("Type 'h' for help\n");
-
-	for (;;)
-	{
-	    char * datetime = SOPC_Time_GetStringOfCurrentTimeUTC(false);
-        synch_printf("\n[%s]>", datetime);
-	    SOPC_Free(datetime);
-
-        const char* line = console_getline();
-
-        Mutex_Lock(&gMutex);
-        if (NULL == line)
-        {
-            printk("\n Serial read failed\n");
-            SOPC_ASSERT(false);
-        }
-        else if (line[0] < ' ') // Empty or invalid line : stop tests
-        {
-            gSubTestId  = 0;
-            gTestId = 0;
-        }
-        else if (line[0] == 's') // Sleep test
-        {
-            gSubTestId  = 0;
-            gTestId = 1;
-        }
-        else if (line[0] == 'u') // Sleep until test
-        {
-            gSubTestId  = 0;
-            gTestId = 2;
-        }
-        else if (line[0] == '+') // Sleep until test
-        {
-            net_set(1);
-        }
-        else if (line[0] == '-') // Sleep until test
-        {
-            net_set(0);
-        }
-        else if (line[0] == 'h')
-        {
-            test_help();
-        }
-        else if (line[0] == 'i')
-        {
-            test_infos();
-        }
-        else if (line[0] == 'w')
-        {
-            gSubTestId  = 0;
-            gTestId = 5;
-        }
-        else if (line[0] == 'o') // Sleep until test
-        {
-            gSubTestId  = 0;
-            gTestId = 4;
-            char* param2S = NULL;
-            gParamI1 = 200;
-            gParamI2 = 20;
-            if (line[1] > 0)
-            {
-                gParamI1 = strtol(line + 1, &param2S, 10);
-                if (param2S != NULL && param2S[0] != 0)
-                {
-                    gParamI2 = strtol(param2S, NULL, 10);
-                }
-            }
-        }
-        else if (line[0] == 'c') // Chronometer start
-        {
-            gSubTestId = 0;
-            gTestId = 3;
-        }
-        else if (line[0] == 'd') // Date
-        {
-            test_print_DateTime();
-        }
-        else if (line[0] == 'r')
-        {
-            sys_reboot(SYS_REBOOT_COLD);
-        }
-        else
-        {
-            printk("\n[EE] Invalid command ; <%s>\n", line);
-        }
-
-        Mutex_Unlock(&gMutex);
-	}
+#endif
 }
+
+/***************************************************/
+static int cmd_demo_info(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    synch_printf("\nZephyr S2OPC PTP demo\n");
+    synch_printf("Server toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+    test_infos();
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_sleep(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    gSubTestId  = 0;
+    gTestId = 1;
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_stop(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    gSubTestId  = 0;
+    gTestId = 0;
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_sleep_until(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    gSubTestId  = 0;
+    gTestId = 2;
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_wait(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    gSubTestId  = 0;
+    gTestId = 5;
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_chrono(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    gSubTestId  = 0;
+    gTestId = 3;
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_date(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    test_print_DateTime();
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_reboot(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    sys_reboot(SYS_REBOOT_COLD);
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_offset(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    const char* param1 = (argc < 2 ? "200" : argv[1]);
+    const char* param2 = (argc < 3 ? "20" : argv[2]);
+
+    gSubTestId  = 0;
+    gTestId = 4;
+    gParamI1 = strtol(param1, NULL, 10);
+    gParamI2 = strtol(param2, NULL, 10);
+
+    return 0;
+}
+
+/* Creating subcommands (level 1 command) array for command "demo". */
+SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
+        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+        SHELL_CMD(stop, NULL, "Stop current test", cmd_demo_stop),
+        SHELL_CMD(sleep, NULL, "Sleep test", cmd_demo_sleep),
+        SHELL_CMD(until, NULL, "Sleep until test", cmd_demo_sleep_until),
+        SHELL_CMD(wait, NULL, "Wait for TPP synchro", cmd_demo_wait),
+        SHELL_CMD(offset, NULL, "Time offset test", cmd_demo_offset),
+        SHELL_CMD(chrono, NULL, "Chronometer test", cmd_demo_chrono),
+        SHELL_CMD(date, NULL, "Print date", cmd_demo_date),
+        SHELL_CMD(reboot, NULL, "Reboot target", cmd_demo_reboot),
+            SHELL_SUBCMD_SET_END
+);
+
+/* Creating root (level 0) command "demo" */
+SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

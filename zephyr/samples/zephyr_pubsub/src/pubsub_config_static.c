@@ -39,40 +39,17 @@
 #error "CONFIG_SOPC_SUBSCRIBER_ADDRESS is not defined!"
 #endif
 
-#if 0
-    This file provides a software-generated Pub-Sub configuration corresponding to the
-    following XMl configuration:
+#define PUBSUB_VAR_STRING "ns=1;s=aString"
+#define PUBSUB_VAR_BYTE "ns=1;s=aByte"
+#define PUBSUB_VAR_UINT32 "ns=1;s=aUINT32"
+#define PUBSUB_VAR_INT16 "ns=1;s=aINT16"
+#define PUBSUB_VAR_BOOL "ns=1;s=aBOOL"
+#define PUBSUB_VAR_STATUS "ns=1;s=aStatusCode"
+#define NB_PUBSUB_VARS 6
 
-
-    <PubSub publisherId="42" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
-        <!-- one to many -->
-        <connection address="opc.udp://232.1.2.100:4840" mode="publisher">
-            <!-- one to many -->
-            <message id="20" version="1" publishingInterval="100." securityMode="signAndEncrypt">
-              <!-- one to many -->
-                <variable nodeId="ns=1;s=PubVarLoops" displayName="SubVarLoops" dataType="UInt32"/>
-                <variable nodeId="ns=1;s=PubVarUpTime" displayName="SubVarUpTime" dataType="UInt32"/>
-                <variable nodeId="ns=1;s=PubVarFill64" displayName="PubVarFill64" dataType="UInt64"/>
-                <!-- the nodeId is used to retrieve the variable in the adresse space -->
-            </message>
-        </connection>
-        <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-            <!-- one to many -->
-            <message id="14" version="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
-                <!-- one to many -->
-                <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
-                <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>
-                <!-- the nodeId is used to retrieve the variable in the adresse space -->
-            </message>
-            <message id="15" version="1" publishingInterval="1000." publisherId="42">
-                <!-- one to many -->
-                <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
-                <variable nodeId="ns=1;s=SubUInt" displayName="varUInt" dataType="UInt64"/>
-            </message>
-        </connection>
-    </PubSub>
-
-#endif
+#define PUBLISHER_ID 42
+#define MESSAGE_ID 20
+#define MESSAGE_VERSION 1
 
 static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection* connection,
                                                              uint16_t index,
@@ -188,7 +165,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         // Set publisher id and address
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
-        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
+        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, PUBLISHER_ID);
         alloc = SOPC_PubSubConnection_Set_Address(connection, CONFIG_SOPC_PUBLISHER_ADDRESS);
     }
 
@@ -204,14 +181,16 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 1);
     }
 
-    /*** Pub Message 20 ***/
+    /*** Pub Message ***/
 
     SOPC_DataSetWriter* writer = NULL;
     if (alloc)
     {
         // TODO : None or Sign&Encrypt
-        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 20, 1, CONFIG_SOPC_PUBLISHER_PERIOD_US/1000, SOPC_SecurityMode_None
-                                                   //                    SOPC_SecurityMode_SignAndEncrypt
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, MESSAGE_ID, MESSAGE_VERSION,
+                                                   CONFIG_SOPC_PUBLISHER_PERIOD_US/1000,
+                                                   SOPC_SecurityMode_None
+                                                   // SOPC_SecurityMode_SignAndEncrypt
         );
         alloc = NULL != writer;
     }
@@ -219,14 +198,17 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_PublishedDataSet* dataset = NULL;
     if (alloc)
     {
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 3);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, NB_PUBSUB_VARS);
         alloc = NULL != dataset;
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, SERVER_STATUS_PUB_VAR_LOOP, SOPC_UInt32_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, SERVER_CMD_PUBSUB_PERIOD_MS, SOPC_UInt32_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=1;s=PubVarFill64", SOPC_UInt64_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, PUBSUB_VAR_STRING, SOPC_String_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, PUBSUB_VAR_UINT32, SOPC_UInt32_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, PUBSUB_VAR_INT16, SOPC_Int16_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, PUBSUB_VAR_BOOL, SOPC_Boolean_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, PUBSUB_VAR_STATUS, SOPC_StatusCode_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, PUBSUB_VAR_BYTE, SOPC_Byte_Id);
     }
 
     /* 1 connection Sub */
@@ -243,49 +225,35 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        // 2 sub messages
-        alloc = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, 2);
+        // 1 sub message
+        alloc = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, 1);
     }
 
     SOPC_DataSetReader* reader = NULL;
-    /*** Sub Message 21 ***/
+    /*** Sub Message ***/
 
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, 42, 21, 1, 1000, SOPC_SecurityMode_None);
-        alloc = NULL != reader;
-    }
-
-    if (alloc)
-    {
-        alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, 4);
-    }
-    if (alloc)
-    {
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 0, "ns=1;s=SubVarResult", SOPC_Byte_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 1, "ns=1;s=SubVarInfo", SOPC_String_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 2, "ns=1;s=SubVarLoops", SOPC_UInt32_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 3, "ns=1;s=SubVarUpTime", SOPC_UInt32_Id);
-    }
-
-    /*** Sub Message 15 ***/
-
-    if (alloc)
-    {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, 42, 15, 1, CONFIG_SOPC_SUBSCRIBER_PERIOD_US / 1000,
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID,
+                                                   MESSAGE_VERSION, 1000,
                                                    SOPC_SecurityMode_None);
         alloc = NULL != reader;
     }
 
     if (alloc)
     {
-        alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, 2);
+        alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, NB_PUBSUB_VARS);
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 0, "ns=1;s=SubInt", SOPC_Int64_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 1, "ns=1;s=SubUInt", SOPC_UInt64_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 0, PUBSUB_VAR_STRING, SOPC_String_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 1, PUBSUB_VAR_UINT32, SOPC_UInt32_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 2, PUBSUB_VAR_INT16, SOPC_Int16_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 3, PUBSUB_VAR_BOOL, SOPC_Boolean_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 4, PUBSUB_VAR_STATUS, SOPC_StatusCode_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 5, PUBSUB_VAR_BYTE, SOPC_Byte_Id);
     }
+
 
     if (!alloc)
     {

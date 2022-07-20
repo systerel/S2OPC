@@ -21,6 +21,7 @@
 #include <kernel.h>
 #include <limits.h>
 #include <signal.h>
+#include <shell/shell.h>
 
 #include <stdlib.h>
 
@@ -28,6 +29,8 @@
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_common.h"
+#include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_sub_scheduler.h"
@@ -40,6 +43,12 @@
 #include "pubsub_config_static.h"
 #include "static_security_data.h"
 #include "threading_alt.h"
+
+static SOPC_PubSubConfiguration* pPubSubConfig = NULL;
+static SOPC_SubTargetVariableConfig* pTargetConfig = NULL;
+static SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
+static bool gPubStarted = false;
+static bool gSubStarted = false;
 
 volatile int stopSignal = 0;
 static void signal_stop_server(int sig)
@@ -84,6 +93,8 @@ static void log_UserCallback(const char* context, const char* text)
 /***************************************************/
 int main(int argc, char* const argv[])
 {
+    printk("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
+
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
     signal(SIGTERM, signal_stop_server);
@@ -101,9 +112,10 @@ int main(int argc, char* const argv[])
     tls_threading_initialize();
 
     /* Initialize S2OPC Server */
-    const SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
-                                           .logSystem = SOPC_LOG_SYSTEM_USER,
-                                           .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
+    const SOPC_Log_Configuration logCfg = {
+            .logLevel = SOPC_LOG_LEVEL_WARNING,
+            .logSystem = SOPC_LOG_SYSTEM_USER,
+            .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logCfg);
 
@@ -113,14 +125,13 @@ int main(int argc, char* const argv[])
     }
 
     // CONFIGURE PUBSUB
-    SOPC_PubSubConfiguration* pPubSubConfig = SOPC_PubSubConfig_GetStatic();
+    pPubSubConfig = SOPC_PubSubConfig_GetStatic();
     if (NULL == pPubSubConfig)
     {
         return SOPC_STATUS_NOK;
     }
 
     /* Sub target configuration */
-    SOPC_SubTargetVariableConfig* pTargetConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
         pTargetConfig = SOPC_SubTargetVariableConfig_Create(&Cache_SetTargetVariables);
@@ -132,7 +143,6 @@ int main(int argc, char* const argv[])
     }
 
     /* Pub target configuration */
-    SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
         pSourceConfig = SOPC_PubSourceVariableConfig_Create(&Cache_GetSourceVariables);
@@ -153,16 +163,6 @@ int main(int argc, char* const argv[])
         Cache_Initialize(pPubSubConfig);
     }
 
-
-    // Start Pub sub
-    bool bResult;
-    bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
-    SOPC_ASSERT(bResult);
-    bResult = SOPC_PubScheduler_Start(pPubSubConfig, pSourceConfig, CONFIG_SOPC_PUBLISHER_PRIORITY);
-    SOPC_ASSERT(bResult);
-
-    printk("\r\nDemo (PubSub + Server) started\r\n");
-
     while (!stopSignal)
     {
         k_sleep(K_MSEC(50));
@@ -179,3 +179,223 @@ int main(int argc, char* const argv[])
     return 0;
 }
 
+/*---------------------------------------------------------------------------
+ *                             NET SHELL CONFIGURATION
+ *---------------------------------------------------------------------------*/
+/***************************************************/
+static int cmd_demo_info(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+
+    printk("\nZephyr S2OPC PubSub demo status\n");
+    printk("Server toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+    if (pPubSubConfig != NULL)
+    {
+        uint32_t nbConn = SOPC_PubSubConfiguration_Nb_PubConnection(pPubSubConfig);
+        printk("Pub connections: %d\n", nbConn);
+        for (uint32_t iConn = 0 ; iConn < nbConn ; iConn ++)
+        {
+            SOPC_PubSubConnection* connx = SOPC_PubSubConfiguration_Get_PubConnection_At(pPubSubConfig, iConn);
+            printk("  - RUNNING=%d\n", gPubStarted);
+            printk("  - ADDR :%s\n", SOPC_PubSubConnection_Get_Address(connx));
+        }
+
+        nbConn = SOPC_PubSubConfiguration_Nb_SubConnection(pPubSubConfig);
+        printk("Sub connections: %d\n", nbConn);
+        for (uint32_t iConn = 0 ; iConn < nbConn ; iConn ++)
+        {
+            SOPC_PubSubConnection* connx = SOPC_PubSubConfiguration_Get_SubConnection_At(pPubSubConfig, iConn);
+            connx = SOPC_PubSubConfiguration_Get_PubConnection_At(pPubSubConfig, 0);
+            printk("  - RUNNING=%d\n", gSubStarted);
+            printk("  - ADDR :%s\n", SOPC_PubSubConnection_Get_Address(connx));
+        }
+    }
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_log(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    const char* param = (argc < 2 ? "" : argv[1]);
+    if (0 == SOPC_strcmp_ignore_case(param, "debug"))
+    {
+        SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
+    }
+    else if (0 == SOPC_strcmp_ignore_case(param, "info"))
+    {
+        SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+    }
+    else if (0 == SOPC_strcmp_ignore_case(param, "warning"))
+    {
+        SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_WARNING);
+    }
+    else if (0 == SOPC_strcmp_ignore_case(param, "error"))
+    {
+        SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_ERROR);
+    }
+    else
+    {
+        printk("\n Invalid log level (debug/info/warning/error).\n");
+    }
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_set(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const char* param1 = (argc < 3 ? "" : argv[1]);
+    const char* param2 = (argc < 3 ? "" : argv[2]);
+
+    SOPC_NodeId nid;
+    status = SOPC_NodeId_InitializeFromCString(&nid, param1, strlen(param1));
+    if (SOPC_STATUS_OK == status && param2[0] != 0)
+    {
+        bool result = false;
+        Cache_Lock();
+        SOPC_DataValue* dv = Cache_Get(&nid);
+        if (NULL != dv)
+        {
+            result = Cache_UpdateVariant(dv->Value.BuiltInTypeId, &dv->Value.Value, param2);
+        }
+        Cache_Unlock();
+
+        if (result)
+        {
+            printk("\n..OK!\n");
+        }
+        else
+        {
+            printk("\nUpdate failed.\n");
+        }
+    }
+    else
+    {
+        printk("\n Invalid parameters.");
+    }
+    SOPC_NodeId_Clear(&nid);
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_print(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const char* param = (argc < 2 ? NULL : argv[1]);
+
+    if (param == NULL)
+    {
+        printk("\nDump full cache:\n");
+        Cache_Dump();
+    }
+    else
+    {
+        SOPC_NodeId nid;
+        status = SOPC_NodeId_InitializeFromCString(&nid, param, strlen(param));
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_DataValue dvc;
+            SOPC_DataValue_Initialize(&dvc);
+
+            // Only copy DV during Cache_Lock , to avoid too long Cache blocking
+            Cache_Lock();
+            SOPC_DataValue* dv = Cache_Get(&nid);
+            if (NULL != dv)
+            {
+                status = SOPC_DataValue_Copy(&dvc, dv);
+            }
+            Cache_Unlock();
+
+            // Now process with copy
+            if (status == SOPC_STATUS_OK)
+            {
+                Cache_Dump_VarValue(&nid, &dvc);
+            }
+
+            SOPC_DataValue_Clear(&dvc);
+        }
+        else
+        {
+            printk("\n Invalid node id.\n");
+        }
+        SOPC_NodeId_Clear(&nid);
+    }
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_start(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    const char* param = (argc < 2 ? "" : argv[1]);
+
+    if (0 == strcmp(param, "pub"))
+    {
+        // start pub
+        bool bResult;
+        bResult = SOPC_PubScheduler_Start(pPubSubConfig, pSourceConfig, CONFIG_SOPC_PUBLISHER_PRIORITY);
+        if (!bResult)
+        {
+            printk("\r\nFailed to start Publisher!\r\n");
+        }
+        else
+        {
+            gPubStarted = true;
+            printk("\r\nPublisher started\r\n");
+        }
+    }
+    else if (0 == strcmp(param, "sub"))
+    {
+        // start sub
+        bool bResult;
+        bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
+        if (!bResult)
+        {
+            printk("\r\nFailed to start Subscriber!\r\n");
+        }
+        else
+        {
+            gSubStarted = true;
+            printk("\r\nSubscriber started\r\n");
+        }
+    }
+    else
+    {
+        printk("usage: %s [pub|sub]\n", argv[0]);
+    }
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_kill(const struct shell *shell, size_t argc,
+        char **argv)
+{
+    ARG_UNUSED(argc);
+    ARG_UNUSED(argv);
+    stopSignal = 1;
+
+    return 0;
+}
+
+/* Creating subcommands (level 1 command) array for command "demo". */
+SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
+        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+        SHELL_CMD(start, NULL, "Start [pub|sub]", cmd_demo_start),
+        SHELL_CMD(print, NULL, "Print content of  <NodeId>", cmd_demo_print),
+        SHELL_CMD(set, NULL, "Set content of  <NodeId>", cmd_demo_set),
+        SHELL_CMD(log, NULL, "Set log level", cmd_demo_log),
+        SHELL_CMD(kill, NULL, "Kill demo", cmd_demo_kill),
+                SHELL_SUBCMD_SET_END
+);
+
+/* Creating root (level 0) command "demo" */
+SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);
