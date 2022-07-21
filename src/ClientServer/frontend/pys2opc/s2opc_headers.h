@@ -79,7 +79,7 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
                                                            SOPC_Buffer* msgBuffer,
                                                            uint32_t nestedStructLevel);
-typedef struct SOPC_EncodeableType
+typedef struct SOPC_EncodeableType_Struct
 {
     char* TypeName;
     uint32_t TypeId;

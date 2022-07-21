@@ -93,34 +93,23 @@ typedef struct SOPC_EncodeableType_FieldDescriptor
 /**
  *  \brief Encodeable object type structure definition. It provides all the services
  *  functions associated with the encodeable object for encoding needs.
- *  In case of C++, the struct name is mangled to avoid conflict issues with "const" keyword
  */
-#ifdef __cplusplus
-extern "C"
+typedef const struct SOPC_EncodeableType_Struct
 {
-#define SOPC_CPP_STRUCT_MANGLE(x) x##_Struct
-#else
-#define SOPC_CPP_STRUCT_MANGLE(x) x
-#endif
-    typedef const struct SOPC_CPP_STRUCT_MANGLE(SOPC_EncodeableType)
-    {
-        char* TypeName;
-        uint32_t TypeId;
-        uint32_t BinaryEncodingTypeId;
-        uint32_t XmlEncodingTypeId;
-        char* NamespaceUri;
-        size_t AllocationSize;
-        SOPC_EncodeableObject_PfnInitialize* Initialize;
-        SOPC_EncodeableObject_PfnClear* Clear;
-        SOPC_EncodeableObject_PfnGetSize* GetSize;
-        SOPC_EncodeableObject_PfnEncode* Encode;
-        SOPC_EncodeableObject_PfnDecode* Decode;
-        int32_t NoOfFields;
-        const SOPC_EncodeableType_FieldDescriptor* Fields;
-    } SOPC_EncodeableType;
-#ifdef __cplusplus
-}
-#endif
+    char* TypeName;
+    uint32_t TypeId;
+    uint32_t BinaryEncodingTypeId;
+    uint32_t XmlEncodingTypeId;
+    char* NamespaceUri;
+    size_t AllocationSize;
+    SOPC_EncodeableObject_PfnInitialize* Initialize;
+    SOPC_EncodeableObject_PfnClear* Clear;
+    SOPC_EncodeableObject_PfnGetSize* GetSize;
+    SOPC_EncodeableObject_PfnEncode* Encode;
+    SOPC_EncodeableObject_PfnDecode* Decode;
+    int32_t NoOfFields;
+    const SOPC_EncodeableType_FieldDescriptor* Fields;
+} SOPC_EncodeableType;
 
 /**
  * \brief       Registers a user-defined encodeable type.

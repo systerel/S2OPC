@@ -32,7 +32,7 @@ typedef enum
     OpcUa_MessageSecurityMode_SizeOf = INT32_MAX
 } OpcUa_MessageSecurityMode;
 
-extern struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 typedef struct _OpcUa_ResponseHeader
 {
     SOPC_EncodeableType* encodeableType;
@@ -143,7 +143,7 @@ typedef struct _OpcUa_GetEndpointsResponse
 
 /* Read structures */
 
-extern struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
 typedef struct _OpcUa_ReadValueId
 {
     SOPC_EncodeableType* encodeableType;
@@ -153,7 +153,7 @@ typedef struct _OpcUa_ReadValueId
     SOPC_QualifiedName DataEncoding;
 } OpcUa_ReadValueId;
 
-extern struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
 typedef struct _OpcUa_ReadRequest
 {
     SOPC_EncodeableType* encodeableType;
@@ -163,7 +163,7 @@ typedef struct _OpcUa_ReadRequest
     OpcUa_ReadValueId* NodesToRead;
 } OpcUa_ReadRequest;
 
-extern struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
 typedef struct _OpcUa_ReadResponse
 {
     SOPC_EncodeableType* encodeableType;
@@ -176,7 +176,7 @@ typedef struct _OpcUa_ReadResponse
 
 /* Write structures */
 
-extern struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
+extern SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
 typedef struct _OpcUa_WriteValue
 {
     SOPC_EncodeableType* encodeableType;
@@ -186,7 +186,7 @@ typedef struct _OpcUa_WriteValue
     SOPC_DataValue Value;
 } OpcUa_WriteValue;
 
-extern struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
+extern SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
 typedef struct _OpcUa_WriteRequest
 {
     SOPC_EncodeableType* encodeableType;
@@ -194,7 +194,7 @@ typedef struct _OpcUa_WriteRequest
     OpcUa_WriteValue* NodesToWrite;
 } OpcUa_WriteRequest;
 
-extern struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
+extern SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
 typedef struct _OpcUa_WriteResponse
 {
     SOPC_EncodeableType* encodeableType;
@@ -215,7 +215,7 @@ typedef enum _OpcUa_BrowseDirection
     OpcUa_BrowseDirection_SizeOf = INT32_MAX
 } OpcUa_BrowseDirection;
 
-extern struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
 typedef struct _OpcUa_ViewDescription
 {
     SOPC_EncodeableType* encodeableType;
@@ -239,7 +239,7 @@ typedef enum _OpcUa_BrowseResultMask
     OpcUa_BrowseResultMask_SizeOf = INT32_MAX
 } OpcUa_BrowseResultMask;
 
-extern struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
+extern SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
 typedef struct _OpcUa_BrowseDescription
 {
     SOPC_EncodeableType* encodeableType;
@@ -259,9 +259,9 @@ typedef struct _OpcUa_BrowseRequest
     int32_t NoOfNodesToBrowse;
     OpcUa_BrowseDescription* NodesToBrowse;
 } OpcUa_BrowseRequest;
-extern struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
+extern SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
 
-extern struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
+extern SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
 typedef struct _OpcUa_ReferenceDescription
 {
     SOPC_EncodeableType* encodeableType;
@@ -274,7 +274,7 @@ typedef struct _OpcUa_ReferenceDescription
     SOPC_ExpandedNodeId TypeDefinition;
 } OpcUa_ReferenceDescription;
 
-extern struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
+extern SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
 typedef struct _OpcUa_BrowseResult
 {
     SOPC_EncodeableType* encodeableType;
@@ -284,7 +284,7 @@ typedef struct _OpcUa_BrowseResult
     OpcUa_ReferenceDescription* References;
 } OpcUa_BrowseResult;
 
-extern struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
+extern SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
 typedef struct _OpcUa_BrowseResponse
 {
     SOPC_EncodeableType* encodeableType;
@@ -296,7 +296,7 @@ typedef struct _OpcUa_BrowseResponse
 } OpcUa_BrowseResponse;
 
 /* Misc */
-extern struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
+extern SOPC_EncodeableType OpcUa_Range_EncodeableType;
 typedef struct _OpcUa_Range
 {
     SOPC_EncodeableType* encodeableType;
@@ -304,7 +304,7 @@ typedef struct _OpcUa_Range
     double High;
 } OpcUa_Range;
 
-extern struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
+extern SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
 typedef struct _OpcUa_EUInformation
 {
     SOPC_EncodeableType* encodeableType;

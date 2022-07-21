@@ -45,7 +45,7 @@
 /*============================================================================
  * The ReferenceNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType;
 
 typedef struct _OpcUa_ReferenceNode
 {
@@ -72,7 +72,7 @@ SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The Node structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_Node_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_Node_EncodeableType;
 
 typedef struct _OpcUa_Node
 {
@@ -105,7 +105,7 @@ SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nes
 /*============================================================================
  * The InstanceNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType;
 
 typedef struct _OpcUa_InstanceNode
 {
@@ -138,7 +138,7 @@ SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The TypeNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TypeNode_EncodeableType;
 
 typedef struct _OpcUa_TypeNode
 {
@@ -171,7 +171,7 @@ SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The ObjectNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType;
 
 typedef struct _OpcUa_ObjectNode
 {
@@ -205,7 +205,7 @@ SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The ObjectTypeNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
 
 typedef struct _OpcUa_ObjectTypeNode
 {
@@ -239,7 +239,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The VariableNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_VariableNode_EncodeableType;
 
 typedef struct _OpcUa_VariableNode
 {
@@ -281,7 +281,7 @@ SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The VariableTypeNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
 
 typedef struct _OpcUa_VariableTypeNode
 {
@@ -320,7 +320,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ReferenceTypeNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
 
 typedef struct _OpcUa_ReferenceTypeNode
 {
@@ -356,7 +356,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The MethodNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MethodNode_EncodeableType;
 
 typedef struct _OpcUa_MethodNode
 {
@@ -391,7 +391,7 @@ SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The ViewNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ViewNode_EncodeableType;
 
 typedef struct _OpcUa_ViewNode
 {
@@ -426,7 +426,7 @@ SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The DataTypeNode structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType;
 
 typedef struct _OpcUa_DataTypeNode
 {
@@ -460,7 +460,7 @@ SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The Argument structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_Argument_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_Argument_EncodeableType;
 
 typedef struct _OpcUa_Argument
 {
@@ -490,7 +490,7 @@ SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf, uint32_t
 /*============================================================================
  * The EnumValueType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType;
 
 typedef struct _OpcUa_EnumValueType
 {
@@ -517,7 +517,7 @@ SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The EnumField structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
 
 typedef struct _OpcUa_EnumField
 {
@@ -545,7 +545,7 @@ SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The OptionSet structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_OptionSet_EncodeableType;
 
 typedef struct _OpcUa_OptionSet
 {
@@ -571,7 +571,7 @@ SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The TimeZoneDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
 
 typedef struct _OpcUa_TimeZoneDataType
 {
@@ -597,7 +597,7 @@ SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ApplicationDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
 
 typedef struct _OpcUa_ApplicationDescription
 {
@@ -629,7 +629,7 @@ SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The RequestHeader structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType;
 
 typedef struct _OpcUa_RequestHeader
 {
@@ -660,7 +660,7 @@ SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ResponseHeader structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 
 typedef struct _OpcUa_ResponseHeader
 {
@@ -691,7 +691,7 @@ SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The ServiceFault structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType;
 
 typedef struct _OpcUa_ServiceFault
 {
@@ -717,7 +717,7 @@ SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The FindServersRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType;
 
 typedef struct _OpcUa_FindServersRequest
 {
@@ -746,7 +746,7 @@ SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The FindServersResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType;
 
 typedef struct _OpcUa_FindServersResponse
 {
@@ -774,7 +774,7 @@ SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ServerOnNetwork structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
 
 typedef struct _OpcUa_ServerOnNetwork
 {
@@ -804,7 +804,7 @@ SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The FindServersOnNetworkRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
 
 typedef struct _OpcUa_FindServersOnNetworkRequest
 {
@@ -834,7 +834,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The FindServersOnNetworkResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
 
 typedef struct _OpcUa_FindServersOnNetworkResponse
 {
@@ -865,7 +865,7 @@ SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The UserTokenPolicy structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
 
 typedef struct _OpcUa_UserTokenPolicy
 {
@@ -894,7 +894,7 @@ SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The EndpointDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
 
 typedef struct _OpcUa_EndpointDescription
 {
@@ -928,7 +928,7 @@ SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The GetEndpointsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
 
 typedef struct _OpcUa_GetEndpointsRequest
 {
@@ -957,7 +957,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The GetEndpointsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
 
 typedef struct _OpcUa_GetEndpointsResponse
 {
@@ -985,7 +985,7 @@ SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RegisteredServer structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType;
 
 typedef struct _OpcUa_RegisteredServer
 {
@@ -1020,7 +1020,7 @@ SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The RegisterServerRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
 
 typedef struct _OpcUa_RegisterServerRequest
 {
@@ -1045,7 +1045,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The RegisterServerResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
 
 typedef struct _OpcUa_RegisterServerResponse
 {
@@ -1071,7 +1071,7 @@ SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The MdnsDiscoveryConfiguration structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
 
 typedef struct _OpcUa_MdnsDiscoveryConfiguration
 {
@@ -1101,7 +1101,7 @@ SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The RegisterServer2Request structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
 
 typedef struct _OpcUa_RegisterServer2Request
 {
@@ -1128,7 +1128,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The RegisterServer2Response structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
 
 typedef struct _OpcUa_RegisterServer2Response
 {
@@ -1160,7 +1160,7 @@ SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The ChannelSecurityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
 
 typedef struct _OpcUa_ChannelSecurityToken
 {
@@ -1189,7 +1189,7 @@ SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The OpenSecureChannelRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
 
 typedef struct _OpcUa_OpenSecureChannelRequest
 {
@@ -1220,7 +1220,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The OpenSecureChannelResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
 
 typedef struct _OpcUa_OpenSecureChannelResponse
 {
@@ -1252,7 +1252,7 @@ SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CloseSecureChannelRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
 
 typedef struct _OpcUa_CloseSecureChannelRequest
 {
@@ -1278,7 +1278,7 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CloseSecureChannelResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
 
 typedef struct _OpcUa_CloseSecureChannelResponse
 {
@@ -1306,7 +1306,7 @@ SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SignedSoftwareCertificate structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
 
 typedef struct _OpcUa_SignedSoftwareCertificate
 {
@@ -1334,7 +1334,7 @@ SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The SignatureData structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SignatureData_EncodeableType;
 
 typedef struct _OpcUa_SignatureData
 {
@@ -1361,7 +1361,7 @@ SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The CreateSessionRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateSessionRequest
 {
@@ -1393,7 +1393,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The CreateSessionResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateSessionResponse
 {
@@ -1430,7 +1430,7 @@ SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The UserIdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_UserIdentityToken
 {
@@ -1455,7 +1455,7 @@ SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AnonymousIdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_AnonymousIdentityToken
 {
@@ -1480,7 +1480,7 @@ SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The UserNameIdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_UserNameIdentityToken
 {
@@ -1508,7 +1508,7 @@ SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The X509IdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
 
 typedef struct _OpcUa_X509IdentityToken
 {
@@ -1534,7 +1534,7 @@ SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The KerberosIdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_KerberosIdentityToken
 {
@@ -1560,7 +1560,7 @@ SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The IssuedIdentityToken structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
 
 typedef struct _OpcUa_IssuedIdentityToken
 {
@@ -1588,7 +1588,7 @@ SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ActivateSessionRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_ActivateSessionRequest
 {
@@ -1619,7 +1619,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ActivateSessionResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_ActivateSessionResponse
 {
@@ -1653,7 +1653,7 @@ SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The CloseSessionRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
 
 typedef struct _OpcUa_CloseSessionRequest
 {
@@ -1678,7 +1678,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The CloseSessionResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
 
 typedef struct _OpcUa_CloseSessionResponse
 {
@@ -1705,7 +1705,7 @@ SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The CancelRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType;
 
 typedef struct _OpcUa_CancelRequest
 {
@@ -1730,7 +1730,7 @@ SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The CancelResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType;
 
 typedef struct _OpcUa_CancelResponse
 {
@@ -1757,7 +1757,7 @@ SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The NodeAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType;
 
 typedef struct _OpcUa_NodeAttributes
 {
@@ -1786,7 +1786,7 @@ SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The ObjectAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
 
 typedef struct _OpcUa_ObjectAttributes
 {
@@ -1816,7 +1816,7 @@ SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The VariableAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType;
 
 typedef struct _OpcUa_VariableAttributes
 {
@@ -1854,7 +1854,7 @@ SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The MethodAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType;
 
 typedef struct _OpcUa_MethodAttributes
 {
@@ -1885,7 +1885,7 @@ SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ObjectTypeAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_ObjectTypeAttributes
 {
@@ -1915,7 +1915,7 @@ SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The VariableTypeAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_VariableTypeAttributes
 {
@@ -1950,7 +1950,7 @@ SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ReferenceTypeAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_ReferenceTypeAttributes
 {
@@ -1984,7 +1984,7 @@ SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The DataTypeAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
 
 typedef struct _OpcUa_DataTypeAttributes
 {
@@ -2014,7 +2014,7 @@ SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The ViewAttributes structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType;
 
 typedef struct _OpcUa_ViewAttributes
 {
@@ -2045,7 +2045,7 @@ SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AddNodesItem structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType;
 
 typedef struct _OpcUa_AddNodesItem
 {
@@ -2076,7 +2076,7 @@ SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The AddNodesResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType;
 
 typedef struct _OpcUa_AddNodesResult
 {
@@ -2103,7 +2103,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AddNodesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_AddNodesRequest
 {
@@ -2129,7 +2129,7 @@ SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The AddNodesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_AddNodesResponse
 {
@@ -2159,7 +2159,7 @@ SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The AddReferencesItem structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesItem
 {
@@ -2190,7 +2190,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AddReferencesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesRequest
 {
@@ -2216,7 +2216,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The AddReferencesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
 
 typedef struct _OpcUa_AddReferencesResponse
 {
@@ -2246,7 +2246,7 @@ SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DeleteNodesItem structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesItem
 {
@@ -2273,7 +2273,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The DeleteNodesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesRequest
 {
@@ -2299,7 +2299,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The DeleteNodesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteNodesResponse
 {
@@ -2329,7 +2329,7 @@ SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteReferencesItem structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesItem
 {
@@ -2359,7 +2359,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The DeleteReferencesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesRequest
 {
@@ -2387,7 +2387,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The DeleteReferencesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteReferencesResponse
 {
@@ -2419,7 +2419,7 @@ SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The ViewDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType;
 
 typedef struct _OpcUa_ViewDescription
 {
@@ -2446,7 +2446,7 @@ SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The BrowseDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType;
 
 typedef struct _OpcUa_BrowseDescription
 {
@@ -2476,7 +2476,7 @@ SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The ReferenceDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
 
 typedef struct _OpcUa_ReferenceDescription
 {
@@ -2507,7 +2507,7 @@ SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The BrowseResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType;
 
 typedef struct _OpcUa_BrowseResult
 {
@@ -2536,7 +2536,7 @@ SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The BrowseRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType;
 
 typedef struct _OpcUa_BrowseRequest
 {
@@ -2564,7 +2564,7 @@ SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The BrowseResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType;
 
 typedef struct _OpcUa_BrowseResponse
 {
@@ -2595,7 +2595,7 @@ SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The BrowseNextRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
 
 typedef struct _OpcUa_BrowseNextRequest
 {
@@ -2622,7 +2622,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The BrowseNextResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
 
 typedef struct _OpcUa_BrowseNextResponse
 {
@@ -2652,7 +2652,7 @@ SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The RelativePathElement structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType;
 
 typedef struct _OpcUa_RelativePathElement
 {
@@ -2680,7 +2680,7 @@ SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The RelativePath structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RelativePath_EncodeableType;
 
 typedef struct _OpcUa_RelativePath
 {
@@ -2706,7 +2706,7 @@ SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The BrowsePath structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType;
 
 typedef struct _OpcUa_BrowsePath
 {
@@ -2732,7 +2732,7 @@ SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The BrowsePathTarget structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
 
 typedef struct _OpcUa_BrowsePathTarget
 {
@@ -2758,7 +2758,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The BrowsePathResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
 
 typedef struct _OpcUa_BrowsePathResult
 {
@@ -2786,7 +2786,7 @@ SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
 
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsRequest
 {
@@ -2816,7 +2816,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
 
 typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsResponse
 {
@@ -2851,7 +2851,7 @@ SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValu
 /*============================================================================
  * The RegisterNodesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_RegisterNodesRequest
 {
@@ -2877,7 +2877,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The RegisterNodesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_RegisterNodesResponse
 {
@@ -2906,7 +2906,7 @@ SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The UnregisterNodesRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
 
 typedef struct _OpcUa_UnregisterNodesRequest
 {
@@ -2932,7 +2932,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The UnregisterNodesResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
 
 typedef struct _OpcUa_UnregisterNodesResponse
 {
@@ -2960,7 +2960,7 @@ SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The EndpointConfiguration structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
 
 typedef struct _OpcUa_EndpointConfiguration
 {
@@ -2993,7 +2993,7 @@ SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The SupportedProfile structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
 
 typedef struct _OpcUa_SupportedProfile
 {
@@ -3024,7 +3024,7 @@ SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The SoftwareCertificate structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
 
 typedef struct _OpcUa_SoftwareCertificate
 {
@@ -3059,7 +3059,7 @@ SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The QueryDataDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
 
 typedef struct _OpcUa_QueryDataDescription
 {
@@ -3086,7 +3086,7 @@ SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The NodeTypeDescription structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
 
 typedef struct _OpcUa_NodeTypeDescription
 {
@@ -3114,7 +3114,7 @@ SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The QueryDataSet structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType;
 
 typedef struct _OpcUa_QueryDataSet
 {
@@ -3142,7 +3142,7 @@ SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The NodeReference structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NodeReference_EncodeableType;
 
 typedef struct _OpcUa_NodeReference
 {
@@ -3171,7 +3171,7 @@ SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ContentFilterElement structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterElement
 {
@@ -3198,7 +3198,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ContentFilter structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
 
 typedef struct _OpcUa_ContentFilter
 {
@@ -3224,7 +3224,7 @@ SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ElementOperand structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType;
 
 typedef struct _OpcUa_ElementOperand
 {
@@ -3249,7 +3249,7 @@ SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The LiteralOperand structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType;
 
 typedef struct _OpcUa_LiteralOperand
 {
@@ -3274,7 +3274,7 @@ SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The AttributeOperand structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType;
 
 typedef struct _OpcUa_AttributeOperand
 {
@@ -3303,7 +3303,7 @@ SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The SimpleAttributeOperand structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
 
 typedef struct _OpcUa_SimpleAttributeOperand
 {
@@ -3332,7 +3332,7 @@ SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ContentFilterElementResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterElementResult
 {
@@ -3363,7 +3363,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The ContentFilterResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
 
 typedef struct _OpcUa_ContentFilterResult
 {
@@ -3391,7 +3391,7 @@ SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The ParsingResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType;
 
 typedef struct _OpcUa_ParsingResult
 {
@@ -3421,7 +3421,7 @@ SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The QueryFirstRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
 
 typedef struct _OpcUa_QueryFirstRequest
 {
@@ -3451,7 +3451,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The QueryFirstResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
 
 typedef struct _OpcUa_QueryFirstResponse
 {
@@ -3486,7 +3486,7 @@ SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The QueryNextRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
 
 typedef struct _OpcUa_QueryNextRequest
 {
@@ -3512,7 +3512,7 @@ SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The QueryNextResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
 
 typedef struct _OpcUa_QueryNextResponse
 {
@@ -3541,7 +3541,7 @@ SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The ReadValueId structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType;
 
 typedef struct _OpcUa_ReadValueId
 {
@@ -3570,7 +3570,7 @@ SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType;
 
 typedef struct _OpcUa_ReadRequest
 {
@@ -3598,7 +3598,7 @@ SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType;
 
 typedef struct _OpcUa_ReadResponse
 {
@@ -3628,7 +3628,7 @@ SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The HistoryReadValueId structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadValueId
 {
@@ -3656,7 +3656,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryReadResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadResult
 {
@@ -3683,7 +3683,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The EventFilter structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EventFilter_EncodeableType;
 
 typedef struct _OpcUa_EventFilter
 {
@@ -3710,7 +3710,7 @@ SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ReadEventDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadEventDetails
 {
@@ -3738,7 +3738,7 @@ SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The ReadRawModifiedDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadRawModifiedDetails
 {
@@ -3767,7 +3767,7 @@ SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The AggregateConfiguration structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
 
 typedef struct _OpcUa_AggregateConfiguration
 {
@@ -3796,7 +3796,7 @@ SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The ReadProcessedDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadProcessedDetails
 {
@@ -3826,7 +3826,7 @@ SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ReadAtTimeDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
 
 typedef struct _OpcUa_ReadAtTimeDetails
 {
@@ -3853,7 +3853,7 @@ SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The HistoryData structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryData_EncodeableType;
 
 typedef struct _OpcUa_HistoryData
 {
@@ -3879,7 +3879,7 @@ SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The ModificationInfo structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType;
 
 typedef struct _OpcUa_ModificationInfo
 {
@@ -3906,7 +3906,7 @@ SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The HistoryModifiedData structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
 
 typedef struct _OpcUa_HistoryModifiedData
 {
@@ -3934,7 +3934,7 @@ SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The HistoryEventFieldList structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
 
 typedef struct _OpcUa_HistoryEventFieldList
 {
@@ -3960,7 +3960,7 @@ SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The HistoryEvent structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType;
 
 typedef struct _OpcUa_HistoryEvent
 {
@@ -3987,7 +3987,7 @@ SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The HistoryReadRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadRequest
 {
@@ -4016,7 +4016,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryReadResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
 
 typedef struct _OpcUa_HistoryReadResponse
 {
@@ -4046,7 +4046,7 @@ SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The WriteValue structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_WriteValue_EncodeableType;
 
 typedef struct _OpcUa_WriteValue
 {
@@ -4075,7 +4075,7 @@ SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf, uint32
 /*============================================================================
  * The WriteRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType;
 
 typedef struct _OpcUa_WriteRequest
 {
@@ -4101,7 +4101,7 @@ SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The WriteResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType;
 
 typedef struct _OpcUa_WriteResponse
 {
@@ -4131,7 +4131,7 @@ SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The HistoryUpdateDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateDetails
 {
@@ -4156,7 +4156,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The UpdateDataDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateDataDetails
 {
@@ -4184,7 +4184,7 @@ SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The UpdateStructureDataDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateStructureDataDetails
 {
@@ -4214,7 +4214,7 @@ SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The UpdateEventDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
 
 typedef struct _OpcUa_UpdateEventDetails
 {
@@ -4243,7 +4243,7 @@ SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The DeleteRawModifiedDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteRawModifiedDetails
 {
@@ -4273,7 +4273,7 @@ SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The DeleteAtTimeDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteAtTimeDetails
 {
@@ -4300,7 +4300,7 @@ SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The DeleteEventDetails structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
 
 typedef struct _OpcUa_DeleteEventDetails
 {
@@ -4327,7 +4327,7 @@ SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf
 /*============================================================================
  * The HistoryUpdateResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateResult
 {
@@ -4357,7 +4357,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The HistoryUpdateRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateRequest
 {
@@ -4383,7 +4383,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The HistoryUpdateResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
 
 typedef struct _OpcUa_HistoryUpdateResponse
 {
@@ -4413,7 +4413,7 @@ SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The CallMethodRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
 
 typedef struct _OpcUa_CallMethodRequest
 {
@@ -4441,7 +4441,7 @@ SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The CallMethodResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType;
 
 typedef struct _OpcUa_CallMethodResult
 {
@@ -4473,7 +4473,7 @@ SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The CallRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CallRequest_EncodeableType;
 
 typedef struct _OpcUa_CallRequest
 {
@@ -4499,7 +4499,7 @@ SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf, uint3
 /*============================================================================
  * The CallResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CallResponse_EncodeableType;
 
 typedef struct _OpcUa_CallResponse
 {
@@ -4529,7 +4529,7 @@ SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The DataChangeFilter structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
 
 typedef struct _OpcUa_DataChangeFilter
 {
@@ -4556,7 +4556,7 @@ SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The AggregateFilter structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType;
 
 typedef struct _OpcUa_AggregateFilter
 {
@@ -4584,7 +4584,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The EventFilterResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType;
 
 typedef struct _OpcUa_EventFilterResult
 {
@@ -4613,7 +4613,7 @@ SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The AggregateFilterResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
 
 typedef struct _OpcUa_AggregateFilterResult
 {
@@ -4640,7 +4640,7 @@ SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The MonitoringParameters structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
 
 typedef struct _OpcUa_MonitoringParameters
 {
@@ -4669,7 +4669,7 @@ SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The MonitoredItemCreateRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemCreateRequest
 {
@@ -4698,7 +4698,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MonitoredItemCreateResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemCreateResult
 {
@@ -4730,7 +4730,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CreateMonitoredItemsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateMonitoredItemsRequest
 {
@@ -4760,7 +4760,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The CreateMonitoredItemsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateMonitoredItemsResponse
 {
@@ -4792,7 +4792,7 @@ SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The MonitoredItemModifyRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemModifyRequest
 {
@@ -4820,7 +4820,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The MonitoredItemModifyResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemModifyResult
 {
@@ -4851,7 +4851,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The ModifyMonitoredItemsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_ModifyMonitoredItemsRequest
 {
@@ -4881,7 +4881,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The ModifyMonitoredItemsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_ModifyMonitoredItemsResponse
 {
@@ -4914,7 +4914,7 @@ SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The SetMonitoringModeRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
 
 typedef struct _OpcUa_SetMonitoringModeRequest
 {
@@ -4944,7 +4944,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SetMonitoringModeResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
 
 typedef struct _OpcUa_SetMonitoringModeResponse
 {
@@ -4977,7 +4977,7 @@ SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The SetTriggeringRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
 
 typedef struct _OpcUa_SetTriggeringRequest
 {
@@ -5007,7 +5007,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The SetTriggeringResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
 
 typedef struct _OpcUa_SetTriggeringResponse
 {
@@ -5042,7 +5042,7 @@ SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The DeleteMonitoredItemsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteMonitoredItemsRequest
 {
@@ -5071,7 +5071,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The DeleteMonitoredItemsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteMonitoredItemsResponse
 {
@@ -5104,7 +5104,7 @@ SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The CreateSubscriptionRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
 
 typedef struct _OpcUa_CreateSubscriptionRequest
 {
@@ -5136,7 +5136,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The CreateSubscriptionResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
 
 typedef struct _OpcUa_CreateSubscriptionResponse
 {
@@ -5169,7 +5169,7 @@ SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The ModifySubscriptionRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
 
 typedef struct _OpcUa_ModifySubscriptionRequest
 {
@@ -5201,7 +5201,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The ModifySubscriptionResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
 
 typedef struct _OpcUa_ModifySubscriptionResponse
 {
@@ -5233,7 +5233,7 @@ SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SetPublishingModeRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
 
 typedef struct _OpcUa_SetPublishingModeRequest
 {
@@ -5262,7 +5262,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SetPublishingModeResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
 
 typedef struct _OpcUa_SetPublishingModeResponse
 {
@@ -5294,7 +5294,7 @@ SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The NotificationMessage structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType;
 
 typedef struct _OpcUa_NotificationMessage
 {
@@ -5322,7 +5322,7 @@ SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* bu
 /*============================================================================
  * The MonitoredItemNotification structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
 
 typedef struct _OpcUa_MonitoredItemNotification
 {
@@ -5350,7 +5350,7 @@ SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The DataChangeNotification structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
 
 typedef struct _OpcUa_DataChangeNotification
 {
@@ -5378,7 +5378,7 @@ SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The EventFieldList structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType;
 
 typedef struct _OpcUa_EventFieldList
 {
@@ -5405,7 +5405,7 @@ SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The EventNotificationList structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType;
 
 typedef struct _OpcUa_EventNotificationList
 {
@@ -5431,7 +5431,7 @@ SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* 
 /*============================================================================
  * The StatusChangeNotification structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
 
 typedef struct _OpcUa_StatusChangeNotification
 {
@@ -5459,7 +5459,7 @@ SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffe
 /*============================================================================
  * The SubscriptionAcknowledgement structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
 
 typedef struct _OpcUa_SubscriptionAcknowledgement
 {
@@ -5488,7 +5488,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The PublishRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType;
 
 typedef struct _OpcUa_PublishRequest
 {
@@ -5514,7 +5514,7 @@ SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The PublishResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType;
 
 typedef struct _OpcUa_PublishResponse
 {
@@ -5550,7 +5550,7 @@ SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The RepublishRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType;
 
 typedef struct _OpcUa_RepublishRequest
 {
@@ -5576,7 +5576,7 @@ SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf, 
 /*============================================================================
  * The RepublishResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType;
 
 typedef struct _OpcUa_RepublishResponse
 {
@@ -5603,7 +5603,7 @@ SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The TransferResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TransferResult_EncodeableType;
 
 typedef struct _OpcUa_TransferResult
 {
@@ -5631,7 +5631,7 @@ SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf, ui
 /*============================================================================
  * The TransferSubscriptionsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
 
 typedef struct _OpcUa_TransferSubscriptionsRequest
 {
@@ -5660,7 +5660,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The TransferSubscriptionsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
 
 typedef struct _OpcUa_TransferSubscriptionsResponse
 {
@@ -5695,7 +5695,7 @@ SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue,
 /*============================================================================
  * The DeleteSubscriptionsRequest structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
 
 typedef struct _OpcUa_DeleteSubscriptionsRequest
 {
@@ -5723,7 +5723,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The DeleteSubscriptionsResponse structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
 
 typedef struct _OpcUa_DeleteSubscriptionsResponse
 {
@@ -5755,7 +5755,7 @@ SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Bu
 /*============================================================================
  * The BuildInfo structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType;
 
 typedef struct _OpcUa_BuildInfo
 {
@@ -5785,7 +5785,7 @@ SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf, uint32_
 /*============================================================================
  * The RedundantServerDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
 
 typedef struct _OpcUa_RedundantServerDataType
 {
@@ -5814,7 +5814,7 @@ SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The EndpointUrlListDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
 
 typedef struct _OpcUa_EndpointUrlListDataType
 {
@@ -5842,7 +5842,7 @@ SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The NetworkGroupDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
 
 typedef struct _OpcUa_NetworkGroupDataType
 {
@@ -5869,7 +5869,7 @@ SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The SamplingIntervalDiagnosticsDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SamplingIntervalDiagnosticsDataType
 {
@@ -5901,7 +5901,7 @@ SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The ServerDiagnosticsSummaryDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
 
 typedef struct _OpcUa_ServerDiagnosticsSummaryDataType
 {
@@ -5941,7 +5941,7 @@ SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue,
 /*============================================================================
  * The ServerStatusDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
 
 typedef struct _OpcUa_ServerStatusDataType
 {
@@ -5971,7 +5971,7 @@ SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* b
 /*============================================================================
  * The ServiceCounterDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
 
 typedef struct _OpcUa_ServiceCounterDataType
 {
@@ -5997,7 +5997,7 @@ SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer*
 /*============================================================================
  * The SessionDiagnosticsDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SessionDiagnosticsDataType
 {
@@ -6067,7 +6067,7 @@ SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buf
 /*============================================================================
  * The SessionSecurityDiagnosticsDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SessionSecurityDiagnosticsDataType
 {
@@ -6105,7 +6105,7 @@ SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The StatusResult structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_StatusResult_EncodeableType;
 
 typedef struct _OpcUa_StatusResult
 {
@@ -6131,7 +6131,7 @@ SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf, uint
 /*============================================================================
  * The SubscriptionDiagnosticsDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
 
 typedef struct _OpcUa_SubscriptionDiagnosticsDataType
 {
@@ -6190,7 +6190,7 @@ SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue,
 /*============================================================================
  * The ModelChangeStructureDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
 
 typedef struct _OpcUa_ModelChangeStructureDataType
 {
@@ -6219,7 +6219,7 @@ SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_B
 /*============================================================================
  * The SemanticChangeStructureDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
 
 typedef struct _OpcUa_SemanticChangeStructureDataType
 {
@@ -6249,7 +6249,7 @@ SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue,
 /*============================================================================
  * The Range structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_Range_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_Range_EncodeableType;
 
 typedef struct _OpcUa_Range
 {
@@ -6275,7 +6275,7 @@ SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf, uint32_t ne
 /*============================================================================
  * The EUInformation structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EUInformation_EncodeableType;
 
 typedef struct _OpcUa_EUInformation
 {
@@ -6303,7 +6303,7 @@ SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf, uin
 /*============================================================================
  * The ComplexNumberType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
 
 typedef struct _OpcUa_ComplexNumberType
 {
@@ -6329,7 +6329,7 @@ SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf,
 /*============================================================================
  * The DoubleComplexNumberType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
 
 typedef struct _OpcUa_DoubleComplexNumberType
 {
@@ -6357,7 +6357,7 @@ SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer
 /*============================================================================
  * The AxisInformation structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType;
 
 typedef struct _OpcUa_AxisInformation
 {
@@ -6387,7 +6387,7 @@ SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf, u
 /*============================================================================
  * The XVType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_XVType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_XVType_EncodeableType;
 
 typedef struct _OpcUa_XVType
 {
@@ -6413,7 +6413,7 @@ SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t n
 /*============================================================================
  * The ProgramDiagnosticDataType structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
 
 typedef struct _OpcUa_ProgramDiagnosticDataType
 {
@@ -6451,7 +6451,7 @@ SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buff
 /*============================================================================
  * The Annotation structure.
  *===========================================================================*/
-S2OPC_COMMON_EXPORT extern const struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_Annotation_EncodeableType;
 
 typedef struct _OpcUa_Annotation
 {
@@ -7257,7 +7257,7 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_User
 /*============================================================================
  * Table of known types.
  *===========================================================================*/
-extern const struct SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
+extern SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
 
 #endif
 /* This is the last line of an autogenerated file. */
