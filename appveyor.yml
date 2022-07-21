@@ -29,12 +29,13 @@ test_script:
     - set CHECK_DIR_NAME=check-0.14.0
     - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
     - set CHECK_BUILD_DIR=%CHECK_DIR%\build
-    - set MBEDTLS_VERSION=2.28.0
+    - set MBEDTLS_VERSION=2.28.1
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
-    - set EXPAT_DIR_NAME=expat-2.4.3
-    - set EXPAT_DIR=%ROOT_DIR%\libexpat-R_2_4_3\expat
+    - set EXPAT_DIR_NAME=expat-2.4.8
+    - set EXPAT_FILE_NAME=R_2_4_8
+    - set EXPAT_DIR=%ROOT_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
     - set S2OPC_CLIENTSERVER_ONLY=1
     - set CONFIG=RelWithDebInfo
@@ -56,7 +57,7 @@ test_script:
 
     # download and extractbuild expat
     - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/R_2_4_3.zip -FileName %EXPAT_DIR_NAME%.zip"
+    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/%EXPAT_FILE_NAME%.zip -FileName %EXPAT_DIR_NAME%.zip"
     - "unzip %EXPAT_DIR_NAME%.zip"
 
     # configure, build dependencies and build S2OPC project as shared DLL
