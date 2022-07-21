@@ -170,6 +170,15 @@ void session_core_bs__may_validate_server_certificate(
         {
             status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->pki, serverCert, &errorCode);
             *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Services: session=%" PRIu32
+                                       " user activation impossible because server certificate is validation failed "
+                                       "using channel config %" PRIu32,
+                                       session_core_bs__p_session, session_core_bs__p_channel_config_idx);
+            }
         }
         SOPC_KeyManager_Certificate_Free(serverCert);
         SOPC_CryptoProvider_Free(cp);

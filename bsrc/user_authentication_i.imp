@@ -86,7 +86,7 @@ OPERATIONS
 
     /* END OF LOCAL OPERATIONS */
 
-    p_valid, p_user_token_encrypted <-- may_encrypt_user_token(p_user_server_cert, p_server_nonce, p_user_secu_policy, p_user_token) =
+    p_valid, p_user_token_encrypted <-- may_encrypt_user_token(p_channel_config_idx, p_user_server_cert, p_server_nonce, p_user_secu_policy, p_user_token) =
     VAR
         l_user_token_type
     IN
@@ -94,7 +94,7 @@ OPERATIONS
         IF l_user_token_type = e_userTokenType_anonymous THEN
             p_valid, p_user_token_encrypted <-- shallow_copy_user_token(l_user_token_type, p_user_token)
         ELSIF l_user_token_type = e_userTokenType_userName THEN
-                p_valid, p_user_token_encrypted <-- encrypt_user_token(p_user_server_cert, p_server_nonce, p_user_secu_policy, l_user_token_type, p_user_token)
+                p_valid, p_user_token_encrypted <-- encrypt_user_token(p_channel_config_idx, p_user_server_cert, p_server_nonce, p_user_secu_policy, l_user_token_type, p_user_token)
         ELSE
             /* Unsupported user token type */
             p_user_token_encrypted := c_user_token_indet;

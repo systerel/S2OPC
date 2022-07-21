@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 02/06/2022 15:06:45
+ Date                 : 21/07/2022 15:59:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -1412,7 +1412,7 @@ void service_mgr__client_service_activate_session(
             }
             else {
                session_mgr__client_close_session(service_mgr__session,
-                  constants_statuscodes_bs__e_sc_bad_internal_error);
+                  service_mgr__l_ret);
             }
          }
          else {

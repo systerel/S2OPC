@@ -1241,7 +1241,7 @@ OPERATIONS
                         client_close_session (session, l_ret)
                     END
                 ELSE
-                    client_close_session (session, e_sc_bad_internal_error)
+                    client_close_session (session, l_ret)
                 END
             ELSE
                 client_close_session (session, e_sc_bad_out_of_memory);

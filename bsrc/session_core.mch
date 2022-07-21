@@ -282,7 +282,7 @@ OPERATIONS
         OR
             // applicative code provided invalid p_user_token: no change
             // ...
-            ret :: {e_sc_bad_identity_token_invalid,
+            ret :: {e_sc_bad_security_checks_failed,
                 e_sc_bad_unexpected_error} ||
             channel := c_channel_indet ||
             session_token := c_session_token_indet

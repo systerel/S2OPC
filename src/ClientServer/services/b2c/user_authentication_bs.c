@@ -594,6 +594,7 @@ void user_authentication_bs__decrypt_user_token(
 }
 
 void user_authentication_bs__encrypt_user_token(
+    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
     const constants__t_byte_buffer_i user_authentication_bs__p_server_cert,
     const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
     const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
@@ -610,6 +611,9 @@ void user_authentication_bs__encrypt_user_token(
     *user_authentication_bs__p_valid = false;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    SOPC_SecureChannel_Config* scConfig =
+        SOPC_ToolkitClient_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
 
     OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
 
@@ -635,15 +639,27 @@ void user_authentication_bs__encrypt_user_token(
     // No encryption if security policy is None
     if (SOPC_STATUS_OK == status && constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
     {
-        status = SOPC_ByteString_Copy(&encryptedToken->Password, &userToken->Password);
-        if (SOPC_STATUS_OK != status)
+        // Forbids to transmit password as clear text on wire (only SignAndEncrypt mode accepted)
+        if (OpcUa_MessageSecurityMode_SignAndEncrypt == scConfig->msgSecurityMode)
         {
-            SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
-            SOPC_Free(encryptedTokenExtObj);
-            return;
+            status = SOPC_ByteString_Copy(&encryptedToken->Password, &userToken->Password);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
+                SOPC_Free(encryptedTokenExtObj);
+                return;
+            }
+            *user_authentication_bs__p_valid = true;
+            *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
         }
-        *user_authentication_bs__p_valid = true;
-        *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Services: user activation using channel config %" PRIu32
+                " impossible because transmitting password as clear text is forbiden for security reasons",
+                user_authentication_bs__p_channel_config_idx);
+        }
         return;
     }
 

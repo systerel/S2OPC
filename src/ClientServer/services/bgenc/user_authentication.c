@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 18/11/2021 12:13:28
+ Date                 : 21/07/2022 15:59:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -71,6 +71,7 @@ void user_authentication__allocate_user_if_authenticated(
 }
 
 void user_authentication__may_encrypt_user_token(
+   const constants__t_channel_config_idx_i user_authentication__p_channel_config_idx,
    const constants__t_byte_buffer_i user_authentication__p_user_server_cert,
    const constants__t_Nonce_i user_authentication__p_server_nonce,
    const constants__t_SecurityPolicy user_authentication__p_user_secu_policy,
@@ -89,7 +90,8 @@ void user_authentication__may_encrypt_user_token(
             user_authentication__p_user_token_encrypted);
       }
       else if (user_authentication__l_user_token_type == constants__e_userTokenType_userName) {
-         user_authentication_bs__encrypt_user_token(user_authentication__p_user_server_cert,
+         user_authentication_bs__encrypt_user_token(user_authentication__p_channel_config_idx,
+            user_authentication__p_user_server_cert,
             user_authentication__p_server_nonce,
             user_authentication__p_user_secu_policy,
             user_authentication__l_user_token_type,

@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 18/11/2021 12:14:09
+ Date                 : 21/07/2022 16:00:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -65,6 +65,7 @@ extern void user_authentication_bs__decrypt_user_token(
    t_bool * const user_authentication_bs__p_sc_valid_user_token,
    constants__t_user_token_i * const user_authentication_bs__p_user_token_decrypted);
 extern void user_authentication_bs__encrypt_user_token(
+   const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
    const constants__t_byte_buffer_i user_authentication_bs__p_server_cert,
    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,

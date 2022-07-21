@@ -524,7 +524,7 @@ OPERATIONS
         l_user_server_cert,
         l_encrypted_user_token,
         l_valid_cert,
-        l_valid,
+        l_valid_encrypt,
         l_bret
     IN
         channel <-- get_session_channel (session);
@@ -544,14 +544,14 @@ OPERATIONS
             END
             ;
             IF l_valid_cert = TRUE THEN
-                l_valid, l_encrypted_user_token <-- may_encrypt_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token)
+                l_valid_encrypt, l_encrypted_user_token <-- may_encrypt_user_token(l_channel_config_idx, l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token)
             ELSE
                 l_encrypted_user_token := c_user_token_indet;
-                l_valid := FALSE
+                l_valid_encrypt := FALSE
             END
             ;
             /* TODO: populate msg with parameters */
-            IF l_valid_cert = TRUE & l_valid = TRUE THEN
+            IF l_valid_cert = TRUE & l_valid_encrypt = TRUE THEN
                 write_activate_msg_user(activate_req_msg, l_encrypted_user_token);
                 l_secpol <-- get_SecurityPolicy(channel);
                 IF l_secpol /= e_secpol_None THEN
@@ -573,7 +573,7 @@ OPERATIONS
                     ret := e_sc_ok
                 END
             ELSE
-                ret := e_sc_bad_invalid_argument
+                ret := e_sc_bad_security_checks_failed
             END
         ELSE
             channel := c_channel_indet;

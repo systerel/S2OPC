@@ -26,8 +26,10 @@ SEES
 
 OPERATIONS
 
-    p_valid, p_user_token_encrypted <-- may_encrypt_user_token(p_user_server_cert, p_server_nonce, p_user_secu_policy, p_user_token) =
+    p_valid, p_user_token_encrypted <-- may_encrypt_user_token(p_channel_config_idx, p_user_server_cert, p_server_nonce, p_user_secu_policy, p_user_token) =
     PRE
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
         p_user_server_cert : t_byte_buffer_i &
         p_user_server_cert : t_byte_buffer &
         p_server_nonce : t_Nonce_i &

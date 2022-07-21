@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/07/2022 12:36:22
+ Date                 : 21/07/2022 15:59:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -366,7 +366,7 @@ void session_core__client_user_activate_session_req_sm(
       constants__t_byte_buffer_i session_core__l_user_server_cert;
       constants__t_user_token_i session_core__l_encrypted_user_token;
       t_bool session_core__l_valid_cert;
-      t_bool session_core__l_valid;
+      t_bool session_core__l_valid_encrypt;
       t_bool session_core__l_bret;
       
       session_core_1__get_session_channel(session_core__session,
@@ -396,19 +396,20 @@ void session_core__client_user_activate_session_req_sm(
                &session_core__l_valid_cert);
          }
          if (session_core__l_valid_cert == true) {
-            user_authentication__may_encrypt_user_token(session_core__l_user_server_cert,
+            user_authentication__may_encrypt_user_token(session_core__l_channel_config_idx,
+               session_core__l_user_server_cert,
                session_core__l_server_nonce,
                session_core__l_user_secu_policy,
                session_core__p_user_token,
-               &session_core__l_valid,
+               &session_core__l_valid_encrypt,
                &session_core__l_encrypted_user_token);
          }
          else {
             session_core__l_encrypted_user_token = constants__c_user_token_indet;
-            session_core__l_valid = false;
+            session_core__l_valid_encrypt = false;
          }
          if ((session_core__l_valid_cert == true) &&
-            (session_core__l_valid == true)) {
+            (session_core__l_valid_encrypt == true)) {
             msg_session_bs__write_activate_msg_user(session_core__activate_req_msg,
                session_core__l_encrypted_user_token);
             channel_mgr__get_SecurityPolicy(*session_core__channel,
@@ -444,7 +445,7 @@ void session_core__client_user_activate_session_req_sm(
             }
          }
          else {
-            *session_core__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
+            *session_core__ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
          }
       }
       else {
