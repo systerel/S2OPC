@@ -179,8 +179,8 @@ static void establishSC(void)
     {
         // The pki function pointer shall be const after this init
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *(SOPC_PKIProvider_Free_Func*) (&pki.pFnFree) = &PKIStub_Free;
-        *(SOPC_FnValidateCertificate*) (&pki.pFnValidateCertificate) = &PKIStub_ValidateAnything;
+        *((SOPC_PKIProvider_Free_Func**) (&pki.pFnFree)) = &PKIStub_Free;
+        *((SOPC_FnValidateCertificate**) (&pki.pFnValidateCertificate)) = &PKIStub_ValidateAnything;
         SOPC_GCC_DIAGNOSTIC_RESTORE
         pki.pTrustedIssuerRootsList = NULL;
         pki.pIssuedCertsList = NULL;

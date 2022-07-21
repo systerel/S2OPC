@@ -370,7 +370,7 @@ static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, SOPC_LibSub
 }
 
 // Return 0 if succeeded
-int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback)
+int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disconnect_callback)
 {
     if (SOPC_Atomic_Int_Get(&initialized))
     {

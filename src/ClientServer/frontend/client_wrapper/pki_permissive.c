@@ -56,8 +56,8 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
 
     // The pki function pointer shall be const after this init
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *(SOPC_PKIProvider_Free_Func*) (&pki->pFnFree) = &PKIPermissive_Free;
-    *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIPermissive_ValidateAnything;
+    *((SOPC_PKIProvider_Free_Func**) (&pki->pFnFree)) = &PKIPermissive_Free;
+    *((SOPC_FnValidateCertificate**) (&pki->pFnValidateCertificate)) = &PKIPermissive_ValidateAnything;
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     pki->pTrustedIssuerRootsList = NULL;

@@ -49,9 +49,9 @@
  * @warning
  *   ServiceFault can be retrieve instead of the expected response
  */
-typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStatus,
-                                               const void* response,
-                                               const uintptr_t responseContext);
+typedef void SOPC_ClientCommon_DiscoveryCbk(const SOPC_StatusCode requestStatus,
+                                            const void* response,
+                                            const uintptr_t responseContext);
 
 /*
  ===================
@@ -73,7 +73,7 @@ typedef void (*SOPC_ClientCommon_DiscoveryCbk)(const SOPC_StatusCode requestStat
  @return
     The operation status */
 SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
-                                               const SOPC_ClientCommon_DiscoveryCbk cbkGetEndpoints);
+                                               SOPC_ClientCommon_DiscoveryCbk* const cbkGetEndpoints);
 
 /**
  @brief

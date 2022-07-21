@@ -81,8 +81,8 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
     else
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = &SOPC_MethodCallManager_InternalData_Free;
-        *(SOPC_MethodCallManager_Get_Func*) (&mcm->pFnGetMethod) = &SOPC_MethodCallManager_Get;
+        *((SOPC_MethodCallManager_Free_Func**) (&mcm->pFnFree)) = &SOPC_MethodCallManager_InternalData_Free;
+        *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = &SOPC_MethodCallManager_Get;
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
@@ -101,8 +101,8 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
     }
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *(SOPC_MethodCallManager_Free_Func*) (&mcm->pFnFree) = NULL;
-    *(SOPC_MethodCallManager_Get_Func*) (&mcm->pFnGetMethod) = NULL;
+    *((SOPC_MethodCallManager_Free_Func**) (&mcm->pFnFree)) = NULL;
+    *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = NULL;
     SOPC_GCC_DIAGNOSTIC_RESTORE
     mcm->pUserData = NULL;
     SOPC_Free(mcm);

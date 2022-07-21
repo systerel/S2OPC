@@ -54,15 +54,15 @@
 #define SOPC_CertificateValidationError_ChainIncomplete 0x810D0000
 #define SOPC_CertificateValidationError_Unkown 0x80000000
 
-typedef void (*SOPC_PKIProvider_Free_Func)(SOPC_PKIProvider* pPKI);
+typedef void SOPC_PKIProvider_Free_Func(SOPC_PKIProvider* pPKI);
 
 /**
  * \brief \p error is only set if returned status is different from SOPC_STATUS_OK
  *
  */
-typedef SOPC_ReturnStatus (*SOPC_FnValidateCertificate)(const struct SOPC_PKIProvider* pPKI,
-                                                        const SOPC_CertificateList* pToValidate,
-                                                        uint32_t* error);
+typedef SOPC_ReturnStatus SOPC_FnValidateCertificate(const struct SOPC_PKIProvider* pPKI,
+                                                     const SOPC_CertificateList* pToValidate,
+                                                     uint32_t* error);
 
 /**
  * \brief   The PKIProvider object defines the common interface for the Public Key Infrastructure.
@@ -72,7 +72,7 @@ struct SOPC_PKIProvider
     /**
      * \brief   The free function, called upon generic SOPC_PKIProvider destruction.
      */
-    const SOPC_PKIProvider_Free_Func pFnFree;
+    SOPC_PKIProvider_Free_Func* const pFnFree;
 
     /** \brief The validation function, which is wrapped by SOPC_CryptoProvider_Certificate_Validate().
      *
@@ -86,7 +86,7 @@ struct SOPC_PKIProvider
      * \return         SOPC_STATUS_OK when the certificate is successfully validated, and
      *                 SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
      */
-    const SOPC_FnValidateCertificate pFnValidateCertificate;
+    SOPC_FnValidateCertificate* const pFnValidateCertificate;
 
     /** \brief Placeholder for CAs of trusted issuer roots (only roots, not links). */
     void* pTrustedIssuerRootsList;

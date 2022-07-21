@@ -68,7 +68,7 @@
 static int32_t libInitialized = 0;
 static Mutex mutex; /* Mutex which protects global variables except libInitialized */
 static SOPC_LibSub_DisconnectCbk* cbkDisco = NULL;
-static SOPC_ClientCommon_DiscoveryCbk getEndpointsCbk = NULL;
+static SOPC_ClientCommon_DiscoveryCbk* getEndpointsCbk = NULL;
 static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId, value is SOPC_LibSub_ConnectionCfg */
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
@@ -83,7 +83,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
  */
 
 SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg,
-                                               const SOPC_ClientCommon_DiscoveryCbk cbkGetEndpoints)
+                                               SOPC_ClientCommon_DiscoveryCbk* const cbkGetEndpoints)
 {
     if (NULL == pCfg || NULL == pCfg->host_log_callback || NULL == pCfg->disconnect_callback)
     {

@@ -64,7 +64,7 @@ typedef void SOPC_ClientHelper_DataChangeCbk(const int32_t connectionId,
  * @param connectionId
  *   The disconnected connection id
  */
-typedef void (*SOPC_ClientHelper_DisconnectCbk)(const uint32_t connectionId);
+typedef void SOPC_ClientHelper_DisconnectCbk(const uint32_t connectionId);
 
 /**
  @struct SOPC_ClientHelper_Security
@@ -400,7 +400,7 @@ typedef struct
    '-2' if toolkit not initialized
    '-100' if toolkit already initialized
  */
-int32_t SOPC_ClientHelper_Initialize(const SOPC_ClientHelper_DisconnectCbk disconnect_callback);
+int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disconnect_callback);
 
 /**
  @brief

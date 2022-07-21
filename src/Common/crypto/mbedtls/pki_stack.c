@@ -362,8 +362,8 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* lRootsTrusted,
     {
         /* The pki function pointer shall be const after this init */
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *(SOPC_PKIProvider_Free_Func*) (&pki->pFnFree) = &PKIProviderStack_Free;
-        *(SOPC_FnValidateCertificate*) (&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
+        *((SOPC_PKIProvider_Free_Func**) (&pki->pFnFree)) = &PKIProviderStack_Free;
+        *((SOPC_FnValidateCertificate**) (&pki->pFnValidateCertificate)) = &PKIProviderStack_ValidateCertificate;
         SOPC_GCC_DIAGNOSTIC_RESTORE
 
         pki->pTrustedIssuerRootsList = lRootsTrusted;

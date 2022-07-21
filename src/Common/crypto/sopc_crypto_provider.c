@@ -1061,7 +1061,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
-    FnSymmetricSign pFnSign = NULL;
+    FnSymmetricSign* pFnSign = NULL;
     if (NULL != pProfile)
     {
         pFnSign = pProfile->pFnSymmSign;
@@ -1126,7 +1126,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider*
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
-    FnSymmetricVerify pFnVerif = NULL;
+    FnSymmetricVerify* pFnVerif = NULL;
     if (NULL != pProfile)
     {
         pFnVerif = pProfile->pFnSymmVerif;
@@ -1189,7 +1189,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_GenerateRandomBytes(const SOPC_CryptoProvi
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     const SOPC_CryptoProfile_PubSub* pProfilePubSub = SOPC_CryptoProvider_GetProfilePubSub(pProvider);
-    FnGenerateRandom pFnRnd = NULL;
+    FnGenerateRandom* pFnRnd = NULL;
     if (NULL != pProfile)
     {
         pFnRnd = pProfile->pFnGenRnd;

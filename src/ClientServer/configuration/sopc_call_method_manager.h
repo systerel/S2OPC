@@ -87,10 +87,10 @@ struct SOPC_MethodCallFunc
 };
 
 /* Type of the function to free SOPC_MethodCallManager internal data */
-typedef void (*SOPC_MethodCallManager_Free_Func)(void* data);
+typedef void SOPC_MethodCallManager_Free_Func(void* data);
 
 /* Type of the function to get a C function associated to a SOPC_NodeId of a Method */
-typedef SOPC_MethodCallFunc* (*SOPC_MethodCallManager_Get_Func)(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId);
+typedef SOPC_MethodCallFunc* SOPC_MethodCallManager_Get_Func(SOPC_MethodCallManager* mcm, SOPC_NodeId* methodId);
 
 /**
  * \brief The SOPC_MethodCallManager object defines the common interface for the method manager.
@@ -107,7 +107,7 @@ struct SOPC_MethodCallManager
      * \brief The free function, called upon generic SOPC_MethodCallManager destruction.
      * \param mcm     a valid pointer to the SOPC_MethodCallManager.
      */
-    const SOPC_MethodCallManager_Free_Func pFnFree;
+    SOPC_MethodCallManager_Free_Func* const pFnFree;
 
     /**
      * \brief Function to get a function pointer corresponding to an object Method of the Address Space.
@@ -119,7 +119,7 @@ struct SOPC_MethodCallManager
      * \return           a valid function pointer (SOPC_MethodCallManager_Free_Func) or NULL if there is no
      * implementation for the given methodId.
      */
-    const SOPC_MethodCallManager_Get_Func pFnGetMethod;
+    SOPC_MethodCallManager_Get_Func* const pFnGetMethod;
 
     /**
      * \brief internal data of the manager.
