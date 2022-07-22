@@ -175,7 +175,7 @@ void session_core_bs__may_validate_server_certificate(
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "Services: session=%" PRIu32
-                                       " user activation impossible because server certificate is validation failed "
+                                       " user activation impossible because server certificate validation failed "
                                        "using channel config %" PRIu32,
                                        session_core_bs__p_session, session_core_bs__p_channel_config_idx);
             }
