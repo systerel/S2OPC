@@ -145,6 +145,7 @@ check_commit_signature:
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:2c5ad684d4970ee0e4511540cabad44c256189b2b1d4a44949686c2fedf1c35b'
+    CMAKE_C_FLAGS: '-D_GNU_SOURCE'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
