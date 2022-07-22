@@ -308,8 +308,27 @@ if(ENABLE_TESTING)
   # Manage the Nano profiles extended mode
   if (WITH_NANO_EXTENDED)
     set(TOOLKIT_TEST_SERVER "toolkit_test_server")
+    set(TOOLKIT_TEST_FILE_TRANSFER "toolkit_test_file_transfer")
   else()
     set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
+  endif()
+
+  if (expat_FOUND)
+  add_executable(${TOOLKIT_TEST_FILE_TRANSFER} "validation_tests/client/test_file_transfer.c"
+  "validation_tests/client/test_file_transfer_method.c"
+  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
+  target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer")
+  target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+
+  target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_serverwrapper s2opc_clientwrapper Check::check)
+  target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
+
+  target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
+  target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "WITH_EXPAT")
+
+  else()
+  message(WARNING "test file transfer method ${TOOLKIT_TEST_FILE_TRANSFER} executable will not be compiled since Expat library not available.")
   endif()
 
   add_executable(${TOOLKIT_TEST_SERVER}
