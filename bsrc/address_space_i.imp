@@ -790,8 +790,14 @@ OPERATIONS
         IF l_bres = TRUE THEN
             IF p_nodeClass = e_ncl_Variable
             THEN
-                sc_addnode
-                <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId);
+
+                sc_addnode <-- check_constraints_addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_typeDefId);
+                IF sc_addnode = e_sc_ok
+                THEN
+                    sc_addnode
+                    <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
+                END
+                ;
                 IF sc_addnode = e_sc_ok
                 THEN
                     gen_addNode_event(p_newNodeId)

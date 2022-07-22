@@ -29,4 +29,15 @@ void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_b
 
 bool util_addspace__is_reversed_has_child(const OpcUa_ReferenceNode* ref);
 
+const SOPC_NodeId* util_addspace__get_direct_parent(const SOPC_NodeId* childNodeId);
+
+#define RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
+
+bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
+                                                    const SOPC_NodeId* originSubtype,
+                                                    const SOPC_NodeId* currentTypeOrSubtype,
+                                                    const SOPC_NodeId* expectedParentType);
+
+bool util_addspace__is_valid_ReferenceTypeId(const SOPC_NodeId* address_space_typing_bs__p_nodeId);
+
 #endif /* UTIL_ADDRESS_SPACE_H_ */

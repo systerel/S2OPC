@@ -31,8 +31,6 @@
 #include "util_address_space.h"
 
 #include "sopc_address_space.h"
-#include "sopc_embedded_nodeset2.h"
-#include "sopc_logger.h"
 #include "sopc_toolkit_config_constants.h"
 
 /*------------------------
@@ -47,120 +45,13 @@ void address_space_typing_bs__INITIALISATION(void) {}
 static bool is_component_of(const SOPC_NodeId* component, const constants_bs__t_Node_i node);
 static bool recursive_check_object_has_method(int recursionLimit, const SOPC_NodeId* object, const SOPC_NodeId* method);
 
-static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* error)
-{
-    if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";i=%" PRIu32,
-                               error, node_adjective, nodeId->Namespace, nodeId->Data.Numeric);
-    }
-    else if (nodeId->IdentifierType == SOPC_IdentifierType_String)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "address_space_typing_bs__is_transitive_child: %s, %s node: ns=%" PRIu16 ";s=%s", error,
-                               node_adjective, nodeId->Namespace, SOPC_String_GetRawCString(&nodeId->Data.String));
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "address_space_typing_bs__is_transitive_child: %s node: %s", node_adjective, error);
-    }
-}
-
-static const SOPC_NodeId* get_direct_parent_of_node(const constants_bs__t_Node_i child)
-{
-    SOPC_NodeId* directParent = NULL;
-    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, child);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, child);
-    for (int32_t i = 0; i < *n_refs; ++i)
-    {
-        OpcUa_ReferenceNode* ref = &(*refs)[i];
-
-        if (util_addspace__is_reversed_has_child(ref))
-        {
-            if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
-            { // Shall be on same server and shall use only NodeId
-                directParent = &ref->TargetId.NodeId;
-                break;
-            }
-            else
-            {
-                log_error_for_unknown_node(&ref->TargetId.NodeId, "direct parent", "is out of server");
-            }
-        }
-    }
-    return directParent;
-}
-
-static const SOPC_NodeId* get_direct_parent(const SOPC_NodeId* childNodeId)
-{
-    const SOPC_NodeId* result = NULL;
-
-    if (SOPC_IdentifierType_Numeric == childNodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == childNodeId->Namespace &&
-        childNodeId->Data.Numeric <= SOPC_MAX_TYPE_INFO_NODE_ID)
-    {
-        const SOPC_AddressSpaceTypeInfo* typeInfo = &SOPC_Embedded_HasSubTypeBackward[childNodeId->Data.Numeric];
-        if (typeInfo->hasSubtype)
-        {
-            result = &typeInfo->subtypeNodeId;
-        }
-    }
-    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
-    {
-        // Parent not found in static array of extracted HasSubtype references, start research in address space
-
-        void* node;
-        bool node_found = false;
-
-        node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, childNodeId, &node_found);
-
-        if (node_found)
-        {
-            // Starting to check if direct parent is researched parent
-            result = get_direct_parent_of_node(node);
-        }
-    }
-    return result;
-}
-
-#define RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
-
-static bool recursive_is_transitive_subtype(int recursionLimit,
-                                            const SOPC_NodeId* originSubtype,
-                                            const SOPC_NodeId* currentTypeOrSubtype,
-                                            const SOPC_NodeId* expectedParentType)
-{
-    recursionLimit--;
-    if (recursionLimit < 0)
-    {
-        return false;
-    }
-
-    // Starting to check if direct parent is researched parent
-    const SOPC_NodeId* directParent = get_direct_parent(currentTypeOrSubtype);
-    if (NULL != directParent)
-    {
-        if (SOPC_NodeId_Equal(directParent, expectedParentType))
-        {
-            return true;
-        }
-        else
-        {
-            return recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent, expectedParentType);
-        }
-    } // else: transitive research failed
-
-    return false;
-}
-
 void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i address_space_typing_bs__p_subtype,
                                                     const constants__t_NodeId_i address_space_typing_bs__p_parent_type,
                                                     t_bool* const address_space_typing_bs__bres)
 {
-    *address_space_typing_bs__bres =
-        recursive_is_transitive_subtype(RECURSION_LIMIT, address_space_typing_bs__p_subtype,
-                                        address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
+    *address_space_typing_bs__bres = util_addspace__recursive_is_transitive_subtype(
+        RECURSION_LIMIT, address_space_typing_bs__p_subtype, address_space_typing_bs__p_subtype,
+        address_space_typing_bs__p_parent_type);
 }
 
 static SOPC_NodeId Enumeration_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
@@ -192,7 +83,7 @@ void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
     }
 
     // Case 1 evaluation
-    bool res = recursive_is_transitive_subtype(1, dataType, dataType, valueType);
+    bool res = util_addspace__recursive_is_transitive_subtype(1, dataType, dataType, valueType);
 
     // Case 2 evaluation
     if (!res && SOPC_Int32_Id == valueType->Data.Numeric)
@@ -215,27 +106,7 @@ void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
 void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId_i address_space_typing_bs__p_nodeId,
                                                        t_bool* const address_space_typing_bs__bres)
 {
-    const SOPC_NodeId* nodeId = address_space_typing_bs__p_nodeId;
-    *address_space_typing_bs__bres = false;
-    if (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == nodeId->Namespace &&
-        nodeId->Data.Numeric <= SOPC_MAX_TYPE_INFO_NODE_ID)
-    {
-        // NodeId is in statically extracted type nodes info
-        const SOPC_AddressSpaceTypeInfo* typeInfo = &SOPC_Embedded_HasSubTypeBackward[nodeId->Data.Numeric];
-        *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == typeInfo->nodeClass;
-    }
-    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
-    {
-        // NodeId not in static array of type nodes info, start research in address space
-        bool node_found = false;
-        SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, nodeId, &node_found);
-
-        if (node_found)
-        {
-            // Check node has expected class
-            *address_space_typing_bs__bres = OpcUa_NodeClass_ReferenceType == node->node_class;
-        }
-    }
+    *address_space_typing_bs__bres = util_addspace__is_valid_ReferenceTypeId(address_space_typing_bs__p_nodeId);
 }
 
 static bool recursive_check_object_has_method(int recursionLimit,
@@ -280,7 +151,8 @@ static bool recursive_check_object_has_method(int recursionLimit,
             break;
 
         case OpcUa_NodeClass_ObjectType:
-            res = recursive_check_object_has_method(recursionLimit, get_direct_parent(objectId), methodId);
+            res =
+                recursive_check_object_has_method(recursionLimit, util_addspace__get_direct_parent(objectId), methodId);
             break;
 
         default:
