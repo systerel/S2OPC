@@ -704,7 +704,6 @@ void user_authentication_bs__encrypt_user_token(
     }
     if (SOPC_STATUS_OK == status)
     {
-        // TODO: forbid empty password ?
         if (userToken->Password.Length > 0)
         {
             pwdLength = (uint32_t) userToken->Password.Length;
@@ -723,7 +722,7 @@ void user_authentication_bs__encrypt_user_token(
         {
             const uint32_t length = pwdLength + lenNonce;
             status = SOPC_UInt32_Write(&length, unencryptedBuffer, 0);
-            if (SOPC_STATUS_OK == status)
+            if (SOPC_STATUS_OK == status && pwdLength > 0)
             {
                 status = SOPC_Buffer_Write(unencryptedBuffer, userToken->Password.Data,
                                            (uint32_t) userToken->Password.Length);
