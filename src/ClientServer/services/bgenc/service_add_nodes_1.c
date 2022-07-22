@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 05/08/2022 09:03:06
+ Date                 : 05/08/2022 09:26:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -177,9 +177,6 @@ void service_add_nodes_1__treat_add_nodes_item(
          service_add_nodes_1__p_typeDefId,
          &service_add_nodes_1__l_sc,
          &service_add_nodes_1__l_new_nid);
-      if (service_add_nodes_1__l_sc == constants_statuscodes_bs__e_sc_ok) {
-         ;
-      }
       if (service_add_nodes_1__l_sc == constants_statuscodes_bs__e_sc_ok) {
          service_write__addNode_AddressSpace(service_add_nodes_1__p_parentExpNid,
             service_add_nodes_1__p_refTypeId,

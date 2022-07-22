@@ -21,7 +21,7 @@ IMPLEMENTATION
     service_add_nodes_1_i
 
 REFINES
-    service_add_nodes_1
+    service_add_nodes_1_r
 
 SEES
     constants,
@@ -72,18 +72,15 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    /* TODO: make browse service accessible to check browse name properties ? */
     sc_operation, new_nid
       <-- check_add_nodes_item_params
-        (p_parentNid, p_refTypeId, p_reqNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId) =
+        (p_parentNid, p_refTypeId, p_reqNodeId, p_nodeClass, p_typeDefId) =
     PRE
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : t_ExpandedNodeId &
         p_refTypeId : t_NodeId_i &
         p_refTypeId : t_NodeId &
         p_reqNodeId : t_ExpandedNodeId_i &
-        /*p_browseName : t_QualifiedName_i &
-        p_browseName : t_QualifiedName &*/
         p_nodeClass : t_NodeClass_i &
         p_nodeClass : t_NodeClass &
         p_typeDefId : t_ExpandedNodeId_i &
@@ -101,7 +98,7 @@ LOCAL_OPERATIONS
                             e_sc_bad_node_id_exists,
                             /* bad_node_class_invalid => already checked */
                             /* e_sc_bad_browse_name_invalid => already checked */
-                            /* e_sc_bad_browse_name_duplicated, => we should use browse service here but it is not possible  */
+                            /* e_sc_bad_browse_name_duplicated, => checked in address_space_bs (browse service not accessible here) */
                             /* bad_node_attributes_invalid => already checked */
                             e_sc_bad_type_definition_invalid,
                             e_sc_bad_out_of_memory }  &
@@ -134,7 +131,7 @@ OPERATIONS
 
     sc_operation, new_nid
       <-- check_add_nodes_item_params
-        (p_parentNid, p_refTypeId, p_reqNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId) =
+        (p_parentNid, p_refTypeId, p_reqNodeId, p_nodeClass, p_typeDefId) =
     VAR
         l_bres,
         l_local_server_exp_node_id,
@@ -174,14 +171,13 @@ OPERATIONS
         ;
         IF l_bres = TRUE
         THEN
-            /* Check it is a hierarchical reference type (minimal condition) */
+            /* Check it is a hierarchical reference type (minimal condition),
+               then check specific node class condition in address_space_bs */
             l_bres <-- is_transitive_subtype(p_refTypeId, c_HierarchicalReferences_Type_NodeId);
             IF l_bres = FALSE
             THEN
                 sc_operation := e_sc_bad_reference_type_id_invalid
             END
-            /* TODO: check reference type allowed given parent node class and new node class:
-                     only possible for "known" semantic and to be done in address_space_bs when node available ? */
         END
         ;
         /* Validates requested NodeId (or Generates a fresh one if not defined) */
@@ -212,10 +208,8 @@ OPERATIONS
             END
         END
         ;
-        /* TODO: check uniqueness of BrowseName (only in TypeDefinition and InstanceDeclaration).
-           Or for all "same relationship with the parent" as stated by bad status code ?
-           Note: it should use browse service / ref iterator which is in another branch or C implem only.
-        */
+        /* Note: BrowseName is checked in address_space_bs since we do not have access to browse service here */
+
         /* Validates TypeDefinition if defined (mandatory for nodes of class Object or Variable) */
         IF l_bres = TRUE & p_typeDefId /= c_ExpandedNodeId_indet
         THEN
@@ -259,13 +253,7 @@ OPERATIONS
     IN
         l_sc, l_new_nid
           <-- check_add_nodes_item_params
-            (p_parentExpNid, p_refTypeId, p_reqExpNodeId, /*p_browseName,*/ p_nodeClass, p_typeDefId);
-        IF l_sc = e_sc_ok
-        THEN
-            /* Check user right ? Or before ? */
-            skip
-        END
-        ;
+            (p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_nodeClass, p_typeDefId);
         IF l_sc = e_sc_ok
         THEN
             l_sc <-- addNode_AddressSpace(p_parentExpNid, p_refTypeId, l_new_nid, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
