@@ -1503,6 +1503,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     SOPC_ReturnStatus sopc_status;
     bool found = false;
     size_t read_count;
+    char* buffer = NULL;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1514,9 +1515,6 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             /* avoid hard indentation level */
             return OpcUa_BadInvalidArgument;
         }
-        char buffer[length + 1];
-        memset(buffer, 0, sizeof(buffer));
-
         if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
         {
             /* check if File was not opened for read access */
@@ -1528,6 +1526,10 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                 /* avoid hard indentation level */
                 return OpcUa_BadInvalidState;
             }
+
+            buffer = SOPC_Malloc((size_t)(length + 1) * sizeof(char));
+            memset(buffer, 0, (size_t)(length + 1));
+
             if (NULL != msg)
             {
                 if (NULL != file->fp)
@@ -1582,6 +1584,8 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                                "FileTransfer:ReadTmpFile: unable to retrieve file in the API");
         status = OpcUa_BadUnexpectedError;
     }
+
+    SOPC_Free(buffer);
     return status;
 }
 
@@ -1591,6 +1595,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
 {
     SOPC_StatusCode status;
     bool found = false;
+    char* buffer = NULL;
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1611,7 +1616,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                             return SOPC_GoodGenericStatus;
                         }
                         size_t ret;
-                        char buffer[msg->Length];
+                        buffer = SOPC_Malloc((size_t) msg->Length);
                         memcpy(buffer, msg->Data, (size_t) msg->Length);
                         /* If ret != msg->Length then file might be locked and thus not writable */
                         ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
@@ -1659,6 +1664,8 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                                "FileTransfer:WriteTmpFile: unable to retrieve file in the API");
         status = OpcUa_BadUnexpectedError;
     }
+
+    SOPC_Free(buffer);
     return status;
 }
 
