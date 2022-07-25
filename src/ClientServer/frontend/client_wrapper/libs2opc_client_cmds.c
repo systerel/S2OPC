@@ -2097,16 +2097,13 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
     }
 
     int32_t count = 0;
-    if (SOPC_STATUS_OK == status)
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < (int32_t) nbElements && NULL != continuationPoints[i] &&
+                        0 < continuationPoints[i]->Length;
+         i++)
     {
-        for (int32_t i = 0; i < (int32_t) nbElements; i++)
-        {
-            if (NULL != continuationPoints[i] && 0 < continuationPoints[i]->Length)
-            {
-                SOPC_ByteString_Copy(&nextContinuationPoints[count], continuationPoints[i]);
-                count++;
-            }
-        }
+        SOPC_ByteString_Initialize(&nextContinuationPoints[count]);
+        status = SOPC_ByteString_Copy(&nextContinuationPoints[count], continuationPoints[i]);
+        count++;
     }
 
     /* craft request */
