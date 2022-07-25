@@ -118,7 +118,8 @@ typedef struct T_MQTT_TRANSPORT_CONTEXT_CONNEXION_CONFIGURATION
 {
     char uri[MQTT_LIB_MAX_SIZE_URI];              /* Uri of the broker */
     char topicname[MQTT_LIB_MAX_SIZE_TOPIC_NAME]; /* Mqtt topic name or OPCUA PUB SUB queuename*/
-
+    char username[MQTT_LIB_MAX_SIZE_USERNAME];    /* Username for authentification connection optional*/
+    char password[MQTT_LIB_MAX_SIZE_PASSWORD];
 } tMqttTransportContextConnexionConfig;
 
 /* This structure defines the callbacks configuration, submitted by get handle request sent to a mqtt manager */
@@ -2562,6 +2563,9 @@ static int api_lib_connect(tMqttTransportContext* pCtx)
         conn_opts.onFailure = cb_lib_onConnectFailure;
         conn_opts.context = &pCtx->identification; /* Context shall be identification information : manager
                                                                  handle and transport context async handle */
+        conn_opts.username = pCtx->connexionConfig.username;
+        conn_opts.password = pCtx->connexionConfig.password;
+
         MQTTAsyncResult = MQTTAsync_connect(pCtx->clientHandle, &conn_opts);
 
         if (MQTTASYNC_SUCCESS != MQTTAsyncResult)
@@ -3198,6 +3202,8 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_Clear(MqttManagerHandle* pWks)
 static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHandleRequest* pGetHandleRequest,
                                                                      const char* sUri,
                                                                      const char* sTopicName,
+                                                                     const char* sUsername,
+                                                                     const char* sPassword,
                                                                      FctGetHandleResponse* pCbGetHandleSuccess,
                                                                      FctGetHandleResponse pCbGetHandleFailure,
                                                                      FctClientStatus* pCbClientReady,
@@ -3225,6 +3231,12 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
 
     snprintf(pGetHandleRequest->connectionConf.topicname, sizeof(pGetHandleRequest->connectionConf.topicname) - 1, "%s",
              sTopicName);
+
+    snprintf(pGetHandleRequest->connectionConf.username, sizeof(pGetHandleRequest->connectionConf.username) - 1, "%s",
+             sUsername);
+
+    snprintf(pGetHandleRequest->connectionConf.password, sizeof(pGetHandleRequest->connectionConf.password) - 1, "%s",
+             sPassword);
 
     pGetHandleRequest->callbacksConf.pCbGetHandleSuccess = pCbGetHandleSuccess;
     pGetHandleRequest->callbacksConf.pCbGetHandleFailure = pCbGetHandleFailure;
@@ -3287,6 +3299,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
                                                       void* pUserContext,
                                                       const char* uri,
                                                       const char* topicName,
+                                                      const char* username,
+                                                      const char* password,
                                                       FctGetHandleResponse* pCbGetHandleSuccess,
                                                       FctGetHandleResponse* pCbGetHandleFailure,
                                                       FctClientStatus* pCbClientReady,
@@ -3325,8 +3339,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
     }
 
     /* Get handle request data initialization */
-    SOPC_MQTT_MGR_InitializeGetNewHandleRequest((tMqttGetHandleRequest*) event.pEventData, uri, topicName,
-                                                pCbGetHandleSuccess, pCbGetHandleFailure, pCbClientReady,
+    SOPC_MQTT_MGR_InitializeGetNewHandleRequest((tMqttGetHandleRequest*) event.pEventData, uri, topicName, username,
+                                                password, pCbGetHandleSuccess, pCbGetHandleFailure, pCbClientReady,
                                                 pCbClientNotReady, pCbMessageReceived, pCbReleaseHandle, pUserContext);
 
     event.size = sizeof(tMqttGetHandleRequest);
@@ -3847,6 +3861,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(MqttTransportHandle* pCt
 MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
                                                          const char* uri,
                                                          const char* topicName,
+                                                         const char* username,
+                                                         const char* password,
                                                          FctMessageSyncReceived* pCbMessageReceived,
                                                          void* pUserContext)
 {
@@ -3916,9 +3932,9 @@ MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks
 
     Mutex_Lock(&pCtx->lock);
 
-    result = SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, pCtx, uri, topicName, SYNCH_getHandleCb, SYNCH_getHandleFailedCb,
-                                                 SYNCH_clientReadyCb, SYNCH_clientNotReady, SYNCH_msgReceived,
-                                                 SYNCH_handleReleased);
+    result = SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, pCtx, uri, topicName, username, password, SYNCH_getHandleCb,
+                                                 SYNCH_getHandleFailedCb, SYNCH_clientReadyCb, SYNCH_clientNotReady,
+                                                 SYNCH_msgReceived, SYNCH_handleReleased);
 
     if (SOPC_STATUS_OK != result)
     {

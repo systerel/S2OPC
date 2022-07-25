@@ -73,9 +73,10 @@
 #define MQTT_LIB_QOS (2)                /* QOS of publish, subscribe set to 2*/
 #define MQTT_LIB_CONNECTION_TIMEOUT (4) /* Connection lib timeout = 4 s*/
 #define MQTT_LIB_KEEPALIVE (4)          /* Connection lost detection set to 4 s*/
-#define MQTT_LIB_TOPIC_NAME ("S2OPC")   /* Topic name hard coded.*/
 #define MQTT_LIB_MAX_SIZE_TOPIC_NAME (256)
 #define MQTT_LIB_MAX_SIZE_URI (256)
+#define MQTT_LIB_MAX_SIZE_USERNAME (256)
+#define MQTT_LIB_MAX_SIZE_PASSWORD (256)
 
 /* Others constants*/
 
@@ -151,6 +152,8 @@ SOPC_ReturnStatus SOPC_MQTT_MGR_Destroy(MqttManagerHandle** ppWks);
  * \param pUserContext  User context, pass in paramters of callbacks
  * \param uri           Uri of broker
  * \param topicname     Topic name to subscribe
+ * \param username      Username identifier optional. Can be NULL
+ * \param password      Password required if identifier. Can be NULL
  * \param cbGetHandleSuccess Callback of success of GetTransportAsyncHandle
  * \param cbGetHandleFailure Callback of failure of GetTransportAsyncHandle
  * \param cbClientReady  Callback of status change to READY
@@ -162,6 +165,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(MqttManagerHandle* pWks,
                                                       void* pUserContext,
                                                       const char* uri,
                                                       const char* topicname,
+                                                      const char* username,
+                                                      const char* password,
                                                       FctGetHandleResponse* cbGetHandleSuccess,
                                                       FctGetHandleResponse* cbGetHandleFailure,
                                                       FctClientStatus* cbClientReady,
@@ -198,6 +203,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,
  * \param pWks  MQTT Manager handle
  * \param uri   Uri of broker
  * \param topicName  MQTT topic name used for subscriptions
+ * \param username   Username identifier optional. Can be NULL
+ * \param password   Password required if identifier. Can be NULL
  * \param getMsg  Callback of message reception. If NULL, SOPC_MQTT_TRANSPORT_SYNCH_ReadMessage
  *                must be used to retrieve SOPC_Buffer data message.
  * \param pUserContext  Passed when calling getMsg
@@ -205,6 +212,8 @@ SOPC_ReturnStatus SOPC_MQTT_TRANSPORT_ASYNC_SendMessage(MqttManagerHandle* pWks,
 MqttTransportHandle* SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(MqttManagerHandle* pWks,
                                                          const char* uri,
                                                          const char* topicName,
+                                                         const char* username,
+                                                         const char* password,
                                                          FctMessageSyncReceived getMsg,
                                                          void* pUserContext);
 
