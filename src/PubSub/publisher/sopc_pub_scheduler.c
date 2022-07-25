@@ -714,7 +714,9 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         }
         handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
         pubSchedulerCtx.transport[index].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-            handleMqttManager, &address[strlen(MQTT_PREFIX)], MQTT_LIB_TOPIC_NAME, on_mqtt_message_received, NULL);
+            handleMqttManager, &address[strlen(MQTT_PREFIX)], SOPC_PubSubConnection_Get_MqttTopic(connection),
+            SOPC_PubSubConnection_Get_MqttUsername(connection), SOPC_PubSubConnection_Get_MqttPassword(connection),
+            on_mqtt_message_received, NULL);
 
         if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
         {

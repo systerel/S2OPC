@@ -527,8 +527,11 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             else
                             {
                                 schedulerCtx.transport[iIter].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-                                    handleMqttMgr, &address[strlen(MQTT_PREFIX)], MQTT_LIB_TOPIC_NAME,
-                                    on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
+                                    handleMqttMgr, &address[strlen(MQTT_PREFIX)],
+                                    SOPC_PubSubConnection_Get_MqttTopic(connection),
+                                    SOPC_PubSubConnection_Get_MqttUsername(connection),
+                                    SOPC_PubSubConnection_Get_MqttPassword(connection), on_mqtt_message_received,
+                                    schedulerCtx.transport[iIter].connection);
 
                                 if (schedulerCtx.transport[iIter].mqttHandle == NULL)
                                 {
