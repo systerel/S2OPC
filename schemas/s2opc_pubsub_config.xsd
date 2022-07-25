@@ -53,6 +53,9 @@
     <xs:attribute name="mode" type="modeType" use="required"/>
     <xs:attribute name="interfaceName" type="xs:string"/> <!-- mandatory for publisher with Ethernet protocol, optional otherwise -->
     <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
+    <xs:attribute name="mqttUsername" type="xs:string" use="optional"/> <!-- mqttUsername and mqttPassword must be either none or both set -->
+    <xs:attribute name="mqttPassword" type="xs:string" use="optional"/> 
+    <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used--> 
   </xs:complexType>
   <xs:complexType name="message">
     <xs:sequence>
