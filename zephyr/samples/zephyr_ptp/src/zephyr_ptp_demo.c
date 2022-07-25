@@ -31,26 +31,26 @@
 
 #include <logging/log.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <zephyr.h>
-#include <errno.h>
 #include <console/console.h>
-#include <sys/reboot.h>
 #include <drivers/hwinfo.h>
+#include <errno.h>
 #include <shell/shell.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/reboot.h>
+#include <zephyr.h>
 
-#include "sopc_macros.h"
-#include "sopc_mutexes.h"
-#include "sopc_time.h"
-#include "sopc_threads.h"
 #include "sopc_assert.h"
 #include "sopc_async_queue.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
+#include "sopc_threads.h"
+#include "sopc_time.h"
 #include "sopc_version.h"
 
-#include "sopc_zephyr_time.h"
 #include "sopc_udp_sockets.h"
+#include "sopc_zephyr_time.h"
 
 #include <net/net_core.h>
 
@@ -90,23 +90,28 @@ static int gParamI2 = 0;
 static Mutex gMutex;
 
 static SOPC_Time_TimeSource gSource = SOPC_TIME_TIMESOURCE_INTERNAL;
-static uint8_t gLastGmId [8] = {0}; //
+static uint8_t gLastGmId[8] = {0}; //
 
 static const char* sourceToString(const SOPC_Time_TimeSource source)
 {
-    switch (source) {
-    case SOPC_TIME_TIMESOURCE_INTERNAL:   return "INTERNAL";
-    case SOPC_TIME_TIMESOURCE_PTP_SLAVE:  return "PTP_SLAVE";
-    case SOPC_TIME_TIMESOURCE_PTP_MASTER: return "PTP_MASTER";
-        default: return "INVALID";
+    switch (source)
+    {
+    case SOPC_TIME_TIMESOURCE_INTERNAL:
+        return "INTERNAL";
+    case SOPC_TIME_TIMESOURCE_PTP_SLAVE:
+        return "PTP_SLAVE";
+    case SOPC_TIME_TIMESOURCE_PTP_MASTER:
+        return "PTP_MASTER";
+    default:
+        return "INVALID";
     }
 }
 
 typedef struct
 {
     const uint8_t* serialNumber;
-    const char*  ipAddr;
-    const char*  deviceName;
+    const char* ipAddr;
+    const char* deviceName;
 } DeviceIdentifier;
 
 static const DeviceIdentifier gDevices[] = {
@@ -117,7 +122,6 @@ static const DeviceIdentifier gDevices[] = {
     {"", "192.168.42.110", "Unknown device"},
 };
 
-
 /***************************************************/
 /***************************************************/
 
@@ -126,10 +130,10 @@ static const DeviceIdentifier* getDevice(void);
 static const char* DateToTimeString(const SOPC_DateTime dt);
 
 /***************************************************/
-static void gptp_phase_dis_cb(uint8_t *gm_identity,
-                              uint16_t *time_base,
-                              struct gptp_scaled_ns *last_gm_ph_change,
-                              double *last_gm_freq_change)
+static void gptp_phase_dis_cb(uint8_t* gm_identity,
+                              uint16_t* time_base,
+                              struct gptp_scaled_ns* last_gm_ph_change,
+                              double* last_gm_freq_change)
 {
     SOPC_UNUSED_ARG(time_base);
     SOPC_UNUSED_ARG(last_gm_ph_change);
@@ -141,9 +145,8 @@ static void gptp_phase_dis_cb(uint8_t *gm_identity,
     if (memcmp(gLastGmId, gm_identity, GPTP_CLOCK_ID_LEN) != 0)
     {
         memcpy(gLastGmId, gm_identity, GPTP_CLOCK_ID_LEN);
-        synch_printf("[II] New GM clock : %02X%02X%02X:%02X%02X:%02X%02X%02X\n",
-                gLastGmId[0], gLastGmId[1], gLastGmId[2], gLastGmId[3],
-                gLastGmId[4], gLastGmId[5], gLastGmId[6], gLastGmId[7]);
+        synch_printf("[II] New GM clock : %02X%02X%02X:%02X%02X:%02X%02X%02X\n", gLastGmId[0], gLastGmId[1],
+                     gLastGmId[2], gLastGmId[3], gLastGmId[4], gLastGmId[5], gLastGmId[6], gLastGmId[7]);
     }
 
     /* Note:
@@ -174,14 +177,14 @@ static void net_send(void)
     static SOPC_Socket_AddressInfo* addr = NULL;
 
     static Socket sock = SOPC_INVALID_SOCKET;
-    static SOPC_Buffer* buffer= NULL;
+    static SOPC_Buffer* buffer = NULL;
     if (!initialized)
     {
         bool netInit = Network_Initialize(getDefaultIp());
         SOPC_ASSERT(netInit == true);
 
         addr = SOPC_UDP_SocketAddress_Create(false, MULTICAST_OUT_ADDR, MULTICAST_OUT_PORT);
-        status = SOPC_UDP_Socket_CreateToSend (addr, NULL, 1, &sock);
+        status = SOPC_UDP_Socket_CreateToSend(addr, NULL, 1, &sock);
         SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         SOPC_UDP_Socket_Set_MulticastTTL(sock, 4);
@@ -201,7 +204,7 @@ static void net_send(void)
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     status = SOPC_UDP_Socket_SendTo(sock, addr, buffer);
-    if(status != SOPC_STATUS_OK)
+    if (status != SOPC_STATUS_OK)
     {
         synch_printf("Failed to send net message (%d)\n", status);
     }
@@ -209,23 +212,18 @@ static void net_send(void)
 
 static const char* DateToTimeString(const SOPC_DateTime dt)
 {
-    static char dateOnce [60];
+    static char dateOnce[60];
     // dt / MS_TO_100NS = number of milliseconds
     // Avoid overflow by removing part greater than 1 day
-    const uint32_t i_ms = (uint32_t) ((dt / MS_TO_100NS) % (1000 * 60 * 60 * 24));
-    const uint32_t i_day = (uint32_t) ((dt / MS_TO_100NS) /(1000 * 60 * 60 * 24));
+    const uint32_t i_ms = (uint32_t)((dt / MS_TO_100NS) % (1000 * 60 * 60 * 24));
+    const uint32_t i_day = (uint32_t)((dt / MS_TO_100NS) / (1000 * 60 * 60 * 24));
 
     const uint32_t i_s = (i_ms / MS_TO_US);
     const uint32_t i_min = (i_s / 60);
     const uint32_t i_hour = (i_min / 60);
 
-    snprintf(dateOnce, sizeof(dateOnce), "Day %u, %02d h %02d m %02d s %03d ms",
-            i_day,
-            i_hour % 24,
-            i_min % 60,
-            i_s % 60,
-            i_ms % MS_TO_US
-            );
+    snprintf(dateOnce, sizeof(dateOnce), "Day %u, %02d h %02d m %02d s %03d ms", i_day, i_hour % 24, i_min % 60,
+             i_s % 60, i_ms % MS_TO_US);
     return dateOnce;
 }
 
@@ -238,8 +236,8 @@ static void* print_thread(void* context)
     for (;;)
     {
         char* element;
-        SOPC_ReturnStatus result = SOPC_AsyncQueue_BlockingDequeue(printQueue, (void**)&element);
-        SOPC_ASSERT(result ==SOPC_STATUS_OK);
+        SOPC_ReturnStatus result = SOPC_AsyncQueue_BlockingDequeue(printQueue, (void**) &element);
+        SOPC_ASSERT(result == SOPC_STATUS_OK);
         printk("%s", element);
         SOPC_Free(element);
     }
@@ -255,13 +253,13 @@ static void synch_printf(const char* format, ...)
     va_start(args, format);
     vsnprintf(buffer, 80, format, args);
     va_end(args);
-    SOPC_AsyncQueue_BlockingEnqueue(printQueue, (void**)buffer);
+    SOPC_AsyncQueue_BlockingEnqueue(printQueue, (void**) buffer);
 }
 #endif
 
 static void test_print_DateTime(void)
 {
-    char * datetime = SOPC_Time_GetStringOfCurrentTimeUTC(false);
+    char* datetime = SOPC_Time_GetStringOfCurrentTimeUTC(false);
 
     synch_printf("\nCurrent date/time : %s\n", datetime);
 
@@ -275,11 +273,11 @@ static void test_infos(void)
     synch_printf("- Time source is %s\n", sourceToString(gSource));
     if (gSource == SOPC_TIME_TIMESOURCE_PTP_SLAVE)
     {
-        const int corrPrecent = -(int)(10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
-        synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent /100, abs(corrPrecent %100));
+        const int corrPrecent = -(int) (10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+        synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent / 100, abs(corrPrecent % 100));
     }
-    const int clockPrec = (int)(10000 * (SOPC_RealTime_GetClockPrecision()));
-    synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec /100, abs(clockPrec %100));
+    const int clockPrec = (int) (10000 * (SOPC_RealTime_GetClockPrecision()));
+    synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec / 100, abs(clockPrec % 100));
 
     const char* const ip = getDefaultIp();
     synch_printf("- IP ADDR = %s\n", (ip != NULL ? ip : "<NULL>"));
@@ -289,9 +287,8 @@ static void test_infos(void)
         synch_printf("- Device ID = %s\n", dev->deviceName);
         synch_printf("- Device SN = <%s>\n", dev->serialNumber);
 
-        synch_printf("- GM Clock Id : %02X%02X%02X:%02X%02X:%02X%02X%02X\n",
-                gLastGmId[0], gLastGmId[1], gLastGmId[2], gLastGmId[3],
-                gLastGmId[4], gLastGmId[5], gLastGmId[6], gLastGmId[7]);
+        synch_printf("- GM Clock Id : %02X%02X%02X:%02X%02X:%02X%02X%02X\n", gLastGmId[0], gLastGmId[1], gLastGmId[2],
+                     gLastGmId[3], gLastGmId[4], gLastGmId[5], gLastGmId[6], gLastGmId[7]);
     }
 }
 
@@ -307,14 +304,14 @@ static void* test_thread(void* context)
 
     net_send(); // Setup socket;
 
-    SOPC_RealTime_GetTime (&t0);
+    SOPC_RealTime_GetTime(&t0);
 
     for (;;)
     {
         // Test management
         Mutex_Lock(&gMutex);
         const bool newTest = (gSubTestId == 0);
-        gSubTestId ++;
+        gSubTestId++;
         const int testId = gTestId;
         Mutex_Unlock(&gMutex);
 
@@ -325,11 +322,11 @@ static void* test_thread(void* context)
             synch_printf("[II] Time gSource changed to %s\n", sourceToString(gSource));
         }
 
-        const int corrPrecent = -(int)(10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+        const int corrPrecent = -(int) (10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
         if (corrPrecent != previousCorrection)
         {
             previousCorrection = corrPrecent;
-            synch_printf("[II] Time Correction changed to %3d.%02d%%\n", corrPrecent /100, abs(corrPrecent %100));
+            synch_printf("[II] Time Correction changed to %3d.%02d%%\n", corrPrecent / 100, abs(corrPrecent % 100));
         }
         if (testId == 1)
         {
@@ -341,18 +338,17 @@ static void* test_thread(void* context)
                 synch_printf("-----------------------------------\n");
                 synch_printf("Delta RT, delta DateTime, Ptp Corr\n");
             }
-            SOPC_RealTime_GetTime (&rt1);
+            SOPC_RealTime_GetTime(&rt1);
             dt1 = SOPC_Time_GetCurrentTimeUTC();
             SOPC_Sleep(ONE_SECOND_MS);
-            SOPC_RealTime_GetTime (&rt2);
+            SOPC_RealTime_GetTime(&rt2);
             dt2 = SOPC_Time_GetCurrentTimeUTC();
             net_send();
 
             const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / MS_TO_US;
             const int deltaDt100us = (dt2 - dt1) / MS_TO_US;
-            synch_printf("dRT=(%3d.%01d ms) dDT=(%3d.%01d ms)\n",
-                    deltaRt100us /10, abs(deltaRt100us %10),
-                    deltaDt100us /10, abs(deltaDt100us %10));
+            synch_printf("dRT=(%3d.%01d ms) dDT=(%3d.%01d ms)\n", deltaRt100us / 10, abs(deltaRt100us % 10),
+                         deltaDt100us / 10, abs(deltaDt100us % 10));
         }
         else if (testId == 2)
         {
@@ -365,8 +361,8 @@ static void* test_thread(void* context)
                 synch_printf("----------------------------------------\n");
                 synch_printf("Delta RT, delta DateTime, Ptp Corr\n");
             }
-            SOPC_RealTime_GetTime (&rt1);
-            SOPC_RealTime_GetTime (&rt2);
+            SOPC_RealTime_GetTime(&rt1);
+            SOPC_RealTime_GetTime(&rt2);
             dt1 = SOPC_Time_GetCurrentTimeUTC();
             SOPC_RealTime_AddSynchedDuration(&rt2, ONE_SECOND_MS * MS_TO_US, 0);
             SOPC_RealTime_SleepUntil(&rt2);
@@ -376,10 +372,8 @@ static void* test_thread(void* context)
             dtPrec = dt2;
             const int deltaRt100us = (rt2.tick100ns - rt1.tick100ns) / MS_TO_US;
             const int deltaDt100us = (dtPrec - dt1) / MS_TO_US;
-            synch_printf("dRT=(%4d.%01d ms) dDT=(%4d.%01d ms) DT=(%s)\n",
-                    deltaRt100us /10, abs(deltaRt100us %10),
-                    deltaDt100us /10, abs(deltaDt100us %10),
-                    DateToTimeString(dt2));
+            synch_printf("dRT=(%4d.%01d ms) dDT=(%4d.%01d ms) DT=(%s)\n", deltaRt100us / 10, abs(deltaRt100us % 10),
+                         deltaDt100us / 10, abs(deltaDt100us % 10), DateToTimeString(dt2));
         }
         else if (testId == 3)
         {
@@ -391,7 +385,7 @@ static void* test_thread(void* context)
                 synch_printf("========================================\n");
                 synch_printf("Test #3: Chrono test\n\n");
                 synch_printf("----------------------------------------\n");
-                SOPC_RealTime_GetTime (&rt1);
+                SOPC_RealTime_GetTime(&rt1);
                 dt1 = SOPC_Time_GetCurrentTimeUTC();
                 pre = 5;
             }
@@ -403,22 +397,20 @@ static void* test_thread(void* context)
             else if (pre == 0)
             {
                 synch_printf(" !!! GO !!!\n");
-                SOPC_RealTime_GetTime (&rt1);
+                SOPC_RealTime_GetTime(&rt1);
                 dt1 = SOPC_Time_GetCurrentTimeUTC();
             }
             SOPC_Sleep(ONE_SECOND_MS);
-            pre --;
+            pre--;
 
             if (pre < -1)
             {
                 dt2 = SOPC_Time_GetCurrentTimeUTC();
-                SOPC_RealTime_GetTime (&rt2);
+                SOPC_RealTime_GetTime(&rt2);
 
                 const int deltaRts = (rt2.tick100ns - rt1.tick100ns) / SECOND_TO_100NS;
                 const int deltaDts = (dt2 - dt1) / SECOND_TO_100NS;
-                synch_printf("dRT=(%6d s) dDT=(%6d s)\n",
-                        deltaRts,
-                        deltaDts);
+                synch_printf("dRT=(%6d s) dDT=(%6d s)\n", deltaRts, deltaDts);
             }
         }
         else if (testId == 4)
@@ -429,11 +421,12 @@ static void* test_thread(void* context)
             {
                 synch_printf("\n");
                 synch_printf("========================================\n");
-                synch_printf("Test #4: Requesting 'SleepUntil(Per=%ums/Off=%ums)'\n\n", (unsigned)periodMs, (unsigned)offsetMs);
+                synch_printf("Test #4: Requesting 'SleepUntil(Per=%ums/Off=%ums)'\n\n", (unsigned) periodMs,
+                             (unsigned) offsetMs);
                 synch_printf("----------------------------------------\n");
             }
             dt1 = SOPC_Time_GetCurrentTimeUTC();
-            SOPC_RealTime_GetTime (&rt2);
+            SOPC_RealTime_GetTime(&rt2);
             uint64_t rt2Prec = rt2.tick100ns;
             SOPC_RealTime_AddSynchedDuration(&rt2, periodMs * MS_TO_US, offsetMs * MS_TO_US);
             SOPC_RealTime_SleepUntil(&rt2);
@@ -442,7 +435,7 @@ static void* test_thread(void* context)
 
             const unsigned dt = (rt2.tick100ns - rt2Prec) / 10;
             synch_printf("Event woken Drt=(%u us)", dt);
-            synch_printf(" at DT=(%s)\n",DateToTimeString(dt2));
+            synch_printf(" at DT=(%s)\n", DateToTimeString(dt2));
         }
         else if (testId == 5)
         {
@@ -451,25 +444,26 @@ static void* test_thread(void* context)
             {
                 synch_printf("\n");
                 synch_printf("========================================\n");
-                synch_printf("Test #5: WAITING FOR PTP SYNCHRO, thr = %03d.%02u%%'\n\n", thresholdPer10000/100, thresholdPer10000%100);
+                synch_printf("Test #5: WAITING FOR PTP SYNCHRO, thr = %03d.%02u%%'\n\n", thresholdPer10000 / 100,
+                             thresholdPer10000 % 100);
                 synch_printf("----------------------------------------\n");
             }
 
             // Reading SOPC_Time_GetCurrentTimeUTC forces PtP clock synchronization protocol.
             // See details in "opc_zephyr_time.h"
             dt1 = SOPC_Time_GetCurrentTimeUTC();
-            (void)dt1;
+            (void) dt1;
             SOPC_Sleep(1000);
 
-            const int clockPrec = (int)(10000 * (SOPC_RealTime_GetClockPrecision()));
-            const int corrPrecent = -(int)(10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
-            synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent /100, abs(corrPrecent %100));
-            synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec /100, abs(clockPrec %100));
+            const int clockPrec = (int) (10000 * (SOPC_RealTime_GetClockPrecision()));
+            const int corrPrecent = -(int) (10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+            synch_printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent / 100, abs(corrPrecent % 100));
+            synch_printf("- PtP Time precision is %3d.%02d%%\n", clockPrec / 100, abs(clockPrec % 100));
 
             if (clockPrec >= thresholdPer10000)
             {
                 synch_printf("DONE!\n");
-                gSubTestId  = 0;
+                gSubTestId = 0;
                 gTestId = 0;
             }
         }
@@ -510,10 +504,10 @@ static const DeviceIdentifier* getDevice(void)
         if (NULL == result)
         {
             printf("Unidentified device : [");
-            for (size_t i = 0 ; i < len ; i++)
+            for (size_t i = 0; i < len; i++)
             {
                 const uint8_t c = buffer[i];
-                if (c =='\\')
+                if (c == '\\')
                 {
                     printf("\\");
                 }
@@ -548,8 +542,8 @@ void main(void)
     printk("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
     SOPC_Sleep(100);
 
-	static struct gptp_phase_dis_cb phase_dis;
-	gptp_register_phase_dis_cb(&phase_dis, gptp_phase_dis_cb);
+    static struct gptp_phase_dis_cb phase_dis;
+    gptp_register_phase_dis_cb(&phase_dis, gptp_phase_dis_cb);
 
     Thread thread = P_THREAD_Create(&test_thread, NULL, "demo", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
     SOPC_ASSERT(thread != NULL);
@@ -564,8 +558,7 @@ void main(void)
 }
 
 /***************************************************/
-static int cmd_demo_info(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -577,63 +570,57 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_sleep(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_sleep(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 1;
     return 0;
 }
 
 /***************************************************/
-static int cmd_demo_stop(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_stop(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 0;
     return 0;
 }
 
 /***************************************************/
-static int cmd_demo_sleep_until(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_sleep_until(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 2;
     return 0;
 }
 
 /***************************************************/
-static int cmd_demo_wait(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_wait(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 5;
     return 0;
 }
 
 /***************************************************/
-static int cmd_demo_chrono(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_chrono(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 3;
     return 0;
 }
 
 /***************************************************/
-static int cmd_demo_date(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_date(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -642,8 +629,7 @@ static int cmd_demo_date(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_reboot(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_reboot(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -652,8 +638,7 @@ static int cmd_demo_reboot(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_offset(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_offset(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -661,7 +646,7 @@ static int cmd_demo_offset(const struct shell *shell, size_t argc,
     const char* param1 = (argc < 2 ? "200" : argv[1]);
     const char* param2 = (argc < 3 ? "20" : argv[2]);
 
-    gSubTestId  = 0;
+    gSubTestId = 0;
     gTestId = 4;
     gParamI1 = strtol(param1, NULL, 10);
     gParamI2 = strtol(param2, NULL, 10);
@@ -671,17 +656,16 @@ static int cmd_demo_offset(const struct shell *shell, size_t argc,
 
 /* Creating subcommands (level 1 command) array for command "demo". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
-        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
-        SHELL_CMD(stop, NULL, "Stop current test", cmd_demo_stop),
-        SHELL_CMD(sleep, NULL, "Sleep test", cmd_demo_sleep),
-        SHELL_CMD(until, NULL, "Sleep until test", cmd_demo_sleep_until),
-        SHELL_CMD(wait, NULL, "Wait for TPP synchro", cmd_demo_wait),
-        SHELL_CMD(offset, NULL, "Time offset test", cmd_demo_offset),
-        SHELL_CMD(chrono, NULL, "Chronometer test", cmd_demo_chrono),
-        SHELL_CMD(date, NULL, "Print date", cmd_demo_date),
-        SHELL_CMD(reboot, NULL, "Reboot target", cmd_demo_reboot),
-            SHELL_SUBCMD_SET_END
-);
+                               SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+                               SHELL_CMD(stop, NULL, "Stop current test", cmd_demo_stop),
+                               SHELL_CMD(sleep, NULL, "Sleep test", cmd_demo_sleep),
+                               SHELL_CMD(until, NULL, "Sleep until test", cmd_demo_sleep_until),
+                               SHELL_CMD(wait, NULL, "Wait for TPP synchro", cmd_demo_wait),
+                               SHELL_CMD(offset, NULL, "Time offset test", cmd_demo_offset),
+                               SHELL_CMD(chrono, NULL, "Chronometer test", cmd_demo_chrono),
+                               SHELL_CMD(date, NULL, "Print date", cmd_demo_date),
+                               SHELL_CMD(reboot, NULL, "Reboot target", cmd_demo_reboot),
+                               SHELL_SUBCMD_SET_END);
 
 /* Creating root (level 0) command "demo" */
 SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

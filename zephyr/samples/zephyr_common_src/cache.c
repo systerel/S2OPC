@@ -91,7 +91,7 @@ bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const 
     }
     else if (SOPC_strncmp_ignore_case(value, "0x", 2) == 0)
     {
-        iValue = (int64_t) strtoll(value+2, NULL, 0x10);
+        iValue = (int64_t) strtoll(value + 2, NULL, 0x10);
     }
     else
     {
@@ -105,37 +105,37 @@ bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const 
         result = false;
         break;
     case SOPC_Boolean_Id:
-        variant->Boolean = (SOPC_Boolean)iValue;
+        variant->Boolean = (SOPC_Boolean) iValue;
         break;
     case SOPC_SByte_Id:
-        variant->Sbyte = (SOPC_SByte)iValue;
+        variant->Sbyte = (SOPC_SByte) iValue;
         break;
     case SOPC_Byte_Id:
-        variant->Byte = (SOPC_Byte)iValue;
+        variant->Byte = (SOPC_Byte) iValue;
         break;
     case SOPC_Int16_Id:
-        variant->Int16 = (int16_t)iValue;
+        variant->Int16 = (int16_t) iValue;
         break;
     case SOPC_UInt16_Id:
-        variant->Uint16 = (uint16_t)iValue;
+        variant->Uint16 = (uint16_t) iValue;
         break;
     case SOPC_Int32_Id:
-        variant->Int32 = (int32_t)iValue;
+        variant->Int32 = (int32_t) iValue;
         break;
     case SOPC_UInt32_Id:
-        variant->Uint32 = (uint32_t)iValue;
+        variant->Uint32 = (uint32_t) iValue;
         break;
     case SOPC_Int64_Id:
-        variant->Int64 = (int64_t)iValue;
+        variant->Int64 = (int64_t) iValue;
         break;
     case SOPC_UInt64_Id:
-        variant->Uint64 = (uint64_t)iValue;
+        variant->Uint64 = (uint64_t) iValue;
         break;
     case SOPC_Float_Id:
-        variant->Floatv = (float)fValue;
+        variant->Floatv = (float) fValue;
         break;
     case SOPC_Double_Id:
-        variant->Doublev = (double)fValue;
+        variant->Doublev = (double) fValue;
         break;
     case SOPC_String_Id:
         SOPC_String_InitializeFromCString(&variant->String, value);
@@ -148,7 +148,7 @@ bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const 
         SOPC_ByteString_CopyFromBytes(&variant->Bstring, value, strlen(value));
         break;
     case SOPC_StatusCode_Id:
-        variant->Status = (SOPC_StatusCode)iValue;
+        variant->Status = (SOPC_StatusCode) iValue;
         break;
     case SOPC_Guid_Id:
     case SOPC_XmlElement_Id:
@@ -516,11 +516,11 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
         if (type[0] == 0)
         {
             static const char* typeName[] = {
-                    "Null",           "Boolean",       "SByte",         "Byte",          "Int16",           "UInt16",
-                    "Int32",          "UInt32",        "Int64",         "UInt64",        "Float",           "Double",
-                    "String",         "DateTime",      "Guid",          "ByteString",    "XmlElement",      "NodeId",
-                    "ExpandedNodeId", "StatusCode",    "QualifiedName", "LocalizedText", "ExtensionObject", "DataValue",
-                    "Variant",        "DiagnosticInfo"};
+                "Null",           "Boolean",       "SByte",         "Byte",          "Int16",           "UInt16",
+                "Int32",          "UInt32",        "Int64",         "UInt64",        "Float",           "Double",
+                "String",         "DateTime",      "Guid",          "ByteString",    "XmlElement",      "NodeId",
+                "ExpandedNodeId", "StatusCode",    "QualifiedName", "LocalizedText", "ExtensionObject", "DataValue",
+                "Variant",        "DiagnosticInfo"};
 
             const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
             SOPC_ASSERT(typeId <= SOPC_DiagnosticInfo_Id);
@@ -547,7 +547,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
                 printf("%" PRId32, dv->Value.Value.Int32);
                 break;
             case SOPC_UInt32_Id:
-                printf("%" PRIu32,  dv->Value.Value.Uint32);
+                printf("%" PRIu32, dv->Value.Value.Uint32);
                 break;
             case SOPC_Int64_Id:
                 printf("%" PRId64, dv->Value.Value.Int64);

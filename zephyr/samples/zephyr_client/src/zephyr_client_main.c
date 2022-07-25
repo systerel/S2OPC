@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <kernel.h>
 #include <limits.h>
-#include <signal.h>
 #include <shell/shell.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -67,13 +67,10 @@ static void signal_stop_server(int sig)
 /***************************************************/
 SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
 {
-    static const SOPC_Build_Info sopc_client_server_build_info =
-    {
-            .buildVersion = SOPC_TOOLKIT_VERSION,
-            .buildSrcCommit = "Not applicable",
-            .buildDockerId = "",
-            .buildBuildDate = ""
-    };
+    static const SOPC_Build_Info sopc_client_server_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
+                                                                  .buildSrcCommit = "Not applicable",
+                                                                  .buildDockerId = "",
+                                                                  .buildBuildDate = ""};
 
     return sopc_client_server_build_info;
 }
@@ -81,13 +78,10 @@ SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
 /***************************************************/
 SOPC_Build_Info SOPC_Common_GetBuildInfo()
 {
-    static const SOPC_Build_Info sopc_common_build_info =
-    {
-            .buildVersion = SOPC_TOOLKIT_VERSION,
-            .buildSrcCommit = "Unknown_Revision",
-            .buildDockerId = "",
-            .buildBuildDate = ""
-    };
+    static const SOPC_Build_Info sopc_common_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
+                                                           .buildSrcCommit = "Unknown_Revision",
+                                                           .buildDockerId = "",
+                                                           .buildBuildDate = ""};
 
     return sopc_common_build_info;
 }
@@ -123,7 +117,7 @@ static void client_tester(int connectionId)
 {
     static const char* root_node_id = "ns=0;i=85";
     int res;
-    printk ("Browse Root.Objects\n");
+    printk("Browse Root.Objects\n");
 
     SOPC_ClientHelper_BrowseRequest browseRequest;
     SOPC_ClientHelper_BrowseResult browseResult;
@@ -139,7 +133,7 @@ static void client_tester(int connectionId)
         SOPC_ClientHelper_BrowseRequest browseRequest;
         SOPC_ClientHelper_BrowseResult browseResult;
 
-        browseRequest.nodeId = root_node_id;                      // Root/Objects/
+        browseRequest.nodeId = root_node_id;                     // Root/Objects/
         browseRequest.direction = OpcUa_BrowseDirection_Forward; // forward
         browseRequest.referenceTypeId = "";                      // all reference types
         browseRequest.includeSubtypes = true;
@@ -186,19 +180,17 @@ int main(int argc, char* const argv[])
 
     bool netInit = Network_Initialize("192.168.42.22");
     SOPC_ReturnStatus status;
-    SOPC_Log_Configuration logCfg = {
-            .logLevel = SOPC_LOG_LEVEL_WARNING,
-            .logSystem = SOPC_LOG_SYSTEM_USER,
-            .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}
-    };
+    SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
+                                     .logSystem = SOPC_LOG_SYSTEM_USER,
+                                     .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
     SOPC_ASSERT(netInit == true);
 
     /* Initialize MbedTLS */
     tls_threading_initialize();
 
-    printk("========================\n" );
-    printk("ZEPHYR S2OPC client demo\n" );
+    printk("========================\n");
+    printk("ZEPHYR S2OPC client demo\n");
 
     /* Initialize the toolkit */
     status = SOPC_CommonHelper_Initialize(&logCfg);
@@ -224,8 +216,7 @@ int main(int argc, char* const argv[])
 #define BOOL_TO_TEXT(b) ((b) ? "YES" : "NO")
 
 /***************************************************/
-static int cmd_demo_info(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -239,8 +230,7 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_configure(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_configure(const struct shell* shell, size_t argc, char** argv)
 {
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,
@@ -281,8 +271,7 @@ static int cmd_demo_configure(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_connect(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_connect(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -306,8 +295,7 @@ static int cmd_demo_connect(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_kill(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_kill(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -317,12 +305,11 @@ static int cmd_demo_kill(const struct shell *shell, size_t argc,
 }
 /* Creating subcommands (level 1 command) array for command "demo". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
-        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
-        SHELL_CMD(conf, NULL, "Configure client [<endpoint>]", cmd_demo_configure),
-        SHELL_CMD(conn, NULL, "Connect client", cmd_demo_connect),
-        SHELL_CMD(kill, NULL, "Quit", cmd_demo_kill),
-        SHELL_SUBCMD_SET_END
-);
+                               SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+                               SHELL_CMD(conf, NULL, "Configure client [<endpoint>]", cmd_demo_configure),
+                               SHELL_CMD(conn, NULL, "Connect client", cmd_demo_connect),
+                               SHELL_CMD(kill, NULL, "Quit", cmd_demo_kill),
+                               SHELL_SUBCMD_SET_END);
 
 /* Creating root (level 0) command "demo" */
 SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

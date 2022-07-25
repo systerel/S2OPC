@@ -118,7 +118,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     {
         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
         assert(reader != NULL);
-        SOPC_DataSetReader_Set_DataSetWriterId(reader,  messageId);
+        SOPC_DataSetReader_Set_DataSetWriterId(reader, messageId);
         SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2 * interval);
         return reader;
     }
@@ -187,10 +187,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         // TODO : None or Sign&Encrypt
-        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, MESSAGE_ID, MESSAGE_VERSION,
-                                                   CONFIG_SOPC_PUBLISHER_PERIOD_US/1000,
-                                                   SOPC_SecurityMode_None
-                                                   // SOPC_SecurityMode_SignAndEncrypt
+        writer = SOPC_PubSubConfig_SetPubMessageAt(
+            connection, 0, MESSAGE_ID, MESSAGE_VERSION, CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, SOPC_SecurityMode_None
+            // SOPC_SecurityMode_SignAndEncrypt
         );
         alloc = NULL != writer;
     }
@@ -234,8 +233,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID,
-                                                   MESSAGE_VERSION, 1000,
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID, MESSAGE_VERSION, 1000,
                                                    SOPC_SecurityMode_None);
         alloc = NULL != reader;
     }
@@ -253,7 +251,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         SOPC_PubSubConfig_SetSubVariableAt(reader, 4, PUBSUB_VAR_STATUS, SOPC_StatusCode_Id);
         SOPC_PubSubConfig_SetSubVariableAt(reader, 5, PUBSUB_VAR_BYTE, SOPC_Byte_Id);
     }
-
 
     if (!alloc)
     {

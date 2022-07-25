@@ -18,44 +18,41 @@
  */
 
 #include <assert.h>
+#include <kernel.h>
+#include <shell/shell.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <kernel.h>
-#include <shell/shell.h>
 
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 
-#include "sopc_assert.h"
 #include "sopc_address_space.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
 #include "sopc_threads.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
-#include "server.h"
 #include "network_init.h"
+#include "server.h"
 #include "threading_alt.h"
 
 // Global test variables
 static SOPC_S2OPC_Config s2opcConfig;
 
 static void log_UserCallback(const char* context, const char* text);
-static int cmd_demo_info(const struct shell *shell, size_t argc, char **argv);
+static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv);
 
 /***************************************************/
 SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
 {
-    static const SOPC_Build_Info sopc_client_server_build_info =
-    {
-            .buildVersion = SOPC_TOOLKIT_VERSION,
-            .buildSrcCommit = "Not applicable",
-            .buildDockerId = "",
-            .buildBuildDate = ""
-    };
+    static const SOPC_Build_Info sopc_client_server_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
+                                                                  .buildSrcCommit = "Not applicable",
+                                                                  .buildDockerId = "",
+                                                                  .buildBuildDate = ""};
 
     return sopc_client_server_build_info;
 }
@@ -63,13 +60,10 @@ SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
 /***************************************************/
 SOPC_Build_Info SOPC_Common_GetBuildInfo()
 {
-    static const SOPC_Build_Info sopc_common_build_info =
-    {
-            .buildVersion = SOPC_TOOLKIT_VERSION,
-            .buildSrcCommit = "Unknown_Revision",
-            .buildDockerId = "",
-            .buildBuildDate = ""
-    };
+    static const SOPC_Build_Info sopc_common_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
+                                                           .buildSrcCommit = "Unknown_Revision",
+                                                           .buildDockerId = "",
+                                                           .buildBuildDate = ""};
 
     return sopc_common_build_info;
 }
@@ -165,8 +159,7 @@ int main(int argc, char* argv[])
  *                             NET SHELL CONFIGURATION
  *---------------------------------------------------------------------------*/
 /***************************************************/
-static int cmd_demo_info(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -180,8 +173,7 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_write(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_write(const struct shell* shell, size_t argc, char** argv)
 {
     if (argc < 3)
     {
@@ -226,8 +218,7 @@ static int cmd_demo_write(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_kill(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_kill(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -238,11 +229,10 @@ static int cmd_demo_kill(const struct shell *shell, size_t argc,
 
 /* Creating subcommands (level 1 command) array for command "demo". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
-        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
-        SHELL_CMD(kill, NULL, "Kill server", cmd_demo_kill),
-        SHELL_CMD(write, NULL, "Write value to server", cmd_demo_write),
-        SHELL_SUBCMD_SET_END
-);
+                               SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+                               SHELL_CMD(kill, NULL, "Kill server", cmd_demo_kill),
+                               SHELL_CMD(write, NULL, "Write value to server", cmd_demo_write),
+                               SHELL_SUBCMD_SET_END);
 
 /* Creating root (level 0) command "demo" */
 SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);

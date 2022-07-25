@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <stdio.h>
 #include <kernel.h>
 #include <limits.h>
-#include <signal.h>
 #include <shell/shell.h>
+#include <signal.h>
+#include <stdio.h>
 
 #include <stdlib.h>
 
@@ -112,10 +112,9 @@ int main(int argc, char* const argv[])
     tls_threading_initialize();
 
     /* Initialize S2OPC Server */
-    const SOPC_Log_Configuration logCfg = {
-            .logLevel = SOPC_LOG_LEVEL_WARNING,
-            .logSystem = SOPC_LOG_SYSTEM_USER,
-            .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
+    const SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
+                                           .logSystem = SOPC_LOG_SYSTEM_USER,
+                                           .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logCfg);
 
@@ -183,8 +182,7 @@ int main(int argc, char* const argv[])
  *                             NET SHELL CONFIGURATION
  *---------------------------------------------------------------------------*/
 /***************************************************/
-static int cmd_demo_info(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -195,7 +193,7 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
     {
         uint32_t nbConn = SOPC_PubSubConfiguration_Nb_PubConnection(pPubSubConfig);
         printk("Pub connections: %d\n", nbConn);
-        for (uint32_t iConn = 0 ; iConn < nbConn ; iConn ++)
+        for (uint32_t iConn = 0; iConn < nbConn; iConn++)
         {
             SOPC_PubSubConnection* connx = SOPC_PubSubConfiguration_Get_PubConnection_At(pPubSubConfig, iConn);
             printk("  - RUNNING=%d\n", gPubStarted);
@@ -204,7 +202,7 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
 
         nbConn = SOPC_PubSubConfiguration_Nb_SubConnection(pPubSubConfig);
         printk("Sub connections: %d\n", nbConn);
-        for (uint32_t iConn = 0 ; iConn < nbConn ; iConn ++)
+        for (uint32_t iConn = 0; iConn < nbConn; iConn++)
         {
             SOPC_PubSubConnection* connx = SOPC_PubSubConfiguration_Get_SubConnection_At(pPubSubConfig, iConn);
             connx = SOPC_PubSubConfiguration_Get_PubConnection_At(pPubSubConfig, 0);
@@ -217,8 +215,7 @@ static int cmd_demo_info(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_log(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_log(const struct shell* shell, size_t argc, char** argv)
 {
     const char* param = (argc < 2 ? "" : argv[1]);
     if (0 == SOPC_strcmp_ignore_case(param, "debug"))
@@ -246,8 +243,7 @@ static int cmd_demo_log(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_set(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_set(const struct shell* shell, size_t argc, char** argv)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const char* param1 = (argc < 3 ? "" : argv[1]);
@@ -285,8 +281,7 @@ static int cmd_demo_set(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_print(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_print(const struct shell* shell, size_t argc, char** argv)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const char* param = (argc < 2 ? NULL : argv[1]);
@@ -333,8 +328,7 @@ static int cmd_demo_print(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_start(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_start(const struct shell* shell, size_t argc, char** argv)
 {
     const char* param = (argc < 2 ? "" : argv[1]);
 
@@ -357,7 +351,8 @@ static int cmd_demo_start(const struct shell *shell, size_t argc,
     {
         // start sub
         bool bResult;
-        bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
+        bResult =
+            SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
         if (!bResult)
         {
             printk("\r\nFailed to start Subscriber!\r\n");
@@ -376,8 +371,7 @@ static int cmd_demo_start(const struct shell *shell, size_t argc,
 }
 
 /***************************************************/
-static int cmd_demo_kill(const struct shell *shell, size_t argc,
-        char **argv)
+static int cmd_demo_kill(const struct shell* shell, size_t argc, char** argv)
 {
     ARG_UNUSED(argc);
     ARG_UNUSED(argv);
@@ -388,14 +382,13 @@ static int cmd_demo_kill(const struct shell *shell, size_t argc,
 
 /* Creating subcommands (level 1 command) array for command "demo". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
-        SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
-        SHELL_CMD(start, NULL, "Start [pub|sub]", cmd_demo_start),
-        SHELL_CMD(print, NULL, "Print content of  <NodeId>", cmd_demo_print),
-        SHELL_CMD(set, NULL, "Set content of  <NodeId>", cmd_demo_set),
-        SHELL_CMD(log, NULL, "Set log level", cmd_demo_log),
-        SHELL_CMD(kill, NULL, "Kill demo", cmd_demo_kill),
-                SHELL_SUBCMD_SET_END
-);
+                               SHELL_CMD(info, NULL, "Show demo info", cmd_demo_info),
+                               SHELL_CMD(start, NULL, "Start [pub|sub]", cmd_demo_start),
+                               SHELL_CMD(print, NULL, "Print content of  <NodeId>", cmd_demo_print),
+                               SHELL_CMD(set, NULL, "Set content of  <NodeId>", cmd_demo_set),
+                               SHELL_CMD(log, NULL, "Set log level", cmd_demo_log),
+                               SHELL_CMD(kill, NULL, "Kill demo", cmd_demo_kill),
+                               SHELL_SUBCMD_SET_END);
 
 /* Creating root (level 0) command "demo" */
 SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);
