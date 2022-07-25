@@ -94,7 +94,7 @@ if(ENABLE_SAMPLES)
       "demo_file_transfer/toolkit_demo_file_transfer.c"
       "demo_file_transfer/sopc_file_transfer.c")
     target_link_libraries(toolkit_demo_file_transfer PRIVATE s2opc_serverwrapper)
-	# toolkit_demo_file_transfer needs GNU_SOURCE (fileno and mkstemp functions)
+    # toolkit_demo_file_transfer needs GNU_SOURCE (fileno and mkstemp functions)
     target_compile_options(toolkit_demo_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
     target_compile_definitions(toolkit_demo_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
 
