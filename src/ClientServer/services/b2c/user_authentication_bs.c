@@ -663,7 +663,6 @@ void user_authentication_bs__encrypt_user_token(
         {
             SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
             SOPC_Free(encryptedTokenExtObj);
-            return;
         }
         return;
     }
