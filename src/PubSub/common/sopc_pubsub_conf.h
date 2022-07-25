@@ -146,6 +146,15 @@ bool SOPC_PubSubConnection_Set_Address(SOPC_PubSubConnection* connection, const 
 const char* SOPC_PubSubConnection_Get_InterfaceName(const SOPC_PubSubConnection* connection);
 bool SOPC_PubSubConnection_Set_InterfaceName(SOPC_PubSubConnection* connection, const char* interfaceName);
 
+const char* SOPC_PubSubConnection_Get_MqttUsername(const SOPC_PubSubConnection* connection);
+bool SOPC_PubSubConnection_Set_MqttUsername(SOPC_PubSubConnection* connection, const char* username);
+
+const char* SOPC_PubSubConnection_Get_MqttPassword(const SOPC_PubSubConnection* connection);
+bool SOPC_PubSubConnection_Set_MqttPassword(SOPC_PubSubConnection* connection, const char* password);
+
+const char* SOPC_PubSubConnection_Get_MqttTopic(const SOPC_PubSubConnection* connection);
+bool SOPC_PubSubConnection_Set_MqttTopic(SOPC_PubSubConnection* connection, const char* topic);
+
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb);
 uint16_t SOPC_PubSubConnection_Nb_WriterGroup(const SOPC_PubSubConnection* connection);
 SOPC_WriterGroup* SOPC_PubSubConnection_Get_WriterGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);

@@ -73,6 +73,11 @@ struct SOPC_PubSubConnection
     SOPC_WriterGroup* writerGroups;
     uint16_t readerGroups_length;
     SOPC_ReaderGroup* readerGroups;
+    // Username for MQTT protocol
+    char* mqttUsername;
+    // Password for MQTT protocol
+    char* mqttPassword;
+    char* mqttTopic;
 
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
@@ -473,6 +478,45 @@ bool SOPC_PubSubConnection_Set_InterfaceName(SOPC_PubSubConnection* connection, 
     // free in SOPC_PubSubConnection_Clear
     connection->interfaceName = SOPC_PubSub_String_Copy(interfaceName);
     return (NULL != connection->interfaceName);
+}
+
+const char* SOPC_PubSubConnection_Get_MqttUsername(const SOPC_PubSubConnection* connection)
+{
+    assert(NULL != connection);
+    return connection->mqttUsername;
+}
+
+bool SOPC_PubSubConnection_Set_MqttUsername(SOPC_PubSubConnection* connection, const char* username)
+{
+    assert(NULL != username);
+    connection->mqttUsername = SOPC_PubSub_String_Copy(username);
+    return (NULL != connection->mqttUsername);
+}
+
+const char* SOPC_PubSubConnection_Get_MqttPassword(const SOPC_PubSubConnection* connection)
+{
+    assert(NULL != connection);
+    return connection->mqttPassword;
+}
+
+bool SOPC_PubSubConnection_Set_MqttPassword(SOPC_PubSubConnection* connection, const char* password)
+{
+    assert(NULL != password);
+    connection->mqttPassword = SOPC_PubSub_String_Copy(password);
+    return (NULL != connection->mqttPassword);
+}
+
+const char* SOPC_PubSubConnection_Get_MqttTopic(const SOPC_PubSubConnection* connection)
+{
+    assert(NULL != connection);
+    return connection->mqttTopic;
+}
+
+bool SOPC_PubSubConnection_Set_MqttTopic(SOPC_PubSubConnection* connection, const char* topic)
+{
+    assert(NULL != topic);
+    connection->mqttTopic = SOPC_PubSub_String_Copy(topic);
+    return (NULL != connection->mqttTopic);
 }
 
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb)
