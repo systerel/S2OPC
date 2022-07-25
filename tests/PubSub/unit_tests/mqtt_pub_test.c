@@ -30,6 +30,7 @@
 #include "sopc_time.h"
 
 static const char* ADRESSE_MQTT_BROKER = "127.0.0.1:1883";
+static const char* MQTT_LIB_TOPIC_NAME = "S2OPC";
 
 /**** Variables for tests asynchronous API *****/
 
@@ -185,8 +186,8 @@ int main(void)
             if (result == SOPC_STATUS_OK)
             {
                 printf("\r\nSOPC MQTT Manager created\r\n");
-                pHandleSynchroContext =
-                    SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(pWks, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, NULL, NULL);
+                pHandleSynchroContext = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
+                    pWks, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, NULL, NULL, NULL, NULL);
                 if (pHandleSynchroContext != NULL)
                 {
                     printf("\r\nSOPC MQTT Transport Context created\r\n");
@@ -315,7 +316,7 @@ int main(void)
             {
                 printf("\r\nSOPC MQTT Manager created\r\n");
                 pHandleSynchroContext = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-                    pWks, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, pFctReceiveMessage, NULL);
+                    pWks, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, NULL, NULL, pFctReceiveMessage, NULL);
                 if (pHandleSynchroContext != NULL)
                 {
                     printf("\r\nSOPC MQTT Transport Context created\r\n");
@@ -405,11 +406,11 @@ int main(void)
 
             if (result == SOPC_STATUS_OK)
             {
-                SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, &id1, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME,
+                SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, &id1, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, NULL, NULL,
                                                     pFctGetHandleSuccess, pFctGetHandleFailure, pFctHandleRdy,
                                                     pFctHandleNotRdy, pFctMessageRcv, pFctReleaseHandle);
 
-                SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, &id2, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME,
+                SOPC_MQTT_TRANSPORT_ASYNC_GetHandle(pWks, &id2, ADRESSE_MQTT_BROKER, MQTT_LIB_TOPIC_NAME, NULL, NULL,
                                                     pFctGetHandleSuccess, pFctGetHandleFailure, pFctHandleRdy,
                                                     pFctHandleNotRdy, pFctMessageRcv, pFctReleaseHandle);
 
