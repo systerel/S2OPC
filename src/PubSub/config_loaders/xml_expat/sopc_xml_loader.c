@@ -80,6 +80,9 @@
 #define ATTR_CONNECTION_MODE_VAL_PUB "publisher"
 #define ATTR_CONNECTION_MODE_VAL_SUB "subscriber"
 #define ATTR_CONNECTION_IFNAME "interfaceName"
+#define ATTR_CONNECTION_MQTTUSERNAME "mqttUsername"
+#define ATTR_CONNECTION_MQTTPASSWORD "mqttPassword"
+#define ATTR_CONNECTION_MQTTTOPIC "mqttTopic"
 
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
@@ -147,6 +150,10 @@ struct sopc_xml_pubsub_connection_t
     bool is_mode_set;
     char* interfaceName;
     uint16_t nb_messages;
+    char* mqttUsername;
+    char* mqttPassword;
+    char* mqttTopic;
+
     struct sopc_xml_pubsub_message_t* messageArr;
 };
 
@@ -382,6 +389,18 @@ static bool parse_connection_attributes(const char* attr_name,
     {
         result = parse_unsigned_value(attr_val, strlen(attr_val), 64, &connection->publisher_id);
         result &= (0 != connection->publisher_id);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTUSERNAME, attr_name))
+    {
+        result = copy_any_string_attribute_value(&connection->mqttUsername, attr_val);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTPASSWORD, attr_name))
+    {
+        result = copy_any_string_attribute_value(&connection->mqttPassword, attr_val);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTTOPIC, attr_name))
+    {
+        result = copy_any_string_attribute_value(&connection->mqttTopic, attr_val);
     }
     else
     {
@@ -847,6 +866,14 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     {
     case PARSE_CONNECTION:
         ctx->state = PARSE_PUBSUB;
+        connection = &ctx->connectionArr[ctx->nb_connections - 1];
+        assert(NULL != connection);
+        if ((NULL == connection->mqttPassword) != (NULL == connection->mqttUsername))
+        {
+            LOG("mqttPassword and mqttUsername must be set together.");
+            XML_StopParser(ctx->parser, 0);
+            return;
+        }
         break;
     case PARSE_MESSAGE:
         // It must be ensured that all dataset have consistent writerId (all 0 or all non-0)
@@ -1081,6 +1108,18 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
         if (allocSuccess && NULL != p_connection->interfaceName)
         {
             allocSuccess = SOPC_PubSubConnection_Set_InterfaceName(connection, p_connection->interfaceName);
+        }
+        if (allocSuccess && NULL != p_connection->mqttUsername)
+        {
+            allocSuccess = SOPC_PubSubConnection_Set_MqttUsername(connection, p_connection->mqttUsername);
+        }
+        if (allocSuccess && NULL != p_connection->mqttPassword)
+        {
+            allocSuccess = SOPC_PubSubConnection_Set_MqttPassword(connection, p_connection->mqttPassword);
+        }
+        if (allocSuccess && NULL != p_connection->mqttTopic)
+        {
+            allocSuccess = SOPC_PubSubConnection_Set_MqttTopic(connection, p_connection->mqttTopic);
         }
     }
     if (!allocSuccess)
