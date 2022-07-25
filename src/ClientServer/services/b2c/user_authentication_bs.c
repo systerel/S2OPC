@@ -614,6 +614,7 @@ void user_authentication_bs__encrypt_user_token(
 
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitClient_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
+    assert(NULL != scConfig);
 
     OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
 
@@ -643,14 +644,6 @@ void user_authentication_bs__encrypt_user_token(
         if (OpcUa_MessageSecurityMode_SignAndEncrypt == scConfig->msgSecurityMode)
         {
             status = SOPC_ByteString_Copy(&encryptedToken->Password, &userToken->Password);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
-                SOPC_Free(encryptedTokenExtObj);
-                return;
-            }
-            *user_authentication_bs__p_valid = true;
-            *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
         }
         else
         {
@@ -659,6 +652,18 @@ void user_authentication_bs__encrypt_user_token(
                 "Services: user activation using channel config %" PRIu32
                 " impossible because transmitting password as clear text is forbiden for security reasons",
                 user_authentication_bs__p_channel_config_idx);
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            *user_authentication_bs__p_valid = true;
+            *user_authentication_bs__p_user_token_encrypted = encryptedTokenExtObj;
+        }
+        else
+        {
+            SOPC_ExtensionObject_Clear(encryptedTokenExtObj);
+            SOPC_Free(encryptedTokenExtObj);
+            return;
         }
         return;
     }
