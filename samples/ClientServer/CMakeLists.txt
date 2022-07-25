@@ -49,7 +49,6 @@ if(ENABLE_SAMPLES)
     set(TOOLKIT_DEMO_FILE_TRANSFER "toolkit_demo_file_transfer")
   else()
     set(TOOLKIT_DEMO_SERVER "toolkit_demo_nano_server")
-    # set(TOOLKIT_DEMO_FILE_TRANSFER "toolkit_demo_nano_file_transfer")
   endif()
 
   if (expat_FOUND)
@@ -96,7 +95,8 @@ if(ENABLE_SAMPLES)
       "demo_file_transfer/toolkit_demo_file_transfer.c"
       "demo_file_transfer/sopc_file_transfer.c")
     target_link_libraries(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE s2opc_serverwrapper)
-    target_compile_options(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS})
+	# toolkit_demo_file_transfer needs GNU_SOURCE (fileno and mkstemp functions)
+    target_compile_options(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
     target_compile_definitions(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
 
     target_link_libraries(${TOOLKIT_DEMO_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
