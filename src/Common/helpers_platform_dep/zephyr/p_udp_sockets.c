@@ -139,7 +139,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return P_MULTICAST_AddIpV4Membership(sock, multicast);
+    return SOPC_STATUS_OK; // Already done in SOPC_UDP_Socket_CreateToReceive
 }
 
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
@@ -179,7 +179,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
     {
         if (listenAddress->ai_family == AF_INET)
         {
-            // add mcast for bind
+            // Multicast must be set before Bind for ZEPHYR
             status = P_MULTICAST_AddIpV4Membership(sock, listenAddress);
             if (SOPC_STATUS_OK == status)
             {
