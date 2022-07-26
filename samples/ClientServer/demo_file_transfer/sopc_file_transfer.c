@@ -112,18 +112,9 @@ typedef SOPC_Byte SOPC_OpenMode;
 #define USER_WRITABLE_VAR_IDX 3u
 
 /**
- * \brief Default value for UserWritable variable of FileType Object
- */
-#define VAR_USER_WRITABLE_DEFAULT true
-/**
- * \brief Default value for Writable variable of FileType Object
- */
-#define VAR_WRITABLE_DEFAULT true
-
-/**
  * \brief structure to manage FileType object
  */
-struct SOPC_FileType
+typedef struct SOPC_FileType
 {
     SOPC_NodeId* node_id;   /*!< The nodeId of the FileType object into the adress space. */
     SOPC_FileHandle handle; /*!< The handle of the file send to the client. */
@@ -139,7 +130,7 @@ struct SOPC_FileType
     uint16_t open_count;   /*!< The number of times the Open method has been called since the server started. */
     uint64_t size_in_byte; /*!< The size in byte of the file, updated after a read operation from the client. */
     SOPC_FileTransfer_UserClose_Callback pFunc_UserCloseCallback; /*!< The Method Close Callback */
-};
+} SOPC_FileType;
 
 /**
  * \brief Create a FileType object.
@@ -1417,7 +1408,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     /* User close callback */
                     if (NULL != file->pFunc_UserCloseCallback)
                     {
-                        file->pFunc_UserCloseCallback(file);
+                        file->pFunc_UserCloseCallback(SOPC_String_GetRawCString(file->tmp_path));
                     }
                     file->fp = NULL;
                     file->is_open = false;
@@ -1781,62 +1772,6 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:SetPosTmpFile: unable to retrieve file in the API");
         status = OpcUa_BadUnexpectedError;
-    }
-    return status;
-}
-
-SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name)
-{
-    (void) name;
-    char* node_id;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != file)
-    {
-        node_id = SOPC_NodeId_ToCString(file->node_id);
-        status = SOPC_STATUS_OK;
-        if (NULL == node_id)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:GetTmpPath: Unable to retrieve the nodeId of the file");
-            printf("<FileTransfer_Get_TmpPath> Unable to retrieve the nodeId of the file\n");
-            status = SOPC_STATUS_NOK;
-        }
-        if (false == file->is_open)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:GetTmpPath: file object '%s' is not openned", node_id);
-            printf("<FileTransfer_Get_TmpPath> File object '%s' is not openned\n", node_id);
-            status = SOPC_STATUS_NOK;
-        }
-
-        if (NULL == file->fp)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:GetTmpPath: file object '%s' is not initialized", node_id);
-            printf("<FileTransfer_Get_TmpPath> File object '%s' is not initialized\n", node_id);
-            status = SOPC_STATUS_NOK;
-        }
-        if (NULL != file->tmp_path)
-        {
-            if (0 > file->tmp_path->Length)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:GetTmpPath: file object '%s' is not created", node_id);
-                printf("<FileTransfer_Get_TmpPath> File object '%s' is not created\n", node_id);
-                status = SOPC_STATUS_NOK;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:GetTmpPath: unexpected error");
-            printf("<FileTransfer_Get_TmpPath> Unexpected error\n");
-            status = SOPC_STATUS_NOK;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            memcpy(name, SOPC_String_GetCString(file->tmp_path), (size_t) file->tmp_path->Length + 1);
-        }
     }
     return status;
 }

@@ -34,8 +34,8 @@
  *         <SOPC_FileTransfer_Add_File> function (one call for each file).
  *      -4 Add optional user method(s) implementation with <SOPC_FileTransfer_Add_MethodItems> function.
  *      -5 Start the server asynchronously with <SOPC_FileTransfer_StartServer> function.
- *      -6 Get the name of temporary file in the close callback implementation through
- *         <SOPC_FileTransfer_Get_TmpPath> function.
+ *      -6 Get the name of temporary file in the closing processing (user close callback implementation:
+ *         SOPC_FileTransfer_UserClose_Callback)
  *      - The user can read the values of the variables in the address space with <SOPC_FileTransfer_ReadVariable>
  *        function.
  *      - The user can write the values of the variables in the address space with <SOPC_FileTransfer_WriteVariable>
@@ -46,15 +46,24 @@
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
 
-typedef struct SOPC_FileType SOPC_FileType;
+/**
+ * \brief Default value for UserWritable variable of FileType Object
+ */
+#define VAR_USER_WRITABLE_DEFAULT true
+/**
+ * \brief Default value for Writable variable of FileType Object
+ */
+#define VAR_WRITABLE_DEFAULT true
 
 /**
  * \brief User callback for the closing processing
- * \param file The pointer to the structure of the FileType object that gathers the file data. This parameter is
- * optional and may not be used by the user. \return In the function code, the user must return SOPC_STATUT_OK if no
- * error otherwise SOPC_STATUT_NOK.
+ * \param tmp_file_path A pointer to the temporary file path.
+ * \note After this callback, the path of the tmp file will be deallocated and the user should copy it.
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call.
+ * \return In the function code, the user has to return SOPC_STATUT_OK if no error otherwise SOPC_STATUT_NOK.
  */
-typedef SOPC_ReturnStatus (*SOPC_FileTransfer_UserClose_Callback)(SOPC_FileType* file);
+typedef void (*SOPC_FileTransfer_UserClose_Callback)(const char* tmp_file_path);
 
 /**
  * \brief Structure to gather FilType configuration data
@@ -112,14 +121,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
  * fileType object on the address space.
  */
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback);
-
-/**
- * \brief Function to get the temporary file path name created by the API.
- * \param file A pointer to the structure of the FileType object.
- * \param name The output name of the temporary file path.
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name);
 
 /**
  * \brief Function to write a single value of variable (array are not supported).

@@ -71,11 +71,11 @@ static char* Server_ConfigLogPath(const char* logDirName)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "./datas/server_config.xml";
+    const char* xml_server_cfg_path = "./data/server_config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "./datas/address_space.xml";
+    const char* xml_address_space_path = "./data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "./datas/users_config.xml";
+    const char* xml_users_cfg_path = "./data/users_config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
@@ -142,20 +142,16 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
 
 /*
  * User Close method callback definition.
+ * The callback function shall not do anything blocking or long treatment since it will block any other
+ * callback call.
+ * After this callback, the path of the tmp_file will be deallocated and the user should copy it. 
  */
-static SOPC_ReturnStatus UserCloseCallback(SOPC_FileType* file)
+static void UserCloseCallback(const char* tmp_file_path)
 {
     /********************/
     /* USER CODE BEGING */
     /********************/
-    SOPC_ReturnStatus status;
-    char name[BUFF_SIZE];
-    status = SOPC_FileTransfer_Get_TmpPath(file, name);
-    if (SOPC_STATUS_OK == status)
-    {
-        printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", name);
-    }
-    return status;
+    printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", tmp_file_path);
     /********************/
     /* END USER CODE   */
     /********************/
