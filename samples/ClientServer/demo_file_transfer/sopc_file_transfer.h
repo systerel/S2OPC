@@ -1,3 +1,48 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/** \file
+ *
+ * \brief API to manage the OPC UA FileTransfer.
+ *
+ * The API only handles temporary files. A temporary file is created with each call to the Open method.
+ * If several Openings are followed without a call to the close method between them, then the temporary file of the
+ * first Opening is deleted. The path to store the temporary file and its prefix name must be defined by the user. The
+ * user can access the name of the temporary file (prefix and radom sufix) using a notification when the close method is
+ * called.
+ * Typical use in main (see toolkit_demo_file_transfer.c):
+ *      -1 Initialise the API with <SOPC_FileTransfer_Initialize> function.
+ *      -2 Configure FileType data of the address space (nodeId, methodId, variableId, close callback, tmp file path
+ *         and tmp file name) with <SOPC_FileType_Config> structure.
+ *      -3 Add file(s) to the API through the configuration(s) data of the address space with
+ *         <SOPC_FileTransfer_Add_File> function (one call for each file).
+ *      -4 Add optional user method(s) implementation with <SOPC_FileTransfer_Add_MethodItems> function.
+ *      -5 Start the server asynchronously with <SOPC_FileTransfer_StartServer> function.
+ *      -6 Get the name of temporary file in the close callback implementation through
+ *         <SOPC_FileTransfer_Get_TmpPath> function.
+ *      - The user can read the values of the variables in the address space with <SOPC_FileTransfer_ReadVariable>
+ *        function.
+ *      - The user can write the values of the variables in the address space with <SOPC_FileTransfer_WriteVariable>
+ *        function.
+ *      - The user can implement a server callback definition used for address space modification by client.
+ */
+
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
 
