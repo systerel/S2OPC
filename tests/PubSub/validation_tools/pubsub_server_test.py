@@ -115,7 +115,7 @@ XML_PUBSUB_LOOP = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttTopic="S2OPC">
         <message groupId="1" publishingInterval="1000" groupVersion="1">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -125,8 +125,8 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
