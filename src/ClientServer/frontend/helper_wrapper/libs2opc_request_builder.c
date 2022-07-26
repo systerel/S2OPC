@@ -560,7 +560,7 @@ OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Cre
 static OpcUa_BrowsePath* TranslateBPRequest_InitializeBrowsePathPointer(
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
     size_t index,
-    const char* startingNodeId,
+    const void* startingNodeId,
     size_t nbPathElements,
     OpcUa_RelativePathElement* pathElements)
 {
@@ -580,8 +580,8 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
     size_t nbPathElements,
     OpcUa_RelativePathElement* pathElements)
 {
-    OpcUa_BrowsePath* browsePath =
-        TranslateBPRequest_InitializeBrowsePathPointer(tbpRequest, index, startingNodeId, nbPathElements, pathElements);
+    OpcUa_BrowsePath* browsePath = TranslateBPRequest_InitializeBrowsePathPointer(
+        tbpRequest, index, (const void*) startingNodeId, nbPathElements, pathElements);
     if (NULL == browsePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -606,12 +606,10 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
                                                           size_t nbPathElements,
                                                           OpcUa_RelativePathElement* pathElements)
 {
-    char* startingNodeIdCString = SOPC_NodeId_ToCString(startingNodeId);
     OpcUa_BrowsePath* browsePath = TranslateBPRequest_InitializeBrowsePathPointer(
-        tbpRequest, index, startingNodeIdCString, nbPathElements, pathElements);
+        tbpRequest, index, (const void*) startingNodeId, nbPathElements, pathElements);
     if (NULL == browsePath)
     {
-        SOPC_Free(startingNodeIdCString);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&browsePath->StartingNode, startingNodeId);
@@ -624,7 +622,6 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
     {
         OpcUa_BrowsePath_Clear(browsePath);
     }
-    SOPC_Free(startingNodeIdCString);
     return status;
 }
 
