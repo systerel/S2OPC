@@ -61,6 +61,7 @@
 
 #include "ethernet/gptp/gptp_data_set.h"
 
+#include "helpers.h"
 #include "network_init.h"
 
 #define MULTICAST_OUT_ADDR "232.1.3.4"
@@ -91,21 +92,6 @@ static Mutex gMutex;
 
 static SOPC_Time_TimeSource gSource = SOPC_TIME_TIMESOURCE_INTERNAL;
 static uint8_t gLastGmId[8] = {0}; //
-
-static const char* sourceToString(const SOPC_Time_TimeSource source)
-{
-    switch (source)
-    {
-    case SOPC_TIME_TIMESOURCE_INTERNAL:
-        return "INTERNAL";
-    case SOPC_TIME_TIMESOURCE_PTP_SLAVE:
-        return "PTP_SLAVE";
-    case SOPC_TIME_TIMESOURCE_PTP_MASTER:
-        return "PTP_MASTER";
-    default:
-        return "INVALID";
-    }
-}
 
 typedef struct
 {

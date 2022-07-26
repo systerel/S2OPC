@@ -56,6 +56,7 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
                                                              uint16_t messageId,
                                                              uint32_t version,
                                                              uint64_t interval,
+                                                             int32_t offset,
                                                              SOPC_SecurityMode_Type securityMode)
 
 {
@@ -63,6 +64,10 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
     SOPC_WriterGroup_Set_Id(group, messageId);
     SOPC_WriterGroup_Set_Version(group, version);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
+    if (offset >=0)
+    {
+        SOPC_WriterGroup_Set_PublishingOffset(group, offset / 1000);
+    }
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
 
     // Create one DataSet Writer
@@ -188,7 +193,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         // TODO : None or Sign&Encrypt
         writer = SOPC_PubSubConfig_SetPubMessageAt(
-            connection, 0, MESSAGE_ID, MESSAGE_VERSION, CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, SOPC_SecurityMode_None
+            connection, 0, MESSAGE_ID, MESSAGE_VERSION, CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000,
+            CONFIG_SOPC_PUBLISHER_OFFSET_US, SOPC_SecurityMode_None
             // SOPC_SecurityMode_SignAndEncrypt
         );
         alloc = NULL != writer;

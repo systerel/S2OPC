@@ -70,6 +70,13 @@ config SOPC_PUBLISHER_PERIOD_US
 	depends on S2OPC
 	help
 	  This value is used by Publisher
+	  
+config SOPC_PUBLISHER_OFFSET_US
+	int "Publisher offset in microseconds. If negative, no offset is used"
+	default -1
+	depends on S2OPC
+	help
+	  This value is used by Publisher
 
 config SOPC_PUBSUB_USES_CACHE
 	bool "S2OPC pubsub uses cache (true) or address space (false)"

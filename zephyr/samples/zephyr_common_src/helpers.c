@@ -22,6 +22,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_types.h"
+#include "sopc_zephyr_time.h"
 
 #include "helpers.h"
 
@@ -99,4 +100,19 @@ SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
     }
 
     return status;
+}
+
+const char* sourceToString(const SOPC_Time_TimeSource source)
+{
+    switch (source)
+    {
+    case SOPC_TIME_TIMESOURCE_INTERNAL:
+        return "INTERNAL";
+    case SOPC_TIME_TIMESOURCE_PTP_SLAVE:
+        return "PTP_SLAVE";
+    case SOPC_TIME_TIMESOURCE_PTP_MASTER:
+        return "PTP_MASTER";
+    default:
+        return "INVALID";
+    }
 }

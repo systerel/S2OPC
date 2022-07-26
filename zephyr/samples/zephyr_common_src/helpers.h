@@ -21,6 +21,7 @@
 #define HELPERS_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
 typedef void Helpers_WriteValue_Callback(OpcUa_WriteValue* pwv);
 
@@ -39,5 +40,7 @@ SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
                                           SOPC_DataValue** lpDv,
                                           size_t nItems,
                                           Helpers_WriteValue_Callback* wvNotifier);
+
+const char* sourceToString(const SOPC_Time_TimeSource source);
 
 #endif /* HELPERS_H_ */

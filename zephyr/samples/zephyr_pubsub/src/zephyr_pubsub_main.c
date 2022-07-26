@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <drivers/hwinfo.h>
 #include <kernel.h>
 #include <limits.h>
 #include <shell/shell.h>
@@ -31,14 +32,18 @@
 #include "sopc_common.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_sub_scheduler.h"
+#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_user_manager.h"
+#include "sopc_zephyr_time.h"
 
 #include "cache.h"
+#include "helpers.h"
 #include "network_init.h"
 #include "pubsub_config_static.h"
 #include "static_security_data.h"
@@ -49,8 +54,75 @@ static SOPC_SubTargetVariableConfig* pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
 static bool gPubStarted = false;
 static bool gSubStarted = false;
-
 volatile int stopSignal = 0;
+
+typedef struct
+{
+    const uint8_t* serialNumber;
+    const char* ipAddr;
+    const char* deviceName;
+} DeviceIdentifier;
+static const DeviceIdentifier* gDevice = NULL;
+
+static const DeviceIdentifier gDevices[] = {
+    // Note: Example to be adapted for each device/configuration!
+    {"624248Q", "192.168.42.111", "N.144/A"},
+    {"652248Q", "192.168.42.112", "N.144/B"},
+    // Last element will match all devices (default)
+    {"", "192.168.42.110", "Unknown device"},
+};
+
+static const DeviceIdentifier* getDevice(void)
+{
+    static const DeviceIdentifier* result = NULL;
+    if (NULL == result)
+    {
+        uint8_t buffer[16];
+        const ssize_t len = hwinfo_get_device_id(buffer, sizeof(buffer) - 1);
+        if (len > 0)
+        {
+            for (size_t i = 0; result == NULL && i < sizeof(gDevices) / sizeof(*gDevices); i++)
+            {
+                const DeviceIdentifier* dev = &gDevices[i];
+                SOPC_ASSERT(NULL != dev->serialNumber);
+                size_t len = strlen(dev->serialNumber);
+                if (len > sizeof(buffer))
+                {
+                    len = sizeof(buffer);
+                }
+                if (0 == memcmp(dev->serialNumber, buffer, len))
+                {
+                    printf("Identified device '%s'\n", dev->deviceName);
+                    result = dev;
+                }
+            }
+        }
+        if (NULL == result)
+        {
+            printf("Unidentified device : [");
+            for (size_t i = 0; i < len; i++)
+            {
+                const uint8_t c = buffer[i];
+                if (c == '\\')
+                {
+                    printf("\\");
+                }
+                if (c >= 0x20 && c < 0x7F)
+                {
+                    // Displayable char
+                    printf("%c", (char) c);
+                }
+                else
+                {
+                    printf("\\x%02X", (int) c);
+                }
+            }
+            printf("]\n");
+        }
+    }
+    return result;
+}
+
 static void signal_stop_server(int sig)
 {
     (void) sig;
@@ -91,9 +163,52 @@ static void log_UserCallback(const char* context, const char* text)
 }
 
 /***************************************************/
+static void waitPtPSynchro(void)
+{
+    static const unsigned int thresholdPer10000 = 9980;
+    printf("\n");
+    printf("========================================\n");
+    printf("Test #5: WAITING FOR PTP SYNCHRO, thr = %03d.%02u%%'\n\n", thresholdPer10000 / 100,
+            thresholdPer10000 % 100);
+    printf("----------------------------------------\n");
+
+    SOPC_Time_TimeSource source = SOPC_Time_GetTimeSource();
+    while (true)
+    {
+
+        const SOPC_Time_TimeSource newSource = SOPC_Time_GetTimeSource();
+        if (newSource != source)
+        {
+            source = newSource;
+            printf("[II] Time PTP source changed to %s\n", sourceToString(source));
+        }
+
+        // Reading SOPC_Time_GetCurrentTimeUTC forces PtP clock synchronization protocol.
+        // See details in "opc_zephyr_time.h"
+        SOPC_DateTime dt1 = SOPC_Time_GetCurrentTimeUTC();
+        (void) dt1;
+        SOPC_Sleep(1000);
+
+        const int clockPrec = (int) (10000 * (SOPC_RealTime_GetClockPrecision()));
+        const int corrPrecent = -(int) (10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+        printf("- PtP Time correction is %3d.%02d%%\n", corrPrecent / 100, abs(corrPrecent % 100));
+        printf("- PtP Time precision is %3d.%02d%%\n", clockPrec / 100, abs(clockPrec % 100));
+
+        if (clockPrec >= thresholdPer10000)
+        {
+            printf("DONE!\n");
+            return;
+        }
+    }
+}
+
+/***************************************************/
 int main(int argc, char* const argv[])
 {
     printk("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
+
+    gDevice = getDevice();
+    SOPC_ASSERT(NULL != gDevice);
 
     /* Signal handling: close the server gracefully when interrupted */
     signal(SIGINT, signal_stop_server);
@@ -105,12 +220,13 @@ int main(int argc, char* const argv[])
 
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
 
-    bool netInit = Network_Initialize(NULL);
+    bool netInit = Network_Initialize(gDevice->ipAddr);
     SOPC_ASSERT(netInit == true);
 
     /* Initialize MbedTLS */
     tls_threading_initialize();
 
+    waitPtPSynchro();
     /* Initialize S2OPC Server */
     const SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
                                            .logSystem = SOPC_LOG_SYSTEM_USER,
@@ -181,6 +297,40 @@ int main(int argc, char* const argv[])
 /*---------------------------------------------------------------------------
  *                             NET SHELL CONFIGURATION
  *---------------------------------------------------------------------------*/
+
+/***************************************************/
+static void test_print_DateTime(void)
+{
+    char* datetime = SOPC_Time_GetStringOfCurrentTimeUTC(false);
+
+    printk("\nCurrent date/time : %s\n", datetime);
+
+    SOPC_Free(datetime);
+}
+
+/***************************************************/
+static void test_infos(void)
+{
+    test_print_DateTime();
+    printk("System info\n");
+    const SOPC_Time_TimeSource source = SOPC_Time_GetTimeSource();
+    printk("- Time source is %s\n", sourceToString(source));
+    if (source == SOPC_TIME_TIMESOURCE_PTP_SLAVE)
+    {
+        const int corrPrecent = -(int) (10000 * (SOPC_RealTime_GetClockCorrection() - 1.0));
+        printk("- PtP Time correction is %3d.%02d%%\n", corrPrecent / 100, abs(corrPrecent % 100));
+    }
+    const int clockPrec = (int) (10000 * (SOPC_RealTime_GetClockPrecision()));
+    printk("- PtP Time precision is %3d.%02d%%\n", clockPrec / 100, abs(clockPrec % 100));
+
+    if (NULL != gDevice)
+    {
+        printk("- IP ADDR = %s\n", (gDevice->ipAddr != NULL ? gDevice->ipAddr : "<NULL>"));
+        printk("- Device ID = %s\n", gDevice->deviceName);
+        printk("- Device SN = <%s>\n", gDevice->serialNumber);
+    }
+}
+
 /***************************************************/
 static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
 {
@@ -210,6 +360,7 @@ static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
             printk("  - ADDR :%s\n", SOPC_PubSubConnection_Get_Address(connx));
         }
     }
+    test_infos();
 
     return 0;
 }
