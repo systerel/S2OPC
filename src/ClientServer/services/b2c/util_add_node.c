@@ -416,6 +416,13 @@ static SOPC_ReturnStatus util_AddCommonNodeAttributes(OpcUa_Node* node,
         if (0 != (commonNodeAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_WriteMask) ||
             commonNodeAttributes->WriteMask != 0)
         {
+            char* nodeIdStr = SOPC_NodeId_ToCString(&node->NodeId);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "util_add_node: cannot add Variable node %s with WriteMask attribute value since it is not supported",
+                nodeIdStr);
+            SOPC_Free(nodeIdStr);
+
             // Note: server does not manage write masks, it is not possible to specify some
             *sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -426,6 +433,13 @@ static SOPC_ReturnStatus util_AddCommonNodeAttributes(OpcUa_Node* node,
         if (0 != (commonNodeAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_UserWriteMask) ||
             commonNodeAttributes->UserWriteMask != 0)
         {
+            char* nodeIdStr = SOPC_NodeId_ToCString(&node->NodeId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "util_add_node: cannot add Variable node %s with UserWriteMask attribute value "
+                                   "since it is not supported",
+                                   nodeIdStr);
+            SOPC_Free(nodeIdStr);
+
             // Note: server does not manage write masks, it is not possible to specify some
             *sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -469,6 +483,13 @@ SOPC_ReturnStatus util_add_node__AddVariableNodeAttributes(SOPC_AddressSpace_Nod
         if (0 != (varAttrs->SpecifiedAttributes & OpcUa_NodeAttributesMask_UserAccessLevel) ||
             (varAttrs->UserAccessLevel != 0 && varAttrs->UserAccessLevel != varAttrs->AccessLevel))
         {
+            char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "util_add_node: cannot add Variable node %s with UserAccessLevel attribute value "
+                                   "since it is specific to each user (managed by application)",
+                                   nodeIdStr);
+            SOPC_Free(nodeIdStr);
+
             // Note: server does not manage to set user access level this way
             *sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -485,6 +506,13 @@ SOPC_ReturnStatus util_add_node__AddVariableNodeAttributes(SOPC_AddressSpace_Nod
             }
             else if (varAttrs->NoOfArrayDimensions > 0)
             {
+                char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "util_add_node: cannot add Variable node %s since NoOfarraysDimensions and "
+                                       "ArrayDimensions attributes values are not coherent",
+                                       nodeIdStr);
+                SOPC_Free(nodeIdStr);
+
                 // Incoherent parameters
                 *sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
                 status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -513,6 +541,13 @@ SOPC_ReturnStatus util_add_node__AddVariableNodeAttributes(SOPC_AddressSpace_Nod
     {
         if (0 != (varAttrs->SpecifiedAttributes & OpcUa_NodeAttributesMask_Historizing) && varAttrs->Historizing)
         {
+            char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "util_add_node: cannot add Variable node %s with Historizing attribute value since it is not supported",
+                nodeIdStr);
+            SOPC_Free(nodeIdStr);
+
             // Note: server does not manage to set historizing
             *sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -522,7 +557,14 @@ SOPC_ReturnStatus util_add_node__AddVariableNodeAttributes(SOPC_AddressSpace_Nod
     {
         if (0 != (varAttrs->SpecifiedAttributes & OpcUa_NodeAttributesMask_MinimumSamplingInterval))
         {
-            varNode->MinimumSamplingInterval = varAttrs->MinimumSamplingInterval;
+            char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "util_add_node: add Variable node %s but ignoring MinimumSamplingInterval "
+                                     "attribute value %lf since server only supports 0",
+                                     nodeIdStr, varAttrs->MinimumSamplingInterval);
+            SOPC_Free(nodeIdStr);
+
+            // remains 0
         } // else: remains 0
     }
     if (SOPC_STATUS_OK == status)
