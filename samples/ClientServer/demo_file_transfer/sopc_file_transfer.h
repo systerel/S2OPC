@@ -22,39 +22,45 @@
  * \brief API to manage the OPC UA FileTransfer.
  *
  * The API only handles temporary files. A temporary file is created with each call to the Open method.
- * If several Openings are followed without a call to the close method between them, then the temporary file of the
- * first Opening is deleted. The path to store the temporary file and its prefix name must be defined by the user. The
- * user can access the name of the temporary file (prefix and radom sufix) using a notification when the close method is
- * called.
+ * If several Openings are followed without a call to the close method between them,
+ * then the temporary file of the first Opening is deleted.
+ * The path to store the temporary file and its prefix name must be defined by the user. The
+ * user can access the name of the temporary file (prefix and random sufix) using a notification when
+ * the close method is called.
  * Typical use in main (see toolkit_demo_file_transfer.c):
  *      -1 Initialise the API with <SOPC_FileTransfer_Initialize> function.
- *      -2 Configure FileType data of the address space (nodeId, methodId, variableId, close callback, tmp file path
- *         and tmp file name) with <SOPC_FileType_Config> structure.
- *      -3 Add file(s) to the API through the configuration(s) data of the address space with
- *         <SOPC_FileTransfer_Add_File> function (one call for each file).
+ *      -2 Configure FileType data of the address space (nodeId, methodId, variableId, close callback,
+ *         tmp file path and tmp file name) with <SOPC_FileType_Config> structure.
+ *      -3 Add file(s) to the API through the configuration(s) data of the address space
+ *         with <SOPC_FileTransfer_Add_File> function (one call for each file).
  *      -4 Add optional user method(s) implementation with <SOPC_FileTransfer_Add_MethodItems> function.
  *      -5 Start the server asynchronously with <SOPC_FileTransfer_StartServer> function.
- *      -6 Get the name of temporary file in the close callback implementation through
- *         <SOPC_FileTransfer_Get_TmpPath> function.
- *      - The user can read the values of the variables in the address space with <SOPC_FileTransfer_ReadVariable>
- *        function.
- *      - The user can write the values of the variables in the address space with <SOPC_FileTransfer_WriteVariable>
- *        function.
- *      - The user can implement a server callback definition used for address space modification by client.
+ *      -6 Get the name of temporary file in the closing processing
+ *         (user close callback implementation: SOPC_FileTransfer_UserClose_Callback)
+ *      - The user can implement a server callback definition used for address space modification
+ *        by client.
  */
 
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
 
-typedef struct SOPC_FileType SOPC_FileType;
+/**
+ * \brief Default value for UserWritable variable of FileType Object
+ */
+#define VAR_USER_WRITABLE_DEFAULT true
+/**
+ * \brief Default value for Writable variable of FileType Object
+ */
+#define VAR_WRITABLE_DEFAULT true
 
 /**
  * \brief User callback for the closing processing
- * \param file The pointer to the structure of the FileType object that gathers the file data. This parameter is
- * optional and may not be used by the user. \return In the function code, the user must return SOPC_STATUT_OK if no
- * error otherwise SOPC_STATUT_NOK.
+ * \param tmp_file_path A pointer to the temporary file path.
+ * \note After this callback, the path of the tmp file will be deallocated and the user should copy it.
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call.
  */
-typedef SOPC_ReturnStatus (*SOPC_FileTransfer_UserClose_Callback)(SOPC_FileType* file);
+typedef void (*SOPC_FileTransfer_UserClose_Callback)(const char* tmp_file_path);
 
 /**
  * \brief Structure to gather FilType configuration data
@@ -80,6 +86,8 @@ typedef struct SOPC_FileType_Config
 /**
  * \brief Initialise the API.
  * \note Memory allocation, need to call SOPC_FileTransfer_Clear after use.
+ * \warning The function shall be called after SOPC_HelperConfigServer_Initialize and before any other function of the
+ *  server wrapper module (for exemple local services...).
  * \return SOPC_STATUS_OK if no error
  */
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
@@ -88,9 +96,11 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
  * \brief Adding a FileType object to the API from the address space information.
  * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>
  * \param config The structure which gather FileType configuration data
- * \return SOPC_STATUS_OK if no error
+ * \warning In case of error, the API is uninitialized (except for SOPC_STATUS_INVALID_PARAMETERS and
+ * SOPC_STATUS_INVALID_STATE errors).
+ * \return SOPC_STATUS_OK if no error.
  */
-SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config);
+SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config);
 
 /**
  * \brief Adding a user method into the Server.
@@ -113,33 +123,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
  */
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback);
 
-/**
- * \brief Function to get the temporary file path name created by the API.
- * \param file A pointer to the structure of the FileType object.
- * \param name The output name of the temporary file path.
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_Get_TmpPath(SOPC_FileType* file, char* name);
-
-/**
- * \brief Function to write a single value of variable (array are not supported).
- * \param CnodeId The nodeId of the variable to write.
- * \param UserBuiltInId The type of the variable.
- * \param pUserValue A pointer allocated to write the value with the same type as the UserBuiltInId parameter.
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* pUserValue);
-
-/**
- * \brief Function to read a single value of variable (array are not supported).
- * \note This is a blocking function.
- * \param CnodeId The nodeId of the variable to write.
- * \param UserBuiltInId The type of the variable.
- * \param pUserValue A pointer allocated to read the value.
- * \param timeout Timeout in milliseconds (wait until service response is received)
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_ReadVariable(const char* CnodeId, void* pUserValue, uint32_t timeout);
 /**
  * \brief Uninitialize the API (Free the memory)
  */

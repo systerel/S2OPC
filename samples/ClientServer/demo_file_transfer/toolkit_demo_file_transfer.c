@@ -1,4 +1,3 @@
-
 /*
  * Licensed to Systerel under one or more contributor license
  * agreements. See the NOTICE file distributed with this work
@@ -37,29 +36,44 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
-#define BUFF_SIZE 100u
+static int32_t gB_file_is_close = false;
+static char* gCstr_tmp_path = NULL;
+static void set_file_closing_status(SOPC_Boolean res);
+static SOPC_Boolean get_file_closing_status(void);
+static SOPC_Boolean bEnd = false;
+void sigint(int arg);
+
+static void set_file_closing_status(SOPC_Boolean res)
+{
+    SOPC_Atomic_Int_Set(&gB_file_is_close, res ? true : false);
+}
+
+static SOPC_Boolean get_file_closing_status(void)
+{
+    return SOPC_Atomic_Int_Get(&gB_file_is_close) == 1;
+}
 
 /*-----------------------
  * Logger configuration :
  *-----------------------*/
 
 /* Set the log path and set directory path built on executable name prefix */
-static char* Server_ConfigLogPath(const char* logDirName)
+static char* Server_ConfigLogPath(const char* logPrefix)
 {
     char* logDirPath = NULL;
 
-    size_t logDirPathSize = strlen(logDirName) + 7; // <logDirName> + "_logs/" + '\0'
+    size_t logDirPathSize = strlen(logPrefix) + 7; // <logPrefix> + "_logs/" + '\0'
 
     logDirPath = SOPC_Malloc(logDirPathSize * sizeof(char));
 
-    if (NULL != logDirPath &&
-        (int) (logDirPathSize - 1) != snprintf(logDirPath, logDirPathSize, "%s_logs/", logDirName))
+    if (NULL != logDirPath && (int) (logDirPathSize - 1) != snprintf(logDirPath, logDirPathSize, "%s_logs/", logPrefix))
     {
         SOPC_Free(logDirPath);
         logDirPath = NULL;
@@ -71,11 +85,11 @@ static char* Server_ConfigLogPath(const char* logDirName)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "./datas/server_config.xml";
+    const char* xml_server_cfg_path = "./data/server_config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "./datas/address_space.xml";
+    const char* xml_address_space_path = "./data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "./datas/users_config.xml";
+    const char* xml_users_cfg_path = "./data/users_config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
@@ -136,26 +150,47 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     (void) status;
+    if (NULL != gCstr_tmp_path)
+    {
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
+    }
     SOPC_FileTransfer_Clear();
     printf("******* Server stopped\n");
 }
 
+void sigint(int arg)
+{
+    (void) arg;
+    if (NULL != gCstr_tmp_path)
+    {
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
+    }
+    SOPC_FileTransfer_Clear();
+    printf("******* Server stopped\n");
+    bEnd = true;
+}
+
 /*
  * User Close method callback definition.
+ * The callback function shall not do anything blocking or long treatment since it will block any other
+ * callback call.
+ * After this callback, the path of the tmp_file will be deallocated and the user should copy it.
  */
-static SOPC_ReturnStatus UserCloseCallback(SOPC_FileType* file)
+static void UserCloseCallback(const char* tmp_file_path)
 {
     /********************/
     /* USER CODE BEGING */
     /********************/
-    SOPC_ReturnStatus status;
-    char name[BUFF_SIZE];
-    status = SOPC_FileTransfer_Get_TmpPath(file, name);
-    if (SOPC_STATUS_OK == status)
+    if (NULL != gCstr_tmp_path)
     {
-        printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", name);
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
     }
-    return status;
+    gCstr_tmp_path = SOPC_Calloc(strlen(tmp_file_path) + 1, sizeof(char));
+    memcpy(gCstr_tmp_path, tmp_file_path, (size_t) strlen(tmp_file_path));
+    set_file_closing_status(true);
     /********************/
     /* END USER CODE   */
     /********************/
@@ -163,6 +198,7 @@ static SOPC_ReturnStatus UserCloseCallback(SOPC_FileType* file)
 
 /*
  * User Server callback definition used for address space modification by client.
+ * The callback function shall not do anything blocking or long treatment
  */
 static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr,
                                           OpcUa_WriteValue* writeValue,
@@ -185,6 +221,7 @@ static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr
 int main(int argc, char* argv[])
 {
     printf("******* API test\n");
+    signal(SIGINT, sigint);
 
     // Note: avoid unused parameter warning from compiler
     (void) argc;
@@ -200,26 +237,33 @@ int main(int argc, char* argv[])
 
     /* Configure the server to support message size of 128 Mo */
     SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
-    encConf.buffer_size = 1000000;
-    encConf.receive_max_nb_chunks = 128;
+    encConf.buffer_size = 2097152;
+    encConf.receive_max_nb_chunks = 100;
     /* receive_max_msg_size = buffer_size * receive_max_nb_chunks */
-    encConf.receive_max_msg_size = 128000000; // 128 Mo
-    encConf.send_max_nb_chunks = 128;
+    encConf.receive_max_msg_size = 209715200; // 209 Mo
+    encConf.send_max_nb_chunks = 100;
     /* send_max_msg_size = buffer_size  * send_max_nb_chunks */
-    encConf.send_max_msg_size = 128000000; // 128 Mo
-    encConf.max_string_length = 128000000; // 128 Mo
+    encConf.send_max_msg_size = 209715200; // 209 Mo
+    encConf.max_string_length = 209715200; // 209 Mo
 
     bool res = SOPC_Common_SetEncodingConstants(encConf);
     if (false == res)
     {
         printf("******* Failed to configure message size of S2OPC\n");
+        return 0;
     }
-
     status = SOPC_CommonHelper_Initialize(&logConfig);
+    SOPC_Free(logDirPath);
+    logDirPath = NULL;
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_Initialize();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Unable to initialize the S2OPC Server frontend configuration.\n");
+        }
     }
+
     if (SOPC_STATUS_OK == status)
     {
         /* status = Server_LoadServerConfigurationFromFiles(); */
@@ -227,9 +271,9 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to load configuration from paths:\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/users_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/server_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/address_space.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/users_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/server_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/address_space.xml\n");
         }
     }
 
@@ -242,118 +286,81 @@ int main(int argc, char* argv[])
         }
     }
 
-    /* Finalize the server configuration */
     if (SOPC_STATUS_OK == status)
     {
-        printf("******* Code begin ...\n");
-
         status = SOPC_FileTransfer_Initialize();
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "API: FileTransfer intialization failed");
-            SOPC_ASSERT(SOPC_STATUS_OK == status && "during file transfer intialization");
+            printf("******* API FileTransfer intialization failed\n");
+            return 1; // SOPC_FileTransfer_Initialize free the memory in case of error
         }
+    }
+    else
+    {
+        SOPC_FileTransfer_Clear();
+        return 1;
+    }
 
-        const SOPC_FileType_Config config_Item1_PreloadFile = {.file_path = "/tmp/Item1_preloadFile",
-                                                               .fileType_nodeId = "ns=1;i=15478",
-                                                               .met_openId = "ns=1;i=15484",
-                                                               .met_closeId = "ns=1;i=15487",
-                                                               .met_readId = "ns=1;i=15489",
-                                                               .met_writeId = "ns=1;i=15492",
-                                                               .met_getposId = "ns=1;i=15494",
-                                                               .met_setposId = "ns=1;i=15497",
-                                                               .var_sizeId = "ns=1;i=15479",
-                                                               .var_openCountId = "ns=1;i=15482",
-                                                               .var_userWritableId = "ns=1;i=15481",
-                                                               .var_writableId = "ns=1;i=15480",
-                                                               .pFunc_UserCloseCallback = &UserCloseCallback};
+    printf("******* Code begin ...\n");
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_FileTransfer_Add_File(config_Item1_PreloadFile);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("******* Failed to add file into server\n");
-                SOPC_FileTransfer_Clear();
-                return 1;
-            }
-        }
-        printf("******* File added ...\n");
+    const SOPC_FileType_Config config_Item1_PreloadFile = {.file_path = "/tmp/Item1_preloadFile",
+                                                           .fileType_nodeId = "ns=1;i=15478",
+                                                           .met_openId = "ns=1;i=15484",
+                                                           .met_closeId = "ns=1;i=15487",
+                                                           .met_readId = "ns=1;i=15489",
+                                                           .met_writeId = "ns=1;i=15492",
+                                                           .met_getposId = "ns=1;i=15494",
+                                                           .met_setposId = "ns=1;i=15497",
+                                                           .var_sizeId = "ns=1;i=15479",
+                                                           .var_openCountId = "ns=1;i=15482",
+                                                           .var_userWritableId = "ns=1;i=15481",
+                                                           .var_writableId = "ns=1;i=15480",
+                                                           .pFunc_UserCloseCallback = &UserCloseCallback};
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test",
-                                                       "ns=1;i=15790");
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("******* Failed to add UserMethod_Test to the server ...\n");
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
-        }
+    status = SOPC_FileTransfer_Add_File(&config_Item1_PreloadFile);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("******* Failed to add file into server\n");
+        return 1; // SOPC_FileTransfer_Add_File free the memory in case of error
+    }
+    printf("******* File added ...\n");
+    status =
+        SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test", "ns=1;i=15790");
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("******* Failed to add UserMethod_Test to the server ...\n");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to start server ...\n");
             SOPC_FileTransfer_Clear();
             return 1;
         }
-        printf("******* Start server ...\n");
     }
 
     /********************/
     /* USER CODE BEGING */
     /********************/
+    bool file_is_close = false;
 
-    SOPC_Boolean var_executable = true;
-
-    if (SOPC_STATUS_OK == status)
+    while (!bEnd)
     {
-        status = SOPC_FileTransfer_WriteVariable("ns=1;i=15792", SOPC_Boolean_Id, &var_executable);
-        if (SOPC_STATUS_OK != status)
+        file_is_close = get_file_closing_status();
+        if (file_is_close)
         {
-            printf("******* Failed to write Executable variable (RemoteReset node)\n");
+            printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", gCstr_tmp_path);
+            if (NULL != gCstr_tmp_path)
+            {
+                SOPC_Free(gCstr_tmp_path);
+                gCstr_tmp_path = NULL;
+            }
+            set_file_closing_status(false);
         }
-    }
-
-    SOPC_String* var_operationState = SOPC_String_Create();
-    SOPC_String* var_operationState_readback = SOPC_String_Create();
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_CopyFromCString(var_operationState, "This is a test");
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_FileTransfer_WriteVariable("ns=1;i=15626", SOPC_String_Id, var_operationState);
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("******* Failed to write OperationState variable (Items node)\n");
-        }
-    }
-    status = SOPC_FileTransfer_ReadVariable("ns=1;i=15626", var_operationState_readback, 5000u);
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("******* ReadBack OperationState variable (failure)\n");
-    }
-    else
-    {
-        printf("******* ReadBack on OperationState (success): %s\n",
-               SOPC_String_GetCString(var_operationState_readback));
-    }
-
-    SOPC_String_Delete(var_operationState);
-    SOPC_String_Delete(var_operationState_readback);
-    var_operationState = NULL;
-    var_operationState_readback = NULL;
-
-    while (1)
-    {
         SOPC_Sleep(500);
     }
-
     /********************/
     /* END USER CODE   */
     /********************/
