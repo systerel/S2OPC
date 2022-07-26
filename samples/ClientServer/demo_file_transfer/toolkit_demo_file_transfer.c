@@ -51,42 +51,15 @@ static char* Server_ConfigLogPath(const char* logDirName)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path =
-        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_S2OPC_Server_Demo_Config.xml";
+    const char* xml_server_cfg_path = "./datas/server_config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_address_space.xml";
+    const char* xml_address_space_path = "./datas/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/RBA_DATA/RBA_S2OPC_Users_Demo_Config.xml";
+    const char* xml_users_cfg_path = "./datas/users_config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
 }
-
-/*---------------------------------------------------------------------------
- *                             Server configuration
- *---------------------------------------------------------------------------*/
-
-// static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(void)
-// {
-//     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
-//      * TEST_SERVER_XML_ADDRESS_SPACE and TEST_USERS_XML_CONFIG.
-//      *
-//      * In case of success returns the file path otherwise display error message and return failure status.
-//      */
-
-//     const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
-//     const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
-//     const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
-
-//     if (NULL == xml_server_config_path || NULL == xml_address_space_config_path || NULL == xml_users_config_path)
-//     {
-//         printf("Error: an XML server configuration file path shall be provided\n");
-//         return SOPC_STATUS_INVALID_PARAMETERS;
-//     }
-
-//     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
-//                                                     xml_users_config_path, NULL);
-// }
 
 static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callContextPtr,
                                                    const SOPC_NodeId* objectId,
@@ -231,6 +204,13 @@ int main(int argc, char* argv[])
     {
         /* status = Server_LoadServerConfigurationFromFiles(); */
         status = Server_LoadServerConfigurationFromPaths();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("******* Failed to load configuration from paths:\n");
+            printf("******* \t--> need file (relative path where the server is running):\t/datas/users_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t/datas/server_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t/datas/address_space.xml\n");
+        }
     }
 
     if (SOPC_STATUS_OK == status)
