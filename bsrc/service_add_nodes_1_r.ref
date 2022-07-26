@@ -70,9 +70,38 @@ OPERATIONS
             d_adsp_nodes_invariant &
             sc_operation : t_StatusCode_i &
             sc_operation : {e_sc_ok,
-                            // temporary to indicate unsupported node classes
-                            e_sc_bad_node_class_invalid,
-                            e_sc_bad_out_of_memory }  &
+                            e_sc_bad_parent_node_id_invalid,
+                            e_sc_bad_reference_type_id_invalid,
+                            e_sc_bad_reference_not_allowed,
+                            e_sc_bad_node_id_rejected,
+                            e_sc_bad_node_id_exists,
+                            /* bad_node_class_invalid => already checked */
+                            /* e_sc_bad_browse_name_invalid => already checked */
+                            e_sc_bad_browse_name_duplicated,
+                            /* bad_node_attributes_invalid => already checked */
+                            e_sc_bad_type_definition_invalid,
+                            e_sc_bad_node_attributes_invalid,
+                            e_sc_bad_out_of_memory,
+                            e_sc_bad_node_class_invalid} & // BadNodeClassInvalid used for unsupported NodeClass for now3
+            new_nodeId : t_NodeId_i &
+            (sc_operation = e_sc_ok =>
+                /* Parent node is valid */
+                p_parentExpNid : dom(conv_ExpandedNodeId_NodeId) &
+                conv_ExpandedNodeId_NodeId(p_parentExpNid) : ran(a_NodeId) &
+                /* Reference type is valid */
+                p_refTypeId : Type_IsReferenceTypeIdValid &
+                new_nodeId : t_NodeId &
+                new_nodeId /: ran(a_NodeId) &
+                (p_reqExpNodeId : t_ExpandedNodeId =>
+                    p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) & new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId)) &
+                /* Type definition is valid if node is an object or variable */
+                (p_nodeClass = e_ncl_Object or p_nodeClass = e_ncl_Variable =>
+                    p_typeDefId : t_ExpandedNodeId &
+                    p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
+                    conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)
+                )
+            ) &
+            (not(sc_operation = e_sc_ok) => new_nodeId = c_NodeId_indet) &
             new_nodeId : t_NodeId_i &
             (sc_operation = e_sc_ok =>
                 new_nodeId : t_NodeId &
@@ -80,7 +109,7 @@ OPERATIONS
                 (p_reqExpNodeId : t_ExpandedNodeId =>
                     p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) &
                     new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId))
-          )
+            )
         )
     END
 END

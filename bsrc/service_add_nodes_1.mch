@@ -93,10 +93,7 @@ OPERATIONS
         :(
             d_adsp_nodes_invariant &
             sc_operation : t_StatusCode_i &
-            sc_operation : {e_sc_ok,
-                            // temporary to indicate unsupported node classes
-                            e_sc_bad_node_class_invalid,
-                            e_sc_bad_out_of_memory }  &
+            sc_operation : t_StatusCode &
             new_nodeId : t_NodeId_i &
             (sc_operation = e_sc_ok =>
                 new_nodeId : t_NodeId &
