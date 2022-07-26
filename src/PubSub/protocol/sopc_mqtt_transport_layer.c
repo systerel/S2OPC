@@ -2563,8 +2563,11 @@ static int api_lib_connect(tMqttTransportContext* pCtx)
         conn_opts.onFailure = cb_lib_onConnectFailure;
         conn_opts.context = &pCtx->identification; /* Context shall be identification information : manager
                                                                  handle and transport context async handle */
-        conn_opts.username = pCtx->connexionConfig.username;
-        conn_opts.password = pCtx->connexionConfig.password;
+        if (('\0' != pCtx->connexionConfig.username[0]) && ('\0' != pCtx->connexionConfig.password[0]))
+        {
+            conn_opts.username = pCtx->connexionConfig.username;
+            conn_opts.password = pCtx->connexionConfig.password;
+        }
 
         MQTTAsyncResult = MQTTAsync_connect(pCtx->clientHandle, &conn_opts);
 
@@ -3232,11 +3235,33 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     snprintf(pGetHandleRequest->connectionConf.topicname, sizeof(pGetHandleRequest->connectionConf.topicname) - 1, "%s",
              sTopicName);
 
-    snprintf(pGetHandleRequest->connectionConf.username, sizeof(pGetHandleRequest->connectionConf.username) - 1, "%s",
-             sUsername);
+    if (NULL != sUsername)
+    {
+        const int n = snprintf(pGetHandleRequest->connectionConf.username,
+                               sizeof(pGetHandleRequest->connectionConf.username) - 1, "%s", sUsername);
+        if (n < 0 || n >= (int) sizeof(pGetHandleRequest->connectionConf.username))
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        pGetHandleRequest->connectionConf.username[0] = '\0';
+    }
 
-    snprintf(pGetHandleRequest->connectionConf.password, sizeof(pGetHandleRequest->connectionConf.password) - 1, "%s",
-             sPassword);
+    if (SOPC_STATUS_OK == result && NULL != sPassword)
+    {
+        const int n = snprintf(pGetHandleRequest->connectionConf.password,
+                               sizeof(pGetHandleRequest->connectionConf.password) - 1, "%s", sPassword);
+        if (n < 0 || n >= (int) sizeof(pGetHandleRequest->connectionConf.password))
+        {
+            result = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        pGetHandleRequest->connectionConf.password[0] = '\0';
+    }
 
     pGetHandleRequest->callbacksConf.pCbGetHandleSuccess = pCbGetHandleSuccess;
     pGetHandleRequest->callbacksConf.pCbGetHandleFailure = pCbGetHandleFailure;
