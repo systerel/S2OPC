@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_FileTransfer_Add_File(config_Item1_PreloadFile);
+            status = SOPC_FileTransfer_Add_File(&config_Item1_PreloadFile);
             if (SOPC_STATUS_OK != status)
             {
                 printf("******* Failed to add file into server\n");

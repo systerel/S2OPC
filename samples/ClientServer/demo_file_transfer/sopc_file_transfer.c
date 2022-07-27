@@ -244,27 +244,6 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
 static void filetype_free(void* value);
 
 /**
- * \brief Function to free a C string (used for dictionary management purposes).
- * \param value The C string
- */
-static void cstring_free(void* value);
-
-/**
- * \brief Function to compare two C string (used for dictionary management purposes).
- * \param a first C string
- * \param b second C string
- * \return true if equal else false
- */
-static bool cstring_equal(const void* a, const void* b);
-
-/**
- * \brief Function to hash a C string (used for dictionary management purposes).
- * \param cstring the C string to hash
- * \return the hash result
- */
-static uint64_t cstring_hash(const void* cstring);
-
-/**
  * \brief Function to compare two SOPC_FileHandle (used for dictionary management purposes).
  * \param a first SOPC_FileHandle
  * \param b second SOPC_FileHandle
@@ -397,7 +376,6 @@ static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t
 /* STATIC VARIABLE */
 /************************************/
 static SOPC_Dict* g_objectId_to_file = NULL;
-static SOPC_Dict* g_str_objectId_to_file = NULL;
 /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
  * multiple handles for the same file)*/
 static SOPC_Dict* g_handle_to_file = NULL;
@@ -432,25 +410,6 @@ static void filetype_free(void* value)
     {
         FileTransfer_FileType_Delete((SOPC_FileType**) &value);
     }
-}
-
-static void cstring_free(void* value)
-{
-    if (NULL != value)
-    {
-        SOPC_Free(value);
-    }
-}
-
-static bool cstring_equal(const void* a, const void* b)
-{
-    return (strcmp((const char*) a, (const char*) b) == 0);
-}
-
-static uint64_t cstring_hash(const void* cstring)
-{
-    uint64_t hash = SOPC_DJBHash((const uint8_t*) cstring, (size_t) strlen(cstring));
-    return hash;
 }
 
 static bool handle_equal(const void* a, const void* b)
@@ -984,7 +943,7 @@ static void FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL != g_objectId_to_file || NULL != g_str_objectId_to_file || NULL != g_method_call_manager)
+    if (NULL != g_objectId_to_file || NULL != g_method_call_manager)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:Init: The FileTransfer API is already initialized.");
@@ -997,13 +956,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Init: unable to create dictionary <g_objectId_to_file>");
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        g_str_objectId_to_file = SOPC_Dict_Create(NULL, cstring_hash, cstring_equal, cstring_free, NULL);
-        if (NULL == g_str_objectId_to_file)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Init: unable to create dictionary <g_str_objectId_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         g_method_call_manager = SOPC_MethodCallManager_Create();
@@ -1038,188 +990,266 @@ void SOPC_FileTransfer_Clear(void)
 {
     SOPC_Dict_Delete(g_objectId_to_file);
     g_objectId_to_file = NULL;
-    SOPC_Dict_Delete(g_str_objectId_to_file);
-    g_str_objectId_to_file = NULL;
     SOPC_Dict_Delete(g_handle_to_file);
     g_handle_to_file = NULL;
+    SOPC_MethodCallManager_Free(g_method_call_manager);
+    g_method_call_manager = NULL;
     SOPC_HelperConfigServer_Clear();
     SOPC_CommonHelper_Clear();
 }
 
-SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
+SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_FileType* file;
-    bool status_nok = false;
+    bool res = false;
 
-    if (NULL != config.fileType_nodeId && NULL != config.file_path && NULL != config.met_openId &&
-        NULL != config.met_closeId && NULL != config.met_readId && NULL != config.met_writeId &&
-        NULL != config.met_getposId && NULL != config.met_setposId && NULL != config.var_openCountId &&
-        NULL != config.var_sizeId && NULL != config.var_userWritableId && NULL != config.var_writableId)
+    if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
     {
-        file = FileTransfer_FileType_Create();
-        if (NULL == file)
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: The FileTransfer API is not initialized.");
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == config->fileType_nodeId || NULL == config->file_path || NULL == config->met_openId ||
+        NULL == config->met_closeId || NULL == config->met_readId || NULL == config->met_writeId ||
+        NULL == config->met_getposId || NULL == config->met_setposId || NULL == config->var_openCountId ||
+        NULL == config->var_sizeId || NULL == config->var_userWritableId || NULL == config->var_writableId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: The fields of the config argument must be initialized");
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    file = FileTransfer_FileType_Create();
+    if (NULL == file)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: unable to create FileType structure");
+        status = SOPC_STATUS_NOK;
+    }
+    file->mode = FileTransfer_UnknownMode;
+    file->pFunc_UserCloseCallback = config->pFunc_UserCloseCallback;
+    file->node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
+    if (NULL == file->node_id)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
+        status = SOPC_STATUS_NOK;
+    }
+    file->path = SOPC_String_Create();
+    if (NULL == file->path)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create the path string");
+        status = SOPC_STATUS_NOK;
+    }
+    file->tmp_path = SOPC_String_Create();
+    if (NULL == file->tmp_path)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:AddFile: unable to create the tmp_path string");
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_CopyFromCString(file->path, config->file_path);
+        if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:AddFile: unable to create FileType structure");
-            status_nok = true;
+                                   "FileTransfer:AddFile: unable to set file path from a C string");
+            status = SOPC_STATUS_NOK;
         }
-        file->mode = FileTransfer_UnknownMode;
-        file->pFunc_UserCloseCallback = config.pFunc_UserCloseCallback;
-        file->node_id = SOPC_NodeId_FromCString(config.fileType_nodeId, (int32_t) strlen(config.fileType_nodeId));
-        file->path = SOPC_String_Create();
-        file->tmp_path = SOPC_String_Create();
-        if (NULL == file->node_id)
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->methodIds[OPEN_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_openId, (int32_t) strlen(config->met_openId));
+        if (NULL != file->methodIds[OPEN_METHOD_IDX])
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
-            status_nok = true;
-        }
-        status = SOPC_String_CopyFromCString(file->path, config.file_path);
-        if (SOPC_STATUS_OK == status)
-        {
-            file->methodIds[OPEN_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_openId, (int32_t) strlen(config.met_openId));
-            if (NULL != file->methodIds[OPEN_METHOD_IDX])
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[OPEN_METHOD_IDX],
+                                                      &FileTransfer_Method_Open, "Open", NULL);
+            if (SOPC_STATUS_OK != status)
             {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[OPEN_METHOD_IDX],
-                                                          &FileTransfer_Method_Open, "Open", NULL);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to add Open method");
             }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:AddFile: unable to create NodeId from a C string for Open method");
-                status_nok = true;
-            }
-            file->methodIds[CLOSE_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_closeId, (int32_t) strlen(config.met_closeId));
-            if (NULL != file->methodIds[CLOSE_METHOD_IDX])
-            {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[CLOSE_METHOD_IDX],
-                                                          &FileTransfer_Method_Close, "Close", NULL);
-            }
-            else
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for Close method");
-                status_nok = true;
-            }
-            file->methodIds[READ_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_readId, (int32_t) strlen(config.met_readId));
-            if (NULL != file->methodIds[READ_METHOD_IDX])
-            {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[READ_METHOD_IDX],
-                                                          &FileTransfer_Method_Read, "Read", NULL);
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:AddFile: unable to create NodeId from a C string for Read method");
-                status_nok = true;
-            }
-            file->methodIds[WRITE_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_writeId, (int32_t) strlen(config.met_writeId));
-            if (NULL != file->methodIds[WRITE_METHOD_IDX])
-            {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[WRITE_METHOD_IDX],
-                                                          &FileTransfer_Method_Write, "Write", NULL);
-            }
-            else
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for Write method");
-                status_nok = true;
-            }
-            file->methodIds[GETPOS_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_getposId, (int32_t) strlen(config.met_getposId));
-            if (NULL != file->methodIds[GETPOS_METHOD_IDX])
-            {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[GETPOS_METHOD_IDX],
-                                                          &FileTransfer_Method_GetPos, "GetPosition", NULL);
-            }
-            else
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for GetPosition method");
-                status_nok = true;
-            }
-
-            file->methodIds[SETPOS_METHOD_IDX] =
-                SOPC_NodeId_FromCString(config.met_setposId, (int32_t) strlen(config.met_setposId));
-            if (NULL != file->methodIds[SETPOS_METHOD_IDX])
-            {
-                status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[SETPOS_METHOD_IDX],
-                                                          &FileTransfer_Method_SetPos, "SetPosition", NULL);
-            }
-            else
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for SetPosition method");
-                status_nok = true;
-            }
-
-            file->variableIds[SIZE_VAR_IDX] =
-                SOPC_NodeId_FromCString(config.var_sizeId, (int32_t) strlen(config.var_sizeId));
-            if (NULL == file->variableIds[SIZE_VAR_IDX])
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for Size variable");
-                status_nok = true;
-            }
-            file->variableIds[OPEN_COUNT_VAR_IDX] =
-                SOPC_NodeId_FromCString(config.var_openCountId, (int32_t) strlen(config.var_openCountId));
-            if (NULL == file->variableIds[OPEN_COUNT_VAR_IDX])
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for OpenCount variable");
-                status_nok = true;
-            }
-            file->variableIds[WRITABLE_VAR_IDX] =
-                SOPC_NodeId_FromCString(config.var_writableId, (int32_t) strlen(config.var_writableId));
-            if (NULL == file->variableIds[WRITABLE_VAR_IDX])
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for Writable variable");
-                status_nok = true;
-            }
-            file->variableIds[USER_WRITABLE_VAR_IDX] =
-                SOPC_NodeId_FromCString(config.var_userWritableId, (int32_t) strlen(config.var_userWritableId));
-            if (NULL == file->variableIds[USER_WRITABLE_VAR_IDX])
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
-                status_nok = true;
-            }
-
-            /* g_str_objectId_to_file only for debuging with string key */
-            char* str_key = SOPC_Malloc(strlen(config.fileType_nodeId));
-            memcpy(str_key, config.fileType_nodeId, (size_t) strlen(config.fileType_nodeId));
-            bool res;
-            res = SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file);
-            SOPC_ASSERT(true == res);
-            res = SOPC_Dict_Insert(g_str_objectId_to_file, str_key, file);
-            SOPC_ASSERT(true == res);
         }
         else
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:AddFile: unable to set file path from a C string");
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for Open method");
+            status = SOPC_STATUS_NOK;
         }
     }
-    if (status_nok)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:AddFile: The fields of the config argument must be initialized");
+        file->methodIds[CLOSE_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_closeId, (int32_t) strlen(config->met_closeId));
+        if (NULL != file->methodIds[CLOSE_METHOD_IDX])
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[CLOSE_METHOD_IDX],
+                                                      &FileTransfer_Method_Close, "Close", NULL);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to add Close method");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for Close method");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->methodIds[READ_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_readId, (int32_t) strlen(config->met_readId));
+        if (NULL != file->methodIds[READ_METHOD_IDX])
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[READ_METHOD_IDX],
+                                                      &FileTransfer_Method_Read, "Read", NULL);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to add Read method");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for Read method");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->methodIds[WRITE_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_writeId, (int32_t) strlen(config->met_writeId));
+        if (NULL != file->methodIds[WRITE_METHOD_IDX])
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[WRITE_METHOD_IDX],
+                                                      &FileTransfer_Method_Write, "Write", NULL);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to add Write method");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for Write method");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->methodIds[GETPOS_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_getposId, (int32_t) strlen(config->met_getposId));
+        if (NULL != file->methodIds[GETPOS_METHOD_IDX])
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[GETPOS_METHOD_IDX],
+                                                      &FileTransfer_Method_GetPos, "GetPosition", NULL);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to add GetPosition method");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:AddFile: unable to create NodeId from a C string for GetPosition method");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->methodIds[SETPOS_METHOD_IDX] =
+            SOPC_NodeId_FromCString(config->met_setposId, (int32_t) strlen(config->met_setposId));
+        if (NULL != file->methodIds[SETPOS_METHOD_IDX])
+        {
+            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[SETPOS_METHOD_IDX],
+                                                      &FileTransfer_Method_SetPos, "SetPosition", NULL);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:AddFile: unable to add SetPosition method");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:AddFile: unable to create NodeId from a C string for SetPosition method");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->variableIds[SIZE_VAR_IDX] =
+            SOPC_NodeId_FromCString(config->var_sizeId, (int32_t) strlen(config->var_sizeId));
+        if (NULL == file->variableIds[SIZE_VAR_IDX])
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for Size variable");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->variableIds[OPEN_COUNT_VAR_IDX] =
+            SOPC_NodeId_FromCString(config->var_openCountId, (int32_t) strlen(config->var_openCountId));
+        if (NULL == file->variableIds[OPEN_COUNT_VAR_IDX])
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:AddFile: unable to create NodeId from a C string for OpenCount variable");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->variableIds[WRITABLE_VAR_IDX] =
+            SOPC_NodeId_FromCString(config->var_writableId, (int32_t) strlen(config->var_writableId));
+        if (NULL == file->variableIds[WRITABLE_VAR_IDX])
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:AddFile: unable to create NodeId from a C string for Writable variable");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        file->variableIds[USER_WRITABLE_VAR_IDX] =
+            SOPC_NodeId_FromCString(config->var_userWritableId, (int32_t) strlen(config->var_userWritableId));
+        if (NULL == file->variableIds[USER_WRITABLE_VAR_IDX])
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        res = SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file);
+        if (false == res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to insert file into dictionary");
+            FileTransfer_FileType_Delete(&file); // The FileType will not be deleted throught <SOPC_FileTransfer_Clear>
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_FileTransfer_Clear(); // Unitialize the API
         status = SOPC_STATUS_NOK;
     }
+
     return status;
 }
 

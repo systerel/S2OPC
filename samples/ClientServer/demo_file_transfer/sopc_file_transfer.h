@@ -98,9 +98,10 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
  * \brief Adding a FileType object to the API from the address space information.
  * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>
  * \param config The structure which gather FileType configuration data
+ * \warning In case of errors, the API is uninitialized.
  * \return SOPC_STATUS_OK if no error
  */
-SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config);
+SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config);
 
 /**
  * \brief Adding a user method into the Server.
