@@ -147,11 +147,9 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
 
 static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
 {
+    assert(args != NULL);
     Thread* thread = (Thread*) args;
-    // void* res =
-    thread->startFct(thread->args);
-    // TODO: deal with returned value ?
-    return 0;
+    return (DWORD) thread->startFct(thread->args);
 }
 
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
@@ -171,7 +169,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     }
 
     thread->args = startArgs;
-    thread->startFct = (SOPCThreadStartFct*) startFct;
+    thread->startFct = startFct;
     thread->thread = CreateThread(NULL, // default security attributes
                                   0,    // use default stack size
                                   SOPC_Thread_StartFct, thread,

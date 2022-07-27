@@ -30,7 +30,7 @@ typedef CRITICAL_SECTION Mutex;
 
 typedef CONDITION_VARIABLE Condition;
 
-typedef void SOPCThreadStartFct(void*);
+typedef void* SOPCThreadStartFct(void*);
 
 typedef struct Thread
 {

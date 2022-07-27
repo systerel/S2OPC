@@ -38,7 +38,8 @@
  *  \brief Function to create a thread
  *
  *  \param thread      Return parameter for the created thread
- *  \param startFct    Function called at thread start
+ *  \param startFct    Function called at thread start. The \a startFct function is called in a new thread context
+ *      with \a startArgs as parameter. The return value is not relevant and shall be set to NULL.
  *  \param startArgs   Arguments of the start function
  *  \param taskName    Name of the created thread
  *
