@@ -78,7 +78,7 @@ typedef SOPC_Byte SOPC_OpenMode;
 /**
  * \brief A buffer size to manage C string
  */
-#define STR_BUFF_SIZE 100
+#define STR_MARGIN_SIZE 50
 
 /**
  * \brief Value to check if the opening mode is unknown
@@ -1268,45 +1268,80 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
 
 static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 {
-    SOPC_StatusCode status = OpcUa_BadOutOfMemory;
-    if (NULL != file)
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+    SOPC_ReturnStatus return_status = SOPC_STATUS_OK;
+    const char* Cpath = NULL;
+    char* tmp_file_path = NULL;
+    size_t size_path = 0;
+    int res = -1;
+    int filedes = -1;
+    SOPC_ASSERT(NULL != file && "CreateTmpFile: unexpected error");
+    if ((NULL != file->node_id) && (NULL != file->path) && (NULL != file->tmp_path))
     {
-        if ((NULL != file->node_id) && (NULL != file->path) && (NULL != file->tmp_path))
-        {
-            char tmp_file_path[STR_BUFF_SIZE];
-
-            memset(tmp_file_path, 0, sizeof(tmp_file_path));
-
-            sprintf(tmp_file_path, "%s-XXXXXX", SOPC_String_GetRawCString(file->path));
-
-            int filedes = mkstemp(tmp_file_path);
-            if (1 > filedes)
-            {
-                const char* str = SOPC_String_GetRawCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:CreateTmpFile: the mkstemp function has failed (file '%s')", str);
-                SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
-            }
-            int res = close(filedes);
-            if (0 != res)
-            {
-                const char* str = SOPC_String_GetRawCString(file->path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:CreateTmpFile: the close function has failed (file '%s')", str);
-                SOPC_ASSERT(0 == res && "closing of tmp file failed");
-            }
-
-            if (SOPC_STATUS_OK == SOPC_String_CopyFromCString(file->tmp_path, (const char*) tmp_file_path))
-            {
-                status = SOPC_GoodGenericStatus;
-            }
-        }
-        else
+        Cpath = SOPC_String_GetRawCString(file->path);
+        size_path =
+            (size_t) file->path->Length +
+            STR_MARGIN_SIZE; // Margin if the number of random digits of the mkstemp function changes in a future use.
+        tmp_file_path = SOPC_Calloc(size_path, sizeof(char));
+        if (NULL == tmp_file_path)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:CreateTmpFile: the FileType object is not initialize in the API");
+                                   "FileTransfer:CreateTmpFile: the calloc has failed (file '%s')", Cpath);
+            status = OpcUa_BadUnexpectedError;
+        }
+        if (0 == (status & SOPC_GoodStatusOppositeMask))
+        {
+            res = snprintf(tmp_file_path, size_path, "%s-XXXXXX", SOPC_String_GetRawCString(file->path));
+            if (0 > res)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:CreateTmpFile: the snprintf function has failed (file '%s')",
+                                       Cpath);
+                status = OpcUa_BadUnexpectedError;
+            }
+        }
+        if (0 == (status & SOPC_GoodStatusOppositeMask))
+        {
+            filedes = mkstemp(tmp_file_path);
+            if (0 > filedes)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:CreateTmpFile: the mkstemp function has failed (file '%s')",
+                                       Cpath);
+                status = OpcUa_BadUnexpectedError;
+            }
+        }
+        if (0 == (status & SOPC_GoodStatusOppositeMask))
+        {
+            res = close(filedes);
+            if (0 != res)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "FileTransfer:CreateTmpFile: the close function has failed (file '%s')", Cpath);
+                status = OpcUa_BadUnexpectedError;
+            }
+        }
+        if (0 == (status & SOPC_GoodStatusOppositeMask))
+        {
+            return_status = SOPC_String_InitializeFromCString(file->tmp_path, (const char*) tmp_file_path);
+            if (SOPC_STATUS_OK != return_status)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "FileTransfer:CreateTmpFile: the InitializeFromCString function has failed (file '%s')", Cpath);
+                status = OpcUa_BadUnexpectedError;
+            }
         }
     }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:CreateTmpFile: the FileType object is not initialize in the API");
+        status = OpcUa_BadUnexpectedError;
+    }
+
+    SOPC_Free(tmp_file_path);
+    tmp_file_path = NULL;
     return status;
 }
 
