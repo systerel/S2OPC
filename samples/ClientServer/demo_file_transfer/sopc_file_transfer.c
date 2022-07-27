@@ -1277,12 +1277,12 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 
             memset(tmp_file_path, 0, sizeof(tmp_file_path));
 
-            sprintf(tmp_file_path, "%s-XXXXXX", SOPC_String_GetCString(file->path));
+            sprintf(tmp_file_path, "%s-XXXXXX", SOPC_String_GetRawCString(file->path));
 
             int filedes = mkstemp(tmp_file_path);
             if (1 > filedes)
             {
-                char* str = SOPC_String_GetCString(file->path);
+                const char* str = SOPC_String_GetRawCString(file->path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:CreateTmpFile: the mkstemp function has failed (file '%s')", str);
                 SOPC_ASSERT(1 <= filedes && "creation of tmp file failed");
@@ -1290,7 +1290,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
             int res = close(filedes);
             if (0 != res)
             {
-                char* str = SOPC_String_GetCString(file->path);
+                const char* str = SOPC_String_GetRawCString(file->path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:CreateTmpFile: the close function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "closing of tmp file failed");
@@ -1325,10 +1325,10 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                 status = opcuaMode_to_CMode(file->mode, Cmode);
                 if (SOPC_GoodGenericStatus == status)
                 {
-                    file->fp = fopen(SOPC_String_GetCString(file->tmp_path), Cmode);
+                    file->fp = fopen(SOPC_String_GetRawCString(file->tmp_path), Cmode);
                     if (NULL == file->fp)
                     {
-                        char* str = SOPC_String_GetCString(file->tmp_path);
+                        const char* str = SOPC_String_GetRawCString(file->tmp_path);
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                                "FileTransfer:OpenTmpFile: the fopen function has failed (file '%s')",
                                                str);
@@ -1397,7 +1397,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     res = fclose(file->fp);
                     if (0 != res)
                     {
-                        char* str = SOPC_String_GetCString(file->tmp_path);
+                        const char* str = SOPC_String_GetRawCString(file->tmp_path);
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                                "FileTransfer:CloseTmpFile: the fclose function has failed (file '%s')",
                                                str);
