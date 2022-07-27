@@ -949,8 +949,8 @@ static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
     SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer needs to be initialize");
     filetype->node_id = NULL;
     filetype->handle = INVALID_HANDLE_VALUE;
-    filetype->path = SOPC_String_Create();
-    filetype->tmp_path = SOPC_String_Create();
+    filetype->path = NULL;
+    filetype->tmp_path = NULL;
     for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
     {
         filetype->methodIds[i] = NULL;
@@ -969,30 +969,20 @@ static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
 
 static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 {
-    SOPC_NodeId_Clear(filetype->node_id);
     if (NULL != filetype)
     {
-        filetype->handle = 0;
+        SOPC_NodeId_Clear(filetype->node_id);
         SOPC_String_Delete(filetype->path);
-        filetype->path = NULL;
         SOPC_String_Delete(filetype->tmp_path);
-        filetype->tmp_path = NULL;
         for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
         {
             SOPC_NodeId_Clear(filetype->methodIds[i]);
-            filetype->methodIds[i] = NULL;
         }
         for (int i = 0; i < NB_VARIABLE; i++)
         {
             SOPC_NodeId_Clear(filetype->variableIds[i]);
-            filetype->variableIds[i] = NULL;
         }
-        filetype->mode = FileTransfer_UnknownMode;
-        filetype->is_open = false;
-        filetype->fp = NULL;
-        filetype->open_count = 0;
-        filetype->size_in_byte = 0;
-        filetype->pFunc_UserCloseCallback = NULL;
+        FileTransfer_FileType_Initialize(filetype);
     }
 }
 
@@ -1092,6 +1082,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config config)
         file->mode = FileTransfer_UnknownMode;
         file->pFunc_UserCloseCallback = config.pFunc_UserCloseCallback;
         file->node_id = SOPC_NodeId_FromCString(config.fileType_nodeId, (int32_t) strlen(config.fileType_nodeId));
+        file->path = SOPC_String_Create();
+        file->tmp_path = SOPC_String_Create();
         if (NULL == file->node_id)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
