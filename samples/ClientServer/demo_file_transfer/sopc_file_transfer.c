@@ -547,6 +547,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     }
 
     bool found = false;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:Method_Open: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -767,6 +769,8 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     if (SOPC_GoodGenericStatus == result_code)
     {
         bool found = false;
+        SOPC_ASSERT(g_objectId_to_file != NULL &&
+                    "FileTransfer:Method_Read: API not initialized with <SOPC_FileTransfer_Initialize>");
         SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
         if (found)
         {
@@ -1379,6 +1383,8 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
     SOPC_StatusCode status;
     int res;
     bool found = false;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:CloseTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1519,6 +1525,8 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     bool found = false;
     size_t read_count;
     char* buffer = NULL;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:ReadTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1611,6 +1619,8 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     SOPC_StatusCode status;
     bool found = false;
     char* buffer = NULL;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:WriteTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1688,6 +1698,8 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
 {
     SOPC_StatusCode status;
     bool found = false;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:GetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {
@@ -1737,6 +1749,8 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
 {
     SOPC_StatusCode status;
     bool found = false;
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:SetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
     if (found)
     {

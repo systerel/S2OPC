@@ -22,25 +22,27 @@
  * \brief API to manage the OPC UA FileTransfer.
  *
  * The API only handles temporary files. A temporary file is created with each call to the Open method.
- * If several Openings are followed without a call to the close method between them, then the temporary file of the
- * first Opening is deleted. The path to store the temporary file and its prefix name must be defined by the user. The
- * user can access the name of the temporary file (prefix and radom sufix) using a notification when the close method is
- * called.
+ * If several Openings are followed without a call to the close method between them,
+ * then the temporary file of the first Opening is deleted.
+ * The path to store the temporary file and its prefix name must be defined by the user. The
+ * user can access the name of the temporary file (prefix and random sufix) using a notification when
+ * the close method is called.
  * Typical use in main (see toolkit_demo_file_transfer.c):
  *      -1 Initialise the API with <SOPC_FileTransfer_Initialize> function.
- *      -2 Configure FileType data of the address space (nodeId, methodId, variableId, close callback, tmp file path
- *         and tmp file name) with <SOPC_FileType_Config> structure.
- *      -3 Add file(s) to the API through the configuration(s) data of the address space with
- *         <SOPC_FileTransfer_Add_File> function (one call for each file).
+ *      -2 Configure FileType data of the address space (nodeId, methodId, variableId, close callback,
+ *         tmp file path and tmp file name) with <SOPC_FileType_Config> structure.
+ *      -3 Add file(s) to the API through the configuration(s) data of the address space
+ *         with <SOPC_FileTransfer_Add_File> function (one call for each file).
  *      -4 Add optional user method(s) implementation with <SOPC_FileTransfer_Add_MethodItems> function.
  *      -5 Start the server asynchronously with <SOPC_FileTransfer_StartServer> function.
- *      -6 Get the name of temporary file in the closing processing (user close callback implementation:
- *         SOPC_FileTransfer_UserClose_Callback)
- *      - The user can read the values of the variables in the address space with <SOPC_FileTransfer_ReadVariable>
- *        function.
- *      - The user can write the values of the variables in the address space with <SOPC_FileTransfer_WriteVariable>
- *        function.
- *      - The user can implement a server callback definition used for address space modification by client.
+ *      -6 Get the name of temporary file in the closing processing
+ *         (user close callback implementation: SOPC_FileTransfer_UserClose_Callback)
+ *      - The user can read the values of the variables in the address space with
+ *        <SOPC_FileTransfer_ReadVariable> function.
+ *      - The user can write the values of the variables in the address space with
+ *        <SOPC_FileTransfer_WriteVariable> function.
+ *      - The user can implement a server callback definition used for address space modification
+ *        by client.
  */
 
 #include "libs2opc_server.h"
@@ -61,7 +63,6 @@
  * \note After this callback, the path of the tmp file will be deallocated and the user should copy it.
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call.
- * \return In the function code, the user has to return SOPC_STATUT_OK if no error otherwise SOPC_STATUT_NOK.
  */
 typedef void (*SOPC_FileTransfer_UserClose_Callback)(const char* tmp_file_path);
 
