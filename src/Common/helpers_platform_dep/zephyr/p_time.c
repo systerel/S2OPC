@@ -276,7 +276,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
         hw_clocks_per_sec = sys_clock_hw_cycles_per_sec();
         const uint64_t tick_reduce_factor = uint64_gcd(SECOND_TO_100NS, hw_clocks_per_sec);
 
-        // tick_to_100ns_n and tick_to_100nsdn are numerator and denominator of (hw_clocks_per_sec / SECOND_TO_100NS)
+        // tick_to_100ns_n and tick_to_100ns_d are numerator and denominator of (SECOND_TO_100NS / hw_clocks_per_sec)
         // So as to avoid overflows, they are reduced using their GCD
         tick_to_100ns_d = (hw_clocks_per_sec / tick_reduce_factor);
         tick_to_100ns_n = (SECOND_TO_100NS / tick_reduce_factor);
