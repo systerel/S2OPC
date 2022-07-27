@@ -1166,6 +1166,12 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
         p_connection->address = NULL;
         SOPC_Free(p_connection->interfaceName);
         p_connection->interfaceName = NULL;
+        SOPC_Free(p_connection->mqttTopic);
+        p_connection->mqttTopic = NULL;
+        SOPC_Free(p_connection->mqttUsername);
+        p_connection->mqttUsername = NULL;
+        SOPC_Free(p_connection->mqttPassword);
+        p_connection->mqttPassword = NULL;
         SOPC_Free(p_connection->messageArr);
         p_connection->messageArr = NULL;
     }

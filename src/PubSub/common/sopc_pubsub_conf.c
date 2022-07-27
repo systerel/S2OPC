@@ -368,6 +368,9 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
         SOPC_Conf_PublisherId_Clear(&connection->publisherId);
         SOPC_Free(connection->address);
         SOPC_Free(connection->interfaceName);
+        SOPC_Free(connection->mqttTopic);
+        SOPC_Free(connection->mqttUsername);
+        SOPC_Free(connection->mqttPassword);
         SOPC_Free(connection->transportProfileUri);
         for (int i = 0; i < connection->writerGroups_length; i++)
         {
