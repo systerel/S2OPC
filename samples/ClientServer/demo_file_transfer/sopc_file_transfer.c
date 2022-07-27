@@ -1550,8 +1550,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                 return OpcUa_BadInvalidState;
             }
 
-            buffer = SOPC_Malloc((size_t)(length + 1) * sizeof(char));
-            memset(buffer, 0, (size_t)(length + 1));
+            buffer = SOPC_Calloc((size_t)(length + 1), sizeof(char));
 
             if (NULL != msg)
             {
