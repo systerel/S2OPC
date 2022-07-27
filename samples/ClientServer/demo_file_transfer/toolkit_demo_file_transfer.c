@@ -144,7 +144,7 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
  * User Close method callback definition.
  * The callback function shall not do anything blocking or long treatment since it will block any other
  * callback call.
- * After this callback, the path of the tmp_file will be deallocated and the user should copy it. 
+ * After this callback, the path of the tmp_file will be deallocated and the user should copy it.
  */
 static void UserCloseCallback(const char* tmp_file_path)
 {

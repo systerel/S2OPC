@@ -969,9 +969,9 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
     if (NULL != filetype)
     {
         filetype->handle = 0;
-        SOPC_String_Clear(filetype->path);
+        SOPC_String_Delete(filetype->path);
         filetype->path = NULL;
-        SOPC_String_Clear(filetype->tmp_path);
+        SOPC_String_Delete(filetype->tmp_path);
         filetype->tmp_path = NULL;
         for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
         {
@@ -1421,7 +1421,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                     SOPC_Dict_Remove(g_handle_to_file, &file->handle);
                     file->handle = INVALID_HANDLE_VALUE;
                     /* Free and creat a new tmp_path */
-                    SOPC_String_Clear(file->tmp_path);
+                    SOPC_String_Delete(file->tmp_path);
                     file->tmp_path = NULL;
                     file->tmp_path = SOPC_String_Create();
                 }
@@ -1490,7 +1490,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             SOPC_Dict_Remove(g_handle_to_file, &file->handle);
             file->handle = INVALID_HANDLE_VALUE;
             /* Free and creat a new tmp_path */
-            SOPC_String_Clear(file->tmp_path);
+            SOPC_String_Delete(file->tmp_path);
             file->tmp_path = NULL;
             file->tmp_path = SOPC_String_Create();
             status = SOPC_GoodGenericStatus;
