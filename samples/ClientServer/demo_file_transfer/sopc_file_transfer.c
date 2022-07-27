@@ -533,7 +533,6 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: Bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
 
@@ -542,7 +541,6 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     if (!mode_ok)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: OpenMode %d is unknown", mode);
-        /* avoid hard indentation level */
         return result_code;
     }
 
@@ -561,7 +559,6 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 SOPC_Logger_TraceError(
                     SOPC_LOG_MODULE_CLIENTSERVER,
                     "FileTransfer:Method_Open: file is open in read mode, it cannot be opened in write mode");
-                /* avoid hard indentation level */
                 return OpcUa_BadNotWritable;
             }
             /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.
@@ -573,7 +570,6 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
                         "FileTransfer:Method_Open: file is open in write mode, it cannot be opened in read mode");
-                    /* avoid hard indentation level */
                     return OpcUa_BadNotReadable;
                 }
             }
@@ -584,7 +580,6 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:Method_Open: unable to deleted tmp file");
-                /* avoid hard indentation level */
                 return result_code;
             }
         }
@@ -690,14 +685,12 @@ static SOPC_StatusCode FileTransfer_Method_Close(const SOPC_CallContext* callCon
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
 
     if ((SOPC_UInt32_Id != inputArgs->BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: bad BuiltInTypeId argument");
-        /* avoid hard indentation level */
         return result_code;
     }
 
@@ -729,14 +722,12 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
 
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_Int32_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: bad BuiltInTypeId arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
 
@@ -819,13 +810,11 @@ static SOPC_StatusCode FileTransfer_Method_Write(const SOPC_CallContext* callCon
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Write: bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Write: bad BuiltInTypeId arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
     SOPC_FileHandle handle = inputArgs[0].Value.Uint32;
@@ -858,13 +847,11 @@ static SOPC_StatusCode FileTransfer_Method_GetPos(const SOPC_CallContext* callCo
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
     if (SOPC_UInt32_Id != inputArgs->BuiltInTypeId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: bad BuiltInTypeId argument");
-        /* avoid hard indentation level */
         return result_code;
     }
 
@@ -913,13 +900,11 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_SetPos: bad inputs arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_UInt64_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_SetPos: bad BuiltInTypeId arguments");
-        /* avoid hard indentation level */
         return result_code;
     }
     SOPC_FileHandle handle = inputArgs[0].Value.Uint32;
@@ -1242,25 +1227,26 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
                                                     char* methodName,
                                                     const char* CnodeId)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_NodeId* node_id;
-    if (NULL != methodFunc || NULL != CnodeId || NULL != methodName)
+    if (NULL == methodFunc || NULL == CnodeId || NULL == methodName)
     {
-        node_id = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
-        if (NULL == node_id)
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    node_id = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
+    if (NULL == node_id)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Add_MethodItems: unable to create NodeId from a C string");
+        status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, node_id, methodFunc, methodName, NULL);
+        if (SOPC_STATUS_NOK == status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Add_MethodItems: unable to create NodeId from a C string");
-            status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, node_id, methodFunc, methodName, NULL);
-            if (SOPC_STATUS_NOK == status)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:Add_MethodItems: unable to register method '%s'", methodName);
-            }
+                                   "FileTransfer:Add_MethodItems: unable to register method '%s'", methodName);
         }
     }
     return status;
@@ -1562,7 +1548,6 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument");
-            /* avoid hard indentation level */
             return OpcUa_BadInvalidArgument;
         }
         if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
@@ -1573,7 +1558,6 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:ReadTmpFile: file has not been opened for read access");
-                /* avoid hard indentation level */
                 return OpcUa_BadInvalidState;
             }
 
@@ -1663,7 +1647,6 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                          * file. */
                         if (-1 == msg->Length)
                         {
-                            /* avoid hard indentation level */
                             return SOPC_GoodGenericStatus;
                         }
                         size_t ret;
