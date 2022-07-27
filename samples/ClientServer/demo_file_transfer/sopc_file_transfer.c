@@ -1473,15 +1473,15 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             res = fclose(file->fp);
             if (0 != res)
             {
-                char* str = SOPC_String_GetCString(file->tmp_path);
+                const char* str = SOPC_String_GetRawCString(file->tmp_path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:DeleteTmpFile: the fclose function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be closed");
             }
-            res = remove(SOPC_String_GetCString(file->tmp_path));
+            res = remove(SOPC_String_GetRawCString(file->tmp_path));
             if (0 != res)
             {
-                char* str = SOPC_String_GetCString(file->tmp_path);
+                const char* str = SOPC_String_GetRawCString(file->tmp_path);
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "FileTransfer:DeleteTmpFile: the remove function has failed (file '%s')", str);
                 SOPC_ASSERT(0 == res && "tmp file can't be remove");
