@@ -1747,52 +1747,55 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
 
 static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId, uint64_t* pos)
 {
-    SOPC_StatusCode status;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:GetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
+
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:GetPosTmpFile: unable to retrieve file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:GetPosTmpFile: unexpected file handle");
         status = OpcUa_BadInvalidArgument;
-        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        if (NULL == file->fp)
         {
-            *pos = 0;
-            if (NULL != file->fp)
-            {
-                long int ret;
-                ret = ftell(file->fp);
-                if (-1L == ret)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:GetPosTmpFile: the ftell function has failed");
-                    status = OpcUa_BadUnexpectedError;
-                }
-                else
-                {
-                    *pos = (uint64_t) ret;
-                    status = SOPC_GoodGenericStatus;
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:GetPosTmpFile: the file pointer is not initialized");
-                status = OpcUa_BadOutOfMemory;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:GetPosTmpFile: unexpected file handle");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:GetPosTmpFile: the file pointer is not initialized");
             status = OpcUa_BadInvalidArgument;
         }
     }
-    else
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:GetPosTmpFile: unable to retrieve file in the API");
-        status = OpcUa_BadUnexpectedError;
+        *pos = 0;
+        long int ret;
+        ret = ftell(file->fp);
+        if (-1L == ret)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:GetPosTmpFile: the ftell function has failed");
+            status = OpcUa_BadInvalidArgument;
+        }
+        else
+        {
+            *pos = (uint64_t) ret;
+        }
     }
+
     return status;
 }
 
