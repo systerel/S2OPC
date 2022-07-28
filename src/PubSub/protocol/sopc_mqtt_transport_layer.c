@@ -118,8 +118,10 @@ typedef struct T_MQTT_TRANSPORT_CONTEXT_CONNEXION_CONFIGURATION
 {
     char uri[MQTT_LIB_MAX_SIZE_URI];              /* Uri of the broker */
     char topicname[MQTT_LIB_MAX_SIZE_TOPIC_NAME]; /* Mqtt topic name or OPCUA PUB SUB queuename*/
-    char username[MQTT_LIB_MAX_SIZE_USERNAME];    /* Username for authentification connection optional*/
-    char password[MQTT_LIB_MAX_SIZE_PASSWORD];
+    char username[MQTT_LIB_MAX_SIZE_USERNAME];    /* Username for authentification connection, optional. if empty no
+                                                     username is used*/
+    char password[MQTT_LIB_MAX_SIZE_PASSWORD];    /* Password for authentification connection, optional. if empty no
+                                                     password is used*/
 } tMqttTransportContextConnexionConfig;
 
 /* This structure defines the callbacks configuration, submitted by get handle request sent to a mqtt manager */
@@ -3238,10 +3240,10 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     if (NULL != sUsername)
     {
         const int n = snprintf(pGetHandleRequest->connectionConf.username,
-                               sizeof(pGetHandleRequest->connectionConf.username) - 1, "%s", sUsername);
+                               sizeof(pGetHandleRequest->connectionConf.username), "%s", sUsername);
         if (n < 0 || n >= (int) sizeof(pGetHandleRequest->connectionConf.username))
         {
-            result = SOPC_STATUS_NOK;
+            result = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else
@@ -3252,10 +3254,10 @@ static SOPC_ReturnStatus SOPC_MQTT_MGR_InitializeGetNewHandleRequest(tMqttGetHan
     if (SOPC_STATUS_OK == result && NULL != sPassword)
     {
         const int n = snprintf(pGetHandleRequest->connectionConf.password,
-                               sizeof(pGetHandleRequest->connectionConf.password) - 1, "%s", sPassword);
+                               sizeof(pGetHandleRequest->connectionConf.password), "%s", sPassword);
         if (n < 0 || n >= (int) sizeof(pGetHandleRequest->connectionConf.password))
         {
-            result = SOPC_STATUS_NOK;
+            result = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else
