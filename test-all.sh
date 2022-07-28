@@ -138,8 +138,11 @@ else
 fi
 
 if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
-   adduser --system mosquitto
-   mosquitto &
+   adduser --system mosquitto 
+   echo "password_file  ${BUILD_DIR}/bin/passwordfile.txt" > ${BUILD_DIR}/bin/mosquitto.conf
+   echo "allow_anonymous true" >> ${BUILD_DIR}/bin/mosquitto.conf
+   mosquitto -c ${BUILD_DIR}/bin/mosquitto.conf &
+
    MOSQUITTO_PID=$!
 
    if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
