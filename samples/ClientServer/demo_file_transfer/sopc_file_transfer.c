@@ -1668,77 +1668,66 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
                                                   SOPC_ByteString* msg,
                                                   const SOPC_NodeId* objectId)
 {
-    SOPC_StatusCode status;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
     char* buffer = NULL;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:WriteTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
-        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
-        {
-            /* check if File was not opened for write access */
-            if ((file->is_open) && (READ_MASK != file->mode))
-            {
-                if (NULL != msg)
-                {
-                    if (NULL != file->fp)
-                    {
-                        /* Writing an empty or null ByteString returns a Good result code without any affect on the
-                         * file. */
-                        if (-1 == msg->Length)
-                        {
-                            return SOPC_GoodGenericStatus;
-                        }
-                        size_t ret;
-                        buffer = SOPC_Malloc((size_t) msg->Length);
-                        memcpy(buffer, msg->Data, (size_t) msg->Length);
-                        /* If ret != msg->Length then file might be locked and thus not writable */
-                        ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
-                        if ((size_t) msg->Length == ret)
-                        {
-                            status = SOPC_GoodGenericStatus;
-                        }
-                        else
-                        {
-                            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                                   "FileTransfer:WriteTmpFile: the fwrite function has failed");
-                            status = OpcUa_BadNotWritable;
-                        }
-                    }
-                    else
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:WriteTmpFile: the file pointer is not initialized");
-                        status = OpcUa_BadOutOfMemory;
-                    }
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:WriteTmpFile: ByteString msg has not been allocated");
-                    status = OpcUa_BadOutOfMemory;
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:WriteTmpFile: file has not been opened for write access");
-                status = OpcUa_BadInvalidState;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:WriteTmpFile: unexpected file handle");
-            status = OpcUa_BadInvalidArgument;
-        }
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: unable to retrieve file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadInvalidState;
     }
-    else
+    if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:WriteTmpFile: unexpected file handle");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    /* check if File was not opened for write access */
+    if ((false == file->is_open) || (READ_MASK == file->mode))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:WriteTmpFile: unable to retrieve file in the API");
-        status = OpcUa_BadUnexpectedError;
+                               "FileTransfer:WriteTmpFile: file has not been opened for write access");
+        return OpcUa_BadInvalidState;
+    }
+
+    if (NULL == msg)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: ByteString msg has not been allocated");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (NULL == file->fp)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: the file pointer is not initialized");
+        return OpcUa_BadInvalidState;
+    }
+
+    /* Writing an empty or null ByteString returns a Good result code without any affect on the
+     * file. */
+    if (-1 == msg->Length)
+    {
+        return SOPC_GoodGenericStatus;
+    }
+
+    size_t ret;
+    buffer = SOPC_Malloc((size_t) msg->Length);
+    memcpy(buffer, msg->Data, (size_t) msg->Length);
+    /* If ret != msg->Length then file might be locked and thus not writable */
+    ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
+    if ((size_t) msg->Length != ret)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: the fwrite function has failed");
+        status = OpcUa_BadNotWritable;
     }
 
     SOPC_Free(buffer);
