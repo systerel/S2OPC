@@ -146,7 +146,7 @@ rm -fr bin_windows install_windows
 echo "Generate Toolkit windows binaries (library and tests)"
 mkdir -p build_toolchain || exit 1
 cd build_toolchain || exit 1
-../.mingwbuild-in-docker.sh cmake -DS2OPC_CLIENTSERVER_ONLY=1 -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DBUILD_SHARED_LIBS=true -DCMAKE_INSTALL_PREFIX=../install_windows -DCMAKE_BUILD_TYPE=RelWithDebInfo .. || exit 1
+../.mingwbuild-in-docker.sh cmake -DS2OPC_CLIENTSERVER_ONLY=1 -DWARNINGS_AS_ERRORS=0 -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw32-w64.cmake -DCMAKE_INSTALL_PREFIX=../install_windows -DCMAKE_BUILD_TYPE=RelWithDebInfo .. || exit 1
 ../.mingwbuild-in-docker.sh cmake --build . --target install
 if [[ $? != 0 ]]; then
     echo "Error: Generation of Toolkit windows binaries failed";
