@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:MY_SERVER_HOST"/>
+      <Namespace uri="urn:S2OPC:MY_SERVER_HOST:2"/>
+    </Namespaces>
+    <Locales>
+      <Locale id="en"/>
+      <Locale id="es-ES"/>
+      <Locale id="fr-FR"/>
+    </Locales>
+    <ApplicationCertificates>
+      <ServerCertificate path="/mypath/mycert.der"/>
+      <ServerKey path="/mypath/mykey.pem"/>
+      <TrustedIssuers>
+        <TrustedIssuer root="true" cert_path="/mypath/cacert.der" revocation_list_path="/mypath/cacrl.der"/>
+        <TrustedIssuer root="true" cert_path="/mypath/othercacert.der" revocation_list_path="/mypath/othercacrl.der"/>
+        <TrustedIssuer root="false" cert_path="/mypath/intermediate_cacert.der" revocation_list_path="/mypath/intermediate_cacrl.der"/>
+      </TrustedIssuers>
+      <IssuedCertificates>
+        <IssuedCertificate path="/mypath/self_signed.der"/>
+        <IssuedCertificate path="/mypath/signed_by_not_trusted_ca.der"/>
+      </IssuedCertificates>
+      <UntrustedIssuers>
+        <UntrustedIssuer root="true" cert_path="/mypath/not_trusted_ca.der" revocation_list_path="/mypath/not_trusted_revoked.crl"/>
+        <UntrustedIssuer root="false" cert_path="/mypath/not_trusted_intermediate_ca.der" revocation_list_path="/mypath/not_trusted_intermediate_revoked.crl"/>
+      </UntrustedIssuers>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>
+      <ProductURI uri="urn:S2OPC:MY_SERVER_HOST:prod"/>
+      <ApplicationName text="S2OPC toolkit configuration example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit: ejemplo de configuración" locale="es-ES"/>
+      <ApplicationName text="S2OPC toolkit: exemple de configuration" locale="fr-FR"/>
+      <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
+    </ApplicationDescription>
+    <Endpoints>
+      <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME">
+        <SecurityPolicies>
+          <!-- Only None/Basic256/Basic256Sha256 available -->
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon1" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon2" tokenType="anonymous"/>
+              <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2">
+        <SecurityPolicies>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
+            <SecurityModes>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="username" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+</S2OPC>

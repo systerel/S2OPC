@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <Anonymous>
+    <!-- Anonymous is read only -->
+    <UserAuthorization write="false" read="true" execute="false" />
+  </Anonymous>
+  <!-- "user1" cannot call methods of address space -->
+  <UserPassword user="user1" pwd="password">
+    <UserAuthorization write="true" read="true" execute="false" />
+  </UserPassword>
+  <!-- "me" has all right accesses.
+       note: still restricted by nodes static access rights in address space
+  -->
+  <UserPassword user="me" pwd="1234">
+    <UserAuthorization write="true" read="true" execute="true" />
+  </UserPassword>
+</S2OPC_Users>
