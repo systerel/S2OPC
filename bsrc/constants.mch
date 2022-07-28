@@ -567,9 +567,8 @@ PROPERTIES
     c_HierarchicalReferences_Type_NodeId /= c_ByteString_Type_NodeId &
     c_HierarchicalReferences_Type_NodeId /= c_Byte_Type_NodeId &
 
-    t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
-    c_ExpandedNodeId_indet /: t_ExpandedNodeId &
+    t_ExpandedNodeId = t_ExpandedNodeId_i - {c_ExpandedNodeId_indet} &
 
     t_Reference <: t_Reference_i &
     c_Reference_indet : t_Reference_i &
@@ -1131,10 +1130,13 @@ OPERATIONS
     THEN
         p_local_server, p_nid :(p_local_server : BOOL &
                                 p_nid : t_NodeId_i &
-                                (p_local_server = TRUE =>
-                                    p_nid = conv_ExpandedNodeId_NodeId(p_expnid)) &
-                                (p_local_server = FALSE =>
-                                    p_nid = c_NodeId_indet)
+                                (p_expnid : dom(conv_ExpandedNodeId_NodeId) =>
+                                  p_nid = conv_ExpandedNodeId_NodeId(p_expnid) &
+                                  p_local_server = TRUE
+                                ) &
+                                (not(p_expnid : dom(conv_ExpandedNodeId_NodeId)) =>
+                                 p_local_server = FALSE &
+                                 p_nid = c_NodeId_indet)
                                )
     END
     ;
