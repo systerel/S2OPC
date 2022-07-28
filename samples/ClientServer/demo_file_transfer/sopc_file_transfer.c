@@ -942,14 +942,15 @@ static void FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL != g_objectId_to_file || NULL != g_method_call_manager)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:Init: The FileTransfer API is already initialized.");
-        status = SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_STATE;
     }
-    else
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
     {
         g_objectId_to_file = SOPC_NodeId_Dict_Create(true, filetype_free);
         if (NULL == g_objectId_to_file)
@@ -958,6 +959,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
                                    "FileTransfer:Init: unable to create dictionary <g_objectId_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
         g_method_call_manager = SOPC_MethodCallManager_Create();
         if (NULL == g_method_call_manager)
         {
@@ -965,6 +969,9 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
                                    "FileTransfer:Init: unable to create the MethodCallManager");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
         g_handle_to_file = SOPC_Dict_Create(NULL, handle_hash, handle_equal, NULL, NULL);
         if (NULL == g_handle_to_file)
         {
@@ -972,16 +979,21 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
                                    "FileTransfer:Init: unable to create dictionary <g_handle_to_file>");
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        else
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetMethodCallManager(g_method_call_manager);
+        if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_HelperConfigServer_SetMethodCallManager(g_method_call_manager);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:Init: error while configuring the MethodCallManager");
-            }
-            SOPC_Dict_SetTombstoneKey(g_handle_to_file, &g_tombstone_key);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Init: error while configuring the MethodCallManager");
         }
+        SOPC_Dict_SetTombstoneKey(g_handle_to_file, &g_tombstone_key);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_FileTransfer_Clear();
     }
     return status;
 }

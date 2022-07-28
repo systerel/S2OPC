@@ -90,6 +90,7 @@ typedef struct SOPC_FileType_Config
 /**
  * \brief Initialise the API.
  * \note Memory allocation, need to call SOPC_FileTransfer_Clear after use.
+ * \warning The function shall be called after SOPC_HelperConfigServer_Initialize.
  * \return SOPC_STATUS_OK if no error
  */
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
