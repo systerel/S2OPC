@@ -185,6 +185,7 @@ build-win64: &build_win64
     DOCKER_IMAGE: 'sha256:3d552edb5eab18138ef4ad6652b6da8fef00dc36dc6b9fd9fe890ffff513c3e5'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
+    WARNINGS_AS_ERRORS: 0 # Some format warnings remain on MinGW
   artifacts:
     name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
