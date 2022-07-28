@@ -145,7 +145,7 @@ OPERATIONS
         p_browseName : t_QualifiedName_i &
         p_browseName : t_QualifiedName &
         p_nodeClass : t_NodeClass_i &
-        p_nodeClass = e_ncl_Variable &
+        p_nodeClass : t_NodeClass &
         p_nodeAttributes : t_NodeAttributes_i &
         p_nodeAttributes : t_NodeAttributes &
         p_typeDefId : t_ExpandedNodeId_i &

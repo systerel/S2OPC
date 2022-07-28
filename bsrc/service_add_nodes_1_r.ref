@@ -95,10 +95,13 @@ OPERATIONS
                 (p_reqExpNodeId : t_ExpandedNodeId =>
                     p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) & new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId)) &
                 /* Type definition is valid if node is an object or variable */
-                (p_nodeClass = e_ncl_Object or p_nodeClass = e_ncl_Variable =>
+                (p_nodeClass : {e_ncl_Object, e_ncl_Variable} =>
                     p_typeDefId : t_ExpandedNodeId &
                     p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
                     conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)
+                ) &
+                (not (p_nodeClass : {e_ncl_Object, e_ncl_Variable}) =>
+                    p_typeDefId = c_ExpandedNodeId_indet
                 )
             ) &
             (not(sc_operation = e_sc_ok) => new_nodeId = c_NodeId_indet) &
