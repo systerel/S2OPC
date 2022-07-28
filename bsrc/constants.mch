@@ -876,9 +876,7 @@ PROPERTIES
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
 
-    t_operation_type = {e_operation_type_read,
-                        e_operation_type_write,
-                        e_operation_type_executable} &
+    t_operation_type = t_operation_type_i - {c_operation_type_indet} &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,

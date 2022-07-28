@@ -21,7 +21,7 @@
 
  File Name            : msg_node_management_add_nodes.c
 
- Date                 : 05/08/2022 09:01:19
+ Date                 : 05/08/2022 14:48:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,6 +54,7 @@ void msg_node_management_add_nodes__getall_msg_add_nodes_req_params(
    msg_node_management_add_nodes_bs__get_msg_create_add_nodes_req_nb_add_nodes(msg_node_management_add_nodes__p_req_msg,
       msg_node_management_add_nodes__p_nb_nodes_to_add);
    if (*msg_node_management_add_nodes__p_nb_nodes_to_add <= 0) {
+      *msg_node_management_add_nodes__p_nb_nodes_to_add = 0;
       *msg_node_management_add_nodes__p_sc = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
    }
    else if (*msg_node_management_add_nodes__p_nb_nodes_to_add > constants__k_n_nodesToAdd_max) {

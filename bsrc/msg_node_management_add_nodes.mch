@@ -30,7 +30,6 @@ DEFINITIONS
     d_inv == (
         nb_nodes_to_add : NAT &
         nb_nodes_to_add <= k_n_nodesToAdd_max &
-
         AddNodeItemReq_ParentNodeId       : t_nodeToAddReqIndex +-> t_ExpandedNodeId &
         AddNodeItemReq_ReferenceTypeId    : t_nodeToAddReqIndex +-> t_NodeId &
         AddNodeItemReq_RequestedNewNodeId : t_nodeToAddReqIndex +-> t_ExpandedNodeId_i & // Might be NULL ExpandedNodeId if server assigns a fresh one
@@ -44,9 +43,9 @@ DEFINITIONS
         AddNodeItemResp_Allocated : BOOL &
         AddNodeItemResp_StatusCode : t_nodeToAddReqIndex +-> t_StatusCode &
         AddNodeItemResp_AddedNodeId : t_nodeToAddReqIndex +-> t_NodeId_i
-    )
+    );
 
-ABSTRACT_VARIABLES
+    d_var ==
     nb_nodes_to_add,
     AddNodeItemReq_ParentNodeId,
     AddNodeItemReq_ReferenceTypeId,
@@ -60,22 +59,14 @@ ABSTRACT_VARIABLES
     AddNodeItemResp_AddedNodeId,
     AddNodeItemResp_StatusCode
 
+ABSTRACT_VARIABLES
+    d_var
+
 INVARIANT
     d_inv
 
 INITIALISATION
-    nb_nodes_to_add           := 0          ||
-    AddNodeItemReq_ParentNodeId      := {}  ||
-    AddNodeItemReq_ReferenceTypeId := {}    ||
-    AddNodeItemReq_RequestedNewNodeId := {} ||
-    AddNodeItemReq_BrowseName := {}         ||
-    AddNodeItemReq_NodeClass := {}          ||
-    AddNodeItemReq_NodeAttributes := {}     ||
-    AddNodeItemReq_TypeDefinition := {}     ||
-
-    AddNodeItemResp_Allocated := FALSE ||
-    AddNodeItemResp_AddedNodeId := {}  ||
-    AddNodeItemResp_StatusCode := {}
+    d_var :( d_inv )
 
 OPERATIONS
 
@@ -102,6 +93,7 @@ OPERATIONS
                 =>
                 p_nb_nodes_to_add > 0 &
                 p_nb_nodes_to_add <= k_n_nodesToAdd_max &
+                p_nb_nodes_to_add : t_nodeToAddReqIndex &
                 nb_nodes_to_add = p_nb_nodes_to_add &
                 AddNodeItemReq_ParentNodeId       : 1..nb_nodes_to_add --> t_ExpandedNodeId &
                 AddNodeItemReq_ReferenceTypeId    : 1..nb_nodes_to_add --> t_NodeId &
@@ -164,8 +156,9 @@ OPERATIONS
                 AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] <: t_ExpandedNodeId &
                 /* for indexes of objects and variables: TypeDefinition is never defined */
                 AddNodeItemReq_TypeDefinition[dom(AddNodeItemReq_NodeClass |>> {e_ncl_Object, e_ncl_Variable})] <: {c_ExpandedNodeId_indet}
-            ) or p_sc : {e_sc_bad_node_id_rejected, e_sc_bad_node_class_invalid, e_sc_bad_node_attributes_invalid,
-                         e_sc_bad_browse_name_invalid, e_sc_bad_type_definition_invalid})
+            ) &
+            (not (p_sc = e_sc_ok) => p_sc : {e_sc_bad_node_id_rejected, e_sc_bad_node_class_invalid, e_sc_bad_node_attributes_invalid,
+                                             e_sc_bad_browse_name_invalid, e_sc_bad_type_definition_invalid}))
 
         )
     END

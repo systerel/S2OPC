@@ -26,6 +26,45 @@ SEES
     message_in_bs,
     message_out_bs
 
+DEFINITIONS
+    d_inv == (
+        AddNodeItemReq_ParentNodeId       : t_nodeToAddReqIndex +-> t_ExpandedNodeId &
+        AddNodeItemReq_ReferenceTypeId    : t_nodeToAddReqIndex +-> t_NodeId &
+        AddNodeItemReq_RequestedNewNodeId : t_nodeToAddReqIndex +-> t_ExpandedNodeId_i & // Might be NULL ExpandedNodeId if server assigns a fresh one
+        AddNodeItemReq_BrowseName         : t_nodeToAddReqIndex +-> t_QualifiedName &
+        AddNodeItemReq_NodeClass          : t_nodeToAddReqIndex +-> t_NodeClass_i & // Validity not guaranteed by message decoding
+        AddNodeItemReq_NodeAttributes     : t_nodeToAddReqIndex +-> t_NodeAttributes &
+        AddNodeItemReq_TypeDefinition     : t_nodeToAddReqIndex +-> t_ExpandedNodeId_i &
+
+        /* Response content */
+
+        AddNodeItemResp_Allocated : BOOL &
+        AddNodeItemResp_StatusCode : t_nodeToAddReqIndex +-> t_StatusCode &
+        AddNodeItemResp_AddedNodeId : t_nodeToAddReqIndex +-> t_NodeId_i
+    );
+
+    d_var ==
+    AddNodeItemReq_ParentNodeId,
+    AddNodeItemReq_ReferenceTypeId,
+    AddNodeItemReq_RequestedNewNodeId,
+    AddNodeItemReq_BrowseName,
+    AddNodeItemReq_NodeClass,
+    AddNodeItemReq_NodeAttributes,
+    AddNodeItemReq_TypeDefinition,
+
+    AddNodeItemResp_Allocated,
+    AddNodeItemResp_AddedNodeId,
+    AddNodeItemResp_StatusCode
+
+ABSTRACT_VARIABLES
+    d_var
+
+INVARIANT
+    d_inv
+
+INITIALISATION
+    d_var :( d_inv )
+
 OPERATIONS
 
     p_sc, p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId
@@ -48,16 +87,33 @@ OPERATIONS
         p_nodeAttributes,
         p_typeDefId
         :(
-            p_sc : t_StatusCode & p_sc : {e_sc_ok, e_sc_bad_node_id_rejected, e_sc_bad_node_class_invalid,
-                                          e_sc_bad_node_attributes_invalid, e_sc_bad_browse_name_invalid,
-                                          e_sc_bad_type_definition_invalid} &
-            p_parentExpNid : t_ExpandedNodeId_i & p_parentExpNid : t_ExpandedNodeId &
-            p_refTypeId : t_NodeId_i & p_refTypeId : t_NodeId &
+            p_sc : t_StatusCode &
+            p_parentExpNid : t_ExpandedNodeId_i &
+            p_parentExpNid = AddNodeItemReq_ParentNodeId(p_index) &
+            p_refTypeId : t_NodeId_i &
+            p_refTypeId = AddNodeItemReq_ReferenceTypeId(p_index) &
             p_reqExpNodeId : t_ExpandedNodeId_i &
-            p_browseName : t_QualifiedName_i & p_browseName : t_QualifiedName &
-            p_nodeClass : t_NodeClass_i & p_nodeClass : t_NodeClass &
-            p_nodeAttributes : t_NodeAttributes_i & p_nodeAttributes : t_NodeAttributes &
-            p_typeDefId : t_ExpandedNodeId_i
+            p_reqExpNodeId = AddNodeItemReq_RequestedNewNodeId(p_index) &
+            p_browseName : t_QualifiedName_i &
+            p_browseName = AddNodeItemReq_BrowseName(p_index) &
+            p_nodeClass : t_NodeClass_i &
+            p_nodeClass = AddNodeItemReq_NodeClass(p_index) &
+            p_nodeAttributes : t_NodeAttributes_i &
+            p_nodeAttributes = AddNodeItemReq_NodeAttributes(p_index) &
+            p_typeDefId : t_ExpandedNodeId_i &
+            p_typeDefId = AddNodeItemReq_TypeDefinition(p_index) &
+            ((/* We only check local constraint on requested NodeId (serverIndex == 0), BrowseName (not empty), NodeClass (valid) and NodeAttributes (decoded object).
+                 The rest is checked in AddNode item treatment using address space. */
+                p_sc = e_sc_ok =>
+                p_nodeClass : t_NodeClass &
+                /* for indexes of objects and variables: TypeDefinition is always defined */
+                AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] <: t_ExpandedNodeId &
+                /* for indexes of objects and variables: TypeDefinition is never defined */
+                AddNodeItemReq_TypeDefinition[dom(AddNodeItemReq_NodeClass |>> {e_ncl_Object, e_ncl_Variable})] <: {c_ExpandedNodeId_indet}
+            ) &
+            (not (p_sc = e_sc_ok) => p_sc : {e_sc_bad_node_id_rejected, e_sc_bad_node_class_invalid, e_sc_bad_node_attributes_invalid,
+                                             e_sc_bad_browse_name_invalid, e_sc_bad_type_definition_invalid}))
+
         )
     END
     ;
@@ -71,7 +127,10 @@ OPERATIONS
         p_nb_results : NAT &
         p_nb_results > 0
     THEN
-        bres :: BOOL
+        bres, AddNodeItemResp_Allocated
+        :(bres : BOOL &
+          AddNodeItemResp_Allocated : BOOL &
+          AddNodeItemResp_Allocated = bres)
     END
     ;
 
@@ -90,7 +149,8 @@ OPERATIONS
         (p_sc = e_sc_ok => p_nid : t_NodeId) &
         (p_sc /= e_sc_ok => p_nid = c_NodeId_indet)
     THEN
-        skip
+        AddNodeItemResp_AddedNodeId(p_index) := p_nid ||
+        AddNodeItemResp_StatusCode(p_index) := p_sc
     END
     ;
 
@@ -99,7 +159,7 @@ OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_monitored_items_create_req
+        a_msg_in_type = e_msg_node_add_nodes_req
     THEN
         p_nb_add_nodes :: INT
     END

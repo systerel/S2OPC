@@ -134,18 +134,21 @@ OPERATIONS
             IF l_sc = e_sc_ok
             THEN
                 l_local_treatment <-- is_local_service_treatment;
-                IF l_local_treatment = FALSE THEN
+                /* Note: we shall generate a fresh node id prior to this step, to be done when generation is implemented.
+                         For now the add node operation will fail in case it is c_ExpandedNodeId_indet
+                */
+                IF l_local_treatment = FALSE & l_reqExpNodeId /= c_ExpandedNodeId_indet THEN
                     l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(l_reqExpNodeId);
                     IF l_local_server_exp_node_id = TRUE
                     THEN
-                        /* TODO: add node class ? Or aux parameter ? */
+                        /* TODO in user authorization callback: add node class ? Or aux parameter ? */
                         l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user);
                         IF l_authorized_add_node = FALSE
                         THEN
                             l_sc := e_sc_bad_user_access_denied
                         END
                     END // ELSE will be rejected due to nodeId param in next step
-                END // ELSE always authorized
+                END // ELSE always authorized (will fail if requested id is c_ExpandedNodeId_indet)
             END
             ;
             IF l_sc = e_sc_ok
@@ -156,8 +159,8 @@ OPERATIONS
             setall_msg_add_nodes_item_resp_params (p_resp_msg, l_index, l_sc, l_new_nid)
 
         INVARIANT
-            rreqs_to_iterate <: t_monitoredItemReqIndex &
-            rreqs_iterated   <: t_monitoredItemReqIndex &
+            rreqs_to_iterate <: t_nodeToAddReqIndex &
+            rreqs_iterated   <: t_nodeToAddReqIndex &
             rreqs_to_iterate /\ rreqs_iterated = {} &
             rreqs_to_iterate \/ rreqs_iterated = 1..nb_nodes_to_add &
             l_continue = bool(rreqs_to_iterate /= {})

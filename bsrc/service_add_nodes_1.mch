@@ -101,7 +101,8 @@ OPERATIONS
                 (p_reqExpNodeId : t_ExpandedNodeId =>
                     p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) &
                     new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId))
-          )
+            ) &
+            (not(sc_operation = e_sc_ok) => new_nodeId = c_NodeId_indet)
         )
     END
 

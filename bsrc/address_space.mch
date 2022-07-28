@@ -179,7 +179,7 @@ OPERATIONS
         :(
             sc_addnode : t_StatusCode_i &
             sc_addnode : {e_sc_ok, e_sc_bad_browse_name_duplicated, e_sc_bad_reference_not_allowed,
-                          e_sc_bad_type_definition_invalid, e_sc_bad_out_of_memory,
+                          e_sc_bad_type_definition_invalid, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory,
                           e_sc_bad_node_class_invalid} & // BadNodeClassInvalid used for unsupported NodeClass for now
             s_Node <: t_Node &
 

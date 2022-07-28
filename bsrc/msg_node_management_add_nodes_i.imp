@@ -50,6 +50,7 @@ OPERATIONS
         p_nb_nodes_to_add <-- get_msg_create_add_nodes_req_nb_add_nodes (p_req_msg);
         IF p_nb_nodes_to_add <= 0
         THEN
+            p_nb_nodes_to_add := 0;
             p_sc := e_sc_bad_nothing_to_do
         ELSIF p_nb_nodes_to_add > k_n_nodesToAdd_max
         THEN

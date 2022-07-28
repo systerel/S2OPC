@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 05/08/2022 09:03:06
+ Date                 : 05/08/2022 09:35:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -100,6 +100,23 @@ extern void service_add_nodes_1__check_add_nodes_item_params(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
    constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation,
    constants__t_NodeId_i * const service_add_nodes_1__new_nid);
+extern void service_add_nodes_1__check_add_nodes_item_params_parent_nid(
+   const constants__t_ExpandedNodeId_i service_add_nodes_1__p_parentNid,
+   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation);
+extern void service_add_nodes_1__check_add_nodes_item_params_ref_type(
+   const constants__t_NodeId_i service_add_nodes_1__p_refTypeId,
+   const constants_statuscodes_bs__t_StatusCode_i service_add_nodes_1__p_sc_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation);
+extern void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
+   const constants__t_ExpandedNodeId_i service_add_nodes_1__p_reqNodeId,
+   const constants_statuscodes_bs__t_StatusCode_i service_add_nodes_1__p_sc_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation,
+   constants__t_NodeId_i * const service_add_nodes_1__new_nid);
+extern void service_add_nodes_1__check_add_nodes_item_params_type_def(
+   const constants__t_NodeClass_i service_add_nodes_1__p_nodeClass,
+   const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
+   const constants_statuscodes_bs__t_StatusCode_i service_add_nodes_1__p_sc_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation);
 
 /*--------------------
    OPERATIONS Clause

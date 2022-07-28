@@ -52,13 +52,12 @@ OPERATIONS
     continue <-- init_iter_add_nodes_items(nb_req) =
     PRE
         nb_req : NAT &
-        nb_req : t_nodeToAddReqIndex &
-        nb_req <= k_n_nodesToAdd_max
+        nb_req : t_nodeToAddReqIndex
     THEN
         rreqs_nb_reqs := nb_req ||
         rreqs_iterated := {} ||
         rreqs_to_iterate := 1..nb_req ||
-        continue := bool(0 < nb_req)
+        continue := TRUE
     END
     ;
 
