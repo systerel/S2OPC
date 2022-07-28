@@ -137,6 +137,51 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user1" mqttPassword="password" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user" mqttPassword="passwor" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password"  mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
@@ -887,6 +932,36 @@ def testPubSubDynamicConf():
         helpRestart(pubsubserver, logger, possibleFail=True)
         
         helpAssertState(pubsubserver, PubSubState.DISABLED, logger)
+
+        # TC 21 : Test with username and password from mqtt security  ==> subscriber variables change through Pub/Sub
+        logger.begin_section("TC 21 : Test with Publisher and Subscriber security configuration (MQTT): variables change through Pub/Sub ")
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_STRING, "Test MQTT From Publisher", logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
+
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # TC 22 : Test with bad username and bad password from mqtt security
+        logger.begin_section("TC 22 : Test with Publisher and Subscriber bad security configuration (MQTT) ")
+        helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU_FAIL, logger, possibleFail=True)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)  
 
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)
