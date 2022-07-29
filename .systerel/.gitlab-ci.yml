@@ -70,6 +70,8 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
       when: never
     - if: '$CI_COMMIT_BRANCH'
@@ -192,7 +194,7 @@ build-win64: &build_win64
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
 build-win32:
@@ -206,7 +208,7 @@ build-win32:
       - '$BUILD_DIR/bin/'
     expire_in: '1 week'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
 build-rpi:
@@ -225,7 +227,7 @@ build-rpi:
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
 build-zephyr:
@@ -435,5 +437,5 @@ check_doc:
     expire_in: '1 week'
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
