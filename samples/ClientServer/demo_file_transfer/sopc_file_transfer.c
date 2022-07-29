@@ -648,26 +648,26 @@ static SOPC_StatusCode FileTransfer_Method_Close(const SOPC_CallContext* callCon
     (void) nbOutputArgs;
     (void) outputArgs;
     (void) param;
-    SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
 
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: bad inputs arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     if ((SOPC_UInt32_Id != inputArgs->BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: bad BuiltInTypeId argument");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     SOPC_FileHandle handle = inputArgs->Value.Uint32;
-    result_code = FileTransfer_Close_TmpFile(handle, objectId);
-    if (SOPC_GoodGenericStatus != result_code)
+    SOPC_StatusCode result_code = FileTransfer_Close_TmpFile(handle, objectId);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Close: error while closing tmp file");
     }
+
     return result_code;
 }
 
