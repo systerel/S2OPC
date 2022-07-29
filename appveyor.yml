@@ -1,0 +1,152 @@
+environment:
+
+    matrix:
+        - CC_NAME: Visual Studio 15 2017
+          CC_SHORTNAME: vs2017
+          PYTHON: "C:\\Python36-x64"
+image:
+    - Visual Studio 2017
+
+install:
+    # Prepend chosen Python to the PATH of this build
+    - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+    # Check that we have the expected version and architecture for Python
+    - "pip --version"
+    - "pip install cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
+    - "pip install --upgrade wheel==0.34.2 setuptools==47.3.1"
+    - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
+    - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
+    - "unzip %FREEOPCUA_DIR_NAME%.zip"
+    # Patch free opcua server
+    - cd %FREEOPCUA_DIR_NAME%
+    - ps: (get-content opcua/server/internal_server.py) | %{$_ -replace "result.MaxRequestMessageSize =.*","result.MaxRequestMessageSize = 65536 * 10"}  | set-content opcua/server/internal_server.py
+    - python setup.py install
+
+test_script:
+    - echo %APPVEYOR_BUILD_FOLDER%
+    - cd %APPVEYOR_BUILD_FOLDER%
+    - set ROOT_DIR=%APPVEYOR_BUILD_FOLDER%
+    - set CHECK_DIR_NAME=check-0.14.0
+    - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
+    - set CHECK_BUILD_DIR=%CHECK_DIR%\build
+    - set MBEDTLS_VERSION=2.28.1
+    - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
+    - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
+    - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
+    - set EXPAT_DIR_NAME=expat-2.4.8
+    - set EXPAT_FILE_NAME=R_2_4_8
+    - set EXPAT_DIR=%ROOT_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
+    - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
+    - set S2OPC_CLIENTSERVER_ONLY=1
+    - set CONFIG=RelWithDebInfo
+    - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
+    - set PYS2OPC_WHEEL_NAME=pys2opc-0.1.1-cp36-cp36m-win_amd64.whl
+    - set VS_VERSION="Visual Studio 15 2017 Win64"
+    - set WITH_NANO_EXTENDED=on
+    - set ENABLE_SAMPLES=on
+
+    # download and extract libcheck
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://github.com/libcheck/check/archive/0.14.0.zip -FileName %CHECK_DIR_NAME%.zip"
+    - "unzip %CHECK_DIR_NAME%.zip"
+
+    # download and extract mbedtls
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://github.com/Mbed-TLS/mbedtls/archive/v%MBEDTLS_VERSION%.tar.gz -FileName %MBEDTLS_DIR_NAME%-apache.tgz"
+    - tar xvf "%MBEDTLS_DIR_NAME%-apache.tgz"
+
+    # download and extractbuild expat
+    - cd %ROOT_DIR%
+    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/%EXPAT_FILE_NAME%.zip -FileName %EXPAT_DIR_NAME%.zip"
+    - "unzip %EXPAT_DIR_NAME%.zip"
+
+    # configure, build dependencies and build S2OPC project as shared DLL
+    - cd %ROOT_DIR%
+    - .\build_s2opc.bat
+    - cd %ROOT_DIR%
+    - move build build_dll
+
+    # Builds with PyS2OPC and tests:
+    - set WITH_PYS2OPC=1
+    - set BUILD_SHARED_LIBS=off
+    - set ENABLE_TESTING=on
+    # configure, build S2OPC project as static library for tests and for building PyS2OPC
+    - |-
+        cd %ROOT_DIR%
+        mkdir build
+        cd build
+        mkdir lib
+        copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedtls.lib lib
+        copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedx509.lib lib
+        copy %MBEDTLS_DIR%\build\library\%CONFIG%\mbedcrypto.lib lib
+        copy %EXPAT_INSTALL_DIR%\lib\libexpatMD.lib lib\libexpat.lib
+        cd %ROOT_DIR%
+        .\build_s2opc.bat
+    - cd %ROOT_DIR%\build\tests\ClientServer
+    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc*"
+
+    # Build pys2opc for Py35+
+    - |-
+        set PYTHON="C:\\Python38-x64"
+        set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp38-cp38-win_amd64.whl
+        pip --version
+        pip install --upgrade wheel setuptools
+        cd %ROOT_DIR%\build
+        rm CMakeCache.txt
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
+        cmake --build . --target pys2opc --config %CONFIG%
+    - |-
+        set PYTHON="C:\\Python37-x64"
+        set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp37-cp37m-win_amd64.whl
+        pip --version
+        pip install --upgrade wheel setuptools
+        cd %ROOT_DIR%\build
+        rm CMakeCache.txt
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
+        cmake --build . --target pys2opc --config %CONFIG%
+    - |-
+        set PYTHON="C:\\Python35-x64"
+        set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+        set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp35-cp35m-win_amd64.whl
+        pip --version
+        pip install --upgrade wheel setuptools
+        cd %ROOT_DIR%\build
+        rm CMakeCache.txt
+        cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
+        cmake --build . --target pys2opc --config %CONFIG%
+    # Failed with Py3.4, seems like cffi is not correctly found for this version
+    #- |-
+    #    set PYTHON="C:\\Python34-x64"
+    #    set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+    #    set PYS2OPC_WHEEL_NAME=pys2opc-0.1.0.dev3-cp34-cp34m-win_amd64.whl
+    #    pip --version
+    #    pip install --upgrade wheel setuptools
+    #    cd %ROOT_DIR%\build
+    #    rm CMakeCache.txt
+    #    cmake -DWITH_NANO_EXTENDED=on -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
+    #    cmake --build . --target pys2opc --config %CONFIG%
+
+
+build: off
+
+artifacts:
+  - path: build\bin
+    name: Binaries
+    type: zip
+  - path: build\lib
+    name: Libraries
+    type: zip
+  - path: build_dll
+    name: DLL_build
+    type: zip
+
+on_failure:
+  - ps: |-
+      Compress-Archive -DestinationPath "build.zip" -Path $Env:APPVEYOR_BUILD_FOLDER\build
+      Push-AppveyorArtifact "build.zip" -FileName "build.zip" -DeploymentName to-publish
+
+# Note: uncomment for CI debug with RDP
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
