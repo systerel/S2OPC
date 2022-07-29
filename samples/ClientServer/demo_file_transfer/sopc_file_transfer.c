@@ -1537,61 +1537,85 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
 
 static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
 {
-    SOPC_StatusCode status = OpcUa_BadOutOfMemory;
-    int res;
-    if (NULL != file)
-    {
-        if (NULL != file->fp)
-        {
-            res = flock(fileno(file->fp), LOCK_UN);
-            if (0 != res)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:DeleteTmpFile: unable to unlock the file");
-                SOPC_ASSERT(0 == res && "the tmp file can't be unlocked");
-            }
-            res = fclose(file->fp);
-            if (0 != res)
-            {
-                const char* str = SOPC_String_GetRawCString(file->tmp_path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:DeleteTmpFile: the fclose function has failed (file '%s')", str);
-                SOPC_ASSERT(0 == res && "tmp file can't be closed");
-            }
-            res = remove(SOPC_String_GetRawCString(file->tmp_path));
-            if (0 != res)
-            {
-                const char* str = SOPC_String_GetRawCString(file->tmp_path);
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:DeleteTmpFile: the remove function has failed (file '%s')", str);
-                SOPC_ASSERT(0 == res && "tmp file can't be remove");
-            }
-            file->fp = NULL;
-            file->is_open = false;
-            file->size_in_byte = 0;
-            file->open_count = 0;
-            /* Remove the file handle in the API and invalid it */
-            /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
-             * support multiple handles for the same file)*/
-            SOPC_Dict_Remove(g_handle_to_file, &file->handle);
-            file->handle = INVALID_HANDLE_VALUE;
-            /* Free and creat a new tmp_path */
-            SOPC_String_Delete(file->tmp_path);
-            file->tmp_path = NULL;
-            file->tmp_path = SOPC_String_Create();
-            status = SOPC_GoodGenericStatus;
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:DeleteTmpFile: the file pointer is not initialized");
-        }
-    }
-    else
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+    int res = -1;
+    int filedes = -1;
+    if (NULL == file)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:DeleteTmpFile: the FileType object is not initialized in the API");
+        return OpcUa_BadUnexpectedError;
     }
+
+    if (NULL == file->fp)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:DeleteTmpFile: the file pointer is not initialized");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    filedes = fileno(file->fp);
+    if (-1 == filedes)
+    {
+        const char* str = SOPC_String_GetRawCString(file->tmp_path);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:DeleteTmpFile: the fileno function has failed (file '%s')", str);
+        status = OpcUa_BadUnexpectedError;
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        res = flock(filedes, LOCK_UN);
+        if (0 != res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:DeleteTmpFile: unable to unlock the file");
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        res = fclose(file->fp);
+        if (0 != res)
+        {
+            const char* str = SOPC_String_GetRawCString(file->tmp_path);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:DeleteTmpFile: the fclose function has failed (file '%s')", str);
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        res = remove(SOPC_String_GetRawCString(file->tmp_path));
+        if (0 != res)
+        {
+            const char* str = SOPC_String_GetRawCString(file->tmp_path);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:DeleteTmpFile: the remove function has failed (file '%s')", str);
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        file->fp = NULL;
+        file->is_open = false;
+        file->size_in_byte = 0;
+        file->open_count = 0;
+        /* Remove the file handle in the API and invalid it */
+        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
+         * support multiple handles for the same file)*/
+        SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+        file->handle = INVALID_HANDLE_VALUE;
+        /* Free and creat a new tmp_path */
+        SOPC_String_Delete(file->tmp_path);
+        file->tmp_path = NULL;
+        file->tmp_path = SOPC_String_Create();
+        status = SOPC_GoodGenericStatus;
+    }
+
     return status;
 }
 
