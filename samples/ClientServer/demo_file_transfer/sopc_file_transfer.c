@@ -808,45 +808,44 @@ static SOPC_StatusCode FileTransfer_Method_GetPos(const SOPC_CallContext* callCo
     (void) callContextPtr;
     (void) param;
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
-     * / spec V1.05)*/
+     * spec V1.05)*/
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode result_code = SOPC_GoodGenericStatus;
 
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: bad inputs arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
     if (SOPC_UInt32_Id != inputArgs->BuiltInTypeId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: bad BuiltInTypeId argument");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     SOPC_FileHandle handle = inputArgs->Value.Uint32;
     SOPC_Variant* v = SOPC_Variant_Create(); // Free by the Method Call Manager
-    if (NULL != v)
-    {
-        v->ArrayType = SOPC_VariantArrayType_SingleValue;
-        v->BuiltInTypeId = SOPC_UInt64_Id;
-        SOPC_UInt64_Initialize(&v->Value.Uint64);
-        result_code = FileTransfer_GetPos_TmpFile(handle, objectId, &(v->Value.Uint64));
-        if (SOPC_GoodGenericStatus == result_code)
-        {
-            *nbOutputArgs = 1;
-            *outputArgs = v;
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_GetPos: error while retrieving the position of the tmp file");
-        }
-    }
-    else
+    if (NULL == v)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_GetPos: unable to create a variant");
-        result_code = OpcUa_BadOutOfMemory;
+        return OpcUa_BadResourceUnavailable;
+    }
+
+    v->ArrayType = SOPC_VariantArrayType_SingleValue;
+    v->BuiltInTypeId = SOPC_UInt64_Id;
+    SOPC_UInt64_Initialize(&v->Value.Uint64);
+    result_code = FileTransfer_GetPos_TmpFile(handle, objectId, &(v->Value.Uint64));
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_GetPos: error while retrieving the position of the tmp file");
+    }
+
+    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        *nbOutputArgs = 1;
+        *outputArgs = v;
     }
 
     return result_code;
