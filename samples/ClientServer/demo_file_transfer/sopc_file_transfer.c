@@ -863,26 +863,28 @@ static SOPC_StatusCode FileTransfer_Method_SetPos(const SOPC_CallContext* callCo
     (void) nbOutputArgs;
     (void) outputArgs;
     (void) param;
-    SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
 
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_SetPos: bad inputs arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
+
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_UInt64_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_SetPos: bad BuiltInTypeId arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
+
     SOPC_FileHandle handle = inputArgs[0].Value.Uint32;
     uint64_t pos = inputArgs[1].Value.Uint64;
-    result_code = FileTransfer_SetPos_TmpFile(handle, objectId, pos);
-    if (SOPC_GoodGenericStatus != result_code)
+    SOPC_StatusCode result_code = FileTransfer_SetPos_TmpFile(handle, objectId, pos);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:Method_SetPos: error while setting the position of the tmp file");
     }
+
     return result_code;
 }
 
