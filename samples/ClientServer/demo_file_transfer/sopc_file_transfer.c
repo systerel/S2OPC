@@ -1382,6 +1382,14 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
     int filedes = -1;
     char Cmode[5] = {0};
     bool mode_is_ok = check_openModeArg(file->mode);
+
+    if (NULL == file)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
+        status = OpcUa_BadUnexpectedError;
+    }
+    
     if (false == mode_is_ok)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:OpenTmpFile: bad openning mode");
@@ -1394,13 +1402,6 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:OpenTmpFile: unable to decode mode to fopen function");
         return OpcUa_BadInvalidArgument;
-    }
-
-    if (NULL == file)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
-        status = OpcUa_BadUnexpectedError;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
