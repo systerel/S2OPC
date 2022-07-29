@@ -1450,78 +1450,91 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
 
 static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId)
 {
-    SOPC_StatusCode status;
-    int res;
+    int res = -1;
+    int filedes = -1;
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:CloseTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
-        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:CloseTmpFile: unable to retrieve file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:CloseTmpFile: unexpected file handle");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if ((NULL == file->fp) || (NULL == file->tmp_path))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:CloseTmpFile: the file pointer or the file path are not initialized");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+    filedes = fileno(file->fp);
+    if (-1 == filedes)
+    {
+        const char* str = SOPC_String_GetRawCString(file->tmp_path);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:CloseTmpFile: the fileno function has failed (file '%s')", str);
+        status = OpcUa_BadInvalidArgument;
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        res = flock(filedes, LOCK_UN);
+        if (0 != res)
         {
-            status = SOPC_GoodGenericStatus;
-            if (file->is_open)
-            {
-                if ((NULL != file->fp) && (NULL != file->tmp_path))
-                {
-                    res = flock(fileno(file->fp), LOCK_UN);
-                    if (0 != res)
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:CloseTmpFile: unable to unlock the file");
-                        SOPC_ASSERT(0 == res && "the tmp file can't be unlocked");
-                    }
-                    res = fclose(file->fp);
-                    if (0 != res)
-                    {
-                        const char* str = SOPC_String_GetRawCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:CloseTmpFile: the fclose function has failed (file '%s')",
-                                               str);
-                        SOPC_ASSERT(0 == res && "file can't be closed");
-                    }
-                    /* User close callback */
-                    if (NULL != file->pFunc_UserCloseCallback)
-                    {
-                        file->pFunc_UserCloseCallback(SOPC_String_GetRawCString(file->tmp_path));
-                    }
-                    file->fp = NULL;
-                    file->is_open = false;
-                    file->size_in_byte = 0;
-                    file->open_count = 0;
-                    local_write_open_count(*file);
-                    /* Remove the file handle in the API and invalid it */
-                    /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently
-                     * we don't support multiple handles for the same file)*/
-                    SOPC_Dict_Remove(g_handle_to_file, &file->handle);
-                    file->handle = INVALID_HANDLE_VALUE;
-                    /* Free and creat a new tmp_path */
-                    SOPC_String_Delete(file->tmp_path);
-                    file->tmp_path = NULL;
-                    file->tmp_path = SOPC_String_Create();
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:CloseTmpFile: the file pointer or the file path are not initialized");
-                    status = OpcUa_BadOutOfMemory;
-                }
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:CloseTmpFile: unexpected file handle");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:CloseTmpFile: unable to unlock the file");
             status = OpcUa_BadInvalidArgument;
         }
     }
-    else
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:CloseTmpFile: unable to retrieve file in the API");
-        status = OpcUa_BadUnexpectedError;
+        res = fclose(file->fp);
+        if (0 != res)
+        {
+            const char* str = SOPC_String_GetRawCString(file->tmp_path);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:CloseTmpFile: the fclose function has failed (file '%s')", str);
+            status = OpcUa_BadInvalidArgument;
+        }
     }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        /* User close callback */
+        if (NULL != file->pFunc_UserCloseCallback)
+        {
+            file->pFunc_UserCloseCallback(SOPC_String_GetRawCString(file->tmp_path));
+        }
+        file->fp = NULL;
+        file->is_open = false;
+        file->size_in_byte = 0;
+        file->open_count = 0;
+        local_write_open_count(*file);
+        /* Remove the file handle in the API and invalid it */
+        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently
+         * we don't support multiple handles for the same file)*/
+        SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+        file->handle = INVALID_HANDLE_VALUE;
+        /* Free and creat a new tmp_path */
+        SOPC_String_Delete(file->tmp_path);
+        file->tmp_path = NULL;
+        file->tmp_path = SOPC_String_Create();
+    }
+
     return status;
 }
 
