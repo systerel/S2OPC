@@ -1375,61 +1375,76 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
 
 static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
 {
-    SOPC_StatusCode status;
-    int res;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+    int res = -1;
+    int filedes = -1;
     char Cmode[5] = {0};
     bool mode_is_ok = check_openModeArg(file->mode);
-    if (mode_is_ok)
-    {
-        if (NULL != file)
-        {
-            if (NULL == file->fp)
-            {
-                status = opcuaMode_to_CMode(file->mode, Cmode);
-                if (SOPC_GoodGenericStatus == status)
-                {
-                    file->fp = fopen(SOPC_String_GetRawCString(file->tmp_path), Cmode);
-                    if (NULL == file->fp)
-                    {
-                        const char* str = SOPC_String_GetRawCString(file->tmp_path);
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:OpenTmpFile: the fopen function has failed (file '%s')",
-                                               str);
-                        SOPC_ASSERT(NULL != file->fp && "tmp file can't be open");
-                    }
-                    res = flock(fileno(file->fp), LOCK_SH);
-                    if (0 != res)
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:OpenTmpFile: unable to lock the file");
-                        SOPC_ASSERT(0 == res && "the tmp file can't be locked");
-                    }
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:OpenTmpFile: unable to decode mode to fopen function");
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:OpenTmpFile: the file pointer is already initialized");
-                status = OpcUa_BadOutOfMemory;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
-            status = OpcUa_BadOutOfMemory;
-        }
-    }
-    else
+    if (false == mode_is_ok)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:OpenTmpFile: bad openning mode");
-        status = OpcUa_BadInvalidArgument;
+        return OpcUa_BadInvalidArgument;
     }
+
+    status = opcuaMode_to_CMode(file->mode, Cmode);
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:OpenTmpFile: unable to decode mode to fopen function");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (NULL == file)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
+        status = OpcUa_BadUnexpectedError;
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        if (NULL != file->fp)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:OpenTmpFile: the file pointer is already initialized");
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        file->fp = fopen(SOPC_String_GetRawCString(file->tmp_path), Cmode);
+        if (NULL == file->fp)
+        {
+            const char* str = SOPC_String_GetRawCString(file->tmp_path);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:OpenTmpFile: the fopen function has failed (file '%s')", str);
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        filedes = fileno(file->fp);
+        if (-1 == filedes)
+        {
+            const char* str = SOPC_String_GetRawCString(file->tmp_path);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:OpenTmpFile: the fileno function has failed (file '%s')", str);
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        res = flock(filedes, LOCK_SH);
+        if (0 != res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:OpenTmpFile: unable to lock the file");
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
     return status;
 }
 
