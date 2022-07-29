@@ -1790,45 +1790,45 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
 
 static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId, uint64_t posOff)
 {
-    SOPC_StatusCode status;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:SetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
-        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:SetPosTmpFile: unable to retrieve file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadInvalidArgument;
+    }
+    if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:SetPosTmpFile: unexpected file handle");
+        status = OpcUa_BadInvalidArgument;
+    }
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        if (NULL == file->fp)
         {
-            status = SOPC_GoodGenericStatus;
-            if (NULL != file->fp)
-            {
-                int ret;
-                ret = fseek(file->fp, (long int) posOff, SEEK_SET);
-                if (0 != ret)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:SetPosTmpFile: the fseek function has failed");
-                    status = OpcUa_BadUnexpectedError;
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:SetPosTmpFile: The file pointer is not initialized");
-                status = OpcUa_BadOutOfMemory;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:SetPosTmpFile: unexpected file handle");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:SetPosTmpFile: The file pointer is not initialized");
             status = OpcUa_BadInvalidArgument;
         }
     }
-    else
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:SetPosTmpFile: unable to retrieve file in the API");
-        status = OpcUa_BadUnexpectedError;
+        int ret;
+        ret = fseek(file->fp, (long int) posOff, SEEK_SET);
+        if (0 != ret)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:SetPosTmpFile: the fseek function has failed");
+            status = OpcUa_BadInvalidArgument;
+        }
     }
     return status;
 }
