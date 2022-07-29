@@ -688,83 +688,98 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
 {
     (void) callContextPtr;
     (void) param;
+
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
+
+    SOPC_ASSERT(g_objectId_to_file != NULL &&
+                "FileTransfer:Method_Read: API not initialized with <SOPC_FileTransfer_Initialize>");
 
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: bad inputs arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_Int32_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: bad BuiltInTypeId arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     SOPC_FileHandle handle = inputArgs[0].Value.Uint32;
     int32_t length = inputArgs[1].Value.Int32;
 
     SOPC_Variant* v = SOPC_Variant_Create(); // Free by the Method Call Manager
-    if (NULL != v)
-    {
-        v->ArrayType = SOPC_VariantArrayType_SingleValue;
-        v->BuiltInTypeId = SOPC_ByteString_Id;
-        SOPC_ByteString_Initialize(&v->Value.Bstring);
-        result_code = FileTransfer_Read_TmpFile(handle, length, &(v->Value.Bstring), objectId);
-        if (SOPC_GoodGenericStatus == result_code)
-        {
-            *nbOutputArgs = 1;
-            *outputArgs = v;
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Read: error while reading tmp file");
-        }
-    }
-    else
+    if (NULL == v)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: unable to create a variant");
-        result_code = OpcUa_BadOutOfMemory;
+        return OpcUa_BadResourceUnavailable;
     }
-    if (SOPC_GoodGenericStatus == result_code)
+
+    v->ArrayType = SOPC_VariantArrayType_SingleValue;
+    v->BuiltInTypeId = SOPC_ByteString_Id;
+    SOPC_ByteString_Initialize(&v->Value.Bstring);
+    SOPC_StatusCode result_code = FileTransfer_Read_TmpFile(handle, length, &(v->Value.Bstring), objectId);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: error while reading tmp file");
+    }
+
+    SOPC_FileType* file = NULL;
+    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        *nbOutputArgs = 1;
+        *outputArgs = v;
+
         bool found = false;
-        SOPC_ASSERT(g_objectId_to_file != NULL &&
-                    "FileTransfer:Method_Read: API not initialized with <SOPC_FileTransfer_Initialize>");
-        SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-        if (found)
-        {
-            struct stat sb;
-            int res = fstat(fileno(file->fp), &sb);
-            if (-1 != res)
-            {
-                file->size_in_byte = (uint64_t) sb.st_size;
-                result_code = local_write_size(file);
-                if (SOPC_GoodGenericStatus != result_code)
-                {
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:Method_Read: unable to make a local write request for Size variable");
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:Method_Read: unable to get stat on the tmp file");
-            }
-        }
-        else
+        file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+        if (false == found)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Method_Read: unable to retrieve FileType in the API");
+            result_code = OpcUa_BadUnexpectedError;
         }
     }
+
+    int filedes = -1;
+    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        filedes = fileno(file->fp);
+        if (-1 == filedes)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Read: the fileno function has failed");
+            result_code = OpcUa_BadResourceUnavailable;
+        }
+    }
+
+    struct stat sb;
+    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        int res = fstat(filedes, &sb);
+        if (-1 == res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Read: unable to get stat on the tmp file");
+            result_code = OpcUa_BadResourceUnavailable;
+        }
+    }
+
+    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        file->size_in_byte = (uint64_t) sb.st_size;
+        result_code = local_write_size(file);
+        if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Read: unable to make a local write request for Size variable");
+            result_code = OpcUa_BadUnexpectedError;
+        }
+    }
+
     return result_code;
 }
 
