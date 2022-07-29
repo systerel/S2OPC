@@ -1644,92 +1644,111 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
                                                  SOPC_ByteString* msg,
                                                  const SOPC_NodeId* objectId)
 {
-    SOPC_StatusCode status;
-    SOPC_ReturnStatus sopc_status;
+    SOPC_StatusCode status = SOPC_STATUS_OK;
     bool found = false;
-    size_t read_count;
-    char* buffer = NULL;
+    size_t read_count = 0;
+    long int old_pos = -1;
+    long int last_pos = -1;
+    int res = -1;
+    int32_t size_available = -1;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:ReadTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
-        if (0 >= length)
-        {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument");
-            return OpcUa_BadInvalidArgument;
-        }
-        if ((handle == file->handle) && (INVALID_HANDLE_VALUE != handle))
-        {
-            /* check if File was not opened for read access */
-            if ((file->is_open == true) && ((file->mode == WRITE_MASK) || (file->mode == APPEND_MASK) ||
-                                            (file->mode == (APPEND_MASK + WRITE_MASK))))
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:ReadTmpFile: file has not been opened for read access");
-                return OpcUa_BadInvalidState;
-            }
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ReadTmpFile: unable to retrieve file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadUnexpectedError;
+    }
 
-            buffer = SOPC_Calloc((size_t)(length + 1), sizeof(char));
+    if (0 >= length)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument, rcv len: %d", length);
+        return OpcUa_BadInvalidArgument;
+    }
 
-            if (NULL != msg)
-            {
-                if (NULL != file->fp)
-                {
-                    read_count = fread(buffer, 1, (size_t) length, file->fp);
-                    int end_of_file = feof(file->fp);
-                    if ((read_count < (size_t) length) && (0 == end_of_file))
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:ReadTmpFile: the fread function has failed");
-                        status = OpcUa_BadUnexpectedError;
-                    }
-                    else
-                    {
-                        sopc_status = SOPC_String_CopyFromCString(msg, (const char*) buffer);
-                        if (SOPC_STATUS_OK != sopc_status)
-                        {
-                            SOPC_Logger_TraceError(
-                                SOPC_LOG_MODULE_CLIENTSERVER,
-                                "FileTransfer:ReadTmpFile: the SOPC_String_CopyFromCString function has failed");
-                            status = OpcUa_BadUnexpectedError;
-                        }
-                        else
-                        {
-                            status = SOPC_GoodGenericStatus;
-                        }
-                    }
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:ReadTmpFile: the file pointer is not initialized");
-                    status = OpcUa_BadOutOfMemory;
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:ReadTmpFile: ByteString msg has not been allocated");
-                status = OpcUa_BadOutOfMemory;
-            }
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: unexpected file handle");
-            status = OpcUa_BadInvalidArgument;
-        }
+    if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: unexpected file handle");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    /* check if File was not opened for read access */
+    if ((false == file->is_open) || (file->mode & READ_MASK) == 0)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ReadTmpFile: file has not been opened for read access");
+        return OpcUa_BadInvalidState;
+    }
+
+    if (NULL == file->fp)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ReadTmpFile: the file pointer is not initialized");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    /* Calculate the size to allocate */
+    old_pos = ftell(file->fp);
+    if (-1L == old_pos)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the ftell function has failed");
+        return OpcUa_BadResourceUnavailable;
+    }
+
+    res = fseek(file->fp, 0, SEEK_END);
+    if (0 != res)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the fseek function has failed");
+        return OpcUa_BadResourceUnavailable;
+    }
+
+    last_pos = ftell(file->fp);
+    if (-1L == last_pos)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the ftell function has failed");
+        return OpcUa_BadResourceUnavailable;
+    }
+
+    res = fseek(file->fp, old_pos, SEEK_SET);
+    if (0 != res)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the fseek function has failed");
+        return OpcUa_BadResourceUnavailable;
+    }
+
+    size_available = (int32_t) last_pos - (int32_t) old_pos;
+    if (length > size_available)
+    {
+        msg->Length = size_available;
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:ReadTmpFile: unable to retrieve file in the API");
-        status = OpcUa_BadUnexpectedError;
+        msg->Length = length;
     }
 
-    SOPC_Free(buffer);
+    msg->Data = SOPC_Malloc((size_t) msg->Length);
+
+    read_count = fread(msg->Data, 1, (size_t) msg->Length, file->fp);
+    if (read_count != (size_t) msg->Length)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the fread function has failed");
+        status = OpcUa_BadResourceUnavailable;
+    }
+
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Free(msg->Data);
+        msg->Length = -1;
+        msg->Data = NULL;
+        msg->DoNotClear = false;
+    }
+
     return status;
 }
 
