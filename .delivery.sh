@@ -98,7 +98,7 @@ echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
-git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit / subscription library" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit to $1" &> /dev/null || exit 1
 
 echo "Checking out $DELIVERY_NAME"
 git checkout $DELIVERY_NAME || exit 1
@@ -209,9 +209,11 @@ fi
 echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
 git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
-echo "Remove .gitignore file and commit"
-git rm -rf .gitignore &> /dev/null || exit 1
-git commit -S -m "Remove .gitignore file" &> /dev/null || exit 1
+echo "Keep CI artifacts, remove internal CI files, .gitignore file and commit"
+sed -i 's/expire_in:.*$/expire_in: never/g' .gitlab-ci.yml
+git add .gitlab-ci.yml
+git rm -rf .systerel/ .gitignore &> /dev/null || exit 1
+git commit -S -m "Keep CI artifacts, remove internal CI files and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
 
