@@ -285,34 +285,39 @@ static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode);
  * \param file The FileType structure object
  * \return SOPC_GoodGenericStatus if no error
  */
-static SOPC_StatusCode local_write_open_count(SOPC_FileType file);
+static SOPC_StatusCode local_write_open_count(const SOPC_FileType* file);
 
 /**
  * \brief Function to update the Size variable of a FileType object on the address space (local write request)
  * \param file The FileType structure object
  * \return SOPC_GoodGenericStatus if no error
  */
-static SOPC_StatusCode local_write_size(SOPC_FileType file);
+static SOPC_StatusCode local_write_size(const SOPC_FileType* file);
 
 /**
  * \brief Function to write the default value of Writable variable for a FileType object on the address space (local
- * write request) \param file The FileType structure object \return SOPC_GoodGenericStatus if no error
+ * write request)
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
  */
-static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file);
+static SOPC_StatusCode local_write_default_Writable(const SOPC_FileType* file);
 
 /**
  * \brief Function to write the default value of UserWritable variable for a FileType object on the address space (local
- * write request) \param file The FileType structure object \return SOPC_GoodGenericStatus if no error
+ * write request)
+ * \param file The FileType structure object
+ * \return SOPC_GoodGenericStatus if no error
  */
-static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file);
+static SOPC_StatusCode local_write_default_UserWritable(const SOPC_FileType* file);
 
 /**
- * \brief Function used with SOPC_Dict_ForEach
- * \note Purpose: For each FileType registered into the API, intialized each variable of the object on the address
- * space. \param key not used here \param value the pointer on the SOPC_FileType \param user_data use to get
- * SOPC_StatusCode (SOPC_STATUT_OK if no error)
+ * \brief Function used with SOPC_Dict_ForEach. Purpose: For each FileType registered into the API, intialized each
+ * variable of the object on the address space.
+ * \param key not used here
+ * \param value the pointer on the SOPC_FileType
+ * \param user_data use to get SOPC_StatusCode (SOPC_STATUT_OK if no error)
  */
-static void local_write_init(const void* key, const void* value, void* user_data);
+static void local_write_all(const void* key, const void* value, void* user_data);
 
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
@@ -559,7 +564,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 as we do not support multiple handlers, this one is maintained at 1 */
                 file->open_count = 1;
                 /* Start local service on variables */
-                result_code = local_write_open_count(*file);
+                result_code = local_write_open_count(file);
                 if (SOPC_GoodGenericStatus != result_code)
                 {
                     SOPC_Logger_TraceError(
@@ -571,7 +576,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                 if (-1 != ret)
                 {
                     file->size_in_byte = (uint64_t) sb.st_size;
-                    result_code = local_write_size(*file);
+                    result_code = local_write_size(file);
                     if (SOPC_GoodGenericStatus != result_code)
                     {
                         SOPC_Logger_TraceError(
@@ -729,7 +734,7 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
             if (-1 != res)
             {
                 file->size_in_byte = (uint64_t) sb.st_size;
-                result_code = local_write_size(*file);
+                result_code = local_write_size(file);
                 if (SOPC_GoodGenericStatus != result_code)
                 {
                     SOPC_Logger_TraceError(
@@ -1520,7 +1525,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
         file->is_open = false;
         file->size_in_byte = 0;
         file->open_count = 0;
-        local_write_open_count(*file);
+        local_write_open_count(file);
         /* Remove the file handle in the API and invalid it */
         /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently
          * we don't support multiple handles for the same file)*/
@@ -1882,28 +1887,28 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     return status;
 }
 
-static void local_write_init(const void* key, const void* value, void* user_data)
+static void local_write_all(const void* key, const void* value, void* user_data)
 {
     (void) key;
     const SOPC_FileType* file = value;
     SOPC_ReturnStatus* status = user_data;
     SOPC_StatusCode res;
-    res = local_write_default_UserWritable(*file);
+    res = local_write_default_UserWritable(file);
     if (SOPC_GoodGenericStatus != res)
     {
         *status = SOPC_STATUS_NOK;
     }
-    res = local_write_default_Writable(*file);
+    res = local_write_default_Writable(file);
     if (SOPC_GoodGenericStatus != res)
     {
         *status = SOPC_STATUS_NOK;
     }
-    res = local_write_open_count(*file);
+    res = local_write_open_count(file);
     if (SOPC_GoodGenericStatus != res)
     {
         *status = SOPC_STATUS_NOK;
     }
-    res = local_write_size(*file);
+    res = local_write_size(file);
     if (SOPC_GoodGenericStatus != res)
     {
         *status = SOPC_STATUS_NOK;
@@ -1921,7 +1926,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
     if (SOPC_STATUS_OK == status)
     {
         /* Initialize each variables for each each FileType added into the API */
-        SOPC_Dict_ForEach(g_objectId_to_file, &local_write_init, &status);
+        SOPC_Dict_ForEach(g_objectId_to_file, &local_write_all, &status);
     }
     return status;
 }
@@ -2038,128 +2043,180 @@ static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t
     }
 }
 
-static SOPC_StatusCode local_write_open_count(SOPC_FileType file)
+static SOPC_StatusCode local_write_open_count(const SOPC_FileType* file)
 {
-    SOPC_ASSERT(NULL != file.variableIds[OPEN_COUNT_VAR_IDX] &&
+    SOPC_ASSERT(NULL != file->variableIds[OPEN_COUNT_VAR_IDX] &&
                 "OpenCount variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus return_status = SOPC_STATUS_OK;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        return OpcUa_BadUnexpectedError;
+        status = OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId* nodeId = file.variableIds[OPEN_COUNT_VAR_IDX];
-    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt16_Id,
-                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Uint16 = file.open_count},
-                                .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
-    if (SOPC_STATUS_OK != status)
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
-    }
-    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        SOPC_NodeId* nodeId = file->variableIds[OPEN_COUNT_VAR_IDX];
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt16_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Uint16 = file->open_count},
+                                    .Status = SOPC_GoodGenericStatus};
 
-    if (SOPC_STATUS_OK != status)
+        return_status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
+        return_status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
     }
 
-    return SOPC_GoodGenericStatus;
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        OpcUa_WriteRequest_Clear(pReq);
+    }
+
+    return status;
 }
 
-static SOPC_StatusCode local_write_size(SOPC_FileType file)
+static SOPC_StatusCode local_write_size(const SOPC_FileType* file)
 {
-    SOPC_ASSERT(NULL != file.variableIds[SIZE_VAR_IDX] &&
+    SOPC_ASSERT(NULL != file->variableIds[SIZE_VAR_IDX] &&
                 "Size variable nodeId shall be added with <SOPC_FileTransfer_Add_Variable_To_File>");
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus return_status = SOPC_STATUS_OK;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        return OpcUa_BadUnexpectedError;
+        status = OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId* nodeId = file.variableIds[SIZE_VAR_IDX];
-    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt64_Id,
-                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Uint64 = file.size_in_byte},
-                                .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
-    if (SOPC_STATUS_OK != status)
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
-    }
-    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        SOPC_NodeId* nodeId = file->variableIds[SIZE_VAR_IDX];
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt64_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Uint64 = file->size_in_byte},
+                                    .Status = SOPC_GoodGenericStatus};
 
-    if (SOPC_STATUS_OK != status)
+        return_status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
+        return_status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
     }
 
-    return SOPC_GoodGenericStatus;
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        OpcUa_WriteRequest_Clear(pReq);
+    }
+
+    return status;
 }
 
-static SOPC_StatusCode local_write_default_Writable(SOPC_FileType file)
+static SOPC_StatusCode local_write_default_Writable(const SOPC_FileType* file)
 {
-    SOPC_ASSERT(NULL != file.variableIds[WRITABLE_VAR_IDX] &&
+    SOPC_ASSERT(NULL != file->variableIds[WRITABLE_VAR_IDX] &&
                 "Writable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus return_status = SOPC_STATUS_OK;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        return OpcUa_BadUnexpectedError;
+        status = OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId* nodeId = file.variableIds[WRITABLE_VAR_IDX];
-    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
-                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Boolean = VAR_WRITABLE_DEFAULT},
-                                .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
-    if (SOPC_STATUS_OK != status)
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
-    }
-    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        SOPC_NodeId* nodeId = file->variableIds[WRITABLE_VAR_IDX];
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Boolean = VAR_WRITABLE_DEFAULT},
+                                    .Status = SOPC_GoodGenericStatus};
 
-    if (SOPC_STATUS_OK != status)
+        return_status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
+        return_status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
     }
 
-    return SOPC_GoodGenericStatus;
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        OpcUa_WriteRequest_Clear(pReq);
+    }
+
+    return status;
 }
 
-static SOPC_StatusCode local_write_default_UserWritable(SOPC_FileType file)
+static SOPC_StatusCode local_write_default_UserWritable(const SOPC_FileType* file)
 {
-    SOPC_ASSERT(NULL != file.variableIds[USER_WRITABLE_VAR_IDX] &&
+    SOPC_ASSERT(NULL != file->variableIds[USER_WRITABLE_VAR_IDX] &&
                 "UserWritable variable nodeId shall be added with <SOPC_FileTransfer_Add_File>");
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus return_status = SOPC_STATUS_OK;
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        return OpcUa_BadUnexpectedError;
+        status = OpcUa_BadUnexpectedError;
     }
-    SOPC_NodeId* nodeId = file.variableIds[USER_WRITABLE_VAR_IDX];
-    SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
-                                          .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                          .Value.Boolean = VAR_USER_WRITABLE_DEFAULT},
-                                .Status = SOPC_GoodGenericStatus};
 
-    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
-    if (SOPC_STATUS_OK != status)
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
-    }
-    status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        SOPC_NodeId* nodeId = file->variableIds[USER_WRITABLE_VAR_IDX];
+        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
+                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                              .Value.Boolean = VAR_USER_WRITABLE_DEFAULT},
+                                    .Status = SOPC_GoodGenericStatus};
 
-    if (SOPC_STATUS_OK != status)
+        return_status = SOPC_WriteRequest_SetWriteValue(pReq, 0, nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        return OpcUa_BadUnexpectedError;
+        return_status = SOPC_ServerHelper_LocalServiceAsync(pReq, 1);
+        if (SOPC_STATUS_OK != return_status)
+        {
+            status = OpcUa_BadUnexpectedError;
+        }
     }
 
-    return SOPC_GoodGenericStatus;
+    if (0 != (status & SOPC_GoodStatusOppositeMask))
+    {
+        OpcUa_WriteRequest_Clear(pReq);
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* UserValue)
