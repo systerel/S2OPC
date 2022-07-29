@@ -190,6 +190,13 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
 static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file);
 
 /**
+ * \brief Function to reset the internal data of the FileType structure in case of closing or deleted tmp file.
+ * \param file The FileType structure object.
+ * \return SOPC_GoodGenericStatus if no error
+ */
+static SOPC_StatusCode FileTransfer_Reset_FileType_Data(SOPC_FileType* file);
+
+/**
  * \brief Read into the temporary file (from the current position).
  * \note This function is usefull for the Read method implementation.
  * \param handle The handle of the file to read.
@@ -1457,6 +1464,33 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
     return status;
 }
 
+static SOPC_StatusCode FileTransfer_Reset_FileType_Data(SOPC_FileType* file)
+{
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
+
+    file->fp = NULL;
+    file->is_open = false;
+    file->size_in_byte = 0;
+    file->open_count = 0;
+    local_write_open_count(file);
+    /* Remove the file handle in the API and invalid it */
+    /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
+     * multiple handles for the same file)*/
+    SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+    file->handle = INVALID_HANDLE_VALUE;
+    /* Free and creat a new tmp_path */
+    SOPC_String_Delete(file->tmp_path);
+    file->tmp_path = NULL;
+    file->tmp_path = SOPC_String_Create();
+    if (NULL == file->tmp_path)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ResetFileType: unable to create a new tmp_path string");
+        status = OpcUa_BadResourceUnavailable;
+    }
+    return status;
+}
+
 static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const SOPC_NodeId* objectId)
 {
     int res = -1;
@@ -1528,20 +1562,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
         {
             file->pFunc_UserCloseCallback(SOPC_String_GetRawCString(file->tmp_path));
         }
-        file->fp = NULL;
-        file->is_open = false;
-        file->size_in_byte = 0;
-        file->open_count = 0;
-        local_write_open_count(file);
-        /* Remove the file handle in the API and invalid it */
-        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently
-         * we don't support multiple handles for the same file)*/
-        SOPC_Dict_Remove(g_handle_to_file, &file->handle);
-        file->handle = INVALID_HANDLE_VALUE;
-        /* Free and creat a new tmp_path */
-        SOPC_String_Delete(file->tmp_path);
-        file->tmp_path = NULL;
-        file->tmp_path = SOPC_String_Create();
+        status = FileTransfer_Reset_FileType_Data(file);
     }
 
     return status;
@@ -1612,20 +1633,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        file->fp = NULL;
-        file->is_open = false;
-        file->size_in_byte = 0;
-        file->open_count = 0;
-        /* Remove the file handle in the API and invalid it */
-        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
-         * support multiple handles for the same file)*/
-        SOPC_Dict_Remove(g_handle_to_file, &file->handle);
-        file->handle = INVALID_HANDLE_VALUE;
-        /* Free and creat a new tmp_path */
-        SOPC_String_Delete(file->tmp_path);
-        file->tmp_path = NULL;
-        file->tmp_path = SOPC_String_Create();
-        status = SOPC_GoodGenericStatus;
+        status = FileTransfer_Reset_FileType_Data(file);
     }
 
     return status;
