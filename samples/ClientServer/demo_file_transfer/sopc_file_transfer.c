@@ -488,7 +488,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
 {
     (void) callContextPtr;
     (void) param;
-    SOPC_StatusCode result_code = OpcUa_BadInvalidArgument;
+    SOPC_StatusCode result_code = SOPC_GoodGenericStatus;
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
     *nbOutputArgs = 0;
@@ -497,7 +497,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: Bad inputs arguments");
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     SOPC_Byte mode = inputArgs->Value.Byte;
@@ -505,130 +505,134 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     if (!mode_ok)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: OpenMode %d is unknown", mode);
-        return result_code;
+        return OpcUa_BadInvalidArgument;
     }
 
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:Method_Open: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-    if (found)
+    if (false == found)
     {
-        if (file->is_open)
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: unable to retieve the tmp file in the API from nodeId '%s'",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        return OpcUa_BadNotFound;
+    }
+
+    if (file->is_open)
+    {
+        /* Clients can open the same file several times for read */
+        /* A request to open for writing shall return Bad_NotWritable when the file is already opened */
+        if ((READ_MASK == file->mode) && (READ_MASK != mode))
         {
-            /* Clients can open the same file several times for read */
-            /* A request to open for writing shall return Bad_NotWritable when the file is already opened */
-            if ((READ_MASK == file->mode) && (READ_MASK != mode))
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "FileTransfer:Method_Open: file is open in read mode, it cannot be opened in write mode");
-                return OpcUa_BadNotWritable;
-            }
-            /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.
-             */
-            if ((WRITE_MASK == file->mode) || (APPEND_MASK == file->mode) || ((APPEND_MASK + WRITE_MASK) == file->mode))
-            {
-                if ((WRITE_MASK != mode) && (APPEND_MASK != mode) && ((APPEND_MASK + WRITE_MASK) != mode))
-                {
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:Method_Open: file is open in write mode, it cannot be opened in read mode");
-                    return OpcUa_BadNotReadable;
-                }
-            }
-            /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted
-             */
-            result_code = FileTransfer_Delete_TmpFile(file);
-            if (SOPC_GoodGenericStatus != result_code)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:Method_Open: unable to deleted tmp file");
-                return result_code;
-            }
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:Method_Open: file is open in read mode, it cannot be opened in write mode");
+            return OpcUa_BadNotWritable;
         }
-        /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't
-         * support multiple handles for the same file)*/
-        file->handle = generate_random_handle();
-        bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
-        SOPC_ASSERT(true == res);
-        file->mode = mode;
-        result_code = FileTransfer_FileType_Create_TmpFile(file);
-        if (SOPC_GoodGenericStatus == result_code)
+        /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.*/
+        if ((0 != (file->mode & (WRITE_MASK | APPEND_MASK))) && (0 == (mode & (WRITE_MASK | APPEND_MASK))))
         {
-            result_code = FileTransfer_Open_TmpFile(file);
-            if (SOPC_GoodGenericStatus == result_code)
-            {
-                file->is_open = true;
-                /* OpenCount indicates the number of currently valid file handles on the file.
-                as we do not support multiple handlers, this one is maintained at 1 */
-                file->open_count = 1;
-                /* Start local service on variables */
-                result_code = local_write_open_count(file);
-                if (SOPC_GoodGenericStatus != result_code)
-                {
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "FileTransfer:Method_Open: unable to make a local write request for the OpenCount variable");
-                }
-                struct stat sb;
-                int ret = fstat(fileno(file->fp), &sb);
-                if (-1 != ret)
-                {
-                    file->size_in_byte = (uint64_t) sb.st_size;
-                    result_code = local_write_size(file);
-                    if (SOPC_GoodGenericStatus != result_code)
-                    {
-                        SOPC_Logger_TraceError(
-                            SOPC_LOG_MODULE_CLIENTSERVER,
-                            "FileTransfer:Method_Open: unable to make a local write request for the Size variable");
-                    }
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "FileTransfer:Method_Open: unable to get stat on the tmp file");
-                }
-                /* End local service on variables */
-                if (SOPC_GoodGenericStatus == result_code)
-                {
-                    SOPC_Variant* v = SOPC_Variant_Create();
-                    if (NULL != v)
-                    {
-                        v->ArrayType = SOPC_VariantArrayType_SingleValue;
-                        v->BuiltInTypeId = SOPC_UInt32_Id;
-                        SOPC_UInt32_Initialize(&v->Value.Uint32);
-                        v->Value.Uint32 = (uint32_t) file->handle;
-                        *nbOutputArgs = 1;
-                        *outputArgs = v;
-                        result_code = SOPC_GoodGenericStatus;
-                    }
-                    else
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "FileTransfer:Method_Open: unable to create a variant");
-                        result_code = OpcUa_BadOutOfMemory;
-                    }
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "FileTransfer:Method_Open: unable to open the tmp file");
-            }
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:Method_Open: file is open in write mode, it cannot be opened in read mode");
+            return OpcUa_BadNotReadable;
         }
-        else
+        /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted.*/
+        result_code = FileTransfer_Delete_TmpFile(file);
+        if (0 != (result_code & SOPC_GoodStatusOppositeMask))
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Open: unable to create the tmp file");
+                                   "FileTransfer:Method_Open: unable to deleted tmp file");
+            return result_code;
         }
     }
-    else
+
+    /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
+     * multiple handles for the same file)*/
+    file->handle = generate_random_handle();
+    bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
+    if (false == res)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:Method_Open: unable to retieve the tmp file in the API");
-        result_code = OpcUa_BadNotFound;
+                               "FileTransfer:Method_Open: unable to insert file into g_handle_to_file dictionary");
+        return OpcUa_BadUnexpectedError;
     }
+
+    file->mode = mode;
+    result_code = FileTransfer_FileType_Create_TmpFile(file);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to create the tmp file");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    result_code = FileTransfer_Open_TmpFile(file);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to open the tmp file");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    file->is_open = true;
+    /* OpenCount indicates the number of currently valid file handles on the file.
+    as we do not support multiple handlers, this one is maintained at 1 */
+    file->open_count = 1;
+    /* Start local service on variables */
+    result_code = local_write_open_count(file);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "FileTransfer:Method_Open: unable to make a local write request for the OpenCount variable");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    int filedes = fileno(file->fp);
+    if (-1 == filedes)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: the fileno function has failed");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    struct stat sb;
+    int ret = fstat(filedes, &sb);
+    if (-1 == ret)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: unable to get stat on the tmp file");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    file->size_in_byte = (uint64_t) sb.st_size;
+    result_code = local_write_size(file);
+    if (0 != (result_code & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: unable to make a local write request for the Size variable");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    /* End local service on variables */
+    SOPC_Variant* v = SOPC_Variant_Create();
+    if (NULL == v)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: unable to create a variant");
+        return OpcUa_BadUnexpectedError;
+    }
+
+    v->ArrayType = SOPC_VariantArrayType_SingleValue;
+    v->BuiltInTypeId = SOPC_UInt32_Id;
+    SOPC_UInt32_Initialize(&v->Value.Uint32);
+    v->Value.Uint32 = (uint32_t) file->handle;
+    *nbOutputArgs = 1;
+    *outputArgs = v;
+    result_code = SOPC_GoodGenericStatus;
+
     return result_code;
 }
 
@@ -1389,7 +1393,7 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                                "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
         status = OpcUa_BadUnexpectedError;
     }
-    
+
     if (false == mode_is_ok)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:OpenTmpFile: bad openning mode");
