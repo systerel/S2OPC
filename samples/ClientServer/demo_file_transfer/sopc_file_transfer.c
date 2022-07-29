@@ -1506,7 +1506,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
                                "FileTransfer:CloseTmpFile: unable to retrieve file in the API from nodeId '%s'",
                                C_objectId);
         SOPC_Free(C_objectId);
-        return OpcUa_BadInvalidArgument;
+        return OpcUa_BadUnexpectedError;
     }
 
     if ((handle != file->handle) || (INVALID_HANDLE_VALUE == handle))
@@ -1519,7 +1519,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:CloseTmpFile: the file pointer or the file path are not initialized");
-        return OpcUa_BadInvalidArgument;
+        return OpcUa_BadUnexpectedError;
     }
 
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
@@ -1529,7 +1529,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
         const char* str = SOPC_String_GetRawCString(file->tmp_path);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:CloseTmpFile: the fileno function has failed (file '%s')", str);
-        status = OpcUa_BadInvalidArgument;
+        status = OpcUa_BadResourceUnavailable;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
@@ -1539,7 +1539,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:CloseTmpFile: unable to unlock the file");
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadResourceUnavailable;
         }
     }
 
@@ -1551,7 +1551,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
             const char* str = SOPC_String_GetRawCString(file->tmp_path);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:CloseTmpFile: the fclose function has failed (file '%s')", str);
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadResourceUnavailable;
         }
     }
 
@@ -1593,7 +1593,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
         const char* str = SOPC_String_GetRawCString(file->tmp_path);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:DeleteTmpFile: the fileno function has failed (file '%s')", str);
-        status = OpcUa_BadUnexpectedError;
+        status = OpcUa_BadResourceUnavailable;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
@@ -1603,7 +1603,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:DeleteTmpFile: unable to unlock the file");
-            status = OpcUa_BadUnexpectedError;
+            status = OpcUa_BadResourceUnavailable;
         }
     }
 
@@ -1615,7 +1615,7 @@ static SOPC_StatusCode FileTransfer_Delete_TmpFile(SOPC_FileType* file)
             const char* str = SOPC_String_GetRawCString(file->tmp_path);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:DeleteTmpFile: the fclose function has failed (file '%s')", str);
-            status = OpcUa_BadUnexpectedError;
+            status = OpcUa_BadResourceUnavailable;
         }
     }
 
@@ -1833,7 +1833,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:GetPosTmpFile: the file pointer is not initialized");
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadUnexpectedError;
         }
     }
 
@@ -1846,7 +1846,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:GetPosTmpFile: the ftell function has failed");
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadResourceUnavailable;
         }
         else
         {
@@ -1884,7 +1884,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:SetPosTmpFile: The file pointer is not initialized");
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadUnexpectedError;
         }
     }
 
@@ -1896,7 +1896,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:SetPosTmpFile: the fseek function has failed");
-            status = OpcUa_BadInvalidArgument;
+            status = OpcUa_BadResourceUnavailable;
         }
     }
     return status;
