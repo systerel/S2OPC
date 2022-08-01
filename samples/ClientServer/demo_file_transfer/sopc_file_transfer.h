@@ -126,25 +126,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback);
 
 /**
- * \brief Function to write a single value of variable (array are not supported).
- * \param CnodeId The nodeId of the variable to write.
- * \param UserBuiltInId The type of the variable.
- * \param pUserValue A pointer allocated to write the value with the same type as the UserBuiltInId parameter.
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_WriteVariable(const char* CnodeId, SOPC_BuiltinId UserBuiltInId, void* pUserValue);
-
-/**
- * \brief Function to read a single value of variable (array are not supported).
- * \note This is a blocking function.
- * \param CnodeId The nodeId of the variable to write.
- * \param UserBuiltInId The type of the variable.
- * \param pUserValue A pointer allocated to read the value.
- * \param timeout Timeout in milliseconds (wait until service response is received)
- * \return SOPC_STATUS_OK if no error otherwise SOPC_STATUS_NOK
- */
-SOPC_ReturnStatus SOPC_FileTransfer_ReadVariable(const char* CnodeId, void* pUserValue, uint32_t timeout);
-/**
  * \brief Uninitialize the API (Free the memory)
  */
 void SOPC_FileTransfer_Clear(void);
