@@ -153,6 +153,11 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     (void) status;
+    if (NULL != gCstr_tmp_path)
+    {
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
+    }
     SOPC_FileTransfer_Clear();
     printf("******* Server stopped\n");
 }
@@ -186,7 +191,7 @@ static void UserCloseCallback(const char* tmp_file_path)
         SOPC_Free(gCstr_tmp_path);
         gCstr_tmp_path = NULL;
     }
-    gCstr_tmp_path = SOPC_Calloc(strlen(tmp_file_path), sizeof(char));
+    gCstr_tmp_path = SOPC_Calloc(strlen(tmp_file_path) + 1, sizeof(char));
     memcpy(gCstr_tmp_path, tmp_file_path, (size_t) strlen(tmp_file_path));
     set_file_closing_status(true);
     /********************/
@@ -343,14 +348,18 @@ int main(int argc, char* argv[])
     /* USER CODE BEGING */
     /********************/
     bool file_is_close = false;
+
     while (!bEnd)
     {
         file_is_close = get_file_closing_status();
         if (file_is_close)
         {
             printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", gCstr_tmp_path);
-            SOPC_Free(gCstr_tmp_path);
-            gCstr_tmp_path = NULL;
+            if (NULL != gCstr_tmp_path)
+            {
+                SOPC_Free(gCstr_tmp_path);
+                gCstr_tmp_path = NULL;
+            }
             set_file_closing_status(false);
         }
         SOPC_Sleep(500);

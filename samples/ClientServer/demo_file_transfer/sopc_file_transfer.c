@@ -424,7 +424,7 @@ static bool handle_equal(const void* a, const void* b)
 
 static uint64_t handle_hash(const void* handle)
 {
-    uint64_t hash = SOPC_DJBHash((const uint8_t*) handle, (size_t) strlen(handle));
+    uint64_t hash = SOPC_DJBHash((const uint8_t*) handle, (size_t) sizeof(SOPC_FileHandle));
     return hash;
 }
 
@@ -941,16 +941,14 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 {
     if (NULL != filetype)
     {
-        SOPC_NodeId_Clear(filetype->node_id);
+        // filetype->node_id Free by <the g_objectId_to_file> dictionary
         SOPC_String_Delete(filetype->path);
         SOPC_String_Delete(filetype->tmp_path);
-        for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
-        {
-            SOPC_NodeId_Clear(filetype->methodIds[i]);
-        }
+        // filetype->methodIds[i] Free by the MethodCallManager
         for (int i = 0; i < NB_VARIABLE; i++)
         {
             SOPC_NodeId_Clear(filetype->variableIds[i]);
+            SOPC_Free(filetype->variableIds[i]);
         }
         FileTransfer_FileType_Initialize(filetype);
     }
@@ -1030,10 +1028,10 @@ void SOPC_FileTransfer_Clear(void)
     g_objectId_to_file = NULL;
     SOPC_Dict_Delete(g_handle_to_file);
     g_handle_to_file = NULL;
-    SOPC_MethodCallManager_Free(g_method_call_manager);
-    g_method_call_manager = NULL;
     SOPC_HelperConfigServer_Clear();
     SOPC_CommonHelper_Clear();
+    // MethodCallManager free by SOPC_CommonHelper_Clear->SOPC_S2OPC_Config_Clear->SOPC_ServerConfig_Clear
+    g_method_call_manager = NULL;
 }
 
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
@@ -1481,10 +1479,7 @@ static SOPC_StatusCode FileTransfer_Reset_FileType_Data(SOPC_FileType* file)
     file->size_in_byte = 0;
     file->open_count = 0;
     local_write_open_count(file);
-    /* Remove the file handle in the API and invalid it */
-    /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
-     * multiple handles for the same file)*/
-    SOPC_Dict_Remove(g_handle_to_file, &file->handle);
+    /* Invalid the file handle in the API */
     file->handle = INVALID_HANDLE_VALUE;
     /* Free and creat a new tmp_path */
     SOPC_String_Delete(file->tmp_path);
