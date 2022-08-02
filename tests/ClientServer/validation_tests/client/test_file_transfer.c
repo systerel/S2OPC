@@ -383,9 +383,9 @@ START_TEST(test_file_transfer_method)
     {
         status = SOPC_FileTransfer_Initialize();
         ck_assert_int_eq(status, SOPC_STATUS_OK);
-        status = SOPC_FileTransfer_Add_File(item1PreloadFile);
+        status = SOPC_FileTransfer_Add_File(&item1PreloadFile);
         ck_assert_int_eq(status, SOPC_STATUS_OK);
-        status = SOPC_FileTransfer_Add_File(item2PreloadFile);
+        status = SOPC_FileTransfer_Add_File(&item2PreloadFile);
         ck_assert_int_eq(status, SOPC_STATUS_OK);
         status = SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test",
                                                    met_remoteResetId);
