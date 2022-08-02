@@ -70,20 +70,13 @@ static void disconnect_callback(const uint32_t c_id)
 }
 
 // Close file CallBack
-static SOPC_ReturnStatus(UserCloseCallback)(SOPC_FileType* file)
+static void(UserCloseCallback)(const char* tmp_file_path)
 {
-    SOPC_ReturnStatus status;
-    char name[BUFF_SIZE];
-    status = SOPC_FileTransfer_Get_TmpPath(file, name);
-    if (SOPC_STATUS_OK == status)
-    {
 #if TEST_DEBUG_FT
-        printf("<Test_File_Transfer: tmp file path name: '%s'\n", name);
+        printf("<Test_File_Transfer: tmp file path name: '%s'\n", tmp_file_path);
 #else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: tmp file path name: '%s'\n", name);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: tmp file path name: '%s'\n", tmp_file_path);
 #endif
-    }
-    return status;
 }
 
 /*
