@@ -149,7 +149,9 @@ static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
 {
     assert(args != NULL);
     Thread* thread = (Thread*) args;
-    return (DWORD) thread->startFct(thread->args);
+    void* returnValue = thread->startFct(thread->args);
+    assert(NULL == returnValue);
+    return 0;
 }
 
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
