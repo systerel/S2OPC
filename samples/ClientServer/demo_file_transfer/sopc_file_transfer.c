@@ -534,7 +534,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             return OpcUa_BadNotWritable;
         }
         /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.*/
-        if ((0 != (file->mode & (WRITE_MASK | APPEND_MASK))) && (0 == (mode & (WRITE_MASK | APPEND_MASK))))
+        if ((0 != (file->mode & (WRITE_MASK | APPEND_MASK))) && (0 == (file->mode & READ_MASK)) &&
+            (0 == (mode & (WRITE_MASK | APPEND_MASK))))
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
