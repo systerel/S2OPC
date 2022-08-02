@@ -765,10 +765,9 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     }
 
     bool found = false;
-    SOPC_FileType* file = NULL;
-    SOPC_StatusCode result_code_service = SOPC_GoodStatusOppositeMask;
-    file = SOPC_FT_Dict_Get(objectId, &found);
-    if (false == found)
+    SOPC_StatusCode result_code_service = result_code;
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
+    if ((false == found) && (0 == (result_code_service & SOPC_GoodStatusOppositeMask)))
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

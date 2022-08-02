@@ -34,6 +34,18 @@
 #define TEST_DEBUG_FT 0
 
 /**
+ * \brief Get the current internal TestCase number.
+ * \return The current TestCase number.
+ */
+int32_t SOPC_TEST_FileTransfer_GetTestCaseNumber(void);
+
+/**
+ * \brief Set the current internal TestCase number.
+ * \param number The number to set.
+ */
+void SOPC_TEST_FileTransfer_SetTestCaseNumber(int32_t number);
+
+/**
  * \brief Open a file with a specific mode and return a file handle.
  * \param connectionId connectionId of the client.
  * \param sameTestCase true if it is the same test case, otherwise false.

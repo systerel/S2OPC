@@ -94,11 +94,11 @@ static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "./data/server_config.xml";
+    const char* xml_server_cfg_path = "./S2OPC_Server_Demo_Config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "./data/address_space.xml";
+    const char* xml_address_space_path = "./ft_data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "./data/users_config.xml";
+    const char* xml_users_cfg_path = "./S2OPC_Users_Demo_Config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
