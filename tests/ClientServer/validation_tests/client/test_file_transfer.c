@@ -183,11 +183,11 @@ static int32_t client_create_configuration(void)
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI, // None, Basic256
         .security_mode = OpcUa_MessageSecurityMode_None, // Sign and Encrypt, None or Sign only
-        .path_cert_auth = "/home/shahbaaz/private/S2OPC/samples/ClientServer/data/cert/cacert.der",
-        .path_crl = "/home/shahbaaz/private/S2OPC/samples/ClientServer/data/cert/cacrl.der",
-        .path_cert_srv = "/home/shahbaaz/private/S2OPC/samples/ClientServer/data/cert/server_2k_cert.der",
-        .path_cert_cli = "/home/shahbaaz/private/S2OPC/samples/ClientServer/data/cert/client_2k_cert.der",
-        .path_key_cli = "/home/shahbaaz/private/S2OPC/samples/ClientServer/data/cert/client_2k_key.pem",
+        .path_cert_auth = "./data/trusted/cacert.der",
+        .path_crl = "./data/revoked/cacrl.der",
+        .path_cert_srv = "./data/server_public/server_2k_cert.der",
+        .path_cert_cli = "./data/client_public/client_2k_cert.der",
+        .path_key_cli = "./data/client_private/client_2k_key.pem",
         .policyId = "anonymous",
         .username = NULL,
         .password = NULL,
@@ -200,11 +200,11 @@ static int32_t client_create_configuration(void)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "/home/shahbaaz/SRA_DATA/SRA_S2OPC_Server_Demo_Config.xml";
+    const char* xml_server_cfg_path = "./data/server_config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "/home/shahbaaz/SRA_DATA/ALSTOM_address_space.xml";
+    const char* xml_address_space_path = "./data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "/home/shahbaaz/SRA_DATA/SRA_S2OPC_Users_Demo_Config.xml";
+    const char* xml_users_cfg_path = "./data/users_config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
