@@ -88,11 +88,11 @@ static char* Server_ConfigLogPath(const char* logPrefix)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/data/server_config.xml";
+    const char* xml_server_cfg_path = "./data/server_config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/data/address_space.xml";
+    const char* xml_address_space_path = "./data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/data/users_config.xml";
+    const char* xml_users_cfg_path = "./data/users_config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
@@ -274,9 +274,9 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to load configuration from paths:\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/users_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/server_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t/datas/address_space.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/users_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/server_config.xml\n");
+            printf("******* \t--> need file (relative path where the server is running):\t./data/address_space.xml\n");
         }
     }
 
