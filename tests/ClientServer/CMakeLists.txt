@@ -308,10 +308,10 @@ if(ENABLE_TESTING)
   # Manage the Nano profiles extended mode
   if (WITH_NANO_EXTENDED)
     set(TOOLKIT_TEST_SERVER "toolkit_test_server")
-    set(TOOLKIT_TEST_FILE_TRANSFER "toolkit_test_file_transfer")
   else()
     set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
   endif()
+  set(TOOLKIT_TEST_FILE_TRANSFER "toolkit_test_file_transfer")
 
   if (expat_FOUND)
   add_executable(${TOOLKIT_TEST_FILE_TRANSFER} "validation_tests/client/test_file_transfer.c"
@@ -321,7 +321,8 @@ if(ENABLE_TESTING)
   target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
 
   target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_serverwrapper s2opc_clientwrapper Check::check)
-  target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS})
+  # file_transfer API needs GNU_SOURCE (fileno and mkstemp functions)
+  target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
   target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
 
   target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
