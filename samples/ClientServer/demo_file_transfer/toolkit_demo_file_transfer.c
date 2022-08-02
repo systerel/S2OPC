@@ -326,48 +326,6 @@ int main(int argc, char* argv[])
     /********************/
     /* USER CODE BEGING */
     /********************/
-
-    SOPC_Boolean var_executable = true;
-
-    status = SOPC_FileTransfer_WriteVariable("ns=1;i=15792", SOPC_Boolean_Id, &var_executable);
-    if (SOPC_STATUS_OK != status)
-    {
-        printf("******* Failed to write Executable variable (RemoteReset node)\n");
-    }
-
-    SOPC_String var_operationState;
-    SOPC_String var_operationState_readback;
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_InitializeFromCString(&var_operationState, "This is a test");
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_FileTransfer_WriteVariable("ns=1;i=15626", SOPC_String_Id, &var_operationState);
-        }
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("******* Failed to write OperationState variable (Items node)\n");
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_String_Initialize(&var_operationState_readback);
-        status = SOPC_FileTransfer_ReadVariable("ns=1;i=15626", &var_operationState_readback, 5000u);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("******* ReadBack OperationState variable (failure)\n");
-        }
-        else
-        {
-            printf("******* ReadBack on OperationState (success): %s\n",
-                   SOPC_String_GetRawCString(&var_operationState_readback));
-        }
-    }
-
-    SOPC_String_Clear(&var_operationState);
-    SOPC_String_Clear(&var_operationState_readback);
-
     bool file_is_close = false;
     while (1)
     {
@@ -381,7 +339,6 @@ int main(int argc, char* argv[])
         }
         SOPC_Sleep(500);
     }
-
     /********************/
     /* END USER CODE   */
     /********************/
