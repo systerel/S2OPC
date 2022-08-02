@@ -50,6 +50,8 @@ static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
 static void set_file_closing_status(SOPC_Boolean res);
 static SOPC_Boolean get_file_closing_status(void);
+static SOPC_Boolean bEnd = false;
+void sigint(int arg);
 
 static void set_file_closing_status(SOPC_Boolean res)
 {
@@ -155,6 +157,19 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
     printf("******* Server stopped\n");
 }
 
+void sigint(int arg)
+{
+    (void) arg;
+    if (NULL != gCstr_tmp_path)
+    {
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
+    }
+    SOPC_FileTransfer_Clear();
+    printf("******* Server stopped\n");
+    bEnd = true;
+}
+
 /*
  * User Close method callback definition.
  * The callback function shall not do anything blocking or long treatment since it will block any other
@@ -204,6 +219,7 @@ static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr
 int main(int argc, char* argv[])
 {
     printf("******* API test\n");
+    signal(SIGINT, sigint);
 
     // Note: avoid unused parameter warning from compiler
     (void) argc;
@@ -327,7 +343,7 @@ int main(int argc, char* argv[])
     /* USER CODE BEGING */
     /********************/
     bool file_is_close = false;
-    while (1)
+    while (!bEnd)
     {
         file_is_close = get_file_closing_status();
         if (file_is_close)
