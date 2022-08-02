@@ -321,13 +321,11 @@ START_TEST(test_file_transfer_method)
     callRequestsItem2.objectNodeId = item2PreloadFile.fileType_nodeId;
 
     // Fonctional test: PHASE 3: declaration variables:
-    char* operationStateId = "ns=1;i=15626";
     char* remoteResetId = "ns=1;i=15789";
     char* met_remoteResetId = "ns=1;i=15790";
     SOPC_ClientHelper_WriteValue writeValueClient = {.indexRange = NULL};
     SOPC_DataValue readValClient;
     SOPC_DataValue writeValClient;
-    SOPC_StatusCode writeResults;
     SOPC_DataValue_Initialize(&readValClient);
     SOPC_DataValue_Initialize(writeValueClient.value);
     SOPC_String* pHelloWorldString = &writeValClient.Value.Value.String;
@@ -768,20 +766,6 @@ START_TEST(test_file_transfer_method)
     ck_assert("TC_SOPC_FileTransfer_029" && SOPC_GoodGenericStatus == statusMethodItem2);
 
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 3:\n");
-
-    // TC_SOPC_FileTransfer_031:
-    writeValueClient.nodeId = operationStateId;
-    writeValueClient.value = &writeValClient;
-    writeValueClient.value->Value.BuiltInTypeId = SOPC_String_Id;
-    writeValueClient.value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-    SOPC_String variableOperationStateRead;
-    SOPC_String_Initialize(&variableOperationStateRead);
-    clientResultCode = SOPC_ClientHelper_Write(coId, &writeValueClient, nbElements, &writeResults);
-    status = SOPC_FileTransfer_ReadVariable(operationStateId, &variableOperationStateRead, 5000u);
-    ck_assert("TC_SOPC_FileTransfer_031" && SOPC_STATUS_OK == status && 0 == clientResultCode);
-    ck_assert("TC_SOPC_FileTransfer_031" && 0 == writeResults);
-    ck_assert("TC_SOPC_FileTransfer_031" && true == booleanNotification); // Check if callback notification is called
-    ck_assert("TC_SOPC_FileTransfer_031" && true == SOPC_String_Equal(&variableOperationStateRead, pHelloWorldString));
 
     // TC_SOPC_FileTransfer_032:
     booleanNotification = false;
