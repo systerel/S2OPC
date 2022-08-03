@@ -116,7 +116,6 @@ typedef SOPC_Byte SOPC_OpenMode;
  */
 typedef struct SOPC_FileType
 {
-    SOPC_NodeId* node_id;   /*!< The nodeId of the FileType object into the adress space. */
     SOPC_FileHandle handle; /*!< The handle of the file send to the client. */
     SOPC_String* path;      /*!< the file path where the tmp file will created (shall include the prefix name, example:
                                /tmp/my_file). */
@@ -921,7 +920,6 @@ SOPC_FileType* FileTransfer_FileType_Create(void)
 static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
 {
     SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer must be initialized");
-    filetype->node_id = NULL;
     filetype->handle = INVALID_HANDLE_VALUE;
     filetype->path = NULL;
     filetype->tmp_path = NULL;
@@ -945,7 +943,6 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
 {
     if (NULL != filetype)
     {
-        // filetype->node_id Free by <the g_objectId_to_file> dictionary
         SOPC_String_Delete(filetype->path);
         SOPC_String_Delete(filetype->tmp_path);
         // filetype->methodIds[i] Free by the MethodCallManager
@@ -1041,7 +1038,8 @@ void SOPC_FileTransfer_Clear(void)
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_FileType* file;
+    SOPC_FileType* file = NULL;
+    SOPC_NodeId* node_id = NULL; 
     bool res = false;
 
     if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
@@ -1068,8 +1066,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     file->mode = FileTransfer_UnknownMode;
     file->pFunc_UserCloseCallback = config->pFunc_UserCloseCallback;
-    file->node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
-    if (NULL == file->node_id)
+    node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
+    if (NULL == node_id)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
@@ -1274,7 +1272,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
 
     if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_Dict_Insert(g_objectId_to_file, file->node_id, file);
+        res = SOPC_Dict_Insert(g_objectId_to_file, node_id, file);
         if (false == res)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1333,7 +1331,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
     int filedes = -1;
     SOPC_ASSERT(NULL != file && "CreateTmpFile: unexpected error");
 
-    if ((NULL == file->node_id) || (NULL == file->path) || (NULL == file->tmp_path))
+    if ((NULL == file->path) || (NULL == file->tmp_path))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:CreateTmpFile: the FileType object is not initialized in the API");
