@@ -37,10 +37,6 @@
  *      -5 Start the server asynchronously with <SOPC_FileTransfer_StartServer> function.
  *      -6 Get the name of temporary file in the closing processing
  *         (user close callback implementation: SOPC_FileTransfer_UserClose_Callback)
- *      - The user can read the values of the variables in the address space with
- *        <SOPC_FileTransfer_ReadVariable> function.
- *      - The user can write the values of the variables in the address space with
- *        <SOPC_FileTransfer_WriteVariable> function.
  *      - The user can implement a server callback definition used for address space modification
  *        by client.
  */
@@ -90,7 +86,8 @@ typedef struct SOPC_FileType_Config
 /**
  * \brief Initialise the API.
  * \note Memory allocation, need to call SOPC_FileTransfer_Clear after use.
- * \warning The function shall be called after SOPC_HelperConfigServer_Initialize.
+ * \warning The function shall be called after SOPC_HelperConfigServer_Initialize and before any other function of the
+ *  server wrapper module (for exemple local services...).
  * \return SOPC_STATUS_OK if no error
  */
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
@@ -100,7 +97,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void);
  * \note This function shall be call after <SOPC_FileTransfer_Initialize> and before <SOPC_FileTransfer_StartServer>
  * \param config The structure which gather FileType configuration data
  * \warning In case of error, the API is uninitialized (except for SOPC_STATUS_INVALID_PARAMETERS and
- * SOPC_STATUS_INVALID_STATE errors). \return SOPC_STATUS_OK if no error.
+ * SOPC_STATUS_INVALID_STATE errors).
+ * \return SOPC_STATUS_OK if no error.
  */
 SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config);
 

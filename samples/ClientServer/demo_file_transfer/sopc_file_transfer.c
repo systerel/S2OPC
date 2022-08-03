@@ -1842,8 +1842,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
         return OpcUa_BadInvalidState;
     }
 
-    /* Writing an empty or null ByteString returns a Good result code without any affect on the
-     * file. */
+    /* Writing an empty or null ByteString returns a Good result code without any affect on the file. */
     if (-1 == msg->Length)
     {
         return SOPC_GoodGenericStatus;
