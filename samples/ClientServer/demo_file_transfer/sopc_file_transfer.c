@@ -214,7 +214,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
  * \brief Write the temporary file (from the current position).
  * \note This function is usefull for the Write method implementation.
  * \param handle The handle of the file to write.
- * \param msg The input buffer to write
+ * \param msg The input buffer to write (pre-allocated)
  * \param objectId The nodeID of the FileType object on the address space.
  * \return SOPC_GoodGenericStatus if no error
  */
@@ -1812,14 +1812,13 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     if (NULL == msg)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:WriteTmpFile: ByteString msg has not been allocated");
+                               "FileTransfer:WriteTmpFile: invalid pointer for the ByteString msg");
         return OpcUa_BadInvalidArgument;
     }
 
     if (NULL == file->fp)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:WriteTmpFile: the file pointer is not initialized");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:WriteTmpFile: invalid file pointer");
         return OpcUa_BadInvalidState;
     }
 
@@ -1830,16 +1829,33 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
         return SOPC_GoodGenericStatus;
     }
 
-    size_t ret;
-    buffer = SOPC_Malloc((size_t) msg->Length);
-    memcpy(buffer, msg->Data, (size_t) msg->Length);
-    /* If ret != msg->Length then file might be locked and thus not writable */
-    ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
-    if ((size_t) msg->Length != ret)
+    if (NULL == msg->Data)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:WriteTmpFile: the fwrite function has failed");
-        status = OpcUa_BadNotWritable;
+                               "FileTransfer:WriteTmpFile: ByteString msg has not been allocated");
+        return OpcUa_BadInvalidArgument;
+    }
+
+    size_t ret;
+    buffer = SOPC_Malloc((size_t) msg->Length);
+    if (buffer == NULL)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:WriteTmpFile: unable to allocate memory for writing the message");
+        status = OpcUa_BadResourceUnavailable;
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        memcpy(buffer, msg->Data, (size_t) msg->Length);
+        /* If ret != msg->Length then file might be locked and thus not writable */
+        ret = fwrite(buffer, 1, (size_t) msg->Length, file->fp);
+        if ((size_t) msg->Length != ret)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:WriteTmpFile: the fwrite function has failed");
+            status = OpcUa_BadNotWritable;
+        }
     }
 
     SOPC_Free(buffer);
