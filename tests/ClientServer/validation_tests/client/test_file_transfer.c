@@ -782,6 +782,7 @@ START_TEST(test_file_transfer_method)
     ck_assert("TC_SOPC_FileTransfer_029" && SOPC_GoodGenericStatus == statusMethodItem2);
 
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 3:\n");
+    SOPC_TEST_FileTransfer_SetTestCaseNumber(32);
 
     // TC_SOPC_FileTransfer_032:
     booleanNotification = false;

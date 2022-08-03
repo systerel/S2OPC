@@ -66,6 +66,16 @@ static void SOPC_Initialize_VariantCallMethodRequest(SOPC_Variant* pVariant,
     pVariant->Value = Value;
 }
 
+int32_t SOPC_TEST_FileTransfer_GetTestCaseNumber(void)
+{
+    return testCaseNum;
+}
+
+void SOPC_TEST_FileTransfer_SetTestCaseNumber(int32_t number)
+{
+    testCaseNum = number;
+}
+
 uint32_t SOPC_TEST_FileTransfer_OpenMethod(int32_t connectionId,
                                            bool sameTestCase,
                                            SOPC_ClientHelper_CallMethodRequest* pCallRequest,
