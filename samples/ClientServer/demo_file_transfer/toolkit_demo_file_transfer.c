@@ -44,7 +44,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
-
 static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
 static void set_file_closing_status(SOPC_Boolean res);

@@ -1039,7 +1039,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_FileType* file = NULL;
-    SOPC_NodeId* node_id = NULL; 
+    SOPC_NodeId* node_id = NULL;
     bool res = false;
 
     if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
@@ -1070,7 +1070,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         if (NULL == node_id)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
+                                   "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -1081,7 +1081,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         file->path = SOPC_String_Create();
         if (NULL == file->path)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create the path string");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:AddFile: unable to create the path string");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -1091,7 +1092,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         if (NULL == file->tmp_path)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                "FileTransfer:AddFile: unable to create the tmp_path string");
+                                   "FileTransfer:AddFile: unable to create the tmp_path string");
             status = SOPC_STATUS_NOK;
         }
     }
@@ -1277,7 +1278,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
                 "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
             status = SOPC_STATUS_NOK;
         }
-    }    
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1286,7 +1287,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:AddFile: unable to insert file into dictionary");
-            
+
             status = SOPC_STATUS_NOK;
         }
     }
@@ -1297,8 +1298,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         FileTransfer_FileType_Delete(&file);
         SOPC_NodeId_Clear(node_id);
         SOPC_Free(node_id);
-        file = NULL; 
-        node_id = NULL;   
+        file = NULL;
+        node_id = NULL;
     }
 
     return status;
@@ -1313,7 +1314,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
 
     if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Add_MethodItems: The FileTransfer API is not initialized.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Add_MethodItems: The FileTransfer API is not initialized.");
         return SOPC_STATUS_INVALID_STATE;
     }
 
