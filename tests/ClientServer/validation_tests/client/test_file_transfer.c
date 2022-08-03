@@ -872,18 +872,18 @@ START_TEST(test_file_transfer_method)
     ck_assert("TC_SOPC_FileTransfer_029" && SOPC_GoodGenericStatus == statusMethodItem2);
 
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 3:\n");
-    SOPC_TEST_FileTransfer_SetTestCaseNumber(32);
+    SOPC_TEST_FileTransfer_SetTestCaseNumber(30);
 
-    // TC_SOPC_FileTransfer_032:
+    // TC_SOPC_FileTransfer_030:
     booleanNotification = false;
     callRequestsClient.objectNodeId = remoteResetId;
     callRequestsClient.methodNodeId = met_remoteResetId;
     clientResultCode = SOPC_ClientHelper_CallMethod(coId, &callRequestsClient, nbElements, &callResultsClient);
     pVariantOutput = &callResultsClient.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_032" && 0 == clientResultCode);
-    ck_assert("TC_SOPC_FileTransfer_032" && 0 == callResultsClient.status);
-    ck_assert("TC_SOPC_FileTransfer_032" && true == pVariantOutput->Boolean);
-    ck_assert("TC_SOPC_FileTransfer_032" && true == booleanNotification); // Check if callback notification is called
+    ck_assert("TC_SOPC_FileTransfer_030" && 0 == clientResultCode);
+    ck_assert("TC_SOPC_FileTransfer_030" && 0 == callResultsClient.status);
+    ck_assert("TC_SOPC_FileTransfer_030" && true == pVariantOutput->Boolean);
+    ck_assert("TC_SOPC_FileTransfer_030" && true == booleanNotification); // Check if callback notification is called
 
     /*---------------------------------------------------------------------------
      *        Clear the client/server toolkit library & FileTransfer API
