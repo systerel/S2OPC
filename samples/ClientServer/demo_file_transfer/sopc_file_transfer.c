@@ -1803,6 +1803,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
     char* buffer = NULL;
+    size_t ret = 0;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:WriteTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
@@ -1855,7 +1856,6 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
         return OpcUa_BadInvalidArgument;
     }
 
-    size_t ret;
     buffer = SOPC_Malloc((size_t) msg->Length);
     if (buffer == NULL)
     {
@@ -1885,6 +1885,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
 {
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
+    long int ret = -1L;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:GetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
 
@@ -1918,7 +1919,6 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
     if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
         *pos = 0;
-        long int ret;
         ret = ftell(file->fp);
         if (-1L == ret)
         {
@@ -1939,6 +1939,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
 {
     SOPC_StatusCode status = SOPC_GoodGenericStatus;
     bool found = false;
+    int ret = -1;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:SetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
@@ -1968,7 +1969,6 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
-        int ret;
         ret = fseek(file->fp, (long int) posOff, SEEK_SET);
         if (0 != ret)
         {
@@ -1985,7 +1985,7 @@ static void local_write_all(const void* key, const void* value, void* user_data)
     (void) key;
     const SOPC_FileType* file = value;
     SOPC_ReturnStatus* status = user_data;
-    SOPC_StatusCode res;
+    SOPC_StatusCode res = SOPC_GoodGenericStatus;
     res = local_write_default_UserWritable(file);
     if (SOPC_GoodGenericStatus != res)
     {
@@ -2010,7 +2010,7 @@ static void local_write_all(const void* key, const void* value, void* user_data)
 
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback)
 {
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(&AsyncRespCb_Fct);
     if (SOPC_STATUS_OK == status)
     {
