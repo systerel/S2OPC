@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_common_config.h"
@@ -793,6 +794,92 @@ START_TEST(test_file_transfer_method)
     ck_assert("TC_SOPC_FileTransfer_032" && true == pVariantOutput->Boolean);
     ck_assert("TC_SOPC_FileTransfer_032" && true == booleanNotification); // Check if callback notification is called
 
+    // TC_SOPC_FileTransfer_033:
+    /* Manual check to do with UA Expert
+        - Call the close method and manually open the tmp_path that was created.
+        - Check that the data written are the expected ones.
+    */
+    const char* bin_file_path = "./data/bin_file_TC_33_34.a";
+    FILE* bin_file_fp = NULL;
+    int filedes = -1;
+    int ret = -1;
+    size_t read_count = 0;
+    int32_t comparison = -1;
+    SOPC_ByteString bin_buffer_write;
+    SOPC_ByteString bin_buffer_write_tmp;
+    SOPC_ByteString bin_buffer_read;
+    SOPC_ByteString_Initialize(&bin_buffer_write);
+    SOPC_ByteString_Initialize(&bin_buffer_write_tmp);
+    SOPC_ByteString_Initialize(&bin_buffer_read);
+
+    bin_file_fp = fopen(bin_file_path, "rb+");
+    ck_assert("TC_SOPC_FileTransfer_033: the fopen function has failed (./data/bin_file_TC_33_34.a may missing)" &&
+              NULL != bin_file_fp);
+    filedes = fileno(bin_file_fp);
+    ck_assert("TC_SOPC_FileTransfer_033: the fileno function has failed (./data/bin_file_TC_33_34.a)" && -1 != filedes);
+    struct stat sb;
+    ret = fstat(filedes, &sb);
+    ck_assert("TC_SOPC_FileTransfer_033: the fstat function has failed (./data/bin_file_TC_33_34.a)" && -1 != ret);
+    bin_buffer_write.Length = (int32_t) sb.st_size;
+    bin_buffer_write.Data = SOPC_Malloc((size_t) bin_buffer_write.Length);
+    read_count = fread(bin_buffer_write.Data, 1, (size_t) bin_buffer_write.Length, bin_file_fp);
+    ck_assert("TC_SOPC_FileTransfer_033: the fread function has failed (./data/bin_file_TC_33_34.a)" &&
+              read_count == (size_t) bin_buffer_write.Length);
+    // bin_buffer_write is clear by the after the callRequests
+    SOPC_ByteString_Copy(&bin_buffer_write_tmp, &bin_buffer_write);
+    ret = fclose(bin_file_fp);
+    ck_assert("TC_SOPC_FileTransfer_033: the fclose function has failed (./data/bin_file_TC_33_34.a)" && 0 == ret);
+    mode = 3;
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
+                                                        item1PreloadFile.met_openId, mode);
+    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
+    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
+    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                                                item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert("TC_SOPC_FileTransfer_033" && 0 == *pSizeItem1);
+    ck_assert("TC_SOPC_FileTransfer_033" && 1 == *pOpenCountItem1);
+    ck_assert("TC_SOPC_FileTransfer_033" && 0 == getPositionItem1);
+    statusMethodItem1 =
+        SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                           item1PreloadFile.met_writeId, fileHandleItem1, &bin_buffer_write);
+    ck_assert("TC_SOPC_FileTransfer_033" && SOPC_GoodGenericStatus == statusMethodItem1);
+
+    // TC_SOPC_FileTransfer_034:
+    /* Manual check to do with UA Expert
+        - Check that the data read are the expected ones.
+    */
+    setPositionItem1 = 0;
+    statusMethodItem1 =
+        SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
+                                                 item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
+    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == statusMethodItem1);
+    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                                                item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert("TC_SOPC_FileTransfer_034" && 0 == getPositionItem1);
+    nbOfBytesToRead = bin_buffer_write.Length;
+    statusMethodItem1 =
+        SOPC_TEST_FileTransfer_ReadMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
+    pVariantOutput = &callResultsItem1.outputParams->Value;
+    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == callResultsItem1.status);
+    bin_buffer_read = pVariantOutput->Bstring;
+    SOPC_ByteString_Compare(&bin_buffer_write_tmp, &bin_buffer_read, &comparison);
+    ck_assert("TC_SOPC_FileTransfer_034" && 0 == comparison);
+    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
+    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
+    ck_assert("TC_SOPC_FileTransfer_034" && bin_buffer_write_tmp.Length == (int32_t) *pSizeItem1);
+    ck_assert("TC_SOPC_FileTransfer_034" && 1 == *pOpenCountItem1);
+    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                                           item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == callResultsItem1.status);
+
+    SOPC_Free(bin_buffer_write_tmp.Data);
+    SOPC_ByteString_Initialize(&bin_buffer_write_tmp);
+
     /*---------------------------------------------------------------------------
      *        Clear the client/server toolkit library & FileTransfer API
      *---------------------------------------------------------------------------*/
@@ -814,6 +901,9 @@ static Suite* tests_file_transfer(void)
     tc_file_transfer_method = tcase_create("test file transfer method:");
     tcase_add_test(tc_file_transfer_method, test_file_transfer_method);
     suite_add_tcase(s, tc_file_transfer_method);
+    /* All tests are run with a timeout, the default being 4 seconds. If the test is not finished within that time, it
+     * is killed and logged as an error. */
+    // tcase_set_timeout(tc_file_transfer_method, 10); // 10 seconds
 
     return s;
 }
