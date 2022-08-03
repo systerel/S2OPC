@@ -200,8 +200,8 @@ static SOPC_StatusCode FileTransfer_Reset_FileType_Data(SOPC_FileType* file);
  * \brief Read into the temporary file (from the current position).
  * \note This function is usefull for the Read method implementation.
  * \param handle The handle of the file to read.
- * \param length The byte number to read
- * \param msg The output buffer
+ * \param length The byte number to read.
+ * \param msg The output buffer that is allocated by this function (must be freed by the caller).
  * \param objectId The nodeID of the FileType object on the address space.
  * \return SOPC_GoodGenericStatus if no error
  */
@@ -732,8 +732,11 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
         file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
         if (false == found)
         {
+            char* C_objectId = SOPC_NodeId_ToCString(objectId);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Read: unable to retrieve FileType in the API");
+                                   "FileTransfer:Method_Read: unable to retrieve FileType in the API from nodeId %s",
+                                   C_objectId);
+            SOPC_Free(C_objectId);
             result_code = OpcUa_BadUnexpectedError;
         }
     }
@@ -1655,6 +1658,10 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     long int last_pos = -1;
     int res = -1;
     int32_t size_available = -1;
+
+    SOPC_ASSERT(msg != NULL && "unexpected internal error");
+    SOPC_ASSERT(msg->Data == NULL && "unexpected internal error");
+
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:ReadTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
     SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
@@ -1683,7 +1690,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     }
 
     /* check if File was not opened for read access */
-    if ((false == file->is_open) || (file->mode & READ_MASK) == 0)
+    if (false == file->is_open || 0 == (file->mode & READ_MASK))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:ReadTmpFile: file has not been opened for read access");
@@ -1737,17 +1744,30 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     }
 
     msg->Data = SOPC_Malloc((size_t) msg->Length);
-
-    read_count = fread(msg->Data, 1, (size_t) msg->Length, file->fp);
-    if (read_count != (size_t) msg->Length)
+    if (msg->Data == NULL)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:ReadTmpFile: the fread function has failed");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:ReadTmpFile: unable to allocate memory for reading the message");
         status = OpcUa_BadResourceUnavailable;
+    }
+
+    if (0 == (status & SOPC_GoodStatusOppositeMask))
+    {
+        read_count = fread(msg->Data, 1, (size_t) msg->Length, file->fp);
+        if (read_count != (size_t) msg->Length)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:ReadTmpFile: the fread function has failed");
+            status = OpcUa_BadResourceUnavailable;
+        }
     }
 
     if (0 != (status & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Free(msg->Data);
+        if (msg->Data != NULL)
+        {
+            SOPC_Free(msg->Data);
+        }
         msg->Length = -1;
         msg->Data = NULL;
         msg->DoNotClear = false;
