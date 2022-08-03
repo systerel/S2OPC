@@ -1310,6 +1310,13 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_NodeId* node_id;
+
+    if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Add_MethodItems: The FileTransfer API is not initialized.");
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
     if (NULL == methodFunc || NULL == CnodeId || NULL == methodName)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
