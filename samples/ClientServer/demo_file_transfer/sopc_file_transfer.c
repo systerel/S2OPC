@@ -1064,27 +1064,36 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
                                "FileTransfer:AddFile: unable to create FileType structure");
         status = SOPC_STATUS_NOK;
     }
-    file->mode = FileTransfer_UnknownMode;
-    file->pFunc_UserCloseCallback = config->pFunc_UserCloseCallback;
-    node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
-    if (NULL == node_id)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
-        status = SOPC_STATUS_NOK;
+        node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
+        if (NULL == node_id)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                "FileTransfer:AddFile: unable to create NodeId from a C string for the FileType");
+            status = SOPC_STATUS_NOK;
+        }
     }
-    file->path = SOPC_String_Create();
-    if (NULL == file->path)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create the path string");
-        status = SOPC_STATUS_NOK;
+        file->mode = FileTransfer_UnknownMode;
+        file->pFunc_UserCloseCallback = config->pFunc_UserCloseCallback;
+        file->path = SOPC_String_Create();
+        if (NULL == file->path)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:AddFile: unable to create the path string");
+            status = SOPC_STATUS_NOK;
+        }
     }
-    file->tmp_path = SOPC_String_Create();
-    if (NULL == file->tmp_path)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:AddFile: unable to create the tmp_path string");
-        status = SOPC_STATUS_NOK;
+        file->tmp_path = SOPC_String_Create();
+        if (NULL == file->tmp_path)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                "FileTransfer:AddFile: unable to create the tmp_path string");
+            status = SOPC_STATUS_NOK;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1268,7 +1277,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
                 "FileTransfer:AddFile: unable to create NodeId from a C string for UserWritable variable");
             status = SOPC_STATUS_NOK;
         }
-    }
+    }    
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1277,15 +1286,19 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:AddFile: unable to insert file into dictionary");
-            FileTransfer_FileType_Delete(&file); // The FileType will not be deleted throught <SOPC_FileTransfer_Clear>
+            
             status = SOPC_STATUS_NOK;
         }
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_FileTransfer_Clear(); // Unitialize the API
-        status = SOPC_STATUS_NOK;
+        SOPC_FileTransfer_Clear();
+        FileTransfer_FileType_Delete(&file);
+        SOPC_NodeId_Clear(node_id);
+        SOPC_Free(node_id);
+        file = NULL; 
+        node_id = NULL;   
     }
 
     return status;
