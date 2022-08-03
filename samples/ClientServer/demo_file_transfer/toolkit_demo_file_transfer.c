@@ -44,7 +44,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
-#define BUFF_SIZE 100u
 
 static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
