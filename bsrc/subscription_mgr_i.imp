@@ -190,8 +190,9 @@ LOCAL_OPERATIONS
                                                                         }(bool(MonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
                                                            }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
                                                                    dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index))) or
-                                                                  MonitoredItemReq_AttributeId(mi_index) |-> a_Node_availableInFuture(MonitoredItemReq_NodeId(mi_index))
-                                                                   /: a_NodeClass_HasAttribute))
+                                                                   a_NodeClass_Attribute
+                                                                    (a_Node_availableInFuture(MonitoredItemReq_NodeId(mi_index)) |->
+                                                                       MonitoredItemReq_AttributeId(mi_index)) = FALSE))
                                                 }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
                                                        MonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
                                      }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
@@ -593,7 +594,6 @@ OPERATIONS
                         l_sc, l_value, l_valueSc, l_val_ts_src, l_val_ts_srv <-- read_Node_Attribute(p_user, p_locales, l_node, l_nid, l_aid, l_indexRange)
                     ELSE
                         /* Known node but not yet available: evaluate attribute based on NodeClass and check if index range is not invalid */
-                        /* TODO: implement TODO in create_notification_on_monitored_items_if_data_changed to manage correctly user access notif ... */
                         l_sc, l_value, l_val_ts_src, l_val_ts_srv <-- eval_knownNode_requested_properties(l_nid, l_knownNodeClass, l_aid, l_indexRange)
                     END;
                     /* Create monitored item */

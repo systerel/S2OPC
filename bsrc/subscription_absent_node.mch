@@ -21,18 +21,18 @@ MACHINE
     subscription_absent_node
 SEES
     constants,
-    constants_statuscodes_bs
+    constants_statuscodes_bs,
+    address_space_itf
+
 DEFINITIONS
     d_vars ==
-        a_Node_availableInFuture,
-        a_NodeClass_HasAttribute
+        a_Node_availableInFuture
     ;
 
     d_inv == (
     /* Represents nodeId not present in address space but available in the future.
     MI is created in this case if the attribute is available for this node. */
-    a_Node_availableInFuture : t_NodeId +-> t_NodeClass &
-    a_NodeClass_HasAttribute : t_AttributeId +->> t_NodeClass
+    a_Node_availableInFuture : t_NodeId +-> t_NodeClass
     )
 
 ABSTRACT_VARIABLES
@@ -60,8 +60,6 @@ OPERATIONS
                                            & bres_absent_knownNode = TRUE =>
                                             (knownNodeClass : t_NodeClass
                                              & conv_RawStatusCode_To_StatusCode(valueSc) /= e_sc_ok)))))
-        /* TODO: add a way to indicate RawStatus has Bad mask set instead
-        of using conversion result /= ok which includes Uncertain values */
     END
     ;
 
@@ -76,10 +74,18 @@ OPERATIONS
         p_indexRange : t_IndexRange_i
     THEN
         sc, value, val_ts_src, val_ts_srv :(
-            sc : t_StatusCode_i & sc : {e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_invalid, e_sc_ok} &
+            sc : t_StatusCode_i & sc : {e_sc_bad_attribute_id_invalid, e_sc_bad_index_range_no_data, e_sc_ok} &
             value = c_Variant_indet &
             val_ts_src : t_Timestamp & val_ts_src = c_Timestamp_null &
-            val_ts_srv : t_Timestamp & val_ts_srv = c_Timestamp_null
+            val_ts_srv : t_Timestamp & val_ts_srv = c_Timestamp_null &
+            (not(a_NodeClass_Attribute(p_knownNodeClass |-> p_aid) = TRUE)
+                => sc = e_sc_bad_attribute_id_invalid) &
+            ((a_NodeClass_Attribute(p_knownNodeClass |-> p_aid) = TRUE)
+                =>
+                (p_aid /= e_aid_Value & IsRangeDefined(p_indexRange) = TRUE
+                    => sc = e_sc_bad_index_range_no_data) &
+                (not (p_aid /= e_aid_Value & IsRangeDefined(p_indexRange) = TRUE)
+                    => sc = e_sc_ok))
         )
     END
 END

@@ -75,6 +75,9 @@ DEFINITIONS
         a_ContainsNoLoops,
         a_Symmetric,
 
+        /* Properties */
+        a_NodeClass_Attribute,
+
         /* Types */
         Type_IsTransitiveSubtype,
         Type_IsReferenceTypeIdValid,
@@ -152,6 +155,9 @@ DEFINITIONS
 
         a_Symmetric : a_NodeClass~[{e_ncl_ReferenceType}] --> BOOL &
 
+        /* Properties */
+        a_NodeClass_Attribute : t_NodeClass * t_AttributeId --> BOOL &
+
         /* Types */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
         Type_IsReferenceTypeIdValid <: t_NodeId &
@@ -195,7 +201,10 @@ DEFINITIONS
         p_aid : t_AttributeId_i &
         p_aid : t_AttributeId
     THEN
-        bres := bool(d_Mandatory_Attribute(p_ncl, p_aid))
+        bres :( bres : BOOL &
+                a_NodeClass_Attribute(p_ncl |-> p_aid) = bool(d_Mandatory_Attribute(p_ncl, p_aid)) &
+                bres = bool(d_Mandatory_Attribute(p_ncl, p_aid))
+            )
     END
     ;
 

@@ -25,6 +25,7 @@ SEES
     constants,
     constants_statuscodes_bs,
     address_space_itf
+
 IMPORTS
     subscription_absent_node_bs
 
@@ -46,14 +47,14 @@ OPERATIONS
     VAR
         l_is_supported_attribute,
         l_is_index_range_defined
-        /* TODO: validity of index range (syntax) ? */
+        /* Note: validity of index range (syntax) will be evaluated when node added */
     IN
         nodeId_do_nothing(p_nid); /* avoid unused variable in generated code */
         sc := e_sc_bad_attribute_id_invalid;
         value := c_Variant_indet;
         val_ts_src := c_Timestamp_null;
         val_ts_srv := c_Timestamp_null;
-        l_is_supported_attribute <-- is_mandatory_attribute(p_knownNodeClass, p_aid);
+        l_is_supported_attribute <-- is_mandatory_attribute (p_knownNodeClass, p_aid);
         IF l_is_supported_attribute = TRUE THEN
            l_is_index_range_defined <-- is_IndexRangeDefined(p_indexRange);
             IF p_aid /= e_aid_Value & l_is_index_range_defined = TRUE THEN

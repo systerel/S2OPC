@@ -22,6 +22,27 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs
+
+DEFINITIONS
+    d_vars ==
+        a_Node_availableInFuture
+    ;
+
+    d_inv == (
+    /* Represents nodeId not present in address space but available in the future.
+    MI is created in this case if the attribute is available for this node. */
+    a_Node_availableInFuture : t_NodeId +-> t_NodeClass
+    )
+
+ABSTRACT_VARIABLES
+    d_vars
+
+INVARIANT
+    d_inv
+
+INITIALISATION
+    d_vars : d_inv
+
 OPERATIONS
 
     bres_knownNode, knownNodeClass, valueSc <-- absent_Node_is_known(p_endpoint_config_idx, p_nid) =
@@ -31,14 +52,14 @@ OPERATIONS
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
-        /* TODO: add a way to indicate RawStatus has Bad mask set instead of using conversion result /= ok which includes Uncertain values */
         bres_knownNode, knownNodeClass, valueSc :(
             (bres_knownNode : BOOL & knownNodeClass : t_NodeClass_i & valueSc : t_RawStatusCode) &
+             bres_knownNode = bool(p_nid : dom(a_Node_availableInFuture)) &
             (bres_knownNode = TRUE => knownNodeClass : t_NodeClass & conv_RawStatusCode_To_StatusCode(valueSc) /= e_sc_ok))
     END
     ;
 
-    /* Used to avoid unused variable in father machine */
+    /* Used to avoid unused variable in parent machine */
     nodeId_do_nothing(p_nid) =
     PRE
         p_nid : t_NodeId_i &
