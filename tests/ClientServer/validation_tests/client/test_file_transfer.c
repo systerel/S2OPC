@@ -45,6 +45,7 @@
 static int32_t connectionClosed = false;
 static int32_t endpointClosed = false;
 SOPC_Boolean booleanNotification = false;
+SOPC_Boolean booleanUserCloseCallback = false;
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -73,6 +74,7 @@ static void disconnect_callback(const uint32_t c_id)
 // Close file CallBack
 static void(UserCloseCallback)(const char* tmp_file_path)
 {
+    booleanUserCloseCallback = true;
 #if TEST_DEBUG_FT
     printf("<Test_File_Transfer: tmp file path name: '%s'\n", tmp_file_path);
 #else
@@ -884,6 +886,16 @@ START_TEST(test_file_transfer_method)
     ck_assert("TC_SOPC_FileTransfer_030" && 0 == callResultsClient.status);
     ck_assert("TC_SOPC_FileTransfer_030" && true == pVariantOutput->Boolean);
     ck_assert("TC_SOPC_FileTransfer_030" && true == booleanNotification); // Check if callback notification is called
+
+    // TC_SOPC_FileTransfer_031 (automatic test of the notification to the user during the closing process):
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
+                                                        item1PreloadFile.met_openId, mode);
+    ck_assert("TC_SOPC_FileTransfer_031" && SOPC_GoodGenericStatus == statusMethodItem1);
+    booleanUserCloseCallback = false;
+    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1,
+                                                           item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert("TC_SOPC_FileTransfer_031" && SOPC_GoodGenericStatus == statusMethodItem1);
+    ck_assert("TC_SOPC_FileTransfer_031" && true == booleanUserCloseCallback);
 
     /*---------------------------------------------------------------------------
      *        Clear the client/server toolkit library & FileTransfer API
