@@ -17,6 +17,10 @@ endif()
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
 
+# We always link check statically, so that our test binaries are standalone
+if(ENABLE_TESTING)
+  find_package(check REQUIRED)
+endif()
 
 #### Tests for S2OPC library and extension libraries ####
 
@@ -283,17 +287,6 @@ endif(ENABLE_TESTING)
 if(ENABLE_FUZZING)
   set(FUZZING_PATH "fuzzing")
 
-  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
-      # We need at least CLang 6 to get LibFuzzer
-      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
-    else()
-      s2opc_fuzzer(sub_fuzzer "fuzz_sub.c" "${FUZZING_PATH}" s2opc_pubsub "")
-    endif()
-  endif()
-
-  if(WITH_OSS_FUZZ)
-    s2opc_oss_fuzzer(sub_fuzzer "fuzz_sub.c" "${FUZZING_PATH}" s2opc_pubsub "")
-  endif()
+  s2opc_fuzzer(sub_fuzzer "${FUZZING_PATH}/fuzz_sub.c" s2opc_pubsub "")
 endif(ENABLE_FUZZING)
 

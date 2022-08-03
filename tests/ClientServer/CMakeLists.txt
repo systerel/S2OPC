@@ -17,6 +17,11 @@ endif()
 # Python3 is mandatory for compilation
 find_package(PythonInterp 3 REQUIRED)
 
+# We always link check statically, so that our test binaries are standalone
+if(ENABLE_TESTING)
+  find_package(check REQUIRED)
+endif()
+
 #### Tests for S2OPC library and extension libraries ####
 
 if(WIN32)
@@ -512,20 +517,7 @@ endif(ENABLE_TESTING)
 if(ENABLE_FUZZING)
   set(FUZZING_PATH "unit_tests/fuzzing")
 
-  if (NOT WITH_OSS_FUZZ AND "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-    if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
-      # We need at least CLang 6 to get LibFuzzer
-      message(STATUS "Your version of Clang (${CMAKE_C_COMPILER_ID}) is not recent enough to have LibFuzzer")
-    else()
-      s2opc_fuzzer(server_request_fuzzer "fuzz_server_request.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-      s2opc_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-      s2opc_fuzzer(decode_fuzzer "fuzz_decoder.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-    endif()
-  endif()
-
-  if(WITH_OSS_FUZZ)
-    s2opc_oss_fuzzer(server_request_fuzzer "fuzz_server_request.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-    s2opc_oss_fuzzer(parse_tcp_uri_fuzzer "fuzz_parse_tcp_uri.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-    s2opc_oss_fuzzer(decode_fuzzer "fuzz_decoder.c" "${FUZZING_PATH}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-  endif()
+  s2opc_fuzzer(server_request_fuzzer "${FUZZING_PATH}/fuzz_server_request.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
+  s2opc_fuzzer(parse_tcp_uri_fuzzer "${FUZZING_PATH}/fuzz_parse_tcp_uri.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
+  s2opc_fuzzer(decode_fuzzer "${FUZZING_PATH}/fuzz_decoder.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
 endif(ENABLE_FUZZING)
