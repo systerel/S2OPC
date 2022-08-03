@@ -339,6 +339,20 @@ START_TEST(test_file_transfer_method)
     memset(&callRequestsClient, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
     memset(&callResultsClient, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
 
+    // Configure the server to support message size of 128 Mo
+    SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
+    encConf.buffer_size = 2097152;
+    encConf.receive_max_nb_chunks = 100;
+    /* receive_max_msg_size = buffer_size * receive_max_nb_chunks */
+    encConf.receive_max_msg_size = 209715200; // 209 Mo
+    encConf.send_max_nb_chunks = 100;
+    /* send_max_msg_size = buffer_size  * send_max_nb_chunks */
+    encConf.send_max_msg_size = 209715200; // 209 Mo
+    encConf.max_string_length = 209715200; // 209 Mo
+
+    bool res = SOPC_Common_SetEncodingConstants(encConf);
+    ck_assert("Failed to configure message size of S2OPC" && false != res);
+
     // Get default log config and set the custom path
     SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
