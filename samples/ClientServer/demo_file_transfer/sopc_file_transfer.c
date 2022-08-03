@@ -920,7 +920,7 @@ SOPC_FileType* FileTransfer_FileType_Create(void)
 
 static void FileTransfer_FileType_Initialize(SOPC_FileType* filetype)
 {
-    SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer needs to be initialize");
+    SOPC_ASSERT(NULL != filetype && "SOPC_FileType pointer must be initialized");
     filetype->node_id = NULL;
     filetype->handle = INVALID_HANDLE_VALUE;
     filetype->path = NULL;
@@ -1336,7 +1336,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
     if ((NULL == file->node_id) || (NULL == file->path) || (NULL == file->tmp_path))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:CreateTmpFile: the FileType object is not initialize in the API");
+                               "FileTransfer:CreateTmpFile: the FileType object is not initialized in the API");
         return OpcUa_BadUnexpectedError;
     }
 
