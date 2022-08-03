@@ -76,7 +76,7 @@ static void(UserCloseCallback)(const char* tmp_file_path)
 #if TEST_DEBUG_FT
     printf("<Test_File_Transfer: tmp file path name: '%s'\n", tmp_file_path);
 #else
-    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: tmp file path name: '%s'\n",
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: tmp file path name: '%s'\n",
                            tmp_file_path);
 #endif
 }

@@ -129,7 +129,7 @@ uint32_t SOPC_TEST_FileTransfer_OpenMethod(int32_t connectionId,
             printf("<TC_SOPC_FileTransfer_%03d: open method succeed: fileHandle is: %d\n", SOPC_GetTestCaseNumber(),
                    fileHandle);
 #else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "<TC_SOPC_FileTransfer_%03d: open method succeed: fileHandle is: %d\n",
                                    SOPC_GetTestCaseNumber(), fileHandle);
 #endif
@@ -189,7 +189,7 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_CloseMethod(int32_t connectionId,
 #if TEST_DEBUG_FT
             printf("<TC_SOPC_FileTransfer_%03d: close method succeed.\n", SOPC_GetTestCaseNumber());
 #else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<TC_SOPC_FileTransfer_%03d: close method succeed.\n",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<TC_SOPC_FileTransfer_%03d: close method succeed.\n",
                                    SOPC_GetTestCaseNumber());
 #endif
             status = SOPC_GoodGenericStatus;
@@ -255,7 +255,7 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_WriteMethod(int32_t connectionId,
 #if TEST_DEBUG_FT
             printf("<TC_SOPC_FileTransfer_%03d: write method succeed.\n", SOPC_GetTestCaseNumber());
 #else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<TC_SOPC_FileTransfer_%03d: write method succeed.\n",
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<TC_SOPC_FileTransfer_%03d: write method succeed.\n",
                                    SOPC_GetTestCaseNumber());
 #endif
             status = SOPC_GoodGenericStatus;
@@ -336,7 +336,7 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_ReadMethod(int32_t connectionId,
                 printf("<TC_SOPC_FileTransfer_%03d: read method succeed.\n", SOPC_GetTestCaseNumber());
                 SOPC_Variant_Print(pCallResults->outputParams);
 #else
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "<TC_SOPC_FileTransfer_%03d: read method succeed.\n", SOPC_GetTestCaseNumber());
 #endif
                 status = SOPC_GoodGenericStatus;
@@ -405,7 +405,7 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_SetPositionMethod(int32_t connectionId,
             printf("<TC_SOPC_FileTransfer_%03d: succeed: set the cursor position to: %ld\n", SOPC_GetTestCaseNumber(),
                    position);
 #else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "<TC_SOPC_FileTransfer_%03d: succeed: set the cursor position to: %ld\n",
                                    SOPC_GetTestCaseNumber(), position);
 #endif
@@ -470,7 +470,7 @@ uint64_t SOPC_TEST_FileTransfer_GetPositionMethod(int32_t connectionId,
             printf("<TC_SOPC_FileTransfer_%03d: get position returned value: %ld\n", SOPC_GetTestCaseNumber(),
                    getPosition);
 #else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "<TC_SOPC_FileTransfer_%03d: get position returned value: %ld\n",
                                    SOPC_GetTestCaseNumber(), getPosition);
 #endif
