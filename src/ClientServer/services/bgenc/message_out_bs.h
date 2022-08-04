@@ -21,9 +21,9 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 04/01/2022 14:33:59
+ Date                 : 04/08/2022 14:53:32
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

@@ -21,9 +21,9 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 03/01/2022 11:09:14
+ Date                 : 04/08/2022 14:53:31
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

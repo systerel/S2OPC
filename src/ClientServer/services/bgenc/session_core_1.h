@@ -21,9 +21,9 @@
 
  File Name            : session_core_1.h
 
- Date                 : 31/05/2022 15:46:52
+ Date                 : 04/08/2022 14:53:17
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

@@ -21,9 +21,9 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 21/07/2022 16:00:21
+ Date                 : 04/08/2022 14:53:48
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

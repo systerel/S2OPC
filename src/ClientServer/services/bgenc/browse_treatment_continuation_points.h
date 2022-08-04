@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_continuation_points.h
 
- Date                 : 06/03/2020 14:49:04
+ Date                 : 04/08/2022 14:53:01
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

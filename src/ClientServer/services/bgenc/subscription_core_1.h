@@ -21,9 +21,9 @@
 
  File Name            : subscription_core_1.h
 
- Date                 : 06/03/2020 14:49:22
+ Date                 : 04/08/2022 14:53:20
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

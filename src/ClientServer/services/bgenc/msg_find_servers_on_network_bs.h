@@ -21,9 +21,9 @@
 
  File Name            : msg_find_servers_on_network_bs.h
 
- Date                 : 03/12/2019 08:45:17
+ Date                 : 04/08/2022 14:53:36
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

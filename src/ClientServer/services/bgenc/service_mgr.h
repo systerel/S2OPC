@@ -21,9 +21,9 @@
 
  File Name            : service_mgr.h
 
- Date                 : 01/06/2022 17:07:54
+ Date                 : 04/08/2022 14:53:10
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

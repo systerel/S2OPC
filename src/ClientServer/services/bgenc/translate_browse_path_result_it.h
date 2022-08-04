@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_result_it.h
 
- Date                 : 25/02/2020 13:38:36
+ Date                 : 04/08/2022 14:53:25
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 

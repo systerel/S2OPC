@@ -21,9 +21,9 @@
 
  File Name            : argument_pointer_bs.h
 
- Date                 : 03/05/2021 16:37:53
+ Date                 : 04/08/2022 14:53:28
 
- C Translator Version : tradc Java V1.0 (14/03/2012)
+ C Translator Version : tradc Java V1.2 (06/02/2022)
 
 ******************************************************************************/
 
