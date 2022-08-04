@@ -28,7 +28,7 @@ TEST_IMAGE=sha256:eeefe721b7a6abc26919fac93a886a72dda7a4e0729730c927f6e84146be2c
 ZEPHYR_IMAGE=sha256:b0d247f1dc154ce52714bbada4232187820104d69f2d916d265121a51256506e # zephyr_build:v1
 
 # Private images
-GEN_IMAGE=sha256:c9763068f1e990534d779f2c327296d33647404b5606cccf1fe63c3b3a18ea17 # docker.aix.systerel.fr/c838/gen:1.3
+GEN_IMAGE=sha256:0772db3b0f8466def7656b952f1121ca8db70a521bf0b8fd0684e6e2beecc81d # docker.aix.systerel.fr/c838/gen:1.4
 UACTT_WIN_IMAGE=sha256:1ea36bfabfd56f4567eda8e40c3ac774a4342fdeb18ac642ab31a03bd78f2862 # com.systerel.fr:5000/c838/uactt-win:1.9
 UACTT_LINUX_IMAGE=sha256:f2a80efc09eb004353cc6dde04f023500113a12f83158086dd79cba639883bc4 # com.systerel.fr:5000/c838/uactt-linux:1.2
 

@@ -40,7 +40,7 @@ echo "Pre-build log" > $LOGPATH
 EXITCODE=0
 
 if [[ -z $TOOLING_DIR ]]; then
-    # If tooling directory not define only call make target
+    # If tooling directory is not defined, only call make target
     echo "Environment variable TOOLING_DIR not set (CAUTION: no generation from B model possible)" | tee -a $LOGPATH
     echo "Check C sources files from B model are up to date" | tee -a $LOGPATH
     make VERBOSE=1 -C $BMODEL_DIR >> $LOGPATH
