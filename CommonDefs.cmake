@@ -450,6 +450,10 @@ endfunction()
 
 ## S2OPC fuzzing tests: to be run manually ##
 
+# options with impact on the dependencies
+option(ENABLE_TESTING "Build the S2OPC tests" ON)
+option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
+
 # Enable fuzzing if WITH_OSS_FUZZ is ON
 if(WITH_OSS_FUZZ AND NOT ENABLE_FUZZING)
   message(FATAL_ERROR "'WITH_OSS_FUZZ' needs 'ENABLE_FUZZING'. Check that you have enabled it, or remove 'WITH_OSS_FUZZ'")
@@ -463,9 +467,7 @@ if(ENABLE_FUZZING)
 	message(FATAL_ERROR "Your version of Clang (${CMAKE_C_COMPILER_VERSION}) is not recent enough to have LibFuzzer. You need at leats 6.0.0")
       else()
         # Local fuzzing
-        function(s2opc_fuzzer name src_file library includes)
-          set(fuzz_target_name "${name}.libfuzzer")
-
+        function(s2opc_fuzzer fuzz_target_name src_file library includes)
           add_executable(${fuzz_target_name} "${src_file}")
           set_target_properties(${fuzz_target_name} PROPERTIES COMPILE_FLAGS "-fsanitize=fuzzer")
           set_target_properties(${fuzz_target_name} PROPERTIES LINK_FLAGS "-fsanitize=fuzzer")
