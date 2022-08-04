@@ -464,7 +464,7 @@ if(ENABLE_FUZZING)
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
       if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.0.0")
         # We need at least CLang 6 to get LibFuzzer
-	message(FATAL_ERROR "Your version of Clang (${CMAKE_C_COMPILER_VERSION}) is not recent enough to have LibFuzzer. You need at leats 6.0.0")
+        message(FATAL_ERROR "Your version of Clang (${CMAKE_C_COMPILER_VERSION}) is not recent enough to have LibFuzzer. You need at leats 6.0.0")
       else()
         # Local fuzzing
         function(s2opc_fuzzer fuzz_target_name src_file library includes)
@@ -478,7 +478,7 @@ if(ENABLE_FUZZING)
       endif()
     else()
       # Clang is needed to get LibFuzzer
-      message(FATAL_ERROR "Clang is needed to have LibFuzzer. You have ${CMAKE_C_COMPILER_ID}."})
+      message(FATAL_ERROR "Clang is needed to have LibFuzzer. You have ${CMAKE_C_COMPILER_ID}.")
     endif()
   else()
     # OSS Fuzzing
