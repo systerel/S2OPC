@@ -4,7 +4,7 @@
 
 #########################################################
 # Default CI pipeline configuration:
-# - preset variables: 'WITH_NANO_EXTENDED = 1' set in gitlab project
+# - preset variables: 'WITH_NANO_EXTENDED = 1' and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: build-linux64-ASan
@@ -14,7 +14,7 @@
 #     - test-uactt
 #
 # CI pipeline manual run with 'ALL_TESTS = 1':
-# - preset variables: 'WITH_NANO_EXTENDED = 1' set in gitlab project
+# - preset variables: 'WITH_NANO_EXTENDED = 1' and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - build: build-linux64-pys2opc # 'WITH_ASAN = 0' and 'WITH_PYS2OPC = 1'
 #   - tests: # TEST_SERVER_XML_ADDRESS_SPACE and TEST_SERVER_XML_CONFIG set to use dynamic config
@@ -22,7 +22,7 @@
 #     - test-uactt-all-tests
 #
 # CI pipeline manual run with 'ALL_BUILDS = 1':
-# - preset variables: WITH_NANO_EXTENDED = 1 set in gitlab project
+# - preset variables: 'WITH_NANO_EXTENDED = 1'  and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: # 'WITH_STATIC_SECURITY_DATA: 1', 'WITH_CONST_ADDSPACE: 1' and 'PUBSUB_STATIC_CONFIG: 1'
@@ -413,7 +413,7 @@ pages:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
-    - cmake -DWITH_NANO_EXTENDED=yes -DWITH_PYS2OPC=yes ..
+    - cmake -DWITH_NANO_EXTENDED=yes -DSOPC_HAS_NODE_MANAGEMENT_SERVICES=yes -DWITH_PYS2OPC=yes ..
     - cmake --build . --target doc
     - mv apidoc/html ../public/
   artifacts:
