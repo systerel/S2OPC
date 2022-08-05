@@ -1430,7 +1430,7 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
-        status = OpcUa_BadUnexpectedError;
+        return OpcUa_BadUnexpectedError;
     }
 
     if (false == mode_is_ok)
