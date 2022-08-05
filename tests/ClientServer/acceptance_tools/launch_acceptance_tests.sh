@@ -44,9 +44,13 @@ if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
     SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.selection.xml
+elif [[ -z "$SOPC_HAS_NODE_MANAGEMENT_SERVICES" ]] || [[ $SOPC_HAS_NODE_MANAGEMENT_SERVICES -eq 0 ]]
+then
+    TOOLKIT_TEST_SERVER=./toolkit_test_server
+    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml    
 else
     TOOLKIT_TEST_SERVER=./toolkit_test_server
-    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml
+    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.node_mgt.selection.xml
 fi
 
 # Copy the local S2OPC UACTT configuration files to the UACTT project (overwrite ones in docker)
