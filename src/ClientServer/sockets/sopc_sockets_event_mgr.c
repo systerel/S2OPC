@@ -46,20 +46,16 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_
         {
             result = true;
         }
-        if (result != false)
+        if (result)
         {
             status = SOPC_Socket_Connect(connectSocket->sock, addr);
-            if (SOPC_STATUS_OK != status)
-            {
-                result = false;
-            }
+            result = (SOPC_STATUS_OK == status);
         }
-        if (result != false)
+        if (result)
         {
             connectSocket->state = SOCKET_STATE_CONNECTING;
         }
-
-        if (false == result)
+        else
         {
             SOPC_SocketsInternalContext_CloseSocket(connectSocket->socketIdx);
         }
@@ -70,7 +66,7 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_
 static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSocket)
 {
     bool result = false;
-    if (connectSocket != false && connectSocket->state == SOCKET_STATE_CONNECTING)
+    if (NULL != connectSocket && connectSocket->state == SOCKET_STATE_CONNECTING)
     {
         // Close precedently created socket
         SOPC_Socket_Close(&connectSocket->sock);
@@ -82,7 +78,7 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
         if (nextAddr != NULL)
         {
             result = SOPC_SocketsEventMgr_ConnectClient(connectSocket, nextAddr);
-            if (result != false)
+            if (result)
             {
                 connectSocket->nextConnectAttemptAddr = NULL;
             }
@@ -95,7 +91,6 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
             if (NULL == connectSocket->nextConnectAttemptAddr)
             {
                 SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &connectSocket->connectAddrs);
-                connectSocket->connectAddrs = NULL;
             }
         }
     }
@@ -140,7 +135,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
         if (SOPC_STATUS_OK == status)
         {
             // Try to connect on IP addresses provided (IPV4 and IPV6)
-            for (p = res; p != NULL && false == connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
+            for (p = res; p != NULL && !connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
             {
                 connectResult = SOPC_SocketsEventMgr_ConnectClient(freeSocket, p);
             }
@@ -163,9 +158,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
         }
 
         if (SOPC_STATUS_OK != status || // connection already failed => do not keep addresses for next attempts
-            (res != NULL &&
-             NULL == freeSocket->connectAddrs) || // async connecting but NO next attempts remaining (if current fails)
-            (NULL == p))                          // result is true but res is no more used
+            (res != NULL && NULL == p)) // async connecting but NO next attempts remaining (if current fails)
         {
             SOPC_Socket_AddrInfoDelete(&res);
         }
@@ -223,7 +216,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
 
         if (SOPC_STATUS_OK == status)
         {
-            if (listenAllItfs != false)
+            if (listenAllItfs)
             {
                 SOPC_Free(hostname);
                 hostname = NULL;
@@ -237,9 +230,9 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             p = res;
             attemptWithIPV6 = true; // IPV6 first since it supports IPV4
-            while ((p != NULL || attemptWithIPV6 != false) && false == listenResult)
+            while ((p != NULL || attemptWithIPV6) && !listenResult)
             {
-                if (NULL == p && attemptWithIPV6 != false)
+                if (NULL == p && attemptWithIPV6)
                 {
                     // Failed with IPV6 addresses (or none was present), now try with not IPV6 addresses
                     attemptWithIPV6 = false;
@@ -247,8 +240,8 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
                 }
                 else
                 {
-                    if ((attemptWithIPV6 != false && SOPC_Socket_AddrInfo_IsIPV6(p) != false) ||
-                        (attemptWithIPV6 == false && SOPC_Socket_AddrInfo_IsIPV6(p) == false))
+                    if ((attemptWithIPV6 && SOPC_Socket_AddrInfo_IsIPV6(p)) ||
+                        (!attemptWithIPV6 && !SOPC_Socket_AddrInfo_IsIPV6(p)))
                     {
                         status = SOPC_Socket_CreateNew(p,
                                                        true, // Reuse
@@ -349,13 +342,13 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
     uint32_t sentBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (NULL == sock || NULL == sock->writeQueue || sock->sock == SOPC_INVALID_SOCKET || sock->isNotWritable != false)
+    if (NULL == sock || NULL == sock->writeQueue || sock->sock == SOPC_INVALID_SOCKET || sock->isNotWritable)
     {
         writeQueueResult = false;
     }
 
     /* Dequeue message to write and sent through socket until nothing no message remain or socket write blocked */
-    while (writeQueueResult != false && nothingToDequeue == false && writeBlocked == false)
+    while (writeQueueResult && !nothingToDequeue && !writeBlocked)
     {
         status = SOPC_AsyncQueue_NonBlockingDequeue(sock->writeQueue, (void**) &buffer);
         if (SOPC_STATUS_WOULD_BLOCK == status)
@@ -366,7 +359,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
         {
             writeQueueResult = false;
         }
-        if (false != writeQueueResult && false == nothingToDequeue)
+        if (writeQueueResult && !nothingToDequeue)
         {
             // Treat current buffer to be written on socket
             data = &(buffer->data[buffer->position]);
@@ -390,7 +383,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
         }
     }
 
-    if (writeBlocked != false)
+    if (writeBlocked)
     {
         // Socket write blocked, wait for a ready to write event
         sock->isNotWritable = true;
@@ -596,7 +589,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
             status = SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, buffer);
             assert(SOPC_STATUS_OK == status);
             result = true;
-            if (socketElt->isNotWritable == false)
+            if (!socketElt->isNotWritable)
             {
                 // If socket is in writable state: trigger the socket write treatment
                 result = SOPC_SocketsEventMgr_TreatWriteBuffer(socketElt);
@@ -609,7 +602,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
             result = false;
         }
 
-        if (false == result)
+        if (!result)
         {
             SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, eltId);
             // Definitively close the socket
@@ -686,7 +679,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         // Will do a new attempt with next possible address if possible
         result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
-        if (false == result)
+        if (!result)
         {
             // No new attempt possible, indicates socket connection failed and close the socket
             SOPC_Sockets_Emit(SOCKET_FAILURE,
@@ -708,7 +701,6 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         if (socketElt->connectAddrs != NULL)
         {
             SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &socketElt->connectAddrs);
-            socketElt->connectAddrs = NULL;
             socketElt->nextConnectAttemptAddr = NULL;
         }
 
@@ -755,7 +747,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         // Socket is connected
         if (socketElt->state == SOCKET_STATE_CONNECTED)
         {
-            if (socketElt->isNotWritable == false)
+            if (!socketElt->isNotWritable)
             {
                 // Not expected: ignore
             }

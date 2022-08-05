@@ -65,7 +65,7 @@ void SOPC_SocketsInternalContext_Clear(void)
     uint32_t idx = 0;
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
-        if (false != socketsArray[idx].isUsed)
+        if (socketsArray[idx].isUsed)
         {
             SOPC_Socket_Close(&(socketsArray[idx].sock));
             socketsArray[idx].isUsed = false;
@@ -82,7 +82,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     do
     {
-        if (false == socketsArray[idx].isUsed)
+        if (!socketsArray[idx].isUsed)
         {
             socketsArray[idx].isUsed = true;
             result = &socketsArray[idx];
@@ -90,7 +90,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
         idx++;
     } while (NULL == result && idx < SOPC_MAX_SOCKETS);
 
-    if (NULL != result && isListener == false)
+    if (NULL != result && !isListener)
     {
         status = SOPC_AsyncQueue_Init(&result->writeQueue, "Socket write msgs");
         assert(SOPC_STATUS_OK == status);
@@ -103,7 +103,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
     SOPC_Socket* sock = NULL;
     void* elt = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed != false)
+    if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed)
     {
         sock = &socketsArray[socketIdx];
         SOPC_Socket_Close(&sock->sock);
@@ -130,7 +130,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
 
         if (sock->state != SOCKET_STATE_CLOSED)
         {
-            if (sock->isServerConnection != false)
+            if (sock->isServerConnection)
             {
                 assert(sock->listenerSocketIdx < SOPC_MAX_SOCKETS);
 
