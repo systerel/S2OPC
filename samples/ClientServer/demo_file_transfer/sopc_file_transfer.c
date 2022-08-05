@@ -1679,8 +1679,8 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     int res = -1;
     int32_t size_available = -1;
 
-    SOPC_ASSERT(msg != NULL && "unexpected internal error");
-    SOPC_ASSERT(msg->Data == NULL && "unexpected internal error");
+    SOPC_ASSERT(NULL != msg && "unexpected internal error");
+    SOPC_ASSERT(NULL == msg->Data && "unexpected internal error");
 
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:ReadTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
@@ -1764,7 +1764,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     }
 
     msg->Data = SOPC_Malloc((size_t) msg->Length);
-    if (msg->Data == NULL)
+    if (NULL == msg->Data)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:ReadTmpFile: unable to allocate memory for reading the message");
@@ -1857,7 +1857,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     }
 
     buffer = SOPC_Malloc((size_t) msg->Length);
-    if (buffer == NULL)
+    if (NULL == buffer)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:WriteTmpFile: unable to allocate memory for writing the message");
