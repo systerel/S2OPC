@@ -720,6 +720,8 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 
         if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
         {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Publisher MQTT configuration failed: check if topic is set");
             return false;
         }
 

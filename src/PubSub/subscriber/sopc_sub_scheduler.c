@@ -535,6 +535,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                                 if (schedulerCtx.transport[iIter].mqttHandle == NULL)
                                 {
+                                    SOPC_Logger_TraceError(
+                                        SOPC_LOG_MODULE_PUBSUB,
+                                        "Subscriber MQTT configuration failed: check if topic is set");
                                     status = SOPC_STATUS_NOK;
                                 }
                                 else
