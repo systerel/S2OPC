@@ -2040,7 +2040,7 @@ static SOPC_StatusCode local_write_open_count(const SOPC_FileType* file)
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        status = OpcUa_BadUnexpectedError;
+        return OpcUa_BadUnexpectedError;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
@@ -2084,7 +2084,7 @@ static SOPC_StatusCode local_write_size(const SOPC_FileType* file)
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        status = OpcUa_BadUnexpectedError;
+        return OpcUa_BadUnexpectedError;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
@@ -2128,7 +2128,7 @@ static SOPC_StatusCode local_write_default_Writable(const SOPC_FileType* file)
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        status = OpcUa_BadUnexpectedError;
+        return OpcUa_BadUnexpectedError;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
@@ -2172,7 +2172,7 @@ static SOPC_StatusCode local_write_default_UserWritable(const SOPC_FileType* fil
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(1);
     if (NULL == pReq)
     {
-        status = OpcUa_BadUnexpectedError;
+        return OpcUa_BadUnexpectedError;
     }
 
     if (0 == (status & SOPC_GoodStatusOppositeMask))
