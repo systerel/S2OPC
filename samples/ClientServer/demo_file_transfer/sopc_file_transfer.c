@@ -1310,7 +1310,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
                                                     const char* CnodeId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_NodeId* node_id;
+    SOPC_NodeId* node_id = NULL;
 
     if (NULL == g_objectId_to_file && NULL == g_method_call_manager)
     {
