@@ -239,9 +239,9 @@ build-zephyr:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - 'build_zephyr/'
-    expire_in: '1 week'
-  rules: 
-    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master'"
+    expire_in: '1 month'
+  rules:
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master' || $CI_COMMIT_TAG"
       when: always
 ###
 # Test jobs
