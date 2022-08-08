@@ -583,7 +583,7 @@ START_TEST(test_file_transfer_method)
      *      - A new temporary file was created (deviation Alstom)
      */
     readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    mode = 3;
+    mode = 1;
     fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
                                                         item1PreloadFile.met_openId, mode);
     mode = 1; // try to open a second time with a different mode
