@@ -17,7 +17,7 @@
 # - preset variables: 'WITH_NANO_EXTENDED = 1' and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - build: build-linux64-pys2opc # 'WITH_ASAN = 0' and 'WITH_PYS2OPC = 1'
-#   - tests: # TEST_SERVER_XML_ADDRESS_SPACE and TEST_SERVER_XML_CONFIG set to use dynamic config
+#   - tests: # TEST_SERVER_XML_ADDRESS_SPACE, TEST_SERVER_XML_CONFIG and TEST_USERS_XML_CONFIG are NOT set to use static config
 #     - test-unit-all-tests
 #     - test-uactt-all-tests
 #
@@ -40,15 +40,19 @@
 #     - build-win64
 #########################################################
 
+.variables: &nominal_build_variables
+  SOPC_HAS_NODE_MANAGEMENT_SERVICES: 1
+
+.variables: &nominal_test_variables
+  SOPC_HAS_NODE_MANAGEMENT_SERVICES: 1
+  TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
+  TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
+  TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
+
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
 .variables: &all-tests_build_variables
   WITH_PYS2OPC: 1
-
-.variables: &all-tests_test_variables
-  TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
-  TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
-  TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
 
 .variables: &all-builds_build_variables
   WITH_STATIC_SECURITY_DATA: 1
@@ -138,6 +142,7 @@ build-linux64-ASan:
   <<: *build_linux
   variables:
     <<: *build_linux_variables
+    <<: *nominal_build_variables
     WITH_ASAN: 1
     WITH_UBSAN: 1
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
@@ -243,6 +248,7 @@ build-zephyr:
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == 'master' || $CI_COMMIT_TAG"
       when: always
+     
 ###
 # Test jobs
 ###
@@ -324,8 +330,6 @@ test-check:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
   <<: *test_unit
-  variables:
-    <<: *all-tests_test_variables
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -336,6 +340,8 @@ test-unit-all-tests:
 # Test unit for NOT ALL_TESTS variable
 test-unit:
   <<: *test_unit
+  variables:
+    <<: *nominal_test_variables
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
@@ -361,8 +367,6 @@ test-unit:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
-  variables:
-    <<: *all-tests_test_variables
   rules:
     - if: "$ALL_TESTS != null && \
            $S2OPC_PUBSUB_ONLY == null && \
@@ -371,6 +375,8 @@ test-uactt-all-tests:
 # Test unit for NOT ALL_TESTS variable
 test-uactt:
   <<: *test_uactt
+  variables:
+    <<: *nominal_test_variables
   rules: # repeat .test-uactt variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
