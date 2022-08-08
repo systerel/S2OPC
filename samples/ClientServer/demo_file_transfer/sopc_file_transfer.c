@@ -596,7 +596,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                                "FileTransfer:Method_Open: the fileno function has failed");
     }
 
-    struct stat sb;
+    struct stat sb = {0};
     int ret = fstat(filedes, &sb);
     if (-1 == ret)
     {
@@ -744,7 +744,7 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
                                    "FileTransfer:Method_Read: the fileno function has failed");
         }
 
-        struct stat sb;
+        struct stat sb = {0};
         int res = fstat(filedes, &sb);
         if (-1 == res)
         {
