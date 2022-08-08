@@ -111,4 +111,9 @@
 #error "Maximum number of operations per message cannot be > INT32_MAX"
 #endif
 
+/** Check Node management services activation for clients is set only in case of nano extended services */
+#if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES && 0 == WITH_NANO_EXTENDED
+#error "Node management services cannot be activated for clients without WITH_NANO_EXTENDED variable set"
+#endif
+
 #endif
