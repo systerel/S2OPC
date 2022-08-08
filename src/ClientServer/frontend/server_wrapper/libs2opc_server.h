@@ -58,7 +58,8 @@ typedef void SOPC_ServerStopped_Fct(SOPC_ReturnStatus status);
  * \brief Start the server asynchronously.
  *        Server information node is updated and endpoints are asynchronously requested to be opened.
  *
- * \param stoppedCb  callback called when server will stop (on purpose or due to endpoint opening isssue)
+ * \param stoppedCb  callback called when server will stop (on purpose or due to endpoint opening isssue), it is
+ *                   mandatory to define it and to wait it is called after call to ::SOPC_ServerHelper_StopServer.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, server already started).
@@ -68,7 +69,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
 /**
  * \brief Call to stop the server started with SOPC_ServerHelper_StartServer.
  *        If server started with ::SOPC_ServerHelper_StartServer, this call is blocking during shutdown phase and
- *        ::SOPC_ServerStopped_Fct is called on actual shutdown.
+ *        ::SOPC_ServerStopped_Fct is called on actual shutdown. Caller is responsible to wait for
+ *        ::SOPC_ServerStopped_Fct call prior to use any ::SOPC_HelperConfigServer_Clear function.
  *        If server started with ::SOPC_ServerHelper_Serve, this call is asynchronous and server is actually stopped on
  *        ::SOPC_ServerHelper_Serve return (after shutdown phase).
  *

@@ -341,6 +341,10 @@ static void SOPC_HelperInternal_ActualShutdownServer(void)
 
 SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedCb)
 {
+    if (NULL == stoppedCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
