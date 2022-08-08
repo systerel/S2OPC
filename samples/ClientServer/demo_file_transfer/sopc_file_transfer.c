@@ -400,7 +400,7 @@ static bool check_openModeArg(SOPC_OpenMode mode)
     //  EraseExisting bit can only be set if the file is opened for writing
     if (mode & ERASE_EXISTING_MASK)
     {
-        if ((ERASE_EXISTING_MASK + WRITE_MASK) != mode)
+        if ((ERASE_EXISTING_MASK | WRITE_MASK) != mode)
         {
             ok2 = false;
         }
@@ -446,29 +446,29 @@ static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode)
     SOPC_ASSERT(NULL != Cmode && "Cmode is not initialize");
     switch (mode)
     {
-    case 1:
+    case READ_MASK:
         snprintf(Cmode, 2, "r"); // reading
         break;
-    case 2:
+    case WRITE_MASK:
         snprintf(Cmode, 2, "w"); // writing
         break;
-    case 3:
+    case READ_MASK | WRITE_MASK:
         snprintf(Cmode, 3, "r+"); // Reading and writing
         break;
-    case 6:
-        snprintf(Cmode, 3, "w+"); // Reading and writing with erase if existing
+    case ERASE_EXISTING_MASK | WRITE_MASK:
+        snprintf(Cmode, 3, "w+"); // Writing with erase if existing
         break;
-    case 8:
+    case APPEND_MASK:
         snprintf(Cmode, 2, "a"); // writing into appening mode
         break;
-    case 9:
-        snprintf(Cmode, 3, "a+"); // reading and writing
+    case APPEND_MASK | READ_MASK:
+        snprintf(Cmode, 3, "a+"); // reading and writing into appening mode
         break;
-    case 10:
+    case APPEND_MASK | WRITE_MASK:
         snprintf(Cmode, 2, "a"); // writing into appening mode
         break;
-    case 11:
-        snprintf(Cmode, 3, "a+"); // reading and writing
+    case APPEND_MASK | WRITE_MASK | READ_MASK:
+        snprintf(Cmode, 3, "a+"); // reading and writing into appening mode
         break;
     default:
         status = OpcUa_BadInvalidArgument;
@@ -523,24 +523,23 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
 
     if (file->is_open)
     {
-        /* Clients can open the same file several times for read */
         /* A request to open for writing shall return Bad_NotWritable when the file is already opened */
-        if ((READ_MASK == file->mode) && (READ_MASK != mode))
+        if (0 != (mode & (WRITE_MASK | APPEND_MASK)))
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
-                "FileTransfer:Method_Open: file is open in read mode, it cannot be opened in write mode");
+                "FileTransfer:Method_Open: file is already opened, it cannot be opened in write mode");
             return OpcUa_BadNotWritable;
         }
         /* A request to open for reading shall return Bad_NotReadable when the file is already opened for writing.*/
-        if ((0 != (file->mode & (WRITE_MASK | APPEND_MASK))) && (0 == (file->mode & READ_MASK)) &&
-            (0 == (mode & (WRITE_MASK | APPEND_MASK))))
+        if ((0 != (file->mode & (WRITE_MASK | APPEND_MASK))) && (0 != (mode & READ_MASK)))
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "FileTransfer:Method_Open: file is open in write mode, it cannot be opened in read mode");
             return OpcUa_BadNotReadable;
         }
+        /* Clients can open the same file several times for read */
         /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted.*/
         result_code = FileTransfer_Delete_TmpFile(file);
         if (0 != (result_code & SOPC_GoodStatusOppositeMask))
