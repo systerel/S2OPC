@@ -503,7 +503,8 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     bool mode_ok = check_openModeArg(mode);
     if (!mode_ok)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: OpenMode %d is unknown", mode);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Open: OpenMode %" PRIu8 " is unknown",
+                               mode);
         return OpcUa_BadInvalidArgument;
     }
 
@@ -1693,7 +1694,8 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
     {
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument, rcv len: %d", length);
+            "FileTransfer:ReadTmpFile: only positive values are allowed for the length argument, rcv len: %" PRId32,
+            length);
         return OpcUa_BadInvalidArgument;
     }
 
