@@ -57,7 +57,7 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_
         }
         else
         {
-            SOPC_SocketsInternalContext_CloseSocket(connectSocket->socketIdx);
+            SOPC_Socket_Close(&connectSocket->sock);
         }
     }
     return result;
@@ -80,17 +80,14 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
             result = SOPC_SocketsEventMgr_ConnectClient(connectSocket, nextAddr);
             if (result)
             {
+                // No more attempts possible: free the attempts addresses
+                SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &connectSocket->connectAddrs);
                 connectSocket->nextConnectAttemptAddr = NULL;
+                connectSocket->connectAddrs = NULL;
             }
             else
             {
                 connectSocket->nextConnectAttemptAddr = SOPC_Socket_AddrInfo_IterNext(nextAddr);
-            }
-
-            // No more attempts possible: free the attempts addresses
-            if (NULL == connectSocket->nextConnectAttemptAddr)
-            {
-                SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &connectSocket->connectAddrs);
             }
         }
     }
