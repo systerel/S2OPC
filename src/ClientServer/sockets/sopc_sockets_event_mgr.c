@@ -75,20 +75,11 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
 
         // Check if next connection attempt available
         SOPC_Socket_AddressInfo* nextAddr = (SOPC_Socket_AddressInfo*) connectSocket->nextConnectAttemptAddr;
-        if (nextAddr != NULL)
+        while (!result && nextAddr != NULL)
         {
             result = SOPC_SocketsEventMgr_ConnectClient(connectSocket, nextAddr);
-            if (result)
-            {
-                // No more attempts possible: free the attempts addresses
-                SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &connectSocket->connectAddrs);
-                connectSocket->nextConnectAttemptAddr = NULL;
-                connectSocket->connectAddrs = NULL;
-            }
-            else
-            {
-                connectSocket->nextConnectAttemptAddr = SOPC_Socket_AddrInfo_IterNext(nextAddr);
-            }
+            nextAddr = SOPC_Socket_AddrInfo_IterNext(nextAddr);
+            connectSocket->nextConnectAttemptAddr = nextAddr;
         }
     }
     return result;
