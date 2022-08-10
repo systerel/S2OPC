@@ -22,6 +22,7 @@
 
 #include "sopc_array.h"
 #include "sopc_builtintypes.h"
+#include "sopc_encodeable.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mutexes.h"
@@ -93,8 +94,10 @@ typedef struct
     Condition condition;
     bool finished; /* set when treatment is done */
 
-    bool canceled;            /* Set if request has been canceled before response event reception */
-    void* reqCtx;             /* Context dedicated to the request type */
+    bool canceled; /* Set if request has been canceled before response event reception */
+    bool
+        isGenericServiceUse; /* Set if the generic API was used, in this case reqCtx should be used to store response */
+    void* reqCtx;            /* Context dedicated to the request type */
     SOPC_ReturnStatus status; /* Service response status */
 } SOPC_ClientHelper_GenReqCtx;
 
@@ -104,7 +107,7 @@ static SOPC_SLinkedList* canceledRequestContexts =
     NULL;            /* List of canceled request contexts not received, to be freed on Clear */
 static Mutex gMutex; /* Mutex for global variables concurrent access */
 
-static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* reqCtx)
+static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* reqCtx, bool isGenericServiceUse)
 {
     assert(NULL != reqCtx);
 
@@ -115,6 +118,7 @@ static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* req
         // finished => already false
         // canceled => already false
         result->status = SOPC_STATUS_NOK;
+        result->isGenericServiceUse = isGenericServiceUse;
         result->reqCtx = reqCtx;
         status = SOPC_STATUS_OK;
     }
@@ -486,7 +490,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1141,25 +1145,44 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
         assert(NULL != responseContext);
         SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
 
-        if (pEncType == &OpcUa_ReadResponse_EncodeableType)
+        if (genCtx->isGenericServiceUse)
         {
-            status = GenericCallbackHelper_Read(response, (ReadContext*) responseContext);
+            void** genResponseContext = (void**) responseContext;
+
+            status = SOPC_Encodeable_Create(pEncType, genResponseContext);
+            if (SOPC_STATUS_OK == status)
+            {
+                assert(NULL != *genResponseContext);
+                // Move response to application context
+                *genResponseContext = memcpy(*genResponseContext, response, pEncType->AllocationSize);
+                // Avoid dealloc by caller by resetting content of provided response
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                SOPC_EncodeableObject_Initialize(pEncType, (void*) response);
+                SOPC_GCC_DIAGNOSTIC_RESTORE
+            }
         }
-        else if (pEncType == &OpcUa_WriteResponse_EncodeableType)
+        else
         {
-            status = GenericCallbackHelper_Write(response, (WriteContext*) responseContext);
-        }
-        else if (pEncType == &OpcUa_BrowseResponse_EncodeableType)
-        {
-            status = GenericCallbackHelper_Browse(response, (BrowseContext*) responseContext);
-        }
-        else if (pEncType == &OpcUa_BrowseNextResponse_EncodeableType)
-        {
-            status = GenericCallbackHelper_BrowseNext(response, (BrowseContext*) responseContext);
-        }
-        else if (pEncType == &OpcUa_CallResponse_EncodeableType)
-        {
-            status = GenericCallbackHelper_CallMethod(response, (CallMethodContext*) responseContext);
+            if (pEncType == &OpcUa_ReadResponse_EncodeableType)
+            {
+                status = GenericCallbackHelper_Read(response, (ReadContext*) responseContext);
+            }
+            else if (pEncType == &OpcUa_WriteResponse_EncodeableType)
+            {
+                status = GenericCallbackHelper_Write(response, (WriteContext*) responseContext);
+            }
+            else if (pEncType == &OpcUa_BrowseResponse_EncodeableType)
+            {
+                status = GenericCallbackHelper_Browse(response, (BrowseContext*) responseContext);
+            }
+            else if (pEncType == &OpcUa_BrowseNextResponse_EncodeableType)
+            {
+                status = GenericCallbackHelper_BrowseNext(response, (BrowseContext*) responseContext);
+            }
+            else if (pEncType == &OpcUa_CallResponse_EncodeableType)
+            {
+                status = GenericCallbackHelper_CallMethod(response, (CallMethodContext*) responseContext);
+            }
         }
     }
     genCtx->status = status;
@@ -1301,7 +1324,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1669,7 +1692,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1980,7 +2003,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2158,7 +2181,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2324,7 +2347,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
     /* Initialize generic request context */
     if (SOPC_STATUS_OK == status)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(&ctx);
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(&ctx, false);
         if (NULL == genReqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2386,6 +2409,57 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
         SOPC_Free(results[i].outputParams);
         memset(&results[i], 0, sizeof(SOPC_ClientHelper_CallMethodResult));
     }
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* requestMsg, void** responseMsg)
+{
+    if (!SOPC_Atomic_Int_Get(&initialized))
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (0 > connectionId || NULL == requestMsg || NULL == responseMsg)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ClientHelper_GenReqCtx* genReqCtx = NULL;
+
+    /* Initialize generic request context */
+    if (SOPC_STATUS_OK == status)
+    {
+        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(responseMsg, true);
+        if (NULL == genReqCtx)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* wait for the request result */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
+        /* Prepare the synchronous context */
+        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+
+        status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, requestMsg,
+                                                             (uintptr_t) genReqCtx);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Wait for the response => status OK (response received) or TIMEOUT */
+            status = SOPC_ClientHelper_GenReqCtx_WaitFinishedOrTimeout(genReqCtx, &operationStatus);
+        }
+
+        /* Free or cancel the request context */
+        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        assert(SOPC_STATUS_OK == statusMutex);
+        // Keep same output status if input status != OK
+        status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)

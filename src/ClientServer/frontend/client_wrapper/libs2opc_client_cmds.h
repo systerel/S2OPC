@@ -754,6 +754,23 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
 
 /**
  @brief
+    Call a method
+
+ @param connectionId      The connection id. It shall be > 0
+ @param requestMsg        A pointer to a request message of type OpcUa_*_Request (e.g.: ::OpcUa_AddNodesRequest),
+                          it might be built using request builder module functions (e.g. ::SOPC_AddNodesRequest_Create).
+                          The requestMsg is deallocated by toolkit when returned status
+                          is not invalid state or parameters.
+ @param[out] responseMsg  Address of a pointer that will be used to store the response message in case of success.
+
+ @return     SOPC_STATUS_OK if service operation succeded and \p responseMsg is valid,
+             otherwise SOPC_STATUS_INVALID_STATE in case incorrect initialized state,
+             SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameter.
+*/
+SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* requestMsg, void** responseMsg);
+
+/**
+ @brief
     Clears the content of the SOPC_ClientHelper_CallMethodResult[] \p results.
     The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_CallMethod.
 
