@@ -40,7 +40,7 @@
 
 #if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER _Pragma("GCC diagnostic ignored \"-Wdiscarded-qualifiers\"")
-#elif defined(__GNUC__) && (__GNUC__ > 4) && defined(__clang__)
+#elif defined(__clang__)
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
     _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types-discards-qualifiers\"")
 #else
