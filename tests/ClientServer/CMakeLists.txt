@@ -242,6 +242,10 @@ if(ENABLE_TESTING)
     Check::check)
   target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_client PRIVATE ${S2OPC_DEFINITIONS})
+  if (expat_FOUND)
+    target_link_libraries(toolkit_test_server_client PRIVATE s2opc_clientserver-xml-loaders-expat)
+    target_compile_definitions(toolkit_test_server_client PRIVATE "WITH_EXPAT")
+  endif()
   s2opc_unit_test(toolkit_test_server_client)
 
   # Server running local services

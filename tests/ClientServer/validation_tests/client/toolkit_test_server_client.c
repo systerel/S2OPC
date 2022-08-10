@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <assert.h>
 #include <check.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,12 +32,18 @@
 
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
+#include "sopc_encodeable.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#ifdef WITH_EXPAT
+#include "xml_expat/sopc_uanodeset_loader.h"
+#endif
+
+#include "opcua_identifiers.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
@@ -66,6 +73,8 @@ static const uint64_t write_value = 12;
 static const uint32_t sleepTimeout = 500;
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
+
+SOPC_AddressSpace* addressSpace = NULL;
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -247,6 +256,86 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
     return status;
 }
 
+#ifdef WITH_EXPAT
+#if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES
+static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    OpcUa_AddNodesResponse* addNodesResp = NULL;
+    OpcUa_AddNodesRequest* addNodesReq = NULL;
+    SOPC_ExpandedNodeId parentNodeId;
+    SOPC_ExpandedNodeId_Initialize(&parentNodeId);
+    SOPC_NodeId referenceTypeId;
+    SOPC_NodeId_Initialize(&referenceTypeId);
+    SOPC_ExpandedNodeId reqNodeId;
+    SOPC_ExpandedNodeId_Initialize(&reqNodeId);
+    SOPC_QualifiedName browseName;
+    SOPC_QualifiedName_Initialize(&browseName);
+    SOPC_ExpandedNodeId typeDefinition;
+    SOPC_ExpandedNodeId_Initialize(&typeDefinition);
+
+    // Parent node is "Objects" node
+    parentNodeId.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+    // Reference type "Organizes" node
+    referenceTypeId.Data.Numeric = OpcUaId_Organizes;
+    // Type definition is BaseDataVariable (i=63)
+    typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseDataVariableType;
+
+    // NodeId request
+    reqNodeId.NodeId.Namespace = 1;
+    reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
+    status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId42");
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    // BrowseName
+    browseName.NamespaceIndex = 1;
+    status = SOPC_String_AttachFromCstring(&browseName.Name, "NewAddedNode42");
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    addNodesReq = SOPC_AddNodesRequest_Create(1);
+
+    if (NULL == addNodesReq)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    status = SOPC_AddNodeRequest_SetVariableAttributes(addNodesReq, 0, &parentNodeId, &referenceTypeId, &reqNodeId,
+                                                       &browseName, &typeDefinition, NULL, NULL, NULL, NULL, NULL, NULL,
+                                                       NULL, 0, NULL, NULL, NULL, NULL, NULL);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_GenericService(connectionId, (void*) addNodesReq, (void**) &addNodesResp);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        assert(NULL != addNodesResp);
+        if (addNodesResp->NoOfResults != 1 || addNodesResp->Results[0].StatusCode ||
+            !SOPC_NodeId_Equal(&reqNodeId.NodeId, &addNodesResp->Results[0].AddedNodeId))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        SOPC_ReturnStatus delStatus = status = SOPC_Encodeable_Delete(&OpcUa_AddNodesResponse_EncodeableType, (void**) &addNodesResp);
+        assert(SOPC_STATUS_OK == delStatus);
+    }
+    else
+    {
+    	SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        assert(SOPC_STATUS_OK == delStatus);
+    }
+
+    return status;
+}
+#endif
+#endif
+
 /*---------------------------------------------------------------------------
  *                             Server configuration
  *---------------------------------------------------------------------------*/
@@ -254,6 +343,29 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
 /*----------------------------------------------------
  * Application description and endpoint configuration:
  *---------------------------------------------------*/
+#ifdef WITH_EXPAT
+static SOPC_AddressSpace* SOPC_LoadAddressSpaceConfigFromFile(const char* filename)
+{
+    FILE* fd = fopen(filename, "r");
+    if (NULL == fd)
+    {
+        return NULL;
+    }
+    SOPC_AddressSpace* space = SOPC_UANodeSet_Parse(fd);
+    fclose(fd);
+
+    SOPC_ReturnStatus status = SOPC_ToolkitServer_SetAddressSpaceConfig(space);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_AddressSpace_Delete(space);
+        space = NULL;
+    }
+    // Keep pointer for deallocation
+    addressSpace = space;
+
+    return space;
+}
+#endif
 
 static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 {
@@ -338,16 +450,34 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     }
 
     // Address space configuration
-    SOPC_AddressSpace* address_space = NULL;
-    if (SOPC_STATUS_OK == status)
-    {
-        address_space = SOPC_Embedded_AddressSpace_Load();
-        status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-    }
 
-    if (SOPC_STATUS_OK == status)
+    const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
+    SOPC_AddressSpace* address_space = NULL;
+
+    if (NULL != xml_address_space_config_path)
     {
-        status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
+#ifdef WITH_EXPAT
+        address_space = SOPC_LoadAddressSpaceConfigFromFile(xml_address_space_config_path);
+#else
+        printf(
+            "Error: an XML address space configuration file path provided whereas XML library not available (Expat).\n"
+            "Do not define environment variables TEST_SERVER_XML_ADDRESS_SPACE .\n"
+            "Or compile with XML library available.\n");
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+#endif
+    }
+    else
+    {
+        if (SOPC_STATUS_OK == status)
+        {
+            address_space = SOPC_Embedded_AddressSpace_Load();
+            status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
+        }
     }
 
     // Note: user manager are AllowAll by default
@@ -390,6 +520,7 @@ START_TEST(test_server_client)
     {
         printf("<Test_Server_Client: initialized\n");
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Configuration of:
        - Server endpoints configuration:
@@ -404,6 +535,7 @@ START_TEST(test_server_client)
     {
         status = Server_SetServerConfiguration();
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Start server / Finalize configuration */
     if (SOPC_STATUS_OK == status)
@@ -419,6 +551,7 @@ START_TEST(test_server_client)
             printf("<Test_Server_Client: Endpoint configured\n");
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Create client configuration */
     int32_t clientCfgId = -1;
@@ -435,6 +568,7 @@ START_TEST(test_server_client)
             printf(">>Client: Failed to create configuration\n");
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Connect client to server */
     int32_t connectionId = 0;
@@ -447,6 +581,7 @@ START_TEST(test_server_client)
             status = SOPC_STATUS_NOK;
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Run a write service test */
     if (SOPC_STATUS_OK == status)
@@ -461,6 +596,7 @@ START_TEST(test_server_client)
             printf(">>Client: Test Write Failed\n");
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Run a read service test */
     if (SOPC_STATUS_OK == status)
@@ -475,6 +611,26 @@ START_TEST(test_server_client)
             printf(">>Client: Test Read Failed\n");
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+#ifdef WITH_EXPAT
+#if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES
+    /* Run an add nodes service test */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = client_send_add_nodes_req_test(connectionId);
+        if (SOPC_STATUS_OK == status)
+        {
+            printf(">>Client: Test AddNodes Success\n");
+        }
+        else
+        {
+            printf(">>Client: Test AddNodes Failed\n");
+        }
+    }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+#endif
+#endif
 
     /* client request to close the connection */
     if (SOPC_STATUS_OK == status)
@@ -489,6 +645,7 @@ START_TEST(test_server_client)
             status = SOPC_STATUS_NOK;
         }
     }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Clear client wrapper layer*/
     SOPC_ClientHelper_Finalize();
@@ -508,6 +665,12 @@ START_TEST(test_server_client)
 
     /* Clear the client/server toolkit library (stop all library threads) */
     SOPC_CommonHelper_Clear();
+
+    if (NULL != addressSpace)
+    {
+        SOPC_AddressSpace_Delete(addressSpace);
+        addressSpace = NULL;
+    }
 
     if (SOPC_STATUS_OK == status)
     {
