@@ -235,6 +235,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     char* nodeIdStr = NULL;
     const char* reverseEndpointURL = NULL;
     SOPC_Internal_SessionAppContext* sessionContext = NULL;
+    SOPC_ExtensionObject* userToken = NULL;
     SOPC_Internal_DiscoveryContext* discoveryContext = NULL;
 
     switch (event)
@@ -486,20 +487,17 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         assert(id <= constants__t_channel_config_idx_i_max);
         assert((void*) auxParam != NULL);
         sessionContext = (SOPC_Internal_SessionAppContext*) auxParam;
+        userToken = sessionContext->userToken;
+        sessionContext->userToken = NULL; // Provided as separated parameter
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION scCfgIdx=%" PRIu32 " reverseEpCfgIdx=%" PRIuPTR
                                " ctx=%" PRIuPTR,
                                id, params, sessionContext->userSessionContext);
 
-        io_dispatch_mgr__client_activate_new_session(
-            id, (uint32_t) params, (constants__t_user_token_i) sessionContext->userToken, sessionContext, &bres);
+        io_dispatch_mgr__client_activate_new_session(id, (uint32_t) params, userToken, sessionContext, &bres);
 
-        if (bres)
-        {
-            sessionContext->userToken = NULL; // Provided as separated parameter
-        }
-        else
+        if (!bres)
         {
             SOPC_App_EnqueueComEvent(SE_SESSION_ACTIVATION_FAILURE,
                                      0,                                   // session id (not yet defined)
@@ -509,8 +507,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                      "ServicesMgr: APP_TO_SE_ACTIVATE_SESSION failed scCfgIdx=%" PRIu32
                                      " reverseEpCfgIdx=%" PRIuPTR " ctx=%" PRIuPTR,
                                      id, params, auxParam);
-            SOPC_ExtensionObject_Clear(sessionContext->userToken);
-            SOPC_Free(sessionContext->userToken);
+            SOPC_ExtensionObject_Clear(userToken);
+            SOPC_Free(userToken);
             SOPC_Free(sessionContext);
         }
         break;
