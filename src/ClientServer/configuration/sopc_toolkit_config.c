@@ -420,8 +420,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
 const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
 {
     const char* res = NULL;
-    if (reverseEpCfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
-        reverseEpCfgIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    if (SOPC_IS_VALID_REVERSE_EP_CONFIGURATION(reverseEpCfgIdx))
     {
         if (tConfig.initDone)
         {

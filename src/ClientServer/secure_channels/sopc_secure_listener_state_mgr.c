@@ -42,7 +42,7 @@ static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigI
 {
     bool result = false;
     SOPC_SecureListener* scListener = NULL;
-    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2)
+    if (SOPC_IS_VALID_EP_CONFIGURATION(endpointConfigIdx))
     {
         scListener = &(secureListenersArray[endpointConfigIdx]);
         if (scListener->state == SECURE_LISTENER_STATE_CLOSED)
@@ -61,8 +61,8 @@ static bool SOPC_SecureListenerStateMgr_NoListener(uint32_t endpointConfigIdx)
 {
     bool result = false;
     SOPC_SecureListener* scListener = NULL;
-    // Note: only for server endpoints (first half of listener array)
-    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    // Note: only for server endpoints (classic)
+    if (SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx))
     {
         scListener = &(secureListenersArray[endpointConfigIdx]);
         if (scListener->state == SECURE_LISTENER_STATE_CLOSED)
@@ -82,11 +82,10 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
 {
     assert(NULL != epConfig);
     SOPC_SecureListener* scListener = NULL;
-    SOPC_SecureConnection* sc = NULL;
     bool result = false;
     uint32_t idx = 0;
-    // Note: only for server endpoints (first half of listener array)
-    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    // Note: only for server endpoints (classic)
+    if (SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx))
     {
         result = true;
         scListener = &(secureListenersArray[endpointConfigIdx]);
@@ -103,8 +102,6 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
             {
                 if (scListener->isUsedConnectionIdxArray[idx])
                 {
-                    sc = SC_GetConnection(scListener->connectionIdxArray[idx]);
-                    assert(NULL != sc);
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, scListener->connectionIdxArray[idx],
                                                                    (uintptr_t) NULL, endpointConfigIdx);
                     scListener->isUsedConnectionIdxArray[idx] = false;
@@ -132,9 +129,8 @@ static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseE
     SOPC_SecureListener* scListener = NULL;
     bool result = false;
     uint32_t idx = 0;
-    // Note: only for client reverse endpoints (second half of listener array)
-    if (reverseEndpointCfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
-        reverseEndpointCfgIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2)
+    // Note: only for client reverse endpoints
+    if (SOPC_IS_VALID_REVERSE_EP_CONFIGURATION(reverseEndpointCfgIdx))
     {
         result = true;
         scListener = &(secureListenersArray[reverseEndpointCfgIdx]);
@@ -159,12 +155,8 @@ static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseE
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_LISTENER, scListener->socketIndex, (uintptr_t) NULL,
                                           (uintptr_t) reverseEndpointCfgIdx);
             }
-            memset(scListener, 0, sizeof(SOPC_SecureListener));
         }
-        else
-        {
-            memset(scListener, 0, sizeof(SOPC_SecureListener));
-        }
+        memset(scListener, 0, sizeof(SOPC_SecureListener));
     }
     return result;
 }
@@ -172,7 +164,7 @@ static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseE
 static SOPC_SecureListener* SOPC_SecureListenerStateMgr_GetListener(uint32_t endpointConfigIdx)
 {
     SOPC_SecureListener* scListener = NULL;
-    if (endpointConfigIdx > 0 && endpointConfigIdx <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS * 2)
+    if (SOPC_IS_VALID_EP_CONFIGURATION(endpointConfigIdx))
     {
         scListener = &(secureListenersArray[endpointConfigIdx]);
     }
@@ -394,8 +386,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         // Retrieve the secure connection token created on socket connection from server
         sc = SC_GetConnection(inScIdx);
         if (sc != NULL && sc->isReverseConnection && SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == sc->state &&
-            sc->clientReverseEpConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
-            sc->clientReverseEpConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+            SOPC_IS_VALID_REVERSE_EP_CONFIGURATION(sc->clientReverseEpConfigIdx))
         {
             // Stop RHE reception timer
             SOPC_EventTimer_Cancel(sc->connectionTimeoutTimerId);

@@ -30,7 +30,14 @@
 #include "sopc_address_space.h"
 #include "sopc_event_handler.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_user_app_itf.h"
+
+// Macro used to check EP configuration index validity depending on classic / reverse type
+#define SOPC_IS_VALID_EP_CONFIGURATION(x) ((x) > 0 && (x) <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+#define SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(x) ((x) > 0 && (x) <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+#define SOPC_IS_VALID_REVERSE_EP_CONFIGURATION(x) \
+    ((x) > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS && (x) <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
 
 /**
  *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured

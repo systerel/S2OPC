@@ -256,9 +256,7 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
 static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t endpointConfigIdx, uint16_t reverseConnIdx)
 {
     assert(NULL != timerId);
-    assert(endpointConfigIdx > 0);
-    assert(endpointConfigIdx <=
-           SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS); // Server endpoint (first half of lsitener array)
+    assert(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx)); // Server EP (classic)
     assert(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
     SOPC_Event event;
     event.eltId = endpointConfigIdx;

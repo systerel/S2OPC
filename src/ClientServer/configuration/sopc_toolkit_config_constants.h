@@ -61,7 +61,9 @@
 
 /* SECURE CHANNEL CONFIGURATION */
 
-/** @brief Maximum number of endpoint description configured (same as number of connection listeners) */
+/** @brief Maximum number of classic endpoint descriptions configured (same as number of connection listeners).
+ *         This is also the maximum number of reverse endpoint descriptions configured (in addition to classic ones).
+ */
 #ifndef SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS 10
 #endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
@@ -76,7 +78,7 @@
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /** @brief SOPC_MAX_SECURE_CONNECTIONS defines the simultaneous stable SC,
- *         More slots are used (+0.25%) to check if old connection can be closed when maximum is reached.
+ *         More slots are used (+25%) to check if old connection can be closed when maximum is reached.
  *         If an old connection is closed for each of the buffered new connection attempt,
  *         those are kept otherwise buffered new connection are closed
  */
