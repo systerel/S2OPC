@@ -285,7 +285,8 @@ typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
     SE_REVERSE_ENDPOINT_CLOSED = 0x700, /**< (Client)<br/>
-                                         *  id = reverse endpoint configuration index
+                                         *  id = reverse endpoint configuration index<br/>
+                                         *  auxParams = (SOPC_ReturnStatus) status reason
                                          */
     SE_SESSION_ACTIVATION_FAILURE,      /**< (Client)<br/>
                                          *   id = (SOPC_SessionId) internal session id (or 0 if not yet defined)<br/>

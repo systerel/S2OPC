@@ -161,7 +161,7 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
             SOPC_Free(config->clientLocaleIds[i]);
         }
         SOPC_Free(config->clientLocaleIds);
-        for (int i = 0; NULL != config->reverseEndpoints && config->nbReverseEndpoints; i++)
+        for (int i = 0; i < config->nbReverseEndpoints; i++)
         {
             SOPC_Free(config->reverseEndpoints[i]);
         }
