@@ -145,7 +145,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         break;
     case SC_REVERSE_CONNECTED:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: SC_SC_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
+                               "ServicesMgr: SC_REVERSE_CONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIuPTR, id, auxParam);
         // id = secure channel connection index,
         // params = (uint32_t) secure channel configuration index,
         // auxParams = (uint32) reverse endpoint configuration index

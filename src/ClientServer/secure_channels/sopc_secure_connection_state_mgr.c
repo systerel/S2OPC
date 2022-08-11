@@ -819,13 +819,10 @@ static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rh
     if (SOPC_STATUS_OK == status)
     {
         result = true;
-        // Move C strings into output variables
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *serverURI = (char*) SOPC_String_GetRawCString(&sopcServerURI);
-        sopcServerURI.DoNotClear = true;
-        *serverURL = (char*) SOPC_String_GetRawCString(&sopcServerURL);
-        sopcServerURL.DoNotClear = true;
-        SOPC_GCC_DIAGNOSTIC_RESTORE
+        *serverURI = SOPC_String_GetCString(&sopcServerURI);
+        SOPC_String_Clear(&sopcServerURI);
+        *serverURL = SOPC_String_GetCString(&sopcServerURL);
+        SOPC_String_Clear(&sopcServerURL);
     }
     else
     {
@@ -2936,7 +2933,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else if (!SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(buffer, &serverURI, &serverURL))
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, errorStatus,
-                                     "Error on HELLO message treatment");
+                                     "Error on ReverseHello message treatment");
         }
         else
         {

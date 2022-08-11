@@ -53,7 +53,7 @@ typedef enum
     SECURE_CONNECTION_STATE_SC_INIT,
     SECURE_CONNECTION_STATE_SC_CONNECTING,
     SECURE_CONNECTION_STATE_SC_CONNECTED,
-    SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW,
+    SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW
 } SOPC_SecureConnection_State;
 
 /**
@@ -172,7 +172,7 @@ typedef struct SOPC_SecureConnection
     SOPC_SecureConnection_State state;
     uint32_t secureChannelConfigIdx;
     // SC reverse connection info
-    bool isReverseConnection;          // use ReverseHello mechanism fpr this connection
+    bool isReverseConnection;          // use ReverseHello mechanism for this connection
     uint16_t serverReverseConnIdx;     // reverse connection index in endpoint configuration
                                        // (set only on server side if isReverseConnection is true)
     uint32_t clientReverseEpConfigIdx; // reverse endpoint configuration index
