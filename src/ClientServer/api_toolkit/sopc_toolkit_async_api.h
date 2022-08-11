@@ -247,8 +247,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConn
 /**
  * \brief Request to open a connection listener for the given reverse endpoint description configuration as a client.
  *
- *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
- *   otherwise the listener could be considered as opened.
+ *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct,
+ *   otherwise the listener must be considered as opened.
  *
  * \param reverseEndpointConfigIdx  Endpoint description configuration index provided by
  *                                  SOPC_ToolkitClient_AddReverseEndpointConfig()
@@ -259,8 +259,8 @@ void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx r
 /**
  * \brief Request to close a connection listener for the given endpoint description configuration.
  *
- *   In any case the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
- *   once triggered if the listener was opened it could be now considered closed.
+ *   In any case the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct,
+ *   once triggered if the listener was opened it must be considered closed.
  *
  * \param reverseEndpointConfigIdx  Endpoint description configuration index provided to
  *                                  SOPC_ToolkitClient_AsyncOpenReverseEndpoint()
