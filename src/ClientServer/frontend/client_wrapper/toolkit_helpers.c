@@ -178,14 +178,15 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             pscConfig->msgSecurityMode = msgSecurityMode;
             pscConfig->expectedEndpoints = expectedEndpoints;
             pscConfig->clientConfigPtr = clientAppCfg;
+            char* serverUri = NULL;
+            char* url = NULL;
+            char* secuPolicyUri = NULL;
             if (szServerUri != NULL)
             {
-                pscConfig->serverUri = SOPC_Malloc(strlen(szServerUri) + 1);
-                if (NULL != pscConfig->serverUri)
+                serverUri = SOPC_Malloc(strlen(szServerUri) + 1);
+                if (NULL != serverUri)
                 {
-                    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-                    strcpy((char*) pscConfig->serverUri, szServerUri);
-                    SOPC_GCC_DIAGNOSTIC_RESTORE
+                    pscConfig->serverUri = strcpy(serverUri, szServerUri);
                 }
                 else
                 {
@@ -196,24 +197,26 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             if (SOPC_STATUS_OK == status)
             {
                 /* These input strings are verified non NULL */
-                pscConfig->url = SOPC_Malloc(strlen(szServerUrl) + 1);
-                pscConfig->reqSecuPolicyUri = SOPC_Malloc(strlen(szSecuPolicy) + 1);
-                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-                if (NULL != pscConfig->url && NULL != pscConfig->reqSecuPolicyUri)
+                url = SOPC_Malloc(strlen(szServerUrl) + 1);
+                secuPolicyUri = SOPC_Malloc(strlen(szSecuPolicy) + 1);
+
+                if (NULL != url && NULL != secuPolicyUri)
                 {
-                    strcpy((char*) pscConfig->url, szServerUrl);
-                    strcpy((char*) pscConfig->reqSecuPolicyUri, szSecuPolicy);
                     /* Handles the config to the caller */
+                    pscConfig->url = strcpy(url, szServerUrl);
+                    pscConfig->reqSecuPolicyUri = strcpy(secuPolicyUri, szSecuPolicy);
                     *ppNewCfg = pscConfig;
                 }
                 else
                 {
-                    SOPC_Free((void*) pscConfig->serverUri);
-                    SOPC_Free((void*) pscConfig->url);
-                    SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
+                    SOPC_Free(serverUri);
+                    pscConfig->serverUri = NULL;
+                    SOPC_Free(url);
+                    pscConfig->url = NULL;
+                    SOPC_Free(secuPolicyUri);
+                    pscConfig->reqSecuPolicyUri = NULL;
                     status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
-                SOPC_GCC_DIAGNOSTIC_RESTORE
             }
         }
         else

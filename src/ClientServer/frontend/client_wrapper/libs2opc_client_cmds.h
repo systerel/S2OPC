@@ -137,7 +137,7 @@ typedef struct
     const char* endpointUrl;
     const char* serverUri;
     bool isReverseConnection;
-    int32_t reverseConnectionConfigId;
+    uint32_t reverseConnectionConfigId;
 } SOPC_ClientHelper_EndpointConnection;
 
 /**

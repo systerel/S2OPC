@@ -108,9 +108,9 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  *
  * \param iscConfig               The configuration identifier to use with this machine
  * \param isReverseConnection     Set to true if the reverse connection mechanism shall be used
- * \param reverseConfigIdx        Index of the reverse endpoint configuration.
- *                                Reverse endpoint state is not managed by the state machine,
- *                                it shall be opened by caller prior to this step.
+ * \param reverseConfigIdx        Index of the reverse endpoint configuration created using
+ *                                ::SOPC_ClientCommon_CreateReverseEndpoint.
+ *                                Only significant if \p isReverseConnection is true.
  * \param iCliId                  The client id of the machine, it shall be unique.
  * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
  * \param szUsername              Zero-terminated username, see SOPC_LibSub_ConnectionCfg

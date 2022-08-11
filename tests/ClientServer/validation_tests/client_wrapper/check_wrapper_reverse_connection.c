@@ -68,7 +68,7 @@ START_TEST(test_wrapper_reverse_connections)
         .endpointUrl = INVALID_URL,
         .serverUri = NULL,
         .isReverseConnection = true,
-        .reverseConnectionConfigId = reverseEpId,
+        .reverseConnectionConfigId = (uint32_t) reverseEpId,
     };
 
     /* invalid server URL */

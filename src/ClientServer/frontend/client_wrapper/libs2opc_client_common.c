@@ -172,13 +172,14 @@ void SOPC_ClientCommon_Clear(void)
     {
         SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEpConfigsIds[i]);
         reverseEpConfigsIds[i] = 0;
+        // Free content of reverseEpConfigs (appConfig->clientConfig.reverseEndpoints is mapped onto)
         SOPC_Free(reverseEpConfigs[i]);
         reverseEpConfigs[i] = NULL;
     }
     appConfig->clientConfig.nbReverseEndpoints = 0;
     appConfig->clientConfig.reverseEndpoints = NULL;
 
-    // Close all secure channels that might be opened synchonously
+    // Close all secure channels that might be opened synchronously
     // and clear all toolkit client SC configurations
     SOPC_ToolkitClient_ClearAllSCs();
 
@@ -245,6 +246,7 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
     }
     if (NULL == appConfig->clientConfig.reverseEndpoints)
     {
+        // Maps wrapper reverse EP URL array with client application configuration one
         appConfig->clientConfig.reverseEndpoints = reverseEpConfigs;
     }
 
@@ -257,6 +259,7 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
 
     if (0 != reverseEpIdx)
     {
+        // Store the reverse EP configuration index
         reverseEpConfigsIds[nbReverseEndpoints] = reverseEpIdx;
         // Open the reverse endpoint
         SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseEpIdx);
@@ -757,7 +760,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientComm
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    uint32_t iscConfig = 0;
+    SOPC_SecureChannelConfigIdx scConfigIdx = 0;
     SOPC_StaMac_ReqCtx* pReqCtx = NULL;
 
     if (!SOPC_Atomic_Int_Get(&libInitialized))
@@ -791,8 +794,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientComm
     /* add a secure channel */
     if (SOPC_STATUS_OK == status)
     {
-        iscConfig = SOPC_ToolkitClient_AddSecureChannelConfig(pscConfig);
-        if (0 == iscConfig)
+        scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(pscConfig);
+        if (0 == scConfigIdx)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -838,11 +841,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientComm
         if (connection->isReverseConnection)
         {
             endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateReverse(
-                (SOPC_ReverseEndpointConfigIdx) connection->reverseConnectionConfigId, iscConfig);
+                (SOPC_ReverseEndpointConfigIdx) connection->reverseConnectionConfigId, scConfigIdx);
         }
         else
         {
-            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(iscConfig);
+            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(scConfigIdx);
         }
 
         status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);

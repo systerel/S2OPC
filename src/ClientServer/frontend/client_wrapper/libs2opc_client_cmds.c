@@ -463,8 +463,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
         return -2;
     }
 
-    if ((connection->isReverseConnection && 0 == connection->reverseConnectionConfigId) ||
-        connection->reverseConnectionConfigId < 0)
+    if (connection->isReverseConnection && 0 == connection->reverseConnectionConfigId)
     {
         return -3;
     }
@@ -644,7 +643,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     }
 
     cfg_con->is_reverse_connection = connection->isReverseConnection;
-    cfg_con->reverse_config_idx = (uint32_t) connection->reverseConnectionConfigId;
+    cfg_con->reverse_config_idx = connection->reverseConnectionConfigId;
     cfg_con->server_uri = connection->serverUri;
     cfg_con->server_url = connection->endpointUrl;
     cfg_con->security_policy = security->security_policy;
@@ -706,8 +705,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
     {
         return -2;
     }
-    if ((connection->isReverseConnection && 0 == connection->reverseConnectionConfigId) ||
-        connection->reverseConnectionConfigId < 0)
+    if (connection->isReverseConnection && 0 == connection->reverseConnectionConfigId)
     {
         return -3;
     }

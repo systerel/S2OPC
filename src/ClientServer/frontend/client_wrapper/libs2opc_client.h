@@ -294,8 +294,10 @@ typedef struct
    The reverse_config_idx shall be > 0
  @var SOPC_LibSub_ConnectionCfg::reverse_config_idx
    Index of the reverse endpoint configuration
+ @var SOPC_LibSub_ConnectionCfg::server_uri
+   Zero-terminated string defining server application URI
  @var SOPC_LibSub_ConnectionCfg::server_url
-   Zero-terminated path to server endpoint URL
+   Zero-terminated string defining the server endpoint URL
  @var SOPC_LibSub_ConnectionCfg::security_policy
    The chosen OPC-UA security policy for the connection, one of the SOPC_SecurityPolicy_*_URI string
  @var SOPC_LibSub_ConnectionCfg::security_mode
