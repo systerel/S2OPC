@@ -463,20 +463,11 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: APP_TO_SE_OPEN_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
         reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
-
-        if (NULL == reverseEndpointURL)
-        {
-            status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL,
-                                              SOPC_STATUS_INVALID_PARAMETERS);
-            assert(SOPC_STATUS_OK == status);
-        }
-        else
-        {
-            status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_OPEN,
-                                                      id, // Reverse endpoint config idx
-                                                      (uintptr_t) NULL, 0);
-            assert(SOPC_STATUS_OK == status);
-        }
+        assert(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
+        status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_OPEN,
+                                                  id, // Reverse endpoint config idx
+                                                  (uintptr_t) NULL, 0);
+        assert(SOPC_STATUS_OK == status);
         break;
     case APP_TO_SE_CLOSE_REVERSE_ENDPOINT:
         /* id = reverse endpoint description config index */
@@ -484,17 +475,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: APP_TO_SE_CLOSE_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
         reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
-        if (NULL == reverseEndpointURL)
-        {
-            status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL,
-                                              SOPC_STATUS_INVALID_PARAMETERS);
-            assert(SOPC_STATUS_OK == status);
-        }
-        else
-        {
-            status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_CLOSE, id, (uintptr_t) NULL, 0);
-            assert(SOPC_STATUS_OK == status);
-        }
+        assert(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
+        status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_CLOSE, id, (uintptr_t) NULL, 0);
+        assert(SOPC_STATUS_OK == status);
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
         // id = secure channel config index,
