@@ -246,7 +246,7 @@ SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const 
     return result;
 }
 
-const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
+const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
 {
     const char* res = NULL;
     if (reverseEpCfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&

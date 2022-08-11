@@ -58,13 +58,13 @@ static struct
     /* Specific client */
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     const char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
-    uint32_t scConfigIdxMax;
-    uint32_t reverseEpConfigIdxMax;
+    SOPC_SecureChannelConfigIdx scConfigIdxMax;
+    SOPC_ReverseEndpointConfigIdx reverseEpConfigIdxMax;
     /* Specific server */
     SOPC_SecureChannel_Config* serverScConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
-    uint32_t serverScLastConfigIdx;
-    uint32_t epConfigIdxMax;
+    SOPC_SecureChannelConfigIdx serverScLastConfigIdx;
+    SOPC_EndpointConfigIdx epConfigIdxMax;
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
 tConfig = {.initDone = false,
            .serverConfigLocked = false,
@@ -385,7 +385,7 @@ static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChanne
 SOPC_SecureChannelConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     assert(NULL != scConfig);
-    uint32_t result = 0;
+    SOPC_SecureChannelConfigIdx result = 0;
 
     if (tConfig.initDone && SOPC_Internal_CheckClientSecureChannelConfig(scConfig))
     {
@@ -417,7 +417,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
     return res;
 }
 
-const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
+const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
 {
     const char* res = NULL;
     if (reverseEpCfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
@@ -433,12 +433,12 @@ const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConf
     return res;
 }
 
-uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
+SOPC_SecureChannelConfigIdx SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig)
 {
     assert(NULL != scConfig);
 
-    uint32_t lastScIdx = 0;
-    uint32_t idxWithServerOffset = 0;
+    SOPC_SecureChannelConfigIdx lastScIdx = 0;
+    SOPC_SecureChannelConfigIdx idxWithServerOffset = 0;
 
     // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
     if (tConfig.initDone)
@@ -551,9 +551,9 @@ static bool SOPC_ToolkitServer_AddEndpointConfig_HasOrAddDiscoveryEndpoint(SOPC_
     return hasNoneSecurityConfig;
 }
 
-uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
+SOPC_EndpointConfigIdx SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 {
-    uint32_t result = 0;
+    SOPC_EndpointConfigIdx result = 0;
     assert(NULL != epConfig);
     assert(NULL != epConfig->serverConfigPtr);
 
@@ -589,7 +589,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
 
 SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL)
 {
-    uint32_t result = 0;
+    SOPC_ReverseEndpointConfigIdx result = 0;
     assert(NULL != reverseEndpointURL);
 
     if (tConfig.initDone)
@@ -606,8 +606,8 @@ SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const 
     }
     if (0 != result)
     {
-        // Make server endpoint and client reverse endpoint configuration indexes disjoints
-        return result + SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
+        // Make server endpoint and client reverse endpoint configuration indexes disjoint
+        result += SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
     }
     return result;
 }

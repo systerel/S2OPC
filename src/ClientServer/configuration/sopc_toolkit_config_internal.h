@@ -52,7 +52,7 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
  *  0 if toolkit is not initialized, already
  *  configured or otherwise
  */
-uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
+SOPC_SecureChannelConfigIdx SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
 /**
  *  \brief (SERVER SIDE ONLY) Remove the secure channel configuration for the given server index
@@ -97,6 +97,6 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
  *
  *  \return The client endpointURL of the reverse endpoint or NULL if index invalid or toolkit is not initialized
  */
-const char* SOPC_ToolkitClient_GetReverseEndpointConfig(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
+const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
 
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

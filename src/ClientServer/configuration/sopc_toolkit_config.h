@@ -96,7 +96,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNotif_Fct* pAddSpaceNotifFct);
 
 /**
- * \brief Index type for client secure channel configuration
+ * \brief Index type for client secure channel configuration, 0 is an invalid index.
  */
 typedef uint32_t SOPC_SecureChannelConfigIdx;
 
@@ -111,7 +111,7 @@ typedef uint32_t SOPC_SecureChannelConfigIdx;
 SOPC_SecureChannelConfigIdx SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
 /**
- * \brief Index type for server endpoint configuration
+ * \brief Index type for server endpoint configuration, 0 is an invalid index.
  */
 typedef uint32_t SOPC_EndpointConfigIdx;
 
@@ -129,12 +129,12 @@ typedef uint32_t SOPC_EndpointConfigIdx;
 SOPC_EndpointConfigIdx SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 /**
- * \brief Index type for reverse endpoint configuration
+ * \brief Index type for reverse endpoint configuration, 0 is an invalid index
  */
 typedef uint32_t SOPC_ReverseEndpointConfigIdx;
 
 /**
- *  \brief Record the given client reverse endpoint configuration in given index
+ *  \brief Record the given client reverse endpoint configuration in returned index
  *  (SOPC_Toolkit_Initialize required)
  *
  *  \param reverseEndpointURL  The client endpointURL for reverse connections from server(s)

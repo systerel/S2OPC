@@ -733,7 +733,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScListenerMgr: EP_REVERSE_OPEN epCfgIdx=%" PRIu32, eltId);
         /* id = endpoint description configuration index */
         // Retrieve EP configuration
-        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointConfig(eltId);
+        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(eltId);
         if (reverseEndpointURL != NULL)
         {
             result = SOPC_SecureListenerStateMgr_OpeningListener(eltId, true);

@@ -462,7 +462,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_OPEN_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
-        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointConfig(id);
+        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
 
         if (NULL == reverseEndpointURL)
         {
@@ -483,7 +483,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_CLOSE_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
-        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointConfig(id);
+        reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
         if (NULL == reverseEndpointURL)
         {
             status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL,
