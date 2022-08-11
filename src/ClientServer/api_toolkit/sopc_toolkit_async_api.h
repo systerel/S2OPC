@@ -78,50 +78,24 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
 void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
-
-/**
- * \brief Enumerated type for a connection to a server Endpoint
- */
-typedef enum SOPC_EndpointConnectionType
-{
-    SOPC_EndpointConnectionType_Classic, /*<< Classic connection to server endpoint initiated by client */
-    SOPC_EndpointConnectionType_Reverse, /*<< Reverse connection to server endpoint initiated by server */
-} SOPC_EndpointConnectionType;
-
-/**
- * \brief Configuration parameters for a classic connection to a server endpoint
- */
-typedef struct SOPC_EndpointConnection_Classic
-{
-    SOPC_SecureChannelConfigIdx
-        secureChannelConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
-                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
-} SOPC_EndpointConnection_Classic;
-
-/**
- * \brief Configuration parameters for a reverse connection to a server endpoint
- */
-typedef struct SOPC_EndpointConnection_Reverse
-{
-    SOPC_ReverseEndpointConfigIdx
-        reverseEndpointConfigIdx; /*<< Index of the Reverse Endpoint configuration to listen for server connection
-                                       returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig() */
-    SOPC_SecureChannelConfigIdx
-        secureChannelConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
-                                    returned by ::SOPC_ToolkitClient_AddSecureChannelConfig() */
-} SOPC_EndpointConnection_Reverse;
-
 /**
  * \brief Configuration parameters for a connection to a server endpoint.
  *        The connection is either initiated by the client (classic) or by the server (reverse).
+ *
+ * \note reverseEndpointConfigIdx != 0 => reverse connection
+ *       reverseEndpointConfigIdx == 0 => classic connection
+ *
  */
 typedef struct SOPC_EndpointConnectionCfg
 {
-    SOPC_EndpointConnectionType connectionType;
-    union {
-        SOPC_EndpointConnection_Classic classic;
-        SOPC_EndpointConnection_Reverse reverse;
-    } data;
+    SOPC_ReverseEndpointConfigIdx
+        reverseEndpointConfigIdx; /*<< Index of the Reverse Endpoint configuration to listen for server connection
+                                       returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig().
+                                       It shall be 0 for a classic connection and > 0 for a reverse connection. */
+    SOPC_SecureChannelConfigIdx
+        secureChannelConfigIdx; /*<< Index of the Secure Channel configuration for endpoint connection
+                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig().
+                                     It shall not be 0. */
 } SOPC_EndpointConnectionCfg;
 
 /**

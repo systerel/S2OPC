@@ -277,16 +277,15 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
 static bool lastConnectionTypeIsClassic = false;
 static SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_Create(SOPC_ReverseEndpointConfigIdx reverseEpConfigIdx,
                                                                     SOPC_SecureChannelConfigIdx configIdx,
-                                                                    SOPC_EndpointConnectionType connectionType)
+                                                                    unsigned int connectionType)
 {
     switch (connectionType)
     {
-    case SOPC_EndpointConnectionType_Classic:
+    case 0: // Classic
         return SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
-    case SOPC_EndpointConnectionType_Reverse:
+    case 1: // Reverse
         return SOPC_EndpointConnectionCfg_CreateReverse(reverseEpConfigIdx, configIdx);
-    default:
-        // Alternate classic and reverse
+    default: // Alternate classic and reverse
         if (lastConnectionTypeIsClassic)
         {
             lastConnectionTypeIsClassic = false;
@@ -461,8 +460,7 @@ int main(void)
     }
 
     // Test will run 3 times: 1 with classic endpoint connection, 1 with reverse endpoint connection and 1 with both
-    for (unsigned int connectionType = SOPC_EndpointConnectionType_Classic;
-         SOPC_STATUS_OK == status && connectionType <= SOPC_EndpointConnectionType_Reverse + 1; connectionType++)
+    for (unsigned int connectionType = 0; SOPC_STATUS_OK == status && connectionType <= 2; connectionType++)
     {
         // Configure the 2 secure channel connections to use and retrieve channel configuration index
         if (SOPC_STATUS_OK == status)
