@@ -52,10 +52,9 @@ struct SOPC_StaMac_Machine
 {
     Mutex mutex;
     SOPC_StaMac_State state;
-    uint32_t iscConfig;       /* Toolkit scConfig ID */
-    bool isReverseConnection; /* True if the connection shall use reverse connection mechanism */
+    uint32_t iscConfig; /* Toolkit scConfig ID */
     SOPC_ReverseEndpointConfigIdx
-        reverseConfigIdx; /* Reverse configuration index shall be > 0 if isReverseConnection is set */
+        reverseConfigIdx; /* Reverse configuration index > 0 if reverse connection mechanism shall be used */
     uint32_t iCliId;      /* LibSub connection ID, used by the callback. It shall be unique. */
 
     /* Keeping two callbacks to avoid modification of LibSub API */
@@ -157,7 +156,6 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
  */
 
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
-                                     bool isReverseConnection,
                                      SOPC_ReverseEndpointConfigIdx reverseConfigIdx,
                                      uint32_t iCliId,
                                      const char* szPolicyId,
@@ -185,7 +183,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     {
         pSM->state = stInit;
         pSM->iscConfig = iscConfig;
-        pSM->isReverseConnection = isReverseConnection;
         pSM->reverseConfigIdx = reverseConfigIdx;
         pSM->iCliId = iCliId;
         pSM->pCbkLibSubDataChanged = pCbkLibSubDataChanged;
@@ -346,15 +343,8 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         // Session is strongly linked to the connection since only 1 can be activated on it
         // and connection ID is globally unique.
         pSM->iSessionCtx = pSM->iCliId;
-        SOPC_EndpointConnectionCfg endpointConnectionCfg;
-        if (pSM->isReverseConnection)
-        {
-            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateReverse(pSM->reverseConfigIdx, pSM->iscConfig);
-        }
-        else
-        {
-            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
-        }
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = pSM->reverseConfigIdx,
+                                                            .secureChannelConfigIdx = pSM->iscConfig};
 
         if (NULL == pSM->szUsername)
         {

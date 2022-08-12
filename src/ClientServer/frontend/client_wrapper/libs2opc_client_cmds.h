@@ -126,17 +126,15 @@ typedef struct
  @var SOPC_ClientHelper_EndpointConnection::serverUri
    Zero-terminated server URI (optional).
    If defined it is checked in case of reverse connection configuration
- @var SOPC_ClientHelper_EndpointConnection::isReverseConnection
-   Flag to set if the endpoint connection shall be done using reverse connection mechanism,
-   SOPC_ClientHelper_EndpointConnection::reverseConnectionConfigId shall then be set.
  @var SOPC_ClientHelper_EndpointConnection::reverseConnectionConfigId
-   The reverse connection configuration id configured using ::SOPC_ClientHelper_CreateReverseEndpoint
+   If endpoint connection shall be done using reverse connection mechanism it shall be set with the
+   the configuration id returned by ::SOPC_ClientHelper_CreateReverseEndpoint.
+   Otherwise it shall be 0 if no reverse connection is expected.
  */
 typedef struct
 {
     const char* endpointUrl;
     const char* serverUri;
-    bool isReverseConnection;
     uint32_t reverseConnectionConfigId;
 } SOPC_ClientHelper_EndpointConnection;
 
@@ -446,7 +444,6 @@ void SOPC_ClientHelper_Finalize(void);
  *    - (0): everything is OK.
  *    - (-1): connection is NULL.
  *    - (-2): connection->endpointURL is NULL.
- *    - (-3): connection reverse endpoint configuration is invalid.
  *    - (-10): result is NULL.
  *    - (-100): the request failed.
  * @note
@@ -499,7 +496,6 @@ int32_t SOPC_ClientHelper_CreateReverseEndpoint(const char* reverseEndpointURL);
     If this operation succeeded, return a configuration id \verbatim>\endverbatim 0.
     If NULL connection detected, return -1.
     If invalid endpointUrl detected, return -2.
-    If invalid reverse connection configuration detected (activated with invalid id), return -3
     If invalid security detected, return \verbatim-<10+n>\endverbatim with \verbatim<n>\endverbatim field number
     (starting from 1). If configuration failed, return '-100'.
  */

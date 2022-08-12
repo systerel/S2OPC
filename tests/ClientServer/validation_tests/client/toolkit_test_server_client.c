@@ -144,7 +144,6 @@ static int32_t client_create_configuration(void)
     SOPC_ClientHelper_EndpointConnection endpoint = {
         .endpointUrl = DEFAULT_ENDPOINT_URL,
         .serverUri = NULL,
-        .isReverseConnection = false,
         .reverseConnectionConfigId = 0,
     };
 

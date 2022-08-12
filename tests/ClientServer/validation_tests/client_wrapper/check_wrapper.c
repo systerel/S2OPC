@@ -55,21 +55,18 @@
 static SOPC_ClientHelper_EndpointConnection valid_endpoint = {
     .endpointUrl = VALID_URL,
     .serverUri = NULL,
-    .isReverseConnection = false,
     .reverseConnectionConfigId = 0,
 };
 
 static SOPC_ClientHelper_EndpointConnection invalid_endpoint_NULL = {
     .endpointUrl = NULL,
     .serverUri = NULL,
-    .isReverseConnection = false,
     .reverseConnectionConfigId = 0,
 };
 
 static SOPC_ClientHelper_EndpointConnection invalid_endpoint = {
     .endpointUrl = INVALID_URL,
     .serverUri = NULL,
-    .isReverseConnection = false,
     .reverseConnectionConfigId = 0,
 };
 

@@ -67,7 +67,6 @@ START_TEST(test_wrapper_reverse_connections)
     SOPC_ClientHelper_EndpointConnection reverse_connection_endpoint = {
         .endpointUrl = INVALID_URL,
         .serverUri = NULL,
-        .isReverseConnection = true,
         .reverseConnectionConfigId = (uint32_t) reverseEpId,
     };
 

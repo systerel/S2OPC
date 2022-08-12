@@ -37,14 +37,6 @@
  * ================
  */
 
-typedef struct
-{
-    const char* endpointUrl;
-    const char* serverUri;
-    bool isReverseConnection;
-    uint32_t reverseConnectionConfigId;
-} SOPC_ClientCommon_EndpointConnection;
-
 /**
  * @brief
  *   Callback type for discovery events
@@ -230,7 +222,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
  * @return
  *    the operation status
  */
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCommon_EndpointConnection* connection,
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientHelper_EndpointConnection* connection,
                                                                  uintptr_t requestContext);
 
 /**

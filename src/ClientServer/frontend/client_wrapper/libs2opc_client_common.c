@@ -354,7 +354,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
             pCfgCpy->token_target = pCfg->token_target;
             pCfgCpy->generic_response_callback = pCfg->generic_response_callback;
 
-            pCfgCpy->is_reverse_connection = pCfg->is_reverse_connection;
             pCfgCpy->reverse_config_idx = pCfg->reverse_config_idx;
             if (NULL != pCfg->server_uri)
             {
@@ -556,11 +555,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     {
         ++nCreatedClient;
         clientId = nCreatedClient;
-        status = SOPC_StaMac_Create(cfgId, pCfg->is_reverse_connection, pCfg->reverse_config_idx, clientId,
-                                    pCfg->policyId, pCfg->username, pCfg->password, pCfg->data_change_callback,
-                                    (double) pCfg->publish_period_ms, pCfg->n_max_keepalive, pCfg->n_max_lifetime,
-                                    pCfg->token_target, pCfg->timeout_ms, pCfg->generic_response_callback,
-                                    (uintptr_t) inhibitDisconnectCallback, &pSM);
+        status = SOPC_StaMac_Create(cfgId, pCfg->reverse_config_idx, clientId, pCfg->policyId, pCfg->username,
+                                    pCfg->password, pCfg->data_change_callback, (double) pCfg->publish_period_ms,
+                                    pCfg->n_max_keepalive, pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
+                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */
@@ -755,7 +753,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCommon_EndpointConnection* connection,
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientHelper_EndpointConnection* connection,
                                                                  uintptr_t requestContext)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -837,16 +835,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientComm
     /* send the request */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EndpointConnectionCfg endpointConnectionCfg;
-        if (connection->isReverseConnection)
-        {
-            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateReverse(
-                (SOPC_ReverseEndpointConfigIdx) connection->reverseConnectionConfigId, scConfigIdx);
-        }
-        else
-        {
-            endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(scConfigIdx);
-        }
+        SOPC_EndpointConnectionCfg endpointConnectionCfg = {
+            .reverseEndpointConfigIdx = connection->reverseConnectionConfigId, .secureChannelConfigIdx = scConfigIdx};
 
         status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, pReq, (uintptr_t) pReqCtx);
     }

@@ -84,7 +84,6 @@ int main(int argc, char* const argv[])
     SOPC_ClientHelper_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
-        .isReverseConnection = false,
         .reverseConnectionConfigId = 0,
     };
 

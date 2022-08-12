@@ -462,11 +462,6 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
     {
         return -2;
     }
-
-    if (connection->isReverseConnection && 0 == connection->reverseConnectionConfigId)
-    {
-        return -3;
-    }
     else if (NULL == result)
     {
         return -10;
@@ -507,8 +502,8 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
         assert(SOPC_STATUS_OK == statusMutex);
 
         // Note: SOPC_Client*_EndpointConnection shall remain the same, do a minimal check on size
-        assert(sizeof(SOPC_ClientHelper_EndpointConnection) == sizeof(SOPC_ClientCommon_EndpointConnection));
-        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest((SOPC_ClientCommon_EndpointConnection*) connection,
+        assert(sizeof(SOPC_ClientHelper_EndpointConnection) == sizeof(SOPC_ClientHelper_EndpointConnection));
+        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest((SOPC_ClientHelper_EndpointConnection*) connection,
                                                                 (uintptr_t) genReqCtx);
 
         if (SOPC_STATUS_OK == status)
@@ -642,7 +637,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
                     "No CA (or mandatory CRL) provided, server certificate will be accepted only if it is self-signed");
     }
 
-    cfg_con->is_reverse_connection = connection->isReverseConnection;
     cfg_con->reverse_config_idx = connection->reverseConnectionConfigId;
     cfg_con->server_uri = connection->serverUri;
     cfg_con->server_url = connection->endpointUrl;
@@ -704,10 +698,6 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
     if (NULL == connection->endpointUrl)
     {
         return -2;
-    }
-    if (connection->isReverseConnection && 0 == connection->reverseConnectionConfigId)
-    {
-        return -3;
     }
 
     if (NULL == security->security_policy)
