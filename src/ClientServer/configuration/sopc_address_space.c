@@ -394,7 +394,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
     return result;
 }
 
-bool SOPC_AddressSpace_AreNodesFreed(const SOPC_AddressSpace* space)
+bool SOPC_AddressSpace_AreNodesReleasable(const SOPC_AddressSpace* space)
 {
     assert(space != NULL);
 

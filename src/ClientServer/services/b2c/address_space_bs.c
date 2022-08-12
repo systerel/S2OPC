@@ -78,7 +78,7 @@ void address_space_bs__addNode_AddressSpace_Variable(
     const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
 {
-    assert(SOPC_AddressSpace_AreNodesFreed(address_space_bs__nodes));
+    assert(SOPC_AddressSpace_AreNodesReleasable(address_space_bs__nodes));
     assert(!SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes));
 
     assert(constants__e_ncl_Variable == address_space_bs__p_nodeClass);
@@ -1070,7 +1070,7 @@ void address_space_bs__get_Value_StatusCode(const constants__t_user_i address_sp
 
 void address_space_bs__is_AddressSpace_constant(t_bool* const address_space_bs__bres)
 {
-    *address_space_bs__bres = (!SOPC_AddressSpace_AreNodesFreed(address_space_bs__nodes) ||
+    *address_space_bs__bres = (!SOPC_AddressSpace_AreNodesReleasable(address_space_bs__nodes) ||
                                SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes));
 }
 
