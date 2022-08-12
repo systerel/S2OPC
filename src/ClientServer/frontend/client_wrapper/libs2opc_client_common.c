@@ -74,6 +74,7 @@ static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
 static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to be freed them in SOPC_LibSub_Clear() */
+static uint16_t nbReverseEndpoints = 0;
 static SOPC_ReverseEndpointConfigIdx reverseEpConfigsIds[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
 static char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
 
@@ -168,7 +169,7 @@ void SOPC_ClientCommon_Clear(void)
 
     SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
     // Close all reverse endpoints and free URLs
-    for (int i = 0; NULL != appConfig && i < appConfig->clientConfig.nbReverseEndpoints; i++)
+    for (int i = 0; NULL != appConfig && i < nbReverseEndpoints; i++)
     {
         SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEpConfigsIds[i]);
         reverseEpConfigsIds[i] = 0;
@@ -176,8 +177,7 @@ void SOPC_ClientCommon_Clear(void)
         SOPC_Free(reverseEpConfigs[i]);
         reverseEpConfigs[i] = NULL;
     }
-    appConfig->clientConfig.nbReverseEndpoints = 0;
-    appConfig->clientConfig.reverseEndpoints = NULL;
+    nbReverseEndpoints = 0;
 
     // Close all secure channels that might be opened synchronously
     // and clear all toolkit client SC configurations
@@ -239,22 +239,11 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
     assert(NULL != appConfig);
     // Configure the reverse endpoint
     SOPC_ReverseEndpointConfigIdx reverseEpIdx = 0;
-    uint16_t nbReverseEndpoints = appConfig->clientConfig.nbReverseEndpoints;
     if (nbReverseEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
     {
         return 0;
     }
-    if (NULL == appConfig->clientConfig.reverseEndpoints)
-    {
-        // Maps wrapper reverse EP URL array with client application configuration one
-        appConfig->clientConfig.reverseEndpoints = reverseEpConfigs;
-    }
-
-    appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints] = SOPC_strdup(reverseEndpointURL);
-    if (NULL == appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints])
-    {
-        return 0;
-    }
+    reverseEpConfigs[nbReverseEndpoints] = SOPC_strdup(reverseEndpointURL);
     reverseEpIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(reverseEndpointURL);
 
     if (0 != reverseEpIdx)
@@ -266,10 +255,11 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
     }
     else
     {
-        SOPC_Free(appConfig->clientConfig.reverseEndpoints[nbReverseEndpoints]);
+        SOPC_Free(reverseEpConfigs[nbReverseEndpoints]);
+        reverseEpConfigs[nbReverseEndpoints] = NULL;
         return 0;
     }
-    appConfig->clientConfig.nbReverseEndpoints++;
+    nbReverseEndpoints++;
 
     return reverseEpIdx;
 }

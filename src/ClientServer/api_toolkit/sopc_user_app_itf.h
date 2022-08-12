@@ -170,9 +170,6 @@ struct SOPC_Client_Config
                                  It might be NULL if there are no preferred locale ids.
                                  The array of locale ids indicates priority order for localized strings.
                                  The first LocaleId in the array has the highest priority. */
-
-    uint16_t nbReverseEndpoints; /**< Number of reverse endpoints defined by the client for reverse connection */
-    char** reverseEndpoints;     /**< ReverseEndpoint configuration array */
 };
 
 /**
