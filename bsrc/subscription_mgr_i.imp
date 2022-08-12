@@ -362,6 +362,56 @@ LOCAL_OPERATIONS
     END
     ;
 
+    fill_response_subscription_delete_monitored_items (p_subscription, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    PRE
+        DelMonitoredItemResp_Allocated = TRUE &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_delete_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_delete_resp &
+        p_nb_monitored_items : NAT &
+        p_nb_monitored_items : t_monitoredItemReqIndex &
+        p_nb_monitored_items = nb_monitored_items
+    THEN
+        LET l_delMonitoredItemResp_StatusCode BE
+            /* Evaluate the expected valid responses for which a monitored item should be allocated (e_sc_ok case) */
+            l_delMonitoredItemResp_StatusCode =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                mi_index : 1..nb_monitored_items &
+                mi_index : dom(DelMonitoredItemReq_Id)
+                |
+                {TRUE |-> e_sc_bad_monitored_item_id_invalid,
+                    FALSE |-> e_sc_ok
+                }(bool(DelMonitoredItemReq_Id(mi_index) /: s_monitoredItemId))
+            )
+        IN
+            /* Define the queues of monitored items that will be modified */
+            LET l_MonitoredItemIds, l_MonitoredItemPointers BE
+                l_MonitoredItemIds = DelMonitoredItemReq_Id[dom(l_delMonitoredItemResp_StatusCode |>> {e_sc_ok})] &
+                l_MonitoredItemPointers = a_monitoredItemId~[DelMonitoredItemReq_Id[dom(l_delMonitoredItemResp_StatusCode |>> {e_sc_ok})]]
+            IN
+                /* Set response variables */
+                DelMonitoredItemResp_StatusCode := l_delMonitoredItemResp_StatusCode ||
+
+                /* Delete existing monitored items data */
+                s_monitoredItemId := s_monitoredItemId - l_MonitoredItemIds ||
+                s_monitoredItemPointer := s_monitoredItemPointer - l_MonitoredItemPointers ||
+                a_monitoredItemId := a_monitoredItemId |>> l_MonitoredItemIds ||
+                a_monitoredItemSubs := l_MonitoredItemPointers <<| a_monitoredItemSubs ||
+                a_monitoredItemNodeId := l_MonitoredItemPointers <<| a_monitoredItemNodeId ||
+                a_monitored_item_notifications := a_monitored_item_notifications |>> l_MonitoredItemPointers ||
+                a_defined_monitored_items := a_defined_monitored_items |>> l_MonitoredItemPointers
+            END
+        END
+    END
+    ;
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -624,7 +674,7 @@ OPERATIONS
             l_indexRange := c_IndexRange_indet;
             l_continue, l_index <-- continue_iter_monitored_item_request;
             l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize, l_indexRange
-              <-- getall_monitored_item_req_params(p_req_msg, l_index);
+              <-- getall_create_monitored_item_req_params(p_req_msg, l_index);
             /* Check validity of NodeId */
             IF l_bres = TRUE
             THEN
@@ -677,7 +727,7 @@ OPERATIONS
                 END
             END
             ;
-            setall_msg_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
+            setall_msg_create_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
 
         INVARIANT
             rreqs_to_iterate <: t_monitoredItemReqIndex &
@@ -883,6 +933,40 @@ OPERATIONS
             card(s_mi_to_iterate_it)
         END;
         clear_iter_monitored_item (l_iterator)
+    END
+    ;
+
+    fill_response_subscription_delete_monitored_items (p_subscription, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    VAR
+        l_continue,
+        l_index,
+        l_id,
+        l_sc
+    IN
+        l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
+        WHILE l_continue = TRUE DO
+            l_continue, l_index <-- continue_iter_monitored_item_request;
+            l_id <-- getall_delete_monitored_item_req_params (p_req_msg, l_index);
+            l_sc <-- delete_monitored_item (p_subscription, l_id);
+            setall_msg_delete_monitored_item_resp_params (p_resp_msg, l_index, l_sc)
+
+        INVARIANT
+            rreqs_to_iterate <: t_monitoredItemReqIndex &
+            rreqs_iterated   <: t_monitoredItemReqIndex &
+            rreqs_to_iterate /\ rreqs_iterated = {} &
+            rreqs_to_iterate \/ rreqs_iterated = 1..nb_monitored_items &
+            l_continue = bool(rreqs_to_iterate /= {}) &
+
+            /* Iterated indexes are in domain of the filled status codes */
+            rreqs_iterated = dom(DelMonitoredItemResp_StatusCode) &
+            /* Deleted MI are not present anymore in configuration */
+            s_monitoredItemId /\ DelMonitoredItemReq_Id[dom(DelMonitoredItemResp_StatusCode |>> {e_sc_ok})] = {} &
+            a_monitoredItemId |> DelMonitoredItemReq_Id[dom(DelMonitoredItemResp_StatusCode |>> {e_sc_ok})] = {}
+            /* Note: absence of monitored item pointers in other relations for already iterated items is implied by this last property */
+
+        VARIANT
+            card(rreqs_to_iterate)
+        END
     END
     ;
 
@@ -1212,6 +1296,37 @@ OPERATIONS
                     l_locales <-- get_server_session_preferred_locales(p_session);
                     fill_response_subscription_create_monitored_items
                       (p_session, l_subscription, l_timestampToRet, p_user, l_locales, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                    StatusCode_service := e_sc_ok
+                ELSE
+                    StatusCode_service := e_sc_bad_out_of_memory
+                END
+            ELSE
+                StatusCode_service := e_sc_bad_subscription_id_invalid
+            END
+        ELSE
+            StatusCode_service := l_sc
+        END
+    END
+    ;
+
+    StatusCode_service <-- treat_subscription_delete_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_sc,
+        l_subscription,
+        l_valid_subscription,
+        l_nb_monitored_items,
+        l_bres
+    IN
+        l_sc, l_subscription, l_nb_monitored_items <-- getall_msg_delete_monitored_items_req_params (p_req_msg);
+        IF l_sc = e_sc_ok
+        THEN
+            l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
+            IF l_valid_subscription = TRUE
+            THEN
+                l_bres <-- alloc_msg_delete_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
+                IF l_bres = TRUE
+                THEN
+                    fill_response_subscription_delete_monitored_items (l_subscription, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 05/08/2022 09:12:02
+ Date                 : 19/08/2022 15:43:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -62,6 +62,10 @@ extern void monitored_item_pointer_bs__create_monitored_item_pointer(
    constants__t_monitoredItemId_i * const monitored_item_pointer_bs__monitoredItemId);
 extern void monitored_item_pointer_bs__delete_monitored_item_pointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer);
+extern void monitored_item_pointer_bs__getall_monitoredItemId(
+   const constants__t_monitoredItemId_i monitored_item_pointer_bs__p_monitoredItemId,
+   t_bool * const monitored_item_pointer_bs__bres,
+   constants__t_monitoredItemPointer_i * const monitored_item_pointer_bs__p_monitoredItemPointer);
 extern void monitored_item_pointer_bs__getall_monitoredItemPointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
    constants__t_monitoredItemId_i * const monitored_item_pointer_bs__p_monitoredItemId,

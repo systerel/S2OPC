@@ -891,6 +891,41 @@ OPERATIONS
     END
     ;
 
+    p_sc <-- delete_monitored_item (p_subscription, p_mi_id) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_mi_id : t_monitoredItemId_i
+    THEN
+        p_sc,
+        s_monitoredItemId,
+        s_monitoredItemPointer,
+        a_monitoredItemId,
+        a_monitoredItemSubs,
+        a_monitoredItemNodeId,
+        a_monitored_item_notifications,
+        a_defined_monitored_items
+        :( p_sc : t_StatusCode_i &
+            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid &
+             s_monitoredItemId = s_monitoredItemId$0 &
+             a_monitoredItemId = a_monitoredItemId$0 &
+             a_monitoredItemSubs = a_monitoredItemSubs$0 &
+             a_monitoredItemNodeId = a_monitoredItemNodeId$0 &
+             a_monitored_item_notifications = a_monitored_item_notifications$0 &
+             a_defined_monitored_items = a_defined_monitored_items$0) &
+            (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+             s_monitoredItemId = s_monitoredItemId$0 - {p_mi_id} &
+             s_monitoredItemPointer = s_monitoredItemPointer$0 - {a_monitoredItemId$0~(p_mi_id)} &
+             a_monitoredItemId = a_monitoredItemId |>> {p_mi_id} &
+             a_monitoredItemSubs = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemSubs &
+             a_monitoredItemNodeId = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemNodeId &
+             a_monitored_item_notifications = a_monitored_item_notifications |>> {a_monitoredItemId$0~(p_mi_id)} &
+             a_defined_monitored_items = a_defined_monitored_items |>> {a_monitoredItemId$0~(p_mi_id)}
+            )
+        )
+    END
+    ;
+
     p_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription) =
     PRE
         p_subscription : t_subscription_i &

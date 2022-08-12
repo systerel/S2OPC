@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 25/08/2022 15:41:44
+ Date                 : 26/08/2022 06:43:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -108,6 +108,11 @@ extern void subscription_mgr__fill_response_subscription_create_monitored_items(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items);
+extern void subscription_mgr__fill_response_subscription_delete_monitored_items(
+   const constants__t_subscription_i subscription_mgr__p_subscription,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   const t_entier4 subscription_mgr__p_nb_monitored_items);
 extern void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -162,6 +167,11 @@ extern void subscription_mgr__treat_publishing_mode_request(
 extern void subscription_mgr__treat_subscription_create_monitored_items_req(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_user_i subscription_mgr__p_user,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+extern void subscription_mgr__treat_subscription_delete_monitored_items_req(
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);

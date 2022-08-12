@@ -72,15 +72,6 @@ void msg_subscription_create_monitored_item_bs__alloc_msg_create_monitored_items
     }
 }
 
-void msg_subscription_create_monitored_item_bs__check_msg_create_monitored_items_req_not_null(
-    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
-    t_bool* const msg_subscription_create_monitored_item_bs__l_monitored_item_not_null)
-{
-    OpcUa_CreateMonitoredItemsRequest* createReq =
-        (OpcUa_CreateMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
-    *msg_subscription_create_monitored_item_bs__l_monitored_item_not_null = createReq->ItemsToCreate != NULL;
-}
-
 void msg_subscription_create_monitored_item_bs__get_msg_create_monitored_items_req_nb_monitored_items(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
     t_entier4* const msg_subscription_create_monitored_item_bs__p_nb_monitored_items)
@@ -116,7 +107,7 @@ void msg_subscription_create_monitored_item_bs__get_msg_create_monitored_items_r
         util_TimestampsToReturn__C_to_B(createReq->TimestampsToReturn);
 }
 
-void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params(
+void msg_subscription_create_monitored_item_bs__getall_create_monitored_item_req_params(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     t_bool* const msg_subscription_create_monitored_item_bs__p_bres,
@@ -209,7 +200,7 @@ void msg_subscription_create_monitored_item_bs__getall_monitored_item_req_params
     }
 }
 
-void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_params(
+void msg_subscription_create_monitored_item_bs__setall_msg_create_monitored_item_resp_params(
     const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
     const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
     const constants_statuscodes_bs__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc,
@@ -225,4 +216,70 @@ void msg_subscription_create_monitored_item_bs__setall_msg_monitored_item_resp_p
     monitResp->MonitoredItemId = msg_subscription_create_monitored_item_bs__p_monitored_item_id;
     monitResp->RevisedSamplingInterval = msg_subscription_create_monitored_item_bs__p_revSamplingItv;
     monitResp->RevisedQueueSize = (uint32_t) msg_subscription_create_monitored_item_bs__p_revQueueSize;
+}
+
+void msg_subscription_create_monitored_item_bs__alloc_msg_delete_monitored_items_resp_results(
+    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_create_monitored_item_bs__p_nb_results,
+    t_bool* const msg_subscription_create_monitored_item_bs__bres)
+{
+    assert(msg_subscription_create_monitored_item_bs__p_nb_results > 0);
+    *msg_subscription_create_monitored_item_bs__bres = false;
+    OpcUa_DeleteMonitoredItemsResponse* deleteResp =
+        (OpcUa_DeleteMonitoredItemsResponse*) msg_subscription_create_monitored_item_bs__p_resp_msg;
+    if (SIZE_MAX / (uint32_t) msg_subscription_create_monitored_item_bs__p_nb_results >
+        sizeof(OpcUa_MonitoredItemCreateResult))
+    {
+        deleteResp->Results =
+            SOPC_Calloc((size_t) msg_subscription_create_monitored_item_bs__p_nb_results, sizeof(SOPC_StatusCode));
+        if (NULL != deleteResp->Results)
+        {
+            deleteResp->NoOfResults = msg_subscription_create_monitored_item_bs__p_nb_results;
+            for (int32_t i = 0; i < deleteResp->NoOfResults; i++)
+            {
+                SOPC_StatusCode_Initialize(&deleteResp->Results[i]);
+            }
+            *msg_subscription_create_monitored_item_bs__bres = true;
+        }
+    }
+}
+
+void msg_subscription_create_monitored_item_bs__get_msg_delete_monitored_items_req_params(
+    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
+    constants__t_subscription_i* const msg_subscription_create_monitored_item_bs__p_subscription,
+    t_entier4* const msg_subscription_create_monitored_item_bs__p_nb_monitored_items)
+{
+    OpcUa_DeleteMonitoredItemsRequest* deleteReq =
+        (OpcUa_DeleteMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
+    if (deleteReq->SubscriptionId > 0 && deleteReq->SubscriptionId <= INT32_MAX)
+    {
+        *msg_subscription_create_monitored_item_bs__p_subscription = deleteReq->SubscriptionId;
+    }
+    else
+    {
+        *msg_subscription_create_monitored_item_bs__p_subscription = constants__c_subscription_indet;
+    }
+    *msg_subscription_create_monitored_item_bs__p_nb_monitored_items = deleteReq->NoOfMonitoredItemIds;
+}
+
+void msg_subscription_create_monitored_item_bs__getall_delete_monitored_item_req_params(
+    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_req_msg,
+    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
+    constants__t_monitoredItemId_i* const msg_subscription_create_monitored_item_bs__p_monitored_item_id)
+{
+    OpcUa_DeleteMonitoredItemsRequest* deleteReq =
+        (OpcUa_DeleteMonitoredItemsRequest*) msg_subscription_create_monitored_item_bs__p_req_msg;
+    *msg_subscription_create_monitored_item_bs__p_monitored_item_id =
+        deleteReq->MonitoredItemIds[msg_subscription_create_monitored_item_bs__p_index - 1];
+}
+
+void msg_subscription_create_monitored_item_bs__setall_msg_delete_monitored_item_resp_params(
+    const constants__t_msg_i msg_subscription_create_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_create_monitored_item_bs__p_index,
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_create_monitored_item_bs__p_sc)
+{
+    OpcUa_DeleteMonitoredItemsResponse* deleteResp =
+        (OpcUa_DeleteMonitoredItemsResponse*) msg_subscription_create_monitored_item_bs__p_resp_msg;
+    util_status_code__B_to_C(msg_subscription_create_monitored_item_bs__p_sc,
+                             &deleteResp->Results[msg_subscription_create_monitored_item_bs__p_index - 1]);
 }

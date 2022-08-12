@@ -167,5 +167,16 @@ OPERATIONS
             p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer : t_WriteValuePointer)
         END
     END
+    ;
+
+    clear_monitored_item_from_notification_queue (p_queue, p_monitoredItem) =
+    PRE
+        p_queue : t_notificationQueue_i &
+        p_queue : s_notificationQueue &
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer
+    THEN
+        a_monitored_item_notifications := a_monitored_item_notifications - {p_queue |-> p_monitoredItem}
+    END
 
 END

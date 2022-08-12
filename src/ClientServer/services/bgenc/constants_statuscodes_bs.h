@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 05/08/2022 09:01:45
+ Date                 : 18/08/2022 16:14:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -93,6 +93,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_subscription_id_invalid,
    constants_statuscodes_bs__e_sc_bad_sequence_number_unknown,
    constants_statuscodes_bs__e_sc_bad_too_many_monitored_items,
+   constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid,
    constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid,
    constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported,
    constants_statuscodes_bs__e_sc_bad_too_many_publish_requests,

@@ -72,6 +72,7 @@ SETS
                       e_sc_bad_subscription_id_invalid,
                       e_sc_bad_sequence_number_unknown,
                       e_sc_bad_too_many_monitored_items,
+                      e_sc_bad_monitored_item_id_invalid,
                       e_sc_bad_monitoring_mode_invalid,
                       e_sc_bad_monitored_item_filter_unsupported,
                       e_sc_bad_too_many_publish_requests,

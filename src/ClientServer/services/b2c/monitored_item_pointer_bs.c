@@ -64,7 +64,7 @@ static bool SOPC_InternalMonitoredItemId_Equal(const void* a, const void* b)
 static SOPC_Dict* monitoredItemIdDict = NULL;
 static SOPC_SLinkedList* monitoredItemIdFreed = NULL;
 
-static uintptr_t monitoredItemIdMax = 0;
+static uint32_t monitoredItemIdMax = 0;
 
 /*------------------------
    INITIALISATION Clause
@@ -113,7 +113,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     constants__t_monitoredItemId_i* const monitored_item_pointer_bs__monitoredItemId)
 {
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-    uintptr_t freshId = 0;
+    uint32_t freshId = 0;
     SOPC_InternalMontitoredItem* monitItem = SOPC_Malloc(sizeof(SOPC_InternalMontitoredItem));
     SOPC_NodeId* nid = SOPC_Malloc(sizeof(*nid));
     SOPC_String* rangeStr = NULL;
@@ -166,21 +166,22 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         if (0 == SOPC_SLinkedList_GetLength(monitoredItemIdFreed))
         {
             // No free unique Id, create a new one
-            if (monitoredItemIdMax < UINTPTR_MAX) // Note: we already enforced that UINTPTR_MAX >= UINT32_MAX
+            if (monitoredItemIdMax < UINT32_MAX)
             {
                 monitoredItemIdMax++;
-                monitItem->monitoredItemId = (uint32_t) monitoredItemIdMax;
-                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (void*) monitoredItemIdMax, monitItem);
+                monitItem->monitoredItemId = monitoredItemIdMax;
+                dictInsertionOK =
+                    SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitoredItemIdMax, monitItem);
             } // else: all Ids already in use
         }
         else
         {
             // Reuse freed id
-            freshId = (uintptr_t) SOPC_SLinkedList_PopHead(monitoredItemIdFreed);
+            freshId = (uint32_t)(uintptr_t) SOPC_SLinkedList_PopHead(monitoredItemIdFreed);
             if (freshId != 0)
             {
-                monitItem->monitoredItemId = (uint32_t) freshId;
-                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (void*) freshId, monitItem);
+                monitItem->monitoredItemId = freshId;
+                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) freshId, monitItem);
             }
         }
 
@@ -233,6 +234,26 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
                                "monitored_item_pointer_bs__delete_monitored_item_pointer: monitoredItemId %" PRIu32
                                " cannot be removed from defined set",
                                monitItem->monitoredItemId);
+    }
+}
+
+void monitored_item_pointer_bs__getall_monitoredItemId(
+    const constants__t_monitoredItemId_i monitored_item_pointer_bs__p_monitoredItemId,
+    t_bool* const monitored_item_pointer_bs__bres,
+    constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__p_monitoredItemPointer)
+{
+    *monitored_item_pointer_bs__bres = false;
+    void* miPointer =
+        SOPC_Dict_Get(monitoredItemIdDict, (void*) (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
+                      monitored_item_pointer_bs__bres);
+    if (*monitored_item_pointer_bs__bres && NULL != miPointer)
+    {
+        *monitored_item_pointer_bs__p_monitoredItemPointer = miPointer;
+    }
+    else
+    {
+        *monitored_item_pointer_bs__bres = false;
+        *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
     }
 }
 

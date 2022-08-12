@@ -76,6 +76,24 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
     SOPC_SLinkedList_Delete(monitored_item_notification_queue_bs__p_queue);
 }
 
+void monitored_item_notification_queue_bs__clear_monitored_item_from_notification_queue(
+    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem)
+{
+    SOPC_InternalMontitoredItem* monitoredItemPointer =
+        (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
+    // Removes first notif which references this MonItId
+    void* foundNotif = SOPC_SLinkedList_RemoveFromId(monitored_item_notification_queue_bs__p_queue,
+                                                     monitoredItemPointer->monitoredItemId);
+    // Continues to remove until no more found
+    while (NULL != foundNotif)
+    {
+        SOPC_InternalNotificationQueueElement_Free(0, foundNotif);
+        foundNotif = SOPC_SLinkedList_RemoveFromId(monitored_item_notification_queue_bs__p_queue,
+                                                   monitoredItemPointer->monitoredItemId);
+    }
+}
+
 static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     SOPC_InternalNotificationElement* notifElt,
@@ -108,7 +126,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
     notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
 
-    checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+    checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue,
+                                         notifElt->monitoredItemPointer->monitoredItemId, notifElt);
     if (checkAdded == notifElt)
     {
         return SOPC_STATUS_OK;

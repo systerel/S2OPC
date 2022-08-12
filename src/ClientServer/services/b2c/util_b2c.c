@@ -742,6 +742,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_too_many_monitored_items:
         *status = OpcUa_BadTooManyMonitoredItems;
         break;
+    case constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid:
+        *status = OpcUa_BadMonitoredItemIdInvalid;
+        break;
     case constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid:
         *status = OpcUa_BadMonitoringModeInvalid;
         break;
@@ -1096,6 +1099,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadMonitoringModeInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid;
+        break;
+    case OpcUa_BadMonitoredItemIdInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
         break;
     case OpcUa_BadMonitoredItemFilterUnsupported:
         *bstatus = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;

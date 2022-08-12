@@ -50,17 +50,6 @@ OPERATIONS
     END
     ;
 
-    l_monitored_item_not_null <-- check_msg_create_monitored_items_req_not_null (p_req_msg) =
-    PRE
-        p_req_msg : t_msg_i &
-        p_req_msg : t_msg &
-        p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_monitored_items_create_req
-    THEN
-        l_monitored_item_not_null :: BOOL
-    END
-    ;
-
     p_nb_monitored_items <-- get_msg_create_monitored_items_req_nb_monitored_items (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -72,7 +61,7 @@ OPERATIONS
     END
     ;
 
-    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize, p_indexRange <-- getall_monitored_item_req_params (p_req_msg, p_index) =
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize, p_indexRange <-- getall_create_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -115,7 +104,7 @@ OPERATIONS
     END
     ;
 
-    setall_msg_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize) =
+    setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
@@ -129,6 +118,59 @@ OPERATIONS
         p_monitored_item_id : t_monitoredItemId &
         p_revSamplingItv : t_opcua_duration_i &
         p_revQueueSize : t_counter
+    THEN
+        skip
+    END
+    ;
+
+    p_subscription, p_nb_monitored_items <-- get_msg_delete_monitored_items_req_params (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_delete_req
+    THEN
+        p_subscription :: t_subscription_i ||
+        p_nb_monitored_items :: INT
+    END
+    ;
+
+    p_monitored_item_id <-- getall_delete_monitored_item_req_params (p_req_msg, p_index) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_delete_req &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex
+    THEN
+        p_monitored_item_id :(p_monitored_item_id : t_monitoredItemId_i & p_monitored_item_id : t_monitoredItemId)
+    END
+    ;
+
+    bres <-- alloc_msg_delete_monitored_items_resp_results (p_resp_msg, p_nb_results) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_delete_resp &
+        p_nb_results : NAT &
+        p_nb_results > 0
+    THEN
+        bres :: BOOL
+    END
+    ;
+
+    setall_msg_delete_monitored_item_resp_params (p_resp_msg, p_index, p_sc) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_create_resp &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode
     THEN
         skip
     END

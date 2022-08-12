@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 05/08/2022 09:11:50
+ Date                 : 18/08/2022 16:14:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -141,6 +141,10 @@ extern void subscription_core__create_subscription(
    const t_bool subscription_core__p_publishEnabled,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_subscription_i * const subscription_core__subscription);
+extern void subscription_core__delete_monitored_item(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_monitoredItemId_i subscription_core__p_mi_id,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc);
 extern void subscription_core__empty_session_publish_requests(
    const constants__t_subscription_i subscription_core__p_subscription);
 extern void subscription_core__is_valid_subscription_on_session(

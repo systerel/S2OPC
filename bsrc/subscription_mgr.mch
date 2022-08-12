@@ -200,6 +200,26 @@ OPERATIONS
     END
     ;
 
+    StatusCode_service <-- treat_subscription_delete_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_create_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_create_resp
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
+    ;
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
         p_old_write_value_pointer : t_WriteValuePointer_i &

@@ -862,6 +862,58 @@ OPERATIONS
     END
     ;
 
+    p_sc <-- delete_monitored_item (p_subscription, p_mi_id) =
+    VAR
+        l_subscription_queue,
+        l_continue_mi,
+        l_iterator,
+        l_monitoredItemPointer,
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle,
+        l_isMonitoredItemFound,
+        l_monitored_item_queue,
+        l_bres,
+        l_notificationQueue
+    IN
+        l_isMonitoredItemFound := FALSE;
+        l_monitoredItemPointer := c_monitoredItemPointer_indet;
+        l_monitored_item_queue := c_monitoredItemQueue_indet;
+        l_nid := c_NodeId_indet;
+        l_isMonitoredItemFound, l_monitoredItemPointer <-- getall_monitoredItemId (p_mi_id);
+        IF l_isMonitoredItemFound = TRUE THEN
+            p_sc := e_sc_ok;
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_indexRange,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle <-- getall_monitoredItemPointer (l_monitoredItemPointer);
+            l_subscription_queue <-- get_subscription_monitoredItemQueue (p_subscription);
+            l_bres <-- remove_monitored_item (l_subscription_queue, l_monitoredItemPointer);
+            /* Note: the link between a nodeId and a MonitoredItem is indirect and not represented in B model */
+            l_bres, l_monitored_item_queue <-- get_nodeToMonitoredItemQueue (l_nid);
+            IF l_bres = TRUE
+            THEN
+                l_bres <-- remove_monitored_item (l_monitored_item_queue, l_monitoredItemPointer)
+            END
+            ;
+            l_notificationQueue <-- get_subscription_notificationQueue (p_subscription);
+            clear_monitored_item_from_notification_queue (l_notificationQueue, l_monitoredItemPointer);
+            delete_monitored_item_pointer (l_monitoredItemPointer)
+        ELSE
+            p_sc := e_sc_bad_monitored_item_id_invalid
+        END
+    END
+    ;
+
     p_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription) =
     BEGIN
         p_validPublishingReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription)

@@ -158,6 +158,19 @@ OPERATIONS
     END
     ;
 
+    bres, p_monitoredItemPointer <--getall_monitoredItemId (p_monitoredItemId) =
+    PRE
+          p_monitoredItemId : t_monitoredItemId_i
+    THEN
+        bres, p_monitoredItemPointer
+        :(bres : BOOL & p_monitoredItemPointer : t_monitoredItemPointer_i &
+            (p_monitoredItemId : ran(a_monitoredItemId) =>
+                bres = TRUE & p_monitoredItemPointer = a_monitoredItemId~(p_monitoredItemId)) &
+            (p_monitoredItemId /: ran(a_monitoredItemId) =>
+                bres = FALSE & p_monitoredItemPointer = c_monitoredItemPointer_indet))
+    END
+    ;
+
     bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &

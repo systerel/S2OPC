@@ -33,9 +33,12 @@ SEES
     message_out_bs
 
 PROMOTES
-    getall_monitored_item_req_params,
+    getall_create_monitored_item_req_params,
     alloc_msg_create_monitored_items_resp_results,
-    setall_msg_monitored_item_resp_params
+    setall_msg_create_monitored_item_resp_params,
+    getall_delete_monitored_item_req_params,
+    alloc_msg_delete_monitored_items_resp_results,
+    setall_msg_delete_monitored_item_resp_params
 
 CONCRETE_VARIABLES
     nb_monitored_items
@@ -45,9 +48,7 @@ INITIALISATION
 
 OPERATIONS
     p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_create_monitored_items_req_params (p_req_msg) =
-    VAR
-        l_monitored_item_not_null
-    IN
+    BEGIN
         p_subscription <-- get_msg_create_monitored_items_req_subscription (p_req_msg);
         p_timestampToRet <-- get_msg_create_monitored_items_req_timestamp_to_ret (p_req_msg);
         p_nb_monitored_items <-- get_msg_create_monitored_items_req_nb_monitored_items (p_req_msg);
@@ -61,14 +62,24 @@ OPERATIONS
         THEN
             p_sc := e_sc_bad_timestamps_to_return_invalid
         ELSE
-            l_monitored_item_not_null <-- check_msg_create_monitored_items_req_not_null (p_req_msg);
-            IF l_monitored_item_not_null = FALSE
-            THEN
-                p_sc := e_sc_bad_decoding_error
-            ELSE
-                nb_monitored_items := p_nb_monitored_items;
-                p_sc := e_sc_ok
-            END
+            nb_monitored_items := p_nb_monitored_items;
+            p_sc := e_sc_ok
+        END
+    END
+    ;
+
+    p_sc, p_subscription, p_nb_monitored_items <-- getall_msg_delete_monitored_items_req_params (p_req_msg) =
+    BEGIN
+        p_subscription, p_nb_monitored_items <-- get_msg_delete_monitored_items_req_params (p_req_msg);
+        IF p_nb_monitored_items <= 0
+        THEN
+            p_sc := e_sc_bad_nothing_to_do
+        ELSIF p_nb_monitored_items > k_n_monitoredItem_max
+        THEN
+            p_sc := e_sc_bad_too_many_ops
+        ELSE
+            nb_monitored_items := p_nb_monitored_items;
+            p_sc := e_sc_ok
         END
     END
 
