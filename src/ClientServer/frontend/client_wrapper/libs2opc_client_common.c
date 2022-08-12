@@ -74,9 +74,16 @@ static SOPC_SLinkedList* pListConfig = NULL; /* IDs are cfgId == Toolkit cfgScId
 static SOPC_SLinkedList* pListClient = NULL; /* IDs are cliId, value is a StaMac */
 static SOPC_LibSub_ConnectionId nCreatedClient = 0;
 static SOPC_Array* pArrScConfig = NULL; /* Stores the created scConfig to be freed them in SOPC_LibSub_Clear() */
+
+/* Types and global variables for reverse endpoints management */
+typedef struct
+{
+    SOPC_ReverseEndpointConfigIdx reverseEpIdx;
+    char* reverseEpURL;
+} SOPC_ReverseEndpointConfig;
+
 static uint16_t nbReverseEndpoints = 0;
-static SOPC_ReverseEndpointConfigIdx reverseEpConfigsIds[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
-static char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+static SOPC_ReverseEndpointConfig reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
 
 /* Event callback */
 static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
@@ -117,7 +124,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
         }
 
         nCreatedClient = 0;
-        memset(reverseEpConfigsIds, 0, sizeof(reverseEpConfigsIds));
         memset(reverseEpConfigs, 0, sizeof(reverseEpConfigs));
     }
 
@@ -171,11 +177,11 @@ void SOPC_ClientCommon_Clear(void)
     // Close all reverse endpoints and free URLs
     for (int i = 0; NULL != appConfig && i < nbReverseEndpoints; i++)
     {
-        SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEpConfigsIds[i]);
-        reverseEpConfigsIds[i] = 0;
+        SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEpConfigs[i].reverseEpIdx);
+        reverseEpConfigs[i].reverseEpIdx = 0;
         // Free content of reverseEpConfigs (appConfig->clientConfig.reverseEndpoints is mapped onto)
-        SOPC_Free(reverseEpConfigs[i]);
-        reverseEpConfigs[i] = NULL;
+        SOPC_Free(reverseEpConfigs[i].reverseEpURL);
+        reverseEpConfigs[i].reverseEpURL = NULL;
     }
     nbReverseEndpoints = 0;
 
@@ -243,20 +249,20 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
     {
         return 0;
     }
-    reverseEpConfigs[nbReverseEndpoints] = SOPC_strdup(reverseEndpointURL);
+    reverseEpConfigs[nbReverseEndpoints].reverseEpURL = SOPC_strdup(reverseEndpointURL);
     reverseEpIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(reverseEndpointURL);
 
-    if (0 != reverseEpIdx)
+    if (NULL != reverseEpConfigs[nbReverseEndpoints].reverseEpURL && 0 != reverseEpIdx)
     {
         // Store the reverse EP configuration index
-        reverseEpConfigsIds[nbReverseEndpoints] = reverseEpIdx;
+        reverseEpConfigs[nbReverseEndpoints].reverseEpIdx = reverseEpIdx;
         // Open the reverse endpoint
         SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseEpIdx);
     }
     else
     {
-        SOPC_Free(reverseEpConfigs[nbReverseEndpoints]);
-        reverseEpConfigs[nbReverseEndpoints] = NULL;
+        SOPC_Free(reverseEpConfigs[nbReverseEndpoints].reverseEpURL);
+        reverseEpConfigs[nbReverseEndpoints].reverseEpURL = NULL;
         return 0;
     }
     nbReverseEndpoints++;
