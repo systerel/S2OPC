@@ -2253,7 +2253,7 @@ void SOPC_StatusCode_Initialize(SOPC_StatusCode* status)
 {
     if (status != NULL)
     {
-        *status = SOPC_STATUS_OK;
+        *status = SOPC_GoodGenericStatus;
     }
 }
 
