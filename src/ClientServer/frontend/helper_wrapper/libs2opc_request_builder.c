@@ -868,15 +868,15 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
 
 OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes)
 {
-    OpcUa_AddNodesRequest* req = NULL;
     if (nbAddNodes > INT32_MAX)
     {
-        return req;
+        return NULL;
     }
+    OpcUa_AddNodesRequest* req = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
-        return req;
+        return NULL;
     }
     req->NodesToAdd = SOPC_Calloc(nbAddNodes, sizeof(*req->NodesToAdd));
     if (NULL != req->NodesToAdd)

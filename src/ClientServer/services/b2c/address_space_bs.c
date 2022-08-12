@@ -223,6 +223,7 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
     }
 
     SOPC_EncodeableType* actualNodeAttrsType = address_space_bs__p_nodeAttributes->Body.Object.ObjType;
+    // EncodeableType might be either the generic attributs type (common to all nodes) or specialized for node class
     if (&OpcUa_NodeAttributes_EncodeableType == actualNodeAttrsType || expectedNodeAttrsType == actualNodeAttrsType)
     {
         *address_space_bs__bres = true;

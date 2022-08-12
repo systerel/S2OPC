@@ -171,8 +171,6 @@ const SOPC_NodeId* util_addspace__get_direct_parent(const SOPC_NodeId* childNode
     return result;
 }
 
-#define RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
-
 bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
                                                     const SOPC_NodeId* originSubtype,
                                                     const SOPC_NodeId* currentTypeOrSubtype,

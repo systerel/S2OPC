@@ -203,19 +203,17 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace_Node* pare
                                                     constants_statuscodes_bs__t_StatusCode_i* sc_addnode)
 {
     bool validRef = false;
+    bool identifiedRefType = false;
 
     // Evaluate Organizes reference type from parent to this variable node
     bool isOrganizesRef = is_type_or_subtype(referenceTypeId, &Organizes_Type);
     if (isOrganizesRef)
     {
+        identifiedRefType = true;
         validRef = check_variable_organizes_reference(parentNodeClass, sc_addnode);
-        if (!validRef)
-        {
-            return false;
-        }
     }
 
-    if (!validRef)
+    if (!identifiedRefType)
     {
         // Evaluate HasComponent reference type from parent to this variable node
         bool isHasComponentRef = is_type_or_subtype(referenceTypeId, &HasComponent_Type);
@@ -223,14 +221,10 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace_Node* pare
         if (isHasComponentRef)
         {
             validRef = check_variable_has_component_reference(parentNode, parentNodeClass, typeDefId, sc_addnode);
-            if (!validRef)
-            {
-                return false;
-            }
         }
     }
 
-    if (!validRef)
+    if (!identifiedRefType)
     {
         // Evaluate HasProperty reference type from parent to this variable node
         bool isHasPropertyRef = is_type_or_subtype(referenceTypeId, &HasProperty_Type);
@@ -240,7 +234,7 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace_Node* pare
         }
     }
 
-    if (!validRef)
+    if (!identifiedRefType)
     {
         // Evaluate (unknown) Aggregates reference type from parent to this variable node
         bool isAggregatesRef = util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, referenceTypeId,
