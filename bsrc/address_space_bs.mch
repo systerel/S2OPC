@@ -154,7 +154,7 @@ DEFINITIONS
         /* Relation used to check nodes attributes are well typed regarding the NodeClass */
         NodeAttributesType : t_NodeAttributes --> t_NodeClass &
 
-        HasParentNode : s_Node +->> s_Node &
+        HasParentNode : s_Node +-> s_Node &
         IsParentChildRefTypeSuitable : t_NodeClass * t_NodeId * t_NodeId +-> BOOL & /* child class, reference type, parent */
         IsTypeDefSuitable : t_NodeClass * t_NodeId +-> BOOL /* node class, type definition node id */
     );

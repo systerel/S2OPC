@@ -148,13 +148,14 @@ OPERATIONS
             p_nodeAttributes = AddNodeItemReq_NodeAttributes(p_index) &
             p_typeDefId : t_ExpandedNodeId_i &
             p_typeDefId = AddNodeItemReq_TypeDefinition(p_index) &
-            ((/* We only check local constraint on requested NodeId (serverIndex == 0), BrowseName (not empty), NodeClass (valid) and NodeAttributes (decoded object).
+            ((/* We only check local constraints on requested NodeId (serverIndex == 0), BrowseName (not empty),
+                 NodeClass (valid) and NodeAttributes (decoded object).
                  The rest is checked in AddNode item treatment using address space. */
                 p_sc = e_sc_ok =>
                 p_nodeClass : t_NodeClass &
-                /* for indexes of objects and variables: TypeDefinition is always defined */
+                /* for objects and variables node classes: TypeDefinition is always defined */
                 AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] <: t_ExpandedNodeId &
-                /* for indexes of objects and variables: TypeDefinition is never defined */
+                /* for other node classes: TypeDefinition is never defined */
                 AddNodeItemReq_TypeDefinition[dom(AddNodeItemReq_NodeClass |>> {e_ncl_Object, e_ncl_Variable})] <: {c_ExpandedNodeId_indet}
             ) &
             (not (p_sc = e_sc_ok) => p_sc : {e_sc_bad_node_id_rejected, e_sc_bad_node_class_invalid, e_sc_bad_node_attributes_invalid,

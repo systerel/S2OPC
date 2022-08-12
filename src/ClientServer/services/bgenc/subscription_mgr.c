@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 05/08/2022 09:11:52
+ Date                 : 12/08/2022 15:36:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -451,10 +451,9 @@ void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
                         &subscription_mgr__l_valueSc,
                         &subscription_mgr__l_val_ts_src,
                         &subscription_mgr__l_val_ts_srv);
-                     if ((subscription_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) &&
-                        (((subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_not_readable) ||
+                     if (((subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_not_readable) ||
                         (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_user_access_denied)) ||
-                        (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_index_range_no_data))) {
+                        (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_index_range_no_data)) {
                         constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(subscription_mgr__l_sc,
                            &subscription_mgr__l_valueSc);
                         subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_ok;

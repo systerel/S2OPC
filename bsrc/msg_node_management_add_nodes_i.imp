@@ -47,6 +47,7 @@ OPERATIONS
 
     p_sc, p_nb_nodes_to_add <-- getall_msg_add_nodes_req_params (p_req_msg) =
     BEGIN
+        nb_nodes_to_add := 0;
         p_nb_nodes_to_add <-- get_msg_create_add_nodes_req_nb_add_nodes (p_req_msg);
         IF p_nb_nodes_to_add <= 0
         THEN

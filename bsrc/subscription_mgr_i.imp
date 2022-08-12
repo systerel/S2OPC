@@ -797,9 +797,9 @@ OPERATIONS
                               <-- read_Node_Attribute(l_user, l_locales, l_node, l_nid, l_aid, l_indexRange);
                             /* Evaluate added mode for monitored item,
                                access level and user access levels are evaluated for first time */
-                            IF l_sc /= e_sc_ok & (l_sc = e_sc_bad_not_readable or
-                                    l_sc = e_sc_bad_user_access_denied or
-                                    l_sc = e_sc_bad_index_range_no_data)
+                            IF l_sc = e_sc_bad_not_readable or
+                                l_sc = e_sc_bad_user_access_denied or
+                                l_sc = e_sc_bad_index_range_no_data
                             THEN
                                 /* Set notification bad status but operation result is successful */
                                 l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);

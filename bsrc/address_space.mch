@@ -234,7 +234,7 @@ OPERATIONS
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
                 RefIndex_Reference$0      <: RefIndex_Reference &
-                /* Minimal added references is 2 references for parent / child relationship */
+                /* Minimal added references are 2 references for parent / child relationship */
                 #(l_node, l_refIndex, l_ref, l_parentNode, l_refParentIndex, l_refParent).(
                     (l_node : s_Node & l_node /: s_Node$0 &
                      l_refIndex : t_RefIndex &
