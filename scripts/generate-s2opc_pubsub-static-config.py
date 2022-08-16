@@ -280,6 +280,11 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     }
  """ % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
        getCSecurityMode(msgContext.securityMode)))
+
+    #Get Publishing Offset:
+    result.add("""
+        int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
+    """)
      
     result.add("""
     if (alloc)
@@ -505,6 +510,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            uint16_t groupId,
                                                            uint32_t groupVersion,
                                                            double interval,
+                                                           int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
@@ -512,6 +518,10 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
+    if (offsetUs >=0)
+    {
+        SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
+    }
     
     return group;
 }
