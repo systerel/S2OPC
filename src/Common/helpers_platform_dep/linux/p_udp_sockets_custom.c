@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <ifaddrs.h>
 #include <inttypes.h>
+#include <time.h>
+
 #include <linux/errqueue.h>
 #include <linux/types.h>
 #include <net/if.h>
@@ -31,7 +33,6 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <time.h>
 
 #include "p_udp_sockets_custom.h"
 #include "sopc_common_constants.h"
