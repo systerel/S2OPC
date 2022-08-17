@@ -289,5 +289,6 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                 }
             }
         }
+        printf("\n");
     }
 }
