@@ -907,6 +907,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_type_definition_invalid:
         *status = OpcUa_BadTypeDefinitionInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_user_signature_invalid:
+        *status = OpcUa_BadUserSignatureInvalid;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1261,6 +1264,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadTypeDefinitionInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
+        break; 
+    case OpcUa_BadUserSignatureInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_user_signature_invalid;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
