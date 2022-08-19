@@ -590,27 +590,40 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
             "FileTransfer:Method_Open: unable to make a local write request for the OpenCount variable");
     }
 
-    int filedes = fileno(file->fp);
-    if (-1 == filedes)
+    int filedes = -1;
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:Method_Open: the fileno function has failed");
+        filedes = fileno(file->fp);
+        if (-1 == filedes)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Open: the fileno function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
     }
 
     struct stat sb = {0};
-    int ret = fstat(filedes, &sb);
-    if (-1 == ret)
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:Method_Open: unable to get stat on the tmp file");
+        int ret = fstat(filedes, &sb);
+        if (-1 == ret)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Open: unable to get stat on the tmp file");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
     }
 
-    file->size_in_byte = (uint64_t) sb.st_size;
-    result_code_service = local_write_size(file);
-    if (0 != (result_code_service & SOPC_GoodStatusOppositeMask))
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "FileTransfer:Method_Open: unable to make a local write request for the Size variable");
+        file->size_in_byte = (uint64_t) sb.st_size;
+        result_code_service = local_write_size(file);
+        if (0 != (result_code_service & SOPC_GoodStatusOppositeMask))
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "FileTransfer:Method_Open: unable to make a local write request for the Size variable");
+        }
     }
 
     /* End local service on variables */
@@ -717,44 +730,54 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Read: error while reading tmp file");
     }
 
-    bool found = false;
-    SOPC_FileType* file = NULL;
     if (0 == (result_code & SOPC_GoodStatusOppositeMask))
     {
         *nbOutputArgs = 1;
         *outputArgs = v;
+    }
 
-        file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-        if (false == found)
-        {
-            char* C_objectId = SOPC_NodeId_ToCString(objectId);
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Read: unable to retrieve FileType in the API from nodeId %s",
-                                   C_objectId);
-            SOPC_Free(C_objectId);
-        }
+    bool found = false;
+    SOPC_FileType* file = NULL;
+    SOPC_StatusCode result_code_service = SOPC_GoodStatusOppositeMask;
+    file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    if (false == found)
+    {
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Read: unable to retrieve FileType in the API from nodeId %s",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        result_code_service = OpcUa_BadUnexpectedError;
     }
 
     int filedes = -1;
-    if ((0 == (result_code & SOPC_GoodStatusOppositeMask)) && (false != found))
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
     {
         filedes = fileno(file->fp);
         if (-1 == filedes)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Method_Read: the fileno function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
         }
+    }
 
-        struct stat sb = {0};
+    struct stat sb = {0};
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
         int res = fstat(filedes, &sb);
         if (-1 == res)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Method_Read: unable to get stat on the tmp file");
+            result_code_service = OpcUa_BadUnexpectedError;
         }
+    }
 
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
         file->size_in_byte = (uint64_t) sb.st_size;
-        SOPC_StatusCode result_code_service = local_write_size(file);
+        result_code_service = local_write_size(file);
         if (0 != (result_code_service & SOPC_GoodStatusOppositeMask))
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
