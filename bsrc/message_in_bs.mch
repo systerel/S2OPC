@@ -263,7 +263,7 @@ OPERATIONS
     END
     ;
 
-    p_valid_user_token, p_user_token <-- read_activate_req_msg_identity_token (p_msg) =
+    p_valid_user_token, p_user_token, user_token_signature <-- read_activate_req_msg_identity_token (p_msg) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_in &
@@ -271,10 +271,14 @@ OPERATIONS
         a_msg_in_type = e_msg_session_activate_req
     THEN
         p_valid_user_token,
+        user_token_signature,
         p_user_token
         :(p_valid_user_token : BOOL &
+          user_token_signature : t_SignatureData_i &
           p_user_token : t_user_token_i &
-          (p_valid_user_token = TRUE => p_user_token : t_user_token))
+          (p_valid_user_token = TRUE => p_user_token : t_user_token & user_token_signature : t_SignatureData) &
+          (p_valid_user_token = FALSE => user_token_signature = c_SignatureData_indet)
+        )
     END
     ;
 

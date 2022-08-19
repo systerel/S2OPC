@@ -311,7 +311,7 @@ OPERATIONS
     END
     ;
 
-    p_sc_valid_user, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token) =
+    p_sc_valid_user, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token, p_user_token_signature) =
     PRE
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
@@ -320,7 +320,9 @@ OPERATIONS
         a_state(p_session) : {e_session_created, e_session_userActivated,
                               e_session_scOrphaned} &
         p_user_token : t_user_token_i &
-        p_user_token : t_user_token
+        p_user_token : t_user_token &
+        p_user_token_signature : t_SignatureData_i &
+        p_user_token_signature : t_SignatureData
     THEN
         p_sc_valid_user,
         p_user

@@ -38,6 +38,7 @@ SETS
                       e_sc_bad_too_many_sessions,
                       e_sc_bad_identity_token_invalid,
                       e_sc_bad_identity_token_rejected,
+                      e_sc_bad_user_signature_invalid,
                       e_sc_bad_application_signature_invalid,
                       e_sc_bad_encoding_error,
                       e_sc_bad_decoding_error,
