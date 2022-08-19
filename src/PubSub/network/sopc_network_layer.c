@@ -341,28 +341,40 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
     {
         SOPC_Byte id;
         status = SOPC_Byte_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, id);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, id);
+        }
         break;
     }
     case DataSet_LL_PubId_UInt16_Id:
     {
         uint16_t id;
         status = SOPC_UInt16_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(header, id);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(header, id);
+        }
         break;
     }
     case DataSet_LL_PubId_UInt32_Id:
     {
         uint32_t id;
         status = SOPC_UInt32_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(header, id);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(header, id);
+        }
         break;
     }
     case DataSet_LL_PubId_UInt64_Id:
     {
         uint64_t id;
         status = SOPC_UInt64_Read(&id, buffer, 0);
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(header, id);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(header, id);
+        }
         break;
     }
     case DataSet_LL_PubId_String_Id:
@@ -375,8 +387,8 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
 static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Header* nmh, bool security)
 {
     const SOPC_Dataset_LL_PublisherId* pub_id = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nmh);
-    return (DataSet_LL_PubId_Byte_Id != pub_id->type || DATASET_LL_DATASET_CLASSID_ENABLED || security ||
-            DATASET_LL_TIMESTAMP_ENABLED || DATASET_LL_PICOSECONDS_ENABLED);
+    return (NULL != pub_id && DataSet_LL_PubId_Byte_Id != pub_id->type) || DATASET_LL_DATASET_CLASSID_ENABLED ||
+           security || DATASET_LL_TIMESTAMP_ENABLED || DATASET_LL_PICOSECONDS_ENABLED;
 }
 
 static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t processed)
