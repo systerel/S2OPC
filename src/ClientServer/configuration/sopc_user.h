@@ -59,6 +59,15 @@ bool SOPC_User_IsAnonymous(const SOPC_User* user);
 SOPC_User* SOPC_User_CreateUsername(SOPC_String* username);
 
 /**
+ * \brief Creates a \p SOPC_User which has a X509 certificate.
+ *
+ * \param CertificateData A valid pointer to the certificate of the user to create.
+ *
+ * \return An instance of \p SOPC_User if successful, otherwise NULL.
+ */
+SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* CertificateData);
+
+/**
  * \brief Returns a reference to the internal storage of the username.
  *        The user must be a user with a username.
  */
@@ -66,6 +75,15 @@ const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
 
 /** \brief Returns true if the type of the user is username */
 bool SOPC_User_IsUsername(const SOPC_User* user);
+
+/**
+ * \brief Returns a reference to the internal storage of the certificate.
+ *        The user must be a user with a certificate.
+ */
+const SOPC_String* SOPC_User_GetCertificate(const SOPC_User* user);
+
+/** \brief Returns true if the type of the user is certificate */
+bool SOPC_User_IsCertificate(const SOPC_User* user);
 
 /** \brief Returns true if the users are the same type and content (if applicable) */
 bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right);
@@ -82,6 +100,7 @@ SOPC_User* SOPC_User_Copy(const SOPC_User* user);
  *        - Local user (server local service context): '[local_user]'
  *        - Anonymous: '[anonymous]'
  *        - UserName: '&lt;user_name&gt;' (replaced by actual username)
+ *        - Certificate: the certificate
  */
 const char* SOPC_User_ToCString(const SOPC_User* user);
 

@@ -27,7 +27,8 @@ typedef enum
 {
     USER_LOCAL,
     USER_ANONYMOUS,
-    USER_USERNAME
+    USER_USERNAME,
+    USER_CERTIFICATE
 } user_type_t;
 
 struct SOPC_User
@@ -36,6 +37,7 @@ struct SOPC_User
     union {
         /** The \p username is only valid for the \p USER_USERNAME type. */
         SOPC_String username;
+        SOPC_ByteString certificate;
     } data;
 };
 
@@ -83,6 +85,26 @@ SOPC_User* SOPC_User_CreateUsername(SOPC_String* username)
     return user;
 }
 
+SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* CertificateData)
+{
+    SOPC_User* user = SOPC_Calloc(1, sizeof(SOPC_User));
+    if (NULL == user)
+    {
+        return NULL;
+    }
+
+    user->type = USER_CERTIFICATE;
+    SOPC_ByteString_Initialize(&user->data.certificate);
+    SOPC_ReturnStatus status = SOPC_ByteString_Copy(&user->data.certificate, CertificateData);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_ByteString_Clear(&user->data.certificate);
+        SOPC_Free(user);
+        user = NULL;
+    }
+    return user;
+}
+
 const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user)
 {
     assert(SOPC_User_IsUsername(user));
@@ -93,6 +115,19 @@ bool SOPC_User_IsUsername(const SOPC_User* user)
 {
     assert(NULL != user);
     return USER_USERNAME == user->type;
+}
+
+const SOPC_String* SOPC_User_GetCertificate(const SOPC_User* user)
+{
+    assert(SOPC_User_IsCertificate(user));
+    const SOPC_ByteString* ret = &user->data.certificate;
+    return (const SOPC_String*) ret;
+}
+
+bool SOPC_User_IsCertificate(const SOPC_User* user)
+{
+    assert(NULL != user);
+    return USER_CERTIFICATE == user->type;
 }
 
 bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
@@ -109,6 +144,8 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
             return true;
         case USER_USERNAME:
             return SOPC_String_Equal(&left->data.username, &right->data.username);
+        case USER_CERTIFICATE:
+            return SOPC_ByteString_Equal(&left->data.certificate, &right->data.certificate);
         default:
             assert(false && "Unknown Type");
             break;
@@ -127,8 +164,17 @@ void SOPC_User_Free(SOPC_User** ppUser)
     SOPC_User* user = *ppUser;
     if (!SOPC_User_IsLocal(user) && !SOPC_User_IsAnonymous(user))
     {
-        assert(SOPC_User_IsUsername(user));
-        SOPC_String_Clear(&user->data.username);
+        SOPC_Boolean is_username = SOPC_User_IsUsername(user);
+        SOPC_Boolean is_certificate = SOPC_User_IsCertificate(user);
+        assert(is_username || is_certificate);
+        if (is_username)
+        {
+            SOPC_String_Clear(&user->data.username);
+        }
+        if (is_certificate)
+        {
+            SOPC_ByteString_Clear(&user->data.certificate);
+        }
         SOPC_Free(user);
     }
     *ppUser = NULL;
@@ -136,6 +182,7 @@ void SOPC_User_Free(SOPC_User** ppUser)
 
 SOPC_User* SOPC_User_Copy(const SOPC_User* user)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_User* userCopy = NULL;
     if (NULL == user)
     {
@@ -153,14 +200,27 @@ SOPC_User* SOPC_User_Copy(const SOPC_User* user)
         userCopy = (SOPC_User*) SOPC_User_GetAnonymous();
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
-    else
+    else if (SOPC_User_IsUsername(user))
     {
-        SOPC_ReturnStatus status = SOPC_STATUS_NOK;
         userCopy = SOPC_Calloc(1, sizeof(*userCopy));
         if (NULL != userCopy)
         {
             userCopy->type = user->type;
             status = SOPC_String_Copy(&userCopy->data.username, &user->data.username);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(userCopy);
+            userCopy = NULL;
+        }
+    }
+    else
+    {
+        userCopy = SOPC_Calloc(1, sizeof(*userCopy));
+        if (NULL != userCopy)
+        {
+            userCopy->type = user->type;
+            status = SOPC_ByteString_Copy(&userCopy->data.certificate, &user->data.certificate);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -186,6 +246,8 @@ const char* SOPC_User_ToCString(const SOPC_User* user)
         return "[anonymous]";
     case USER_USERNAME:
         return SOPC_String_GetRawCString(SOPC_User_GetUsername(user));
+    case USER_CERTIFICATE:
+        return SOPC_String_GetCString(SOPC_User_GetCertificate(user));
     default:
         assert(false && "Unknown user type");
     }
