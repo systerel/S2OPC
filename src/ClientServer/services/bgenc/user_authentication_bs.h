@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 04/08/2022 14:53:48
+ Date                 : 16/08/2022 09:25:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,6 +40,7 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
+#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -94,6 +95,10 @@ extern void user_authentication_bs__is_valid_user_authentication(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
+   const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
+   const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+   const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+   const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
 extern void user_authentication_bs__shallow_copy_user_token(
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,

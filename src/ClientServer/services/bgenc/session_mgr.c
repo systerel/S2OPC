@@ -66,7 +66,7 @@ void session_mgr__local_client_activate_sessions_on_SC_connection(
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_dom;
       constants__t_channel_config_idx_i session_mgr__l_channel_config_idx;
-      
+
       session_mgr_it__init_iter_session(&session_mgr__l_continue);
       if (session_mgr__l_continue == true) {
          while (session_mgr__l_continue == true) {
@@ -101,7 +101,7 @@ void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_dom;
       constants__t_channel_config_idx_i session_mgr__l_channel_config_idx;
-      
+
       session_mgr_it__init_iter_session(&session_mgr__l_continue);
       if (session_mgr__l_continue == true) {
          while (session_mgr__l_continue == true) {
@@ -143,7 +143,7 @@ void session_mgr__client_receive_session_resp(
       constants__t_user_token_i session_mgr__l_session_user_token;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_status_reason;
       t_bool session_mgr__l_bret;
-      
+
       session_mgr__l_bret = false;
       session_request_handle_bs__client_get_session_and_remove_request_handle(session_mgr__req_handle,
          session_mgr__session);
@@ -275,7 +275,8 @@ void session_mgr__server_receive_session_req(
       t_bool session_mgr__l_has_user_token_policy_available;
       t_bool session_mgr__l_timer_creation_ok;
       constants__t_user_i session_mgr__l_user;
-      
+      constants__t_SignatureData_i session_mgr__l_user_token_signature;
+
       *session_mgr__session = constants__c_session_indet;
       *session_mgr__service_ret = constants_statuscodes_bs__c_StatusCode_indet;
       switch (session_mgr__req_typ) {
@@ -321,11 +322,13 @@ void session_mgr__server_receive_session_req(
                (session_mgr__l_session_state == constants__e_session_scOrphaned)) {
                message_in_bs__read_activate_req_msg_identity_token(session_mgr__req_msg,
                   &session_mgr__l_is_valid_user_token,
-                  &session_mgr__l_user_token);
+                  &session_mgr__l_user_token,
+                  &session_mgr__l_user_token_signature);
                if (session_mgr__l_is_valid_user_token == true) {
                   session_core__allocate_authenticated_user(session_mgr__channel,
                      *session_mgr__session,
                      session_mgr__l_user_token,
+                     session_mgr__l_user_token_signature,
                      session_mgr__service_ret,
                      &session_mgr__l_user);
                   if (*session_mgr__service_ret == constants_statuscodes_bs__e_sc_ok) {
@@ -409,7 +412,7 @@ void session_mgr__client_validate_session_service_req(
    {
       constants__t_sessionState session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
-      
+
       *session_mgr__session_token = constants__c_session_token_indet;
       *session_mgr__channel = constants__c_channel_indet;
       session_core__get_session_state_or_closed(session_mgr__session,
@@ -440,7 +443,7 @@ void session_mgr__client_validate_session_service_resp(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
-      
+
       *session_mgr__session = constants__c_session_indet;
       session_request_handle_bs__client_get_session_and_remove_request_handle(session_mgr__req_handle,
          &session_mgr__l_session);
@@ -492,7 +495,7 @@ void session_mgr__server_validate_session_service_req(
       constants__t_sessionState session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       constants__t_user_i session_mgr__l_user;
-      
+
       session_core__server_get_session_from_token(session_mgr__session_token,
          &session_mgr__l_session);
       session_core__is_valid_session(session_mgr__l_session,
@@ -550,7 +553,7 @@ void session_mgr__server_validate_async_session_service_resp(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
-      
+
       *session_mgr__channel = constants__c_channel_indet;
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
@@ -589,7 +592,7 @@ void session_mgr__client_create_session_req(
       constants__t_sessionState session_mgr__l_session_state;
       t_bool session_mgr__l_valid;
       t_bool session_mgr__l_bret;
-      
+
       session_mgr__l_bret = false;
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
@@ -629,7 +632,7 @@ void session_mgr__client_async_activate_new_session_without_channel(
    {
       constants__t_session_i session_mgr__l_session;
       constants__t_sessionState session_mgr__l_session_state;
-      
+
       session_core__client_init_session_sm(&session_mgr__l_session);
       session_core__get_session_state_or_closed(session_mgr__l_session,
          &session_mgr__l_session_state);
@@ -657,7 +660,7 @@ void session_mgr__client_async_activate_new_session_with_channel(
    {
       constants__t_session_i session_mgr__l_session;
       constants__t_sessionState session_mgr__l_session_state;
-      
+
       channel_mgr__channel_do_nothing(session_mgr__channel);
       session_core__client_init_session_sm(&session_mgr__l_session);
       session_core__get_session_state_or_closed(session_mgr__l_session,
@@ -689,7 +692,7 @@ void session_mgr__client_user_activate_session_req(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -734,7 +737,7 @@ void session_mgr__client_sc_activate_session_req(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -781,7 +784,7 @@ void session_mgr__client_close_session_req(
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -832,7 +835,7 @@ void session_mgr__client_close_session(
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason) {
    {
       t_bool session_mgr__l_valid_session;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -847,7 +850,7 @@ void session_mgr__server_evaluate_session_timeout(
    {
       t_bool session_mgr__l_valid_session;
       t_bool session_mgr__l_session_expired;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -866,7 +869,7 @@ void session_mgr__server_close_session(
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason) {
    {
       t_bool session_mgr__l_valid_session;
-      
+
       session_core__is_valid_session(session_mgr__session,
          &session_mgr__l_valid_session);
       if (session_mgr__l_valid_session == true) {
@@ -882,7 +885,7 @@ void session_mgr__session_get_endpoint_config(
    {
       constants__t_channel_i session_mgr__l_channel;
       t_bool session_mgr__l_continue;
-      
+
       *session_mgr__endpoint_config_idx = constants__c_endpoint_config_idx_indet;
       session_core__getall_valid_session_channel(session_mgr__p_session,
          &session_mgr__l_continue,

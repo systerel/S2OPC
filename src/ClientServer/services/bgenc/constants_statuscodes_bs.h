@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 18/08/2022 16:14:15
+ Date                 : 09/09/2022 15:51:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -59,6 +59,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_too_many_sessions,
    constants_statuscodes_bs__e_sc_bad_identity_token_invalid,
    constants_statuscodes_bs__e_sc_bad_identity_token_rejected,
+   constants_statuscodes_bs__e_sc_bad_user_signature_invalid,
    constants_statuscodes_bs__e_sc_bad_application_signature_invalid,
    constants_statuscodes_bs__e_sc_bad_encoding_error,
    constants_statuscodes_bs__e_sc_bad_decoding_error,

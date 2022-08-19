@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 04/08/2022 14:53:18
+ Date                 : 16/08/2022 09:25:08
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -492,6 +492,7 @@ void session_core__allocate_authenticated_user(
    const constants__t_channel_i session_core__p_channel,
    const constants__t_session_i session_core__p_session,
    const constants__t_user_token_i session_core__p_user_token,
+   const constants__t_SignatureData_i session_core__p_user_token_signature,
    constants_statuscodes_bs__t_StatusCode_i * const session_core__p_sc_valid_user,
    constants__t_user_i * const session_core__p_user) {
    {
@@ -510,6 +511,7 @@ void session_core__allocate_authenticated_user(
          session_core__l_server_nonce,
          session_core__l_channel_config_idx,
          session_core__l_endpoint_config_idx,
+         session_core__p_user_token_signature,
          session_core__p_sc_valid_user,
          session_core__p_user);
    }

@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.h
 
- Date                 : 04/08/2022 14:53:26
+ Date                 : 16/08/2022 09:25:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -45,6 +45,7 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
+#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -76,6 +77,7 @@ extern void user_authentication__allocate_valid_and_authenticated_user(
    const constants__t_Nonce_i user_authentication__p_server_nonce,
    const constants__t_channel_config_idx_i user_authentication__p_channel_config_idx,
    const constants__t_endpoint_config_idx_i user_authentication__p_endpoint_config_idx,
+   const constants__t_SignatureData_i user_authentication__p_user_token_signature,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication__p_sc_valid_user,
    constants__t_user_i * const user_authentication__p_user);
 extern void user_authentication__may_encrypt_user_token(
