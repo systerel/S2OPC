@@ -36,24 +36,24 @@ tools like `gdb`). From the cloned directory, run:
 ./.check-in-docker.sh "
 
 # the fuzzing one
-mkdir build.san 
+mkdir -p build.san
 cd build.san
 CC=clang CFLAGS=-fsanitize=fuzzer-no-link cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_ASAN=1 -DWITH_UBSAN=1 ..
-make
+make -j$(nproc) fuzzers
 cd ..
 
 # the coverage one
-mkdir build.cov
+mkdir -p build.cov
 cd build.san
 CC=clang cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 ..
-make
+make -j$(nproc) fuzzers
 cd ..
 
 # the debug one
-mkdir build.san
-cd build.san
+mkdir -p build.dbg
+cd build.dbg
 CC=clang cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=Debug ..
-make
+make -j$(nproc) fuzzers
 cd ..
 "
 ```
