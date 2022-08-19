@@ -442,18 +442,26 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
     return res;
 }
 
+// allocate strlen(src)/2 in dst. n is strlen(dst)
+// Returns n the number of translated couples (others than n for errors)
 static int unhexlify(const char* src, unsigned char* dst, size_t n)
 {
-    assert(n <= INT32_MAX);
-    static unsigned int buf;
-    size_t i;
+    SOPC_ASSERT(INT32_MAX >= n);
+    static long buf = -1;
+    char* pEnd; // initialise by strtol function
+    char c_hex[2] = {0};
+    size_t i = 0;
 
-    if (!src || !dst)
+    if (NULL == src || NULL == dst)
+    {
         return -1;
+    }
 
     for (i = 0; i < n; ++i)
     {
-        if (sscanf(&src[2 * i], "%02x", &buf) < 1)
+        memcpy(c_hex, &src[2 * i], 2);
+        buf = strtol(c_hex, &pEnd, 16);
+        if (pEnd == c_hex)
         {
             return (int) i;
         }
@@ -462,7 +470,6 @@ static int unhexlify(const char* src, unsigned char* dst, size_t n)
             dst[i] = (unsigned char) buf;
         }
     }
-
     return (int) n;
 }
 
@@ -492,7 +499,7 @@ static bool start_usercertificate(struct parse_context_t* ctx, const XML_Char** 
 
     if (40 != len_hash)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "SHA_1 with a hexa format of 40 characters is expected.");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "SHA_1 with a hexa format of 40 characters is expected");
         return false;
     }
 
@@ -504,7 +511,13 @@ static bool start_usercertificate(struct parse_context_t* ctx, const XML_Char** 
         return false;
     }
 
-    unhexlify(attr_val, ctx->currentUserCert->thumbprint.Data, len_hash / 2);
+    int res = -1;
+    res = unhexlify(attr_val, ctx->currentUserCert->thumbprint.Data, len_hash / 2);
+    if (len_hash / 2 != (size_t) res)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "unhexlify failed: thumbprint bad hexa format");
+        return false;
+    }
 
     return true;
 }
@@ -836,8 +849,8 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
                                             SOPC_UserAuthentication_Status* authenticated,
                                             const char* pUsedSecuPolicy)
 {
+    SOPC_UNUSED_ARG(pUsedSecuPolicy);
     SOPC_ASSERT(NULL != authn && NULL != authn->pData && NULL != token && NULL != authenticated);
-    SOPC_ASSERT(NULL != pUsedSecuPolicy);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -910,6 +923,8 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
+        SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
         SOPC_CryptoProvider* provider = NULL;
         SOPC_SerializedCertificate* psCrtUser = NULL;
         SOPC_CertificateList* pCrtUser = NULL;
