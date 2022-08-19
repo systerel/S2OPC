@@ -25,7 +25,8 @@
 #include "sopc_network_layer.h"
 #include "sopc_reader_layer.h"
 
-#define MAX_LEN 4096
+#define BUFFER_INITIAL_LEN (4096)
+#define BUFFER_MAX_LEN (1u << 30)
 
 static const uint32_t subGroupVersion = 963852;
 static const uint32_t subGroupId = 1245;
@@ -126,7 +127,7 @@ int LLVMFuzzerInitialize(int* argc, char*** argv)
     (void) argv;
     setupConnection();
     SOPC_Helper_EndiannessCfg_Initialize();
-    sopc_buffer = SOPC_Buffer_Create(MAX_LEN);
+    sopc_buffer = SOPC_Buffer_CreateResizable(BUFFER_INITIAL_LEN, BUFFER_MAX_LEN);
     assert(sopc_buffer != NULL);
 
     return 0;
@@ -139,6 +140,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         return 0;
     }
 
+    /* FIXME: Avoid messages with String PublisherId which are known to raise an assert in the subscriber code */
     if ((len >= 2) && (buf[0] & 0x80) && ((buf[1] & 0x07) == DataSet_LL_PubId_String_Id))
     {
         return 0;
