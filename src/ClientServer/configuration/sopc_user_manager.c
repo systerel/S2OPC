@@ -26,6 +26,127 @@
 #include "sopc_types.h"
 #include "sopc_user_manager_internal.h"
 
+static SOPC_ReturnStatus is_valid_user_token_signature(const SOPC_ExtensionObject* pUser,
+                                                       const OpcUa_SignatureData* pUserTokenSignature,
+                                                       const SOPC_ByteString* pServerNonce,
+                                                       const SOPC_SerializedCertificate* pServerCert,
+                                                       const char* pUsedSecuPolicy)
+{
+    SOPC_ASSERT(&OpcUa_X509IdentityToken_EncodeableType == pUser->Body.Object.ObjType &&
+                "only suport x509 certificate");
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pServerNonce);
+    SOPC_ASSERT(NULL != pServerNonce->Data);
+    SOPC_ASSERT(0 < pServerNonce->Length);
+    SOPC_ASSERT(NULL != pServerCert);
+    SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CryptoProvider* provider = NULL;
+    SOPC_SerializedCertificate* psCrtUser = NULL;
+    SOPC_CertificateList* pCrtUser = NULL;
+    SOPC_AsymmetricKey* pKeyCrtUser = NULL;
+    OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
+
+    if (NULL == pUserTokenSignature || NULL == pUserTokenSignature->Algorithm.Data ||
+        NULL == pUserTokenSignature->Signature.Data)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (0 >= pUserTokenSignature->Algorithm.Length || 0 >= pUserTokenSignature->Signature.Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL == x509Token || NULL == x509Token->CertificateData.Data || 0 >= x509Token->CertificateData.Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        provider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+        if (NULL == provider)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(
+            x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &psCrtUser);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_Deserialize(psCrtUser, &pCrtUser);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtUser, &pKeyCrtUser);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_Check_Signature(provider, &pUserTokenSignature->Algorithm, pKeyCrtUser,
+                                                     pServerCert, pServerNonce, &pUserTokenSignature->Signature);
+    }
+
+    /* Clear */
+    SOPC_KeyManager_SerializedCertificate_Delete(psCrtUser);
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtUser);
+    SOPC_CryptoProvider_Free(provider);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
+    SOPC_UserAuthentication_Manager* authenticationManager,
+    const SOPC_ExtensionObject* pUser,
+    SOPC_UserAuthentication_Status* pUserAuthenticated,
+    const OpcUa_SignatureData* pUserTokenSignature,
+    const SOPC_ByteString* pServerNonce,
+    const SOPC_SerializedCertificate* pServerCert,
+    const char* pUsedSecuPolicy)
+{
+    SOPC_ASSERT(&OpcUa_X509IdentityToken_EncodeableType == pUser->Body.Object.ObjType &&
+                "only suport x509 certificate");
+
+    SOPC_ASSERT(NULL != authenticationManager);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pUserAuthenticated);
+
+    SOPC_ASSERT(NULL != pServerNonce);
+    SOPC_ASSERT(NULL != pServerNonce->Data);
+    SOPC_ASSERT(0 < pServerNonce->Length);
+    SOPC_ASSERT(NULL != pServerCert);
+    SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    status = is_valid_user_token_signature(pUser, pUserTokenSignature, pServerNonce, pServerCert, pUsedSecuPolicy);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
+                                                                                pUserAuthenticated, pUsedSecuPolicy);
+    }
+    else
+    {
+        *pUserAuthenticated = SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID;
+        status = SOPC_STATUS_OK;
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated)
@@ -48,7 +169,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
     }
 
     return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
-                                                                          pUserAuthenticated);
+                                                                          pUserAuthenticated, NULL);
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
@@ -102,10 +223,12 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
 static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* authenticationManager,
                                               const SOPC_ExtensionObject* pUserIdentity,
-                                              SOPC_UserAuthentication_Status* pUserAuthenticated)
+                                              SOPC_UserAuthentication_Status* pUserAuthenticated,
+                                              const char* pUsedSecuPolicy)
 {
     SOPC_UNUSED_ARG(authenticationManager);
     SOPC_UNUSED_ARG(pUserIdentity);
+    SOPC_UNUSED_ARG(pUsedSecuPolicy);
     assert(NULL != pUserAuthenticated);
 
     *pUserAuthenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -172,7 +295,8 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
     assert(NULL != pUserIdentity);
     assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
     assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
-           &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
+           &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
+           &OpcUa_X509IdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
 
     SOPC_UserWithAuthorization* userauthz = SOPC_Calloc(1, sizeof(SOPC_UserWithAuthorization));
     if (NULL == userauthz)
@@ -189,8 +313,13 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
     }
     else if (&OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
     {
-        OpcUa_UserNameIdentityToken* tok = pUserIdentity->Body.Object.Value;
-        userauthz->user = SOPC_User_CreateUsername(&tok->UserName);
+        OpcUa_UserNameIdentityToken* user_name_tok = pUserIdentity->Body.Object.Value;
+        userauthz->user = SOPC_User_CreateUsername(&user_name_tok->UserName);
+    }
+    else if (&OpcUa_X509IdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType)
+    {
+        OpcUa_X509IdentityToken* x509_tok = pUserIdentity->Body.Object.Value;
+        userauthz->user = SOPC_User_CreateCertificate(&x509_tok->CertificateData);
     }
 
     if (NULL == userauthz->user)

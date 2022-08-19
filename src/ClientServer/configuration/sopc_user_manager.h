@@ -35,7 +35,9 @@
 
 #include <stdbool.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_user.h"
 
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
@@ -68,6 +70,7 @@ typedef enum
      * but access evaluation shall be enforced on other services calls
      * (read, write, callmethod, etc.) */
     SOPC_USER_AUTHENTICATION_ACCESS_DENIED,
+    SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID,
     SOPC_USER_AUTHENTICATION_OK
 } SOPC_UserAuthentication_Status;
 
@@ -75,7 +78,8 @@ typedef void SOPC_UserAuthentication_Free_Func(SOPC_UserAuthentication_Manager* 
 typedef SOPC_ReturnStatus SOPC_UserAuthentication_ValidateUserIdentity_Func(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
-    SOPC_UserAuthentication_Status* pUserAuthenticated);
+    SOPC_UserAuthentication_Status* pUserAuthenticated,
+    const char* pUsedSecuPolicy);
 
 typedef void SOPC_UserAuthorization_Free_Func(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus SOPC_UserAuthorization_AuthorizeOperation_Func(
@@ -109,7 +113,7 @@ typedef struct SOPC_UserAuthentication_Functions
      *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,
      *    - \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN: the proposed identity could not be authenticated,
      *    - \p SOPC_USER_AUTHENTICATION_OK: the identity token correctly authenticates a user.
-     *
+     * \param pUsedSecuPolicy The used security policy.
      * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
      */
     SOPC_UserAuthentication_ValidateUserIdentity_Func* pFuncValidateUserIdentity;
@@ -178,6 +182,28 @@ struct SOPC_UserAuthorization_Manager
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated);
+
+/**
+ * \brief Authenticate an X509 certificate user with the chosen authentication manager.
+ *
+ * \param authenticationManager The SOPC_UserAuthentication_Manager instance.
+ * \param pUser The user identity token which was received in the ActivateSession request.
+ * \param pUserAuthenticated A valid pointer to the uninitialized result of the operation.
+ * \param pUserTokenSignature The userTokenSiganture which was received in the ActivateSession request.
+ * \param pServerNonce The server nonce.
+ * \param pServerCert The server certificate.
+ * \param pUsedSecuPolicy The security policy used.
+ *
+ * \return SOPC_STATUS_OK when the signature is valid.
+ */
+SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
+    SOPC_UserAuthentication_Manager* authenticationManager,
+    const SOPC_ExtensionObject* pUser,
+    SOPC_UserAuthentication_Status* pUserAuthenticated,
+    const OpcUa_SignatureData* pUserTokenSignature,
+    const SOPC_ByteString* pServerNonce,
+    const SOPC_SerializedCertificate* pServerCert,
+    const char* pUsedSecuPolicy);
 
 /**
  * \brief Authorize an operation with the chosen authorization manager.

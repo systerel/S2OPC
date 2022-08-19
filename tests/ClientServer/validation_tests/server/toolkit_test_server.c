@@ -527,9 +527,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
  */
 static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* authn,
                                               const SOPC_ExtensionObject* token,
-                                              SOPC_UserAuthentication_Status* authenticated)
+                                              SOPC_UserAuthentication_Status* authenticated,
+                                              const char* pUsedSecuPolicy)
 {
     SOPC_UNUSED_ARG(authn);
+    SOPC_UNUSED_ARG(pUsedSecuPolicy);
 
     assert(NULL != token && NULL != authenticated);
 
