@@ -1109,58 +1109,6 @@ void session_core_bs__drop_NonceClient(const constants__t_session_i session_core
     SOPC_ByteString_Clear(&clientSessionDataArray[session_core_bs__p_session].nonceClient);
 }
 
-static SOPC_ReturnStatus check_signature_with_provider(SOPC_CryptoProvider* provider,
-                                                       const SOPC_String* requestedSecurityPolicy,
-                                                       const SOPC_AsymmetricKey* publicKey,
-                                                       const SOPC_Buffer* payload,
-                                                       const SOPC_ByteString* nonce,
-                                                       const SOPC_String* signature)
-{
-    assert(NULL != provider);
-    assert(NULL != requestedSecurityPolicy);
-    assert(NULL != requestedSecurityPolicy->Data);
-    assert(requestedSecurityPolicy->Length > 0);
-    assert(NULL != payload);
-    assert(NULL != nonce);
-    assert(NULL != nonce->Data);
-    assert(LENGTH_NONCE == nonce->Length);
-    assert(NULL != signature);
-    assert(NULL != signature->Data);
-    assert(signature->Length > 0);
-    const char* errorReason = "";
-
-    /* Verify signature algorithm URI */
-    const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
-
-    if (algorithm == NULL ||
-        strncmp(algorithm, (const char*) requestedSecurityPolicy->Data, (size_t) requestedSecurityPolicy->Length) !=
-            0 ||
-        payload->length > (UINT32_MAX - LENGTH_NONCE) || nonce->Length != LENGTH_NONCE)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    uint32_t verify_len = payload->length + LENGTH_NONCE;
-    uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
-    if (verify_payload != NULL)
-    {
-        memcpy(verify_payload, payload->data, payload->length);
-        memcpy(verify_payload + payload->length, nonce->Data, LENGTH_NONCE);
-
-        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
-                                                      (uint32_t) signature->Length, &errorReason);
-        SOPC_Free(verify_payload);
-    }
-    else
-    {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    return status;
-}
-
 static SOPC_ReturnStatus check_signature(const char* channelSecurityPolicy,
                                          const SOPC_String* requestedSecurityPolicy,
                                          const SOPC_AsymmetricKey* publicKey,
@@ -1176,7 +1124,7 @@ static SOPC_ReturnStatus check_signature(const char* channelSecurityPolicy,
     }
 
     SOPC_ReturnStatus status =
-        check_signature_with_provider(provider, requestedSecurityPolicy, publicKey, payload, nonce, signature);
+        SOPC_CryptoProvider_Check_Signature(provider, requestedSecurityPolicy, publicKey, payload, nonce, signature);
     SOPC_CryptoProvider_Free(provider);
     return status;
 }
@@ -1303,8 +1251,8 @@ void session_core_bs__server_activate_session_check_crypto(
     if (provider != NULL &&
         SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_cli, &pCrtCli) == SOPC_STATUS_OK &&
         SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli) == SOPC_STATUS_OK &&
-        check_signature_with_provider(provider, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
-                                      &pSignCandid->Signature) == SOPC_STATUS_OK)
+        SOPC_CryptoProvider_Check_Signature(provider, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
+                                            &pSignCandid->Signature) == SOPC_STATUS_OK)
     {
         *session_core_bs__valid = true;
     }

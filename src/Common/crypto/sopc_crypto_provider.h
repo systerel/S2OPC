@@ -31,6 +31,7 @@
 #include "sopc_key_sets.h"
 #include "sopc_pki.h"
 #include "sopc_secret_buffer.h"
+#include "sopc_types.h"
 
 #include "sopc_enums.h"
 
@@ -1100,5 +1101,39 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
                                                            const SOPC_PKIProvider* pPKI,
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error);
+
+/* ------------------------------------------------------------------------------------------------
+ * Asymmetric Signature validation (payload + nonce secret)
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
+ * \brief  Validate the possession of the private key by verifying the given signature.
+ *
+ *   The given signature \p signature is calculated by appending the
+ *   nonce \p nonce to the payload \p payload and signing the resulting sequence of
+ *   bytes.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param AsymmetricSignatureAlgorithm the URI of the asymmetric algorithm used.
+ * \param publicKey A valid pointer to the public key.
+ * \param payload   The payload.
+ * \param nonce     The nonce secret to append to the payload \p payload .
+ * \param signature The signature to check.
+ *
+ * \note The nonce \p nonce size must be equal to the nonce size of the secure channel of the provider's security
+ * policy.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and SOPC_STATUS_NOK when the algorithm doesn't match that of the provider or when there was an
+ * error.
+ */
+SOPC_ReturnStatus SOPC_CryptoProvider_Check_Signature(SOPC_CryptoProvider* provider,
+                                                      const SOPC_String* AsymmetricSignatureAlgorithm,
+                                                      const SOPC_AsymmetricKey* publicKey,
+                                                      const SOPC_Buffer* payload,
+                                                      const SOPC_ByteString* nonce,
+                                                      const SOPC_String* signature);
 
 #endif /* SOPC_CRYPTO_PROVIDER_H_ */

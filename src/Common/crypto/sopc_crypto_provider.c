@@ -22,6 +22,7 @@
 
 #include "sopc_crypto_provider.h"
 
+#include "sopc_assert.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
@@ -1903,4 +1904,65 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 
     // Verify certificate through PKIProvider callback
     return pPKI->pFnValidateCertificate(pPKI, pCert, error);
+}
+
+SOPC_ReturnStatus SOPC_CryptoProvider_Check_Signature(SOPC_CryptoProvider* provider,
+                                                      const SOPC_String* AsymmetricSignatureAlgorithm,
+                                                      const SOPC_AsymmetricKey* publicKey,
+                                                      const SOPC_Buffer* payload,
+                                                      const SOPC_ByteString* nonce,
+                                                      const SOPC_String* signature)
+{
+    SOPC_ASSERT(NULL != provider);
+    SOPC_ASSERT(NULL != AsymmetricSignatureAlgorithm);
+    SOPC_ASSERT(NULL != AsymmetricSignatureAlgorithm->Data);
+    SOPC_ASSERT(0 < AsymmetricSignatureAlgorithm->Length);
+    SOPC_ASSERT(NULL != payload);
+    SOPC_ASSERT(NULL != nonce);
+    SOPC_ASSERT(NULL != nonce->Data);
+    SOPC_ASSERT(0 < nonce->Length);
+    SOPC_ASSERT(NULL != signature);
+    SOPC_ASSERT(NULL != signature->Data);
+    SOPC_ASSERT(0 < signature->Length);
+    const char* errorReason = "";
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    /* retrieve the length nonce */
+    uint32_t length_nonce = 0;
+    status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(provider, &length_nonce);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    /* Verify signature algorithm URI */
+    const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
+
+    int res = strncmp(algorithm, (const char*) AsymmetricSignatureAlgorithm->Data,
+                      (size_t) AsymmetricSignatureAlgorithm->Length);
+    if (NULL == algorithm || 0 != res || (UINT32_MAX - length_nonce) < payload->length ||
+        (int32_t) length_nonce != nonce->Length)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t verify_len = payload->length + length_nonce;
+    uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
+
+    if (NULL != verify_payload)
+    {
+        memcpy(verify_payload, payload->data, payload->length);
+        memcpy(verify_payload + payload->length, nonce->Data, length_nonce);
+
+        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
+                                                      (uint32_t) signature->Length, &errorReason);
+        SOPC_Free(verify_payload);
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    return status;
 }
