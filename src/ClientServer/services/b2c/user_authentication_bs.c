@@ -169,67 +169,99 @@ void user_authentication_bs__is_valid_user_authentication(
     const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
     const constants__t_user_token_type_i user_authentication_bs__p_token_type,
     const constants__t_user_token_i user_authentication_bs__p_user_token,
+    const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
+    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
     SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
-    assert(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
-    assert(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
+    SOPC_UNUSED_ARG(user_authentication_bs__p_user_token_signature);
+    SOPC_UNUSED_ARG(user_authentication_bs__p_server_nonce);
+    SOPC_UNUSED_ARG(user_authentication_bs__p_user_secu_policy);
+
+    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
+    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
 
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-
-    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
+    SOPC_ASSERT(NULL != epConfig);
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
 
-    SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(
-        authenticationManager, user_authentication_bs__p_user_token, &authnStatus);
+    if (constants__e_userTokenType_x509 == user_authentication_bs__p_token_type)
+    {
+        const SOPC_SecureChannel_Config* pSCCfg =
+            SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
+        const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
+        SOPC_ASSERT(NULL != pSCCfg || NULL != pSCCfg->crt_srv);
+
+        status = SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
+            authenticationManager, user_authentication_bs__p_user_token, &authnStatus,
+            user_authentication_bs__p_user_token_signature, user_authentication_bs__p_server_nonce, pSCCfg->crt_srv,
+            usedSecuPolicy);
+        if (SOPC_STATUS_OK != status)
+        {
+            /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
+            authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
+                user_authentication_bs__p_endpoint_config_idx);
+        }
+    }
+    else
+    {
+        status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager,
+                                                             user_authentication_bs__p_user_token, &authnStatus);
+        if (SOPC_STATUS_OK != status)
+        {
+            /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
+            authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
+                user_authentication_bs__p_endpoint_config_idx);
+        }
+    }
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_ExtensionObject_Clear(user_authentication_bs__p_user_token);
     SOPC_Free(user_authentication_bs__p_user_token);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    if (SOPC_STATUS_OK != status)
+    switch (authnStatus)
     {
-        /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
+    case SOPC_USER_AUTHENTICATION_OK:
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_ok;
+        break;
+    case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User identification failed: identity_token_invalid");
+        break;
+    case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User identification failed: identity_token_rejected");
+        break;
+    case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
         *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
-        SOPC_Logger_TraceWarning(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
-            user_authentication_bs__p_endpoint_config_idx);
-    }
-    else
-    {
-        switch (authnStatus)
-        {
-        case SOPC_USER_AUTHENTICATION_OK:
-            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_ok;
-            break;
-        case SOPC_USER_AUTHENTICATION_INVALID_TOKEN:
-            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "User identification failed: identity_token_invalid");
-            break;
-        case SOPC_USER_AUTHENTICATION_REJECTED_TOKEN:
-            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_rejected;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "User identification failed: identity_token_rejected");
-            break;
-        case SOPC_USER_AUTHENTICATION_ACCESS_DENIED:
-            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User identification failed: identity_token_denied");
-            break;
-        default:
-            /* Invalid of the authentication manager: we do not know if the token was rejected or user denied */
-            *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "User authentication manager returned an invalid authentication status on "
-                                     "endpoint config idx %" PRIu32,
-                                     user_authentication_bs__p_endpoint_config_idx);
-            break;
-        }
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "User identification failed: identity_token_denied");
+        break;
+    case SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID:
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_signature_invalid;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "User identification failed: user_token_signature_invalid");
+        break;
+    default:
+        /* Invalid of the authentication manager: we do not know if the token was rejected or user denied */
+        *user_authentication_bs__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_user_access_denied;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "User authentication manager returned an invalid authentication status on "
+                                 "endpoint config idx %" PRIu32,
+                                 user_authentication_bs__p_endpoint_config_idx);
+        break;
     }
 }
 
@@ -324,7 +356,7 @@ void user_authentication_bs__shallow_copy_user_token(
     }
 }
 
-static bool internal_user_token_copy(OpcUa_UserNameIdentityToken* source, SOPC_ExtensionObject** dest)
+static bool internal_user_name_token_copy(OpcUa_UserNameIdentityToken* source, SOPC_ExtensionObject** dest)
 {
     assert(NULL != source);
     assert(NULL != dest);
@@ -349,6 +381,41 @@ static bool internal_user_token_copy(OpcUa_UserNameIdentityToken* source, SOPC_E
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ByteString_Copy(&token->Password, &source->Password);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *dest = user;
+        return true;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(user);
+        SOPC_Free(user);
+        return false;
+    }
+}
+
+static bool internal_x509_token_copy(OpcUa_X509IdentityToken* source, SOPC_ExtensionObject** dest)
+{
+    assert(NULL != source);
+    assert(NULL != dest);
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_X509IdentityToken* token = NULL;
+
+    if (NULL == user)
+    {
+        return false;
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_CreateExtension(user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ByteString_Copy(&token->CertificateData, &source->CertificateData);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_Copy(&token->PolicyId, &source->PolicyId);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -483,49 +550,12 @@ static SOPC_ReturnStatus internal_compare_user_decrypted_password_nonce(SOPC_Byt
     return status;
 }
 
-void user_authentication_bs__decrypt_user_token(
-    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
-    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
-    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
-    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
-    const constants__t_user_token_i user_authentication_bs__p_user_token,
-    t_bool* const user_authentication_bs__p_sc_valid_user_token,
-    constants__t_user_token_i* const user_authentication_bs__p_user_token_decrypted)
+static SOPC_ReturnStatus decrypt_user_token(OpcUa_UserNameIdentityToken* userToken,
+                                            SOPC_Endpoint_Config* epConfig,
+                                            SOPC_CryptoProvider* cp,
+                                            SOPC_ExtensionObject* puser,
+                                            const constants__t_Nonce_i p_server_nonce)
 {
-    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
-           "Only encrypted username identity token supported");
-    *user_authentication_bs__p_user_token_decrypted = NULL;
-    *user_authentication_bs__p_sc_valid_user_token = false;
-
-    OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
-
-    if (constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
-    {
-        // No encryption: create a copy of user token
-        *user_authentication_bs__p_sc_valid_user_token =
-            internal_user_token_copy(userToken, user_authentication_bs__p_user_token_decrypted);
-        return;
-    }
-
-    if (userToken->Password.Length <= 0)
-    {
-        // TODO: define minimal size regarding encoding blocks
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Client user decryption: encrypted password length invalid");
-        return;
-    }
-
-    SOPC_Endpoint_Config* epConfig =
-        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
-
-    SOPC_CryptoProvider* cp =
-        SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
-    if (NULL == cp)
-    {
-        return;
-    }
-
     // Decrypt password and nonce
     SOPC_Buffer* decryptedBuffer = NULL;
     SOPC_ReturnStatus status =
@@ -535,21 +565,15 @@ void user_authentication_bs__decrypt_user_token(
     uint32_t passwordLength = 0;
     if (SOPC_STATUS_OK == status)
     {
-        status = internal_compare_user_decrypted_password_nonce(user_authentication_bs__p_server_nonce, cp,
-                                                                decryptedBuffer, &passwordLength);
+        status = internal_compare_user_decrypted_password_nonce(p_server_nonce, cp, decryptedBuffer, &passwordLength);
     }
 
     // Create decrypted user token
-    SOPC_ExtensionObject* user = NULL;
     OpcUa_UserNameIdentityToken* token = NULL;
+
     if (SOPC_STATUS_OK == status)
     {
-        user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
-        status = NULL != user ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+        status = SOPC_Encodeable_CreateExtension(puser, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     }
     // Copy user name and policy
     if (SOPC_STATUS_OK == status)
@@ -578,19 +602,91 @@ void user_authentication_bs__decrypt_user_token(
         }
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        *user_authentication_bs__p_sc_valid_user_token = true;
-        *user_authentication_bs__p_user_token_decrypted = user;
-    }
-    else
-    {
-        SOPC_ExtensionObject_Clear(user);
-        SOPC_Free(user);
-    }
     SOPC_Buffer_Clear(decryptedBuffer);
     SOPC_Free(decryptedBuffer);
     SOPC_CryptoProvider_Free(cp);
+    return status;
+}
+
+void user_authentication_bs__decrypt_user_token(
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
+    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    t_bool* const user_authentication_bs__p_sc_valid_user_token,
+    constants__t_user_token_i* const user_authentication_bs__p_user_token_may_decrypted)
+{
+    assert((constants__e_userTokenType_userName == user_authentication_bs__p_token_type ||
+            constants__e_userTokenType_x509 == user_authentication_bs__p_token_type) &&
+           "Only encrypted username and certificat identity token are supported");
+    *user_authentication_bs__p_user_token_may_decrypted = NULL;
+    *user_authentication_bs__p_sc_valid_user_token = false;
+
+    OpcUa_UserNameIdentityToken* userNameToken = NULL;
+    OpcUa_X509IdentityToken* X509Token = NULL;
+    SOPC_ReturnStatus status = false;
+    SOPC_ExtensionObject* puser = NULL;
+    SOPC_Endpoint_Config* epConfig = NULL;
+    SOPC_CryptoProvider* cp = NULL;
+
+    switch (user_authentication_bs__p_token_type)
+    {
+    case constants__e_userTokenType_userName:
+
+        userNameToken = user_authentication_bs__p_user_token->Body.Object.Value;
+        if (constants__e_secpol_None == user_authentication_bs__p_user_secu_policy)
+        {
+            // No encryption: create a copy of user token
+            *user_authentication_bs__p_sc_valid_user_token =
+                internal_user_name_token_copy(userNameToken, user_authentication_bs__p_user_token_may_decrypted);
+            return;
+        }
+
+        if (userNameToken->Password.Length <= 0)
+        {
+            // TODO: define minimal size regarding encoding blocks
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Client user decryption: encrypted password length invalid");
+            return;
+        }
+
+        epConfig = SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
+        assert(NULL != epConfig);
+
+        cp =
+            SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
+        if (NULL == cp)
+        {
+            return;
+        }
+
+        puser = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+        if (NULL != puser)
+        {
+            status = decrypt_user_token(userNameToken, epConfig, cp, puser, user_authentication_bs__p_server_nonce);
+            if (SOPC_STATUS_OK == status)
+            {
+                *user_authentication_bs__p_sc_valid_user_token = true;
+                *user_authentication_bs__p_user_token_may_decrypted = puser;
+            }
+            else
+            {
+                SOPC_ExtensionObject_Clear(puser);
+                SOPC_Free(puser);
+            }
+        }
+        break;
+
+    case constants__e_userTokenType_x509:
+        X509Token = user_authentication_bs__p_user_token->Body.Object.Value;
+        // No encryption: create a copy of user token
+        *user_authentication_bs__p_sc_valid_user_token =
+            internal_x509_token_copy(X509Token, user_authentication_bs__p_user_token_may_decrypted);
+        break;
+    default:
+        break;
+    }
 }
 
 void user_authentication_bs__encrypt_user_token(

@@ -232,11 +232,14 @@ void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg,
     }
 }
 
-void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_i message_in_bs__p_msg,
-                                                         t_bool* const message_in_bs__p_valid_user_token,
-                                                         constants__t_user_token_i* const message_in_bs__p_user_token)
+void message_in_bs__read_activate_req_msg_identity_token(
+    const constants__t_msg_i message_in_bs__p_msg,
+    t_bool* const message_in_bs__p_valid_user_token,
+    constants__t_user_token_i* const message_in_bs__p_user_token,
+    constants__t_SignatureData_i* const message_in_bs__user_token_signature)
 {
     *message_in_bs__p_valid_user_token = false;
+    *message_in_bs__user_token_signature = constants_bs__c_user_token_indet;
     OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
 
     if (activateSessionReq->UserIdentityToken.Length > 0)
@@ -256,11 +259,20 @@ void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_
                     activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
                 OpcUaId_UserNameIdentityToken_Encoding_DefaultXml ==
                     activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric;
-            /* TODO: Add support for X509 user identity token */
-            if (isAnonymous || isUserName)
+            bool isCertificate =
+                OpcUaId_X509IdentityToken == activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_X509IdentityToken_Encoding_DefaultBinary ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric ||
+                OpcUaId_X509IdentityToken_Encoding_DefaultXml ==
+                    activateSessionReq->UserIdentityToken.TypeId.NodeId.Data.Numeric;
+            if (isAnonymous || isUserName || isCertificate)
             {
                 *message_in_bs__p_valid_user_token = true;
                 *message_in_bs__p_user_token = &activateSessionReq->UserIdentityToken;
+            }
+            if (isCertificate)
+            {
+                *message_in_bs__user_token_signature = &activateSessionReq->UserTokenSignature;
             }
         }
     }
