@@ -34,6 +34,8 @@ typedef struct SOPC_InternalMontitoredItem
     constants__t_monitoringMode_i monitoringMode;
     constants__t_client_handle_i clientHandle;
     SOPC_NumericRange* indexRange;
+
+    SOPC_SLinkedList* notifQueue;
 } SOPC_InternalMontitoredItem;
 
 #endif /* SOPC_MONITORED_ITEM_POINTER_IMPL_H_ */

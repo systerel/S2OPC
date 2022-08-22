@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 18/08/2022 16:14:05
+ Date                 : 26/08/2022 15:23:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -96,7 +96,7 @@ extern void subscription_core__INITIALISATION(void);
    LOCAL_OPERATIONS Clause
   --------------------------*/
 extern void subscription_core__fill_notification_message(
-   const constants__t_notificationQueue_i subscription_core__p_queue,
+   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_notif_msg_i subscription_core__p_notif_msg,
    const t_entier4 subscription_core__nb_notif_to_dequeue);
 extern void subscription_core__get_fresh_subscription(
@@ -104,6 +104,12 @@ extern void subscription_core__get_fresh_subscription(
    constants__t_subscription_i * const subscription_core__p_subscription);
 extern void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
+extern void subscription_core__local_monitored_item_nb_available_notifications(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   t_entier4 * const subscription_core__p_nb_available_notifs);
+extern void subscription_core__local_subscription_nb_available_notifications(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   t_entier4 * const subscription_core__p_nb_available_notifs);
 extern void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__p_validPubReqQueued);
@@ -168,7 +174,6 @@ extern void subscription_core__receive_publish_request(
    constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs);
 extern void subscription_core__server_subscription_add_notification_on_node_change(
-   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_NodeId_i subscription_core__p_nid,
    const constants__t_AttributeId_i subscription_core__p_aid,
@@ -178,7 +183,6 @@ extern void subscription_core__server_subscription_add_notification_on_node_chan
    const constants__t_Timestamp subscription_core__p_val_ts_srv,
    t_bool * const subscription_core__bres);
 extern void subscription_core__server_subscription_add_notification_on_value_change(
-   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_WriteValuePointer_i subscription_core__p_writeValuePointer);

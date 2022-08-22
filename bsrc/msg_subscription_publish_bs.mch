@@ -33,7 +33,8 @@ ABSTRACT_VARIABLES
     notification_message,
     notification_message_seq_num,
     nb_monitored_item_notifications,
-    MonitoredItemNotification_MonitoredItemId
+    MonitoredItemNotification_MonitoredItemId,
+    MonitoredItemNotification_MonitoredItemNotif
 
 INVARIANT
 
@@ -43,7 +44,8 @@ INVARIANT
     nb_monitored_item_notifications : NAT &
     nb_monitored_item_notifications <= k_n_monitoredItemNotif_max &
 
-    MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId
+    MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
+    MonitoredItemNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer
 
 INITIALISATION
 
@@ -51,7 +53,8 @@ INITIALISATION
     notification_message := c_notif_msg_indet ||
     notification_message_seq_num := c_sub_seq_num_indet ||
     nb_monitored_item_notifications := 0 ||
-    MonitoredItemNotification_MonitoredItemId :(MonitoredItemNotification_MonitoredItemId = {})
+    MonitoredItemNotification_MonitoredItemId :(MonitoredItemNotification_MonitoredItemId = {}) ||
+    MonitoredItemNotification_MonitoredItemNotif :(MonitoredItemNotification_MonitoredItemNotif = {})
 
 OPERATIONS
 
@@ -161,7 +164,8 @@ OPERATIONS
         p_wv_pointer : t_WriteValuePointer_i &
         p_wv_pointer : t_WriteValuePointer
     THEN
-        MonitoredItemNotification_MonitoredItemId(p_index) := p_monitored_item_id
+        MonitoredItemNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
+        MonitoredItemNotification_MonitoredItemNotif(p_index) := p_wv_pointer
     END
 
 END

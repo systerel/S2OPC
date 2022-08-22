@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.h
 
- Date                 : 04/08/2022 14:53:20
+ Date                 : 26/08/2022 15:23:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -58,7 +58,6 @@ extern t_entier4 subscription_core_1__a_lifetimeExpCount_i[constants__t_subscrip
 extern t_entier4 subscription_core_1__a_maxNotifsPerPublish_i[constants__t_subscription_i_max+1];
 extern constants__t_monitoredItemQueue_i subscription_core_1__a_monitoredItemQueue_i[constants__t_subscription_i_max+1];
 extern constants__t_notifRepublishQueue_i subscription_core_1__a_notifRepublishQueue_i[constants__t_subscription_i_max+1];
-extern constants__t_notificationQueue_i subscription_core_1__a_pendingNotificationQueue_i[constants__t_subscription_i_max+1];
 extern constants__t_opcua_duration_i subscription_core_1__a_publishInterval_i[constants__t_subscription_i_max+1];
 extern constants__t_publishReqQueue_i subscription_core_1__a_publishRequestQueue_i[constants__t_subscription_i_max+1];
 extern constants__t_timer_id_i subscription_core_1__a_publishTimer_i[constants__t_subscription_i_max+1];
@@ -83,7 +82,6 @@ extern void subscription_core_1__add_subscription(
    const t_entier4 subscription_core_1__p_revMaxKeepAlive,
    const t_entier4 subscription_core_1__p_maxNotificationsPerPublish,
    const t_bool subscription_core_1__p_publishEnabled,
-   const constants__t_notificationQueue_i subscription_core_1__p_notifQueue,
    const constants__t_publishReqQueue_i subscription_core_1__p_publishQueue,
    const constants__t_notifRepublishQueue_i subscription_core_1__p_republishQueue,
    const constants__t_monitoredItemQueue_i subscription_core_1__p_monitoredItemQueue,
@@ -121,9 +119,6 @@ extern void subscription_core_1__get_subscription_monitoredItemQueue(
 extern void subscription_core_1__get_subscription_notifRepublishQueue(
    const constants__t_subscription_i subscription_core_1__p_subscription,
    constants__t_notifRepublishQueue_i * const subscription_core_1__p_republishQueue);
-extern void subscription_core_1__get_subscription_notificationQueue(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_notificationQueue_i * const subscription_core_1__p_notificationQueue);
 extern void subscription_core_1__get_subscription_publishInterval(
    const constants__t_subscription_i subscription_core_1__p_subscription,
    constants__t_opcua_duration_i * const subscription_core_1__p_publishInterval);

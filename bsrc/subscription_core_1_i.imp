@@ -45,7 +45,6 @@ CONCRETE_VARIABLES
     a_KeepAliveCounter_i,
     a_MessageSent_i,
     a_SeqNum_i,
-    a_pendingNotificationQueue_i,
     a_publishRequestQueue_i,
     a_notifRepublishQueue_i,
     a_monitoredItemQueue_i,
@@ -101,10 +100,6 @@ INVARIANT
     dom(a_SeqNum)             = s_subscription                                                 &
     a_SeqNum                  = s_subscription <| a_SeqNum_i |> t_sub_seq_num                  &
 
-    a_pendingNotificationQueue_i : t_subscription_i --> t_notificationQueue_i                  &
-    dom(a_pendingNotificationQueue) = s_subscription                                           &
-    a_pendingNotificationQueue   = s_subscription <| a_pendingNotificationQueue_i |> t_notificationQueue &
-
     a_publishRequestQueue_i      : t_subscription_i --> t_publishReqQueue_i                    &
     dom(a_publishRequestQueue)   = s_subscription                                              &
     a_publishRequestQueue        = s_subscription <| a_publishRequestQueue_i |> t_publishReqQueue &
@@ -136,7 +131,6 @@ INITIALISATION
     a_KeepAliveCounter_i         := t_subscription_i * {0};
     a_MessageSent_i              := t_subscription_i * {FALSE};
     a_SeqNum_i                   := t_subscription_i * {c_sub_seq_num_indet};
-    a_pendingNotificationQueue_i := t_subscription_i * {c_notificationQueue_indet};
     a_publishRequestQueue_i      := t_subscription_i * {c_publishReqQueue_indet};
     a_notifRepublishQueue_i      := t_subscription_i * {c_notifRepublishQueue_indet};
     a_monitoredItemQueue_i       := t_subscription_i * {c_monitoredItemQueue_indet};
@@ -170,7 +164,6 @@ OPERATIONS
                       p_revMaxKeepAlive,
                       p_maxNotificationsPerPublish,
                       p_publishEnabled,
-                      p_notifQueue,
                       p_publishQueue,
                       p_republishQueue,
                       p_monitoredItemQueue,
@@ -191,7 +184,6 @@ OPERATIONS
         a_MessageSent_i(p_subscription) := FALSE;
         a_PublishingEnabled_i(p_subscription) := p_publishEnabled;
         a_SeqNum_i (p_subscription) := c_sub_seq_num_init;
-        a_pendingNotificationQueue_i(p_subscription) := p_notifQueue;
         a_publishRequestQueue_i(p_subscription) := p_publishQueue;
         a_notifRepublishQueue_i(p_subscription) := p_republishQueue;
         a_monitoredItemQueue_i(p_subscription) := p_monitoredItemQueue;
@@ -218,7 +210,6 @@ OPERATIONS
         a_KeepAliveCounter_i(p_subscription) := 0;
         a_MessageSent_i(p_subscription) := FALSE;
         a_SeqNum_i (p_subscription) := c_sub_seq_num_indet;
-        a_pendingNotificationQueue_i(p_subscription) := c_notificationQueue_indet;
         a_publishRequestQueue_i(p_subscription) := c_publishReqQueue_indet;
         a_notifRepublishQueue_i(p_subscription) := c_notifRepublishQueue_indet;
         a_monitoredItemQueue_i(p_subscription) := c_monitoredItemQueue_indet;
@@ -362,12 +353,6 @@ OPERATIONS
     p_seqNumToSend <-- get_subscription_SeqNum (p_subscription) =
     BEGIN
         p_seqNumToSend := a_SeqNum_i(p_subscription)
-    END
-    ;
-
-    p_notificationQueue <-- get_subscription_notificationQueue (p_subscription) =
-    BEGIN
-        p_notificationQueue := a_pendingNotificationQueue_i(p_subscription)
     END
     ;
 

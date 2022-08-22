@@ -46,16 +46,20 @@ void monitored_item_notification_queue_bs__INITIALISATION(void) {}
    OPERATIONS Clause
   --------------------*/
 void monitored_item_notification_queue_bs__allocate_new_monitored_item_notification_queue(
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     t_bool* const monitored_item_notification_queue_bs__bres,
     constants__t_notificationQueue_i* const monitored_item_notification_queue_bs__queue)
 {
-    *monitored_item_notification_queue_bs__queue = SOPC_SLinkedList_Create(0);
-    if (*monitored_item_notification_queue_bs__queue == NULL)
+    SOPC_InternalMontitoredItem* monitoredItemPointer =
+        (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
+    monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create(0);
+    if (NULL == monitoredItemPointer->notifQueue)
     {
         *monitored_item_notification_queue_bs__bres = false;
     }
     else
     {
+        *monitored_item_notification_queue_bs__queue = monitoredItemPointer->notifQueue;
         *monitored_item_notification_queue_bs__bres = true;
     }
 }
@@ -70,28 +74,15 @@ static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, void* val)
 }
 
 void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue)
-{
-    SOPC_SLinkedList_Apply(monitored_item_notification_queue_bs__p_queue, SOPC_InternalNotificationQueueElement_Free);
-    SOPC_SLinkedList_Delete(monitored_item_notification_queue_bs__p_queue);
-}
-
-void monitored_item_notification_queue_bs__clear_monitored_item_from_notification_queue(
-    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
-    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem)
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    // Removes first notif which references this MonItId
-    void* foundNotif = SOPC_SLinkedList_RemoveFromId(monitored_item_notification_queue_bs__p_queue,
-                                                     monitoredItemPointer->monitoredItemId);
-    // Continues to remove until no more found
-    while (NULL != foundNotif)
-    {
-        SOPC_InternalNotificationQueueElement_Free(0, foundNotif);
-        foundNotif = SOPC_SLinkedList_RemoveFromId(monitored_item_notification_queue_bs__p_queue,
-                                                   monitoredItemPointer->monitoredItemId);
-    }
+    assert(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
+    SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
+    SOPC_SLinkedList_Delete(monitoredItemPointer->notifQueue);
+    monitoredItemPointer->notifQueue = NULL;
 }
 
 static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
@@ -139,8 +130,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
 }
 
 void monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(
-    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_NodeId_i monitored_item_notification_queue_bs__p_nid,
     const constants__t_AttributeId_i monitored_item_notification_queue_bs__p_aid,
     const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer,
@@ -214,12 +205,14 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 }
 
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
-    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
     const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
+    assert(monitored_item_notification_queue_bs__p_queue ==
+           ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
     *monitored_item_notification_queue_bs__bres = false;
     if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) >=
         INT32_MAX) // number of notifications returned in B model as a int32
@@ -307,7 +300,6 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
 void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     t_bool* const monitored_item_notification_queue_bs__p_continue,
-    constants__t_monitoredItemPointer_i* const monitored_item_notification_queue_bs__p_monitoredItem,
     constants__t_WriteValuePointer_i* const monitored_item_notification_queue_bs__p_writeValuePointer)
 {
     *monitored_item_notification_queue_bs__p_continue = false;
@@ -316,7 +308,6 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
 
     assert(notifElt != NULL);
 
-    *monitored_item_notification_queue_bs__p_monitoredItem = notifElt->monitoredItemPointer;
     *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
     SOPC_Free(notifElt);
     *monitored_item_notification_queue_bs__p_continue =
@@ -329,10 +320,36 @@ void monitored_item_notification_queue_bs__free_first_monitored_item_notificatio
     SOPC_Free(monitored_item_notification_queue_bs__p_VariantValuePointer);
 }
 
+void monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(
+    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
+    t_entier4* const monitored_item_notification_queue_bs__p_nb_available_notifs)
+{
+    assert(NULL != monitored_item_notification_queue_bs__p_mi_notif_queue);
+    uint32_t length = SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_mi_notif_queue);
+    assert(length <= INT32_MAX); // Guaranteed by add functions
+    *monitored_item_notification_queue_bs__p_nb_available_notifs = (int32_t) length;
+}
+
+void monitored_item_notification_queue_bs__get_monitored_item_notification_queue(
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    t_bool* const monitored_item_notification_queue_bs__bres,
+    constants__t_notificationQueue_i* const monitored_item_notification_queue_bs__queue)
+{
+    *monitored_item_notification_queue_bs__bres = NULL;
+    *monitored_item_notification_queue_bs__queue = NULL;
+    SOPC_InternalMontitoredItem* monitoredItemPointer =
+        (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
+    if (NULL != monitoredItemPointer->notifQueue)
+    {
+        *monitored_item_notification_queue_bs__bres = true;
+        *monitored_item_notification_queue_bs__queue = monitoredItemPointer->notifQueue;
+    }
+}
+
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
-    t_entier4* const monitored_item_notification_queue_bs__p_nb_notifications)
+    t_bool* const monitored_item_notification_queue_bs__p_continue)
 {
-    *monitored_item_notification_queue_bs__p_nb_notifications =
-        (int32_t) SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue);
+    *monitored_item_notification_queue_bs__p_continue =
+        SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
 }

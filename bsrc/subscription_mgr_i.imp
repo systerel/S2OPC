@@ -260,7 +260,8 @@ LOCAL_OPERATIONS
                             s_monitoredItemId := s_monitoredItemId \/ s_newMonitoredItemId ||
                             s_monitoredItemPointer := s_monitoredItemPointer \/ s_newMonitoredItemPointer ||
                             a_monitoredItemId, a_monitoredItemSubs, a_monitoredItemNodeId,
-                            a_monitored_item_notifications, a_defined_monitored_items
+                            a_monitored_item_notification_queue, a_notification_queue_notifications,
+                            a_defined_monitored_items
                             :(/* Associate new pointers with new ids */
                               a_monitoredItemId <: a_monitoredItemId$0 &
                               s_newMonitoredItemPointer <<| a_monitoredItemId =
@@ -277,12 +278,15 @@ LOCAL_OPERATIONS
                               s_newMonitoredItemPointer <<| a_monitoredItemSubs =
                                s_newMonitoredItemPointer <<| a_monitoredItemSubs$0 &
                               a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} &
-                              /* Add notifications to subscription notification queue */
-                              a_monitored_item_notifications <: a_monitored_item_notifications$0 &
-                              {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications =
-                               {a_pendingNotificationQueue(p_subscription)} <<| a_monitored_item_notifications$0 &
-                               a_monitored_item_notifications[{a_pendingNotificationQueue(p_subscription)}] =
-                               s_monitoredItemPointer &
+                              /* Add monitored item notification queue and initial notification */
+                              a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
+                              a_monitored_item_notification_queue$0 <: a_monitored_item_notification_queue &
+                              s_newMonitoredItemPointer <: dom(a_monitored_item_notification_queue) &
+                              a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                              a_monitored_item_notification_queue[s_newMonitoredItemPointer] <<| a_notification_queue_notifications$0 =
+                              a_monitored_item_notification_queue[s_newMonitoredItemPointer] <<| a_notification_queue_notifications &
+                              card(a_notification_queue_notifications[a_monitored_item_notification_queue[s_newMonitoredItemPointer]]) =
+                                card(s_newMonitoredItemPointer) &
                               /* Add monitored items to the monitored items queues */
                               a_defined_monitored_items <: a_defined_monitored_items$0 &
                               s_miQueues <<| a_defined_monitored_items =
@@ -301,15 +305,21 @@ LOCAL_OPERATIONS
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
+        p_monitoredItemPointer : dom(a_monitored_item_notification_queue) &
         p_old_wv_pointer : t_WriteValuePointer_i &
         p_old_wv_pointer : t_WriteValuePointer &
         p_new_wv_pointer : t_WriteValuePointer_i &
         p_new_wv_pointer : t_WriteValuePointer
     THEN
-        /* notifications may have been triggered */
-        a_monitored_item_notifications
-        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
-            a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        LET l_MI_notif_queue BE
+            l_MI_notif_queue = a_monitored_item_notification_queue(p_monitoredItemPointer)
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                {l_MI_notif_queue} <| a_notification_queue_notifications$0 <: {l_MI_notif_queue} <| a_notification_queue_notifications &
+                {l_MI_notif_queue} <<| a_notification_queue_notifications$0 = {l_MI_notif_queue} <<| a_notification_queue_notifications)
+        END
     END
     ;
 
@@ -322,10 +332,15 @@ LOCAL_OPERATIONS
         p_new_wv_pointer : t_WriteValuePointer_i &
         p_new_wv_pointer : t_WriteValuePointer
     THEN
-        /* notifications may have been triggered */
-        a_monitored_item_notifications
-        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
-          a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        LET l_MI_notif_queues BE
+            l_MI_notif_queues = a_monitored_item_notification_queue[a_defined_monitored_items[{p_monitoredItemQueue}]]
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
+                l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
+        END
         /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer,
            it is possible to describe first part of criteria to generate notification.
            But other filters will be necessary (index array, ...) */
@@ -340,10 +355,15 @@ LOCAL_OPERATIONS
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
-        /* notification may have been triggered */
-        a_monitored_item_notifications
-        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
-          a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        LET l_MI_notif_queue BE
+            l_MI_notif_queue = a_monitored_item_notification_queue(p_monitoredItemPointer)
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                {l_MI_notif_queue} <| a_notification_queue_notifications$0 <: {l_MI_notif_queue} <| a_notification_queue_notifications &
+                {l_MI_notif_queue} <<| a_notification_queue_notifications$0 = {l_MI_notif_queue} <<| a_notification_queue_notifications)
+        END
     END
     ;
 
@@ -355,10 +375,15 @@ LOCAL_OPERATIONS
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
-        /* notifications may have been triggered */
-        a_monitored_item_notifications
-        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
-          a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        LET l_MI_notif_queues BE
+            l_MI_notif_queues = a_monitored_item_notification_queue[a_defined_monitored_items[{p_monitoredItemQueue}]]
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
+                l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
+        END
     END
     ;
 
@@ -405,7 +430,8 @@ LOCAL_OPERATIONS
                 a_monitoredItemId := a_monitoredItemId |>> l_MonitoredItemIds ||
                 a_monitoredItemSubs := l_MonitoredItemPointers <<| a_monitoredItemSubs ||
                 a_monitoredItemNodeId := l_MonitoredItemPointers <<| a_monitoredItemNodeId ||
-                a_monitored_item_notifications := a_monitored_item_notifications |>> l_MonitoredItemPointers ||
+                a_monitored_item_notification_queue := l_MonitoredItemPointers <<| a_monitored_item_notification_queue ||
+                a_notification_queue_notifications := a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications ||
                 a_defined_monitored_items := a_defined_monitored_items |>> l_MonitoredItemPointers
             END
         END
@@ -470,12 +496,8 @@ LOCAL_OPERATIONS
 
                 /* Queues emptied : publish responses should be sent if remaining */
                 a_publish_responses := a_publish_responses |>> a_publishRequestQueue[l_deleted_subs] ||
-                a_monitored_item_notifications := a_pendingNotificationQueue[l_deleted_subs] <<| a_monitored_item_notifications ||
 
                 /* Queues deleted */
-                s_notificationQueue := s_notificationQueue - a_pendingNotificationQueue[l_deleted_subs] ||
-                a_pendingNotificationQueue := l_deleted_subs <<| a_pendingNotificationQueue ||
-
                 s_publishReqQueue := s_publishReqQueue - a_publishRequestQueue[l_deleted_subs] ||
                 a_publishRequestQueue := l_deleted_subs <<| a_publishRequestQueue ||
 
@@ -492,6 +514,11 @@ LOCAL_OPERATIONS
 
                     s_monitoredItemQueue := s_monitoredItemQueue - a_monitoredItemQueue[l_deleted_subs] ||
                     a_monitoredItemQueue := l_deleted_subs <<| a_monitoredItemQueue ||
+
+                    /* Remove monitored item notification queues */
+                    a_monitored_item_notification_queue := s_removedMonitoredItemPointer <<| a_monitored_item_notification_queue ||
+                    a_notification_queue_notifications :=
+                       a_monitored_item_notification_queue[s_removedMonitoredItemPointer] <<| a_notification_queue_notifications ||
 
                     /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
                     a_defined_monitored_items :=
@@ -792,7 +819,7 @@ OPERATIONS
         IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
         THEN
             /* Note: indexRange filtering on value done in C implementation for now */
-            server_subscription_add_notification_on_value_change (l_subscription, p_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
+            server_subscription_add_notification_on_value_change (p_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
         END
     END
     ;
@@ -896,8 +923,7 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     l_bres <-- server_subscription_add_notification_on_node_change
-                    (l_subscription,
-                        p_monitoredItemPointer,
+                    (p_monitoredItemPointer,
                         l_nid,
                         l_aid,
                         l_value,
@@ -1428,9 +1454,14 @@ OPERATIONS
                         END
                     INVARIANT
                         l_validPublishingReqQueued = validPublishReqQueued &
-                        l_moreNotifs = bool(a_monitored_item_notifications[{a_pendingNotificationQueue(p_subscription)}] /= {})
+                        l_moreNotifs = bool(
+                            a_notification_queue_notifications[
+                                a_monitored_item_notification_queue[
+                                    a_defined_monitored_items[a_monitoredItemQueue[{p_subscription}]]]] /= {})
                     VARIANT
-                        card(a_monitored_item_notifications[{a_pendingNotificationQueue(p_subscription)}]) +
+                        card(a_notification_queue_notifications[
+                                a_monitored_item_notification_queue[
+                                    a_defined_monitored_items[a_monitoredItemQueue[{p_subscription}]]]]) +
                         /* necessary in case allocation failed: notification queue will not decrease */
                         card(a_publish_responses~[{a_publishRequestQueue (p_subscription)}])
                     END

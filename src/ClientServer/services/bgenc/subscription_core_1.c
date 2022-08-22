@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 04/08/2022 14:53:20
+ Date                 : 26/08/2022 15:23:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -46,7 +46,6 @@ t_entier4 subscription_core_1__a_lifetimeExpCount_i[constants__t_subscription_i_
 t_entier4 subscription_core_1__a_maxNotifsPerPublish_i[constants__t_subscription_i_max+1];
 constants__t_monitoredItemQueue_i subscription_core_1__a_monitoredItemQueue_i[constants__t_subscription_i_max+1];
 constants__t_notifRepublishQueue_i subscription_core_1__a_notifRepublishQueue_i[constants__t_subscription_i_max+1];
-constants__t_notificationQueue_i subscription_core_1__a_pendingNotificationQueue_i[constants__t_subscription_i_max+1];
 constants__t_opcua_duration_i subscription_core_1__a_publishInterval_i[constants__t_subscription_i_max+1];
 constants__t_publishReqQueue_i subscription_core_1__a_publishRequestQueue_i[constants__t_subscription_i_max+1];
 constants__t_timer_id_i subscription_core_1__a_publishTimer_i[constants__t_subscription_i_max+1];
@@ -146,12 +145,6 @@ void subscription_core_1__INITIALISATION(void) {
    {
       t_entier4 i;
       for (i = constants__t_subscription_i_max; 0 <= i; i = i - 1) {
-         subscription_core_1__a_pendingNotificationQueue_i[i] = constants__c_notificationQueue_indet;
-      }
-   }
-   {
-      t_entier4 i;
-      for (i = constants__t_subscription_i_max; 0 <= i; i = i - 1) {
          subscription_core_1__a_publishRequestQueue_i[i] = constants__c_publishReqQueue_indet;
       }
    }
@@ -206,7 +199,6 @@ void subscription_core_1__add_subscription(
    const t_entier4 subscription_core_1__p_revMaxKeepAlive,
    const t_entier4 subscription_core_1__p_maxNotificationsPerPublish,
    const t_bool subscription_core_1__p_publishEnabled,
-   const constants__t_notificationQueue_i subscription_core_1__p_notifQueue,
    const constants__t_publishReqQueue_i subscription_core_1__p_publishQueue,
    const constants__t_notifRepublishQueue_i subscription_core_1__p_republishQueue,
    const constants__t_monitoredItemQueue_i subscription_core_1__p_monitoredItemQueue,
@@ -224,7 +216,6 @@ void subscription_core_1__add_subscription(
    subscription_core_1__a_MessageSent_i[subscription_core_1__p_subscription] = false;
    subscription_core_1__a_PublishingEnabled_i[subscription_core_1__p_subscription] = subscription_core_1__p_publishEnabled;
    subscription_core_1__a_SeqNum_i[subscription_core_1__p_subscription] = constants__c_sub_seq_num_init;
-   subscription_core_1__a_pendingNotificationQueue_i[subscription_core_1__p_subscription] = subscription_core_1__p_notifQueue;
    subscription_core_1__a_publishRequestQueue_i[subscription_core_1__p_subscription] = subscription_core_1__p_publishQueue;
    subscription_core_1__a_notifRepublishQueue_i[subscription_core_1__p_subscription] = subscription_core_1__p_republishQueue;
    subscription_core_1__a_monitoredItemQueue_i[subscription_core_1__p_subscription] = subscription_core_1__p_monitoredItemQueue;
@@ -248,7 +239,6 @@ void subscription_core_1__delete_subscription(
    subscription_core_1__a_KeepAliveCounter_i[subscription_core_1__p_subscription] = 0;
    subscription_core_1__a_MessageSent_i[subscription_core_1__p_subscription] = false;
    subscription_core_1__a_SeqNum_i[subscription_core_1__p_subscription] = constants__c_sub_seq_num_indet;
-   subscription_core_1__a_pendingNotificationQueue_i[subscription_core_1__p_subscription] = constants__c_notificationQueue_indet;
    subscription_core_1__a_publishRequestQueue_i[subscription_core_1__p_subscription] = constants__c_publishReqQueue_indet;
    subscription_core_1__a_notifRepublishQueue_i[subscription_core_1__p_subscription] = constants__c_notifRepublishQueue_indet;
    subscription_core_1__a_monitoredItemQueue_i[subscription_core_1__p_subscription] = constants__c_monitoredItemQueue_indet;
@@ -390,12 +380,6 @@ void subscription_core_1__get_subscription_SeqNum(
    const constants__t_subscription_i subscription_core_1__p_subscription,
    constants__t_sub_seq_num_i * const subscription_core_1__p_seqNumToSend) {
    *subscription_core_1__p_seqNumToSend = subscription_core_1__a_SeqNum_i[subscription_core_1__p_subscription];
-}
-
-void subscription_core_1__get_subscription_notificationQueue(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_notificationQueue_i * const subscription_core_1__p_notificationQueue) {
-   *subscription_core_1__p_notificationQueue = subscription_core_1__a_pendingNotificationQueue_i[subscription_core_1__p_subscription];
 }
 
 void subscription_core_1__get_subscription_publishRequestQueue(

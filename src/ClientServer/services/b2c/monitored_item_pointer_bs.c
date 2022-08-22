@@ -114,7 +114,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
 {
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     uint32_t freshId = 0;
-    SOPC_InternalMontitoredItem* monitItem = SOPC_Malloc(sizeof(SOPC_InternalMontitoredItem));
+    SOPC_InternalMontitoredItem* monitItem = SOPC_Calloc(1, sizeof(SOPC_InternalMontitoredItem));
     SOPC_NodeId* nid = SOPC_Malloc(sizeof(*nid));
     SOPC_String* rangeStr = NULL;
     if (NULL != monitored_item_pointer_bs__p_indexRange)

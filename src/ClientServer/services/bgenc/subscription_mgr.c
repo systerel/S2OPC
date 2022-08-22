@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 26/08/2022 11:46:04
+ Date                 : 26/08/2022 15:23:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -346,8 +346,7 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
       if (((subscription_mgr__l_valid_user_access == true) &&
          (subscription_mgr__l_notification_triggered == true)) &&
          (subscription_mgr__l_monitoringMode == constants__e_monitoringMode_reporting)) {
-         subscription_core__server_subscription_add_notification_on_value_change(subscription_mgr__l_subscription,
-            subscription_mgr__p_monitoredItemPointer,
+         subscription_core__server_subscription_add_notification_on_value_change(subscription_mgr__p_monitoredItemPointer,
             subscription_mgr__l_timestampToReturn,
             subscription_mgr__p_new_wv_pointer);
       }
@@ -467,8 +466,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_node_chang
                   &subscription_mgr__l_valueSc);
             }
             if (subscription_mgr__l_bres == true) {
-               subscription_core__server_subscription_add_notification_on_node_change(subscription_mgr__l_subscription,
-                  subscription_mgr__p_monitoredItemPointer,
+               subscription_core__server_subscription_add_notification_on_node_change(subscription_mgr__p_monitoredItemPointer,
                   subscription_mgr__l_nid,
                   subscription_mgr__l_aid,
                   subscription_mgr__l_value,

@@ -41,7 +41,6 @@ DEFINITIONS
     a_PublishingEnabled,
     a_SeqNum,
 
-    a_pendingNotificationQueue,
     a_publishRequestQueue,
     a_notifRepublishQueue,
     a_monitoredItemQueue,
@@ -65,14 +64,15 @@ DEFINITIONS
     a_LifetimeCounter : s_subscription --> t_counter &
     a_KeepAliveCounter : s_subscription --> t_counter & /* missing in table 84 */
     a_MessageSent <: s_subscription &
-    /* a_NotificationAvailable <: s_subscription & */ /* <=> a_monitored_item_notifications[{queue}] /= {} */
+    /* a_NotificationAvailable <: s_subscription & */ /* <=> a_notification_queue_notifications[
+                                                               a_monitored_item_notification_queue[
+                                                                 a_defined_monitored_items[a_monitoredItemQueue[{p_subscription}]]]] /= {} */
     a_PublishingEnabled <: s_subscription &
     /* a_PublishingReqQueued <: s_subscription & */ /* <=> a_publish_responses~[{queue}] /= {} */
     /* a_RequestedMessageFound <: s_subscription */   /* <=> seqNum in a_retransmissionQueue[subscription] */
     a_SeqNum : s_subscription --> t_sub_seq_num &
 
     /* Subscription Implementation variables */
-    a_pendingNotificationQueue : s_subscription --> t_notificationQueue &
     a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue &
 
     a_publishTimer : s_subscription --> t_timer_id &
@@ -106,7 +106,6 @@ INITIALISATION
     a_PublishingEnabled := {}        ||
     a_SeqNum := {}                   ||
 
-    a_pendingNotificationQueue := {} ||
     a_publishRequestQueue := {}      ||
     a_notifRepublishQueue := {}      ||
     a_monitoredItemQueue := {} ||
@@ -154,7 +153,6 @@ OPERATIONS
                       p_revMaxKeepAlive,
                       p_maxNotificationsPerPublish,
                       p_publishEnabled,
-                      p_notifQueue,
                       p_publishQueue,
                       p_republishQueue,
                       p_monitoredItemQueue,
@@ -174,8 +172,6 @@ OPERATIONS
         p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
         p_maxNotificationsPerPublish : t_counter &
         p_publishEnabled = TRUE & /* => no subscription modification for now => refuse publishDisabled */
-        p_notifQueue : t_notificationQueue_i &
-        p_notifQueue : t_notificationQueue &
         p_publishQueue : t_publishReqQueue_i &
         p_publishQueue : t_publishReqQueue &
         p_republishQueue : t_notifRepublishQueue_i &
@@ -199,7 +195,6 @@ OPERATIONS
         a_PublishingEnabled := a_PublishingEnabled \/ {p_subscription}         ||
         a_SeqNum (p_subscription) := c_sub_seq_num_init                        || /* => next SeqNum == 1 */
 
-        a_pendingNotificationQueue (p_subscription) := p_notifQueue ||
         a_publishRequestQueue (p_subscription) := p_publishQueue ||
         a_notifRepublishQueue (p_subscription) := p_republishQueue ||
         a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue ||
@@ -227,8 +222,6 @@ OPERATIONS
         a_MessageSent := a_MessageSent - {p_subscription}               ||
         a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
         a_SeqNum := {p_subscription} <<| a_SeqNum ||
-
-        a_pendingNotificationQueue := {p_subscription} <<| a_pendingNotificationQueue ||
 
         a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
@@ -473,16 +466,6 @@ OPERATIONS
         p_subscription : dom(a_SeqNum)
     THEN
         p_seqNumToSend :(p_seqNumToSend : t_sub_seq_num_i & p_seqNumToSend = a_SeqNum(p_subscription))
-    END
-    ;
-
-    p_notificationQueue <-- get_subscription_notificationQueue (p_subscription) =
-    PRE
-        p_subscription : t_subscription_i &
-        p_subscription : dom(a_pendingNotificationQueue)
-    THEN
-        p_notificationQueue :(p_notificationQueue : t_notificationQueue_i &
-                              p_notificationQueue = a_pendingNotificationQueue(p_subscription))
     END
     ;
 
