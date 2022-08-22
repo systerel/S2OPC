@@ -62,7 +62,7 @@
     <xs:attribute name="publishingOffset" type="xs:unsignedLong" use="optional"/>
     <xs:attribute name="publisherId" type="xs:unsignedLong"/> <!-- required if subscriber mode -->
     <xs:attribute name="securityMode" type="securityModeType"/>
-    <xs:attribute name="groupId" type="xs:unsignedShort" use="optional"/>
+    <xs:attribute name="groupId" type="xs:unsignedShort" use="required"/>
     <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
    </xs:complexType>
   <xs:complexType name="dataset">
