@@ -567,8 +567,10 @@ PROPERTIES
     c_HierarchicalReferences_Type_NodeId /= c_ByteString_Type_NodeId &
     c_HierarchicalReferences_Type_NodeId /= c_Byte_Type_NodeId &
 
+    t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
-    t_ExpandedNodeId = t_ExpandedNodeId_i - {c_ExpandedNodeId_indet} &
+    c_ExpandedNodeId_indet /: t_ExpandedNodeId &
+
 
     t_Reference <: t_Reference_i &
     c_Reference_indet : t_Reference_i &
@@ -876,7 +878,10 @@ PROPERTIES
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
 
-    t_operation_type = t_operation_type_i - {c_operation_type_indet} &
+    t_operation_type = {e_operation_type_read,
+                        e_operation_type_write,
+                        e_operation_type_executable,
+                        e_operation_type_addnode} &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
