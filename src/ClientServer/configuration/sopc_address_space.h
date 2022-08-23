@@ -73,7 +73,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes);
 
 /**
  * \brief Returns true if the AddressSpace will release nodes on ::SOPC_AddressSpace_Delete.
- *        It meands it has been created using ::SOPC_AddressSpace_Create with (free_nodes=true)
+ *        It means it has been created using ::SOPC_AddressSpace_Create with (free_nodes=true)
  *
  * \param space  the AddressSpace to be evaluated
  *
