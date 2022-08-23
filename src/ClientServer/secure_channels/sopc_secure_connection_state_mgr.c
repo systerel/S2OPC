@@ -3458,8 +3458,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                " reverseConnIdx=%" PRIuPTR,
                                eltId, params);
 
-        assert(eltId > 0);
-        assert(eltId <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS); // Server endpoint (first half of listener array)
+        assert(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(eltId)); // Server EP (classic)
         assert(params < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
 
         // Reset connection retry timer id
