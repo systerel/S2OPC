@@ -27,6 +27,7 @@ SEES
     message_out_bs
 
 DEFINITIONS
+
     "address_space.def"
 
 ABSTRACT_VARIABLES
@@ -44,32 +45,8 @@ INITIALISATION
 OPERATIONS
 
     d_adsp_operations;
+    d_adsp_write_operation;
 
-    StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
-    PRE
-        p_user : t_user_i    &
-        p_user : t_user      &
-        p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds   &
-        write_msg : t_msg_i  &
-        write_msg = c_msg_in &
-        c_msg_in : t_msg     &
-        a_msg_in_type = e_msg_attribute_write_req &
-        resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
-        c_msg_out : t_msg
-    THEN
-        StatusCode_service,
-        a_Value
-        :(
-            StatusCode_service       : t_StatusCode_i &
-            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            a_Value                  : s_Node +-> t_Variant &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
-        )
-    END
-    ;
 
 /* Services Node Management */
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
