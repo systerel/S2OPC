@@ -668,16 +668,23 @@ OPERATIONS
         DO
             l_continue, l_index <-- continue_iter_browsePathSourceIdx;
             l_expandedNodeId <-- get_BrowsePathResult(l_index);
-            l_local_server, l_nodeId <-- getall_conv_ExpandedNodeId_NodeId(l_expandedNodeId);
-            ASSERT l_local_server = TRUE THEN
-                l_alloc, l_source_copy <-- copy_node_id_pointer_content (l_nodeId);
-                IF l_alloc = TRUE THEN
-                    add_BrowsePathSource(l_source_copy)
-                ELSE
-                    free_BrowsePathSource;
-                    statusCode_operation := e_sc_bad_out_of_memory;
-                    l_continue := FALSE
+            IF l_expandedNodeId /= c_ExpandedNodeId_indet
+            THEN
+                l_local_server, l_nodeId <-- getall_conv_ExpandedNodeId_NodeId(l_expandedNodeId);
+                ASSERT l_local_server = TRUE THEN
+                    l_alloc, l_source_copy <-- copy_node_id_pointer_content (l_nodeId);
+                    IF l_alloc = TRUE THEN
+                        add_BrowsePathSource(l_source_copy)
+                    ELSE
+                        free_BrowsePathSource;
+                        statusCode_operation := e_sc_bad_out_of_memory;
+                        l_continue := FALSE
+                    END
                 END
+            ELSE
+                free_BrowsePathSource;
+                statusCode_operation := e_sc_bad_unexpected_error;
+                l_continue := FALSE
             END
         INVARIANT
 

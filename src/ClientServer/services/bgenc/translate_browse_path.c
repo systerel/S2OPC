@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 04/08/2022 14:53:24
+ Date                 : 23/08/2022 13:39:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -286,18 +286,25 @@ void translate_browse_path__copy_browsePathResult_to_source(
             &translate_browse_path__l_index);
          translate_browse_path_1__get_BrowsePathResult(translate_browse_path__l_index,
             &translate_browse_path__l_expandedNodeId);
-         constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path__l_expandedNodeId,
-            &translate_browse_path__l_local_server,
-            &translate_browse_path__l_nodeId);
-         node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__l_nodeId,
-            &translate_browse_path__l_alloc,
-            &translate_browse_path__l_source_copy);
-         if (translate_browse_path__l_alloc == true) {
-            translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
+         if (translate_browse_path__l_expandedNodeId != constants__c_ExpandedNodeId_indet) {
+            constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path__l_expandedNodeId,
+               &translate_browse_path__l_local_server,
+               &translate_browse_path__l_nodeId);
+            node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__l_nodeId,
+               &translate_browse_path__l_alloc,
+               &translate_browse_path__l_source_copy);
+            if (translate_browse_path__l_alloc == true) {
+               translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
+            }
+            else {
+               translate_browse_path__free_BrowsePathSource();
+               *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+               translate_browse_path__l_continue = false;
+            }
          }
          else {
             translate_browse_path__free_BrowsePathSource();
-            *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_unexpected_error;
             translate_browse_path__l_continue = false;
          }
       }
