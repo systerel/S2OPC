@@ -110,7 +110,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             if (SOPC_STATUS_OK == status)
             {
                 memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
-                memset(tConfig.reverseEpConfigs, 0, sizeof(tConfig.reverseEpConfigs));
+                memset((void*) tConfig.reverseEpConfigs, 0, sizeof(tConfig.reverseEpConfigs));
                 memset(tConfig.serverScConfigs, 0, sizeof(tConfig.serverScConfigs));
                 memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
                 SOPC_App_Initialize();
