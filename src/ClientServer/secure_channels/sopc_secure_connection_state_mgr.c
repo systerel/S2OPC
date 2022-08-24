@@ -824,11 +824,7 @@ static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rh
         *serverURL = SOPC_String_GetCString(&sopcServerURL);
         SOPC_String_Clear(&sopcServerURL);
     }
-    else
-    {
-        // Buffer will not be used anymore
-        SOPC_Buffer_Delete(rheMsgBuffer);
-    }
+
     SOPC_String_Clear(&sopcServerURI);
     SOPC_String_Clear(&sopcServerURL);
 
