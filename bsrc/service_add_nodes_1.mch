@@ -60,7 +60,7 @@ OPERATIONS
         p_nodeAttributes : t_NodeAttributes_i &
         p_nodeAttributes : t_NodeAttributes &
         p_typeDefId : t_ExpandedNodeId_i &
-        (p_nodeClass :{e_ncl_Object, e_ncl_Variable} => p_typeDefId : t_ExpandedNodeId)
+        (p_nodeClass :{e_ncl_Object, e_ncl_Variable} => p_typeDefId /= c_ExpandedNodeId_indet)
     THEN
         sc_operation,
         new_nodeId,

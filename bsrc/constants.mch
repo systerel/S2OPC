@@ -1136,7 +1136,7 @@ OPERATIONS
     p_local_server, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &
-        p_expnid : t_ExpandedNodeId
+        p_expnid /= c_ExpandedNodeId_indet
     THEN
         p_local_server, p_nid :(p_local_server : BOOL &
                                 p_nid : t_NodeId_i &

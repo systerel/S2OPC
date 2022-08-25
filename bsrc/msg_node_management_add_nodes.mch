@@ -154,7 +154,7 @@ OPERATIONS
                 p_sc = e_sc_ok =>
                 p_nodeClass : t_NodeClass &
                 /* for objects and variables node classes: TypeDefinition is always defined */
-                AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] <: t_ExpandedNodeId &
+                c_ExpandedNodeId_indet /: AddNodeItemReq_TypeDefinition[AddNodeItemReq_NodeClass~[{e_ncl_Object, e_ncl_Variable}]] &
                 /* for other node classes: TypeDefinition is never defined */
                 AddNodeItemReq_TypeDefinition[dom(AddNodeItemReq_NodeClass |>> {e_ncl_Object, e_ncl_Variable})] <: {c_ExpandedNodeId_indet}
             ) &
