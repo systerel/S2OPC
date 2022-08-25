@@ -319,7 +319,7 @@ LOCAL_OPERATIONS
     local_create_notification_on_monitored_item_if_node_changed (p_monitoredItemPointer, p_added, p_nid) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
-        p_monitoredItemPointer : t_monitoredItemPointer &
+        p_monitoredItemPointer : s_monitoredItemPointer &
         p_added : BOOL &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
@@ -334,7 +334,7 @@ LOCAL_OPERATIONS
     create_notification_on_monitored_items_if_node_changed (p_monitoredItemQueue, p_added, p_nid) =
     PRE
         p_monitoredItemQueue : t_monitoredItemQueue_i &
-        p_monitoredItemQueue : t_monitoredItemQueue &
+        p_monitoredItemQueue : s_monitoredItemQueue &
         p_added : BOOL &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId

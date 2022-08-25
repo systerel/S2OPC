@@ -216,9 +216,9 @@ DEFINITIONS
     mi_iterator_it : t_monitoredItemQueueIterator_i &
     nb_monitored_items_it : NAT &
     s_mi_to_iterate_it <: t_monitoredItemPointer_i &
-    s_mi_to_iterate_it <: t_monitoredItemPointer &
+    s_mi_to_iterate_it <: s_monitoredItemPointer &
     s_mi_iterated_it <: t_monitoredItemPointer_i &
-    s_mi_iterated_it <: t_monitoredItemPointer &
+    s_mi_iterated_it <: s_monitoredItemPointer &
     s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
     card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it
     ;
@@ -1346,7 +1346,7 @@ OPERATIONS
     continue, iterator <-- init_iter_monitored_item (p_queue) =
     PRE
         p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue
+        p_queue : s_monitoredItemQueue
     THEN
         mi_queue_it,
         mi_iterator_it,
@@ -1357,8 +1357,8 @@ OPERATIONS
         iterator
         :(mi_queue_it : t_monitoredItemQueue_i &
           mi_iterator_it : t_monitoredItemQueueIterator_i &
-          s_mi_to_iterate_it <: t_monitoredItemPointer &
-          s_mi_iterated_it <: t_monitoredItemPointer &
+          s_mi_to_iterate_it <: s_monitoredItemPointer &
+          s_mi_iterated_it <: s_monitoredItemPointer &
           continue : BOOL &
           iterator : t_monitoredItemQueueIterator_i &
           (continue = TRUE =>
@@ -1394,7 +1394,7 @@ OPERATIONS
         p_iterator : t_monitoredItemQueueIterator_i &
         mi_iterator_it = p_iterator &
         p_queue : t_monitoredItemQueue_i &
-        p_queue : t_monitoredItemQueue &
+        p_queue : s_monitoredItemQueue &
         mi_queue_it = p_queue &
         s_mi_to_iterate_it /= {}
     THEN
