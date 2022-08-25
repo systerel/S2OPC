@@ -56,7 +56,7 @@ For details, see:
 
 Client side (e.g.: `samples/ClientServer/demo_client`):
 
-- Secure Channel configuration
+- Secure Channel configuration (reverse connection available)
 - Activate a session with an anonymous use or user identified by username/password
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
@@ -66,7 +66,7 @@ Client side (e.g.: `samples/ClientServer/demo_client`):
 
 Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 
-- Endpoint descriptions configuration on Toolkit initialization
+- Endpoint descriptions configuration on Toolkit initialization (reverse connection available)
 - 1 address space configuration on Toolkit initialization
 - Checks and accepts several instances of secure channels
 - Checks and accepts activation of several sessions with an anonymous user or user identified by username/password
