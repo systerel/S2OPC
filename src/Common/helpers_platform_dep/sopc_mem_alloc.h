@@ -36,7 +36,7 @@
  * \return a pointer to the new allocated area, which has at least the requested size.
  *      The caller is responsible for calling SOPC_Free when the memory is no more required.
  *      NULL is returned if the memory cannot be allocated.
- *      The memory pointed to is initialized to '\0'
+ *      The memory pointed to is not initialized.
  */
 void* SOPC_Malloc(size_t size);
 
@@ -59,7 +59,7 @@ void SOPC_Free(void* ptr);
  *      The caller is responsible for calling SOPC_Free when the memory is not more required.
  *      The allocated memory never takes into account alignment considerations, whatever the value of size is.
  *      NULL is returned if the memory cannot be allocated.
- *      The memory pointed to is not initialized.
+ *      The memory pointed to is initialized to '\0'
  */
 void* SOPC_Calloc(size_t nmemb, size_t size);
 
