@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 25/08/2022 14:19:14
+ Date                 : 25/08/2022 15:41:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -119,6 +119,10 @@ extern void subscription_mgr__local_create_notification_on_monitored_item_if_nod
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const t_bool subscription_mgr__p_added,
    const constants__t_NodeId_i subscription_mgr__p_nid);
+extern void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
+   const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
+   const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
+   const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
 
 /*--------------------
    OPERATIONS Clause

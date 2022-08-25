@@ -297,11 +297,10 @@ LOCAL_OPERATIONS
     END
     ;
 
-
-    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    local_create_notification_on_monitored_items_if_data_changed (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
-        p_monitoredItemQueue : t_monitoredItemQueue_i &
-        p_monitoredItemQueue : t_monitoredItemQueue &
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
         p_old_wv_pointer : t_WriteValuePointer_i &
         p_old_wv_pointer : t_WriteValuePointer &
         p_new_wv_pointer : t_WriteValuePointer_i &
@@ -309,7 +308,24 @@ LOCAL_OPERATIONS
     THEN
         /* notifications may have been triggered */
         a_monitored_item_notifications
-        :(a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
+            a_monitored_item_notifications$0 <: a_monitored_item_notifications)
+    END
+    ;
+
+    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    PRE
+        p_monitoredItemQueue : t_monitoredItemQueue_i &
+        p_monitoredItemQueue : s_monitoredItemQueue &
+        p_old_wv_pointer : t_WriteValuePointer_i &
+        p_old_wv_pointer : t_WriteValuePointer &
+        p_new_wv_pointer : t_WriteValuePointer_i &
+        p_new_wv_pointer : t_WriteValuePointer
+    THEN
+        /* notifications may have been triggered */
+        a_monitored_item_notifications
+        :(a_monitored_item_notifications : s_notificationQueue <-> s_monitoredItemPointer &
+          a_monitored_item_notifications$0 <: a_monitored_item_notifications)
         /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer,
            it is possible to describe first part of criteria to generate notification.
            But other filters will be necessary (index array, ...) */
@@ -677,13 +693,9 @@ OPERATIONS
     END
     ;
 
-    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    local_create_notification_on_monitored_items_if_data_changed (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     VAR
-        l_continue,
-        l_iterator,
-        l_monitoredItemPointer,
         l_notification_triggered,
-
         l_monitoredItemId,
         l_subscription,
         l_valid_subscription,
@@ -698,43 +710,53 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle
     IN
+        /* Check if notification is triggered: indexRange is evaluated here */
+        l_notification_triggered <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer);
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle <--getall_monitoredItemPointer (p_monitoredItemPointer);
+        l_valid_subscription <-- is_valid_subscription (l_subscription);
+        l_valid_user_access := FALSE;
+        IF l_valid_subscription = TRUE & l_notification_triggered = TRUE
+        THEN
+            /* Note: AccessLevel not checked here, it shall be a condition to generate a DataChange event (inhibition if read forbidden)*/
+            l_session <-- getall_session (l_subscription);
+            l_session_valid <-- is_valid_session (l_session);
+            IF l_session_valid = TRUE
+            THEN
+                l_user <-- get_session_user_server(l_session);
+                /* TODO: when user access right property will be modifiable previous user right shall be
+                checked to notify a user access denied status when it is newly denied for the user
+                */
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
+            END
+        ELSE
+            l_valid_user_access := FALSE
+        END
+        ;
+        IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
+        THEN
+            /* Note: indexRange filtering on value done in C implementation for now */
+            server_subscription_add_notification_on_value_change (l_subscription, p_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
+        END
+    END
+    ;
+
+    create_notification_on_monitored_items_if_data_changed (p_monitoredItemQueue, p_old_wv_pointer, p_new_wv_pointer) =
+    VAR
+        l_continue,
+        l_iterator,
+        l_monitoredItemPointer
+    IN
         l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
         WHILE l_continue = TRUE DO
             l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
-            /* Check if notification is triggered: indexRange is evaluated here */
-            l_notification_triggered <-- is_notification_triggered (l_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer);
-            l_monitoredItemId,
-            l_subscription,
-            l_nid,
-            l_aid,
-            l_indexRange,
-            l_timestampToReturn,
-            l_monitoringMode,
-            l_clientHandle <--getall_monitoredItemPointer (l_monitoredItemPointer);
-            l_valid_subscription <-- is_valid_subscription (l_subscription);
-            l_valid_user_access := FALSE;
-            IF l_valid_subscription = TRUE & l_notification_triggered = TRUE
-            THEN
-                /* Note: AccessLevel not checked here, it shall be a condition to generate a DataChange event (inhibition if read forbidden)*/
-                l_session <-- getall_session (l_subscription);
-                l_session_valid <-- is_valid_session (l_session);
-                IF l_session_valid = TRUE
-                THEN
-                    l_user <-- get_session_user_server(l_session);
-                    /* TODO: when user access right property will be modifiable previous user right shall be
-                    checked to notify a user access denied status when it is newly denied for the user
-                    */
-                    l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
-                END
-            ELSE
-                l_valid_user_access := FALSE
-            END
-            ;
-            IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
-            THEN
-                /* Note: indexRange filtering on value done in C implementation for now */
-                server_subscription_add_notification_on_value_change (l_subscription, l_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
-            END
+            local_create_notification_on_monitored_items_if_data_changed (l_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer)
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &
