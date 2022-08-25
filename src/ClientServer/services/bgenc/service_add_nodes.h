@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 05/08/2022 09:03:06
+ Date                 : 25/08/2022 12:09:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -93,7 +93,12 @@ extern void service_add_nodes__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
-extern void service_add_nodes__treat_add_nodes_items(
+extern void service_add_nodes__local_treat_add_nodes_index(
+   const constants__t_user_i service_add_nodes__p_user,
+   const constants__t_msg_i service_add_nodes__p_req_msg,
+   const constants__t_msg_i service_add_nodes__p_resp_msg,
+   const t_entier4 service_add_nodes__p_index);
+extern void service_add_nodes__local_treat_add_nodes_items(
    const constants__t_user_i service_add_nodes__p_user,
    const constants__t_msg_i service_add_nodes__p_req_msg,
    const constants__t_msg_i service_add_nodes__p_resp_msg,

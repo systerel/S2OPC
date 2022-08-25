@@ -76,7 +76,40 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, p_nb_nodes_to_add) =
+    local_treat_add_nodes_index(p_user, p_req_msg, p_resp_msg, p_index) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user   &
+        p_req_msg : t_msg_i  &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg         &
+        a_msg_in_type = e_msg_node_add_nodes_req &
+        p_resp_msg : t_msg_i   &
+        p_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_node_add_nodes_resp &
+        p_index : NAT &
+        p_index > 0 &
+        p_index <= nb_nodes_to_add &
+        p_index : t_nodeToAddReqIndex &
+        p_index /: dom(AddNodeItemResp_AddedNodeId) &
+        p_index /: dom(AddNodeItemResp_StatusCode)
+    THEN
+        d_adsp_nodes_variables,
+        AddNodeItemResp_AddedNodeId,
+        AddNodeItemResp_StatusCode
+        :(d_adsp_nodes_invariant &
+            AddNodeItemResp_AddedNodeId : t_nodeToAddReqIndex +-> t_NodeId_i &
+            AddNodeItemResp_AddedNodeId$0 <: AddNodeItemResp_AddedNodeId &
+            p_index : dom(AddNodeItemResp_AddedNodeId) &
+            AddNodeItemResp_StatusCode : t_nodeToAddReqIndex +-> t_StatusCode &
+            AddNodeItemResp_StatusCode$0 <: AddNodeItemResp_StatusCode &
+            p_index : dom(AddNodeItemResp_StatusCode)
+        )
+    END
+    ;
+
+    local_treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, p_nb_nodes_to_add) =
     PRE
         p_user : t_user_i        &
         p_user : t_user          &
@@ -105,11 +138,8 @@ LOCAL_OPERATIONS
 OPERATIONS
 
     /* LOCAL_OPERATIONS */
-
-    treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, p_nb_nodes_to_add) =
+    local_treat_add_nodes_index(p_user, p_req_msg, p_resp_msg, p_index) =
     VAR
-        l_continue,
-        l_index,
         l_sc,
         l_parentExpNid,
         l_refTypeId,
@@ -124,46 +154,57 @@ OPERATIONS
         l_authorized_add_node,
         l_new_nid
     IN
+        l_new_nid := c_NodeId_indet;
+        l_sc, l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId
+        <-- getall_add_node_item_req_params (p_req_msg, p_index);
+        IF l_sc = e_sc_ok
+        THEN
+            l_local_treatment <-- is_local_service_treatment;
+            /* Note: we shall generate a fresh node id prior to this step, to be done when generation is implemented.
+            For now the add node operation will fail in case it is c_ExpandedNodeId_indet
+            */
+            IF l_local_treatment = FALSE & l_reqExpNodeId /= c_ExpandedNodeId_indet THEN
+                l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(l_reqExpNodeId);
+                IF l_local_server_exp_node_id = TRUE
+                THEN
+                    /* TODO in user authorization callback: add node class ? Or aux parameter ? */
+                    l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user);
+                    IF l_authorized_add_node = FALSE
+                    THEN
+                        l_sc := e_sc_bad_user_access_denied
+                    END
+                END // ELSE will be rejected due to nodeId param in next step
+            END // ELSE always authorized (will fail if requested id is c_ExpandedNodeId_indet)
+        END
+        ;
+        IF l_sc = e_sc_ok
+        THEN
+            l_sc, l_new_nid <-- treat_add_nodes_item(l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId)
+        END
+        ;
+        setall_msg_add_nodes_item_resp_params (p_resp_msg, p_index, l_sc, l_new_nid)
+    END
+    ;
+
+    local_treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, p_nb_nodes_to_add) =
+    VAR
+        l_continue,
+        l_index
+    IN
         /* Check global user rights ? */
         l_continue <-- init_iter_add_nodes_items(p_nb_nodes_to_add);
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_add_nodes_items;
-            l_new_nid := c_NodeId_indet;
-            l_sc, l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId
-              <-- getall_add_node_item_req_params (p_req_msg, l_index);
-            IF l_sc = e_sc_ok
-            THEN
-                l_local_treatment <-- is_local_service_treatment;
-                /* Note: we shall generate a fresh node id prior to this step, to be done when generation is implemented.
-                         For now the add node operation will fail in case it is c_ExpandedNodeId_indet
-                */
-                IF l_local_treatment = FALSE & l_reqExpNodeId /= c_ExpandedNodeId_indet THEN
-                    l_local_server_exp_node_id, l_node_id <-- getall_conv_ExpandedNodeId_NodeId(l_reqExpNodeId);
-                    IF l_local_server_exp_node_id = TRUE
-                    THEN
-                        /* TODO in user authorization callback: add node class ? Or aux parameter ? */
-                        l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user);
-                        IF l_authorized_add_node = FALSE
-                        THEN
-                            l_sc := e_sc_bad_user_access_denied
-                        END
-                    END // ELSE will be rejected due to nodeId param in next step
-                END // ELSE always authorized (will fail if requested id is c_ExpandedNodeId_indet)
-            END
-            ;
-            IF l_sc = e_sc_ok
-            THEN
-                l_sc, l_new_nid <-- treat_add_nodes_item(l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId)
-            END
-            ;
-            setall_msg_add_nodes_item_resp_params (p_resp_msg, l_index, l_sc, l_new_nid)
-
+            local_treat_add_nodes_index(p_user, p_req_msg, p_resp_msg, l_index)
         INVARIANT
             rreqs_to_iterate <: t_nodeToAddReqIndex &
             rreqs_iterated   <: t_nodeToAddReqIndex &
             rreqs_to_iterate /\ rreqs_iterated = {} &
             rreqs_to_iterate \/ rreqs_iterated = 1..nb_nodes_to_add &
-            l_continue = bool(rreqs_to_iterate /= {})
+            l_continue = bool(rreqs_to_iterate /= {}) &
+
+            rreqs_iterated = dom(AddNodeItemResp_AddedNodeId) &
+            rreqs_iterated = dom(AddNodeItemResp_StatusCode)
         VARIANT
             card(rreqs_to_iterate)
         END
@@ -190,7 +231,7 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     StatusCode_service := e_sc_ok;
-                    treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, l_nb_nodes_to_add)
+                    local_treat_add_nodes_items(p_user, p_req_msg, p_resp_msg, l_nb_nodes_to_add)
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
                 END

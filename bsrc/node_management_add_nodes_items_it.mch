@@ -63,7 +63,8 @@ OPERATIONS
 
     continue, index <-- continue_iter_add_nodes_items =
     PRE
-        rreqs_to_iterate /= {}
+        rreqs_to_iterate /= {} &
+        rreqs_to_iterate <: 1..rreqs_nb_reqs
     THEN
         ANY l_index WHERE
             l_index : NAT &
