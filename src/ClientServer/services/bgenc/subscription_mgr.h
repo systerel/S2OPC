@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 05/08/2022 09:11:52
+ Date                 : 25/08/2022 14:19:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -115,6 +115,10 @@ extern void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_subscription_i subscription_mgr__p_session_sub,
    const t_bool subscription_mgr__p_pub_enabled,
    const t_entier4 subscription_mgr__p_nb_reqs);
+extern void subscription_mgr__local_create_notification_on_monitored_item_if_node_changed(
+   const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
+   const t_bool subscription_mgr__p_added,
+   const constants__t_NodeId_i subscription_mgr__p_nid);
 
 /*--------------------
    OPERATIONS Clause
