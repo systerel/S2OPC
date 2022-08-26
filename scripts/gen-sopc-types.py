@@ -746,6 +746,16 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_User
  */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
 
+// UserTokenPolicyId for x509 token type with Basic256Sha256 SecurityPolicy example
+#define SOPC_UserTokenPolicy_X509Basic256Sha256_ID "x509_Basic256Sha256"
+/** Example x509 security policy supported and configured with Basic256Sha256 security policy.
+ */
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy;
+
+// UserTokenPolicyId for x509 token type with default SecurityPolicy example
+#define SOPC_UserTokenPolicy_X509_ID "x509"
+S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy;
+
 #endif
 
 /*============================================================================
@@ -1079,6 +1089,26 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256Security
                           (SOPC_Byte*) SOPC_SecurityPolicy_Basic256Sha256_URI},
     /* Basic256Sha256 security policy might be used to ensure password is encrypted in any security policy and mode */
 };
+
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_Certificate,
+    .PolicyId = {sizeof(SOPC_UserTokenPolicy_X509Basic256Sha256_ID) - 1, true,
+                 (SOPC_Byte*) SOPC_UserTokenPolicy_X509Basic256Sha256_ID},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_Basic256Sha256_URI) - 1, true,
+                          (SOPC_Byte*) SOPC_SecurityPolicy_Basic256Sha256_URI},
+};
+
+const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy = {
+    .TokenType = OpcUa_UserTokenType_Certificate,
+    .PolicyId = {sizeof(SOPC_UserTokenPolicy_X509_ID) - 1, true,
+                 (SOPC_Byte*) SOPC_UserTokenPolicy_X509_ID},
+    .IssuedTokenType = {0, true, NULL},
+    .IssuerEndpointUrl = {0, true, NULL},
+    .SecurityPolicyUri = {0, true, NULL},
+};
+
 #endif
 """
 
