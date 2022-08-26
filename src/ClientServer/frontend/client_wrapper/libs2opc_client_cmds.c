@@ -589,6 +589,8 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     const char* cert_srv = security->path_cert_srv;
     const char* cert_cli = security->path_cert_cli;
     const char* key_cli = security->path_key_cli;
+    const char* cert_x509_token = security->path_cert_x509_token;
+    const char* key_x509_token = security->path_key_x509_token;
 
     if (NULL == cfg_con)
     {
@@ -635,6 +637,18 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     {
         return -18;
     }
+    if (OpcUa_UserTokenType_Certificate == security->token_type)
+    {
+        if (NULL == cert_x509_token)
+        {
+            return -19;
+        }
+        if (NULL == key_x509_token)
+        {
+            return -20;
+        }
+    }
+    // TODO RBA: Add check on username password
     if (!security_none && (NULL == cert_auth || NULL == ca_crl))
     {
         Helpers_Log(SOPC_LOG_LEVEL_WARNING,
@@ -664,7 +678,9 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->token_target = PUBLISH_N_TOKEN;
     cfg_con->generic_response_callback = SOPC_ClientHelper_GenericCallback;
     cfg_con->expected_endpoints = expectedEndpoints;
-
+    cfg_con->path_cert_x509_token = cert_x509_token;
+    cfg_con->path_key_x509_token = key_x509_token;
+    cfg_con->token_type = security->token_type;
     return 0;
 }
 
@@ -695,10 +711,18 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == connection)
     {
         return -1;
     }
+
+    if (OpcUa_UserTokenType_Certificate != security->token_type &&
+        OpcUa_UserTokenType_Anonymous != security->token_type && OpcUa_UserTokenType_UserName != security->token_type)
+    {
+        return -1;
+    }
+
     if (NULL == connection->endpointUrl)
     {
         return -2;

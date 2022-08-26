@@ -340,6 +340,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
         else
         {
             pCfgCpy->security_mode = pCfg->security_mode;
+            pCfgCpy->token_type = pCfg->token_type;
             pCfgCpy->disable_certificate_verification = pCfg->disable_certificate_verification;
             pCfgCpy->publish_period_ms = pCfg->publish_period_ms;
             pCfgCpy->n_max_keepalive = pCfg->n_max_keepalive;
@@ -427,6 +428,22 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
                     status = SOPC_STATUS_OUT_OF_MEMORY;
                 }
             }
+            if (NULL != pCfg->path_cert_x509_token)
+            {
+                pCfgCpy->path_cert_x509_token = SOPC_Malloc(strlen(pCfg->path_cert_x509_token) + 1);
+                if (NULL == pCfgCpy->path_cert_x509_token)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
+            if (NULL != pCfg->path_key_x509_token)
+            {
+                pCfgCpy->path_key_x509_token = SOPC_Malloc(strlen(pCfg->path_key_x509_token) + 1);
+                if (NULL == pCfgCpy->path_key_x509_token)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            }
 
             if (SOPC_STATUS_OK == status)
             {
@@ -467,6 +484,14 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
                 {
                     strcpy((char*) pCfgCpy->password, pCfg->password);
                 }
+                if (NULL != pCfg->path_cert_x509_token)
+                {
+                    strcpy((char*) pCfgCpy->path_cert_x509_token, pCfg->path_cert_x509_token);
+                }
+                if (NULL != pCfg->path_key_x509_token)
+                {
+                    strcpy((char*) pCfgCpy->path_key_x509_token, pCfg->path_key_x509_token);
+                }
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }
         }
@@ -499,6 +524,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
         SOPC_Free((void*) pCfgCpy->policyId);
         SOPC_Free((void*) pCfgCpy->username);
         SOPC_Free((void*) pCfgCpy->password);
+        SOPC_Free((void*) pCfgCpy->path_cert_x509_token);
+        SOPC_Free((void*) pCfgCpy->path_key_x509_token);
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(pCfgCpy);
     }
@@ -554,7 +581,8 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         status = SOPC_StaMac_Create(cfgId, pCfg->reverse_config_idx, clientId, pCfg->policyId, pCfg->username,
                                     pCfg->password, pCfg->data_change_callback, (double) pCfg->publish_period_ms,
                                     pCfg->n_max_keepalive, pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
-                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
+                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback,
+                                    pCfg->token_type, pCfg->path_cert_x509_token, pCfg->path_key_x509_token, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */

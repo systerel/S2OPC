@@ -112,7 +112,7 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  *                                Otherwise it shall be set to 0.
  * \param iCliId                  The client id of the machine, it shall be unique.
  * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
- * \param szUsername              Zero-terminated username, see SOPC_LibSub_ConnectionCfg
+ * \param szUsername               username, see SOPC_LibSub_ConnectionCfg
  * \param szPassword              Zero-terminated password, see SOPC_LibSub_ConnectionCfg
  * \param cbkLibSubDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval        Subscription publish interval, in milliseconds
@@ -123,6 +123,9 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param iTimeoutMs              Timeout for the synchroneous calls
  * \param cbkGenericEvent         Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession()
  * \param userContext             Caller defined user context that could be retrieved or set using accessors
+ * \param tokenType               The OPC UA tokenType
+ * \param szPath_cert_x509_token  Zero-terminated path of the x509 certificate for X509IdentiyToken (DER format)
+ * \param szPath_key_x509_token   Zero-terminated path of the private key for X509IdentiyToken (PEM format)
  * \param ppSM                    The returned machine, when successful
  *
  * \return SOPC_STATUS_OK when \p ppSM points to a pointer to a valid machine.
@@ -142,6 +145,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk* cbkGenericEvent,
                                      uintptr_t userContext,
+                                     OpcUa_UserTokenType tokenType,
+                                     const char* szPath_cert_x509_token,
+                                     const char* szPath_key_x509_token,
                                      SOPC_StaMac_Machine** ppSM);
 
 /*

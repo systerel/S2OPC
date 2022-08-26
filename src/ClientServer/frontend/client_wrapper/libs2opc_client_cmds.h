@@ -107,6 +107,7 @@ typedef struct
 {
     const char* security_policy;
     OpcUa_MessageSecurityMode security_mode;
+    OpcUa_UserTokenType token_type;
     const char* path_cert_auth;
     const char* path_crl;
     const char* path_cert_srv;
@@ -115,6 +116,8 @@ typedef struct
     const char* policyId;
     const char* username;
     const char* password;
+    const char* path_cert_x509_token;
+    const char* path_key_x509_token;
 } SOPC_ClientHelper_Security;
 
 /**

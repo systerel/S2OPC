@@ -103,6 +103,17 @@ typedef enum
     SOPC_USER_POLICY_ID_USERNAME = 1
 } SOPC_UserPolicyId;
 
+/* The UserTokenType enumeration taken from "sopc_enum_typess.h" */
+typedef enum _OpcUa_UserTokenType
+{
+    OpcUa_UserTokenType_Anonymous = 0,
+    OpcUa_UserTokenType_UserName = 1,
+    OpcUa_UserTokenType_Certificate = 2,
+    OpcUa_UserTokenType_IssuedToken = 3,
+    OpcUa_UserTokenType_Kerberos = 4,
+    OpcUa_UserTokenType_SizeOf = INT32_MAX
+} OpcUa_UserTokenType;
+
 void SOPC_Sleep(unsigned int milliseconds);
 #endif
 
@@ -357,6 +368,7 @@ typedef struct
 
     SOPC_LibSub_CstString server_uri;
     SOPC_LibSub_CstString server_url;
+    OpcUa_UserTokenType token_type;
     SOPC_LibSub_CstString security_policy;
     OpcUa_MessageSecurityMode security_mode;
     uint8_t disable_certificate_verification;
@@ -368,6 +380,8 @@ typedef struct
     SOPC_LibSub_CstString policyId;
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
+    SOPC_LibSub_CstString path_cert_x509_token;
+    SOPC_LibSub_CstString path_key_x509_token;
     int64_t publish_period_ms;
     uint32_t n_max_keepalive;
     uint32_t n_max_lifetime;

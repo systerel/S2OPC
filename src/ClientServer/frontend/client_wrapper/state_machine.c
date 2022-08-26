@@ -85,6 +85,9 @@ struct SOPC_StaMac_Machine
     const char* szPassword;                 /* See SOPC_LibSub_ConnectionCfg */
     int64_t iTimeoutMs;                     /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList;   /* A list of data ids to node ids */
+    OpcUa_UserTokenType tokenType;          /* The OpcUa_UserTokenType */
+    const char* szPath_cert_x509_token;     /* path of the x509 certificate for X509IdentiyToken (DER format) */
+    const char* szPath_key_x509_token;      /* path of the private key for X509IdentiyToken (PEM format)*/
     uintptr_t userContext;                  /* A state machine user defined context */
 };
 
@@ -169,6 +172,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      int64_t iTimeoutMs,
                                      SOPC_LibSub_EventCbk* pCbkGenericEvent,
                                      uintptr_t userContext,
+                                     OpcUa_UserTokenType tokenType,
+                                     const char* szPath_cert_x509_token,
+                                     const char* szPath_key_x509_token,
                                      SOPC_StaMac_Machine** ppSM)
 {
     SOPC_StaMac_Machine* pSM = SOPC_Calloc(1, sizeof(SOPC_StaMac_Machine));
@@ -207,6 +213,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
         pSM->userContext = userContext;
+        pSM->tokenType = tokenType;
+        pSM->szPath_cert_x509_token = NULL;
+        pSM->szPath_key_x509_token = NULL;
         if (NULL != szPolicyId)
         {
             pSM->szPolicyId = SOPC_Malloc(strlen(szPolicyId) + 1);
@@ -231,6 +240,22 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
+        if (NULL != szPath_cert_x509_token)
+        {
+            pSM->szPath_cert_x509_token = SOPC_Malloc(strlen(szPath_cert_x509_token) + 1);
+            if (NULL == pSM->szPath_cert_x509_token)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (NULL != szPath_key_x509_token)
+        {
+            pSM->szPath_key_x509_token = SOPC_Malloc(strlen(szPath_key_x509_token) + 1);
+            if (NULL == pSM->szPath_key_x509_token)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         if (NULL != pSM->szPolicyId)
         {
@@ -243,6 +268,14 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         if (NULL != pSM->szPassword)
         {
             strcpy((char*) pSM->szPassword, szPassword);
+        }
+        if (NULL != pSM->szPath_cert_x509_token)
+        {
+            strcpy((char*) pSM->szPath_cert_x509_token, szPath_cert_x509_token);
+        }
+        if (NULL != pSM->szPath_key_x509_token)
+        {
+            strcpy((char*) pSM->szPath_key_x509_token, szPath_key_x509_token);
         }
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
@@ -345,17 +378,25 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         pSM->iSessionCtx = pSM->iCliId;
         SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = pSM->reverseConfigIdx,
                                                             .secureChannelConfigIdx = pSM->iscConfig};
-
-        if (NULL == pSM->szUsername)
+        switch (pSM->tokenType)
         {
-            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL,
-                                                                       (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
-        }
-        else
-        {
+        case OpcUa_UserTokenType_Anonymous:
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
+            break;
+        case OpcUa_UserTokenType_UserName:
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
                 endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
                 (const uint8_t*) pSM->szPassword, pSM->szPassword != NULL ? (int32_t) strlen(pSM->szPassword) : 0);
+            break;
+        case OpcUa_UserTokenType_Certificate:
+            status = SOPC_ToolkitClient_AsyncActivateSession_Certificate(
+                pSM->iscConfig, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szPath_cert_x509_token,
+                pSM->szPath_key_x509_token);
+            break;
+        default:
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unknown user tokenType to start a session.");
+            status = SOPC_STATUS_INVALID_STATE;
+            break;
         }
     }
     if (SOPC_STATUS_OK == status)
