@@ -144,14 +144,17 @@ static int32_t client_create_configuration(void)
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
+        .token_type = OpcUa_UserTokenType_Certificate,
         .path_cert_auth = "./trusted/cacert.der",
         .path_crl = "./revoked/cacrl.der",
         .path_cert_srv = "./server_public/server_2k_cert.der",
         .path_cert_cli = "./client_public/client_2k_cert.der",
         .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
-        .policyId = "anonymous",
+        .policyId = SOPC_UserTokenPolicy_X509Basic256Sha256_ID,
         .username = NULL,
         .password = NULL,
+        .path_cert_x509_token = "./client_public/client_2k_cert.der", /* The same cert as the client to test */
+        .path_key_x509_token = "./client_private/client_2k_key.pem",  /* The same key as the client to test */
     };
 
     SOPC_ClientHelper_EndpointConnection endpoint = {
@@ -409,6 +412,10 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy);
     }
 
     // Server certificates configuration
