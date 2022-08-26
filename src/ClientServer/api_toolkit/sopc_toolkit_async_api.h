@@ -142,6 +142,7 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
  * \param userToken              An extension object, containing either an OpcUa_AnonymousIdentityToken, a
  *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
+ * \param userTokenCtx           Context for userToken, may be NULL
  *
  * \return                       SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS or
  *                               SOPC_STATUS_OUT_OF_MEMORY otherwise
@@ -150,7 +151,8 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                           const char* sessionName,
                                                           uintptr_t sessionContext,
-                                                          SOPC_ExtensionObject* userToken);
+                                                          SOPC_ExtensionObject* userToken
+                                                          void* userTokenCtx);
 
 /**
  * \brief Request to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()
@@ -200,6 +202,30 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
     const char* username,
     const uint8_t* password,
     int32_t length_password);
+
+/**
+ * \brief Request to activate a session with a x509IdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
+ *
+ *
+ * \param endpointConnectionIdx  Endpoint connection configuration index provided by
+ *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
+ *                               If defined it should be unique for the client.
+ * \param sessionContext         A context value, it will be provided in case of session activation or failure
+ *                               notification
+ * \param policyId               The policy id to use for the identity token, must not be NULL
+ * \param path_cert_x509         The zero-terminated string of the x509 certificate path, must not be NULL (DER format)
+ * \param path_key_x509          The zero-terminated string of the private key path (PEM format)
+ *
+ * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
+ */
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId,
+    const char* path_cert_x509,
+    const char* path_key_x509);
 
 /**
  * \brief Request to send a service request on given active session.

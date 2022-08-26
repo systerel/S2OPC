@@ -26,6 +26,7 @@
 #ifndef SOPC_SERVICES_API_INTERNAL_H
 #define SOPC_SERVICES_API_INTERNAL_H
 
+#include "sopc_key_manager.h"
 #include "sopc_services_api.h"
 
 typedef struct SOPC_Internal_AsyncSendMsgData
@@ -40,6 +41,7 @@ typedef struct SOPC_Internal_SessionAppContext
     SOPC_ExtensionObject* userToken;
     char* sessionName;
     uintptr_t userSessionContext;
+    SOPC_SerializedAsymmetricKey* userTokenKey;
 } SOPC_Internal_SessionAppContext;
 
 typedef struct SOPC_Internal_DiscoveryContext

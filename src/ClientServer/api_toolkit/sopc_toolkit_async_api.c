@@ -73,10 +73,11 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
                                         .secureChannelConfigIdx = secureChannelConfigIdx};
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
                                                           const char* sessionName,
                                                           uintptr_t sessionContext,
-                                                          SOPC_ExtensionObject* userToken)
+                                                          SOPC_ExtensionObject* userToken,
+                                                          void* userTokenCtx)
 {
     if (0 == endpointConnectionCfg.secureChannelConfigIdx)
     {
@@ -102,6 +103,22 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
+
+    if (&OpcUa_X509IdentityToken_EncodeableType == userToken->Body.Object.ObjType)
+    {
+        sessionAppContext->userTokenKey = (SOPC_SerializedAsymmetricKey*) userTokenCtx;
+        if (NULL == sessionAppContext->userTokenKey)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "AsyncActivateSession: missing x509 UserIdentityToken private key");
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    else
+    {
+        sessionAppContext->userTokenKey = NULL;
+    }
+
     sessionAppContext->userSessionContext = sessionContext;
     SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionCfg.secureChannelConfigIdx,
                                (uintptr_t) endpointConnectionCfg.reverseEndpointConfigIdx,
@@ -136,7 +153,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -190,7 +207,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user);
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -198,6 +215,75 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
         SOPC_ExtensionObject_Clear(user);
         SOPC_Free(user);
     }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(
+    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+    const char* sessionName,
+    uintptr_t sessionContext,
+    const char* policyId,
+    const char* path_cert_x509,
+    const char* path_key_x509)
+{
+    if (NULL == policyId || 0 == strlen(policyId) || NULL == path_cert_x509 || 0 == strlen(path_cert_x509) ||
+        NULL == path_key_x509 || 0 == strlen(path_key_x509))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_X509IdentityToken* token = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_SerializedCertificate* serPcert = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_SerializedAsymmetricKey* pKeyUserToken = NULL;
+
+    if (NULL == user)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(path_key_x509, &pKeyUserToken);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load x509 UserIdentityToken private key.");
+    }
+
+    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(path_cert_x509, &serPcert);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_Deserialize(serPcert, &pCert);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ByteString_Initialize(&token->CertificateData);
+        status = SOPC_KeyManager_Certificate_ToDER(pCert, &token->CertificateData.Data,
+                                                   (uint32_t*) &token->CertificateData.Length);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&token->PolicyId, policyId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user,
+                                                           pKeyUserToken);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create x509 UserIdentityToken.");
+        SOPC_ExtensionObject_Clear(user);
+        SOPC_Free(user);
+    }
+
+    SOPC_KeyManager_SerializedCertificate_Delete(serPcert);
+    SOPC_KeyManager_Certificate_Free(pCert);
 
     return status;
 }
