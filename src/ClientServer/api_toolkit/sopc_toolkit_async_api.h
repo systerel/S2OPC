@@ -151,7 +151,7 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                           const char* sessionName,
                                                           uintptr_t sessionContext,
-                                                          SOPC_ExtensionObject* userToken
+                                                          SOPC_ExtensionObject* userToken,
                                                           void* userTokenCtx);
 
 /**
@@ -219,13 +219,12 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
  *
  * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
-    const char* sessionName,
-    uintptr_t sessionContext,
-    const char* policyId,
-    const char* path_cert_x509,
-    const char* path_key_x509);
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                                      const char* sessionName,
+                                                                      uintptr_t sessionContext,
+                                                                      const char* policyId,
+                                                                      const char* path_cert_x509,
+                                                                      const char* path_key_x509);
 
 /**
  * \brief Request to send a service request on given active session.

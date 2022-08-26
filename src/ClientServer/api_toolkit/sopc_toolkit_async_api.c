@@ -73,7 +73,7 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
                                         .secureChannelConfigIdx = secureChannelConfigIdx};
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                           const char* sessionName,
                                                           uintptr_t sessionContext,
                                                           SOPC_ExtensionObject* userToken,
@@ -153,7 +153,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
+        status =
+            SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -207,7 +208,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
+        status =
+            SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, NULL);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -219,13 +221,12 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(
-    SOPC_EndpointConnectionConfigIdx endpointConnectionIdx,
-    const char* sessionName,
-    uintptr_t sessionContext,
-    const char* policyId,
-    const char* path_cert_x509,
-    const char* path_key_x509)
+SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_EndpointConnectionCfg endpointConnectionCfg,
+                                                                      const char* sessionName,
+                                                                      uintptr_t sessionContext,
+                                                                      const char* policyId,
+                                                                      const char* path_cert_x509,
+                                                                      const char* path_key_x509)
 {
     if (NULL == policyId || 0 == strlen(policyId) || NULL == path_cert_x509 || 0 == strlen(path_cert_x509) ||
         NULL == path_key_x509 || 0 == strlen(path_key_x509))
@@ -272,8 +273,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionIdx, sessionName, sessionContext, user,
-                                                           pKeyUserToken);
+        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user,
+                                                         pKeyUserToken);
     }
     if (SOPC_STATUS_OK != status)
     {

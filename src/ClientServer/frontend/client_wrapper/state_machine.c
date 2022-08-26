@@ -381,7 +381,8 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         switch (pSM->tokenType)
         {
         case OpcUa_UserTokenType_Anonymous:
-            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
+            status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL,
+                                                                       (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);
             break;
         case OpcUa_UserTokenType_UserName:
             status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
@@ -390,7 +391,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
             break;
         case OpcUa_UserTokenType_Certificate:
             status = SOPC_ToolkitClient_AsyncActivateSession_Certificate(
-                pSM->iscConfig, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szPath_cert_x509_token,
+                endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szPath_cert_x509_token,
                 pSM->szPath_key_x509_token);
             break;
         default:
