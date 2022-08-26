@@ -59,17 +59,14 @@ typedef struct ServerSessionData
 {
     SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
     SOPC_ByteString nonceServer;
-    OpcUa_SignatureData signatureData; /* TODO: remove ? => no need to be stored */
-    constants__t_user_i user_server;   /* TODO: remove user management */
+    constants__t_user_i user_server; /* TODO: remove user management */
 } ServerSessionData;
 
 typedef struct ClientSessionData
 {
     SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
     SOPC_ByteString nonceServer;
-    SOPC_ByteString nonceClient;       /* TODO: remove ? => no need to be store if returned directly */
-    OpcUa_SignatureData signatureData; /* TODO: remove ? => no need to be stored */
-    OpcUa_SignatureData userTokenSignatureData;
+    SOPC_ByteString nonceClient;           /* TODO: remove ? => no need to be store if returned directly */
     constants__t_user_token_i user_client; /* TODO: remove user management */
     constants__t_SecurityPolicy user_secu_client;
     SOPC_Buffer user_client_server_certificate; // Server certificate for client user encryption
@@ -94,15 +91,12 @@ void session_core_bs__INITIALISATION(void)
         ServerSessionData* serverSessionData = &(serverSessionDataArray[idx]);
         SOPC_NodeId_Initialize(&serverSessionData->sessionToken);
         SOPC_ByteString_Initialize(&serverSessionData->nonceServer);
-        OpcUa_SignatureData_Initialize(&serverSessionData->signatureData);
         serverSessionData->user_server = constants__c_user_indet;
 
         ClientSessionData* clientSessionData = &(clientSessionDataArray[idx]);
         SOPC_NodeId_Initialize(&clientSessionData->sessionToken);
         SOPC_ByteString_Initialize(&clientSessionData->nonceClient);
         SOPC_ByteString_Initialize(&clientSessionData->nonceServer);
-        OpcUa_SignatureData_Initialize(&clientSessionData->signatureData);
-        OpcUa_SignatureData_Initialize(&clientSessionData->userTokenSignatureData);
         clientSessionData->user_client = constants__c_user_token_indet;
         clientSessionData->user_secu_client = constants__e_secpol_B256S256;
         memset(&clientSessionData->user_client_server_certificate, 0,
@@ -560,7 +554,6 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, 
 }
 
 void session_core_bs__server_create_session_req_do_crypto(
-    const constants__t_session_i session_core_bs__p_session,
     const constants__t_msg_i session_core_bs__p_req_msg,
     const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
     const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,
@@ -570,7 +563,6 @@ void session_core_bs__server_create_session_req_do_crypto(
     SOPC_CryptoProvider* pProvider = NULL;
     SOPC_Endpoint_Config* pECfg = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    ServerSessionData* pSession = NULL;
     OpcUa_SignatureData* pSign = NULL;
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
@@ -581,14 +573,6 @@ void session_core_bs__server_create_session_req_do_crypto(
     const char* errorReason = "";
 
     *session_core_bs__signature = constants__c_SignatureData_indet;
-
-    if (constants__c_session_indet == session_core_bs__p_session)
-    {
-        *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-        return;
-    }
-
-    pSession = &serverSessionDataArray[session_core_bs__p_session];
 
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
@@ -604,13 +588,21 @@ void session_core_bs__server_create_session_req_do_crypto(
     /* If security policy is not None, generate the signature */
     if (SOPC_STATUS_OK == status && strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0)
     {
-        pSign = &pSession->signatureData;
-
         if (pReq->ClientNonce.Length < LENGTH_NONCE)
         {
             *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_nonce_invalid;
             return;
         }
+
+        /* Allocated the signature */
+        pSign = SOPC_Malloc(sizeof(OpcUa_SignatureData));
+        if (NULL == pSign)
+        {
+            *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+            return;
+        }
+        /* Initialise the signature */
+        OpcUa_SignatureData_Initialize(pSign);
 
         /* Create the CryptoProvider */
         /* TODO: don't create it each time, maybe add it to the session */
@@ -649,7 +641,6 @@ void session_core_bs__server_create_session_req_do_crypto(
             memcpy(pToSign + pReq->ClientCertificate.Length, pReq->ClientNonce.Data, (size_t) pReq->ClientNonce.Length);
 
             /* b) Sign and store the signature in pSign */
-            SOPC_ByteString_Clear(&pSign->Signature);
             status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, privateKey, &sigLength);
         }
 
@@ -736,27 +727,12 @@ void session_core_bs__server_create_session_req_do_crypto(
     }
 }
 
-void session_core_bs__clear_Signature(const constants__t_session_i session_core_bs__p_session,
-                                      const t_bool session_core_bs__p_is_client,
-                                      const constants__t_SignatureData_i session_core_bs__p_signature)
+void session_core_bs__clear_Signature(const constants__t_SignatureData_i session_core_bs__p_signature)
 {
-    OpcUa_SignatureData* signature = NULL;
-    OpcUa_SignatureData* userTokenSignature = NULL;
-    if (session_core_bs__p_is_client)
+    if (constants__c_SignatureData_indet != session_core_bs__p_signature)
     {
-        signature = &clientSessionDataArray[session_core_bs__p_session].signatureData;
-        userTokenSignature = &clientSessionDataArray[session_core_bs__p_session].userTokenSignatureData;
-    }
-    else
-    {
-        signature = &serverSessionDataArray[session_core_bs__p_session].signatureData;
-    }
-    // Check same signature since not proved by model
-    SOPC_ASSERT(session_core_bs__p_signature == signature || session_core_bs__p_signature == userTokenSignature);
-    OpcUa_SignatureData_Clear(signature);
-    if (NULL != userTokenSignature)
-    {
-        OpcUa_SignatureData_Clear(userTokenSignature);
+        OpcUa_SignatureData* signature = session_core_bs__p_signature;
+        OpcUa_SignatureData_Clear(signature);
     }
 }
 
@@ -871,8 +847,9 @@ void session_core_bs__client_activate_session_req_do_crypto(
     t_bool* const session_core_bs__valid,
     constants__t_SignatureData_i* const session_core_bs__signature)
 {
+    SOPC_UNUSED_ARG(session_core_bs__session); // Keep only for B model proof
+
     SOPC_SecureChannel_Config* pSCCfg = NULL;
-    ClientSessionData* pSession = NULL;
     SOPC_ByteString* serverNonce = NULL;
     const SOPC_Buffer* serverCert = NULL;
     OpcUa_SignatureData* pSign = NULL;
@@ -881,12 +858,6 @@ void session_core_bs__client_activate_session_req_do_crypto(
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
 
-    if (constants__c_session_indet == session_core_bs__session)
-    {
-        return;
-    }
-
-    pSession = &clientSessionDataArray[session_core_bs__session];
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__channel_config_idx);
     if ((NULL == pSCCfg) || (NULL == pSCCfg->crt_srv))
@@ -912,8 +883,14 @@ void session_core_bs__client_activate_session_req_do_crypto(
     /* If security policy is not None, generate the signature */
     if (0 != res && SOPC_STATUS_OK == status) /* Including the terminating \0 */
     {
-        /* Retrieve ptr Signature */
-        pSign = &pSession->signatureData;
+        /* Allocated the signature */
+        pSign = SOPC_Malloc(sizeof(OpcUa_SignatureData));
+        if (NULL == pSign)
+        {
+            return;
+        }
+        /* Initialise the signature */
+        OpcUa_SignatureData_Initialize(pSign);
 
         /* Use the client private key to sign the server certificate + server nonce */
         status =
@@ -931,15 +908,13 @@ void session_core_bs__client_activate_session_req_do_crypto(
     }
 }
 
-void session_core_bs__sign_user_token(const constants__t_session_i session_core_bs__session,
-                                      const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
+void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
                                       const constants__t_Nonce_i session_core_bs__p_server_nonce,
                                       const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
                                       const constants__t_session_application_context_i session_core_bs__app_context,
                                       constants__t_SignatureData_i* const session_core_bs__p_user_token_signature,
                                       t_bool* const session_core_bs__p_bret)
 {
-    ClientSessionData* pSession = NULL;
     OpcUa_SignatureData* pSignUserToken = NULL;
     SOPC_ByteString* serverNonce = NULL;
     const SOPC_Buffer* serverCert = NULL;
@@ -947,8 +922,6 @@ void session_core_bs__sign_user_token(const constants__t_session_i session_core_
 
     *session_core_bs__p_bret = false;
     *session_core_bs__p_user_token_signature = constants__c_SignatureData_indet;
-
-    pSession = &clientSessionDataArray[session_core_bs__session];
 
     /* Check parameters */
     SOPC_ASSERT(NULL != session_core_bs__p_server_nonce && NULL != session_core_bs__p_user_server_cert &&
@@ -970,8 +943,14 @@ void session_core_bs__sign_user_token(const constants__t_session_i session_core_
     /*If the user security policy is None we can't sign*/
     if (0 != res)
     {
-        /* Retrieve ptr Signature */
-        pSignUserToken = &pSession->userTokenSignatureData;
+        /* Allocated the signature */
+        pSignUserToken = SOPC_Malloc(sizeof(OpcUa_SignatureData));
+        if (NULL == pSignUserToken)
+        {
+            return;
+        }
+        /* Initialise the signature */
+        OpcUa_SignatureData_Initialize(pSignUserToken);
         /* Use the user private key to sign the server certificate + server nonce */
         status =
             session_core_asymetric_sign(pSignUserToken, userSecurityPolicy,
