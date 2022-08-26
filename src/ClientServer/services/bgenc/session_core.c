@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 25/08/2022 15:31:46
+ Date                 : 26/08/2022 14:03:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -214,8 +214,7 @@ void session_core__server_create_session_req_and_resp_sm(
                   &session_core__l_secpol);
                if (session_core__l_secpol != constants__e_secpol_None) {
                   session_core__l_set_cert = true;
-                  session_core_1__server_create_session_req_do_crypto(session_core__l_nsession,
-                     session_core__create_req_msg,
+                  session_core_1__server_create_session_req_do_crypto(session_core__create_req_msg,
                      session_core__l_endpoint_config_idx,
                      session_core__l_channel_config_idx,
                      &session_core__l_crypto_status,
@@ -224,9 +223,7 @@ void session_core__server_create_session_req_and_resp_sm(
                      msg_session_bs__write_create_session_resp_signature(session_core__create_resp_msg,
                         session_core__l_signature,
                         &session_core__l_bret);
-                     session_core_1__clear_Signature(session_core__l_nsession,
-                        false,
-                        session_core__l_signature);
+                     session_core_1__clear_Signature(session_core__l_signature);
                      if (session_core__l_bret == false) {
                         *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
                      }
@@ -410,8 +407,7 @@ void session_core__client_user_activate_session_req_sm(
          else if (session_core__l_user_token_type == constants__e_userTokenType_x509) {
             session_core_1__get_session_app_context(session_core__session,
                &session_core__l_app_context);
-            session_core_1__sign_user_token(session_core__session,
-               session_core__l_user_server_cert,
+            session_core_1__sign_user_token(session_core__l_user_server_cert,
                session_core__l_server_nonce,
                session_core__l_user_secu_policy,
                session_core__l_app_context,
@@ -421,9 +417,7 @@ void session_core__client_user_activate_session_req_sm(
                msg_session_bs__write_activate_msg_user_token_signature(session_core__activate_req_msg,
                   session_core__l_user_token_signature,
                   &session_core__l_valid_write_user_token_sign);
-               session_core_1__clear_Signature(session_core__session,
-                  true,
-                  session_core__l_user_token_signature);
+               session_core_1__clear_Signature(session_core__l_user_token_signature);
             }
          }
          if (((session_core__l_valid_cert == true) &&
@@ -456,9 +450,7 @@ void session_core__client_user_activate_session_req_sm(
                   msg_session_bs__write_activate_session_req_msg_crypto(session_core__activate_req_msg,
                      session_core__l_signature,
                      &session_core__l_bret);
-                  session_core_1__clear_Signature(session_core__session,
-                     true,
-                     session_core__l_signature);
+                  session_core_1__clear_Signature(session_core__l_signature);
                   if (session_core__l_bret == true) {
                      msg_session_bs__write_activate_req_msg_locales(session_core__activate_req_msg,
                         session_core__l_channel_config_idx);
