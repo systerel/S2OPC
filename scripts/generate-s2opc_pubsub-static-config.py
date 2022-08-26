@@ -34,6 +34,7 @@ TAG_MESSAGE = "message"
 ATTRIBUTE_MESSAGE_ID = "groupId"
 ATTRIBUTE_MESSAGE_VERSION = "groupVersion"
 ATTRIBUTE_MESSAGE_INTERVAL = "publishingInterval"
+ATTRIBUTE_MESSAGE_OFFSET = "publishingOffset"
 ATTRIBUTE_MESSAGE_SECURITY_MODE = "securityMode"
 VALUE_MESSAGE_SECURITY_MODE_NONE = "none"
 VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
@@ -109,6 +110,7 @@ class MessageContext:
         self.id = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_ID, 0))
         self.version = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_VERSION, 0))
         self.interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
+        self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,0))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
 
 
@@ -273,18 +275,19 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // GroupId = %s
         // GroupVersion = %s
         // Interval = %f ms
- """ % (msgContext.id, msgContext.version, msgContext.interval))
+        // Offest = %d us
+ """ % (msgContext.id, msgContext.version, msgContext.interval,msgContext.offset))
     result.add("""
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %s);
+       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s);
        alloc = NULL != writerGroup;
     }
  """ % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-       getCSecurityMode(msgContext.securityMode)))
+        msgContext.offset, getCSecurityMode(msgContext.securityMode)))
 
     #Get Publishing Offset:
-    result.add("""
-        int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
-    """)
+    #result.add("""
+    #    int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
+    #""")
      
     result.add("""
     if (alloc)
