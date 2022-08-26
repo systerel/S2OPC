@@ -420,6 +420,34 @@ void msg_session_bs__write_activate_session_req_msg_crypto(const constants__t_ms
     }
 }
 
+void msg_session_bs__write_activate_msg_user_token_signature(
+    const constants__t_msg_i msg_session_bs__msg,
+    const constants__t_SignatureData_i msg_session_bs__p_user_token_signature,
+    t_bool* const msg_session_bs__bret)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) msg_session_bs__msg;
+    OpcUa_SignatureData* pSig = msg_session_bs__p_user_token_signature;
+
+    /* Copy Signature, which is not a built-in, so copy its fields */
+    /* TODO: should borrow a reference instead of copy */
+    status = SOPC_String_Copy(&pReq->UserTokenSignature.Algorithm, &pSig->Algorithm);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ByteString_Copy(&pReq->UserTokenSignature.Signature, &pSig->Signature);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *msg_session_bs__bret = true;
+    }
+    else
+    {
+        *msg_session_bs__bret = false;
+    }
+}
+
 void msg_session_bs__write_activate_session_resp_nonce(const constants__t_msg_i msg_session_bs__activate_resp_msg,
                                                        const constants__t_Nonce_i msg_session_bs__nonce)
 {

@@ -67,8 +67,9 @@ typedef struct ClientSessionData
 {
     SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
     SOPC_ByteString nonceServer;
-    SOPC_ByteString nonceClient;           /* TODO: remove ? => no need to be store if returned directly */
-    OpcUa_SignatureData signatureData;     /* TODO: remove ? => no need to be stored */
+    SOPC_ByteString nonceClient;       /* TODO: remove ? => no need to be store if returned directly */
+    OpcUa_SignatureData signatureData; /* TODO: remove ? => no need to be stored */
+    OpcUa_SignatureData userTokenSignatureData;
     constants__t_user_token_i user_client; /* TODO: remove user management */
     constants__t_SecurityPolicy user_secu_client;
     SOPC_Buffer user_client_server_certificate; // Server certificate for client user encryption
@@ -101,6 +102,7 @@ void session_core_bs__INITIALISATION(void)
         SOPC_ByteString_Initialize(&clientSessionData->nonceClient);
         SOPC_ByteString_Initialize(&clientSessionData->nonceServer);
         OpcUa_SignatureData_Initialize(&clientSessionData->signatureData);
+        OpcUa_SignatureData_Initialize(&clientSessionData->userTokenSignatureData);
         clientSessionData->user_client = constants__c_user_token_indet;
         clientSessionData->user_secu_client = constants__e_secpol_B256S256;
         memset(&clientSessionData->user_client_server_certificate, 0,
@@ -426,6 +428,10 @@ void session_core_bs__delete_session_application_context(const constants__t_sess
     SOPC_Internal_SessionAppContext* sessionAppCtx = session_client_app_context[session_core_bs__p_session];
     if (NULL != sessionAppCtx)
     {
+        if (NULL != sessionAppCtx->userTokenKey)
+        {
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(sessionAppCtx->userTokenKey);
+        }
         SOPC_Free(sessionAppCtx->sessionName);
         SOPC_Free(sessionAppCtx);
     }
@@ -735,17 +741,127 @@ void session_core_bs__clear_Signature(const constants__t_session_i session_core_
                                       const constants__t_SignatureData_i session_core_bs__p_signature)
 {
     OpcUa_SignatureData* signature = NULL;
+    OpcUa_SignatureData* userTokenSignature = NULL;
     if (session_core_bs__p_is_client)
     {
         signature = &clientSessionDataArray[session_core_bs__p_session].signatureData;
+        userTokenSignature = &clientSessionDataArray[session_core_bs__p_session].userTokenSignatureData;
     }
     else
     {
         signature = &serverSessionDataArray[session_core_bs__p_session].signatureData;
     }
     // Check same signature since not proved by model
-    assert(session_core_bs__p_signature == signature);
+    SOPC_ASSERT(session_core_bs__p_signature == signature || session_core_bs__p_signature == userTokenSignature);
     OpcUa_SignatureData_Clear(signature);
+    if (NULL != userTokenSignature)
+    {
+        OpcUa_SignatureData_Clear(userTokenSignature);
+    }
+}
+
+static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
+                                                     const char* pSecuPolicyUri,
+                                                     const SOPC_SerializedAsymmetricKey* pKeyPriv,
+                                                     SOPC_ByteString* pServerNonce,
+                                                     const SOPC_Buffer* pServerCert)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    uint8_t* pToSign = NULL;
+    uint32_t lenToSign = 0;
+    SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_CryptoProvider* pProvider = NULL;
+    const char* errorReason = "";
+
+    SOPC_ASSERT(NULL != pSign || NULL != pSecuPolicyUri || NULL != pKeyPriv || NULL != pServerNonce ||
+                NULL != pServerCert);
+
+    /* Create the CryptoProvider */
+    /* TODO: don't create it each time, maybe add it to the session */
+    pProvider = SOPC_CryptoProvider_Create(pSecuPolicyUri);
+    if (NULL == pProvider)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (0 < pServerCert->length && 0 < pServerNonce->Length &&
+        SIZE_MAX / sizeof(uint8_t) >= (uint64_t) pServerCert->length + (uint64_t) pServerNonce->Length)
+    {
+        lenToSign = (uint32_t) pServerCert->length + (uint32_t) pServerNonce->Length;
+        pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
+    }
+
+    if (NULL == pToSign)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pKeyPriv, false, &pKey);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        memcpy(pToSign, pServerCert->data, (size_t) pServerCert->length);
+        memcpy(pToSign + pServerCert->length, pServerNonce->Data, (size_t) pServerNonce->Length);
+
+        /* Sign and store the signature in pSign */
+        SOPC_ByteString_Clear(&pSign->Signature);
+        status =
+            SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, (uint32_t*) &pSign->Signature.Length);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (0 < pSign->Signature.Length && SIZE_MAX >= (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte))
+        {
+            pSign->Signature.Data =
+                SOPC_Malloc(sizeof(SOPC_Byte) *
+                            (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+        }
+        else
+        {
+            pSign->Signature.Data = NULL;
+        }
+        if (NULL == pSign->Signature.Data || 0 >= pSign->Signature.Length)
+        {
+            status = SOPC_STATUS_OK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pKey, pSign->Signature.Data,
+                                                    (uint32_t) pSign->Signature.Length, &errorReason);
+    }
+
+    /* Prepare the OpcUa_SignatureData */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String_Clear(&pSign->Algorithm);
+        status = SOPC_String_CopyFromCString(&pSign->Algorithm,
+                                             SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
+    }
+
+    /* Clean */
+    if (NULL != pKey)
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(pKey);
+        pKey = NULL;
+    }
+    if (NULL != pToSign)
+    {
+        SOPC_Free(pToSign);
+        pToSign = NULL;
+    }
+    if (NULL != pProvider)
+    {
+        SOPC_CryptoProvider_Free(pProvider);
+        pProvider = NULL;
+    }
+
+    return status;
 }
 
 void session_core_bs__client_activate_session_req_do_crypto(
@@ -755,17 +871,12 @@ void session_core_bs__client_activate_session_req_do_crypto(
     t_bool* const session_core_bs__valid,
     constants__t_SignatureData_i* const session_core_bs__signature)
 {
-    SOPC_CryptoProvider* pProvider = NULL;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     ClientSessionData* pSession = NULL;
-    SOPC_AsymmetricKey* clientKey = NULL;
     SOPC_ByteString* serverNonce = NULL;
     const SOPC_Buffer* serverCert = NULL;
     OpcUa_SignatureData* pSign = NULL;
-    uint8_t* pToSign = NULL;
-    uint32_t lenToSign = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    const char* errorReason = "";
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -783,91 +894,30 @@ void session_core_bs__client_activate_session_req_do_crypto(
         return;
     }
 
+    serverNonce = session_core_bs__server_nonce;
+    /* Prepare the buffer to sign */
+    if (serverNonce->Length <= 0)
+    {
+        // server Nonce is not present
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // retrieve expected sender certificate as a ByteString
+        serverCert = pSCCfg->crt_srv;
+    }
+
+    int res = strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI);
     /* If security policy is not None, generate the signature */
-    if (strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0) /* Including the terminating \0 */
+    if (0 != res && SOPC_STATUS_OK == status) /* Including the terminating \0 */
     {
         /* Retrieve ptr Signature */
         pSign = &pSession->signatureData;
 
-        /* Create the CryptoProvider */
-        /* TODO: don't create it each time, maybe add it to the session */
-        pProvider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
-
         /* Use the client private key to sign the server certificate + server nonce */
-        serverNonce = session_core_bs__server_nonce;
-        /* a) Prepare the buffer to sign */
-        if (serverNonce->Length <= 0)
-        {
-            // server Nonce is not present
-            status = SOPC_STATUS_NOK;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            // retrieve expected sender certificate as a ByteString
-            serverCert = pSCCfg->crt_srv;
-        }
-
-        if (SOPC_STATUS_OK == status && serverCert->length > 0 && serverNonce->Length > 0 &&
-            (uint64_t) serverCert->length + (uint64_t) serverNonce->Length <= SIZE_MAX / sizeof(uint8_t))
-        {
-            lenToSign = (uint32_t) serverCert->length + (uint32_t) serverNonce->Length;
-            pToSign = SOPC_Malloc(sizeof(uint8_t) * (size_t) lenToSign);
-        }
-
-        if (SOPC_STATUS_OK == status && NULL == pToSign)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pSCCfg->key_priv_cli, false, &clientKey);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            memcpy(pToSign, serverCert->data, (size_t) serverCert->length);
-            memcpy(pToSign + serverCert->length, serverNonce->Data, (size_t) serverNonce->Length);
-            /* b) Sign and store the signature in pSign */
-            SOPC_ByteString_Clear(&pSign->Signature);
-            status = SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, clientKey,
-                                                                       (uint32_t*) &pSign->Signature.Length);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            if (pSign->Signature.Length > 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
-            {
-                pSign->Signature.Data = SOPC_Malloc(
-                    sizeof(SOPC_Byte) *
-                    (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
-            }
-            else
-            {
-                pSign->Signature.Data = NULL;
-            }
-            if (NULL == pSign->Signature.Data || pSign->Signature.Length <= 0)
-            {
-                status = SOPC_STATUS_OK;
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, clientKey, pSign->Signature.Data,
-                                                        (uint32_t) pSign->Signature.Length, &errorReason);
-        }
-
-        SOPC_KeyManager_AsymmetricKey_Free(clientKey);
-
-        /* c) Prepare the OpcUa_SignatureData */
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_String_Clear(&pSign->Algorithm);
-            status = SOPC_String_CopyFromCString(&pSign->Algorithm,
-                                                 SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
-        }
+        status =
+            session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->key_priv_cli, serverNonce, serverCert);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -879,17 +929,63 @@ void session_core_bs__client_activate_session_req_do_crypto(
     {
         *session_core_bs__valid = true;
     }
+}
 
-    /* Clean */
-    if (NULL != pToSign)
+void session_core_bs__sign_user_token(const constants__t_session_i session_core_bs__session,
+                                      const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
+                                      const constants__t_Nonce_i session_core_bs__p_server_nonce,
+                                      const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
+                                      const constants__t_session_application_context_i session_core_bs__app_context,
+                                      constants__t_SignatureData_i* const session_core_bs__p_user_token_signature,
+                                      t_bool* const session_core_bs__p_bret)
+{
+    ClientSessionData* pSession = NULL;
+    OpcUa_SignatureData* pSignUserToken = NULL;
+    SOPC_ByteString* serverNonce = NULL;
+    const SOPC_Buffer* serverCert = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    *session_core_bs__p_bret = false;
+    *session_core_bs__p_user_token_signature = constants__c_SignatureData_indet;
+
+    pSession = &clientSessionDataArray[session_core_bs__session];
+
+    /* Check parameters */
+    SOPC_ASSERT(NULL != session_core_bs__p_server_nonce && NULL != session_core_bs__p_user_server_cert &&
+                NULL != session_core_bs__app_context);
+    /* Retrieve the server nonce */
+    serverNonce = session_core_bs__p_server_nonce;
+    /* Retrieve the server certificate as a ByteString */
+    serverCert = session_core_bs__p_user_server_cert;
+    /* Retrieve the user security policy */
+    const char* userSecurityPolicy = util_channel__SecurityPolicy_B_to_C(session_core_bs__p_user_secu_policy);
+
+    /* Retrieve the application contexte for the x509 UserIdentityToken privateKey */
+    SOPC_Internal_SessionAppContext* appCtx = session_core_bs__app_context;
+    SOPC_ASSERT(NULL != appCtx);
+    SOPC_SerializedAsymmetricKey* pKeyUserToken = appCtx->userTokenKey;
+    SOPC_ASSERT(NULL != pKeyUserToken);
+
+    int res = strcmp(userSecurityPolicy, SOPC_SecurityPolicy_None_URI);
+    /*If the user security policy is None we can't sign*/
+    if (0 != res)
     {
-        SOPC_Free(pToSign);
-        pToSign = NULL;
+        /* Retrieve ptr Signature */
+        pSignUserToken = &pSession->userTokenSignatureData;
+        /* Use the user private key to sign the server certificate + server nonce */
+        status =
+            session_core_asymetric_sign(pSignUserToken, userSecurityPolicy,
+                                        (const SOPC_SerializedAsymmetricKey*) pKeyUserToken, serverNonce, serverCert);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            *session_core_bs__p_user_token_signature = pSignUserToken;
+        }
     }
-    if (NULL != pProvider)
+
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_CryptoProvider_Free(pProvider);
-        pProvider = NULL;
+        *session_core_bs__p_bret = true;
     }
 }
 
