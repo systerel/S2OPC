@@ -41,7 +41,7 @@ IMPORTS
     msg_subscription_delete_bs,
     msg_subscription_publish_ack_bs,
     msg_subscription_set_publishing_mode_bs,
-    msg_subscription_create_monitored_item,
+    msg_subscription_monitored_item,
     subscription_create_monitored_item_it,
     subscription_absent_node
 
@@ -172,9 +172,9 @@ LOCAL_OPERATIONS
             %mi_index.(mi_index : t_monitoredItemReqIndex &
                 mi_index : 1..nb_monitored_items &
                 /* ith node id has a node in the Address Space */
-                mi_index : dom(MonitoredItemReq_NodeId) &
+                mi_index : dom(CreateMonitoredItemReq_NodeId) &
                 /* Node is in the domain of the attribute */
-                mi_index : dom(MonitoredItemReq_AttributeId)
+                mi_index : dom(CreateMonitoredItemReq_AttributeId)
                 /* TODO: add use-access levels */
                 |
                 {TRUE |-> e_sc_bad_attribute_id_invalid,
@@ -187,17 +187,17 @@ LOCAL_OPERATIONS
                                                                                   FALSE |-> e_sc_ok
                                                                                  }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
                                                                                         t_monitoredItemId = s_monitoredItemId))
-                                                                        }(bool(MonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
-                                                           }(bool(a_NodeId~(MonitoredItemReq_NodeId(mi_index)) /:
-                                                                   dom(AttributeID_Node_Variant(MonitoredItemReq_AttributeId(mi_index))) or
+                                                                        }(bool(CreateMonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
+                                                           }(bool(a_NodeId~(CreateMonitoredItemReq_NodeId(mi_index)) /:
+                                                                   dom(AttributeID_Node_Variant(CreateMonitoredItemReq_AttributeId(mi_index))) or
                                                                    a_NodeClass_Attribute
-                                                                    (a_Node_availableInFuture(MonitoredItemReq_NodeId(mi_index)) |->
-                                                                       MonitoredItemReq_AttributeId(mi_index)) = FALSE))
-                                                }(bool(MonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
-                                                       MonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
-                                     }(bool(MonitoredItemReq_FilterPresence(mi_index) = TRUE))
-                            }(bool(MonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
-                }(bool(mi_index /: dom(MonitoredItemReq_AttributeId)))
+                                                                    (a_Node_availableInFuture(CreateMonitoredItemReq_NodeId(mi_index)) |->
+                                                                       CreateMonitoredItemReq_AttributeId(mi_index)) = FALSE))
+                                                }(bool(CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
+                                                       CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
+                                     }(bool(CreateMonitoredItemReq_FilterPresence(mi_index) = TRUE))
+                            }(bool(CreateMonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
+                }(bool(mi_index /: dom(CreateMonitoredItemReq_AttributeId)))
             )
         IN
             ANY max_mi_ids, max_mi_pointers, s_maximums, nb_allocated_monitored_items WHERE
@@ -248,7 +248,7 @@ LOCAL_OPERATIONS
                                                           mi_index : 1..nb_monitored_items &
                                                           l_allocMonitoredItemResp_StatusCode (mi_index) = e_sc_ok
                                                           |
-                                                          MonitoredItemReq_NodeId(mi_index)) &
+                                                          CreateMonitoredItemReq_NodeId(mi_index)) &
                             s_miNodeQueues = a_nodeToMonitoredItemQueue[ran(miIndexToNodeIds)] &
                             s_miQueues = {miSubQueue} \/ s_miNodeQueues
                         IN

@@ -18,13 +18,13 @@
  */
 
 IMPLEMENTATION
-    msg_subscription_create_monitored_item_i
+    msg_subscription_monitored_item_i
 
 REFINES
-    msg_subscription_create_monitored_item
+    msg_subscription_monitored_item
 
 IMPORTS
-    msg_subscription_create_monitored_item_bs
+    msg_subscription_monitored_item_bs
 
 SEES
     constants,

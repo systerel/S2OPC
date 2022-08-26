@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    msg_subscription_create_monitored_item
+    msg_subscription_monitored_item
 
 SEES
     constants,
@@ -31,11 +31,11 @@ DEFINITIONS
         nb_monitored_items : NAT &
         nb_monitored_items <= k_n_monitoredItem_max &
 
-        MonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
-        MonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
-        MonitoredItemReq_IndexRange  : t_monitoredItemReqIndex +-> t_IndexRange_i &
-        MonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
-        MonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
+        CreateMonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
+        CreateMonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
+        CreateMonitoredItemReq_IndexRange  : t_monitoredItemReqIndex +-> t_IndexRange_i &
+        CreateMonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
+        CreateMonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
 
         MonitoredItemResp_Allocated : BOOL &
         MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
@@ -49,11 +49,11 @@ DEFINITIONS
 
 ABSTRACT_VARIABLES
     nb_monitored_items,
-    MonitoredItemReq_NodeId,
-    MonitoredItemReq_AttributeId,
-    MonitoredItemReq_IndexRange,
-    MonitoredItemReq_ValidMonitoringMode,
-    MonitoredItemReq_FilterPresence,
+    CreateMonitoredItemReq_NodeId,
+    CreateMonitoredItemReq_AttributeId,
+    CreateMonitoredItemReq_IndexRange,
+    CreateMonitoredItemReq_ValidMonitoringMode,
+    CreateMonitoredItemReq_FilterPresence,
     MonitoredItemResp_Allocated,
     MonitoredItemResp_Id,
     MonitoredItemResp_StatusCode,
@@ -69,11 +69,11 @@ INVARIANT
 
 INITIALISATION
     nb_monitored_items           := 0  ||
-    MonitoredItemReq_NodeId      := {} ||
-    MonitoredItemReq_AttributeId := {} ||
-    MonitoredItemReq_IndexRange := {} ||
-    MonitoredItemReq_ValidMonitoringMode := {} ||
-    MonitoredItemReq_FilterPresence := {} ||
+    CreateMonitoredItemReq_NodeId      := {} ||
+    CreateMonitoredItemReq_AttributeId := {} ||
+    CreateMonitoredItemReq_IndexRange := {} ||
+    CreateMonitoredItemReq_ValidMonitoringMode := {} ||
+    CreateMonitoredItemReq_FilterPresence := {} ||
     MonitoredItemResp_Allocated := FALSE ||
     MonitoredItemResp_Id := {}         ||
     MonitoredItemResp_StatusCode := {} ||
@@ -96,11 +96,11 @@ OPERATIONS
         p_timestampToRet,
         p_nb_monitored_items,
         nb_monitored_items,
-        MonitoredItemReq_NodeId,
-        MonitoredItemReq_AttributeId,
-        MonitoredItemReq_IndexRange,
-        MonitoredItemReq_ValidMonitoringMode,
-        MonitoredItemReq_FilterPresence
+        CreateMonitoredItemReq_NodeId,
+        CreateMonitoredItemReq_AttributeId,
+        CreateMonitoredItemReq_IndexRange,
+        CreateMonitoredItemReq_ValidMonitoringMode,
+        CreateMonitoredItemReq_FilterPresence
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
@@ -110,11 +110,11 @@ OPERATIONS
                 p_nb_monitored_items > 0 &
                 p_nb_monitored_items <= k_n_monitoredItem_max &
                 nb_monitored_items = p_nb_monitored_items &
-                MonitoredItemReq_NodeId : 1..nb_monitored_items --> t_NodeId &
-                MonitoredItemReq_AttributeId : 1..nb_monitored_items --> t_AttributeId_i &
-                MonitoredItemReq_IndexRange : 1..nb_monitored_items --> t_IndexRange_i &
-                MonitoredItemReq_ValidMonitoringMode : 1..nb_monitored_items --> BOOL &
-                MonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
+                CreateMonitoredItemReq_NodeId : 1..nb_monitored_items --> t_NodeId &
+                CreateMonitoredItemReq_AttributeId : 1..nb_monitored_items --> t_AttributeId_i &
+                CreateMonitoredItemReq_IndexRange : 1..nb_monitored_items --> t_IndexRange_i &
+                CreateMonitoredItemReq_ValidMonitoringMode : 1..nb_monitored_items --> BOOL &
+                CreateMonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 =>
@@ -155,22 +155,22 @@ OPERATIONS
           p_indexRange : t_IndexRange_i &
           (p_bres = TRUE =>
            p_sc = e_sc_ok &
-           p_nid = MonitoredItemReq_NodeId(p_index) &
-           MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
-           p_indexRange = MonitoredItemReq_IndexRange(p_index) &
-           p_aid = MonitoredItemReq_AttributeId(p_index) &
+           p_nid = CreateMonitoredItemReq_NodeId(p_index) &
+           CreateMonitoredItemReq_AttributeId(p_index) : t_AttributeId &
+           p_indexRange = CreateMonitoredItemReq_IndexRange(p_index) &
+           p_aid = CreateMonitoredItemReq_AttributeId(p_index) &
            p_monitMode : t_monitoringMode) &
           (p_bres = FALSE => p_sc /= e_sc_ok) &
-          (MonitoredItemReq_AttributeId(p_index) /: t_AttributeId =>
+          (CreateMonitoredItemReq_AttributeId(p_index) /: t_AttributeId =>
            p_sc = e_sc_bad_attribute_id_invalid) &
 
-          (MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
-           MonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
+          (CreateMonitoredItemReq_AttributeId(p_index) : t_AttributeId &
+           CreateMonitoredItemReq_ValidMonitoringMode(p_index) = FALSE =>
            p_sc = e_sc_bad_monitoring_mode_invalid) &
 
-          (MonitoredItemReq_AttributeId(p_index) : t_AttributeId &
-           MonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
-           MonitoredItemReq_FilterPresence(p_index) = TRUE =>
+          (CreateMonitoredItemReq_AttributeId(p_index) : t_AttributeId &
+           CreateMonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
+           CreateMonitoredItemReq_FilterPresence(p_index) = TRUE =>
            p_sc = e_sc_bad_monitored_item_filter_unsupported)
          )
     END

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 05/08/2022 09:03:59
+ Date                 : 26/08/2022 11:46:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -89,9 +89,9 @@
 #include "msg_register_server2_bs.h"
 #include "msg_session_bs.h"
 #include "msg_subscription_create_bs.h"
-#include "msg_subscription_create_monitored_item.h"
-#include "msg_subscription_create_monitored_item_bs.h"
 #include "msg_subscription_delete_bs.h"
+#include "msg_subscription_monitored_item.h"
+#include "msg_subscription_monitored_item_bs.h"
 #include "msg_subscription_publish_ack_bs.h"
 #include "msg_subscription_publish_bs.h"
 #include "msg_subscription_set_publishing_mode_bs.h"
@@ -255,8 +255,8 @@ void INITIALISATION(void) {
    msg_subscription_delete_bs__INITIALISATION();
    msg_subscription_publish_ack_bs__INITIALISATION();
    msg_subscription_set_publishing_mode_bs__INITIALISATION();
-   msg_subscription_create_monitored_item_bs__INITIALISATION();
-   msg_subscription_create_monitored_item__INITIALISATION();
+   msg_subscription_monitored_item_bs__INITIALISATION();
+   msg_subscription_monitored_item__INITIALISATION();
    subscription_create_monitored_item_it__INITIALISATION();
    subscription_absent_node_bs__INITIALISATION();
    subscription_absent_node__INITIALISATION();

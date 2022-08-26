@@ -865,8 +865,6 @@ OPERATIONS
     p_sc <-- delete_monitored_item (p_subscription, p_mi_id) =
     VAR
         l_subscription_queue,
-        l_continue_mi,
-        l_iterator,
         l_monitoredItemPointer,
         l_monitoredItemId,
         l_subscription,

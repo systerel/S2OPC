@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    msg_subscription_create_monitored_item_bs
+    msg_subscription_monitored_item_bs
 
 SEES
     constants,

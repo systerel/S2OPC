@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 26/08/2022 06:43:13
+ Date                 : 26/08/2022 11:46:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -199,7 +199,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
          subscription_mgr__l_indexRange = constants__c_IndexRange_indet;
          subscription_create_monitored_item_it__continue_iter_monitored_item_request(&subscription_mgr__l_continue,
             &subscription_mgr__l_index);
-         msg_subscription_create_monitored_item__getall_create_monitored_item_req_params(subscription_mgr__p_req_msg,
+         msg_subscription_monitored_item__getall_create_monitored_item_req_params(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_bres,
             &subscription_mgr__l_sc,
@@ -278,7 +278,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                }
             }
          }
-         msg_subscription_create_monitored_item__setall_msg_create_monitored_item_resp_params(subscription_mgr__p_resp_msg,
+         msg_subscription_monitored_item__setall_msg_create_monitored_item_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_index,
             subscription_mgr__l_sc,
             subscription_mgr__l_monitoredItemId,
@@ -524,13 +524,13 @@ void subscription_mgr__fill_response_subscription_delete_monitored_items(
       while (subscription_mgr__l_continue == true) {
          subscription_create_monitored_item_it__continue_iter_monitored_item_request(&subscription_mgr__l_continue,
             &subscription_mgr__l_index);
-         msg_subscription_create_monitored_item__getall_delete_monitored_item_req_params(subscription_mgr__p_req_msg,
+         msg_subscription_monitored_item__getall_delete_monitored_item_req_params(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_id);
          subscription_core__delete_monitored_item(subscription_mgr__p_subscription,
             subscription_mgr__l_id,
             &subscription_mgr__l_sc);
-         msg_subscription_create_monitored_item__setall_msg_delete_monitored_item_resp_params(subscription_mgr__p_resp_msg,
+         msg_subscription_monitored_item__setall_msg_delete_monitored_item_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_index,
             subscription_mgr__l_sc);
       }
@@ -943,7 +943,7 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
       constants__t_LocaleIds_i subscription_mgr__l_locales;
       t_bool subscription_mgr__l_bres;
       
-      msg_subscription_create_monitored_item__getall_msg_create_monitored_items_req_params(subscription_mgr__p_req_msg,
+      msg_subscription_monitored_item__getall_msg_create_monitored_items_req_params(subscription_mgr__p_req_msg,
          &subscription_mgr__l_sc,
          &subscription_mgr__l_subscription,
          &subscription_mgr__l_timestampToRet,
@@ -953,7 +953,7 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
-            msg_subscription_create_monitored_item__alloc_msg_create_monitored_items_resp_results(subscription_mgr__p_resp_msg,
+            msg_subscription_monitored_item__alloc_msg_create_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
             if (subscription_mgr__l_bres == true) {
@@ -995,7 +995,7 @@ void subscription_mgr__treat_subscription_delete_monitored_items_req(
       t_entier4 subscription_mgr__l_nb_monitored_items;
       t_bool subscription_mgr__l_bres;
       
-      msg_subscription_create_monitored_item__getall_msg_delete_monitored_items_req_params(subscription_mgr__p_req_msg,
+      msg_subscription_monitored_item__getall_msg_delete_monitored_items_req_params(subscription_mgr__p_req_msg,
          &subscription_mgr__l_sc,
          &subscription_mgr__l_subscription,
          &subscription_mgr__l_nb_monitored_items);
@@ -1004,7 +1004,7 @@ void subscription_mgr__treat_subscription_delete_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
-            msg_subscription_create_monitored_item__alloc_msg_delete_monitored_items_resp_results(subscription_mgr__p_resp_msg,
+            msg_subscription_monitored_item__alloc_msg_delete_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
             if (subscription_mgr__l_bres == true) {
