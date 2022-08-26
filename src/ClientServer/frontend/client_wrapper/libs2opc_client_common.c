@@ -224,6 +224,8 @@ void SOPC_ClientCommon_Clear(void)
             SOPC_Free((void*) pCfg->password);
             OpcUa_GetEndpointsResponse_Clear((void*) pCfg->expected_endpoints);
             SOPC_Free((void*) pCfg->expected_endpoints);
+            SOPC_Free((void*) pCfg->path_cert_x509_token);
+            SOPC_Free((void*) pCfg->path_key_x509_token);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             SOPC_Free(pCfg);
         }

@@ -733,6 +733,7 @@ void session_core_bs__clear_Signature(const constants__t_SignatureData_i session
     {
         OpcUa_SignatureData* signature = session_core_bs__p_signature;
         OpcUa_SignatureData_Clear(signature);
+        SOPC_Free(signature);
     }
 }
 

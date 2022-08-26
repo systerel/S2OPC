@@ -345,6 +345,8 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Delete(pSM->dataIdToNodeIdList);
         pSM->dataIdToNodeIdList = NULL;
+        SOPC_Free((void*) pSM->szPath_cert_x509_token);
+        SOPC_Free((void*) pSM->szPath_key_x509_token);
 
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(pSM);
