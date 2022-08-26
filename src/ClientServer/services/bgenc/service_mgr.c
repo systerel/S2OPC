@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 17/10/2022 15:34:52
+ Date                 : 08/11/2022 12:01:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -753,7 +753,6 @@ void service_mgr__server_receive_session_service_req(
       constants__t_session_i service_mgr__l_session;
       constants__t_msg_i service_mgr__l_req_msg;
       t_bool service_mgr__l_valid_req;
-      t_bool service_mgr__l_resp_msg_allocated;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
@@ -773,7 +772,6 @@ void service_mgr__server_receive_session_service_req(
       service_mgr__l_resp_msg_header = constants__c_msg_header_indet;
       service_mgr__l_resp_msg = constants__c_msg_indet;
       *service_mgr__async_resp = false;
-      service_mgr__l_resp_msg_allocated = false;
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
@@ -806,7 +804,6 @@ void service_mgr__server_receive_session_service_req(
                   &service_mgr__l_resp_msg_header,
                   &service_mgr__l_resp_msg);
                if (service_mgr__l_resp_msg != constants__c_msg_indet) {
-                  service_mgr__l_resp_msg_allocated = true;
                   service_mgr__treat_session_service_req(service_mgr__l_endpoint_config_idx,
                      service_mgr__l_session,
                      service_mgr__req_typ,
@@ -837,7 +834,7 @@ void service_mgr__server_receive_session_service_req(
          else {
             service_mgr__l_valid_req = true;
          }
-         if (service_mgr__l_resp_msg_allocated == false) {
+         if (service_mgr__l_resp_msg == constants__c_msg_indet) {
             message_out_bs__alloc_resp_msg(constants__e_msg_service_fault_resp,
                &service_mgr__l_resp_msg_header,
                &service_mgr__l_resp_msg);

@@ -739,7 +739,6 @@ OPERATIONS
         l_session,
         l_req_msg,
         l_valid_req,
-        l_resp_msg_allocated,
         l_resp_msg_typ,
         l_resp_msg,
         l_resp_msg_header,
@@ -759,7 +758,6 @@ OPERATIONS
         l_resp_msg_header := c_msg_header_indet;
         l_resp_msg := c_msg_indet;
         async_resp := FALSE;
-        l_resp_msg_allocated := FALSE;
         l_buffer_out := c_byte_buffer_indet;
         l_valid_req_header, l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         IF l_valid_req_header = TRUE
@@ -782,7 +780,6 @@ OPERATIONS
                     l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                     IF l_resp_msg /= c_msg_indet
                     THEN
-                        l_resp_msg_allocated := TRUE;
                         // Call local operation to dispatch the service request on right service
                         l_ret, async_resp
                               <-- treat_session_service_req (l_endpoint_config_idx,
@@ -815,7 +812,8 @@ OPERATIONS
                 // Note: consider message valid if we do not evaluate it due to session invalid token but we will send a service fault anyway
                 l_valid_req := TRUE
             END; /* VALID SESSION REQ CHECK */
-            IF l_resp_msg_allocated = FALSE THEN
+            IF l_resp_msg = c_msg_indet
+            THEN
                 /* Allocate error response message if not allocated (degraded case) */
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
             END;
