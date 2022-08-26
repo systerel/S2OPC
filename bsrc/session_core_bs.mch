@@ -369,6 +369,33 @@ OPERATIONS
     END
     ;
 
+    p_user_token_signature, p_bret <-- sign_user_token(session, p_user_server_cert, p_server_nonce, p_user_secu_policy, app_context) =
+    PRE
+        session              : t_session_i          &
+        session              : t_session            &
+        p_user_server_cert   : t_byte_buffer_i      &
+        p_server_nonce       : t_Nonce_i            &
+        p_server_nonce       : t_Nonce              &
+        p_user_secu_policy   : t_SecurityPolicy     &
+        p_user_secu_policy   /= e_secpol_None       &
+        app_context          : t_session_application_context_i
+    THEN
+        p_user_token_signature,
+        p_bret
+        :(
+            p_bret : BOOL &
+            p_user_token_signature : t_SignatureData_i &
+            (p_bret = TRUE
+             =>
+             p_user_token_signature : t_SignatureData)
+            &
+            (p_bret = FALSE
+             =>
+             p_user_token_signature = c_SignatureData_indet)
+        )
+    END
+    ;
+
     clear_Signature(p_session, p_is_client, p_signature) =
     PRE
         p_session : t_session_i &

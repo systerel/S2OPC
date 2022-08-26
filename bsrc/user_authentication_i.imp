@@ -92,7 +92,7 @@ OPERATIONS
         l_user_token_type
     IN
         l_user_token_type <-- get_user_token_type_from_token (p_user_token);
-        IF l_user_token_type = e_userTokenType_anonymous THEN
+        IF l_user_token_type = e_userTokenType_anonymous or l_user_token_type = e_userTokenType_x509 THEN
             p_valid, p_user_token_encrypted <-- shallow_copy_user_token(l_user_token_type, p_user_token)
         ELSIF l_user_token_type = e_userTokenType_userName THEN
                 p_valid, p_user_token_encrypted <-- encrypt_user_token(p_channel_config_idx, p_user_server_cert, p_server_nonce, p_user_secu_policy, l_user_token_type, p_user_token)
@@ -133,6 +133,16 @@ OPERATIONS
             p_user := c_user_indet;
             p_sc_valid_user := e_sc_bad_identity_token_invalid
         END
+    END
+    ;
+
+    /* Accessor from user_authentication_bs interface */
+    p_user_token_type <-- get_user_token (p_user_token) =
+    VAR
+        l_user_token_type
+    IN
+        l_user_token_type <-- get_user_token_type_from_token (p_user_token);
+        p_user_token_type := l_user_token_type
     END
 
 END

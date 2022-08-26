@@ -100,5 +100,19 @@ OPERATIONS
     THEN
         p_user_token_policy_available :: BOOL
     END
+    ;
+
+    p_user_token_type <-- get_user_token (p_user_token) =
+    PRE
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        IF p_user_token : t_user_token
+        THEN
+            p_user_token_type :: t_user_token_type_i
+        ELSE
+            p_user_token_type := c_userTokenType_indet
+        END
+    END
 
 END

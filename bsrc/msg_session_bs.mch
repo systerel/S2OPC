@@ -218,6 +218,19 @@ OPERATIONS
     END
     ;
 
+    l_bret <-- write_activate_msg_user_token_signature (msg, p_user_token_signature) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_out &
+        c_msg_out : t_msg &
+        p_user_token_signature : t_SignatureData_i &
+        p_user_token_signature : t_SignatureData &
+        a_msg_out_type = e_msg_session_activate_req
+    THEN
+        l_bret :: BOOL
+    END
+    ;
+
     write_create_session_req_msg_clientDescription (p_req_msg, p_channel_config_idx) =
     PRE
         p_req_msg : t_msg_i &
