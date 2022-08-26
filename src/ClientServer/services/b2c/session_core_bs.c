@@ -713,6 +713,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     else
     {
         OpcUa_SignatureData_Clear(pSign);
+        SOPC_Free(pSign);
     }
 
     if (NULL != pToSign)
