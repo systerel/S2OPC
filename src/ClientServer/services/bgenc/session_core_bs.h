@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 04/08/2022 14:53:47
+ Date                 : 25/08/2022 15:32:00
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -213,5 +213,13 @@ extern void session_core_bs__set_session_user_client(
 extern void session_core_bs__set_session_user_server(
    const constants__t_session_i session_core_bs__session,
    const constants__t_user_i session_core_bs__p_user);
+extern void session_core_bs__sign_user_token(
+   const constants__t_session_i session_core_bs__session,
+   const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
+   const constants__t_Nonce_i session_core_bs__p_server_nonce,
+   const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
+   const constants__t_session_application_context_i session_core_bs__app_context,
+   constants__t_SignatureData_i * const session_core_bs__p_user_token_signature,
+   t_bool * const session_core_bs__p_bret);
 
 #endif

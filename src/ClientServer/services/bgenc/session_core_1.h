@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 04/08/2022 14:53:17
+ Date                 : 25/08/2022 15:31:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -111,6 +111,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__set_session_to_create session_core_2__set_session_to_create
 #define session_core_1__set_session_user_client session_core_bs__set_session_user_client
 #define session_core_1__set_session_user_server session_core_bs__set_session_user_server
+#define session_core_1__sign_user_token session_core_bs__sign_user_token
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

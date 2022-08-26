@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 16/08/2022 09:25:12
+ Date                 : 25/08/2022 15:31:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -83,7 +83,8 @@ void user_authentication__may_encrypt_user_token(
       
       user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
          &user_authentication__l_user_token_type);
-      if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) {
+      if ((user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) ||
+         (user_authentication__l_user_token_type == constants__e_userTokenType_x509)) {
          user_authentication_bs__shallow_copy_user_token(user_authentication__l_user_token_type,
             user_authentication__p_user_token,
             user_authentication__p_valid,
@@ -166,6 +167,18 @@ void user_authentication__allocate_valid_and_authenticated_user(
          *user_authentication__p_user = constants__c_user_indet;
          *user_authentication__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
       }
+   }
+}
+
+void user_authentication__get_user_token(
+   const constants__t_user_token_i user_authentication__p_user_token,
+   constants__t_user_token_type_i * const user_authentication__p_user_token_type) {
+   {
+      constants__t_user_token_type_i user_authentication__l_user_token_type;
+      
+      user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
+         &user_authentication__l_user_token_type);
+      *user_authentication__p_user_token_type = user_authentication__l_user_token_type;
    }
 }
 
