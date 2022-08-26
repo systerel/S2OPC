@@ -407,11 +407,11 @@ OPERATIONS
                         /* If the security policy is not none, the nonce and server certificate are needed */
                         l_set_cert := TRUE;
                         /* Do the cryptographic challenge which may fail because of mallocs */
-                        l_crypto_status, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_channel_config_idx);
+                        l_crypto_status, l_signature <-- server_create_session_req_do_crypto(create_req_msg, l_endpoint_config_idx, l_channel_config_idx);
                         IF  l_crypto_status = e_sc_ok THEN
                             /* Write server signature */
                             l_bret <-- write_create_session_resp_signature(create_resp_msg, l_signature);
-                            clear_Signature(l_nsession, FALSE, l_signature);
+                            clear_Signature(l_signature);
                             IF l_bret = FALSE THEN
                                 service_ret := e_sc_bad_unexpected_error
                             END
@@ -555,10 +555,10 @@ OPERATIONS
                 END
             ELSIF l_user_token_type = e_userTokenType_x509 THEN
                 l_app_context <-- get_session_app_context(session);
-                l_user_token_signature, l_valid_user_token_sign <-- sign_user_token(session, l_user_server_cert, l_server_nonce, l_user_secu_policy, l_app_context);
+                l_user_token_signature, l_valid_user_token_sign <-- sign_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, l_app_context);
                 IF l_valid_user_token_sign = TRUE THEN
                     l_valid_write_user_token_sign <-- write_activate_msg_user_token_signature(activate_req_msg, l_user_token_signature);
-                    clear_Signature(session, TRUE, l_user_token_signature)
+                    clear_Signature(l_user_token_signature)
                 END
             END
             ;
@@ -578,7 +578,7 @@ OPERATIONS
                     l_valid_crypto, l_signature <-- client_activate_session_req_do_crypto(session, l_channel_config_idx, l_server_nonce);
                     IF l_valid_crypto = TRUE THEN
                         l_bret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature);
-                        clear_Signature(session, TRUE, l_signature);
+                        clear_Signature(l_signature);
                         IF l_bret = TRUE THEN
                             write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
                             ret := e_sc_ok

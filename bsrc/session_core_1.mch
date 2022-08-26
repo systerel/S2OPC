@@ -497,10 +497,8 @@ OPERATIONS
     /* This implements the crypto challenge in CreateSession.
      * valid tracks the alloc and success of signature
      */
-    status, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_channel_config_idx) =
+    status, signature <-- server_create_session_req_do_crypto(p_req_msg, p_endpoint_config_idx, p_channel_config_idx) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
         p_req_msg : t_msg_i &
         p_req_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -555,8 +553,8 @@ OPERATIONS
 
     valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) =
     PRE
-        session : t_session_i &
-        session : t_session &
+        session            : t_session_i            &
+        session            : t_session              &
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         server_nonce : t_Nonce_i &
@@ -582,10 +580,8 @@ OPERATIONS
     END
     ;
 
-    p_user_token_signature, p_bret <-- sign_user_token(session, p_user_server_cert, p_server_nonce, p_user_secu_policy, app_context) =
+    p_user_token_signature, p_bret <-- sign_user_token(p_user_server_cert, p_server_nonce, p_user_secu_policy, app_context) =
     PRE
-        session              : t_session_i          &
-        session              : t_session            &
         p_user_server_cert   : t_byte_buffer_i      &
         p_server_nonce       : t_Nonce_i            &
         p_server_nonce       : t_Nonce              &
@@ -609,11 +605,8 @@ OPERATIONS
     END
     ;
 
-    clear_Signature(p_session, p_is_client, p_signature) =
+    clear_Signature(p_signature) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session   &
-        p_is_client : BOOL &
         p_signature : t_SignatureData_i &
         p_signature : t_SignatureData
     THEN
