@@ -1796,20 +1796,20 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         SOPC_Free(nodeId);
         if (SOPC_STATUS_OK == status)
         {
-            // create an instance of NodeId
-            SOPC_NodeId* refNodeId = SOPC_NodeId_FromCString(browseRequests[i].referenceTypeId,
-                                                             (int) strlen(browseRequests[i].referenceTypeId));
-            if (NULL == refNodeId)
+            // Check to avoid segmentation fault error
+            if (NULL == browseRequests[i].referenceTypeId)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "refNodeId NULL");
+                Helpers_Log(SOPC_LOG_LEVEL_INFO, "referenceTypeId is NULL");
+                status = SOPC_STATUS_OK;
             }
             else
             {
-                status = SOPC_NodeId_Copy(&nodesToBrowse[i].ReferenceTypeId, refNodeId);
-                SOPC_NodeId_Clear(refNodeId);
-                SOPC_Free(refNodeId);
+                status = SOPC_NodeId_InitializeFromCString(&nodesToBrowse[i].ReferenceTypeId,
+                                                           browseRequests[i].referenceTypeId,
+                                                           (int) strlen(browseRequests[i].referenceTypeId));
             }
         }
+
         if (SOPC_STATUS_OK == status)
         {
             nodesToBrowse[i].BrowseDirection = (OpcUa_BrowseDirection) browseRequests[i].direction;

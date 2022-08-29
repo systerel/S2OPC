@@ -195,6 +195,7 @@ typedef struct
     - OpcUa_BrowseDirection_Both: Forward and inverse references.
   @var SOPC_ClientHelper_BrowseRequest::referenceTypeId
     NodeId of the ReferenceType to follow. zero-terminated string
+    NULL or zero-length string are supported in which case no filtering is done.
   @var SOPC_ClientHelper_BrowseRequest::includeSubtypes
     Indicates whether subtypes of the ReferenceType should be included.
 */
