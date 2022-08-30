@@ -314,22 +314,25 @@ if(ENABLE_TESTING)
   set(TOOLKIT_TEST_FILE_TRANSFER "toolkit_test_file_transfer")
 
   if (expat_FOUND)
-  add_executable(${TOOLKIT_TEST_FILE_TRANSFER} "validation_tests/client/test_file_transfer.c"
-  "validation_tests/client/test_file_transfer_method.c"
-  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
-  target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer")
-  target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+        # file_transfer only support by linux system
+        if(NOT WIN32)
+            add_executable(${TOOLKIT_TEST_FILE_TRANSFER} "validation_tests/client/test_file_transfer.c"
+            "validation_tests/client/test_file_transfer_method.c"
+            "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
+            target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer")
+            target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
 
-  target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_serverwrapper s2opc_clientwrapper Check::check)
-  # file_transfer API needs GNU_SOURCE (fileno and mkstemp functions)
-  target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
-  target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
+            target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_serverwrapper s2opc_clientwrapper Check::check)
+            # file_transfer API needs GNU_SOURCE (fileno and mkstemp functions)
+            target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
+            target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS})
 
-  target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
-  target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "WITH_EXPAT")
+            target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_clientserver-xml-loaders-expat)
+            target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "WITH_EXPAT")
 
-  else()
-  message(WARNING "test file transfer method ${TOOLKIT_TEST_FILE_TRANSFER} executable will not be compiled since Expat library not available.")
+            else()
+            message(WARNING "test file transfer method ${TOOLKIT_TEST_FILE_TRANSFER} executable will not be compiled since Expat library not available.")
+        endif()
   endif()
 
   add_executable(${TOOLKIT_TEST_SERVER}
