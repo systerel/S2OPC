@@ -197,8 +197,14 @@ static int32_t client_create_configuration(void)
         .password = NULL,
     };
 
+    SOPC_ClientHelper_EndpointConnection endpoint = {
+        .endpointUrl = DEFAULT_ENDPOINT_URL,
+        .serverUri = NULL,
+        .reverseConnectionConfigId = 0,
+    };
+
     // connect to the endpoint
-    return SOPC_ClientHelper_CreateConfiguration(DEFAULT_ENDPOINT_URL, &security, expectedEndpoints);
+    return SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, expectedEndpoints);
 }
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
