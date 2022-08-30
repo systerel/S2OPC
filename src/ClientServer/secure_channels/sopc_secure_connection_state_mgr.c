@@ -1968,7 +1968,7 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
     bool result = false;
     SOPC_SecureListener* scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
 
-    if (scListener->state == SECURE_LISTENER_STATE_OPENED)
+    if (scListener->state == SECURE_LISTENER_STATE_OPENED || scListener->state == SECURE_LISTENER_STATE_INACTIVE)
     {
         // Randomize secure channel ids (table 26 part 6)
         uint32_t resultTokenId = 0;
@@ -2051,7 +2051,7 @@ static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnecti
     uint32_t resultTokenId = 0;
     SOPC_SecureListener* scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
 
-    if (scListener->state == SECURE_LISTENER_STATE_OPENED)
+    if (scListener->state == SECURE_LISTENER_STATE_OPENED || scListener->state == SECURE_LISTENER_STATE_INACTIVE)
     {
         // Randomize secure channel ids (table 26 part 6)
         uint32_t newTokenId = 0;
