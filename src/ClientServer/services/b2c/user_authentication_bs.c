@@ -196,7 +196,8 @@ void user_authentication_bs__is_valid_user_authentication(
         const SOPC_SecureChannel_Config* pSCCfg =
             SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
         const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
-        SOPC_ASSERT(NULL != pSCCfg || NULL != pSCCfg->crt_srv);
+        SOPC_ASSERT(NULL != pSCCfg);
+        SOPC_ASSERT(NULL != pSCCfg->crt_srv);
 
         status = SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
             authenticationManager, user_authentication_bs__p_user_token, &authnStatus,
