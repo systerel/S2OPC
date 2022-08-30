@@ -557,6 +557,19 @@ static void SC_CloseSecureConnection(
             if (immediateClose)
             {
                 serverEndpointConfigIdx = scConnection->serverEndpointConfigIdx;
+                // Manage reverse connections retry attempts (only when connection never established)
+                if (scConnection->isReverseConnection && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
+                    scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+                {
+                    assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+                    SOPC_SecureListener* scListener = &secureListenersArray[serverEndpointConfigIdx];
+
+                    // Configure a timer for next reverse connection attempt to client
+                    SC_Server_StartReverseConnRetryTimer(
+                        &scListener->reverseConnRetryTimerIds[scConnection->serverReverseConnIdx],
+                        scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
+                }
+
                 // Immediatly close the connection if failed
                 if (SC_CloseConnection(scConnectionIdx, socketFailure))
                 {
@@ -3316,7 +3329,6 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 {
     SOPC_UNUSED_ARG(params);
     SOPC_SecureConnection* scConnection = NULL;
-    SOPC_SecureListener* scListener = NULL;
     bool result = false;
 
     switch (event)
@@ -3374,18 +3386,6 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         scConnection = SC_GetConnection(eltId);
         if (scConnection != NULL)
         {
-            // Manage reverse connections retry attempts
-            if (scConnection->isServerConnection && scConnection->isReverseConnection)
-            {
-                assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
-                scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
-
-                // Configure a timer for next reverse connection attempt to client
-                SC_Server_StartReverseConnRetryTimer(
-                    &scListener->reverseConnRetryTimerIds[scConnection->serverReverseConnIdx],
-                    scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
-            }
-
             // Since there was a socket failure, consider the socket close now
             SC_CloseSecureConnection(scConnection, eltId, true, true, 0,
                                      "SecureConnection: disconnected (SOCKET_FAILURE event)");
@@ -3420,15 +3420,6 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
 
         scConnection->connectionTimeoutTimerId = 0; // Timer is expired, do not keep reference on it
 
-        // Manage reverse connection retry attempt
-        if (scConnection->isServerConnection && scConnection->isReverseConnection)
-        {
-            assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
-            // Generate SC_REVERSE_CONNECT events for connection state manager
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
-                                                     (uintptr_t) NULL, scConnection->serverReverseConnIdx);
-        }
-
         // In case of client reverse connection, remove it from reverse endpoint immediately (next event)
         if (!scConnection->isServerConnection && scConnection->isReverseConnection &&
             SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == scConnection->state)
@@ -3437,7 +3428,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                 INT_EP_SC_DISCONNECTED, scConnection->clientReverseEpConfigIdx, (uintptr_t) NULL, (uintptr_t) eltId);
         }
 
-        // Check SC valid + avoid to close a secure channel established just after timeout
+        // Check SC not established before closing SC + avoid to close a secure channel established just after timeout
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
             scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
         {
