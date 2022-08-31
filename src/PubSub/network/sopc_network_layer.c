@@ -1006,7 +1006,8 @@ static inline SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffe
         status = Network_Layer_PublisherId_Read(buffer, pub_id_type, header);
         if (SOPC_STATUS_NOT_SUPPORTED == status)
         {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "String PubId not supported message hasn't been decode");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "String PubId not supported. Message hasn't been decoded.");
         }
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType);
     }
