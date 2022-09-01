@@ -162,12 +162,13 @@ OPERATIONS
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN
-        CHOICE
-            bres := FALSE
-        OR
-            bres := TRUE ||
-            a_notification_queue_notifications := a_notification_queue_notifications \/ {p_queue |-> p_writeValuePointer}
-        END
+        bres,
+        a_notification_queue_notifications
+        :(bres : BOOL &
+            a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            (bres = TRUE => p_queue |-> p_writeValuePointer : a_notification_queue_notifications) & /* Due to discard, previous content may have been modified */
+            (bres = FALSE => a_notification_queue_notifications = a_notification_queue_notifications$0)
+        )
     END
     ;
 

@@ -321,6 +321,7 @@ CONCRETE_CONSTANTS
     k_n_BrowsePathResPerPath_max, /* max result per path in service response */
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
+    k_n_notifQueueSize_max,
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
@@ -600,6 +601,8 @@ PROPERTIES
     k_n_BrowsePathResPerPath_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
+    k_n_notifQueueSize_max : NAT &
+    k_n_notifQueueSize_max > 0 &
     k_n_publishRequestPerSub_max : NAT &
     k_n_publishRequestPerSub_max > 0 &
     k_n_republishNotifPerSub_max : NAT &

@@ -677,6 +677,7 @@ OPERATIONS
         l_monitMode,
         l_clientHandle,
         l_samplingItv,
+        l_discardOldest,
         l_queueSize,
         l_node,
         l_sc,
@@ -700,7 +701,7 @@ OPERATIONS
             l_revQueueSize := 0;
             l_indexRange := c_IndexRange_indet;
             l_continue, l_index <-- continue_iter_monitored_item_request;
-            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_queueSize, l_indexRange
+            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_discardOldest, l_queueSize, l_indexRange
               <-- getall_create_monitored_item_req_params(p_req_msg, l_index);
             /* Check validity of NodeId */
             IF l_bres = TRUE
@@ -737,6 +738,7 @@ OPERATIONS
                     END;
                     IF l_sc = e_sc_ok
                     THEN
+                        l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
                         l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
                                                                                                    l_nid,
                                                                                                    l_aid,
@@ -747,8 +749,9 @@ OPERATIONS
                                                                                                    l_val_ts_srv,
                                                                                                    p_tsToReturn,
                                                                                                    l_monitMode,
-                                                                                                   l_clientHandle);
-                        l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
+                                                                                                   l_clientHandle,
+                                                                                                   l_discardOldest,
+                                                                                                   l_revQueueSize);
                         read_AddressSpace_free_variant(l_value)
                     END
                 END

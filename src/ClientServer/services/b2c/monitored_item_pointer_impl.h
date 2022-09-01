@@ -35,6 +35,8 @@ typedef struct SOPC_InternalMontitoredItem
     constants__t_client_handle_i clientHandle;
     SOPC_NumericRange* indexRange;
 
+    bool discardOldest;
+    int32_t queueSize;
     SOPC_SLinkedList* notifQueue;
 } SOPC_InternalMontitoredItem;
 

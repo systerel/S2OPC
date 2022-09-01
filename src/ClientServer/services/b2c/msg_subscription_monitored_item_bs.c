@@ -117,6 +117,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
     constants__t_monitoringMode_i* const msg_subscription_monitored_item_bs__p_monitMode,
     constants__t_client_handle_i* const msg_subscription_monitored_item_bs__p_clientHandle,
     constants__t_opcua_duration_i* const msg_subscription_monitored_item_bs__p_samplingItv,
+    t_bool* const msg_subscription_monitored_item_bs__p_discardOldest,
     t_entier4* const msg_subscription_monitored_item_bs__p_queueSize,
     constants__t_IndexRange_i* const msg_subscription_monitored_item_bs__p_indexRange)
 {
@@ -173,6 +174,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
     {
         *msg_subscription_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
         *msg_subscription_monitored_item_bs__p_samplingItv = monitReq->RequestedParameters.SamplingInterval;
+        *msg_subscription_monitored_item_bs__p_discardOldest = monitReq->RequestedParameters.DiscardOldest;
 
         if (monitReq->RequestedParameters.QueueSize <= INT32_MAX)
         {

@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 26/08/2022 15:23:18
+ Date                 : 01/09/2022 16:36:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -135,6 +135,8 @@ extern void subscription_core__create_monitored_item(
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const t_bool subscription_core__p_discardOldest,
+   const t_entier4 subscription_core__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
    constants__t_monitoredItemId_i * const subscription_core__monitoredItemId);

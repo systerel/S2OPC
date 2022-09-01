@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 01/09/2022 09:12:50
+ Date                 : 02/09/2022 10:24:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -742,7 +742,15 @@ void subscription_core__compute_create_monitored_item_revised_params(
    constants__t_opcua_duration_i * const subscription_core__revisedSamplingItv,
    t_entier4 * const subscription_core__revisedQueueSize) {
    *subscription_core__revisedSamplingItv = constants__c_opcua_duration_zero;
-   *subscription_core__revisedQueueSize = subscription_core__p_reqQueueSize;
+   if (subscription_core__p_reqQueueSize <= 1) {
+      *subscription_core__revisedQueueSize = 1;
+   }
+   else if (subscription_core__p_reqQueueSize > constants__k_n_notifQueueSize_max) {
+      *subscription_core__revisedQueueSize = constants__k_n_notifQueueSize_max;
+   }
+   else {
+      *subscription_core__revisedQueueSize = subscription_core__p_reqQueueSize;
+   }
 }
 
 void subscription_core__create_monitored_item(
@@ -757,6 +765,8 @@ void subscription_core__create_monitored_item(
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const t_bool subscription_core__p_discardOldest,
+   const t_entier4 subscription_core__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
    constants__t_monitoredItemId_i * const subscription_core__monitoredItemId) {
@@ -775,6 +785,8 @@ void subscription_core__create_monitored_item(
          subscription_core__p_timestampToReturn,
          subscription_core__p_monitoringMode,
          subscription_core__p_clientHandle,
+         subscription_core__p_discardOldest,
+         subscription_core__p_queueSize,
          subscription_core__StatusCode_service,
          subscription_core__monitoredItemPointer,
          subscription_core__monitoredItemId);

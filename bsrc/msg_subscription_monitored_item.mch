@@ -127,9 +127,9 @@ OPERATIONS
     END
     ;
 
-    /* Filters and DiscardOldest not extracted => not managed */
-    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_queueSize, p_indexRange
-    <-- getall_create_monitored_item_req_params (p_req_msg, p_index) =
+    /* Filters not extracted => not managed */
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize, p_indexRange
+      <-- getall_create_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -140,7 +140,7 @@ OPERATIONS
         p_index > 0 &
         p_index <= nb_monitored_items
     THEN
-        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_discardOldest, p_queueSize
         :(p_bres : BOOL &
           p_sc : t_StatusCode_i & p_sc : t_StatusCode &
           p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid,
@@ -151,6 +151,7 @@ OPERATIONS
           p_monitMode : t_monitoringMode_i &
           p_clientHandle : t_client_handle_i &
           p_samplingItv : t_opcua_duration_i &
+          p_discardOldest : BOOL &
           p_queueSize : t_counter &
           p_indexRange : t_IndexRange_i &
           (p_bres = TRUE =>

@@ -108,6 +108,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
+    const t_bool monitored_item_pointer_bs__p_discardOldest,
+    const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
     constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__monitoredItemPointer,
     constants__t_monitoredItemId_i* const monitored_item_pointer_bs__monitoredItemId)
@@ -162,6 +164,8 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
+        monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
+        monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
         if (0 == SOPC_SLinkedList_GetLength(monitoredItemIdFreed))
         {

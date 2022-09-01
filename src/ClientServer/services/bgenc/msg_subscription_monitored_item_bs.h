@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_monitored_item_bs.h
 
- Date                 : 26/08/2022 11:46:20
+ Date                 : 01/09/2022 16:36:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -82,6 +82,7 @@ extern void msg_subscription_monitored_item_bs__getall_create_monitored_item_req
    constants__t_monitoringMode_i * const msg_subscription_monitored_item_bs__p_monitMode,
    constants__t_client_handle_i * const msg_subscription_monitored_item_bs__p_clientHandle,
    constants__t_opcua_duration_i * const msg_subscription_monitored_item_bs__p_samplingItv,
+   t_bool * const msg_subscription_monitored_item_bs__p_discardOldest,
    t_entier4 * const msg_subscription_monitored_item_bs__p_queueSize,
    constants__t_IndexRange_i * const msg_subscription_monitored_item_bs__p_indexRange);
 extern void msg_subscription_monitored_item_bs__getall_delete_monitored_item_req_params(

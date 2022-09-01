@@ -874,7 +874,15 @@ OPERATIONS
     revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_reqQueueSize) =
     BEGIN
         revisedSamplingItv := c_opcua_duration_zero;
-        revisedQueueSize := p_reqQueueSize
+        IF p_reqQueueSize <= 1 THEN
+            /* 0 or 1 the Server returns the default queue size which shall be 1 */
+            revisedQueueSize := 1
+        ELSIF p_reqQueueSize > k_n_notifQueueSize_max
+        THEN
+            revisedQueueSize := k_n_notifQueueSize_max
+        ELSE
+            revisedQueueSize := p_reqQueueSize
+        END
     END
     ;
 
@@ -888,7 +896,9 @@ OPERATIONS
                                                                                          p_val_ts_srv,
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
-                                                                                         p_clientHandle) =
+                                                                                         p_clientHandle,
+                                                                                         p_discardOldest,
+                                                                                         p_queueSize) =
     VAR
         l_bres,
         l_sub_monitIt_queue,
@@ -905,7 +915,9 @@ OPERATIONS
                                             p_indexRange,
                                             p_timestampToReturn,
                                             p_monitoringMode,
-                                            p_clientHandle);
+                                            p_clientHandle,
+                                            p_discardOldest,
+                                            p_queueSize);
         IF StatusCode_service = e_sc_ok
         THEN
             l_bres, l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
@@ -1286,7 +1298,6 @@ OPERATIONS
             /* Note: indexRange filtering on value done in C implementation */
             l_bres <-- add_monitored_item_notification_to_queue
             (p_monitoredItemPointer, l_notif_queue, p_timestampToReturn, p_writeValuePointer)
-            /* TODO: manage l_bres == FALSE*/
         END
 
     END

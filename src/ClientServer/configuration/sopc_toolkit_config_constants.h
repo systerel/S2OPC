@@ -182,6 +182,11 @@
 #define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
 #endif
 
+/** @brief Maximum size of a MonitoredItem notification queue */
+#ifndef SOPC_MAX_NOTIFICATION_QUEUE_SIZE
+#define SOPC_MAX_NOTIFICATION_QUEUE_SIZE 1000
+#endif
+
 /* TRANSLATE BROWSE PATH MANAGEMENT */
 
 /** @brief Maximum number of matches to return for a given relative path

@@ -468,3 +468,9 @@ uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list)
     assert(NULL != list);
     return list->length;
 }
+
+uint32_t SOPC_SLinkedList_GetCapacity(SOPC_SLinkedList* list)
+{
+    assert(NULL != list);
+    return list->maxLength;
+}

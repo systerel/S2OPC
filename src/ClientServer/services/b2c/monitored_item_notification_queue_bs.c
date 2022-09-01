@@ -20,8 +20,6 @@
 #include <assert.h>
 
 #include "monitored_item_notification_queue_bs.h"
-#include "sopc_macros.h"
-#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause
@@ -29,6 +27,9 @@
 #include "constants.h"
 
 #include "monitored_item_pointer_impl.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
 typedef struct SOPC_InternalNotificationElement
@@ -52,7 +53,8 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create(0);
+    assert(monitoredItemPointer->queueSize > 0);
+    monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create((size_t) monitoredItemPointer->queueSize);
     if (NULL == monitoredItemPointer->notifQueue)
     {
         *monitored_item_notification_queue_bs__bres = false;
@@ -105,28 +107,66 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
         retStatus = SOPC_NodeId_Copy(&notifElt->value->NodeId, monitored_item_notification_queue_bs__p_nid);
     }
 
-    if (SOPC_STATUS_OK != retStatus)
+    if (SOPC_STATUS_OK == retStatus)
     {
-        return retStatus;
+        notifElt->value->AttributeId = attributeId;
+        notifElt->value->Value.Status = valueStatus;
+        notifElt->value->Value.SourceTimestamp = monitored_item_notification_queue_bs__p_val_ts_src.timestamp;
+        notifElt->value->Value.SourcePicoSeconds = monitored_item_notification_queue_bs__p_val_ts_src.picoSeconds;
+        notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
+        notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
+
+        checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+        if (checkAdded != notifElt)
+        {
+            /* Discard a notification to add the new one */
+            if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) ==
+                SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue))
+            {
+                SOPC_InternalNotificationElement* discardedNotifElt = NULL;
+                if (notifElt->monitoredItemPointer->discardOldest)
+                {
+                    discardedNotifElt = SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
+                }
+                else
+                {
+                    discardedNotifElt = SOPC_SLinkedList_PopLast(monitored_item_notification_queue_bs__p_queue);
+                }
+                assert(NULL != discardedNotifElt);
+                OpcUa_WriteValue_Clear(discardedNotifElt->value);
+                SOPC_Free(discardedNotifElt->value);
+                SOPC_Free(discardedNotifElt);
+
+                checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+                if (checkAdded != notifElt)
+                {
+                    retStatus = SOPC_STATUS_NOK;
+                }
+                else if (SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue) != 1)
+                {
+                    /* Set the overflow bit in DataValue status code in value replacing discarded one */
+                    if (notifElt->monitoredItemPointer->discardOldest)
+                    {
+                        /* New oldest notification DataValue status code should have bit set */
+                        notifElt = SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
+                        assert(NULL != notifElt);
+                        checkAdded =
+                            SOPC_SLinkedList_Prepend(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+                        assert(checkAdded == notifElt);
+                    } // else: the newly added notification should have bit set (already referenced by pointer)
+
+                    /* The next notification of the one discarded should have overflow bit set */
+                    notifElt->value->Value.Status |= SOPC_DataValueOverflowStatusMask;
+                }
+            }
+            else
+            {
+                retStatus = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
     }
 
-    notifElt->value->AttributeId = attributeId;
-    notifElt->value->Value.Status = valueStatus;
-    notifElt->value->Value.SourceTimestamp = monitored_item_notification_queue_bs__p_val_ts_src.timestamp;
-    notifElt->value->Value.SourcePicoSeconds = monitored_item_notification_queue_bs__p_val_ts_src.picoSeconds;
-    notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
-    notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
-
-    checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue,
-                                         notifElt->monitoredItemPointer->monitoredItemId, notifElt);
-    if (checkAdded == notifElt)
-    {
-        return SOPC_STATUS_OK;
-    }
-    else
-    {
-        return SOPC_STATUS_NOK;
-    }
+    return retStatus;
 }
 
 void monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(
@@ -214,75 +254,66 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     assert(monitored_item_notification_queue_bs__p_queue ==
            ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
     *monitored_item_notification_queue_bs__bres = false;
-    if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) >=
-        INT32_MAX) // number of notifications returned in B model as a int32
-    {
-        return;
-    }
 
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OUT_OF_MEMORY;
     SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
     OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
 
-    if (NULL == notifElt || NULL == pNewWriteValue)
+    if (NULL != notifElt && NULL != pNewWriteValue)
     {
-        SOPC_Free(notifElt);
-        SOPC_Free(pNewWriteValue);
-        return;
-    }
+        OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
+        notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
+        notifElt->value = pNewWriteValue;
 
-    OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
-    notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
-    notifElt->value = pNewWriteValue;
-
-    /* IMPORTANT NOTE: indexRange filtering on value shall be done here ! */
-    SOPC_NumericRange* indexRange =
-        ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->indexRange;
-    if (NULL != indexRange)
-    {
-        retStatus = constants_statuscodes_bs__e_sc_ok ==
-                    util_read_value_indexed_helper(
-                        &pNewWriteValue->Value.Value,
-                        &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value, indexRange);
-    }
-    else
-    {
-        retStatus = SOPC_Variant_Copy(&pNewWriteValue->Value.Value,
-                                      &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value);
-    }
-
-    if (retStatus == SOPC_STATUS_OK)
-    {
-        SOPC_Value_Timestamp srcTs =
-            (SOPC_Value_Timestamp){monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourceTimestamp,
-                                   monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourcePicoSeconds};
-        SOPC_Value_Timestamp srvTs =
-            (SOPC_Value_Timestamp){monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerTimestamp,
-                                   monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerPicoSeconds};
-
-        switch (monitored_item_notification_queue_bs__p_timestampToReturn)
+        /* IMPORTANT NOTE: indexRange filtering on value shall be done here ! */
+        SOPC_NumericRange* indexRange =
+            ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->indexRange;
+        if (NULL != indexRange)
         {
-        case constants__e_ttr_source:
-            srvTs = constants__c_Timestamp_null;
-            break;
-        case constants__e_ttr_server:
-            srcTs = constants__c_Timestamp_null;
-            break;
-        case constants__e_ttr_neither:
-            srcTs = constants__c_Timestamp_null;
-            srvTs = constants__c_Timestamp_null;
-            break;
-        default:
-            // Keep both in other cases
-            break;
+            retStatus = constants_statuscodes_bs__e_sc_ok ==
+                        util_read_value_indexed_helper(
+                            &pNewWriteValue->Value.Value,
+                            &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value, indexRange);
+        }
+        else
+        {
+            retStatus = SOPC_Variant_Copy(&pNewWriteValue->Value.Value,
+                                          &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value);
         }
 
-        retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
-            monitored_item_notification_queue_bs__p_queue, notifElt,
-            &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange,
-            monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status, srcTs, srvTs,
-            &monitored_item_notification_queue_bs__p_writeValuePointer->NodeId,
-            monitored_item_notification_queue_bs__p_writeValuePointer->AttributeId);
+        if (retStatus == SOPC_STATUS_OK)
+        {
+            SOPC_Value_Timestamp srcTs = (SOPC_Value_Timestamp){
+                monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourceTimestamp,
+                monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourcePicoSeconds};
+            SOPC_Value_Timestamp srvTs = (SOPC_Value_Timestamp){
+                monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerTimestamp,
+                monitored_item_notification_queue_bs__p_writeValuePointer->Value.ServerPicoSeconds};
+
+            switch (monitored_item_notification_queue_bs__p_timestampToReturn)
+            {
+            case constants__e_ttr_source:
+                srvTs = constants__c_Timestamp_null;
+                break;
+            case constants__e_ttr_server:
+                srcTs = constants__c_Timestamp_null;
+                break;
+            case constants__e_ttr_neither:
+                srcTs = constants__c_Timestamp_null;
+                srvTs = constants__c_Timestamp_null;
+                break;
+            default:
+                // Keep both in other cases
+                break;
+            }
+
+            retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
+                monitored_item_notification_queue_bs__p_queue, notifElt,
+                &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange,
+                monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status, srcTs, srvTs,
+                &monitored_item_notification_queue_bs__p_writeValuePointer->NodeId,
+                monitored_item_notification_queue_bs__p_writeValuePointer->AttributeId);
+        }
     }
 
     if (SOPC_STATUS_OK == retStatus)
@@ -294,6 +325,12 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
         SOPC_Free(notifElt);
         OpcUa_WriteValue_Clear(pNewWriteValue);
         SOPC_Free(pNewWriteValue);
+
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "Services: add_monitored_item_notification_to_queue out of memory for adding a notification for MI id="
+            "%" PRIu32,
+            ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->monitoredItemId);
     }
 }
 

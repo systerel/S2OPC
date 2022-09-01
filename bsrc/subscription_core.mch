@@ -826,7 +826,9 @@ OPERATIONS
                                                                                          p_val_ts_srv,
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
-                                                                                         p_clientHandle) =
+                                                                                         p_clientHandle,
+                                                                                         p_discardOldest,
+                                                                                         p_queueSize) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
@@ -843,7 +845,9 @@ OPERATIONS
         p_timestampToReturn : t_TimestampsToReturn &
         p_monitoringMode : t_monitoringMode_i &
         p_monitoringMode : t_monitoringMode &
-        p_clientHandle : t_client_handle_i
+        p_clientHandle : t_client_handle_i &
+        p_discardOldest : BOOL &
+        p_queueSize : t_counter
     THEN
         IF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
@@ -1153,10 +1157,8 @@ OPERATIONS
         p_writeValuePointer : t_WriteValuePointer_i &
         p_writeValuePointer : t_WriteValuePointer
     THEN
-        /* a notification is enqueued with current value of monitored item */
-        a_notification_queue_notifications :=
-        a_notification_queue_notifications \/
-        {a_monitored_item_notification_queue(p_monitoredItemPointer) |-> p_writeValuePointer}
+        /* Note: we cannot be more precise, in case of memory issue it might be unchanged */
+        a_notification_queue_notifications :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer)
     END
     ;
 

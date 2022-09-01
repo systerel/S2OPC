@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 24/08/2022 07:50:31
+ Date                 : 01/09/2022 16:35:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -473,6 +473,7 @@ typedef enum {
 #define constants__k_n_monitoredItemNotif_max constants_bs__k_n_monitoredItemNotif_max
 #define constants__k_n_monitoredItem_max constants_bs__k_n_monitoredItem_max
 #define constants__k_n_nodesToAdd_max constants_bs__k_n_nodesToAdd_max
+#define constants__k_n_notifQueueSize_max constants_bs__k_n_notifQueueSize_max
 #define constants__k_n_publishRequestPerSub_max constants_bs__k_n_publishRequestPerSub_max
 #define constants__k_n_read_resp_max constants_bs__k_n_read_resp_max
 #define constants__k_n_registerNodes_max constants_bs__k_n_registerNodes_max

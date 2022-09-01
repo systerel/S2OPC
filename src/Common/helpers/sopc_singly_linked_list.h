@@ -213,12 +213,21 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
 void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId);
 
 /**
- * \brief           Get then number of elements in the linked list
+ * \brief           Get the number of elements in the linked list
  *
  * \param list      Pointer to the list
  *
  * \return          The number of elements in the list
  */
 uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list);
+
+/**
+ * \brief           Get the maximum number of elements that can be contained in the linked list
+ *
+ * \param list      Pointer to the list
+ *
+ * \return          The capacity of the list
+ */
+uint32_t SOPC_SLinkedList_GetCapacity(SOPC_SLinkedList* list);
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */

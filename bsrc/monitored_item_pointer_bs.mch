@@ -62,7 +62,9 @@ OPERATIONS
                                                                                          p_indexRange,
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
-                                                                                         p_clientHandle) =
+                                                                                         p_clientHandle,
+                                                                                         p_discardOldest,
+                                                                                         p_queueSize) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription &
@@ -75,7 +77,9 @@ OPERATIONS
         p_timestampToReturn : t_TimestampsToReturn &
         p_monitoringMode : t_monitoringMode_i &
         p_monitoringMode : t_monitoringMode &
-        p_clientHandle : t_client_handle_i
+        p_clientHandle : t_client_handle_i &
+        p_discardOldest : BOOL &
+        p_queueSize : t_counter
     THEN
         IF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
