@@ -1184,7 +1184,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     assert(SOPC_STATUS_OK == mutStatus);
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, char** localeIds)
+SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     assert(NULL != pConfig);

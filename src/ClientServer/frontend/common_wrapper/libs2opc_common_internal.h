@@ -80,6 +80,6 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverC
  *
  *  \return A new NULL terminated C string array containing a copy of C strings from the source array.
  */
-char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, char** src);
+char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, const char** src);
 
 #endif

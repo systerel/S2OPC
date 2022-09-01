@@ -778,7 +778,7 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
  *
  * \warning It shall not be called once a connection is established
  */
-SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, char** localeIds);
+SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
  * \brief Define client application description

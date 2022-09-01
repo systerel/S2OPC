@@ -251,7 +251,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
  *
  * \warning It shall not be called once a connection is established
  */
-SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, char** localeIds);
+SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
  * \brief Define client application description

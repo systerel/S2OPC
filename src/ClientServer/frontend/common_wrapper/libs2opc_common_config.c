@@ -196,7 +196,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverC
     return SOPC_STATUS_OK;
 }
 
-char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, char** src)
+char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, const char** src)
 {
     // Array length + NULL terminator
     char** sArray = SOPC_Calloc(nbElts + 1, sizeof(char*));

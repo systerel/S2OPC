@@ -100,7 +100,7 @@ static int32_t client_create_configuration(void)
         return res;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (char*[]){"fr-FR", "en-US"});
+    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
 
     if (SOPC_STATUS_OK == status)
     {
@@ -316,7 +316,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         // Set namespaces
-        char* namespaces[] = {DEFAULT_APPLICATION_URI};
+        const char* namespaces[] = {DEFAULT_APPLICATION_URI};
         status = SOPC_HelperConfigServer_SetNamespaces(1, namespaces);
 
         if (SOPC_STATUS_OK != status)

@@ -2388,7 +2388,7 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
     }
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, char** localeIds)
+SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     return SOPC_ClientCommon_SetLocaleIds(nbLocales, localeIds);
 }

@@ -32,7 +32,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     assert(NULL != pConfig);
@@ -55,7 +55,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     assert(NULL != pConfig);

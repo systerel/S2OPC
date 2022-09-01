@@ -49,7 +49,7 @@
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, namesapces already defined, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, char** namespaces);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces);
 
 /**
  * \brief Define server locales ids supported from an array of locale strings.
@@ -65,7 +65,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, cha
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, localesIds already defined, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, char** localeIds);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
  * \brief Define server application description

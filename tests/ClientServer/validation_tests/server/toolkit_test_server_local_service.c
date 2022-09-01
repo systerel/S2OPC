@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         // Set namespaces
-        char* namespaces[] = {DEFAULT_APPLICATION_URI};
+        const char* namespaces[] = {DEFAULT_APPLICATION_URI};
         status = SOPC_HelperConfigServer_SetNamespaces(1, namespaces);
 
         if (SOPC_STATUS_OK != status)
