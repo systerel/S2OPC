@@ -259,12 +259,12 @@ build-rpi:
 build-linux64-coverity:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:2772b9557756c77517217bef69386b4415b6c6a5cf443f42050f08e9ab5c1529 # digest of coverity:1.6
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:d4d0960bce81fc665efff13d04b3246920111a9c63f30b5fa267482a2096c807 # digest of coverity:1.7
   script: |-
     mkdir build
     cd build
     cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_NANO_EXTENDED=1 -DSOPC_HAS_NODE_MANAGEMENT_SERVICES=1 ..
-    /opt/cov-analysis-linux64-2021.12.1/bin/cov-build --dir cov-int make
+    /opt/cov-analysis-linux64-2022.6.0/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
   rules:
