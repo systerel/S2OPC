@@ -785,6 +785,21 @@ static char* get_crt_sha1(const mbedtls_x509_crt* crt)
     return get_raw_sha1(&crt->raw);
 }
 
+char* KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert)
+{
+    char* sha_1_cert = NULL;
+
+    if (NULL == pCert)
+    {
+        return sha_1_cert;
+    }
+
+    mbedtls_x509_crt* crt = &pCert->crt;
+
+    sha_1_cert = get_crt_sha1(crt);
+    return sha_1_cert;
+}
+
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch)
