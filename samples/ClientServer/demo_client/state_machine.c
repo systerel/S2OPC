@@ -148,6 +148,7 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
@@ -163,12 +164,12 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
     SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
     if (activation_parameters.anonymous)
     {
-        SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, SESSION_NAME,
-                                                          (uintptr_t) pSM->pCtxSession, activation_parameters.policyId);
+        status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
+            endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId);
     }
     else
     {
-        SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
+        status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
             endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
             activation_parameters.username, activation_parameters.password, activation_parameters.length);
     }
@@ -177,7 +178,7 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
     mutStatus = Mutex_Unlock(&pSM->mutex);
     assert(SOPC_STATUS_OK == mutStatus);
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus StateMachine_StartSession_Anonymous(StateMachine_Machine* pSM, const char* policyId)
