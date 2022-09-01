@@ -798,9 +798,9 @@ OPERATIONS
                         THEN
                             /* In case there is an issue with the session, it overwrites the possible service issue */
                             l_ret := l_ret2
-                            ELSIF l_session_channel /= channel
-                            THEN
-                                l_ret := e_sc_bad_unexpected_error
+                        ELSIF l_session_channel /= channel
+                        THEN
+                            l_ret := e_sc_bad_unexpected_error
                         END
                     END;
                     /* request message not necessary anymore */
