@@ -61,6 +61,11 @@ bool SOPC_IsGoodStatus(SOPC_StatusCode status);
 #define SOPC_BadStatusMask 0x80000000
 
 /**
+ * \brief Mask to check status contains the DataValue overflow bit set (InfoType DataValue bit + Overflow bit)
+ */
+#define SOPC_DataValueOverflowStatusMask 0x00000480
+
+/**
  * \brief Enumerated for all possible OPC UA attribute ids
  */
 typedef enum
