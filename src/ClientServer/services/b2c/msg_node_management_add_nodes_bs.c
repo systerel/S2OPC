@@ -41,8 +41,7 @@ void msg_node_management_add_nodes_bs__alloc_msg_add_nodes_resp_results(
     OpcUa_AddNodesResponse* addNodesResp = (OpcUa_AddNodesResponse*) msg_node_management_add_nodes_bs__p_resp_msg;
     if (msg_node_management_add_nodes_bs__p_nb_results > 0)
     {
-        if (SIZE_MAX / (uint32_t) msg_node_management_add_nodes_bs__p_nb_results >
-            sizeof(OpcUa_MonitoredItemCreateResult))
+        if (SIZE_MAX / (uint32_t) msg_node_management_add_nodes_bs__p_nb_results > sizeof(*addNodesResp->Results))
         {
             addNodesResp->NoOfResults = msg_node_management_add_nodes_bs__p_nb_results;
             addNodesResp->Results =
