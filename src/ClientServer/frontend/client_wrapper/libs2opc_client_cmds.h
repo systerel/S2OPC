@@ -754,7 +754,8 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
 
 /**
  @brief
-    Call a method
+    Call a generic OPC UA service using OPC UA request/response types.
+    Note: request builder module functions might be used (see example below in \p requestMsg documentation).
 
  @param connectionId      The connection id. It shall be > 0
  @param requestMsg        A pointer to a request message of type OpcUa_*_Request (e.g.: ::OpcUa_AddNodesRequest),

@@ -2426,13 +2426,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* r
     SOPC_ClientHelper_GenReqCtx* genReqCtx = NULL;
 
     /* Initialize generic request context */
-    if (SOPC_STATUS_OK == status)
+    genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(responseMsg, true);
+    if (NULL == genReqCtx)
     {
-        genReqCtx = SOPC_ClientHelper_GenReqCtx_Create(responseMsg, true);
-        if (NULL == genReqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     /* wait for the request result */

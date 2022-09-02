@@ -74,7 +74,7 @@ static const uint32_t sleepTimeout = 500;
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
-SOPC_AddressSpace* addressSpace = NULL;
+static SOPC_AddressSpace* addressSpace = NULL;
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -322,7 +322,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
             status = SOPC_STATUS_NOK;
         }
 
-        SOPC_ReturnStatus delStatus = status = SOPC_Encodeable_Delete(&OpcUa_AddNodesResponse_EncodeableType, (void**) &addNodesResp);
+        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesResponse_EncodeableType, (void**) &addNodesResp);
         assert(SOPC_STATUS_OK == delStatus);
     }
     else
