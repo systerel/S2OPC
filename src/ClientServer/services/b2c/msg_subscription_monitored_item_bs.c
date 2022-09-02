@@ -225,11 +225,10 @@ void msg_subscription_monitored_item_bs__alloc_msg_delete_monitored_items_resp_r
     *msg_subscription_monitored_item_bs__bres = false;
     OpcUa_DeleteMonitoredItemsResponse* deleteResp =
         (OpcUa_DeleteMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
-    if (SIZE_MAX / (uint32_t) msg_subscription_monitored_item_bs__p_nb_results >
-        sizeof(OpcUa_MonitoredItemCreateResult))
+    if (SIZE_MAX / (uint32_t) msg_subscription_monitored_item_bs__p_nb_results > sizeof(*deleteResp->Results))
     {
         deleteResp->Results =
-            SOPC_Calloc((size_t) msg_subscription_monitored_item_bs__p_nb_results, sizeof(SOPC_StatusCode));
+            SOPC_Calloc((size_t) msg_subscription_monitored_item_bs__p_nb_results, sizeof(*deleteResp->Results));
         if (NULL != deleteResp->Results)
         {
             deleteResp->NoOfResults = msg_subscription_monitored_item_bs__p_nb_results;

@@ -896,7 +896,6 @@ OPERATIONS
             l_clientHandle <-- getall_monitoredItemPointer (l_monitoredItemPointer);
             l_subscription_queue <-- get_subscription_monitoredItemQueue (p_subscription);
             l_bres <-- remove_monitored_item (l_subscription_queue, l_monitoredItemPointer);
-            /* Note: the link between a nodeId and a MonitoredItem is indirect and not represented in B model */
             l_bres, l_monitored_item_queue <-- get_nodeToMonitoredItemQueue (l_nid);
             IF l_bres = TRUE
             THEN

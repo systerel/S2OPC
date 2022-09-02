@@ -380,14 +380,14 @@ LOCAL_OPERATIONS
         p_nb_monitored_items = nb_monitored_items
     THEN
         LET l_delMonitoredItemResp_StatusCode BE
-            /* Evaluate the expected valid responses for which a monitored item should be allocated (e_sc_ok case) */
+            /* Evaluate the expected valid responses for which a monitored item should be deallocated (e_sc_ok case) */
             l_delMonitoredItemResp_StatusCode =
             %mi_index.(mi_index : t_monitoredItemReqIndex &
                 mi_index : 1..nb_monitored_items &
                 mi_index : dom(DelMonitoredItemReq_Id)
                 |
                 {TRUE |-> e_sc_bad_monitored_item_id_invalid,
-                    FALSE |-> e_sc_ok
+                 FALSE |-> e_sc_ok
                 }(bool(DelMonitoredItemReq_Id(mi_index) /: s_monitoredItemId))
             )
         IN
