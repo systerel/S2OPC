@@ -290,6 +290,47 @@
      <TestCase name="005.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Monitor MinQueueSize_02">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
+     <TestCase name="007.js"/>
+     <TestCase name="008.js"/>
+     <TestCase name="009.js"/>
+     <TestCase name="010.js"/>
+     <TestCase name="011.js"/>
+     <TestCase name="012.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor MinQueueSize_05">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
+     <TestCase name="007.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor MinQueueSize_10">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor QueueSize_ServerMax">
+    <TestCases>
+     <TestCase name="manual.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Monitor Value Change">
     <TestCases>
      <TestCase name="001.js"/>
@@ -622,6 +663,7 @@
     <TestCases>
      <TestCase name="001.js"/>
      <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
      <TestCase name="004.js"/>
      <TestCase name="005.js"/>
      <TestCase name="Err-001.js"/>
