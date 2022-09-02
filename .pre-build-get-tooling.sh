@@ -38,7 +38,7 @@ if [[ -z "$TOOLING_DIR" ]]; then
     ssh pcb git --git-dir /git/c838/tooling.git archive master bin | tar x
 else
     echo "Environment variable TOOLING_DIR set to '$TOOLING_DIR' => copy of repository"
-    git --git-dir "$TOOLING_DIR"/.git archive master bin | tar x
+    git --git-dir "$TOOLING_DIR"/.git archive master bin bconf | tar x
 fi
 cd - > /dev/null
 
