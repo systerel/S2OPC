@@ -28,7 +28,7 @@ set -e
 TMP_TOOLING_DIR=$1
 
 # Create dir to store tooling directory for generation
-\rm -rf $PREBUILD
+\rm -rf "$TMP_TOOLING_DIR"
 mkdir -p "$TMP_TOOLING_DIR" > /dev/null
 cd "$TMP_TOOLING_DIR" > /dev/null
 
