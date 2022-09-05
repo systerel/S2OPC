@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_monitored_item.h
 
- Date                 : 26/08/2022 11:45:48
+ Date                 : 06/09/2022 09:31:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,10 +63,13 @@ extern void msg_subscription_monitored_item__INITIALISATION(void);
   -------------------------------*/
 #define msg_subscription_monitored_item__alloc_msg_create_monitored_items_resp_results msg_subscription_monitored_item_bs__alloc_msg_create_monitored_items_resp_results
 #define msg_subscription_monitored_item__alloc_msg_delete_monitored_items_resp_results msg_subscription_monitored_item_bs__alloc_msg_delete_monitored_items_resp_results
+#define msg_subscription_monitored_item__alloc_msg_modify_monitored_items_resp_results msg_subscription_monitored_item_bs__alloc_msg_modify_monitored_items_resp_results
 #define msg_subscription_monitored_item__getall_create_monitored_item_req_params msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
 #define msg_subscription_monitored_item__getall_delete_monitored_item_req_params msg_subscription_monitored_item_bs__getall_delete_monitored_item_req_params
+#define msg_subscription_monitored_item__getall_modify_monitored_item_req_params msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
 #define msg_subscription_monitored_item__setall_msg_create_monitored_item_resp_params msg_subscription_monitored_item_bs__setall_msg_create_monitored_item_resp_params
 #define msg_subscription_monitored_item__setall_msg_delete_monitored_item_resp_params msg_subscription_monitored_item_bs__setall_msg_delete_monitored_item_resp_params
+#define msg_subscription_monitored_item__setall_msg_modify_monitored_item_resp_params msg_subscription_monitored_item_bs__setall_msg_modify_monitored_item_resp_params
 
 /*--------------------
    OPERATIONS Clause
@@ -81,6 +84,12 @@ extern void msg_subscription_monitored_item__getall_msg_delete_monitored_items_r
    const constants__t_msg_i msg_subscription_monitored_item__p_req_msg,
    constants_statuscodes_bs__t_StatusCode_i * const msg_subscription_monitored_item__p_sc,
    constants__t_subscription_i * const msg_subscription_monitored_item__p_subscription,
+   t_entier4 * const msg_subscription_monitored_item__p_nb_monitored_items);
+extern void msg_subscription_monitored_item__getall_msg_modify_monitored_items_req_params(
+   const constants__t_msg_i msg_subscription_monitored_item__p_req_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_subscription_monitored_item__p_sc,
+   constants__t_subscription_i * const msg_subscription_monitored_item__p_subscription,
+   constants__t_TimestampsToReturn_i * const msg_subscription_monitored_item__p_timestampToRet,
    t_entier4 * const msg_subscription_monitored_item__p_nb_monitored_items);
 
 #endif

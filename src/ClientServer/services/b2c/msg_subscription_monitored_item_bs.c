@@ -218,6 +218,133 @@ void msg_subscription_monitored_item_bs__setall_msg_create_monitored_item_resp_p
     monitResp->RevisedQueueSize = (uint32_t) msg_subscription_monitored_item_bs__p_revQueueSize;
 }
 
+void msg_subscription_monitored_item_bs__alloc_msg_modify_monitored_items_resp_results(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_nb_results,
+    t_bool* const msg_subscription_monitored_item_bs__bres)
+{
+    *msg_subscription_monitored_item_bs__bres = false;
+    OpcUa_ModifyMonitoredItemsResponse* modifyResp =
+        (OpcUa_ModifyMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
+    if (msg_subscription_monitored_item_bs__p_nb_results > 0)
+    {
+        if (SIZE_MAX / (uint32_t) msg_subscription_monitored_item_bs__p_nb_results > sizeof(*modifyResp->Results))
+        {
+            modifyResp->NoOfResults = msg_subscription_monitored_item_bs__p_nb_results;
+            modifyResp->Results =
+                SOPC_Calloc((size_t) msg_subscription_monitored_item_bs__p_nb_results, sizeof(*modifyResp->Results));
+            if (NULL != modifyResp->Results)
+            {
+                for (int32_t i = 0; i < modifyResp->NoOfResults; i++)
+                {
+                    OpcUa_MonitoredItemModifyResult_Initialize(&modifyResp->Results[i]);
+                }
+                *msg_subscription_monitored_item_bs__bres = true;
+            }
+        }
+    }
+    else
+    {
+        modifyResp->NoOfResults = 0;
+        *msg_subscription_monitored_item_bs__bres = true;
+    }
+}
+
+void msg_subscription_monitored_item_bs__get_msg_modify_monitored_items_req_nb_monitored_items(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    t_entier4* const msg_subscription_monitored_item_bs__p_nb_monitored_items)
+{
+    OpcUa_ModifyMonitoredItemsRequest* modifyReq =
+        (OpcUa_ModifyMonitoredItemsRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    *msg_subscription_monitored_item_bs__p_nb_monitored_items = modifyReq->NoOfItemsToModify;
+}
+
+void msg_subscription_monitored_item_bs__get_msg_modify_monitored_items_req_subscription(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    constants__t_subscription_i* const msg_subscription_monitored_item_bs__p_subscription)
+{
+    OpcUa_ModifyMonitoredItemsRequest* modifyReq =
+        (OpcUa_ModifyMonitoredItemsRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    if (modifyReq->SubscriptionId > 0 && modifyReq->SubscriptionId <= INT32_MAX)
+    {
+        *msg_subscription_monitored_item_bs__p_subscription = modifyReq->SubscriptionId;
+    }
+    else
+    {
+        *msg_subscription_monitored_item_bs__p_subscription = constants__c_subscription_indet;
+    }
+}
+
+void msg_subscription_monitored_item_bs__get_msg_modify_monitored_items_req_timestamp_to_ret(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    constants__t_TimestampsToReturn_i* const msg_subscription_monitored_item_bs__p_timestampToRet)
+{
+    OpcUa_ModifyMonitoredItemsRequest* modifyReq =
+        (OpcUa_ModifyMonitoredItemsRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    *msg_subscription_monitored_item_bs__p_timestampToRet =
+        util_TimestampsToReturn__C_to_B(modifyReq->TimestampsToReturn);
+}
+
+void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_index,
+    constants_statuscodes_bs__t_StatusCode_i* const msg_subscription_monitored_item_bs__p_sc,
+    constants__t_monitoredItemId_i* const msg_subscription_monitored_item_bs__p_monitored_item_id,
+    constants__t_client_handle_i* const msg_subscription_monitored_item_bs__p_clientHandle,
+    constants__t_opcua_duration_i* const msg_subscription_monitored_item_bs__p_samplingItv,
+    t_bool* const msg_subscription_monitored_item_bs__p_discardOldest,
+    t_entier4* const msg_subscription_monitored_item_bs__p_queueSize)
+{
+    *msg_subscription_monitored_item_bs__p_clientHandle = 0;
+    *msg_subscription_monitored_item_bs__p_samplingItv = 0;
+    *msg_subscription_monitored_item_bs__p_queueSize = 0;
+    OpcUa_ModifyMonitoredItemsRequest* modifyReq =
+        (OpcUa_ModifyMonitoredItemsRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    OpcUa_MonitoredItemModifyRequest* monitReq =
+        &modifyReq->ItemsToModify[msg_subscription_monitored_item_bs__p_index - 1];
+
+    // Check no filter active since not supported by server
+    if (monitReq->RequestedParameters.Filter.Length > 0)
+    {
+        // We do not support filter but there is one requested
+        *msg_subscription_monitored_item_bs__p_sc =
+            constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+    }
+    else
+    {
+        *msg_subscription_monitored_item_bs__p_sc = constants_statuscodes_bs__e_sc_ok;
+
+        *msg_subscription_monitored_item_bs__p_monitored_item_id = monitReq->MonitoredItemId;
+        *msg_subscription_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
+        *msg_subscription_monitored_item_bs__p_samplingItv = monitReq->RequestedParameters.SamplingInterval;
+        *msg_subscription_monitored_item_bs__p_discardOldest = monitReq->RequestedParameters.DiscardOldest;
+
+        if (monitReq->RequestedParameters.QueueSize <= INT32_MAX)
+        {
+            *msg_subscription_monitored_item_bs__p_queueSize = (int32_t) monitReq->RequestedParameters.QueueSize;
+        }
+        else
+        {
+            *msg_subscription_monitored_item_bs__p_queueSize = INT32_MAX;
+        }
+    }
+}
+
+void msg_subscription_monitored_item_bs__setall_msg_modify_monitored_item_resp_params(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_index,
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc,
+    const constants__t_opcua_duration_i msg_subscription_monitored_item_bs__p_revSamplingItv,
+    const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize)
+{
+    OpcUa_ModifyMonitoredItemsResponse* modifyResp =
+        (OpcUa_ModifyMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
+    OpcUa_MonitoredItemModifyResult* monitResp = &modifyResp->Results[msg_subscription_monitored_item_bs__p_index - 1];
+    util_status_code__B_to_C(msg_subscription_monitored_item_bs__p_sc, &monitResp->StatusCode);
+    monitResp->RevisedSamplingInterval = msg_subscription_monitored_item_bs__p_revSamplingItv;
+    monitResp->RevisedQueueSize = (uint32_t) msg_subscription_monitored_item_bs__p_revQueueSize;
+}
+
 void msg_subscription_monitored_item_bs__alloc_msg_delete_monitored_items_resp_results(
     const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
     const t_entier4 msg_subscription_monitored_item_bs__p_nb_results,

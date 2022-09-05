@@ -87,6 +87,49 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
     monitoredItemPointer->notifQueue = NULL;
 }
 
+static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bool discardOldest)
+{
+    assert(NULL != notifQueue);
+    SOPC_InternalNotificationElement* discardedNotifElt = NULL;
+    if (discardOldest)
+    {
+        discardedNotifElt = SOPC_SLinkedList_PopHead(notifQueue);
+    }
+    else
+    {
+        discardedNotifElt = SOPC_SLinkedList_PopLast(notifQueue);
+    }
+    assert(NULL != discardedNotifElt);
+    OpcUa_WriteValue_Clear(discardedNotifElt->value);
+    SOPC_Free(discardedNotifElt->value);
+    SOPC_Free(discardedNotifElt);
+}
+
+static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_SLinkedList* notifQueue, bool discardOldest)
+{
+    SOPC_InternalNotificationElement* checkAdded = NULL;
+    SOPC_InternalNotificationElement* notifElt = NULL;
+
+    /* Set the overflow bit in DataValue status code in value replacing discarded one */
+    if (discardOldest)
+    {
+        /* New oldest notification DataValue status code should have bit set */
+        notifElt = SOPC_SLinkedList_PopHead(notifQueue);
+        assert(NULL != notifElt);
+        checkAdded = SOPC_SLinkedList_Prepend(notifQueue, 0, notifElt);
+        assert(checkAdded == notifElt);
+    }
+    else
+    { // New last notification DataValue status code should have bit set
+        notifElt = SOPC_SLinkedList_PopLast(notifQueue);
+        assert(NULL != notifElt);
+        checkAdded = SOPC_SLinkedList_Append(notifQueue, 0, notifElt);
+        assert(checkAdded == notifElt);
+    }
+    /* The next notification of the one discarded should have overflow bit set */
+    notifElt->value->Value.Status |= SOPC_DataValueOverflowStatusMask;
+}
+
 static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     SOPC_InternalNotificationElement* notifElt,
@@ -123,19 +166,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
             if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) ==
                 SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue))
             {
-                SOPC_InternalNotificationElement* discardedNotifElt = NULL;
-                if (notifElt->monitoredItemPointer->discardOldest)
-                {
-                    discardedNotifElt = SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
-                }
-                else
-                {
-                    discardedNotifElt = SOPC_SLinkedList_PopLast(monitored_item_notification_queue_bs__p_queue);
-                }
-                assert(NULL != discardedNotifElt);
-                OpcUa_WriteValue_Clear(discardedNotifElt->value);
-                SOPC_Free(discardedNotifElt->value);
-                SOPC_Free(discardedNotifElt);
+                SOPC_InternalDiscardOneNotification(monitored_item_notification_queue_bs__p_queue,
+                                                    notifElt->monitoredItemPointer->discardOldest);
 
                 checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
                 if (checkAdded != notifElt)
@@ -144,19 +176,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
                 }
                 else if (SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue) != 1)
                 {
-                    /* Set the overflow bit in DataValue status code in value replacing discarded one */
-                    if (notifElt->monitoredItemPointer->discardOldest)
-                    {
-                        /* New oldest notification DataValue status code should have bit set */
-                        notifElt = SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
-                        assert(NULL != notifElt);
-                        checkAdded =
-                            SOPC_SLinkedList_Prepend(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
-                        assert(checkAdded == notifElt);
-                    } // else: the newly added notification should have bit set (already referenced by pointer)
-
-                    /* The next notification of the one discarded should have overflow bit set */
-                    notifElt->value->Value.Status |= SOPC_DataValueOverflowStatusMask;
+                    SOPC_InternalSetOverflowBitAfterDiscard(monitored_item_notification_queue_bs__p_queue,
+                                                            notifElt->monitoredItemPointer->discardOldest);
                 }
             }
             else
@@ -388,4 +409,30 @@ void monitored_item_notification_queue_bs__init_iter_monitored_item_notification
 {
     *monitored_item_notification_queue_bs__p_continue =
         SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
+}
+
+void monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem)
+{
+    SOPC_InternalMontitoredItem* monitoredItemPointer =
+        (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
+    assert(monitoredItemPointer->queueSize >= 0);
+    SOPC_SLinkedList* notifQueue = monitoredItemPointer->notifQueue;
+
+    /* Discard notifications if more available than new capacity */
+    bool discardedNotifs = false;
+    while (SOPC_SLinkedList_GetLength(notifQueue) > (uint32_t) monitoredItemPointer->queueSize)
+    {
+        discardedNotifs = true;
+        SOPC_InternalDiscardOneNotification(notifQueue, monitoredItemPointer->discardOldest);
+    }
+    /* If some notifications were discarded and new capacity is > 1, overflow bit shall be set */
+    if (discardedNotifs && monitoredItemPointer->queueSize > 1)
+    {
+        SOPC_InternalSetOverflowBitAfterDiscard(notifQueue, monitoredItemPointer->discardOldest);
+    }
+
+    /* Change notification queue capacity */
+    bool capacitySet = SOPC_SLinkedList_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize);
+    assert(capacitySet);
 }

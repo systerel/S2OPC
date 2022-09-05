@@ -475,6 +475,8 @@ OPERATIONS
             OR e_msg_monitored_items_create_req THEN
                 l_user <-- get_session_user_server(session);
                 StatusCode_service <-- treat_subscription_create_monitored_items_req (session, l_user, req_msg, resp_msg)
+            OR e_msg_monitored_items_modify_req THEN
+                StatusCode_service <-- treat_subscription_modify_monitored_items_req (session, req_msg, resp_msg)
             OR e_msg_monitored_items_delete_req THEN
                 StatusCode_service <-- treat_subscription_delete_monitored_items_req (session, req_msg, resp_msg)
             OR e_msg_method_call_req THEN

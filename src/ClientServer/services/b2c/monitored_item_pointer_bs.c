@@ -212,6 +212,21 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     }
 }
 
+void monitored_item_pointer_bs__modify_monitored_item_pointer(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
+    const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
+    const t_bool monitored_item_pointer_bs__p_discardOldest,
+    const t_entier4 monitored_item_pointer_bs__p_queueSize)
+{
+    SOPC_InternalMontitoredItem* monitItem =
+        (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
+    monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
+    monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
+    monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
+}
+
 void monitored_item_pointer_bs__delete_monitored_item_pointer(
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer)
 {

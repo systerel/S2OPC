@@ -35,6 +35,7 @@ DEFINITIONS
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId,
+    a_monitoredItemQueueSize,
     a_subscription_session,
     a_publishInterval,
     a_lifetimeExpCount,
@@ -113,6 +114,7 @@ DEFINITIONS
     a_monitoredItemId := {} ||
     a_monitoredItemSubs := {} ||
     a_monitoredItemNodeId := {} ||
+    a_monitoredItemQueueSize := {} ||
     /* Publish response and notification message content */
     publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
@@ -176,6 +178,7 @@ DEFINITIONS
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+    a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
 
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
     s_monitoredItemQueue <: t_monitoredItemQueue &
@@ -629,6 +632,7 @@ OPERATIONS
             a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
             a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
             a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+            a_monitoredItemQueueSize := s_removedMonitoredItemPointer <<| a_monitoredItemQueueSize ||
 
             s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
             a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
@@ -873,6 +877,7 @@ OPERATIONS
                     a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                     a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
                     a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
+                    a_monitoredItemQueueSize(l_monitoredItem) := p_queueSize ||
                     monitoredItemPointer := l_monitoredItem ||
                     monitoredItemId := l_monitoredItemId ||
                     /* a notification is enqueued with current value of monitored item */
@@ -895,6 +900,29 @@ OPERATIONS
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet
         END
+    END
+    ;
+
+    p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_discardOldest, p_queueSize) =
+    PRE
+        p_mi_id : t_monitoredItemId_i &
+        p_timestampToReturn : t_TimestampsToReturn_i &
+        p_timestampToReturn : t_TimestampsToReturn &
+        p_clientHandle : t_client_handle_i &
+        p_discardOldest : BOOL &
+        p_queueSize : t_counter
+    THEN
+        p_sc,
+        a_notification_queue_notifications
+        :( p_sc : t_StatusCode_i &
+            a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid &
+                a_notification_queue_notifications = a_notification_queue_notifications$0) &
+            (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+                {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications =
+                {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications$0
+            )
+         )
     END
     ;
 
@@ -928,6 +956,7 @@ OPERATIONS
              a_monitoredItemId = a_monitoredItemId |>> {p_mi_id} &
              a_monitoredItemSubs = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemSubs &
              a_monitoredItemNodeId = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemNodeId &
+             a_monitoredItemQueueSize = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemQueueSize &
              a_monitored_item_notification_queue = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitored_item_notification_queue &
              a_notification_queue_notifications = {a_monitored_item_notification_queue(a_monitoredItemId$0~(p_mi_id))} <<|a_notification_queue_notifications &
              a_defined_monitored_items = a_defined_monitored_items |>> {a_monitoredItemId$0~(p_mi_id)}

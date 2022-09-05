@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 02/09/2022 10:24:15
+ Date                 : 06/09/2022 12:10:08
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -861,6 +861,35 @@ void subscription_core__create_monitored_item(
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             monitored_item_pointer_bs__delete_monitored_item_pointer(*subscription_core__monitoredItemPointer);
          }
+      }
+   }
+}
+
+void subscription_core__modify_monitored_item(
+   const constants__t_monitoredItemId_i subscription_core__p_mi_id,
+   const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
+   const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const t_bool subscription_core__p_discardOldest,
+   const t_entier4 subscription_core__p_queueSize,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc) {
+   {
+      t_bool subscription_core__bres;
+      constants__t_monitoredItemPointer_i subscription_core__l_monitoredItemPointer;
+      
+      monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
+         &subscription_core__bres,
+         &subscription_core__l_monitoredItemPointer);
+      if (subscription_core__bres == true) {
+         monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
+            subscription_core__p_timestampToReturn,
+            subscription_core__p_clientHandle,
+            subscription_core__p_discardOldest,
+            subscription_core__p_queueSize);
+         monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
+         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
+      }
+      else {
+         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
       }
    }
 }

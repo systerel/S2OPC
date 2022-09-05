@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 26/08/2022 16:04:53
+ Date                 : 06/09/2022 12:10:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -88,5 +88,7 @@ extern void monitored_item_notification_queue_bs__get_monitored_item_notificatio
 extern void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    t_bool * const monitored_item_notification_queue_bs__p_continue);
+extern void monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem);
 
 #endif

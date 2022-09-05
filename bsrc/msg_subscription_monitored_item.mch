@@ -27,10 +27,8 @@ SEES
     message_out_bs
 
 DEFINITIONS
-    d_inv_create == (
-        nb_monitored_items : NAT &
-        nb_monitored_items <= k_n_monitoredItem_max &
 
+    d_inv_create == (
         CreateMonitoredItemReq_NodeId      : t_monitoredItemReqIndex +-> t_NodeId &
         CreateMonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
         CreateMonitoredItemReq_IndexRange  : t_monitoredItemReqIndex +-> t_IndexRange_i &
@@ -40,6 +38,13 @@ DEFINITIONS
         CreateMonitoredItemResp_Allocated : BOOL &
         CreateMonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
         CreateMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
+    );
+
+    d_inv_modify == (
+        ModifyMonitoredItemReq_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
+        ModifyMonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
+        ModifyMonitoredItemResp_Allocated : BOOL &
+        ModifyMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
     );
 
     d_inv_delete == (
@@ -58,13 +63,22 @@ ABSTRACT_VARIABLES
     CreateMonitoredItemResp_Id,
     CreateMonitoredItemResp_StatusCode,
 
+    ModifyMonitoredItemReq_Id,
+    ModifyMonitoredItemReq_FilterPresence,
+    ModifyMonitoredItemResp_Allocated,
+    ModifyMonitoredItemResp_StatusCode,
+
     DelMonitoredItemReq_Id,
     DelMonitoredItemResp_Allocated,
     DelMonitoredItemResp_StatusCode
 
 
 INVARIANT
+    nb_monitored_items : NAT &
+    nb_monitored_items <= k_n_monitoredItem_max &
+
     d_inv_create &
+    d_inv_modify &
     d_inv_delete
 
 INITIALISATION
@@ -77,6 +91,11 @@ INITIALISATION
     CreateMonitoredItemResp_Allocated := FALSE ||
     CreateMonitoredItemResp_Id := {}         ||
     CreateMonitoredItemResp_StatusCode := {} ||
+
+    ModifyMonitoredItemReq_Id := {} ||
+    ModifyMonitoredItemReq_FilterPresence := {} ||
+    ModifyMonitoredItemResp_Allocated := FALSE ||
+    ModifyMonitoredItemResp_StatusCode := {} ||
 
     DelMonitoredItemReq_Id := {} ||
     DelMonitoredItemResp_Allocated := FALSE ||
@@ -105,6 +124,8 @@ OPERATIONS
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
             p_nb_monitored_items : NAT &
+            nb_monitored_items : NAT &
+            nb_monitored_items <= k_n_monitoredItem_max &
             (p_sc = e_sc_ok
                 =>
                 p_nb_monitored_items > 0 &
@@ -218,6 +239,115 @@ OPERATIONS
     END
     ;
 
+    p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_modify_monitored_items_req_params (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_modify_req
+    THEN
+        p_sc,
+        p_subscription,
+        p_timestampToRet,
+        p_nb_monitored_items,
+        nb_monitored_items,
+        ModifyMonitoredItemReq_Id,
+        ModifyMonitoredItemReq_FilterPresence
+        :(  p_sc                 : t_StatusCode &
+            p_subscription       : t_subscription_i &
+            p_timestampToRet     : t_TimestampsToReturn_i &
+            p_nb_monitored_items : NAT &
+            nb_monitored_items : NAT &
+            nb_monitored_items <= k_n_monitoredItem_max &
+            (p_sc = e_sc_ok
+                =>
+                p_nb_monitored_items > 0 &
+                p_nb_monitored_items <= k_n_monitoredItem_max &
+                nb_monitored_items = p_nb_monitored_items &
+                ModifyMonitoredItemReq_Id : 1..nb_monitored_items --> t_monitoredItemId_i &
+                ModifyMonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
+                p_timestampToRet : t_TimestampsToReturn) &
+            (p_sc /= e_sc_ok
+                =>
+                p_sc : {e_sc_bad_nothing_to_do,
+                        e_sc_bad_timestamps_to_return_invalid,
+                        e_sc_bad_too_many_ops} &
+                d_inv_modify
+            )
+        )
+    END
+    ;
+
+    /* Filters not extracted => not managed */
+    p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
+      <-- getall_modify_monitored_item_req_params (p_req_msg, p_index) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_modify_req &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_index > 0 &
+        p_index <= nb_monitored_items
+    THEN
+        p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
+        :(p_sc : t_StatusCode_i & p_sc : t_StatusCode &
+          p_sc : {e_sc_ok,
+                  e_sc_bad_monitored_item_filter_unsupported} &
+          p_monitored_item_id : t_monitoredItemId_i &
+          p_clientHandle : t_client_handle_i &
+          p_samplingItv : t_opcua_duration_i &
+          p_discardOldest : BOOL &
+          p_queueSize : t_counter &
+          (p_sc = e_sc_ok  =>
+           ModifyMonitoredItemReq_FilterPresence(p_index) = FALSE &
+           p_monitored_item_id = ModifyMonitoredItemReq_Id(p_index)
+           ) &
+           (p_sc = e_sc_bad_monitored_item_filter_unsupported =>
+            ModifyMonitoredItemReq_FilterPresence(p_index) = TRUE
+           )
+         )
+    END
+    ;
+
+    bres <-- alloc_msg_modify_monitored_items_resp_results (p_resp_msg, p_nb_results) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_modify_resp &
+        p_nb_results : NAT &
+        p_nb_results > 0 &
+        p_nb_results = nb_monitored_items
+    THEN
+        bres, ModifyMonitoredItemResp_Allocated
+        :(bres : BOOL &
+          ModifyMonitoredItemResp_Allocated : BOOL &
+          ModifyMonitoredItemResp_Allocated = bres)
+    END
+    ;
+
+    setall_msg_modify_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_revSamplingItv, p_revQueueSize) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_modify_resp &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_index > 0 &
+        p_index <= nb_monitored_items &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode &
+        p_revSamplingItv : t_opcua_duration_i &
+        p_revQueueSize : t_counter &
+        ModifyMonitoredItemResp_Allocated = TRUE
+    THEN
+        ModifyMonitoredItemResp_StatusCode(p_index) := p_sc
+    END
+    ;
+
     p_sc, p_subscription, p_nb_monitored_items <-- getall_msg_delete_monitored_items_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -233,6 +363,8 @@ OPERATIONS
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_nb_monitored_items : NAT &
+            nb_monitored_items : NAT &
+            nb_monitored_items <= k_n_monitoredItem_max &
             (p_sc = e_sc_ok
                 =>
                 p_nb_monitored_items > 0 &

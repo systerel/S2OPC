@@ -36,6 +36,9 @@ PROMOTES
     getall_create_monitored_item_req_params,
     alloc_msg_create_monitored_items_resp_results,
     setall_msg_create_monitored_item_resp_params,
+    getall_modify_monitored_item_req_params,
+    alloc_msg_modify_monitored_items_resp_results,
+    setall_msg_modify_monitored_item_resp_params,
     getall_delete_monitored_item_req_params,
     alloc_msg_delete_monitored_items_resp_results,
     setall_msg_delete_monitored_item_resp_params
@@ -52,6 +55,27 @@ OPERATIONS
         p_subscription <-- get_msg_create_monitored_items_req_subscription (p_req_msg);
         p_timestampToRet <-- get_msg_create_monitored_items_req_timestamp_to_ret (p_req_msg);
         p_nb_monitored_items <-- get_msg_create_monitored_items_req_nb_monitored_items (p_req_msg);
+        IF p_nb_monitored_items <= 0
+        THEN
+            p_sc := e_sc_bad_nothing_to_do
+        ELSIF p_nb_monitored_items > k_n_monitoredItem_max
+        THEN
+            p_sc := e_sc_bad_too_many_ops
+        ELSIF p_timestampToRet = c_TimestampsToReturn_indet
+        THEN
+            p_sc := e_sc_bad_timestamps_to_return_invalid
+        ELSE
+            nb_monitored_items := p_nb_monitored_items;
+            p_sc := e_sc_ok
+        END
+    END
+    ;
+
+    p_sc, p_subscription, p_timestampToRet, p_nb_monitored_items <-- getall_msg_modify_monitored_items_req_params (p_req_msg) =
+    BEGIN
+        p_subscription <-- get_msg_modify_monitored_items_req_subscription (p_req_msg);
+        p_timestampToRet <-- get_msg_modify_monitored_items_req_timestamp_to_ret (p_req_msg);
+        p_nb_monitored_items <-- get_msg_modify_monitored_items_req_nb_monitored_items (p_req_msg);
         IF p_nb_monitored_items <= 0
         THEN
             p_sc := e_sc_bad_nothing_to_do

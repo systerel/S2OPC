@@ -66,6 +66,20 @@ OPERATIONS
     END
     ;
 
+    resize_monitored_item_notification_queue (p_monitoredItem) =
+    PRE
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer &
+        p_monitoredItem : dom(a_monitored_item_notification_queue)
+    THEN
+        /* Notifications might be dropped if size reduced */
+        a_notification_queue_notifications
+        :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            {a_monitored_item_notification_queue(p_monitoredItem)} <<| a_notification_queue_notifications =
+            {a_monitored_item_notification_queue(p_monitoredItem)} <<| a_notification_queue_notifications$0)
+    END
+    ;
+
     bres, queue <-- get_monitored_item_notification_queue (p_monitoredItem) =
     PRE
         p_monitoredItem : t_monitoredItemPointer_i &

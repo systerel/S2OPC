@@ -990,6 +990,27 @@ OPERATIONS
     END
     ;
 
+    p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_discardOldest, p_queueSize) =
+    VAR
+        bres,
+        l_monitoredItemPointer
+    IN
+        bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
+        IF bres = TRUE
+        THEN
+            modify_monitored_item_pointer(l_monitoredItemPointer,
+                                          p_timestampToReturn,
+                                          p_clientHandle,
+                                          p_discardOldest,
+                                          p_queueSize);
+            resize_monitored_item_notification_queue(l_monitoredItemPointer);
+            p_sc := e_sc_ok
+        ELSE
+            p_sc := e_sc_bad_monitored_item_id_invalid
+        END
+    END
+    ;
+
     p_sc <-- delete_monitored_item (p_subscription, p_mi_id) =
     VAR
         l_subscription_queue,
