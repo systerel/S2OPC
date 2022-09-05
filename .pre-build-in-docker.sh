@@ -32,4 +32,5 @@ source "$(dirname "$0")/".docker-images.sh
 
 "$(dirname "$0")/".pre-build-get-tooling.sh "$TMP_TOOLING_DIR"
 
-"$(dirname "$0")/".run-in-docker.sh "$GEN_IMAGE" TOOLING_DIR="$TMP_TOOLING_DIR" "$@"
+"$(dirname "$0")/".run-in-docker.sh "$GEN_IMAGE" \
+    TOOLING_DIR="$TMP_TOOLING_DIR" RUN_INTERACTIVELY="$RUN_INTERACTIVELY" "$@"

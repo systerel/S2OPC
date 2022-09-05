@@ -26,6 +26,10 @@
 #
 # Prerequisite (for generation from B model):
 # - TOOLING_DIR contains the path of the tooling directory (root directory containing bin/)
+#
+# Environment variables modifying the behavior of this script:
+# - NO_PREBUILD_RM:    do not delete the PREBUILD directory
+# - RUN_INTERACTIVELY: run an interactive shell in the Atelier B container
 
 BMODEL_DIR=bsrc
 PREBUILD=pre-build
@@ -33,6 +37,16 @@ PROJET=s2opc_genc
 
 CURDIR=`pwd`
 LOGPATH=$CURDIR/pre-build.log
+
+if [[ -n $RUN_INTERACTIVELY ]]; then
+    if [[ -z $TOOLING_DIR ]]; then
+	echo "TOOLING_DIR must be set to run interactively"
+	exit 1
+    fi
+    # Use a different directory for interaction
+    PREBUILD=$PREBUILD-interactive
+    NO_PREBUILD_RM=1
+fi
 
 # Redirect all output and errors to log file
 echo "Pre-build log" > $LOGPATH
@@ -62,8 +76,23 @@ else
     cd $BASE && find ../$BMODEL_DIR -maxdepth 1 -type f -exec ln -f -s {} . \; && cd - >> $LOGPATH
     PATH=$TOOLING_DIR/bin/m:$TOOLING_DIR/bin/trad:$PATH
 
-    echo "Generate C sources files from B model" | tee -a $LOGPATH
-    make VERBOSE=1 -C $BASE >> $LOGPATH
+    if [[ -n $NO_PREBUILD_RM ]]; then
+	# Change Atelier B database path to make the project persistent
+	echo "Changing Atelier B database path to $BASE/bdb" | tee -a $LOGPATH
+	mkdir -p $BASE/bdb
+	sed "/Atelier_Database_Directory/ s;/home/.*;$BASE/bdb;" \
+	    /opt/atelierb-4.2/AtelierB > $BASE/AtelierB
+	export STARTBB="startBB -r=$BASE/AtelierB"
+    fi
+
+    if [[ -n $RUN_INTERACTIVELY ]]; then
+	# Launch an interactive shell in the project
+	( cd $BASE && bash -i )
+	true # Prevent any error reporting
+    else
+	echo "Generate C sources files from B model" | tee -a $LOGPATH
+	make VERBOSE=1 -C $BASE >> $LOGPATH
+    fi
 fi
 
 if [[ $? != 0 ]]; then

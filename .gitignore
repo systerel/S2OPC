@@ -16,3 +16,7 @@ genc/
 *.log
 build_zephyr/
 build-analyzer
+
+# Temporary directories for B to C translation
+pre-build/
+pre-build-interactive/

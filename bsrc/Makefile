@@ -31,9 +31,15 @@ ifndef VERBOSE
 endif
 
 $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
-	m -remove || true
-	m -c -a
-	$(RM) -f ./bdp/*.nf
+	if [ "x$$NO_PREBUILD_RM" = x ]; then \
+	    echo "Creating fresh project"; \
+	    m -remove || true; \
+	    m -c -a; \
+	    $(RM) -f ./bdp/*.nf; \
+	else \
+	    echo "Reusing project if possible"; \
+	    m -c -a; \
+	fi
 	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
 	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
 	$(RM) tc.log
