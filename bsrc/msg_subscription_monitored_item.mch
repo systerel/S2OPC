@@ -37,9 +37,9 @@ DEFINITIONS
         CreateMonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
         CreateMonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
 
-        MonitoredItemResp_Allocated : BOOL &
-        MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
-        MonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
+        CreateMonitoredItemResp_Allocated : BOOL &
+        CreateMonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
+        CreateMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
     );
 
     d_inv_delete == (
@@ -54,9 +54,9 @@ ABSTRACT_VARIABLES
     CreateMonitoredItemReq_IndexRange,
     CreateMonitoredItemReq_ValidMonitoringMode,
     CreateMonitoredItemReq_FilterPresence,
-    MonitoredItemResp_Allocated,
-    MonitoredItemResp_Id,
-    MonitoredItemResp_StatusCode,
+    CreateMonitoredItemResp_Allocated,
+    CreateMonitoredItemResp_Id,
+    CreateMonitoredItemResp_StatusCode,
 
     DelMonitoredItemReq_Id,
     DelMonitoredItemResp_Allocated,
@@ -74,9 +74,9 @@ INITIALISATION
     CreateMonitoredItemReq_IndexRange := {} ||
     CreateMonitoredItemReq_ValidMonitoringMode := {} ||
     CreateMonitoredItemReq_FilterPresence := {} ||
-    MonitoredItemResp_Allocated := FALSE ||
-    MonitoredItemResp_Id := {}         ||
-    MonitoredItemResp_StatusCode := {} ||
+    CreateMonitoredItemResp_Allocated := FALSE ||
+    CreateMonitoredItemResp_Id := {}         ||
+    CreateMonitoredItemResp_StatusCode := {} ||
 
     DelMonitoredItemReq_Id := {} ||
     DelMonitoredItemResp_Allocated := FALSE ||
@@ -187,10 +187,10 @@ OPERATIONS
         p_nb_results > 0 &
         p_nb_results = nb_monitored_items
     THEN
-        bres, MonitoredItemResp_Allocated
+        bres, CreateMonitoredItemResp_Allocated
         :(bres : BOOL &
-          MonitoredItemResp_Allocated : BOOL &
-          MonitoredItemResp_Allocated = bres)
+          CreateMonitoredItemResp_Allocated : BOOL &
+          CreateMonitoredItemResp_Allocated = bres)
     END
     ;
 
@@ -211,10 +211,10 @@ OPERATIONS
         (p_sc /= e_sc_ok => p_monitored_item_id = c_monitoredItemId_indet) &
         p_revSamplingItv : t_opcua_duration_i &
         p_revQueueSize : t_counter &
-        MonitoredItemResp_Allocated = TRUE
+        CreateMonitoredItemResp_Allocated = TRUE
     THEN
-        MonitoredItemResp_Id(p_index) := p_monitored_item_id ||
-        MonitoredItemResp_StatusCode(p_index) := p_sc
+        CreateMonitoredItemResp_Id(p_index) := p_monitored_item_id ||
+        CreateMonitoredItemResp_StatusCode(p_index) := p_sc
     END
     ;
 

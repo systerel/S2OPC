@@ -253,8 +253,8 @@ LOCAL_OPERATIONS
                             s_miQueues = {miSubQueue} \/ s_miNodeQueues
                         IN
                             /* Set response variables */
-                            MonitoredItemResp_StatusCode := l_allocMonitoredItemResp_StatusCode ||
-                            MonitoredItemResp_Id := l_MonitoredItemResp_Id ||
+                            CreateMonitoredItemResp_StatusCode := l_allocMonitoredItemResp_StatusCode ||
+                            CreateMonitoredItemResp_Id := l_MonitoredItemResp_Id ||
 
                             /* Update set of valid monitored items and their properties */
                             s_monitoredItemId := s_monitoredItemId \/ s_newMonitoredItemId ||
