@@ -990,6 +990,8 @@ PROPERTIES
     t_msg_header_type <: t_msg_header_type_i &
     c_msg_header_type_indet : t_msg_header_type_i &
     c_msg_header_type_indet /: t_msg_header_type &
+    e_msg_request_type : t_msg_header_type &
+    e_msg_response_type : t_msg_header_type &
 
     t_msg_service_class <: t_msg_service_class_i &
     c_msg_service_class_indet : t_msg_service_class_i &
