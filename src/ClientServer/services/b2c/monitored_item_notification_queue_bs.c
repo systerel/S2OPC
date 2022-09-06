@@ -107,24 +107,19 @@ static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bo
 
 static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_SLinkedList* notifQueue, bool discardOldest)
 {
-    SOPC_InternalNotificationElement* checkAdded = NULL;
     SOPC_InternalNotificationElement* notifElt = NULL;
 
     /* Set the overflow bit in DataValue status code in value replacing discarded one */
     if (discardOldest)
     {
         /* New oldest notification DataValue status code should have bit set */
-        notifElt = SOPC_SLinkedList_PopHead(notifQueue);
+        notifElt = SOPC_SLinkedList_GetHead(notifQueue);
         assert(NULL != notifElt);
-        checkAdded = SOPC_SLinkedList_Prepend(notifQueue, 0, notifElt);
-        assert(checkAdded == notifElt);
     }
     else
     { // New last notification DataValue status code should have bit set
-        notifElt = SOPC_SLinkedList_PopLast(notifQueue);
+        notifElt = SOPC_SLinkedList_GetLast(notifQueue);
         assert(NULL != notifElt);
-        checkAdded = SOPC_SLinkedList_Append(notifQueue, 0, notifElt);
-        assert(checkAdded == notifElt);
     }
     /* The next notification of the one discarded should have overflow bit set */
     notifElt->value->Value.Status |= SOPC_DataValueOverflowStatusMask;
