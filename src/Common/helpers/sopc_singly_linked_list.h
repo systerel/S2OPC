@@ -52,8 +52,8 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax);
  *  \brief          Add a new element (and allocate new list element) before head of the given linked list.
  *
  *  \param list     Pointer on the linked list in which new element must be added
- *  \param id       Unique identifier to associate with the element (if not unique prepend LIFO behavior for Find and
- *                  Remove)
+ *  \param id       Unique identifier to associate with the element
+ *                  (if not unique Prepend has LIFO behavior for Find and Remove)
  *  \param value    Pointer to the value of the element to prepend
  *
  *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
@@ -64,8 +64,8 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
  *  \brief          Add a new element (and allocate new list element) to the tail of the given linked list.
  *
  *  \param list     Pointer on the linked list in which new element must be added
- *  \param id       Unique identifier to associate with the element (if not unique append FIFO behavior for Find and
- *                  Remove)
+ *  \param id       Unique identifier to associate with the element
+ *                  (if not unique Append has FIFO behavior for Find and Remove)
  *  \param value    Pointer to the value of the element to append
  *
  *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
@@ -113,7 +113,8 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
 
 /**
- *  \brief          Find the value associated to the given id in the linked list
+ *  \brief          Find the first value associated to the given id in the linked list
+ *                  (iterate from head to tail)
  *
  *  \param list     Pointer on the linked list in which element must be found
  *  \param id       Unique identifier associated with the element to find
@@ -134,7 +135,8 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
 void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val));
 
 /**
- *  \brief          Find and remove the first value associated to the given id (FIFO) in the linked list
+ *  \brief          Find and remove the first value associated to the given id in the linked list
+ *                  (iterate from head to tail)
  *
  *  \param list     Pointer on the linked list in which element must be found
  *  \param id       Unique identifier associated with the element to remove
@@ -144,7 +146,8 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
 void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
- *  \brief          Find and remove the first value pointer equal (FIFO) in the linked list
+ *  \brief          Find and remove the first value pointer equal in the linked list
+ *                  (iterate from head to tail)
  *
  *  \param list     Pointer on the linked list in which element must be found
  *  \param value    Pointer on the value to remove from list
@@ -176,7 +179,7 @@ void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
 void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val);
 
 /**
- * \brief           Get an iterator on a linked list to iterate on elements (LIFO behavior)
+ * \brief           Get an iterator on a linked list to iterate on elements from head to tail
  *
  * \param list      Pointer to the list for which an iterator is requested
  *
@@ -194,8 +197,9 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
 bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it);
 
 /**
- * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
- *
+ * \brief           Return the next element pointed by iterator in the linked list
+ *                  (iterate from head to tail)
+
  * \param it        An iterator on a linked list
  *
  * \return          Pointer on the next value of the linked list
@@ -203,7 +207,8 @@ bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it);
 void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
 
 /**
- * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
+ * \brief           Return the next element pointed by iterator in the linked list
+ *                  (iterate from head to tail)
  *
  * \param it        An iterator on a linked list
  * \param pId       Pointer in which the next element id of the linked list is set
