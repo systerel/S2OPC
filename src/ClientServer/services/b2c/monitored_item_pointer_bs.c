@@ -73,8 +73,9 @@ void monitored_item_pointer_bs__INITIALISATION(void)
 {
     monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
 
-    monitoredItemIdDict = SOPC_Dict_Create(0, SOPC_InternalMonitoredItemId_Hash, SOPC_InternalMonitoredItemId_Equal,
-                                           SOPC_InternalMonitoredItemId_Free, SOPC_InternalMonitoredItem_Free);
+    monitoredItemIdDict = SOPC_Dict_Create(constants_bs__c_monitoredItemId_indet, SOPC_InternalMonitoredItemId_Hash,
+                                           SOPC_InternalMonitoredItemId_Equal, SOPC_InternalMonitoredItemId_Free,
+                                           SOPC_InternalMonitoredItem_Free);
     assert(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
     assert(monitoredItemIdFreed != NULL);
@@ -262,17 +263,21 @@ void monitored_item_pointer_bs__getall_monitoredItemId(
     constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__p_monitoredItemPointer)
 {
     *monitored_item_pointer_bs__bres = false;
-    void* miPointer =
-        SOPC_Dict_Get(monitoredItemIdDict, (void*) (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
-                      monitored_item_pointer_bs__bres);
-    if (*monitored_item_pointer_bs__bres && NULL != miPointer)
+    *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
+    if (monitored_item_pointer_bs__p_monitoredItemId != constants_bs__c_monitoredItemId_indet)
     {
-        *monitored_item_pointer_bs__p_monitoredItemPointer = miPointer;
-    }
-    else
-    {
-        *monitored_item_pointer_bs__bres = false;
-        *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
+        void* miPointer =
+            SOPC_Dict_Get(monitoredItemIdDict, (void*) (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
+                          monitored_item_pointer_bs__bres);
+        if (*monitored_item_pointer_bs__bres && NULL != miPointer)
+        {
+            *monitored_item_pointer_bs__p_monitoredItemPointer = miPointer;
+        }
+        else
+        {
+            *monitored_item_pointer_bs__bres = false;
+            *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
+        }
     }
 }
 
