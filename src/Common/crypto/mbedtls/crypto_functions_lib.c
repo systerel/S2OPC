@@ -1052,7 +1052,9 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
     if (SOPC_STATUS_OK == status)
     {
         /* Build the Nonce Counter */
-        /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (endianness?), 4 null bytes */
+
+        /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (Little-endian), 4 for block counter
+         * (Big-endian) */
         assert(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
                       SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
                       4 /* BlockCounter length */) &&
@@ -1064,10 +1066,15 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
         p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce;
         memcpy(p, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
         p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom;
-        /* TODO: find endianness of the SequenceNumber, or raise a Mantis issue */
         memcpy(p, &uSequenceNumber, sizeof(uint32_t));
         p += sizeof(uint32_t);
-        memset(p, 0, 4); /* BlockCounter, which is big endian */
+
+        /* BlockCounter, which is big endian. Initialize to 1 */
+        p[0] = 0x00;
+        p[1] = 0x00;
+        p[2] = 0x00;
+        p[3] = 0x01;
+
         p += 4;
         assert(p - counter == 16 && "Invalid pointer arithmetics");
 
