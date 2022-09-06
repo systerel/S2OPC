@@ -328,6 +328,26 @@ void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list)
     return SOPC_SLinkedList_RemoveFromElt(list, list->last, SOPC_InternalSLinkedList_IsEqualToEltToRemove);
 }
 
+void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list)
+{
+    assert(list != NULL);
+    if (list->first == NULL)
+    {
+        return NULL;
+    }
+    return list->first->value;
+}
+
+void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list)
+{
+    assert(list != NULL);
+    if (list->last == NULL)
+    {
+        return NULL;
+    }
+    return list->last->value;
+}
+
 static SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
 {
     assert(list != NULL);

@@ -98,7 +98,7 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
  *
- *  \return         Pointer to the head element value of the list
+ *  \return         Pointer to the head element value of the list or NULL if list is empty
  */
 void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 
@@ -108,9 +108,29 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
  *
- *  \return         Pointer to the last element value of the list
+ *  \return         Pointer to the last element value of the list or NULL if list is empty
  */
 void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
+
+/**
+ *  \brief          Get the head element of the list without removing it.
+ *                  Note: it shall not be freed.
+ *
+ *  \param list     Pointer on the linked list from which head element must be returned
+ *
+ *  \return         Pointer to the head element value of the list or NULL if list is empty
+ */
+void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list);
+
+/**
+ *  \brief          Get the tail element of the list without removing it.
+ *                  Note: it shall not be freed.
+ *
+ *  \param list     Pointer on the linked list from which tail element must be returned
+ *
+ *  \return         Pointer to the tail element value of the list or NULL if list is empty
+ */
+void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Find the first value associated to the given id in the linked list
@@ -189,6 +209,7 @@ SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list);
 
 /**
  * \brief           Return true if iterator has a non NULL value to provide on next iteration
+ *                  (iterate from head to tail)
  *
  * \param it        An iterator on a linked list
  *
