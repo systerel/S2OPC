@@ -93,7 +93,7 @@ DEFINITIONS
         set_subscription_SeqNum (p_subscription, l_next_seq_num);
 
         /* Fill notification message */
-        fill_notification_message (p_subscription, l_notifMsg, p_nb_notifs);
+        local_fill_notification_message (p_subscription, l_notifMsg, p_nb_notifs);
         /* Add notification message to republish queue */
         /* + Discard oldest if maximum reached */
         l_nb_repub_notifs <-- get_nb_republish_notifs (p_repubQueue);
@@ -174,7 +174,49 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_notification_message (p_subscription, p_notif_msg, nb_notif_to_dequeue) =
+    p_next_index <-- local_fill_notification_message_for_monitored_item (p_monitoredItemPointer , p_notif_msg, p_cur_index, nb_notif_to_dequeue) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : t_monitoredItemPointer &
+        p_notif_msg : t_notif_msg_i &
+        p_notif_msg : t_notif_msg &
+        notification_message = p_notif_msg &
+        nb_notif_to_dequeue : NAT &
+        nb_notif_to_dequeue : t_monitoredItemNotifIndex &
+        nb_notif_to_dequeue = nb_monitored_item_notifications &
+        nb_notif_to_dequeue <= card({a_notification_queue_notifications
+                                      (a_monitored_item_notification_queue
+                                          (p_monitoredItemPointer))}) &
+        p_cur_index : NAT &
+        p_cur_index : t_monitoredItemNotifIndex &
+        p_cur_index <= nb_notif_to_dequeue
+    THEN
+        ANY l_a_monitored_item_notifications_dequeued WHERE
+            l_a_monitored_item_notifications_dequeued <: {a_notification_queue_notifications
+                                                           (a_monitored_item_notification_queue
+                                                             (p_monitoredItemPointer))} & /* Set of dequeued notifications */
+            card(l_a_monitored_item_notifications_dequeued) <= nb_monitored_item_notifications /* Expected number of notification dequeued*/
+        THEN
+            p_next_index,
+            MonitoredItemNotification_MonitoredItemId,
+            MonitoredItemNotification_MonitoredItemNotif
+            :(p_next_index : NAT &
+              p_next_index : t_monitoredItemNotifIndex &
+              p_next_index = p_cur_index + card(l_a_monitored_item_notifications_dequeued) &
+              MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
+              MonitoredItemNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer &
+                dom(MonitoredItemNotification_MonitoredItemId) = 1..nb_monitored_item_notifications &
+                /* Range is the monitored item ids for which notifications are present */
+                ran(MonitoredItemNotification_MonitoredItemId) =
+                 a_monitoredItemId[a_monitored_item_notification_queue~[a_notification_queue_notifications~[l_a_monitored_item_notifications_dequeued]]] &
+                dom(MonitoredItemNotification_MonitoredItemNotif) = 1..nb_monitored_item_notifications &
+                ran(MonitoredItemNotification_MonitoredItemNotif) = l_a_monitored_item_notifications_dequeued) ||
+            a_notification_queue_notifications := a_notification_queue_notifications |>> l_a_monitored_item_notifications_dequeued
+        END
+    END
+    ;
+
+    local_fill_notification_message (p_subscription, p_notif_msg, nb_notif_to_dequeue) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
@@ -373,7 +415,54 @@ OPERATIONS
     END
     ;
 
-    fill_notification_message (p_subscription, p_notif_msg, nb_notif_to_dequeue) =
+    p_next_index <-- local_fill_notification_message_for_monitored_item (p_monitoredItemPointer , p_notif_msg, p_cur_index, nb_notif_to_dequeue) =
+    VAR
+        l_notifQueue,
+        l_continue,
+        l_writeValuePointer,
+
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle
+    IN
+        p_next_index := p_cur_index;
+        l_continue, l_notifQueue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
+        IF l_continue = TRUE
+        THEN
+            l_continue <-- init_iter_monitored_item_notification (l_notifQueue)
+        END
+        ;
+        WHILE l_continue = TRUE & p_next_index <= nb_notif_to_dequeue DO
+            l_continue, l_writeValuePointer <-- continue_pop_iter_monitor_item_notification (l_notifQueue);
+            /* Retrieve monitoredItem Id + client handle */
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_indexRange,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle
+            <--getall_monitoredItemPointer (p_monitoredItemPointer);
+
+            setall_notification_msg_monitored_item_notif (p_notif_msg, p_next_index, l_monitoredItemId, l_clientHandle, l_writeValuePointer);
+            p_next_index := p_next_index + 1
+        INVARIANT
+            dom(MonitoredItemNotification_MonitoredItemId) = 1..p_next_index &
+            a_notification_queue_notifications[{l_notifQueue}] <<: a_notification_queue_notifications$0[{l_notifQueue}] &
+            card(a_notification_queue_notifications[{l_notifQueue}]) = card(a_notification_queue_notifications$0[{l_notifQueue}]) - 1
+        VARIANT
+            card(a_notification_queue_notifications[{l_notifQueue}])
+        END
+    END
+    ;
+
+    local_fill_notification_message (p_subscription, p_notif_msg, nb_notif_to_dequeue) =
     VAR
         l_monitored_item_queue,
         l_continue_mi,
@@ -382,6 +471,7 @@ OPERATIONS
 
         l_notifQueue,
         l_index,
+        l_new_index,
         l_continue,
         l_writeValuePointer,
 
@@ -399,36 +489,8 @@ OPERATIONS
         l_continue_mi, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
         WHILE l_continue_mi = TRUE  & l_index <= nb_notif_to_dequeue DO
             l_continue_mi, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
-
-            l_continue, l_notifQueue <-- get_monitored_item_notification_queue (l_monitoredItemPointer);
-            IF l_continue = TRUE
-            THEN
-                l_continue <-- init_iter_monitored_item_notification (l_notifQueue)
-            END
-            ;
-            /* TODO : create local operation to do this loop ! */
-            WHILE l_continue = TRUE & l_index <= nb_notif_to_dequeue DO
-                l_continue, l_writeValuePointer <-- continue_pop_iter_monitor_item_notification (l_notifQueue);
-                /* Retrieve monitoredItem Id + client handle */
-                l_monitoredItemId,
-                l_subscription,
-                l_nid,
-                l_aid,
-                l_indexRange,
-                l_timestampToReturn,
-                l_monitoringMode,
-                l_clientHandle
-                <--getall_monitoredItemPointer (l_monitoredItemPointer);
-
-                setall_notification_msg_monitored_item_notif (p_notif_msg, l_index, l_monitoredItemId, l_clientHandle, l_writeValuePointer);
-                l_index := l_index + 1
-            INVARIANT
-                dom(MonitoredItemNotification_MonitoredItemId) = 1..l_index &
-                a_notification_queue_notifications[{l_notifQueue}] <<: a_notification_queue_notifications$0[{l_notifQueue}] &
-                card(a_notification_queue_notifications[{l_notifQueue}]) = card(a_notification_queue_notifications$0[{l_notifQueue}]) - 1
-            VARIANT
-                card(a_notification_queue_notifications[{l_notifQueue}])
-            END
+            l_new_index <-- local_fill_notification_message_for_monitored_item (l_monitoredItemPointer, p_notif_msg, l_index, nb_notif_to_dequeue);
+            l_index := l_new_index
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &

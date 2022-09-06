@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 06/09/2022 12:10:08
+ Date                 : 08/09/2022 15:15:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -120,17 +120,14 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
    }
 }
 
-void subscription_core__fill_notification_message(
-   const constants__t_subscription_i subscription_core__p_subscription,
+void subscription_core__local_fill_notification_message_for_monitored_item(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_notif_msg_i subscription_core__p_notif_msg,
-   const t_entier4 subscription_core__nb_notif_to_dequeue) {
+   const t_entier4 subscription_core__p_cur_index,
+   const t_entier4 subscription_core__nb_notif_to_dequeue,
+   t_entier4 * const subscription_core__p_next_index) {
    {
-      constants__t_monitoredItemQueue_i subscription_core__l_monitored_item_queue;
-      t_bool subscription_core__l_continue_mi;
-      constants__t_monitoredItemQueueIterator_i subscription_core__l_iterator;
-      constants__t_monitoredItemPointer_i subscription_core__l_monitoredItemPointer;
       constants__t_notificationQueue_i subscription_core__l_notifQueue;
-      t_entier4 subscription_core__l_index;
       t_bool subscription_core__l_continue;
       constants__t_WriteValuePointer_i subscription_core__l_writeValuePointer;
       constants__t_monitoredItemId_i subscription_core__l_monitoredItemId;
@@ -141,6 +138,51 @@ void subscription_core__fill_notification_message(
       constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_core__l_monitoringMode;
       constants__t_client_handle_i subscription_core__l_clientHandle;
+      
+      *subscription_core__p_next_index = subscription_core__p_cur_index;
+      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+         &subscription_core__l_continue,
+         &subscription_core__l_notifQueue);
+      if (subscription_core__l_continue == true) {
+         monitored_item_notification_queue_bs__init_iter_monitored_item_notification(subscription_core__l_notifQueue,
+            &subscription_core__l_continue);
+      }
+      while ((subscription_core__l_continue == true) &&
+         (*subscription_core__p_next_index <= subscription_core__nb_notif_to_dequeue)) {
+         monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(subscription_core__l_notifQueue,
+            &subscription_core__l_continue,
+            &subscription_core__l_writeValuePointer);
+         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__p_monitoredItemPointer,
+            &subscription_core__l_monitoredItemId,
+            &subscription_core__l_subscription,
+            &subscription_core__l_nid,
+            &subscription_core__l_aid,
+            &subscription_core__l_indexRange,
+            &subscription_core__l_timestampToReturn,
+            &subscription_core__l_monitoringMode,
+            &subscription_core__l_clientHandle);
+         msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(subscription_core__p_notif_msg,
+            *subscription_core__p_next_index,
+            subscription_core__l_monitoredItemId,
+            subscription_core__l_clientHandle,
+            subscription_core__l_writeValuePointer);
+         *subscription_core__p_next_index = *subscription_core__p_next_index +
+            1;
+      }
+   }
+}
+
+void subscription_core__local_fill_notification_message(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_notif_msg_i subscription_core__p_notif_msg,
+   const t_entier4 subscription_core__nb_notif_to_dequeue) {
+   {
+      constants__t_monitoredItemQueue_i subscription_core__l_monitored_item_queue;
+      t_bool subscription_core__l_continue_mi;
+      constants__t_monitoredItemQueueIterator_i subscription_core__l_iterator;
+      constants__t_monitoredItemPointer_i subscription_core__l_monitoredItemPointer;
+      t_entier4 subscription_core__l_index;
+      t_entier4 subscription_core__l_new_index;
       
       subscription_core__l_index = 1;
       subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
@@ -154,35 +196,12 @@ void subscription_core__fill_notification_message(
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
-         monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
-            &subscription_core__l_continue,
-            &subscription_core__l_notifQueue);
-         if (subscription_core__l_continue == true) {
-            monitored_item_notification_queue_bs__init_iter_monitored_item_notification(subscription_core__l_notifQueue,
-               &subscription_core__l_continue);
-         }
-         while ((subscription_core__l_continue == true) &&
-            (subscription_core__l_index <= subscription_core__nb_notif_to_dequeue)) {
-            monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(subscription_core__l_notifQueue,
-               &subscription_core__l_continue,
-               &subscription_core__l_writeValuePointer);
-            monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
-               &subscription_core__l_monitoredItemId,
-               &subscription_core__l_subscription,
-               &subscription_core__l_nid,
-               &subscription_core__l_aid,
-               &subscription_core__l_indexRange,
-               &subscription_core__l_timestampToReturn,
-               &subscription_core__l_monitoringMode,
-               &subscription_core__l_clientHandle);
-            msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(subscription_core__p_notif_msg,
-               subscription_core__l_index,
-               subscription_core__l_monitoredItemId,
-               subscription_core__l_clientHandle,
-               subscription_core__l_writeValuePointer);
-            subscription_core__l_index = subscription_core__l_index +
-               1;
-         }
+         subscription_core__local_fill_notification_message_for_monitored_item(subscription_core__l_monitoredItemPointer,
+            subscription_core__p_notif_msg,
+            subscription_core__l_index,
+            subscription_core__nb_notif_to_dequeue,
+            &subscription_core__l_new_index);
+         subscription_core__l_index = subscription_core__l_new_index;
       }
       monitored_item_queue_it_bs__clear_iter_monitored_item(subscription_core__l_iterator);
    }
@@ -603,7 +622,7 @@ void subscription_core__receive_publish_request(
                &subscription_core__l_next_seq_num);
             subscription_core_1__set_subscription_SeqNum(subscription_core__l_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__fill_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_notification_message(subscription_core__l_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_notifications);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -658,7 +677,7 @@ void subscription_core__receive_publish_request(
                &subscription_core__l_next_seq_num);
             subscription_core_1__set_subscription_SeqNum(subscription_core__l_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__fill_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_notification_message(subscription_core__l_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_notifications);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -1088,7 +1107,7 @@ void subscription_core__server_subscription_core_publish_timeout(
                &subscription_core__l_next_seq_num);
             subscription_core_1__set_subscription_SeqNum(subscription_core__p_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__fill_notification_message(subscription_core__p_subscription,
+            subscription_core__local_fill_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_notifications);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -1193,7 +1212,7 @@ void subscription_core__server_subscription_core_publish_timeout(
                &subscription_core__l_next_seq_num);
             subscription_core_1__set_subscription_SeqNum(subscription_core__p_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__fill_notification_message(subscription_core__p_subscription,
+            subscription_core__local_fill_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_notifications);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -1323,7 +1342,7 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
             &subscription_core__l_next_seq_num);
          subscription_core_1__set_subscription_SeqNum(subscription_core__p_subscription,
             subscription_core__l_next_seq_num);
-         subscription_core__fill_notification_message(subscription_core__p_subscription,
+         subscription_core__local_fill_notification_message(subscription_core__p_subscription,
             subscription_core__l_notifMsg,
             subscription_core__l_nb_notifications);
          notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,

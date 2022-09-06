@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 06/09/2022 12:10:08
+ Date                 : 08/09/2022 15:15:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -95,15 +95,21 @@ extern void subscription_core__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
-extern void subscription_core__fill_notification_message(
-   const constants__t_subscription_i subscription_core__p_subscription,
-   const constants__t_notif_msg_i subscription_core__p_notif_msg,
-   const t_entier4 subscription_core__nb_notif_to_dequeue);
 extern void subscription_core__get_fresh_subscription(
    t_bool * const subscription_core__bres,
    constants__t_subscription_i * const subscription_core__p_subscription);
 extern void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
+extern void subscription_core__local_fill_notification_message(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_notif_msg_i subscription_core__p_notif_msg,
+   const t_entier4 subscription_core__nb_notif_to_dequeue);
+extern void subscription_core__local_fill_notification_message_for_monitored_item(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const constants__t_notif_msg_i subscription_core__p_notif_msg,
+   const t_entier4 subscription_core__p_cur_index,
+   const t_entier4 subscription_core__nb_notif_to_dequeue,
+   t_entier4 * const subscription_core__p_next_index);
 extern void subscription_core__local_monitored_item_nb_available_notifications(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    t_entier4 * const subscription_core__p_nb_available_notifs);
