@@ -230,4 +230,17 @@ uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list);
  */
 uint32_t SOPC_SLinkedList_GetCapacity(SOPC_SLinkedList* list);
 
+/**
+ * \brief           Set the maximum number of elements that can be contained in the linked list.
+ *                  It might be used to modify the value provided on ::SOPC_SLinkedList_Create.
+ *                  Call to this function will fail if the current length is greater than provided value.
+ *
+ * \param list      Pointer to the list
+ * \param sizeMax   The maximum number of elements allowed in the new linked list or 0 if no limit defined.
+ *                  If the current list length is greater than the provided value, call will fail.
+ *
+ * \return          true if the list capacity has been set, false otherwise
+ */
+bool SOPC_SLinkedList_SetCapacity(SOPC_SLinkedList* list, size_t sizeMax);
+
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */
