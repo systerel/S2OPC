@@ -188,15 +188,16 @@ git add -f install_linux install_windows &>/dev/null || exit 1
 git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate test script"
-mkdir bin/ClientServer bin/PubSub
-./tests/scripts/make-ctestfile-relative build/tests/ClientServer/CTestTestfile.cmake > bin/ClientServer/CTestTestfile.cmake
-./tests/scripts/make-ctestfile-relative build/tests/PubSub/CTestTestfile.cmake > bin/PubSub/CTestTestfile.cmake
+mkdir -p bin/tests/ClientServer bin/samples/ClientServer bin/tests/PubSub
+./tests/scripts/make-ctestfile-relative build/tests/ClientServer/CTestTestfile.cmake > bin/tests/ClientServer/CTestTestfile.cmake
+./tests/scripts/make-ctestfile-relative build/samples/ClientServer/CTestTestfile.cmake > bin/samples/ClientServer/CTestTestfile.cmake
+./tests/scripts/make-ctestfile-relative build/tests/PubSub/CTestTestfile.cmake > bin/tests/PubSub/CTestTestfile.cmake
 
 # The bin folder is moved to the root in releases
-sed -i 's,build/bin,bin,g' bin/ClientServer/CTestTestfile.cmake bin/PubSub/CTestTestfile.cmake
-sed -i 's,/usr/local/bin/python3,python3,g' bin/ClientServer/CTestTestfile.cmake bin/PubSub/CTestTestfile.cmake
+sed -i 's,build/bin,bin,g' bin/tests/ClientServer/CTestTestfile.cmake bin/samples/ClientServer/CTestTestfile.cmake bin/tests/PubSub/CTestTestfile.cmake
+sed -i 's,/usr/local/bin/python3,python3,g' bin/tests/ClientServer/CTestTestfile.cmake bin/samples/ClientServer/CTestTestfile.cmake bin/tests/PubSub/CTestTestfile.cmake
 
-git add -f bin/ClientServer/CTestTestfile.cmake bin/PubSub/CTestTestfile.cmake &>/dev/null || exit 1
+git add -f bin/tests/ClientServer/CTestTestfile.cmake bin/samples/ClientServer/CTestTestfile.cmake bin/tests/PubSub/CTestTestfile.cmake &>/dev/null || exit 1
 git commit -S -m "Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate documentation with doxygen"
