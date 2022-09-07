@@ -108,6 +108,7 @@ bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items);
  * key is not set, removals of values is not supported by the dictionary.
  *
  * The tombstone key MUST be different from the empty key.
+ * Otherwise an assertion failure will occur.
  *
  * As a safeguard, calling this function is only allowed when the dictionary is
  * completely empty (including tombstones), like right after its creation.
@@ -117,10 +118,10 @@ void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key);
 /**
  * \brief Inserts a new key and value in the dictionary.
  * \param d      The dictionary.
- * \param key    The key to insert.
+ * \param key    The key to insert (using empty or tombstone key will fail)
  * \param value  The value to insert.
- * \return \c TRUE in case of success, or \c FALSE in case of memory allocation
- *         failure.
+ * \return \c TRUE in case of success, or \c FALSE in case of use of empty key or tombstone key,
+ *            or memory allocation failure.
  *
  * The dictionary takes ownership of the key and value, those should not be
  * modified after insertion. If an item with the same key was already inserted,
@@ -162,7 +163,7 @@ void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
  * \param key  The key to remove.
  *
  * For removals to be supported, a tombstone key MUST have been set before using
- * \ref SOPC_Dict_SetTombstoneKey.
+ * \ref SOPC_Dict_SetTombstoneKey. Otherwise an assertion failure will occur.
  */
 void SOPC_Dict_Remove(SOPC_Dict* d, const void* key);
 

@@ -293,8 +293,10 @@ static bool maybe_resize(SOPC_Dict* d, uint8_t delta)
 bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 {
     assert(d != NULL);
-    assert(key != d->empty_key);
-    assert(key != d->tombstone_key);
+    if (key == d->empty_key || key == d->tombstone_key)
+    {
+        return false;
+    }
 
     if (!maybe_resize(d, 1))
     {
@@ -308,8 +310,10 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 
 static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const void* key)
 {
-    assert(key != d->empty_key);
-    assert(key != d->tombstone_key);
+    if (key == d->empty_key || key == d->tombstone_key)
+    {
+        return NULL;
+    }
 
     uint64_t hash = d->hash_func(key);
 
