@@ -26,7 +26,9 @@ BUILD_DIR="${MY_DIR}/build"
 PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/validation_tests/pys2opc"
 PYS2OPC_LIB_IS_PRESENT=$(ls ${BUILD_DIR}/lib/pys2opc*.whl 2> /dev/null | wc -l)
 CLIENTSERVER_TEST_DIR=${BUILD_DIR}/tests/ClientServer
+CLIENTSERVER_SAMPLE_DIR=${BUILD_DIR}/samples/ClientServer
 CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
+CLIENTSERVER_SAMPLE_CTEST_FILE="${CLIENTSERVER_SAMPLE_DIR}/CTestTestfile.cmake"
 PUBSUB_TEST_DIR=${BUILD_DIR}/tests/PubSub
 PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
@@ -55,7 +57,11 @@ session_timeout.tap
 toolkit_test_server_client.tap
 toolkit_test_server_local_service.tap
 toolkit_test_suite_client.tap
-validation.tap'
+validation.tap
+s2opc_write.tap
+s2opc_read.tap
+s2opc_browse.tap
+s2opc_discovery.tap'
 
 PUBSUB_TAP_FILES='interop_pub_test.tap
 interop_sub_test.tap
@@ -79,15 +85,16 @@ PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
 rm -f "${TAP_DIR}"/*.tap
 
 if [ -z $S2OPC_PUBSUB_ONLY ]; then
+   # Manage tests in tests/ directory
    if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
-       CLIENTSERVER_TEST_DIR=${BIN_DIR}/ClientServer
+       CLIENTSERVER_TEST_DIR=${BIN_DIR}/tests/ClientServer
        CLIENTSERVER_CTEST_FILE="${CLIENTSERVER_TEST_DIR}/CTestTestfile.cmake"
        TAP_DIR="${BIN_DIR}"
        sed -i "s|S2OPC_ROOT_DIR|${MY_DIR}|g" $CLIENTSERVER_CTEST_FILE
    fi
 
    if [ ! -f "${CLIENTSERVER_CTEST_FILE}" ]; then
-       echo "No CTestTestfile in ${BIN_DIR}/ClientServer or ${BUILD_DIR}/tests/ClientServer"
+       echo "No CTestTestfile in ${BIN_DIR}/tests/ClientServer or ${BUILD_DIR}/tests/ClientServer"
        echo "Is this a tagged release, or has CMake been run?"
        exit 1
    fi
@@ -103,8 +110,28 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
        CTEST_RET1=$?
        mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
    fi
+
+    # Manage tests in samples/ directory
+    if [ ! -f "${CLIENTSERVER_SAMPLE_CTEST_FILE}" ]; then      
+       CLIENTSERVER_SAMPLE_DIR=${BIN_DIR}/samples/ClientServer
+       CLIENTSERVER_SAMPLE_CTEST_FILE="${CLIENTSERVER_SAMPLE_DIR}/CTestTestfile.cmake"
+       TAP_DIR="${BIN_DIR}"
+       sed -i "s|S2OPC_ROOT_DIR|${MY_DIR}|g" $CLIENTSERVER_SAMPLE_CTEST_FILE
+   fi
+
+    if [ ! -f "${CLIENTSERVER_SAMPLE_CTEST_FILE}" ]; then
+       echo "No CTestTestfile in ${BIN_DIR}/samples/ClientServer or ${BUILD_DIR}/samples/ClientServer"
+       echo "Is this a tagged release, or has CMake been run?"
+       exit 1
+    fi
+
+    cd "${CLIENTSERVER_SAMPLE_DIR}"
+    EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES
+    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+    CTEST_RET3=$?
 else
    CTEST_RET1=0
+   CTEST_RET3=0
 fi
 
 if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
@@ -113,14 +140,14 @@ if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
    MOSQUITTO_PID=$!
 
    if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
-       PUBSUB_TEST_DIR=${BIN_DIR}/PubSub
+       PUBSUB_TEST_DIR=${BIN_DIR}/tests/PubSub
        PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
        TAP_DIR="${BIN_DIR}"
        sed -i "s|S2OPC_ROOT_DIR|${MY_DIR}|g" $PUBSUB_CTEST_FILE
    fi
 
    if [ ! -f "${PUBSUB_CTEST_FILE}" ]; then
-       echo "No CTestTestfile in ${BIN_DIR}/PubSub or ${BUILD_DIR}/tests/PubSub"
+       echo "No CTestTestfile in ${BIN_DIR}/tests/PubSub or ${BUILD_DIR}/tests/PubSub"
        echo "Is this a tagged release, or has CMake been run?"
        exit 1
    fi
@@ -137,7 +164,7 @@ else
    CTEST_RET2=0
 fi
 
-CTEST_RET=$((CTEST_RET1+CTEST_RET2))
+CTEST_RET=$((CTEST_RET1+CTEST_RET2+CTEST_RET3))
 EXPECTED_TAP_FILES=$(grep -v "^$" <<< "$EXPECTED_TAP_FILES") # remove blank lines
 EXPECTED_TAP_FILES=$(sort <<< "$EXPECTED_TAP_FILES") # sort TAP files names
 ACTUAL_TAP_FILES=$(LANG=C ls "${TAP_DIR}"/*.tap | sed "s|${TAP_DIR}/||")
