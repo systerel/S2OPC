@@ -91,8 +91,6 @@ END_TEST
 
 START_TEST(test_crypto_symm_crypt_PubSub256)
 {
-    /* Testing the AES-256 in CTR is challenging through our interface,
-     * as the block counter is always set to 0, according to the PubSub spec */
     unsigned char key[32];
     unsigned char nonce[4];
     unsigned char random[4];
@@ -126,8 +124,8 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
     ck_assert(hexlify(output, hexoutput, 100) == 100);
     ck_assert(
         memcmp(hexoutput,
-               "8bd92e19311e2188b52fd9177bb3b6cd52306fa9b4026bcd2e0a4bb1f50c008fa231e32661d4ddfcbb11d58a5acf474b4f4bd32"
-               "fd58de7904cfe156502739b9eb1a93c311ff5de7335f5b6d6672d79ddd972a0f5a205302367978d64821fb3540c97e0b3",
+               "0fb8a1a62b4935cdcac7f842c0a216291f9fe56e28de1f911fecc5c8e4e515219f305066c2f67db529577c3bed31e991ea2156"
+               "8fb325053a221149be586f183885d55d3683b06286f760ee7a00ed85ad17b2b3a37b25fd5034af8862a09080a656a6d9ca",
                200) == 0);
     SOPC_SecretBuffer_DeleteClear(pSecKey);
     SOPC_SecretBuffer_DeleteClear(pSecNonce);
@@ -147,8 +145,8 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
     memset(input, 0, sizeof(input));
     ck_assert(
         unhexlify(
-            "8bd92e19311e2188b52fd9177bb3b6cd52306fa9b4026bcd2e0a4bb1f50c008fa231e32661d4ddfcbb11d58a5acf474b4f4bd32fd5"
-            "8de7904cfe156502739b9eb1a93c311ff5de7335f5b6d6672d79ddd972a0f5a205302367978d64821fb3540c97e0b3",
+            "0fb8a1a62b4935cdcac7f842c0a216291f9fe56e28de1f911fecc5c8e4e515219f305066c2f67db529577c3bed31e991ea2156"
+            "8fb325053a221149be586f183885d55d3683b06286f760ee7a00ed85ad17b2b3a37b25fd5034af8862a09080a656a6d9ca",
             input, 100) == 100);
     memset(output, 0, sizeof(output));
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, input, 100, pSecKey, pSecNonce, random, 4, uSeqNum, output,
@@ -180,7 +178,7 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output, 20) ==
               SOPC_STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 20) == 20);
-    ck_assert(memcmp(hexoutput, "9781ccd60f49f58de7783595ef2d38ded4373406", 40) == 0);
+    ck_assert(memcmp(hexoutput, "13e04369151ee1c8989014c0543c983a9998bec1", 40) == 0);
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, output, 20, pSecKey, pSecNonce, random, 4, uSeqNum, input, 20) ==
               SOPC_STATUS_OK);
     ck_assert(hexlify(input, hexoutput, 20) == 20);
