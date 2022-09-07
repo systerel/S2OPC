@@ -335,7 +335,7 @@ void monitored_item_notification_queue_bs__get_monitored_item_notification_queue
     t_bool* const monitored_item_notification_queue_bs__bres,
     constants__t_notificationQueue_i* const monitored_item_notification_queue_bs__queue)
 {
-    *monitored_item_notification_queue_bs__bres = NULL;
+    *monitored_item_notification_queue_bs__bres = false;
     *monitored_item_notification_queue_bs__queue = NULL;
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
