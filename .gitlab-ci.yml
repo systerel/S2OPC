@@ -123,6 +123,15 @@ generation:
            $WITH_DOC == null"
       when: on_success
 
+check_commit_signature:
+  stage: gen
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:cca589b9b38b5ee174349373a1076ee509fe60f25284000d5fdd1d9e14c03d56 # digest of build:1.31
+  script:
+    - ./.check_signed_commit.sh
+  rules:
+   - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+     when: always
+
 ###
 # Compilation jobs
 ###
