@@ -486,6 +486,51 @@ LOCAL_OPERATIONS
     END
     ;
 
+    fill_response_subscription_set_monit_mode_monitored_items (p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    PRE
+        SetMonitModeMonitoredItemResp_Allocated = TRUE &
+        p_monitoring_mode : t_monitoringMode_i &
+        p_monitoring_mode : t_monitoringMode &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_set_monitoring_mode_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_set_monitoring_mode_resp &
+        p_nb_monitored_items : NAT &
+        p_nb_monitored_items : t_monitoredItemReqIndex &
+        p_nb_monitored_items = nb_monitored_items
+    THEN
+        LET l_setMonitModeMonitoredItemResp_StatusCode BE
+            /* Evaluate the expected valid responses for which a monitored item should be deallocated (e_sc_ok case) */
+            l_setMonitModeMonitoredItemResp_StatusCode =
+            %mi_index.(mi_index : t_monitoredItemReqIndex &
+                mi_index : 1..nb_monitored_items &
+                mi_index : dom(SetMonitModeMonitoredItemReq_Id)
+                |
+                {TRUE |-> e_sc_bad_monitored_item_id_invalid,
+                 FALSE |-> e_sc_ok
+                }(bool(SetMonitModeMonitoredItemReq_Id(mi_index) /: s_monitoredItemId))
+            )
+        IN
+            /* Define the queues of monitored items that will be modified */
+            LET l_MonitoredItemIds, l_MonitoredItemPointers BE
+                l_MonitoredItemIds = SetMonitModeMonitoredItemReq_Id[dom(l_setMonitModeMonitoredItemResp_StatusCode |>> {e_sc_ok})] &
+                l_MonitoredItemPointers = a_monitoredItemId~[SetMonitModeMonitoredItemReq_Id[dom(l_setMonitModeMonitoredItemResp_StatusCode |>> {e_sc_ok})]]
+            IN
+                /* Set response variables */
+                SetMonitModeMonitoredItemResp_StatusCode := l_setMonitModeMonitoredItemResp_StatusCode ||
+                a_monitoredItemMonitMode
+                :(a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
+                  /* Only monitored item concerned have monitoring mode that might have changed */
+                  l_MonitoredItemPointers <<| a_monitoredItemMonitMode = l_MonitoredItemPointers <<| a_monitoredItemMonitMode$0)
+            END
+        END
+    END
+    ;
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
@@ -1089,6 +1134,35 @@ OPERATIONS
     END
     ;
 
+    fill_response_subscription_set_monit_mode_monitored_items (p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    VAR
+        l_continue,
+        l_index,
+        l_id,
+        l_sc
+    IN
+        l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
+        WHILE l_continue = TRUE DO
+            l_continue, l_index <-- continue_iter_monitored_item_request;
+            l_id <-- getall_set_monit_mode_monitored_item_req_params (p_req_msg, l_index);
+            l_sc <-- set_monit_mode_monitored_item (l_id, p_monitoring_mode);
+            setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, l_index, l_sc)
+
+        INVARIANT
+            rreqs_to_iterate <: t_monitoredItemReqIndex &
+            rreqs_iterated   <: t_monitoredItemReqIndex &
+            rreqs_to_iterate /\ rreqs_iterated = {} &
+            rreqs_to_iterate \/ rreqs_iterated = 1..nb_monitored_items &
+            l_continue = bool(rreqs_to_iterate /= {}) &
+
+            /* Iterated indexes are in domain of the filled status codes */
+            rreqs_iterated = dom(SetMonitModeMonitoredItemResp_StatusCode)
+        VARIANT
+            card(rreqs_to_iterate)
+        END
+    END
+    ;
+
     fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
     VAR
         l_index,
@@ -1478,6 +1552,38 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     fill_response_subscription_delete_monitored_items (l_subscription, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                    StatusCode_service := e_sc_ok
+                ELSE
+                    StatusCode_service := e_sc_bad_out_of_memory
+                END
+            ELSE
+                StatusCode_service := e_sc_bad_subscription_id_invalid
+            END
+        ELSE
+            StatusCode_service := l_sc
+        END
+    END
+    ;
+
+    StatusCode_service <-- treat_subscription_set_monit_mode_monitored_items_req (p_session, p_req_msg, p_resp_msg) =
+    VAR
+        l_sc,
+        l_subscription,
+        l_monitoring_mode,
+        l_valid_subscription,
+        l_nb_monitored_items,
+        l_bres
+    IN
+        l_sc, l_subscription, l_monitoring_mode, l_nb_monitored_items <-- getall_msg_set_monit_mode_monitored_items_req_params (p_req_msg);
+        IF l_sc = e_sc_ok
+        THEN
+            l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
+            IF l_valid_subscription = TRUE
+            THEN
+                l_bres <-- alloc_msg_set_monit_mode_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
+                IF l_bres = TRUE
+                THEN
+                    fill_response_subscription_set_monit_mode_monitored_items (l_monitoring_mode, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

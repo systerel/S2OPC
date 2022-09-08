@@ -409,3 +409,83 @@ void msg_subscription_monitored_item_bs__setall_msg_delete_monitored_item_resp_p
     util_status_code__B_to_C(msg_subscription_monitored_item_bs__p_sc,
                              &deleteResp->Results[msg_subscription_monitored_item_bs__p_index - 1]);
 }
+
+void msg_subscription_monitored_item_bs__alloc_msg_set_monit_mode_monitored_items_resp_results(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_nb_results,
+    t_bool* const msg_subscription_monitored_item_bs__bres)
+{
+    assert(msg_subscription_monitored_item_bs__p_nb_results > 0);
+    *msg_subscription_monitored_item_bs__bres = false;
+    OpcUa_SetMonitoringModeResponse* setMonitModeResp =
+        (OpcUa_SetMonitoringModeResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
+    if (SIZE_MAX / (uint32_t) msg_subscription_monitored_item_bs__p_nb_results > sizeof(*setMonitModeResp->Results))
+    {
+        setMonitModeResp->Results =
+            SOPC_Calloc((size_t) msg_subscription_monitored_item_bs__p_nb_results, sizeof(*setMonitModeResp->Results));
+        if (NULL != setMonitModeResp->Results)
+        {
+            setMonitModeResp->NoOfResults = msg_subscription_monitored_item_bs__p_nb_results;
+            for (int32_t i = 0; i < setMonitModeResp->NoOfResults; i++)
+            {
+                SOPC_StatusCode_Initialize(&setMonitModeResp->Results[i]);
+            }
+            *msg_subscription_monitored_item_bs__bres = true;
+        }
+    }
+}
+
+void msg_subscription_monitored_item_bs__get_msg_set_monit_mode_monitored_items_req_params(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    constants__t_subscription_i* const msg_subscription_monitored_item_bs__p_subscription,
+    constants__t_monitoringMode_i* const msg_subscription_monitored_item_bs__p_monitoring_mode,
+    t_entier4* const msg_subscription_monitored_item_bs__p_nb_monitored_items)
+{
+    OpcUa_SetMonitoringModeRequest* setMonitModReq =
+        (OpcUa_SetMonitoringModeRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    if (setMonitModReq->SubscriptionId > 0 && setMonitModReq->SubscriptionId <= INT32_MAX)
+    {
+        *msg_subscription_monitored_item_bs__p_subscription = setMonitModReq->SubscriptionId;
+    }
+    else
+    {
+        *msg_subscription_monitored_item_bs__p_subscription = constants__c_subscription_indet;
+    }
+    switch (setMonitModReq->MonitoringMode)
+    {
+    case OpcUa_MonitoringMode_Disabled:
+        *msg_subscription_monitored_item_bs__p_monitoring_mode = constants__e_monitoringMode_disabled;
+        break;
+    case OpcUa_MonitoringMode_Sampling:
+        *msg_subscription_monitored_item_bs__p_monitoring_mode = constants__e_monitoringMode_sampling;
+        break;
+    case OpcUa_MonitoringMode_Reporting:
+        *msg_subscription_monitored_item_bs__p_monitoring_mode = constants__e_monitoringMode_reporting;
+        break;
+    default:
+        *msg_subscription_monitored_item_bs__p_monitoring_mode = constants__c_monitoringMode_indet;
+    }
+    *msg_subscription_monitored_item_bs__p_nb_monitored_items = setMonitModReq->NoOfMonitoredItemIds;
+}
+
+void msg_subscription_monitored_item_bs__getall_set_monit_mode_monitored_item_req_params(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_index,
+    constants__t_monitoredItemId_i* const msg_subscription_monitored_item_bs__p_monitored_item_id)
+{
+    OpcUa_SetMonitoringModeRequest* setMonitModReq =
+        (OpcUa_SetMonitoringModeRequest*) msg_subscription_monitored_item_bs__p_req_msg;
+    *msg_subscription_monitored_item_bs__p_monitored_item_id =
+        setMonitModReq->MonitoredItemIds[msg_subscription_monitored_item_bs__p_index - 1];
+}
+
+void msg_subscription_monitored_item_bs__setall_msg_set_monit_mode_monitored_item_resp_params(
+    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
+    const t_entier4 msg_subscription_monitored_item_bs__p_index,
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc)
+{
+    OpcUa_SetMonitoringModeResponse* setMonitModeResp =
+        (OpcUa_SetMonitoringModeResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
+    util_status_code__B_to_C(msg_subscription_monitored_item_bs__p_sc,
+                             &setMonitModeResp->Results[msg_subscription_monitored_item_bs__p_index - 1]);
+}

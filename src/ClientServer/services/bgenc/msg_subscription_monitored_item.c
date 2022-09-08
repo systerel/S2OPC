@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_monitored_item.c
 
- Date                 : 05/09/2022 10:04:08
+ Date                 : 08/09/2022 13:07:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -110,6 +110,33 @@ void msg_subscription_monitored_item__getall_msg_delete_monitored_items_req_para
       msg_subscription_monitored_item__p_subscription,
       msg_subscription_monitored_item__p_nb_monitored_items);
    if (*msg_subscription_monitored_item__p_nb_monitored_items <= 0) {
+      *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
+   }
+   else if (*msg_subscription_monitored_item__p_nb_monitored_items > constants__k_n_monitoredItem_max) {
+      *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_bad_too_many_ops;
+   }
+   else {
+      msg_subscription_monitored_item__nb_monitored_items = *msg_subscription_monitored_item__p_nb_monitored_items;
+      *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_ok;
+   }
+}
+
+void msg_subscription_monitored_item__getall_msg_set_monit_mode_monitored_items_req_params(
+   const constants__t_msg_i msg_subscription_monitored_item__p_req_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const msg_subscription_monitored_item__p_sc,
+   constants__t_subscription_i * const msg_subscription_monitored_item__p_subscription,
+   constants__t_monitoringMode_i * const msg_subscription_monitored_item__p_monitoring_mode,
+   t_entier4 * const msg_subscription_monitored_item__p_nb_monitored_items) {
+   msg_subscription_monitored_item_bs__get_msg_set_monit_mode_monitored_items_req_params(msg_subscription_monitored_item__p_req_msg,
+      msg_subscription_monitored_item__p_subscription,
+      msg_subscription_monitored_item__p_monitoring_mode,
+      msg_subscription_monitored_item__p_nb_monitored_items);
+   if (((*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_disabled) &&
+      (*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_sampling)) &&
+      (*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_reporting)) {
+      *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid;
+   }
+   else if (*msg_subscription_monitored_item__p_nb_monitored_items <= 0) {
       *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_bad_nothing_to_do;
    }
    else if (*msg_subscription_monitored_item__p_nb_monitored_items > constants__k_n_monitoredItem_max) {

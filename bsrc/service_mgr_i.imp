@@ -479,6 +479,8 @@ OPERATIONS
                 StatusCode_service <-- treat_subscription_modify_monitored_items_req (session, req_msg, resp_msg)
             OR e_msg_monitored_items_delete_req THEN
                 StatusCode_service <-- treat_subscription_delete_monitored_items_req (session, req_msg, resp_msg)
+            OR e_msg_monitored_items_set_monitoring_mode_req THEN
+                StatusCode_service <-- treat_subscription_set_monit_mode_monitored_items_req (session, req_msg, resp_msg)
             OR e_msg_method_call_req THEN
                 StatusCode_service <-- treat_method_call_request (session, req_msg, resp_msg)
             OR e_msg_node_add_nodes_req THEN

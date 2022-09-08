@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 06/09/2022 12:10:10
+ Date                 : 08/09/2022 13:07:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -118,6 +118,11 @@ extern void subscription_mgr__fill_response_subscription_modify_monitored_items(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items);
+extern void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items(
+   const constants__t_monitoringMode_i subscription_mgr__p_monitoring_mode,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   const t_entier4 subscription_mgr__p_nb_monitored_items);
 extern void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -195,6 +200,11 @@ extern void subscription_mgr__treat_subscription_publish_request(
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service,
    t_bool * const subscription_mgr__async_resp_msg);
 extern void subscription_mgr__treat_subscription_republish_request(
+   const constants__t_session_i subscription_mgr__p_session,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service);
+extern void subscription_mgr__treat_subscription_set_monit_mode_monitored_items_req(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,

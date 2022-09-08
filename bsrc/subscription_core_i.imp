@@ -1126,6 +1126,24 @@ OPERATIONS
     END
     ;
 
+    p_sc <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
+    VAR
+        l_isMonitoredItemFound,
+        l_monitoredItemPointer,
+        l_monitoredItemId,
+        l_subscription
+    IN
+        l_monitoredItemPointer := c_monitoredItemPointer_indet;
+        l_isMonitoredItemFound, l_monitoredItemPointer <-- getall_monitoredItemId (p_mi_id);
+        IF l_isMonitoredItemFound = TRUE THEN
+            set_monit_mode_monitored_item_pointer (l_monitoredItemPointer, p_monitoring_mode);
+            p_sc := e_sc_ok
+        ELSE
+            p_sc := e_sc_bad_monitored_item_id_invalid
+        END
+    END
+    ;
+
     p_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription) =
     BEGIN
         p_validPublishingReqQueued <-- pop_invalid_and_check_valid_publishReqQueued (p_subscription)

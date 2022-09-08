@@ -35,6 +35,7 @@ DEFINITIONS
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId,
+    a_monitoredItemMonitMode,
     a_monitoredItemQueueSize,
     a_subscription_session,
     a_publishInterval,
@@ -114,6 +115,7 @@ DEFINITIONS
     a_monitoredItemId := {} ||
     a_monitoredItemSubs := {} ||
     a_monitoredItemNodeId := {} ||
+    a_monitoredItemMonitMode := {} ||
     a_monitoredItemQueueSize := {} ||
     /* Publish response and notification message content */
     publish_response_message := c_msg_indet ||
@@ -178,6 +180,7 @@ DEFINITIONS
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+    a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
     a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
 
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
@@ -632,6 +635,7 @@ OPERATIONS
             a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
             a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
             a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+            a_monitoredItemMonitMode := s_removedMonitoredItemPointer <<| a_monitoredItemMonitMode ||
             a_monitoredItemQueueSize := s_removedMonitoredItemPointer <<| a_monitoredItemQueueSize ||
 
             s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
@@ -877,6 +881,7 @@ OPERATIONS
                     a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                     a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
                     a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
+                    a_monitoredItemMonitMode(l_monitoredItem) := p_monitoringMode ||
                     a_monitoredItemQueueSize(l_monitoredItem) := p_queueSize ||
                     monitoredItemPointer := l_monitoredItem ||
                     monitoredItemId := l_monitoredItemId ||
@@ -938,6 +943,7 @@ OPERATIONS
         a_monitoredItemId,
         a_monitoredItemSubs,
         a_monitoredItemNodeId,
+        a_monitoredItemMonitMode,
         a_monitored_item_notification_queue,
         a_notification_queue_notifications,
         a_defined_monitored_items
@@ -947,6 +953,7 @@ OPERATIONS
              a_monitoredItemId = a_monitoredItemId$0 &
              a_monitoredItemSubs = a_monitoredItemSubs$0 &
              a_monitoredItemNodeId = a_monitoredItemNodeId$0 &
+             a_monitoredItemMonitMode = a_monitoredItemMonitMode$0 &
              a_monitored_item_notification_queue = a_monitored_item_notification_queue$0 &
              a_notification_queue_notifications = a_notification_queue_notifications$0 &
              a_defined_monitored_items = a_defined_monitored_items$0) &
@@ -956,11 +963,33 @@ OPERATIONS
              a_monitoredItemId = a_monitoredItemId |>> {p_mi_id} &
              a_monitoredItemSubs = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemSubs &
              a_monitoredItemNodeId = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemNodeId &
+             a_monitoredItemMonitMode = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemMonitMode &
              a_monitoredItemQueueSize = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitoredItemQueueSize &
              a_monitored_item_notification_queue = {a_monitoredItemId$0~(p_mi_id)} <<| a_monitored_item_notification_queue &
              a_notification_queue_notifications = {a_monitored_item_notification_queue(a_monitoredItemId$0~(p_mi_id))} <<|a_notification_queue_notifications &
              a_defined_monitored_items = a_defined_monitored_items |>> {a_monitoredItemId$0~(p_mi_id)}
             )
+        )
+    END
+    ;
+
+    p_sc <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
+    PRE
+        p_mi_id : t_monitoredItemId_i &
+        p_monitoring_mode : t_monitoringMode_i &
+        p_monitoring_mode : t_monitoringMode
+    THEN
+        p_sc,
+        a_monitoredItemMonitMode
+        :( p_sc : t_StatusCode_i &
+           a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
+           (p_mi_id /: ran(a_monitoredItemId) =>
+               p_sc = e_sc_bad_monitored_item_id_invalid &
+               a_monitoredItemMonitMode = a_monitoredItemMonitMode$0) &
+           (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+               {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode = {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode$0 &
+               a_monitoredItemMonitMode(a_monitoredItemId~(p_mi_id)) = p_monitoring_mode
+           )
         )
     END
     ;

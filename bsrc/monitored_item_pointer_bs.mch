@@ -30,6 +30,7 @@ ABSTRACT_VARIABLES
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId,
+    a_monitoredItemMonitMode,
     a_monitoredItemQueueSize
 
 INVARIANT
@@ -39,6 +40,7 @@ INVARIANT
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+    a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
     a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter
 
 INITIALISATION
@@ -48,6 +50,7 @@ INITIALISATION
     a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
     a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {}) ||
     a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {}) ||
+    a_monitoredItemMonitMode :(a_monitoredItemMonitMode : s_monitoredItemPointer <-> t_monitoringMode & a_monitoredItemMonitMode = {}) ||
     a_monitoredItemQueueSize :(a_monitoredItemQueueSize : s_monitoredItemPointer <-> t_counter & a_monitoredItemQueueSize = {})
 
 OPERATIONS
@@ -102,6 +105,7 @@ OPERATIONS
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                 a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
                 a_monitoredItemNodeId (l_monitoredItem) := p_nid ||
+                a_monitoredItemMonitMode (l_monitoredItem) := p_monitoringMode ||
                 a_monitoredItemQueueSize (l_monitoredItem) := p_queueSize ||
                 monitoredItemPointer := l_monitoredItem ||
                 monitoredItemId := l_monitoredItemId
@@ -146,6 +150,18 @@ OPERATIONS
     END
     ;
 
+    set_monit_mode_monitored_item_pointer (p_monitoredItemPointer, p_monitoring_mode) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
+        p_monitoring_mode : t_monitoringMode_i &
+        p_monitoring_mode : t_monitoringMode
+    THEN
+        /* TODO: add variable */
+        skip
+    END
+    ;
+
     p_monitoredItemId,
     p_subscription,
     p_nid,
@@ -179,7 +195,7 @@ OPERATIONS
           p_timestampToReturn : t_TimestampsToReturn_i &
           p_timestampToReturn : t_TimestampsToReturn &
           p_monitoringMode : t_monitoringMode_i &
-          p_monitoringMode : t_monitoringMode &
+          p_monitoringMode = a_monitoredItemMonitMode(p_monitoredItemPointer) &
           p_clientHandle : t_client_handle_i
         )
     END

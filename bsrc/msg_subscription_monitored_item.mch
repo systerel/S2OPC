@@ -50,7 +50,13 @@ DEFINITIONS
     d_inv_delete == (
         DelMonitoredItemReq_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
         DelMonitoredItemResp_Allocated : BOOL &
-        DelMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode)
+        DelMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
+    );
+
+    d_inv_set_monitoring_mode == (
+        SetMonitModeMonitoredItemReq_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
+        SetMonitModeMonitoredItemResp_Allocated : BOOL &
+        SetMonitModeMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode)
 
 ABSTRACT_VARIABLES
     nb_monitored_items,
@@ -70,8 +76,11 @@ ABSTRACT_VARIABLES
 
     DelMonitoredItemReq_Id,
     DelMonitoredItemResp_Allocated,
-    DelMonitoredItemResp_StatusCode
+    DelMonitoredItemResp_StatusCode,
 
+    SetMonitModeMonitoredItemReq_Id,
+    SetMonitModeMonitoredItemResp_Allocated,
+    SetMonitModeMonitoredItemResp_StatusCode
 
 INVARIANT
     nb_monitored_items : NAT &
@@ -79,7 +88,8 @@ INVARIANT
 
     d_inv_create &
     d_inv_modify &
-    d_inv_delete
+    d_inv_delete &
+    d_inv_set_monitoring_mode
 
 INITIALISATION
     nb_monitored_items           := 0  ||
@@ -99,7 +109,11 @@ INITIALISATION
 
     DelMonitoredItemReq_Id := {} ||
     DelMonitoredItemResp_Allocated := FALSE ||
-    DelMonitoredItemResp_StatusCode := {}
+    DelMonitoredItemResp_StatusCode := {} ||
+
+    SetMonitModeMonitoredItemReq_Id := {} ||
+    SetMonitModeMonitoredItemResp_Allocated := FALSE ||
+    SetMonitModeMonitoredItemResp_StatusCode := {}
 
 OPERATIONS
 
@@ -427,6 +441,91 @@ OPERATIONS
         p_index <= nb_monitored_items
     THEN
         p_monitored_item_id := DelMonitoredItemReq_Id(p_index)
+    END
+    ;
+
+    p_sc, p_subscription, p_monitoring_mode, p_nb_monitored_items <-- getall_msg_set_monit_mode_monitored_items_req_params (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_set_monitoring_mode_req
+    THEN
+        p_sc,
+        p_subscription,
+        p_monitoring_mode,
+        p_nb_monitored_items,
+        nb_monitored_items,
+        SetMonitModeMonitoredItemReq_Id
+        :(  p_sc                 : t_StatusCode &
+            p_subscription       : t_subscription_i &
+            p_monitoring_mode : t_monitoringMode_i &
+            p_nb_monitored_items : NAT &
+            nb_monitored_items : NAT &
+            nb_monitored_items <= k_n_monitoredItem_max &
+            (p_sc = e_sc_ok
+                =>
+                p_monitoring_mode : t_monitoringMode &
+                p_nb_monitored_items > 0 &
+                p_nb_monitored_items <= k_n_monitoredItem_max &
+                nb_monitored_items = p_nb_monitored_items &
+                SetMonitModeMonitoredItemReq_Id : 1..nb_monitored_items --> t_monitoredItemId_i) &
+            (p_sc /= e_sc_ok
+                =>
+                p_sc : {e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_monitoring_mode_invalid} &
+                d_inv_delete
+            )
+        )
+    END
+    ;
+
+    bres <-- alloc_msg_set_monit_mode_monitored_items_resp_results (p_resp_msg, p_nb_results) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_set_monitoring_mode_resp &
+        p_nb_results : NAT &
+        p_nb_results > 0 &
+        p_nb_results = nb_monitored_items
+    THEN
+        bres, SetMonitModeMonitoredItemResp_Allocated
+        :(bres : BOOL &
+          SetMonitModeMonitoredItemResp_Allocated : BOOL &
+          SetMonitModeMonitoredItemResp_Allocated = bres)
+    END
+    ;
+
+    setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, p_index, p_sc) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_set_monitoring_mode_resp &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_index > 0 &
+        p_index <= nb_monitored_items &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode &
+        SetMonitModeMonitoredItemResp_Allocated = TRUE
+    THEN
+        SetMonitModeMonitoredItemResp_StatusCode(p_index) := p_sc
+    END
+    ;
+
+    p_monitored_item_id <-- getall_set_monit_mode_monitored_item_req_params (p_req_msg, p_index) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_create_req &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_index > 0 &
+        p_index <= nb_monitored_items
+    THEN
+        p_monitored_item_id := SetMonitModeMonitoredItemReq_Id(p_index)
     END
 
 END

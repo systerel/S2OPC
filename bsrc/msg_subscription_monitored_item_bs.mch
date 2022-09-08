@@ -261,5 +261,59 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+
+    p_subscription, p_monitoring_mode, p_nb_monitored_items <-- get_msg_set_monit_mode_monitored_items_req_params (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_set_monitoring_mode_req
+    THEN
+        p_subscription :: t_subscription_i ||
+        p_monitoring_mode :: t_monitoringMode_i ||
+        p_nb_monitored_items :: INT
+    END
+    ;
+
+    p_monitored_item_id <-- getall_set_monit_mode_monitored_item_req_params (p_req_msg, p_index) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_monitored_items_set_monitoring_mode_req &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex
+    THEN
+        p_monitored_item_id :(p_monitored_item_id : t_monitoredItemId_i)
+    END
+    ;
+
+    bres <-- alloc_msg_set_monit_mode_monitored_items_resp_results (p_resp_msg, p_nb_results) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_set_monitoring_mode_resp &
+        p_nb_results : NAT &
+        p_nb_results > 0
+    THEN
+        bres :: BOOL
+    END
+    ;
+
+    setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, p_index, p_sc) =
+    PRE
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_monitored_items_set_monitoring_mode_resp &
+        p_index : NAT &
+        p_index : t_monitoredItemReqIndex &
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode
+    THEN
+        skip
+    END
 
 END

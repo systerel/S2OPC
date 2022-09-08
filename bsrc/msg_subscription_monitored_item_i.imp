@@ -41,7 +41,10 @@ PROMOTES
     setall_msg_modify_monitored_item_resp_params,
     getall_delete_monitored_item_req_params,
     alloc_msg_delete_monitored_items_resp_results,
-    setall_msg_delete_monitored_item_resp_params
+    setall_msg_delete_monitored_item_resp_params,
+    getall_set_monit_mode_monitored_item_req_params,
+    alloc_msg_set_monit_mode_monitored_items_resp_results,
+    setall_msg_set_monit_mode_monitored_item_resp_params
 
 CONCRETE_VARIABLES
     nb_monitored_items
@@ -96,6 +99,27 @@ OPERATIONS
     BEGIN
         p_subscription, p_nb_monitored_items <-- get_msg_delete_monitored_items_req_params (p_req_msg);
         IF p_nb_monitored_items <= 0
+        THEN
+            p_sc := e_sc_bad_nothing_to_do
+        ELSIF p_nb_monitored_items > k_n_monitoredItem_max
+        THEN
+            p_sc := e_sc_bad_too_many_ops
+        ELSE
+            nb_monitored_items := p_nb_monitored_items;
+            p_sc := e_sc_ok
+        END
+    END
+    ;
+
+    p_sc, p_subscription, p_monitoring_mode, p_nb_monitored_items <-- getall_msg_set_monit_mode_monitored_items_req_params (p_req_msg) =
+    BEGIN
+        p_subscription, p_monitoring_mode, p_nb_monitored_items <-- get_msg_set_monit_mode_monitored_items_req_params (p_req_msg);
+        IF p_monitoring_mode /= e_monitoringMode_disabled &
+            p_monitoring_mode /= e_monitoringMode_sampling &
+            p_monitoring_mode /= e_monitoringMode_reporting
+        THEN
+            p_sc := e_sc_bad_monitoring_mode_invalid
+        ELSIF p_nb_monitored_items <= 0
         THEN
             p_sc := e_sc_bad_nothing_to_do
         ELSIF p_nb_monitored_items > k_n_monitoredItem_max

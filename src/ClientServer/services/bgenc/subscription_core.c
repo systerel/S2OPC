@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 08/09/2022 15:15:33
+ Date                 : 08/09/2022 15:17:58
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -972,6 +972,29 @@ void subscription_core__delete_monitored_item(
                subscription_core__l_notificationQueue);
          }
          monitored_item_pointer_bs__delete_monitored_item_pointer(subscription_core__l_monitoredItemPointer);
+      }
+      else {
+         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
+      }
+   }
+}
+
+void subscription_core__set_monit_mode_monitored_item(
+   const constants__t_monitoredItemId_i subscription_core__p_mi_id,
+   const constants__t_monitoringMode_i subscription_core__p_monitoring_mode,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc) {
+   {
+      t_bool subscription_core__l_isMonitoredItemFound;
+      constants__t_monitoredItemPointer_i subscription_core__l_monitoredItemPointer;
+      
+      subscription_core__l_monitoredItemPointer = constants__c_monitoredItemPointer_indet;
+      monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
+         &subscription_core__l_isMonitoredItemFound,
+         &subscription_core__l_monitoredItemPointer);
+      if (subscription_core__l_isMonitoredItemFound == true) {
+         monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
+            subscription_core__p_monitoring_mode);
+         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
       }
       else {
          *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;

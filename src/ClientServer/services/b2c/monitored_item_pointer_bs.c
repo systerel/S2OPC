@@ -257,6 +257,15 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
     }
 }
 
+void monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoring_mode)
+{
+    SOPC_InternalMontitoredItem* monitItem =
+        (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoring_mode;
+}
+
 void monitored_item_pointer_bs__getall_monitoredItemId(
     const constants__t_monitoredItemId_i monitored_item_pointer_bs__p_monitoredItemId,
     t_bool* const monitored_item_pointer_bs__bres,

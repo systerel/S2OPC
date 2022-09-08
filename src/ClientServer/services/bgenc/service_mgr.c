@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/09/2022 10:04:12
+ Date                 : 08/09/2022 13:07:08
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -384,6 +384,12 @@ void service_mgr__treat_session_nano_extended_service_req(
          break;
       case constants__e_msg_monitored_items_delete_req:
          subscription_mgr__treat_subscription_delete_monitored_items_req(service_mgr__session,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_monitored_items_set_monitoring_mode_req:
+         subscription_mgr__treat_subscription_set_monit_mode_monitored_items_req(service_mgr__session,
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
