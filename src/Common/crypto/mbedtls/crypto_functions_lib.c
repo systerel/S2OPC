@@ -1069,7 +1069,8 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
         memcpy(p, &uSequenceNumber, sizeof(uint32_t));
         p += sizeof(uint32_t);
 
-        /* BlockCounter, which is big endian. Initialize to 1 */
+        /* BlockCounter, which is big endian is initialized to 1.
+         * This is an errata from 1.04 revision of part 14 (see https://mantis.opcfoundation.org/view.php?id=6852) */
         p[0] = 0x00;
         p[1] = 0x00;
         p[2] = 0x00;
