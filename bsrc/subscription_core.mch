@@ -973,24 +973,37 @@ OPERATIONS
     END
     ;
 
-    p_sc <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
+    p_sc, p_mi_pointer, p_prevMonitMode <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
     PRE
         p_mi_id : t_monitoredItemId_i &
         p_monitoring_mode : t_monitoringMode_i &
         p_monitoring_mode : t_monitoringMode
     THEN
-        p_sc,
+        p_sc, p_mi_pointer, p_prevMonitMode,
         a_monitoredItemMonitMode
         :( p_sc : t_StatusCode_i &
+           p_mi_pointer : t_monitoredItemPointer_i &
+           p_prevMonitMode : t_monitoringMode_i &
            a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
            (p_mi_id /: ran(a_monitoredItemId) =>
                p_sc = e_sc_bad_monitored_item_id_invalid &
                a_monitoredItemMonitMode = a_monitoredItemMonitMode$0) &
            (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+               p_mi_pointer = a_monitoredItemId~(p_mi_id) &
+               p_monitoring_mode = a_monitoredItemMonitMode(a_monitoredItemId~(p_mi_id)) &
                {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode = {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode$0 &
                a_monitoredItemMonitMode(a_monitoredItemId~(p_mi_id)) = p_monitoring_mode
            )
         )
+    END
+    ;
+
+    clear_monitored_item_notifications (p_monitoredItemPointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer
+    THEN
+        a_notification_queue_notifications := {a_monitored_item_notification_queue(p_monitoredItemPointer)} <<|a_notification_queue_notifications
     END
     ;
 
@@ -1220,7 +1233,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- server_subscription_add_notification_on_node_change
+    bres <-- server_subscription_add_notification_on_node_or_monitMode_change
        (p_monitoredItemPointer,
         p_nid,
         p_aid,

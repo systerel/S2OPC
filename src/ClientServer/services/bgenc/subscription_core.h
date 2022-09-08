@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 08/09/2022 15:17:58
+ Date                 : 09/09/2022 08:18:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -123,6 +123,8 @@ extern void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void subscription_core__clear_monitored_item_notifications(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer);
 extern void subscription_core__close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
 extern void subscription_core__compute_create_monitored_item_revised_params(
@@ -188,7 +190,7 @@ extern void subscription_core__receive_publish_request(
    t_bool * const subscription_core__async_resp_msg,
    constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs);
-extern void subscription_core__server_subscription_add_notification_on_node_change(
+extern void subscription_core__server_subscription_add_notification_on_node_or_monitMode_change(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_NodeId_i subscription_core__p_nid,
    const constants__t_AttributeId_i subscription_core__p_aid,
@@ -235,7 +237,9 @@ extern void subscription_core__server_subscription_core_publish_timeout_return_m
 extern void subscription_core__set_monit_mode_monitored_item(
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_monitoringMode_i subscription_core__p_monitoring_mode,
-   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc,
+   constants__t_monitoredItemPointer_i * const subscription_core__p_mi_pointer,
+   constants__t_monitoringMode_i * const subscription_core__p_prevMonitMode);
 extern void subscription_core__subscription_ack_notif_msg(
    const constants__t_subscription_i subscription_core__p_sub,
    const constants__t_sub_seq_num_i subscription_core__p_seq_num,

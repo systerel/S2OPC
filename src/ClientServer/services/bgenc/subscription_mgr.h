@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 08/09/2022 13:07:20
+ Date                 : 08/09/2022 17:20:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -130,9 +130,14 @@ extern void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_subscription_i subscription_mgr__p_session_sub,
    const t_bool subscription_mgr__p_pub_enabled,
    const t_entier4 subscription_mgr__p_nb_reqs);
-extern void subscription_mgr__local_create_notification_on_monitored_item_if_node_changed(
+extern void subscription_mgr__local_create_delete_notification_on_set_monit_mode_change(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
-   const t_bool subscription_mgr__p_added,
+   const constants__t_monitoringMode_i subscription_mgr__p_prevMonitMode,
+   const constants__t_monitoringMode_i subscription_mgr__p_newMonitMode);
+extern void subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(
+   const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
+   const t_bool subscription_mgr__p_added_or_monitMode,
+   const t_bool subscription_mgr__p_monitMode_enabling,
    const constants__t_NodeId_i subscription_mgr__p_nid);
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,

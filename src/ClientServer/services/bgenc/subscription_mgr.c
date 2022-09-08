@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 08/09/2022 13:07:20
+ Date                 : 09/09/2022 08:47:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -382,9 +382,10 @@ void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
    }
 }
 
-void subscription_mgr__local_create_notification_on_monitored_item_if_node_changed(
+void subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
-   const t_bool subscription_mgr__p_added,
+   const t_bool subscription_mgr__p_added_or_monitMode,
+   const t_bool subscription_mgr__p_monitMode_enabling,
    const constants__t_NodeId_i subscription_mgr__p_nid) {
    {
       constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
@@ -435,7 +436,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_node_chang
             subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_unexpected_error;
             constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(subscription_mgr__l_sc,
                &subscription_mgr__l_valueSc);
-            if (subscription_mgr__p_added == true) {
+            if (subscription_mgr__p_added_or_monitMode == true) {
                session_mgr__get_session_user_server(subscription_mgr__l_session,
                   &subscription_mgr__l_user);
                session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
@@ -463,6 +464,11 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_node_chang
                      subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_ok;
                   }
                }
+               else if (subscription_mgr__p_monitMode_enabling == true) {
+                  subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
+                  constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(subscription_mgr__l_sc,
+                     &subscription_mgr__l_valueSc);
+               }
             }
             else {
                subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
@@ -470,7 +476,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_node_chang
                   &subscription_mgr__l_valueSc);
             }
             if (subscription_mgr__l_bres == true) {
-               subscription_core__server_subscription_add_notification_on_node_change(subscription_mgr__p_monitoredItemPointer,
+               subscription_core__server_subscription_add_notification_on_node_or_monitMode_change(subscription_mgr__p_monitoredItemPointer,
                   subscription_mgr__l_nid,
                   subscription_mgr__l_aid,
                   subscription_mgr__l_value,
@@ -502,8 +508,9 @@ void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
             subscription_mgr__p_monitoredItemQueue,
             &subscription_mgr__l_continue,
             &subscription_mgr__l_monitoredItemPointer);
-         subscription_mgr__local_create_notification_on_monitored_item_if_node_changed(subscription_mgr__l_monitoredItemPointer,
+         subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(subscription_mgr__l_monitoredItemPointer,
             subscription_mgr__p_added,
+            false,
             subscription_mgr__p_nid);
       }
       subscription_core__clear_iter_monitored_item(subscription_mgr__l_iterator);
@@ -591,6 +598,43 @@ void subscription_mgr__fill_response_subscription_delete_monitored_items(
    }
 }
 
+void subscription_mgr__local_create_delete_notification_on_set_monit_mode_change(
+   const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
+   const constants__t_monitoringMode_i subscription_mgr__p_prevMonitMode,
+   const constants__t_monitoringMode_i subscription_mgr__p_newMonitMode) {
+   {
+      constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
+      constants__t_subscription_i subscription_mgr__l_subscription;
+      constants__t_NodeId_i subscription_mgr__l_nid;
+      constants__t_AttributeId_i subscription_mgr__l_aid;
+      constants__t_IndexRange_i subscription_mgr__l_indexRange;
+      constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToReturn;
+      constants__t_monitoringMode_i subscription_mgr__l_monitMode;
+      constants__t_client_handle_i subscription_mgr__l_clientHandle;
+      
+      if ((subscription_mgr__p_prevMonitMode == constants__e_monitoringMode_disabled) &&
+         (subscription_mgr__p_newMonitMode != constants__e_monitoringMode_disabled)) {
+         subscription_core__getall_monitoredItemPointer(subscription_mgr__p_monitoredItemPointer,
+            &subscription_mgr__l_monitoredItemId,
+            &subscription_mgr__l_subscription,
+            &subscription_mgr__l_nid,
+            &subscription_mgr__l_aid,
+            &subscription_mgr__l_indexRange,
+            &subscription_mgr__l_timestampToReturn,
+            &subscription_mgr__l_monitMode,
+            &subscription_mgr__l_clientHandle);
+         subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(subscription_mgr__p_monitoredItemPointer,
+            true,
+            true,
+            subscription_mgr__l_nid);
+      }
+      else if ((subscription_mgr__p_prevMonitMode != constants__e_monitoringMode_disabled) &&
+         (subscription_mgr__p_newMonitMode == constants__e_monitoringMode_disabled)) {
+         subscription_core__clear_monitored_item_notifications(subscription_mgr__p_monitoredItemPointer);
+      }
+   }
+}
+
 void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items(
    const constants__t_monitoringMode_i subscription_mgr__p_monitoring_mode,
    const constants__t_msg_i subscription_mgr__p_req_msg,
@@ -601,6 +645,8 @@ void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items
       t_entier4 subscription_mgr__l_index;
       constants__t_monitoredItemId_i subscription_mgr__l_id;
       constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
+      constants__t_monitoredItemPointer_i subscription_mgr__l_mi_pointer;
+      constants__t_monitoringMode_i subscription_mgr__l_mi_prevMonitMode;
       
       subscription_create_monitored_item_it__init_iter_monitored_item_request(subscription_mgr__p_nb_monitored_items,
          &subscription_mgr__l_continue);
@@ -612,10 +658,17 @@ void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items
             &subscription_mgr__l_id);
          subscription_core__set_monit_mode_monitored_item(subscription_mgr__l_id,
             subscription_mgr__p_monitoring_mode,
-            &subscription_mgr__l_sc);
+            &subscription_mgr__l_sc,
+            &subscription_mgr__l_mi_pointer,
+            &subscription_mgr__l_mi_prevMonitMode);
          msg_subscription_monitored_item__setall_msg_set_monit_mode_monitored_item_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_index,
             subscription_mgr__l_sc);
+         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
+            subscription_mgr__local_create_delete_notification_on_set_monit_mode_change(subscription_mgr__l_mi_pointer,
+               subscription_mgr__l_mi_prevMonitMode,
+               subscription_mgr__p_monitoring_mode);
+         }
       }
    }
 }

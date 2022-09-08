@@ -348,11 +348,13 @@ LOCAL_OPERATIONS
     END
     ;
 
-    local_create_notification_on_monitored_item_if_node_changed (p_monitoredItemPointer, p_added, p_nid) =
+    local_create_notification_if_node_changed_or_monitMode_enabling (p_monitoredItemPointer, p_added_or_monitMode, p_monitMode_enabling, p_nid) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
-        p_added : BOOL &
+        p_added_or_monitMode : BOOL &
+        p_monitMode_enabling : BOOL &
+        (p_monitMode_enabling = TRUE => p_added_or_monitMode = TRUE) &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
@@ -481,6 +483,37 @@ LOCAL_OPERATIONS
                 a_monitored_item_notification_queue := l_MonitoredItemPointers <<| a_monitored_item_notification_queue ||
                 a_notification_queue_notifications := a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications ||
                 a_defined_monitored_items := a_defined_monitored_items |>> l_MonitoredItemPointers
+            END
+        END
+    END
+    ;
+
+    local_create_delete_notification_on_set_monit_mode_change (p_monitoredItemPointer, p_prevMonitMode, p_newMonitMode) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
+        p_prevMonitMode : t_monitoringMode_i &
+        p_prevMonitMode : t_monitoringMode &
+        p_newMonitMode : t_monitoringMode_i &
+        p_newMonitMode : t_monitoringMode
+    THEN
+        LET l_MI_notif_queue BE
+            l_MI_notif_queue = a_monitored_item_notification_queue(p_monitoredItemPointer)
+        IN
+            IF p_prevMonitMode = e_monitoringMode_disabled & p_newMonitMode /= e_monitoringMode_disabled
+            THEN
+                ANY l_notif WHERE
+                    l_notif : t_WriteValuePointer &
+                    l_notif /: ran(a_notification_queue_notifications)
+                THEN
+                    a_notification_queue_notifications :=
+                    a_notification_queue_notifications \/ {l_MI_notif_queue |-> l_notif}
+                END
+            ELSIF p_prevMonitMode /= e_monitoringMode_disabled & p_newMonitMode = e_monitoringMode_disabled
+            THEN
+                a_notification_queue_notifications
+                :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                   a_notification_queue_notifications = {l_MI_notif_queue} <<| a_notification_queue_notifications$0)
             END
         END
     END
@@ -945,7 +978,7 @@ OPERATIONS
     END
     ;
 
-    local_create_notification_on_monitored_item_if_node_changed (p_monitoredItemPointer, p_added, p_nid) =
+    local_create_notification_if_node_changed_or_monitMode_enabling (p_monitoredItemPointer, p_added_or_monitMode, p_monitMode_enabling, p_nid) =
     VAR
         l_monitoredItemId,
         l_subscription,
@@ -989,7 +1022,7 @@ OPERATIONS
                 l_val_ts_srv := c_Timestamp_null;
                 l_sc := e_sc_bad_unexpected_error;
                 l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
-                IF p_added = TRUE
+                IF p_added_or_monitMode = TRUE
                 THEN
                     l_user <-- get_session_user_server(l_session);
                     l_locales <-- get_server_session_preferred_locales(l_session);
@@ -1009,7 +1042,13 @@ OPERATIONS
                             l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
                             l_sc := e_sc_ok
                         END
-                    END
+                    ELSIF p_monitMode_enabling = TRUE
+                    THEN
+                        /* Node is unknown on monitoring node enabling
+                           Note: we do not manage case of absent but known available node which should report initial custom SC from application */
+                        l_sc := e_sc_bad_node_id_unknown;
+                        l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc)
+                    END /* ELSE: remains unexpected error  */
                 ELSE
                     /* Node has been deleted */
                     l_sc := e_sc_bad_node_id_unknown;
@@ -1018,7 +1057,7 @@ OPERATIONS
                 ;
                 IF l_bres = TRUE
                 THEN
-                    l_bres <-- server_subscription_add_notification_on_node_change
+                    l_bres <-- server_subscription_add_notification_on_node_or_monitMode_change
                     (p_monitoredItemPointer,
                         l_nid,
                         l_aid,
@@ -1042,7 +1081,7 @@ OPERATIONS
         l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
         WHILE l_continue = TRUE DO
             l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
-            local_create_notification_on_monitored_item_if_node_changed (l_monitoredItemPointer, p_added, p_nid)
+            local_create_notification_if_node_changed_or_monitMode_enabling (l_monitoredItemPointer, p_added, FALSE, p_nid)
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &
@@ -1134,20 +1173,57 @@ OPERATIONS
     END
     ;
 
+    local_create_delete_notification_on_set_monit_mode_change (p_monitoredItemPointer, p_prevMonitMode, p_newMonitMode) =
+    VAR
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitMode,
+        l_clientHandle
+    IN
+        IF p_prevMonitMode = e_monitoringMode_disabled & p_newMonitMode /= e_monitoringMode_disabled
+        THEN
+            /* Generate a notification when the monitoring mode is not anymore disabled */
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_indexRange,
+            l_timestampToReturn,
+            l_monitMode,
+            l_clientHandle
+              <--getall_monitoredItemPointer (p_monitoredItemPointer);
+            local_create_notification_if_node_changed_or_monitMode_enabling (p_monitoredItemPointer, TRUE, TRUE, l_nid)
+        ELSIF p_prevMonitMode /= e_monitoringMode_disabled & p_newMonitMode = e_monitoringMode_disabled
+        THEN
+            /* Remove notification if the monitoring mode is newly disabled */
+            clear_monitored_item_notifications (p_monitoredItemPointer)
+        END
+    END
+    ;
+
     fill_response_subscription_set_monit_mode_monitored_items (p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
         l_id,
-        l_sc
+        l_sc,
+        l_mi_pointer,
+        l_mi_prevMonitMode
     IN
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_monitored_item_request;
             l_id <-- getall_set_monit_mode_monitored_item_req_params (p_req_msg, l_index);
-            l_sc <-- set_monit_mode_monitored_item (l_id, p_monitoring_mode);
-            setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, l_index, l_sc)
-
+            l_sc, l_mi_pointer, l_mi_prevMonitMode <-- set_monit_mode_monitored_item (l_id, p_monitoring_mode);
+            setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, l_index, l_sc);
+            IF l_sc = e_sc_ok
+            THEN
+                local_create_delete_notification_on_set_monit_mode_change (l_mi_pointer, l_mi_prevMonitMode, p_monitoring_mode)
+            END
         INVARIANT
             rreqs_to_iterate <: t_monitoredItemReqIndex &
             rreqs_iterated   <: t_monitoredItemReqIndex &

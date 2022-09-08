@@ -75,6 +75,17 @@ static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, void* val)
     SOPC_Free(notifElt);
 }
 
+void monitored_item_notification_queue_bs__clear_monitored_item_notification_queue(
+    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue)
+{
+    SOPC_InternalMontitoredItem* monitoredItemPointer =
+        (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
+    assert(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
+    SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
+    SOPC_SLinkedList_Clear(monitoredItemPointer->notifQueue);
+}
+
 void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue)
@@ -396,6 +407,12 @@ void monitored_item_notification_queue_bs__get_monitored_item_notification_queue
     {
         *monitored_item_notification_queue_bs__bres = true;
         *monitored_item_notification_queue_bs__queue = monitoredItemPointer->notifQueue;
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "MonitoredItem (%" PRIu32 ") notification queue is not allocated",
+                               monitoredItemPointer->monitoredItemId);
     }
 }
 

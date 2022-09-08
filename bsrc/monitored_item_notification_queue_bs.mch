@@ -104,6 +104,17 @@ OPERATIONS
     END
     ;
 
+    clear_monitored_item_notification_queue (p_monitoredItem, p_queue) =
+    PRE
+        p_monitoredItem : t_monitoredItemPointer_i &
+        p_monitoredItem : t_monitoredItemPointer &
+        p_queue : t_notificationQueue_i &
+        a_monitored_item_notification_queue(p_monitoredItem) = p_queue
+    THEN
+        a_notification_queue_notifications := {p_queue} <<|a_notification_queue_notifications
+    END
+    ;
+
     clear_and_deallocate_monitored_item_notification_queue (p_monitoredItem, p_queue) =
     PRE
         p_monitoredItem : t_monitoredItemPointer_i &

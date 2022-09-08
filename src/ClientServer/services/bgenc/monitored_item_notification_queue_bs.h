@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 06/09/2022 12:10:20
+ Date                 : 09/09/2022 08:18:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -70,6 +70,9 @@ extern void monitored_item_notification_queue_bs__allocate_new_monitored_item_no
    t_bool * const monitored_item_notification_queue_bs__bres,
    constants__t_notificationQueue_i * const monitored_item_notification_queue_bs__queue);
 extern void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue);
+extern void monitored_item_notification_queue_bs__clear_monitored_item_notification_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue);
 extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(
