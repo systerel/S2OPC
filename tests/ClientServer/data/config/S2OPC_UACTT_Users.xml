@@ -18,5 +18,47 @@
       <UserAuthorization/>
     </UserPassword>
   </UserPasswordConfiguration>
+  <UserCertificates>
+		<!-- default right is read only -->
+		<DefaultCertificateAuthorization write="false" read="true" execute="false" addnode="false"/>
+		<TrustedIssuers>
+			<TrustedIssuer root="true" cert_path="trusted_usr/cacert.der" revocation_list_path="revoked_usr/cacrl.der"/>
+			<TrustedIssuer root="true" cert_path="trusted_usr/ctt_ca1T.der" revocation_list_path="revoked_usr/ctt_ca1T.crl"/>
+			<!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
+			<TrustedIssuer root="true" cert_path="trusted_usr/ctt_ca1TC.der"/>
+			<!-- Intermediate CAs shall be provided in the order child to parent -->
+			<TrustedIssuer root="false" cert_path="trusted_usr/ctt_ca1I_ca2T.der" revocation_list_path="revoked_usr/ctt_ca1I_ca2T.crl"/>
+		</TrustedIssuers>
+		<IssuedCertificates>
+			<!-- rigths are not mandatory, if they are not defined or partially defined, then the default certificate rights are used -->
+			<IssuedCertificate path="issued_usr/ctt_usrT.der"/>
+			<IssuedCertificate path="issued_usr/ctt_usrTE.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_usrTSincorrect.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_usrTV.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1I_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1IC_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1IC_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1T_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1T_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1TC_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1TC_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1U_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1U_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1I_ca2T_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1I_ca2T_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1T_ca2U_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1T_ca2U_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1TC_ca2I_usrT.der" write="true" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1TC_ca2I_usrTR.der" write="true" read="true" execute="true" addnode="true"/>
+		</IssuedCertificates>
+		<UntrustedIssuers>
+			<!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
+			<UntrustedIssuer root="true" cert_path="untrusted_usr/ctt_ca1IC.der"/>
+			<UntrustedIssuer root="true" cert_path="untrusted_usr/ctt_ca1I.der" revocation_list_path="revoked_usr/ctt_ca1I.crl"/>
+			<!-- Intermediate CAs shall be provided in the order child to parent -->
+			<UntrustedIssuer root="false" cert_path="untrusted_usr/ctt_ca1TC_ca2I.der" revocation_list_path="revoked_usr/ctt_ca1TC_ca2I.crl"/>
+		</UntrustedIssuers>
+  </UserCertificates>
 
 </S2OPC_Users>
