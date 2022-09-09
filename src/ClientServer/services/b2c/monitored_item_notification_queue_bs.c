@@ -270,10 +270,9 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
             ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->indexRange;
         if (NULL != indexRange)
         {
-            retStatus = constants_statuscodes_bs__e_sc_ok ==
-                        util_read_value_indexed_helper(
-                            &pNewWriteValue->Value.Value,
-                            &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value, indexRange);
+            retStatus = util_status_code__B_to_return_status_C(util_read_value_indexed_helper(
+                &pNewWriteValue->Value.Value, &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value,
+                indexRange));
         }
         else
         {
