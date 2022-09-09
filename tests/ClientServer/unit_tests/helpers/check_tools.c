@@ -4700,11 +4700,11 @@ START_TEST(test_ua_variant_set_range_scalar)
         variant.DoNotClear = false;
 
         SOPC_Variant_Initialize(&src);
-        variant.ArrayType = SOPC_VariantArrayType_SingleValue;
-        variant.BuiltInTypeId = type_id;
-        variant.DoNotClear = false;
+        src.ArrayType = SOPC_VariantArrayType_SingleValue;
+        src.BuiltInTypeId = type_id;
+        src.DoNotClear = false;
 
-        ck_assert_uint_eq(SOPC_STATUS_NOK, SOPC_Variant_SetRange(&variant, &src, array_range));
+        ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_Variant_SetRange(&variant, &src, array_range));
 
         SOPC_Variant_Clear(&src);
         SOPC_Variant_Clear(&variant);

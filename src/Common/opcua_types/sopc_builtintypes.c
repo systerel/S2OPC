@@ -5296,16 +5296,14 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     }
 }
 
-static bool has_range_string(const SOPC_String* str, const SOPC_NumericRange* range)
+static bool has_range_string(const SOPC_String* str, const SOPC_Dimension* dimension)
 {
-    assert(range->n_dimensions == 1);
-
     if (str->Length <= 0)
     {
         return false;
     }
 
-    return range->dimensions[0].start < ((uint32_t) str->Length);
+    return dimension->start < ((uint32_t) str->Length);
 }
 
 static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range)
@@ -5317,11 +5315,11 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
         // Dereferencing scalars is allowed for strings and bytestrings
         if (variant->BuiltInTypeId == SOPC_String_Id)
         {
-            return has_range_string(&variant->Value.String, range);
+            return has_range_string(&variant->Value.String, &range->dimensions[0]);
         }
         else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return has_range_string(&variant->Value.Bstring, range);
+            return has_range_string(&variant->Value.Bstring, &range->dimensions[0]);
         }
     }
 
@@ -5338,6 +5336,63 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
     return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length);
 }
 
+static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range)
+{
+    assert(range->n_dimensions > 1);
+    if (range->n_dimensions > INT32_MAX)
+    {
+        return false;
+    }
+
+    bool has_range = true;
+    int32_t n_dimensions = (int32_t) range->n_dimensions;
+
+    if (variant->ArrayType == SOPC_VariantArrayType_Array && 2 == range->n_dimensions)
+    {
+        SOPC_String* strArray = NULL;
+        // Dereferencing 2-dimension array is allowed for strings and bytestrings
+        if (variant->BuiltInTypeId == SOPC_String_Id)
+        {
+            strArray = variant->Value.Array.Content.StringArr;
+        }
+        else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
+        {
+            strArray = variant->Value.Array.Content.BstringArr;
+        }
+        else
+        {
+            return false;
+        }
+        // First range dimension limit the strings concerned in the string array
+        has_range = range->dimensions[0].start < (uint32_t) variant->Value.Array.Length;
+        for (uint32_t i = range->dimensions[0].start;
+             i <= range->dimensions[0].end && i < (uint32_t) variant->Value.Array.Length && has_range; i++)
+        {
+            // Second range dimension limit the part of the string concerned
+            has_range &= has_range_string(&strArray[i], &range->dimensions[1]);
+        }
+    }
+    else
+    {
+        if (variant->ArrayType != SOPC_VariantArrayType_Matrix)
+        {
+            return false;
+        }
+
+        if (variant->Value.Matrix.Dimensions != n_dimensions)
+        {
+            return false;
+        }
+
+        for (size_t i = 0; i < range->n_dimensions && has_range; i++)
+        {
+            has_range &= range->dimensions[i].start < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
+        }
+    }
+
+    return has_range;
+}
+
 SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool* has_range)
 {
     switch (range->n_dimensions)
@@ -5348,22 +5403,19 @@ SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_
         *has_range = has_range_array(variant, range);
         return SOPC_STATUS_OK;
     default:
-        // Matrix will come later
-        return SOPC_STATUS_NOT_SUPPORTED;
+        *has_range = has_range_matrix(variant, range);
+        return SOPC_STATUS_OK;
     }
 }
 
 // Common treatment for slicing both strings and bytestrings
 static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
                                                  const SOPC_String* src,
-                                                 const SOPC_NumericRange* range)
+                                                 const SOPC_Dimension* dimension)
 {
-    assert(range->n_dimensions == 1);
-
-    SOPC_Dimension* dim = &range->dimensions[0];
     assert(src->Length >= 0);
     uint32_t src_length = (uint32_t) src->Length;
-    uint32_t start = dim->start;
+    uint32_t start = dimension->start;
 
     if (start >= src_length)
     {
@@ -5372,7 +5424,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
         return SOPC_STATUS_OK;
     }
 
-    uint32_t end = (dim->end >= src_length) ? (src_length - 1) : dim->end;
+    uint32_t end = (dimension->end >= src_length) ? (src_length - 1) : dimension->end;
     assert(end >= start);
 
     uint32_t dst_len = end - start + 1;
@@ -5390,7 +5442,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus get_range_string(SOPC_Variant* dst, const SOPC_String* src, const SOPC_NumericRange* range)
+static SOPC_ReturnStatus get_range_string(SOPC_Variant* dst, const SOPC_String* src, const SOPC_Dimension* dimension)
 {
     dst->ArrayType = SOPC_VariantArrayType_SingleValue;
     dst->BuiltInTypeId = SOPC_String_Id;
@@ -5398,10 +5450,12 @@ static SOPC_ReturnStatus get_range_string(SOPC_Variant* dst, const SOPC_String* 
 
     SOPC_String_Initialize(&dst->Value.String);
 
-    return get_range_string_helper(&dst->Value.String, src, range);
+    return get_range_string_helper(&dst->Value.String, src, dimension);
 }
 
-static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst, const SOPC_String* src, const SOPC_NumericRange* range)
+static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst,
+                                              const SOPC_String* src,
+                                              const SOPC_Dimension* dimension)
 {
     dst->ArrayType = SOPC_VariantArrayType_SingleValue;
     dst->BuiltInTypeId = SOPC_ByteString_Id;
@@ -5409,7 +5463,7 @@ static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst, const SOPC_Stri
 
     SOPC_ByteString_Initialize(&dst->Value.Bstring);
 
-    return get_range_string_helper(&dst->Value.Bstring, src, range);
+    return get_range_string_helper(&dst->Value.Bstring, src, dimension);
 }
 
 static size_t size_of_builtin_type(SOPC_BuiltinId builtInTypeId)
@@ -5432,11 +5486,11 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
         // Dereferencing scalars is allowed for strings and bytestrings
         if (src->BuiltInTypeId == SOPC_String_Id)
         {
-            return get_range_string(dst, &src->Value.String, range);
+            return get_range_string(dst, &src->Value.String, &range->dimensions[0]);
         }
         else if (src->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return get_range_bytestring(dst, &src->Value.Bstring, range);
+            return get_range_bytestring(dst, &src->Value.Bstring, &range->dimensions[0]);
         }
     }
 
@@ -5510,6 +5564,176 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus get_range_matrix_on_string_array(SOPC_Variant* dst,
+                                                          const SOPC_Variant* src,
+                                                          const SOPC_NumericRange* range)
+{
+    assert(src->ArrayType == SOPC_VariantArrayType_Array);
+    assert(2 == range->n_dimensions);
+
+    if (range->dimensions[0].start >= (uint32_t) src->Value.Array.Length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    uint32_t array_end_index = (range->dimensions[0].end < (uint32_t) src->Value.Array.Length)
+                                   ? range->dimensions[0].end
+                                   : (uint32_t) src->Value.Array.Length - 1;
+    uint32_t array_length = array_end_index - range->dimensions[0].start + 1;
+
+    SOPC_String* srcStrArray = NULL;
+    SOPC_String* dstStrArray = SOPC_Calloc(array_length, sizeof(*dstStrArray));
+    if (NULL == dstStrArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    dst->ArrayType = SOPC_VariantArrayType_Array;
+    dst->BuiltInTypeId = src->BuiltInTypeId;
+    dst->DoNotClear = false;
+    dst->Value.Array.Length = (int32_t) array_length;
+    if (src->BuiltInTypeId == SOPC_String_Id)
+    {
+        srcStrArray = src->Value.Array.Content.StringArr;
+        dst->Value.Array.Content.StringArr = dstStrArray;
+    }
+    else if (src->BuiltInTypeId == SOPC_ByteString_Id)
+    {
+        srcStrArray = src->Value.Array.Content.BstringArr;
+        dst->Value.Array.Content.BstringArr = dstStrArray;
+    }
+    else
+    {
+        SOPC_Free(dstStrArray);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus grStatus = SOPC_STATUS_OK;
+    // First range dimension limit the strings concerned in the string array
+    for (uint32_t i = range->dimensions[0].start; i < array_length && SOPC_STATUS_OK == grStatus; i++)
+    {
+        // Second range dimension limit the part of the string concerned
+        grStatus = get_range_string_helper(&dstStrArray[i], &srcStrArray[i], &range->dimensions[1]);
+    }
+
+    return grStatus;
+}
+
+static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    /*
+     * Destination matrix: new matrix to get the specified ranges: dimensions lengths will be length of intersection
+     *                                                             of range and source matrix data
+     * Source matrix: data source for the specified ranges to read, dimensions lengths might differ from ranges
+     * lengths
+     */
+
+    assert(range->n_dimensions > 1);
+    if (range->n_dimensions > INT32_MAX)
+    {
+        return false;
+    }
+
+    int32_t n_dimensions = (int32_t) range->n_dimensions;
+
+    if (src->ArrayType == SOPC_VariantArrayType_Array)
+    {
+        return get_range_matrix_on_string_array(dst, src, range);
+    }
+
+    if (src->ArrayType != SOPC_VariantArrayType_Matrix)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
+    const size_t type_size = size_of_builtin_type(src->BuiltInTypeId);
+
+    dst->ArrayType = SOPC_VariantArrayType_Matrix;
+    dst->BuiltInTypeId = src->BuiltInTypeId;
+    dst->DoNotClear = false;
+    dst->Value.Matrix.Dimensions = n_dimensions;
+
+    /* Compute total length of destination array: limited by each dimension range and source array length */
+    uint32_t total_dst_len = 0;
+    for (size_t i = 0; i < range->n_dimensions; i++)
+    {
+        SOPC_Dimension* dim = &range->dimensions[i];
+        assert(src->Value.Array.Length >= 0);
+        uint32_t start_in_dim = dim->start;
+        uint32_t array_length = (uint32_t) src->Value.Matrix.ArrayDimensions[i];
+        uint32_t end_in_dim = (dim->end >= array_length) ? (array_length - 1) : dim->end;
+        assert(end_in_dim >= start_in_dim);
+        total_dst_len += end_in_dim - start_in_dim + 1;
+    }
+    if (total_dst_len > INT32_MAX)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Allocate array (flattened matrix) */
+    SOPC_ReturnStatus status =
+        AllocVariantArrayBuiltInType(dst->BuiltInTypeId, &dst->Value.Matrix.Content, (int32_t) total_dst_len);
+
+    if (status != SOPC_STATUS_OK)
+    {
+        return status;
+    }
+
+    uint32_t nextDimStartIdxInSrcArray = 0;
+    uint32_t nextDimStartIdxInDstArray = 0;
+    for (uint32_t i = 0; i < (uint32_t) range->n_dimensions; i++)
+    {
+        SOPC_Dimension* dim = &range->dimensions[i];
+        assert(src->Value.Array.Length >= 0);
+        uint32_t start_in_dim = dim->start;
+        uint32_t dim_length = (uint32_t) src->Value.Matrix.ArrayDimensions[i];
+        uint32_t end_in_dim = (dim->end >= dim_length) ? (dim_length - 1) : dim->end;
+        assert(end_in_dim >= start_in_dim);
+
+        uint32_t dst_len_in_dim = end_in_dim - start_in_dim + 1;
+
+        if (start_in_dim >= dim_length)
+        {
+            // Nothing to copy
+            return SOPC_STATUS_OK;
+        }
+
+        /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
+         * Higher rank dimensions are serialized first.
+         * For example, an array with dimensions [3,2] is written in this order:
+         * [0,0], [0,1], [0,2], [1,0], [1,1]
+         */
+        uint32_t start_in_src_array = nextDimStartIdxInSrcArray + start_in_dim;
+
+        // Untyped pointer to the source array data at the correct offset
+        const uint8_t* src_j = *((const uint8_t* const*) &src->Value.Matrix.Content) + start_in_src_array * type_size;
+        uint8_t* dst_j = *((uint8_t**) &dst->Value.Matrix.Content) + nextDimStartIdxInDstArray * type_size;
+
+        for (uint32_t j = 0; j < dst_len_in_dim; ++j)
+        {
+            status = copyFunction(dst_j, src_j);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                return status;
+            }
+
+            src_j += type_size;
+            dst_j += type_size;
+
+            // Update array length so that SOPC_Variant_Clear clears the copied
+            // items in case of failure
+            dst->Value.Matrix.ArrayDimensions[i] = (int32_t)(j + 1);
+        }
+        /* Next index in flattened source array is previous + current source array dimension length */
+        nextDimStartIdxInSrcArray += dim_length;
+        /* Next index in flattened destination array is previous + the number of copied elements */
+        nextDimStartIdxInDstArray += dst_len_in_dim;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
     switch (range->n_dimensions)
@@ -5520,16 +5744,14 @@ SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* s
         return get_range_array(dst, src, range);
     default:
         // Matrix will come later
-        return SOPC_STATUS_NOT_SUPPORTED;
+        return get_range_matrix(dst, src, range);
     }
 }
 
-static SOPC_ReturnStatus set_range_string(SOPC_String* variant, const SOPC_String* src, const SOPC_NumericRange* range)
+static SOPC_ReturnStatus set_range_string(SOPC_String* variant, const SOPC_String* src, const SOPC_Dimension* dimension)
 {
-    assert(range->n_dimensions == 1);
-
-    uint32_t start = range->dimensions[0].start;
-    uint32_t end = range->dimensions[0].end;
+    uint32_t start = dimension->start;
+    uint32_t end = dimension->end;
     assert(end >= start);
 
     if (((uint32_t) src->Length) != (end - start + 1))
@@ -5568,12 +5790,13 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
         // Dereferencing scalars is allowed for strings and bytestrings
         if (src->BuiltInTypeId == SOPC_String_Id)
         {
-            return set_range_string(&variant->Value.String, &src->Value.String, range);
+            return set_range_string(&variant->Value.String, &src->Value.String, &range->dimensions[0]);
         }
         else if (src->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return set_range_string(&variant->Value.Bstring, &src->Value.Bstring, range);
+            return set_range_string(&variant->Value.Bstring, &src->Value.Bstring, &range->dimensions[0]);
         }
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (src->ArrayType != SOPC_VariantArrayType_Array)
@@ -5649,6 +5872,171 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus set_range_matrix_on_string_array(SOPC_Variant* dst,
+                                                          const SOPC_Variant* src,
+                                                          const SOPC_NumericRange* range)
+{
+    assert(dst->ArrayType == SOPC_VariantArrayType_Array);
+    assert(2 == range->n_dimensions);
+
+    if (range->dimensions[0].start >= (uint32_t) dst->Value.Array.Length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    bool set_range = true;
+    SOPC_String* strArray = NULL;
+    if (dst->BuiltInTypeId == SOPC_String_Id)
+    {
+        strArray = dst->Value.Array.Content.StringArr;
+    }
+    else if (dst->BuiltInTypeId == SOPC_ByteString_Id)
+    {
+        strArray = dst->Value.Array.Content.BstringArr;
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    uint32_t array_end_index = (range->dimensions[0].end < (uint32_t) dst->Value.Array.Length)
+                                   ? range->dimensions[0].end
+                                   : (uint32_t) dst->Value.Array.Length - 1;
+    uint32_t array_length = array_end_index - range->dimensions[0].start + 1;
+    // First range dimension limit the strings concerned in the string array
+    for (uint32_t i = range->dimensions[0].start; i < array_length && set_range; i++)
+    {
+        // Second range dimension limit the part of the string concerned
+        set_range &= set_range_string(&strArray[i], &src->Value.Array.Content.StringArr[i], &range->dimensions[1]);
+    }
+
+    if (set_range)
+    {
+        return SOPC_STATUS_OK;
+    }
+    else
+    {
+        return SOPC_STATUS_NOK;
+    }
+}
+
+static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
+{
+    /*
+     * Destination matrix: existing matrix to be modify: dimensions lengths might differ from ranges lengths
+     * Source matrix: data source for the specified ranges to write, dimensions lengths shall match ranges lengths
+     */
+
+    assert(range->n_dimensions > 1);
+    if (range->n_dimensions > INT32_MAX)
+    {
+        return false;
+    }
+
+    if (dst->BuiltInTypeId != src->BuiltInTypeId)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (src->ArrayType == SOPC_VariantArrayType_Array)
+    {
+        return set_range_matrix_on_string_array(dst, src, range);
+    }
+
+    if (src->ArrayType != SOPC_VariantArrayType_Matrix)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
+    SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(src->BuiltInTypeId);
+
+    if (NULL == copyFunction || NULL == clearFunction)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    const size_t type_size = size_of_builtin_type(src->BuiltInTypeId);
+
+    /* Note: fix to ensure we will free the variant content at the end.
+     * If the variant was a static definition it has DoNotClear flag
+     * but since we will do partial modification (to be cleared) on it we need to change that.
+     * Make the variant "clearable" by copying itself before the partial modification.
+     */
+    if (dst->DoNotClear)
+    {
+        SOPC_Variant tmp;
+        SOPC_Variant_Initialize(&tmp);
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(&tmp, dst);
+        if (status != SOPC_STATUS_OK)
+        {
+            return status;
+        }
+        *dst = tmp;
+    }
+
+    /* Indexes in arrays (flattened matrix) */
+    uint32_t nextDimStartIdxInSrcArray = 0;
+    uint32_t nextDimStartIdxInDstArray = 0;
+    for (size_t i = 0; i < range->n_dimensions; i++)
+    {
+        SOPC_Dimension* dim = &range->dimensions[i];
+        uint32_t start_in_dim = dim->start;
+        uint32_t end_in_dim = dim->end;
+        assert(end_in_dim >= start_in_dim);
+
+        /* Source array dimension shall match the range length (values to write in dimension) */
+        if (((uint32_t) src->Value.Matrix.ArrayDimensions[i]) != (end_in_dim - start_in_dim + 1))
+        {
+            return SOPC_STATUS_NOK;
+        }
+
+        if (dst->Value.Matrix.ArrayDimensions[i] <= 0 ||
+            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= start_in_dim)
+        {
+            // Nothing to copy
+            return SOPC_STATUS_OK;
+        }
+
+        if (((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= end_in_dim)
+        {
+            end_in_dim = (uint32_t)(dst->Value.Matrix.ArrayDimensions[i] - 1);
+        }
+        uint32_t dst_len_in_dim = end_in_dim - start_in_dim + 1;
+
+        /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
+         * Higher rank dimensions are serialized first.
+         * For example, an array with dimensions [3,2] is written in this order:
+         * [0,0], [0,1], [0,2], [1,0], [1,1]
+         */
+        uint32_t start_in_dst_array = nextDimStartIdxInDstArray + start_in_dim;
+
+        // Untyped pointer to the source array data at the correct offset
+        const uint8_t* src_j =
+            *((const uint8_t* const*) &src->Value.Matrix.Content) + nextDimStartIdxInSrcArray * type_size;
+        uint8_t* dst_j = *((uint8_t**) &dst->Value.Matrix.Content) + start_in_dst_array * type_size;
+
+        for (uint32_t j = 0; j < dst_len_in_dim; ++j)
+        {
+            clearFunction(dst_j);
+            SOPC_ReturnStatus status = copyFunction(dst_j, src_j);
+
+            if (status != SOPC_STATUS_OK)
+            {
+                return status;
+            }
+
+            src_j += type_size;
+            dst_j += type_size;
+        }
+        /* Next index in flattened source array is previous + current source array dimension length */
+        nextDimStartIdxInSrcArray += (uint32_t) src->Value.Matrix.ArrayDimensions[i];
+        /* Next index in flattened destination array is previous + current dest array dimension length */
+        nextDimStartIdxInDstArray += (uint32_t) dst->Value.Matrix.ArrayDimensions[i];
+    }
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
     switch (range->n_dimensions)
@@ -5658,8 +6046,7 @@ SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Varian
     case 1:
         return set_range_array(variant, src, range);
     default:
-        // Matrix will come later
-        return SOPC_STATUS_NOT_SUPPORTED;
+        return set_range_matrix(variant, src, range);
     }
 }
 

@@ -1580,8 +1580,7 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Var
                                      "read_value_indexed: matrix index range not supported");
         }
 
-        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range
-                                                                       // either (matrix)
+        return constants_statuscodes_bs__e_sc_bad_index_range_invalid;
     }
 
     if (!has_range)
