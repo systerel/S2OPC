@@ -26,6 +26,7 @@
 
 #include "expat.h"
 
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
@@ -33,8 +34,10 @@
 #include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_types.h"
 
 /* Default name for rejected token with wrong username (to avoid timing attack) */
@@ -50,7 +53,14 @@ typedef enum
     PARSE_USERPASSWORD_CONFIGURATION, // ..In UserPasswordConfiguration tag
     PARSE_USERPASSWORD,               // ....In a UserPassword tag
     PARSE_USERAUTHORIZATION,          // ......In a UserAuthorization tag
-    PARSE_USERCERTIFICATE,
+    PARSE_USERCERTIFICATES,           // ..In userCertificates
+    PARSE_DEFAULT_CERTAUTHORIZATION,  // ....In a DefaultCertificateAuthorization tag
+    PARSE_TRUSTED_ISSUERS,            // ....In a TrustedIssuers tag
+    PARSE_TRUSTED_ISSUER,             // ......In a TrustedIssuer tag
+    PARSE_ISSUED_CERTS,               // ....In a IssuedCertificates tag
+    PARSE_ISSUED_CERT,                // ......In a IssuedCertificate tag
+    PARSE_UNTRUSTED_ISSUERS,          // ....In a UntrustedIssuers tag
+    PARSE_UNTRUSTED_ISSUER,           // ......In a UntrustedIssuer tag
 } parse_state_t;
 
 typedef struct user_rights
@@ -71,19 +81,22 @@ typedef struct user_password
 
 } user_password;
 
-typedef struct user_cert_thumbprint
+typedef struct user_cert
 {
-    SOPC_ByteString thumbprint;
+    SOPC_CertificateList* pCert; // Contain a single certificate
+    SOPC_ByteString rawCert;
+    bool has_rights;
     user_rights rights; // mask of SOPC_UserAuthorization_OperationType
-
-} user_cert_thumbprint;
+} user_cert;
 
 typedef struct _SOPC_UsersConfig
 {
+    SOPC_PKIProvider* pX509_UserIdentity_PKI;
     SOPC_Dict* users;
-    SOPC_Dict* validUserCertificates;
+    SOPC_Dict* certificates; // dict{key = raw certificate as SOPC_ByteString; value = user_cert structure}
     user_rights anonRights;
     user_password* rejectedUser;
+    user_rights defaultCertRights;
 } SOPC_UsersConfig;
 
 struct parse_context_t
@@ -91,11 +104,32 @@ struct parse_context_t
     SOPC_HelperExpatCtx helper_ctx;
 
     SOPC_Dict* users;
-    SOPC_Dict* validUserCertificates;
+    SOPC_Dict* certificates; // dict{key = raw certificate as SOPC_ByteString; value = user_cert structure}
 
     bool currentAnonymous;
     bool hasAnonymous;
     user_rights anonymousRights;
+
+    bool userCertSet;
+    bool defaultCertRightsSet;
+    user_rights defaultCertRights;
+    bool trustedIssuersSet;
+    SOPC_Array* trustedRootIssuers;
+    SOPC_Array* trustedIntermediateIssuers;
+    bool issuedCertificatesSet;
+    SOPC_Array* issuedCertificates;
+    bool untrustedIssuersSet;
+    SOPC_Array* untrustedRootIssuers;
+    SOPC_Array* untrustedIntermediateIssuers;
+    bool crlSet;
+    SOPC_Array* crlCertificates;
+
+    char** trustedRootIssuersList;
+    char** trustedIntermediateIssuersList;
+    char** issuedCertificatesList;
+    char** untrustedRootIssuersList;
+    char** untrustedIntermediateIssuersList;
+    char** certificateRevocationList;
 
     user_password* currentUserPassword;
     bool usrPwdCfgSet;
@@ -103,7 +137,7 @@ struct parse_context_t
     size_t hashLength;
     size_t saltLength;
 
-    user_cert_thumbprint* currentUserCert;
+    user_cert* currentCert;
     parse_state_t state;
 };
 
@@ -379,22 +413,22 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
 static bool end_usercertificate(struct parse_context_t* ctx)
 {
     bool found = false;
-    SOPC_Dict_Get(ctx->users, (SOPC_String*) &ctx->currentUserCert->thumbprint, &found);
+    SOPC_Dict_Get(ctx->users, (SOPC_String*) &ctx->currentCert->thumbprint, &found);
     if (found)
     {
         LOG_XML_ERRORF(ctx->helper_ctx.parser, "Duplicated thumbprint %s found in XML",
-                       SOPC_String_GetRawCString((SOPC_String*) &ctx->currentUserCert->thumbprint));
+                       SOPC_String_GetRawCString((SOPC_String*) &ctx->currentCert->thumbprint));
         return false;
     }
 
-    bool res = SOPC_Dict_Insert(ctx->users, (SOPC_String*) &ctx->currentUserCert->thumbprint, NULL);
+    bool res = SOPC_Dict_Insert(ctx->users, (SOPC_String*) &ctx->currentCert->thumbprint, NULL);
     if (!res)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
     // Reset current user
-    ctx->currentUserCert = NULL;
+    ctx->currentCert = NULL;
 
     return true;
 }
@@ -442,103 +476,8 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
     return res;
 }
 
-// allocate strlen(src)/2 in dst. n is strlen(dst)
-// Returns n the number of translated couples (others than n for errors)
-static int unhexlify(const char* src, unsigned char* dst, size_t n)
+static bool start_authorization(struct parse_context_t* ctx, const XML_Char** attrs, user_rights* rights)
 {
-    SOPC_ASSERT(INT32_MAX >= n);
-    static long buf = -1;
-    char* pEnd; // initialise by strtol function
-    char c_hex[2] = {0};
-    size_t i = 0;
-
-    if (NULL == src || NULL == dst)
-    {
-        return -1;
-    }
-
-    for (i = 0; i < n; ++i)
-    {
-        memcpy(c_hex, &src[2 * i], 2);
-        buf = strtol(c_hex, &pEnd, 16);
-        if (pEnd == c_hex)
-        {
-            return (int) i;
-        }
-        else
-        {
-            dst[i] = (unsigned char) buf;
-        }
-    }
-    return (int) n;
-}
-
-static bool start_usercertificate(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    ctx->currentUserCert = SOPC_Calloc(1, sizeof(user_cert_thumbprint));
-    if (NULL == ctx->currentUserCert)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    SOPC_ByteString_Initialize(&ctx->currentUserCert->thumbprint);
-
-    const char* attr_val = get_attr(ctx, "thumbprint", attrs);
-    if (NULL == attr_val)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no thumbprint defined");
-        return false;
-    }
-
-    size_t len_hash = strlen(attr_val);
-    if (0 == len_hash)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "empty thumbprint is forbidden");
-        return false;
-    }
-
-    if (40 != len_hash)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "SHA_1 with a hexa format of 40 characters is expected");
-        return false;
-    }
-
-    SOPC_ReturnStatus status =
-        SOPC_ByteString_InitializeFixedSize(&ctx->currentUserCert->thumbprint, (uint32_t) len_hash / 2);
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    int res = -1;
-    res = unhexlify(attr_val, ctx->currentUserCert->thumbprint.Data, len_hash / 2);
-    if (len_hash / 2 != (size_t) res)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "unhexlify failed: thumbprint bad hexa format");
-        return false;
-    }
-
-    return true;
-}
-
-static bool start_authorization(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    user_rights* rights = NULL;
-    if (ctx->currentAnonymous)
-    {
-        rights = &ctx->anonymousRights;
-    }
-    else if (ctx->currentUserCert)
-    {
-        rights = &ctx->currentUserCert->rights;
-    }
-    else
-    {
-        SOPC_ASSERT(NULL != ctx->currentUserPassword);
-        rights = &ctx->currentUserPassword->rights;
-    }
-
     const char* attr_val = get_attr(ctx, "read", attrs);
     rights->read = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
@@ -550,6 +489,337 @@ static bool start_authorization(struct parse_context_t* ctx, const XML_Char** at
 
     attr_val = get_attr(ctx, "addnode", attrs);
     rights->addnode = attr_val != NULL && 0 == strcmp(attr_val, "true");
+
+    return true;
+}
+
+static bool start_issuer(struct parse_context_t* ctx,
+                         const XML_Char** attrs,
+                         SOPC_Array* rootIssuers,
+                         SOPC_Array* IntermediateIssuers)
+{
+    const char* attr_val = get_attr(ctx, "root", attrs);
+
+    if (attr_val == NULL)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "root attribute missing in Issuer definition");
+        return false;
+    }
+
+    bool isRoot = (strcmp(attr_val, "true") == 0);
+
+    attr_val = get_attr(ctx, "cert_path", attrs);
+
+    char* pathCA = SOPC_strdup(attr_val);
+
+    if (pathCA == NULL)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Issuer: no path defined");
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    if (0 == strlen(pathCA))
+    {
+        SOPC_Free(pathCA);
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Issuer: empty path is forbidden");
+        return false;
+    }
+
+    SOPC_Array* issuers = isRoot ? rootIssuers : IntermediateIssuers;
+
+    if (!SOPC_Array_Append(issuers, pathCA))
+    {
+        SOPC_Free(pathCA);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    attr_val = get_attr(ctx, "revocation_list_path", attrs);
+
+    char* pathCRL = SOPC_strdup(attr_val);
+
+    if (pathCRL == NULL)
+    {
+        LOGF("Warning: CRL missing for the root certificate '%s'", pathCA);
+    }
+    else if (!SOPC_Array_Append(ctx->crlCertificates, pathCRL))
+    {
+        SOPC_Free(pathCRL);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    return true;
+}
+
+static bool start_trusted_issuer(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    bool result = start_issuer(ctx, attrs, ctx->trustedRootIssuers, ctx->trustedIntermediateIssuers);
+
+    ctx->state = PARSE_TRUSTED_ISSUER;
+
+    return result;
+}
+
+static bool end_trusted_issuers(struct parse_context_t* ctx)
+{
+    if (0 == SOPC_Array_Size(ctx->trustedRootIssuers))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no trusted root CA defined");
+        return false;
+    }
+    ctx->trustedIssuersSet = true;
+
+    return true;
+}
+
+static bool start_untrusted_issuer(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    bool result = start_issuer(ctx, attrs, ctx->untrustedRootIssuers, ctx->untrustedIntermediateIssuers);
+
+    ctx->state = PARSE_UNTRUSTED_ISSUER;
+
+    return result;
+}
+
+static bool end_untrusted_issuers(struct parse_context_t* ctx)
+{
+    if (0 == SOPC_Array_Size(ctx->untrustedRootIssuers) && 0 == SOPC_Array_Size(ctx->untrustedIntermediateIssuers))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no untrusted CA defined");
+        return false;
+    }
+
+    ctx->untrustedIssuersSet = true;
+
+    return true;
+}
+
+static bool cert_has_authorization(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* read = get_attr(ctx, "read", attrs);
+    const char* write = get_attr(ctx, "write", attrs);
+    const char* exe = get_attr(ctx, "execute", attrs);
+    const char* addnode = get_attr(ctx, "addnode", attrs);
+
+    return (NULL != read) && (NULL != write) && (NULL != exe) && (NULL != addnode);
+}
+
+static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char** attrs, const char* path)
+{
+    ctx->currentCert = SOPC_Calloc(1, sizeof(user_cert));
+    if (NULL == ctx->currentCert)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    SOPC_ByteString_Initialize(&ctx->currentCert->rawCert);
+
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(path, &ctx->currentCert->pCert);
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "IssuedCertificate: Enable to load user certificate from path %s", path);
+        return false;
+    }
+
+    status = SOPC_KeyManager_Certificate_ToDER(ctx->currentCert->pCert, &ctx->currentCert->rawCert.Data,
+                                               (uint32_t*) &ctx->currentCert->rawCert.Length);
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                       "IssuedCertificate: Enable to load user certificate as ByteSting from path %s", path);
+        return false;
+    }
+
+    start_authorization(ctx, attrs, &ctx->currentCert->rights);
+    return true;
+}
+
+static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* attr_val = get_attr(ctx, "path", attrs);
+
+    char* path = SOPC_strdup(attr_val);
+
+    if (path == NULL)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "IssuedCertificate: no path defined");
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    if (0 == strlen(path))
+    {
+        SOPC_Free(path);
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "IssuedCertificate: empty path is forbidden");
+        return false;
+    }
+
+    if (!SOPC_Array_Append(ctx->issuedCertificates, path))
+    {
+        SOPC_Free(path);
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    bool res = set_cert_authorization(ctx, attrs, path);
+    if (res && cert_has_authorization(ctx, attrs))
+    {
+        ctx->currentCert->has_rights = true;
+    }
+    else
+    {
+        ctx->currentCert->has_rights = false;
+    }
+
+    ctx->state = PARSE_ISSUED_CERT;
+
+    return res;
+}
+
+static bool end_issued_cert(struct parse_context_t* ctx)
+{
+    if (ctx->currentCert)
+    {
+        bool found = false;
+        SOPC_Dict_Get(ctx->certificates, &ctx->currentCert->rawCert, &found);
+        if (found)
+        {
+            char* tpr = SOPC_KeyManager_Certificate_GetCstring_SHA1(ctx->currentCert->pCert);
+            if (NULL == tpr)
+            {
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Duplicated Issued certificate found in XML");
+            }
+            else
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Duplicated Issued certificate with SHA-1 thumbprint %s found in XML", tpr);
+                SOPC_Free(tpr);
+            }
+            return false;
+        }
+
+        bool res = SOPC_Dict_Insert(ctx->certificates, &ctx->currentCert->rawCert, ctx->currentCert);
+        if (!res)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+        // Reset current user
+        ctx->currentCert = NULL;
+    }
+
+    return true;
+}
+
+static bool end_issued_certs(struct parse_context_t* ctx)
+{
+    if (0 == SOPC_Array_Size(ctx->issuedCertificates))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no issued certificates defined");
+        return false;
+    }
+
+    ctx->issuedCertificatesSet = true;
+
+    return true;
+}
+
+static bool end_user_certificates(struct parse_context_t* ctx)
+{
+    if (!SOPC_Array_Append_Values(ctx->trustedRootIssuers, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    /* check if DefaultCertificateAuthorization tag is defined */
+    if (!ctx->defaultCertRightsSet)
+    {
+        LOGF("Warning: <DefaultCertificateAuthorization> tag is missing%c", '.');
+    }
+
+    ctx->trustedRootIssuersList = SOPC_Array_Into_Raw(ctx->trustedRootIssuers);
+    if (NULL == ctx->trustedRootIssuersList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->trustedRootIssuers = NULL;
+
+    if (!SOPC_Array_Append_Values(ctx->trustedIntermediateIssuers, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->trustedIntermediateIssuersList = SOPC_Array_Into_Raw(ctx->trustedIntermediateIssuers);
+    if (NULL == ctx->trustedIntermediateIssuersList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->trustedIntermediateIssuers = NULL;
+
+    if (!SOPC_Array_Append_Values(ctx->issuedCertificates, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->issuedCertificatesList = SOPC_Array_Into_Raw(ctx->issuedCertificates);
+    if (NULL == ctx->issuedCertificatesList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->issuedCertificates = NULL;
+
+    if (!SOPC_Array_Append_Values(ctx->untrustedRootIssuers, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->untrustedRootIssuersList = SOPC_Array_Into_Raw(ctx->untrustedRootIssuers);
+    if (NULL == ctx->untrustedRootIssuersList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->untrustedRootIssuers = NULL;
+
+    if (!SOPC_Array_Append_Values(ctx->untrustedIntermediateIssuers, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->untrustedIntermediateIssuersList = SOPC_Array_Into_Raw(ctx->untrustedIntermediateIssuers);
+    if (NULL == ctx->untrustedIntermediateIssuersList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->untrustedIntermediateIssuers = NULL;
+
+    if (!SOPC_Array_Append_Values(ctx->crlCertificates, NULL, 1))
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->certificateRevocationList = SOPC_Array_Into_Raw(ctx->crlCertificates);
+    if (NULL == ctx->certificateRevocationList)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->crlCertificates = NULL;
+
+    if (!ctx->issuedCertificatesSet && !ctx->trustedIssuersSet)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser,
+                      "If application certificates section is defined, at least one issued certificate or trusted CA "
+                      "should be define.");
+        return false;
+    }
 
     return true;
 }
@@ -591,14 +861,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             }
             ctx->state = PARSE_ANONYMOUS;
         }
-        else if (0 == strcmp(name, "Certificate"))
+        else if (0 == strcmp(name, "UserCertificates") && !ctx->userCertSet)
         {
-            if (!start_usercertificate(ctx, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-            ctx->state = PARSE_USERCERTIFICATE;
+            ctx->userCertSet = true;
+            ctx->state = PARSE_USERCERTIFICATES;
         }
         else
         {
@@ -607,6 +873,83 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
+        break;
+    case PARSE_USERCERTIFICATES:
+        if (0 == strcmp(name, "DefaultCertificateAuthorization") && !ctx->defaultCertRightsSet)
+        {
+            if (!start_authorization(ctx, attrs, &ctx->defaultCertRights))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+            ctx->state = PARSE_DEFAULT_CERTAUTHORIZATION;
+        }
+        else if (0 == strcmp(name, "TrustedIssuers") && !ctx->trustedIssuersSet)
+        {
+            ctx->state = PARSE_TRUSTED_ISSUERS;
+        }
+        else if (0 == strcmp(name, "IssuedCertificates") && !ctx->issuedCertificatesSet)
+        {
+            ctx->state = PARSE_ISSUED_CERTS;
+        }
+        else if (0 == strcmp(name, "UntrustedIssuers") && !ctx->untrustedIssuersSet)
+        {
+            ctx->state = PARSE_UNTRUSTED_ISSUERS;
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_TRUSTED_ISSUERS:
+        if (0 == strcmp(name, "TrustedIssuer"))
+        {
+            if (!start_trusted_issuer(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_ISSUED_CERTS:
+        if (0 == strcmp(name, "IssuedCertificate"))
+        {
+            if (!start_issued_cert(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_UNTRUSTED_ISSUERS:
+        if (0 == strcmp(name, "UntrustedIssuer"))
+        {
+            if (!start_untrusted_issuer(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
         break;
     case PARSE_USERPASSWORD_CONFIGURATION:
         if (0 == strcmp(name, "UserPassword"))
@@ -627,9 +970,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         break;
     case PARSE_ANONYMOUS:
-    case PARSE_USERPASSWORD:
-    case PARSE_USERCERTIFICATE:
-    {
         if (0 != strcmp(name, "UserAuthorization"))
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
@@ -637,17 +977,30 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        if (!start_authorization(ctx, attrs))
+        if (!start_authorization(ctx, attrs, &ctx->anonymousRights))
         {
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
-
         ctx->state = PARSE_USERAUTHORIZATION;
-
         break;
-    }
+    case PARSE_USERPASSWORD:
+        if (0 != strcmp(name, "UserAuthorization"))
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        SOPC_ASSERT(NULL != ctx->currentUserPassword);
+        if (!start_authorization(ctx, attrs, &ctx->currentUserPassword->rights))
+        {
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        ctx->state = PARSE_USERAUTHORIZATION;
+        break;
     case PARSE_USERAUTHORIZATION:
+    case PARSE_DEFAULT_CERTAUTHORIZATION:
         break;
     default:
         assert(false && "Unknown state.");
@@ -663,18 +1016,18 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
     switch (ctx->state)
     {
+    case PARSE_DEFAULT_CERTAUTHORIZATION:
+        ctx->defaultCertRightsSet = true;
+        ctx->state = PARSE_USERCERTIFICATES;
+        break;
     case PARSE_USERAUTHORIZATION:
         if (ctx->currentAnonymous)
         {
             ctx->state = PARSE_ANONYMOUS;
         }
-        else if (ctx->currentUserCert)
-        {
-            ctx->state = PARSE_USERCERTIFICATE;
-        }
         else
         {
-            assert(NULL != ctx->currentUserPassword);
+            SOPC_ASSERT(NULL != ctx->currentUserPassword);
             ctx->state = PARSE_USERPASSWORD;
         }
         break;
@@ -697,8 +1050,46 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_USERPASSWORD_CONFIGURATION:
         ctx->state = PARSE_S2OPC_USERS;
         break;
-    case PARSE_USERCERTIFICATE:
-        if (!end_usercertificate(ctx))
+    case PARSE_TRUSTED_ISSUER:
+        ctx->state = PARSE_TRUSTED_ISSUERS;
+        break;
+    case PARSE_TRUSTED_ISSUERS:
+        if (!end_trusted_issuers(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_USERCERTIFICATES;
+        break;
+    case PARSE_ISSUED_CERT:
+        if (!end_issued_cert(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_ISSUED_CERTS;
+        break;
+    case PARSE_ISSUED_CERTS:
+        if (!end_issued_certs(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_USERCERTIFICATES;
+        break;
+    case PARSE_UNTRUSTED_ISSUER:
+        ctx->state = PARSE_UNTRUSTED_ISSUERS;
+        break;
+    case PARSE_UNTRUSTED_ISSUERS:
+        if (!end_untrusted_issuers(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
+        ctx->state = PARSE_USERCERTIFICATES;
+        break;
+    case PARSE_USERCERTIFICATES:
+        if (!end_user_certificates(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
@@ -740,13 +1131,25 @@ static void userpassword_free(void* up)
     }
 }
 
-static void usercert_thumbprint_free(void* uct)
+static uint64_t cert_hash(const void* c)
 {
-    if (NULL != uct)
+    const SOPC_ByteString* cert = c;
+    return SOPC_DJBHash(cert->Data, (size_t) cert->Length);
+}
+
+static bool cert_equal(const void* a, const void* b)
+{
+    return SOPC_ByteString_Equal((const SOPC_ByteString*) a, (const SOPC_ByteString*) b);
+}
+
+static void user_cert_free(void* uc)
+{
+    if (NULL != uc)
     {
-        user_cert_thumbprint* userCertThumbprint = uct;
-        SOPC_String_Clear(&userCertThumbprint->thumbprint);
-        SOPC_Free(userCertThumbprint);
+        user_cert* userCert = uc;
+        SOPC_KeyManager_Certificate_Free(userCert->pCert);
+        SOPC_ByteString_Delete(&userCert->rawCert);
+        SOPC_Free(userCert);
     }
 }
 
@@ -925,85 +1328,60 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
     {
         SOPC_ASSERT(NULL != pUsedSecuPolicy);
 
-        SOPC_CryptoProvider* provider = NULL;
-        SOPC_SerializedCertificate* psCrtUser = NULL;
-        SOPC_CertificateList* pCrtUser = NULL;
+        const SOPC_PKIProvider* pkiProvider = config->pX509_UserIdentity_PKI;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
-        uint32_t thumbprintLength = 0;
-        SOPC_ByteString CertThumbprint;
+        SOPC_ByteString* rawCert = &x509Token->CertificateData;
+        SOPC_CertificateList* pUserCert = NULL;
+        SOPC_StatusCode errorStatus;
+        SOPC_CryptoProvider* cryptoProvider = NULL;
 
-        provider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
-        if (NULL == provider)
+        cryptoProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+        if (NULL == cryptoProvider)
         {
             status = SOPC_STATUS_NOK;
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(provider, &thumbprintLength);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ByteString_InitializeFixedSize(&CertThumbprint, thumbprintLength);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(
-                x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &psCrtUser);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_Deserialize(psCrtUser, &pCrtUser);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
             status =
-                SOPC_KeyManager_Certificate_GetThumbprint(provider, pCrtUser, CertThumbprint.Data, thumbprintLength);
+                SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
         }
 
-        bool thumbprint_match = false;
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_Dict_Get(config->users, (SOPC_String*) &CertThumbprint, &thumbprint_match);
-        }
-
-        if (thumbprint_match)
-        {
-            SOPC_ByteString* CertificateData_Copy = SOPC_ByteString_Create();
-            status = SOPC_ByteString_Copy(CertificateData_Copy, &x509Token->CertificateData);
+            status = SOPC_CryptoProvider_Certificate_Validate(cryptoProvider, pkiProvider, pUserCert, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
-                bool res = false;
-                res = SOPC_Dict_Insert(config->validUserCertificates, (SOPC_String*) CertificateData_Copy,
-                                       &CertThumbprint);
-                if (false == res)
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+            else
+            {
+                /* UACTT expected BadIdentityTokenRejected */
+                *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+                char* tpr = SOPC_KeyManager_Certificate_GetCstring_SHA1(pUserCert);
+                if (NULL == tpr)
                 {
-                    printf("***** x509 authentication failed to insert trusted certificate %s\n", CertThumbprint.Data);
-                    status = SOPC_STATUS_NOK;
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "authentication: Validation of User Certificate failed with error: %X",
+                                           errorStatus);
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "authentication: Validation of User Certificate with SHA-1 thumbprint %s failed with error: %X",
+                        tpr, errorStatus);
+                    SOPC_Free(tpr);
                 }
             }
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_ByteString_Delete(&CertThumbprint);
-            }
-
-            *authenticated = SOPC_USER_AUTHENTICATION_OK;
-        }
-        else
-        {
-            *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+            /* The certificate validation failed but not the authentication function itself*/
+            status = SOPC_STATUS_OK;
         }
 
         /* Clear */
-        SOPC_KeyManager_SerializedCertificate_Delete(psCrtUser);
-        SOPC_KeyManager_Certificate_Free(pCrtUser);
-        SOPC_CryptoProvider_Free(provider);
+        SOPC_CryptoProvider_Free(cryptoProvider);
+        SOPC_KeyManager_Certificate_Free(pUserCert);
     }
-
     return status;
 }
 
@@ -1053,21 +1431,33 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
     }
     else if (SOPC_User_IsCertificate(pUser))
     {
-        const SOPC_String* certificate = SOPC_User_GetCertificate(pUser);
+        const SOPC_ByteString* rawCert = SOPC_User_GetCertificate(pUser);
+        user_rights* userRights = NULL;
         bool found = false;
-        user_cert_thumbprint* userCertThumbprint = SOPC_Dict_Get(config->validUserCertificates, certificate, &found);
+        user_cert* pUserCert = SOPC_Dict_Get(config->certificates, rawCert, &found);
         if (found)
         {
+            if (!pUserCert->has_rights)
+            {
+                userRights = &config->defaultCertRights;
+            }
+            else
+            {
+                userRights = &pUserCert->rights;
+            }
             switch (operationType)
             {
             case SOPC_USER_AUTHORIZATION_OPERATION_READ:
-                *pbOperationAuthorized = userCertThumbprint->rights.read;
+                *pbOperationAuthorized = userRights->read;
                 break;
             case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
-                *pbOperationAuthorized = userCertThumbprint->rights.write;
+                *pbOperationAuthorized = userRights->write;
                 break;
             case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
-                *pbOperationAuthorized = userCertThumbprint->rights.exec;
+                *pbOperationAuthorized = userRights->exec;
+                break;
+            case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
+                *pbOperationAuthorized = userRights->addnode;
                 break;
             default:
                 SOPC_ASSERT(false && "Unknown operation type.");
@@ -1106,7 +1496,8 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
     {
         SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->users);
         userpassword_free(((SOPC_UsersConfig*) authentication->pData)->rejectedUser);
-        SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->validUserCertificates);
+        SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->certificates);
+        SOPC_PKIProvider_Free(&((SOPC_UsersConfig*) authentication->pData)->pX509_UserIdentity_PKI);
         SOPC_Free(authentication->pData);
     }
     SOPC_Free(authentication);
@@ -1124,6 +1515,54 @@ static const SOPC_UserAuthentication_Functions authentication_functions = {
 static const SOPC_UserAuthorization_Functions authorization_functions = {.pFuncFree = UserAuthorization_Free,
                                                                          .pFuncAuthorizeOperation = authorization_fct};
 
+static void SOPC_Free_CstringFromPtr(void* data)
+{
+    if (NULL != data)
+    {
+        SOPC_Free(*(char**) data);
+    }
+}
+
+static void SOPC_Free_CertificateList(struct parse_context_t* ctx)
+{
+    for (int i = 0; NULL != ctx->trustedRootIssuersList && NULL != ctx->trustedRootIssuersList[i]; i++)
+    {
+        SOPC_Free(ctx->trustedRootIssuersList[i]);
+    }
+    SOPC_Free(ctx->trustedRootIssuersList);
+
+    for (int i = 0; NULL != ctx->trustedIntermediateIssuersList && NULL != ctx->trustedIntermediateIssuersList[i]; i++)
+    {
+        SOPC_Free(ctx->trustedIntermediateIssuersList[i]);
+    }
+    SOPC_Free(ctx->trustedIntermediateIssuersList);
+
+    for (int i = 0; NULL != ctx->issuedCertificatesList && NULL != ctx->issuedCertificatesList[i]; i++)
+    {
+        SOPC_Free(ctx->issuedCertificatesList[i]);
+    }
+    SOPC_Free(ctx->issuedCertificatesList);
+
+    for (int i = 0; NULL != ctx->untrustedRootIssuersList && NULL != ctx->untrustedRootIssuersList[i]; i++)
+    {
+        SOPC_Free(ctx->untrustedRootIssuersList[i]);
+    }
+    SOPC_Free(ctx->untrustedRootIssuersList);
+
+    for (int i = 0; NULL != ctx->untrustedIntermediateIssuersList && NULL != ctx->untrustedIntermediateIssuersList[i];
+         i++)
+    {
+        SOPC_Free(ctx->untrustedIntermediateIssuersList[i]);
+    }
+    SOPC_Free(ctx->untrustedIntermediateIssuersList);
+
+    for (int i = 0; NULL != ctx->certificateRevocationList && NULL != ctx->certificateRevocationList[i]; i++)
+    {
+        SOPC_Free(ctx->certificateRevocationList[i]);
+    }
+    SOPC_Free(ctx->certificateRevocationList);
+}
+
 bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
                             SOPC_UserAuthorization_Manager** authorization)
@@ -1133,16 +1572,32 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
 
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
+    SOPC_PKIProvider* pX509_UserIdentity_PKI = NULL;
+    SOPC_ReturnStatus pki_status = SOPC_STATUS_OK;
     SOPC_Dict* users = SOPC_Dict_Create(NULL, username_hash, username_equal, NULL, userpassword_free);
-    SOPC_Dict* valid_user_certificates =
-        SOPC_Dict_Create(NULL, username_hash, username_equal, NULL, usercert_thumbprint_free);
+    SOPC_Dict* certificates = SOPC_Dict_Create(NULL, cert_hash, cert_equal, NULL, user_cert_free);
 
-    if (NULL == users || NULL == valid_user_certificates)
+    SOPC_Array* trustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* trustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* issuedCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* untrustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* untrustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* revokedListCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+
+    if ((NULL == users) || (NULL == certificates) || (NULL == trustedRootIssuers) ||
+        (NULL == trustedIntermediateIssuers) || (NULL == issuedCerts) || (NULL == untrustedRootIssuers) ||
+        (NULL == untrustedIntermediateIssuers) || (NULL == revokedListCerts))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Dict_Delete(users);
-        SOPC_Dict_Delete(valid_user_certificates);
+        SOPC_Dict_Delete(certificates);
+        SOPC_Array_Delete(trustedRootIssuers);
+        SOPC_Array_Delete(trustedIntermediateIssuers);
+        SOPC_Array_Delete(issuedCerts);
+        SOPC_Array_Delete(untrustedRootIssuers);
+        SOPC_Array_Delete(untrustedIntermediateIssuers);
+        SOPC_Array_Delete(revokedListCerts);
         return false;
     }
 
@@ -1153,18 +1608,45 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     ctx.state = PARSE_START;
     ctx.helper_ctx.parser = parser;
     ctx.users = users;
-    ctx.validUserCertificates = valid_user_certificates;
     ctx.currentAnonymous = false;
     ctx.hasAnonymous = false;
     ctx.anonymousRights = (user_rights){false, false, false, false};
     ctx.currentUserPassword = NULL;
     ctx.usrPwdCfgSet = false;
-    ctx.currentUserCert = NULL;
+
+    ctx.certificates = certificates;
+    ctx.defaultCertRightsSet = false;
+    ctx.defaultCertRights = (user_rights){false, false, false, false};
+    ctx.currentCert = NULL;
+    ctx.userCertSet = false;
+
+    ctx.trustedIssuersSet = false;
+    ctx.trustedRootIssuers = trustedRootIssuers;
+    ctx.trustedIntermediateIssuers = trustedIntermediateIssuers;
+    ctx.issuedCertificatesSet = false;
+    ctx.issuedCertificates = issuedCerts;
+    ctx.untrustedIssuersSet = false;
+    ctx.untrustedRootIssuers = untrustedRootIssuers;
+    ctx.untrustedIntermediateIssuers = untrustedIntermediateIssuers;
+    ctx.crlCertificates = revokedListCerts;
+
+    ctx.trustedRootIssuersList = NULL;
+    ctx.trustedIntermediateIssuersList = NULL;
+    ctx.issuedCertificatesList = NULL;
+    ctx.untrustedRootIssuersList = NULL;
+    ctx.untrustedIntermediateIssuersList = NULL;
+    ctx.certificateRevocationList = NULL;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
 
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
+    SOPC_Array_Delete(ctx.trustedRootIssuers);
+    SOPC_Array_Delete(ctx.trustedIntermediateIssuers);
+    SOPC_Array_Delete(ctx.issuedCertificates);
+    SOPC_Array_Delete(ctx.untrustedRootIssuers);
+    SOPC_Array_Delete(ctx.untrustedIntermediateIssuers);
+    SOPC_Array_Delete(ctx.crlCertificates);
 
     if (SOPC_STATUS_OK == res)
     {
@@ -1173,12 +1655,18 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         SOPC_UsersConfig* config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig));
         user_password* rejectedUser = NULL;
         res = set_default_password_hash(&rejectedUser, ctx.hashLength, ctx.saltLength, ctx.hashIterationCount);
-        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != res)
+        pki_status = SOPC_PKIProviderStack_CreateFromPaths(
+            ctx.trustedRootIssuersList, ctx.trustedIntermediateIssuersList, ctx.untrustedRootIssuersList,
+            ctx.untrustedIntermediateIssuersList, ctx.issuedCertificatesList, ctx.certificateRevocationList,
+            &pX509_UserIdentity_PKI);
+        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status)
         {
             SOPC_Free(*authentication);
             *authentication = NULL;
             SOPC_Free(*authorization);
             *authorization = NULL;
+            SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
+            pX509_UserIdentity_PKI = NULL;
             SOPC_Free(config);
             config = NULL;
             userpassword_free(rejectedUser);
@@ -1186,9 +1674,11 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         }
         else
         {
+            config->pX509_UserIdentity_PKI = pX509_UserIdentity_PKI;
             config->users = users;
             config->rejectedUser = rejectedUser;
-            config->validUserCertificates = valid_user_certificates;
+            config->certificates = certificates;
+            config->defaultCertRights = ctx.defaultCertRights;
             config->anonRights = ctx.anonymousRights;
             (*authentication)->pData = config;
             (*authentication)->pFunctions = &authentication_functions;
@@ -1205,14 +1695,17 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
             SOPC_ByteString_Clear(&ctx.currentUserPassword->hash);
             SOPC_ByteString_Clear(&ctx.currentUserPassword->salt);
         }
-        if (NULL != ctx.currentUserCert)
+        if (NULL != ctx.currentCert)
         {
-            SOPC_ByteString_Delete(&ctx.currentUserCert->thumbprint);
+            SOPC_ByteString_Delete(&ctx.currentCert->rawCert);
+            SOPC_KeyManager_Certificate_Free(ctx.currentCert->pCert);
         }
         SOPC_Dict_Delete(users);
-        SOPC_Dict_Delete(valid_user_certificates);
+        SOPC_Dict_Delete(certificates);
         return false;
     }
 
+    /* Delete pki paths loading from xml  */
+    SOPC_Free_CertificateList(&ctx);
     return true;
 }
