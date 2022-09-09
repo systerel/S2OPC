@@ -21,6 +21,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="anonymous"/>
       <xs:enumeration value="username"/>
+			<xs:enumeration value="certificate"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="NamespaceType">

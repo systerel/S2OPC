@@ -20,7 +20,7 @@
     <xs:attribute type="xs:string" name="hash" use="required"/>
     <xs:attribute type="xs:string" name="salt" use="required"/>
     <!-- TODO: Add base64 encoding feature (see ticket #1057)
-    <xs:attribute type="xs:string" name="base64" use="optional"/> 
+    <xs:attribute type="xs:string" name="base64" use="optional"/>
     -->
   </xs:complexType>
   <xs:complexType name="UserPasswordConfigurationType">
@@ -31,10 +31,76 @@
     <xs:attribute type="xs:string" name="hash_length" use="required"/>
     <xs:attribute type="xs:string" name="salt_length" use="required"/>
   </xs:complexType>
+	<xs:complexType name="DefaultCertificateAuthorizationType">
+    <xs:attribute type="xs:boolean" name="read" default="false"/>
+    <xs:attribute type="xs:boolean" name="write" default="false"/>
+    <xs:attribute type="xs:boolean" name="execute" default="false"/>
+    <xs:attribute type="xs:boolean" name="addnode" default="false"/>
+  </xs:complexType>
+	<xs:complexType name="IssuerType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="cert_path" use="required"/>
+        <xs:attribute type="xs:string" name="revocation_list_path" use="required"/>
+        <xs:attribute type="xs:boolean" name="root" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TrustedIssuersType">
+    <xs:sequence>
+      <xs:element type="IssuerType" name="TrustedIssuer" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or several trusted certificate authorities</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IssuedCertificateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:string" name="path" use="required"/>
+				<xs:attribute type="xs:boolean" name="read" use="optional"/>
+				<xs:attribute type="xs:boolean" name="write" use="optional"/>
+				<xs:attribute type="xs:boolean" name="execute" use="optional"/>
+				<xs:attribute type="xs:boolean" name="addnode" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="IssuedCertificatesType">
+    <xs:sequence>
+      <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or several explicitly trusted certificates issued by provided issuers or self-signed</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="UntrustedIssuersType">
+    <xs:sequence>
+      <xs:element type="IssuerType" name="UntrustedIssuer" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>One or several untrusted certificate authorities. Those are only used to validate trust chain of issued certificate.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="UserCertificatesType">
+    <xs:sequence>
+      <xs:element type="DefaultCertificateAuthorizationType" name="DefaultCertificateAuthorization" />
+      <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
+      <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>At least one shall be filled in either TrustedIssuers or IssuedCertificates</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="UntrustedIssuersType" name="UntrustedIssuers" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="S2OPC_UsersType">
     <xs:sequence>
       <xs:element type="AnonymousType" name="Anonymous" minOccurs="0"/>
       <xs:element type="UserPasswordConfigurationType" name="UserPasswordConfiguration" minOccurs="0" maxOccurs="1"/>
+      <xs:element type="UserCertificatesType" name="UserCertificates" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>
