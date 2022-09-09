@@ -366,6 +366,10 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted_usr
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted_usr
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public
@@ -373,6 +377,8 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted_usr/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
@@ -418,6 +424,36 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1TC_ca2I_appTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1U_appT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ctt_ca1U_appTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1T.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1I_ca2T.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/crl/ctt_ca1T.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/crl/ctt_ca1I_ca2T.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/certs/ctt_ca1IC.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/certs/ctt_ca1I.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/certs/ctt_ca1TC_ca2I.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/untrusted_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/crl/ctt_ca1I.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/crl/ctt_ca1TC_ca2I.crl ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_usrTE.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_usrTSincorrect.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_usrTV.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1I_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1I_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1IC_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1IC_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1T_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1T_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1U_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1U_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1I_ca2T_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1I_ca2T_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1T_ca2U_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1T_ca2U_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC_ca2I_usrT.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC_ca2I_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
     )
 
 # Tests run definition #
