@@ -22,6 +22,7 @@
   ------------------------*/
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 #include <string.h>
 
 #include "msg_session_bs.h"
@@ -218,17 +219,19 @@ void msg_session_bs__write_create_session_msg_session_revised_timeout(const cons
     OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) msg_session_bs__req_msg;
     OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg_session_bs__resp_msg;
 
-    if (createSessionReq->RequestedSessionTimeout < SOPC_MIN_SESSION_TIMEOUT)
+    createSessionResp->RevisedSessionTimeout = SOPC_MIN_SESSION_TIMEOUT;
+
+    if (!isnan(createSessionReq->RequestedSessionTimeout))
     {
-        createSessionResp->RevisedSessionTimeout = SOPC_MIN_SESSION_TIMEOUT;
-    }
-    else if (createSessionReq->RequestedSessionTimeout > SOPC_MAX_SESSION_TIMEOUT)
-    {
-        createSessionResp->RevisedSessionTimeout = SOPC_MAX_SESSION_TIMEOUT;
-    }
-    else
-    {
-        createSessionResp->RevisedSessionTimeout = createSessionReq->RequestedSessionTimeout;
+        if (createSessionReq->RequestedSessionTimeout <= SOPC_MAX_SESSION_TIMEOUT &&
+            createSessionReq->RequestedSessionTimeout >= SOPC_MIN_SESSION_TIMEOUT)
+        {
+            createSessionResp->RevisedSessionTimeout = createSessionReq->RequestedSessionTimeout;
+        }
+        else if (createSessionReq->RequestedSessionTimeout > SOPC_MAX_SESSION_TIMEOUT)
+        {
+            createSessionResp->RevisedSessionTimeout = SOPC_MAX_SESSION_TIMEOUT;
+        } // else SOPC_MIN_SESSION_TIMEOUT value kept
     }
 }
 

@@ -26,6 +26,7 @@
 #include "constants.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include "address_space_impl.h"
 #include "inttypes.h"
@@ -73,17 +74,19 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     t_entier4* const subscription_core_bs__revisedMaxKeepAlive,
     t_entier4* const subscription_core_bs__revisedMaxNotificationsPerPublish)
 {
-    if (subscription_core_bs__p_reqPublishInterval < SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
+    *subscription_core_bs__revisedPublishInterval = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
+
+    if (!isnan(subscription_core_bs__p_reqPublishInterval))
     {
-        *subscription_core_bs__revisedPublishInterval = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
-    }
-    else if (subscription_core_bs__p_reqPublishInterval > SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION)
-    {
-        *subscription_core_bs__revisedPublishInterval = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
-    }
-    else
-    {
-        *subscription_core_bs__revisedPublishInterval = subscription_core_bs__p_reqPublishInterval;
+        if (subscription_core_bs__p_reqPublishInterval <= SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION &&
+            subscription_core_bs__p_reqPublishInterval >= SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
+        {
+            *subscription_core_bs__revisedPublishInterval = subscription_core_bs__p_reqPublishInterval;
+        }
+        else if (subscription_core_bs__p_reqPublishInterval > SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION)
+        {
+            *subscription_core_bs__revisedPublishInterval = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
+        } // else SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION value kept
     }
 
     if (subscription_core_bs__p_reqMaxKeepAlive < SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS)

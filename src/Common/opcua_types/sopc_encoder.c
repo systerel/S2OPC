@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <math.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
@@ -653,6 +654,13 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_
 
     nestedStructLevel++;
     float encodedValue = *value;
+    // Normalize NaN value if quiet NaN available
+#ifdef NAN
+    if (isnan(encodedValue) != 0)
+    {
+        encodedValue = NAN;
+    }
+#endif
     SOPC_EncodeDecode_Float(&encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
@@ -690,6 +698,13 @@ SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t neste
     {
         status = SOPC_STATUS_ENCODING_ERROR;
     }
+    // Normalize NaN value if quiet NaN available
+#ifdef NAN
+    if (isnan(*value) != 0)
+    {
+        *value = NAN;
+    }
+#endif
 
     return status;
 }
@@ -712,6 +727,13 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint3
 
     nestedStructLevel++;
     double encodedValue = *value;
+    // Normalize NaN value if quiet NaN available
+#ifdef NAN
+    if (isnan(encodedValue) != 0)
+    {
+        encodedValue = NAN;
+    }
+#endif
     SOPC_EncodeDecode_Double(&encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
@@ -748,6 +770,13 @@ SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nes
     {
         status = SOPC_STATUS_ENCODING_ERROR;
     }
+    // Normalize NaN value if quiet NaN available
+#ifdef NAN
+    if (isnan(*value) != 0)
+    {
+        *value = NAN;
+    }
+#endif
     return status;
 }
 

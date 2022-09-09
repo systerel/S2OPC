@@ -873,6 +873,7 @@ OPERATIONS
 
     revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_reqQueueSize) =
     BEGIN
+        /* Note: if it changes in the future, NaN shall be considered for requested value (cf. sessionTimeout and publishingInterval) */
         revisedSamplingItv := c_opcua_duration_zero;
         IF p_reqQueueSize <= 1 THEN
             /* 0 or 1 the Server returns the default queue size which shall be 1 */
