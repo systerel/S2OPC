@@ -90,6 +90,45 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der",          "revoked/c
                                         "revoked/ctt_ca1I.crl",       "revoked/ctt_ca1I_ca2T.crl",
                                         "revoked/ctt_ca1TC_ca2I.crl", NULL};
 
+// Default certificate paths for X509 Identity tokens
+
+static char* x509_Identity_trusted_root_issuers[] = {
+    "trusted_usr/cacert.der",    /* Demo CA */
+    "trusted_usr/ctt_ca1TC.der", /* Will be ignored because no CRL associated. Tests 042, 043 */
+    "trusted_usr/ctt_ca1T.der", NULL};
+
+static char* x509_Identity_trusted_intermediate_issuers[] = {"trusted_usr/ctt_ca1I_ca2T.der", NULL};
+
+static char* x509_Identity_issued_certs[] = {"issued_usr/ctt_usrT.der",
+                                             "issued_usr/ctt_usrTE.der",
+                                             "issued_usr/ctt_usrTSincorrect.der",
+                                             "issued_usr/ctt_usrTV.der",
+                                             "issued_usr/ctt_ca1I_usrT.der",
+                                             "issued_usr/ctt_ca1I_usrTR.der",
+                                             "issued_usr/ctt_ca1IC_usrT.der",
+                                             "issued_usr/ctt_ca1IC_usrTR.der",
+                                             "issued_usr/ctt_ca1T_usrT.der",
+                                             "issued_usr/ctt_ca1T_usrTR.der",
+                                             "issued_usr/ctt_ca1TC_usrT.der",
+                                             "issued_usr/ctt_ca1TC_usrTR.der",
+                                             "issued_usr/ctt_ca1U_usrT.der",
+                                             "issued_usr/ctt_ca1U_usrTR.der",
+                                             "issued_usr/ctt_ca1I_ca2T_usrT.der",
+                                             "issued_usr/ctt_ca1I_ca2T_usrTR.der",
+                                             "issued_usr/ctt_ca1T_ca2U_usrT.der",
+                                             "issued_usr/ctt_ca1T_ca2U_usrTR.der",
+                                             "issued_usr/ctt_ca1TC_ca2I_usrT.der",
+                                             "issued_usr/ctt_ca1TC_ca2I_usrTR.der",
+                                             NULL};
+static char* x509_Identity_untrusted_root_issuers[] = {
+    "untrusted_usr/ctt_ca1IC.der", /* Will be ignored because no CRL associated */
+    "untrusted_usr/ctt_ca1I.der", NULL};
+static char* x509_Identity_untrusted_intermediate_issuers[] = {"untrusted_usr/ctt_ca1TC_ca2I.der", /* Test 002 */
+                                                               NULL};
+static char* x509_Identity_revoked_certs[] = {"revoked_usr/cacrl.der",          "revoked_usr/ctt_ca1I.crl",
+                                              "revoked_usr/ctt_ca1TC_ca2I.crl", "revoked_usr/ctt_ca1I_ca2T.crl",
+                                              "revoked_usr/ctt_ca1T.crl",       NULL};
+
 #endif // WITH_STATIC_SECURITY_DATA
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -381,6 +420,10 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                 status =
                     SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
             }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy);
+            }
         }
 
         /*
@@ -406,6 +449,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                 {
                     status = SOPC_SecurityConfig_AddUserTokenPolicy(
                         sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy);
                 }
             }
         }
@@ -435,6 +483,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                     status = SOPC_SecurityConfig_AddUserTokenPolicy(
                         sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
                 }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy);
+                }
             }
         }
 
@@ -462,6 +515,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                 {
                     status = SOPC_SecurityConfig_AddUserTokenPolicy(
                         sp, &SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        SOPC_SecurityConfig_AddUserTokenPolicy(sp, &SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy);
                 }
             }
         }
@@ -493,6 +551,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
                 status = SOPC_SecurityConfig_AddUserTokenPolicy(
                     sp,
                     &SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy); /* Necessary for UACTT tests only */
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_SecurityConfig_AddUserTokenPolicy(
+                    sp, &SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy); /* Necessary for UACTT tests only */
             }
         }
     }
@@ -532,6 +595,10 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 {
     SOPC_UNUSED_ARG(authn);
     SOPC_UNUSED_ARG(pUsedSecuPolicy);
+    SOPC_ASSERT(NULL != token);
+    SOPC_ASSERT(NULL != authenticated);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     assert(NULL != token && NULL != authenticated);
 
@@ -567,33 +634,124 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         }
     }
 
-    return SOPC_STATUS_OK;
+    if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        SOPC_ASSERT(NULL != pUsedSecuPolicy);
+        SOPC_ASSERT(NULL != authn);
+        SOPC_ASSERT(NULL != authn->pData);
+
+        const SOPC_PKIProvider* pkiProvider = authn->pData;
+        OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
+        SOPC_ByteString* rawCert = &x509Token->CertificateData;
+        SOPC_CertificateList* pUserCert = NULL;
+        SOPC_StatusCode errorStatus;
+        SOPC_CryptoProvider* cryptoProvider = NULL;
+
+        cryptoProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+        if (NULL == cryptoProvider)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CryptoProvider_Certificate_Validate(cryptoProvider, pkiProvider, pUserCert, &errorStatus);
+            if (SOPC_STATUS_OK == status)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+            else
+            {
+                /* UACTT expected BadIdentityTokenRejected */
+                *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+                char* tpr = SOPC_KeyManager_Certificate_GetCstring_SHA1(pUserCert);
+                if (NULL == tpr)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "authentication: Validation of User Certificate failed with error: %X",
+                                           errorStatus);
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "authentication: Validation of User Certificate with SHA-1 thumbprint %s failed with error: %X",
+                        tpr, errorStatus);
+                    SOPC_Free(tpr);
+                }
+            }
+            /* The certificate validation failed but not the authentication function itself*/
+            status = SOPC_STATUS_OK;
+        }
+
+        /* Clear */
+        SOPC_CryptoProvider_Free(cryptoProvider);
+        SOPC_KeyManager_Certificate_Free(pUserCert);
+    }
+
+    return status;
+}
+
+static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authentication)
+{
+    if (NULL != authentication)
+    {
+        if (NULL != authentication->pData)
+        {
+            SOPC_PKIProvider_Free((SOPC_PKIProvider**) &authentication->pData);
+        }
+        SOPC_Free(authentication);
+    }
 }
 
 static const SOPC_UserAuthentication_Functions authentication_uactt_functions = {
-    .pFuncFree = (SOPC_UserAuthentication_Free_Func*) &SOPC_Free,
+    .pFuncFree = (SOPC_UserAuthentication_Free_Func*) &UserAuthentication_Free,
     .pFuncValidateUserIdentity = authentication_uactt};
 
 static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_PKIProvider* pX509_UserIdentity_PKI = NULL;
+    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
+    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 
     /* Create an user authorization manager which accepts any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
-    SOPC_UserAuthorization_Manager* authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    SOPC_UserAuthentication_Manager* authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
-    if (NULL == authenticationManager || NULL == authorizationManager)
+    authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
+    if (NULL == authorizationManager)
     {
-        SOPC_UserAuthorization_FreeManager(&authorizationManager);
-        SOPC_UserAuthentication_FreeManager(&authenticationManager);
-        status = SOPC_STATUS_OUT_OF_MEMORY;
         printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    status = SOPC_PKIProviderStack_CreateFromPaths(
+        x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
+        x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers, x509_Identity_issued_certs,
+        x509_Identity_revoked_certs, &pX509_UserIdentity_PKI);
+    if (SOPC_STATUS_OK == status)
+    {
+        authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
+        if (NULL == authenticationManager)
+        {
+            /* clear */
+            SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
+            SOPC_UserAuthorization_FreeManager(&authorizationManager);
+            printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
     if (SOPC_STATUS_OK == status)
     {
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
+        authenticationManager->pData = pX509_UserIdentity_PKI;
         SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
         SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
     }
