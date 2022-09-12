@@ -207,8 +207,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
  * \brief Request to activate a session with a x509IdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
  *
  *
- * \param endpointConnectionIdx  Endpoint connection configuration index provided by
- *                               SOPC_ToolkitClient_AddSecureChannelConfig()
+ * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
  *                               If defined it should be unique for the client.
  * \param sessionContext         A context value, it will be provided in case of session activation or failure

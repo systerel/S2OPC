@@ -1114,7 +1114,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
  *   nonce \p nonce to the payload \p payload and signing the resulting sequence of
  *   bytes.
  *
- * \param pProvider An initialized cryptographic context.
+ * \param provider An initialized cryptographic context.
  * \param AsymmetricSignatureAlgorithm the URI of the asymmetric algorithm used.
  * \param publicKey A valid pointer to the public key.
  * \param payload   The payload.
