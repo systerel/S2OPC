@@ -963,16 +963,15 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
 
     if (address_space_bs__index_range->Length <= 0)
     {
-        *address_space_bs__serviceStatusCode = set_value_full(
-            address_space_bs__p_locales, pvar, address_space_bs__variant, &(*address_space_bs__prev_dataValue)->Value);
+        *address_space_bs__serviceStatusCode =
+            set_value_full(address_space_bs__p_locales, pvar, newValue, &(*address_space_bs__prev_dataValue)->Value);
     }
     else
     {
         // Note: set_value_indexed on single value will always fail except on ByteString/String
         // Note2: set_value_indexed does not support partial update of localized text (whole overwrite)
-        *address_space_bs__serviceStatusCode =
-            set_value_indexed(pvar, address_space_bs__variant, address_space_bs__index_range,
-                              &(*address_space_bs__prev_dataValue)->Value);
+        *address_space_bs__serviceStatusCode = set_value_indexed(pvar, newValue, address_space_bs__index_range,
+                                                                 &(*address_space_bs__prev_dataValue)->Value);
     }
 
     if (*address_space_bs__serviceStatusCode == constants_statuscodes_bs__e_sc_ok)
