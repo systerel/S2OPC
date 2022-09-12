@@ -21,5 +21,24 @@
       <UserAuthorization  write="true" read="true" execute="false" />
     </UserPassword>
   </UserPasswordConfiguration>
-
+  <UserCertificates>
+		<!-- default right is read only -->
+		<DefaultCertificateAuthorization write="false" read="true" execute="false" addnode="false"/>
+		<TrustedIssuers>
+			<TrustedIssuer root="true" cert_path="trusted_usr/cacert.der" revocation_list_path="revoked_usr/cacrl.der"/>
+			<TrustedIssuer root="true" cert_path="trusted_usr/ctt_ca1T.der" revocation_list_path="revoked_usr/ctt_ca1T.crl"/>
+			<TrustedIssuer root="false" cert_path="trusted_usr/ctt_ca1I_ca2T.der" revocation_list_path="revoked_usr/ctt_ca1I_ca2T.crl"/>
+		</TrustedIssuers>
+		<IssuedCertificates>
+			<IssuedCertificate path="issued_usr/ctt_usrT.der" write="true"/>  <!-- partially defined, then the default certificate rights are used -->
+			<IssuedCertificate path="issued_usr/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
+			<IssuedCertificate path="issued_usr/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
+		</IssuedCertificates>
+		<UntrustedIssuers>
+			<UntrustedIssuer root="true" cert_path="untrusted_usr/ctt_ca1I.der" revocation_list_path="revoked_usr/ctt_ca1I.crl"/>
+			<UntrustedIssuer root="false" cert_path="untrusted_usr/ctt_ca1TC_ca2I.der" revocation_list_path="revoked_usr/ctt_ca1TC_ca2I.crl"/>
+		</UntrustedIssuers>
+  </UserCertificates>
 </S2OPC_Users>
