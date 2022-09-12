@@ -1148,7 +1148,7 @@ static void user_cert_free(void* uc)
     {
         user_cert* userCert = uc;
         SOPC_KeyManager_Certificate_Free(userCert->pCert);
-        SOPC_ByteString_Delete(&userCert->rawCert);
+        SOPC_ByteString_Clear(&userCert->rawCert);
         SOPC_Free(userCert);
     }
 }
