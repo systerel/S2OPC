@@ -286,7 +286,8 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OUT_OF_MEMORY;
     SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
     OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
-
+    SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status;
+    constants_statuscodes_bs__t_StatusCode_i readSC = constants_statuscodes_bs__c_StatusCode_indet;
     if (NULL != notifElt && NULL != pNewWriteValue)
     {
         OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
@@ -298,9 +299,19 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
             ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->indexRange;
         if (NULL != indexRange)
         {
-            retStatus = util_status_code__B_to_return_status_C(util_read_value_indexed_helper(
+            readSC = util_read_value_indexed_helper(
                 &pNewWriteValue->Value.Value, &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value,
-                indexRange));
+                indexRange);
+            // Manage no data and exclude index range invalid which is a syntax error and shall occur on createMI
+            if (constants_statuscodes_bs__e_sc_bad_index_range_no_data == readSC)
+            {
+                retStatus = SOPC_STATUS_OK;
+                util_status_code__B_to_C(readSC, &valueStatus);
+            }
+            else
+            {
+                retStatus = util_status_code__B_to_return_status_C(readSC);
+            }
         }
         else
         {
@@ -336,8 +347,7 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
 
             retStatus = SOPC_InternalAddCommonFinishAddNotifElt(
                 monitored_item_notification_queue_bs__p_queue, notifElt,
-                &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange,
-                monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status, srcTs, srvTs,
+                &monitored_item_notification_queue_bs__p_writeValuePointer->IndexRange, valueStatus, srcTs, srvTs,
                 &monitored_item_notification_queue_bs__p_writeValuePointer->NodeId,
                 monitored_item_notification_queue_bs__p_writeValuePointer->AttributeId);
         }
@@ -355,9 +365,10 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
 
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
-            "Services: add_monitored_item_notification_to_queue out of memory for adding a notification for MI id="
-            "%" PRIu32,
-            ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->monitoredItemId);
+            "Services: add_monitored_item_notification_to_queue OOM for MI id="
+            "%" PRIu32 " or read failed with sc=%d",
+            ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->monitoredItemId,
+            readSC);
     }
 }
 
