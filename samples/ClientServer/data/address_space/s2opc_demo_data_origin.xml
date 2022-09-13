@@ -473,7 +473,7 @@
         <uax:String>brown fox</uax:String>
         <uax:String>jumps over</uax:String>
         <uax:String>the lazy</uax:String>
-        <uax:String>dog</uax:String>
+        <uax:String>dogs</uax:String>
       </uax:ListOfString>
     </Value>
   </UAVariable>
@@ -490,7 +490,7 @@
         <uax:ByteString>YnJvd24gZm94</uax:ByteString>
         <uax:ByteString>anVtcHMgb3Zlcg==</uax:ByteString>
         <uax:ByteString>dGhlIGxhenk=</uax:ByteString>
-        <uax:ByteString>ZG9n</uax:ByteString>
+        <uax:ByteString>ZG9ndGhl</uax:ByteString>
       </uax:ListOfByteString>
     </Value>
   </UAVariable>
