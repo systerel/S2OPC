@@ -5332,6 +5332,9 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
     {
         return false;
     }
+    /* Note: we might also detect static range invalid cases but we need the ArrayDimension attribute of Variable node.
+     *       if (ArrayDimension[0] != 0 && range->dimensions[0].start >= ArrayDimension[0]) return false
+     */
 
     return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length);
 }
@@ -5389,6 +5392,9 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
             has_range &= range->dimensions[i].start < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
         }
     }
+    /* Note: we might also detect static range invalid cases but we need the ArrayDimension attribute of Variable node.
+     *       if (ArrayDimension[i] != 0 && range->dimensions[i].start >= ArrayDimension[i]) return false
+     */
 
     return has_range;
 }
@@ -5626,7 +5632,6 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
      * Source matrix: data source for the specified ranges to read, dimensions lengths might differ from ranges
      * lengths
      */
-
     assert(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
     {
@@ -5748,7 +5753,7 @@ SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* s
     }
 }
 
-static SOPC_ReturnStatus set_range_string(SOPC_String* variant, const SOPC_String* src, const SOPC_Dimension* dimension)
+static SOPC_ReturnStatus set_range_string(SOPC_String* dst, const SOPC_String* src, const SOPC_Dimension* dimension)
 {
     uint32_t start = dimension->start;
     uint32_t end = dimension->end;
@@ -5759,42 +5764,38 @@ static SOPC_ReturnStatus set_range_string(SOPC_String* variant, const SOPC_Strin
         return SOPC_STATUS_NOK;
     }
 
-    if (variant->Length <= 0 || ((uint32_t) variant->Length) <= start)
+    if (dst->Length <= 0 || ((uint32_t) dst->Length) <= start)
     {
         // Nothing to copy
         return SOPC_STATUS_OK;
     }
 
-    if (((uint32_t) variant->Length) <= end)
+    if (((uint32_t) dst->Length) <= end)
     {
-        end = (uint32_t)(variant->Length - 1);
+        end = (uint32_t)(dst->Length - 1);
     }
 
     size_t range_len = (size_t)(end - start + 1);
-    memcpy(variant->Data + ((size_t) start), src->Data, range_len * sizeof(SOPC_Byte));
+    memcpy(dst->Data + ((size_t) start), src->Data, range_len * sizeof(SOPC_Byte));
 
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Variant* src, const SOPC_NumericRange* range)
+static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
+    assert(dst->BuiltInTypeId == src->BuiltInTypeId);
     assert(range->n_dimensions == 1);
-
-    if (variant->BuiltInTypeId != src->BuiltInTypeId)
-    {
-        return SOPC_STATUS_NOK;
-    }
 
     if (src->ArrayType == SOPC_VariantArrayType_SingleValue)
     {
         // Dereferencing scalars is allowed for strings and bytestrings
         if (src->BuiltInTypeId == SOPC_String_Id)
         {
-            return set_range_string(&variant->Value.String, &src->Value.String, &range->dimensions[0]);
+            return set_range_string(&dst->Value.String, &src->Value.String, &range->dimensions[0]);
         }
         else if (src->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return set_range_string(&variant->Value.Bstring, &src->Value.Bstring, &range->dimensions[0]);
+            return set_range_string(&dst->Value.Bstring, &src->Value.Bstring, &range->dimensions[0]);
         }
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -5813,15 +5814,15 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
         return SOPC_STATUS_NOK;
     }
 
-    if (variant->Value.Array.Length <= 0 || ((uint32_t) variant->Value.Array.Length) <= start)
+    if (dst->Value.Array.Length <= 0 || ((uint32_t) dst->Value.Array.Length) <= start)
     {
         // Nothing to copy
         return SOPC_STATUS_OK;
     }
 
-    if (((uint32_t) variant->Value.Array.Length) <= end)
+    if (((uint32_t) dst->Value.Array.Length) <= end)
     {
-        end = (uint32_t)(variant->Value.Array.Length - 1);
+        end = (uint32_t)(dst->Value.Array.Length - 1);
     }
 
     SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
@@ -5839,21 +5840,21 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* variant, const SOPC_Varia
      * but since we will do partial modification (to be cleared) on it we need to change that.
      * Make the variant "clearable" by copying itself before the partial modification.
      */
-    if (variant->DoNotClear)
+    if (dst->DoNotClear)
     {
         SOPC_Variant tmp;
         SOPC_Variant_Initialize(&tmp);
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(&tmp, variant);
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(&tmp, dst);
         if (status != SOPC_STATUS_OK)
         {
             return status;
         }
-        *variant = tmp;
+        *dst = tmp;
     }
 
     // Untyped pointer to the source array data at the correct offset
     const uint8_t* src_i = *((const uint8_t* const*) &src->Value.Array.Content);
-    uint8_t* dst_i = *((uint8_t**) &variant->Value.Array.Content) + start * type_size;
+    uint8_t* dst_i = *((uint8_t**) &dst->Value.Array.Content) + start * type_size;
 
     for (uint32_t i = 0; i < (end - start + 1); ++i)
     {
@@ -5926,15 +5927,11 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
      * Source matrix: data source for the specified ranges to write, dimensions lengths shall match ranges lengths
      */
 
+    assert(dst->BuiltInTypeId == src->BuiltInTypeId);
     assert(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
     {
         return false;
-    }
-
-    if (dst->BuiltInTypeId != src->BuiltInTypeId)
-    {
-        return SOPC_STATUS_NOK;
     }
 
     if (src->ArrayType == SOPC_VariantArrayType_Array)
@@ -6037,16 +6034,21 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* variant, const SOPC_Variant* src, const SOPC_NumericRange* range)
+SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
+    if (dst->BuiltInTypeId != src->BuiltInTypeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     switch (range->n_dimensions)
     {
     case 0:
         return SOPC_STATUS_INVALID_PARAMETERS;
     case 1:
-        return set_range_array(variant, src, range);
+        return set_range_array(dst, src, range);
     default:
-        return set_range_matrix(variant, src, range);
+        return set_range_matrix(dst, src, range);
     }
 }
 
