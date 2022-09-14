@@ -91,6 +91,14 @@ typedef struct user_cert
 
 typedef struct _SOPC_UsersConfig
 {
+    char** trustedRootIssuersList;
+    char** trustedIntermediateIssuersList;
+    char** issuedCertificatesList;
+    char** untrustedRootIssuersList;
+    char** untrustedIntermediateIssuersList;
+    char** certificateRevocationList;
+
+    bool need_pki;
     SOPC_PKIProvider* pX509_UserIdentity_PKI;
     SOPC_Dict* users;
     SOPC_Dict* certificates; // dict{key = raw certificate as SOPC_ByteString; value = user_cert structure}
@@ -1490,17 +1498,68 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
     return SOPC_STATUS_OK;
 }
 
+static void free_certificate_lists(char** trustedRootIssuersList,
+                                   char** trustedIntermediateIssuersList,
+                                   char** issuedCertificatesList,
+                                   char** untrustedRootIssuersList,
+                                   char** untrustedIntermediateIssuersList,
+                                   char** certificateRevocationList)
+{
+    for (int i = 0; NULL != trustedRootIssuersList && NULL != trustedRootIssuersList[i]; i++)
+    {
+        SOPC_Free(trustedRootIssuersList[i]);
+    }
+    SOPC_Free(trustedRootIssuersList);
+
+    for (int i = 0; NULL != trustedIntermediateIssuersList && NULL != trustedIntermediateIssuersList[i]; i++)
+    {
+        SOPC_Free(trustedIntermediateIssuersList[i]);
+    }
+    SOPC_Free(trustedIntermediateIssuersList);
+
+    for (int i = 0; NULL != issuedCertificatesList && NULL != issuedCertificatesList[i]; i++)
+    {
+        SOPC_Free(issuedCertificatesList[i]);
+    }
+    SOPC_Free(issuedCertificatesList);
+
+    for (int i = 0; NULL != untrustedRootIssuersList && NULL != untrustedRootIssuersList[i]; i++)
+    {
+        SOPC_Free(untrustedRootIssuersList[i]);
+    }
+    SOPC_Free(untrustedRootIssuersList);
+
+    for (int i = 0; NULL != untrustedIntermediateIssuersList && NULL != untrustedIntermediateIssuersList[i]; i++)
+    {
+        SOPC_Free(untrustedIntermediateIssuersList[i]);
+    }
+    SOPC_Free(untrustedIntermediateIssuersList);
+
+    for (int i = 0; NULL != certificateRevocationList && NULL != certificateRevocationList[i]; i++)
+    {
+        SOPC_Free(certificateRevocationList[i]);
+    }
+    SOPC_Free(certificateRevocationList);
+}
+
 static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authentication)
 {
-    if (NULL != authentication && NULL != authentication->pData)
+    if (NULL != authentication)
     {
-        SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->users);
-        userpassword_free(((SOPC_UsersConfig*) authentication->pData)->rejectedUser);
-        SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->certificates);
-        SOPC_PKIProvider_Free(&((SOPC_UsersConfig*) authentication->pData)->pX509_UserIdentity_PKI);
-        SOPC_Free(authentication->pData);
+        if (NULL != authentication->pData)
+        {
+            SOPC_UsersConfig* config = (SOPC_UsersConfig*) authentication->pData;
+            SOPC_Dict_Delete(config->users);
+            userpassword_free(config->rejectedUser);
+            SOPC_Dict_Delete(config->certificates);
+            SOPC_PKIProvider_Free(&config->pX509_UserIdentity_PKI);
+            free_certificate_lists(config->trustedRootIssuersList, config->trustedIntermediateIssuersList,
+                                   config->issuedCertificatesList, config->untrustedRootIssuersList,
+                                   config->untrustedIntermediateIssuersList, config->certificateRevocationList);
+            SOPC_Free(authentication->pData);
+        }
+        SOPC_Free(authentication);
     }
-    SOPC_Free(authentication);
 }
 
 static void UserAuthorization_Free(SOPC_UserAuthorization_Manager* authorization)
@@ -1523,44 +1582,56 @@ static void SOPC_Free_CstringFromPtr(void* data)
     }
 }
 
-static void SOPC_Free_CertificateList(struct parse_context_t* ctx)
+SOPC_ReturnStatus SOPC_UserConfig_SetPKI(SOPC_UserAuthentication_Manager* authentication)
 {
-    for (int i = 0; NULL != ctx->trustedRootIssuersList && NULL != ctx->trustedRootIssuersList[i]; i++)
-    {
-        SOPC_Free(ctx->trustedRootIssuersList[i]);
-    }
-    SOPC_Free(ctx->trustedRootIssuersList);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_UsersConfig* config = (SOPC_UsersConfig*) authentication->pData;
 
-    for (int i = 0; NULL != ctx->trustedIntermediateIssuersList && NULL != ctx->trustedIntermediateIssuersList[i]; i++)
+    if (NULL == config)
     {
-        SOPC_Free(ctx->trustedIntermediateIssuersList[i]);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_Free(ctx->trustedIntermediateIssuersList);
 
-    for (int i = 0; NULL != ctx->issuedCertificatesList && NULL != ctx->issuedCertificatesList[i]; i++)
+    if (config->need_pki)
     {
-        SOPC_Free(ctx->issuedCertificatesList[i]);
+        status = SOPC_PKIProviderStack_CreateFromPaths(
+            config->trustedRootIssuersList, config->trustedIntermediateIssuersList, config->untrustedRootIssuersList,
+            config->untrustedIntermediateIssuersList, config->issuedCertificatesList, config->certificateRevocationList,
+            &config->pX509_UserIdentity_PKI);
     }
-    SOPC_Free(ctx->issuedCertificatesList);
+    return status;
+}
 
-    for (int i = 0; NULL != ctx->untrustedRootIssuersList && NULL != ctx->untrustedRootIssuersList[i]; i++)
+SOPC_ReturnStatus SOPC_UserConfig_GetPKIPaths(SOPC_UserAuthentication_Manager* authentication,
+                                              SOPC_UsersConfig_PKIPaths** ppPKIConfig)
+{
+    if (NULL == authentication || NULL == ppPKIConfig)
     {
-        SOPC_Free(ctx->untrustedRootIssuersList[i]);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_Free(ctx->untrustedRootIssuersList);
 
-    for (int i = 0; NULL != ctx->untrustedIntermediateIssuersList && NULL != ctx->untrustedIntermediateIssuersList[i];
-         i++)
+    if (NULL == authentication->pData)
     {
-        SOPC_Free(ctx->untrustedIntermediateIssuersList[i]);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_Free(ctx->untrustedIntermediateIssuersList);
 
-    for (int i = 0; NULL != ctx->certificateRevocationList && NULL != ctx->certificateRevocationList[i]; i++)
+    SOPC_UsersConfig* config = (SOPC_UsersConfig*) authentication->pData;
+    SOPC_UsersConfig_PKIPaths* pki_config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig_PKIPaths));
+    if (NULL == pki_config)
     {
-        SOPC_Free(ctx->certificateRevocationList[i]);
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    SOPC_Free(ctx->certificateRevocationList);
+
+    pki_config->trustedRootIssuersList = config->trustedRootIssuersList;
+    pki_config->trustedIntermediateIssuersList = config->trustedIntermediateIssuersList;
+    pki_config->issuedCertificatesList = config->issuedCertificatesList;
+    pki_config->untrustedRootIssuersList = config->untrustedRootIssuersList;
+    pki_config->untrustedIntermediateIssuersList = config->untrustedIntermediateIssuersList;
+    pki_config->certificateRevocationList = config->certificateRevocationList;
+
+    *ppPKIConfig = pki_config;
+
+    return SOPC_STATUS_OK;
 }
 
 bool SOPC_UsersConfig_Parse(FILE* fd,
@@ -1572,8 +1643,6 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
 
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
-    SOPC_PKIProvider* pX509_UserIdentity_PKI = NULL;
-    SOPC_ReturnStatus pki_status = SOPC_STATUS_OK;
     SOPC_Dict* users = SOPC_Dict_Create(NULL, username_hash, username_equal, NULL, userpassword_free);
     SOPC_Dict* certificates = SOPC_Dict_Create(NULL, cert_hash, cert_equal, NULL, user_cert_free);
 
@@ -1659,14 +1728,12 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
             ctx.trustedRootIssuersList, ctx.trustedIntermediateIssuersList, ctx.untrustedRootIssuersList,
             ctx.untrustedIntermediateIssuersList, ctx.issuedCertificatesList, ctx.certificateRevocationList,
             &pX509_UserIdentity_PKI);
-        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status)
+        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status || SOPC_STATUS_OK != res)
         {
             SOPC_Free(*authentication);
             *authentication = NULL;
             SOPC_Free(*authorization);
             *authorization = NULL;
-            SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
-            pX509_UserIdentity_PKI = NULL;
             SOPC_Free(config);
             config = NULL;
             userpassword_free(rejectedUser);
@@ -1674,7 +1741,14 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         }
         else
         {
-            config->pX509_UserIdentity_PKI = pX509_UserIdentity_PKI;
+            config->need_pki = ctx.userCertSet;
+            config->trustedRootIssuersList = ctx.trustedRootIssuersList;
+            config->trustedIntermediateIssuersList = ctx.trustedIntermediateIssuersList;
+            config->issuedCertificatesList = ctx.issuedCertificatesList;
+            config->untrustedRootIssuersList = ctx.untrustedRootIssuersList;
+            config->untrustedIntermediateIssuersList = ctx.untrustedIntermediateIssuersList;
+            config->certificateRevocationList = ctx.certificateRevocationList;
+            config->pX509_UserIdentity_PKI = NULL;
             config->users = users;
             config->rejectedUser = rejectedUser;
             config->certificates = certificates;
@@ -1702,10 +1776,12 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         }
         SOPC_Dict_Delete(users);
         SOPC_Dict_Delete(certificates);
+        /* Delete pki paths loading from xml  */
+        free_certificate_lists(ctx.trustedRootIssuersList, ctx.trustedIntermediateIssuersList,
+                               ctx.issuedCertificatesList, ctx.untrustedRootIssuersList,
+                               ctx.untrustedIntermediateIssuersList, ctx.certificateRevocationList);
         return false;
     }
 
-    /* Delete pki paths loading from xml  */
-    SOPC_Free_CertificateList(&ctx);
     return true;
 }
