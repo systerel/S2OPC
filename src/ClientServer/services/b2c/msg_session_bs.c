@@ -221,18 +221,17 @@ void msg_session_bs__write_create_session_msg_session_revised_timeout(const cons
 
     createSessionResp->RevisedSessionTimeout = SOPC_MIN_SESSION_TIMEOUT;
 
-    if (!isnan(createSessionReq->RequestedSessionTimeout))
+    // IMPORTANT NOTE: if RequestedSessionTimeout is NaN, all comparisons will fail.
+    //                 It means we shall keep SOPC_MIN_SESSION_TIMEOUT as default value in this case.
+    if (createSessionReq->RequestedSessionTimeout <= SOPC_MAX_SESSION_TIMEOUT &&
+        createSessionReq->RequestedSessionTimeout >= SOPC_MIN_SESSION_TIMEOUT)
     {
-        if (createSessionReq->RequestedSessionTimeout <= SOPC_MAX_SESSION_TIMEOUT &&
-            createSessionReq->RequestedSessionTimeout >= SOPC_MIN_SESSION_TIMEOUT)
-        {
-            createSessionResp->RevisedSessionTimeout = createSessionReq->RequestedSessionTimeout;
-        }
-        else if (createSessionReq->RequestedSessionTimeout > SOPC_MAX_SESSION_TIMEOUT)
-        {
-            createSessionResp->RevisedSessionTimeout = SOPC_MAX_SESSION_TIMEOUT;
-        } // else SOPC_MIN_SESSION_TIMEOUT value kept
+        createSessionResp->RevisedSessionTimeout = createSessionReq->RequestedSessionTimeout;
     }
+    else if (createSessionReq->RequestedSessionTimeout > SOPC_MAX_SESSION_TIMEOUT)
+    {
+        createSessionResp->RevisedSessionTimeout = SOPC_MAX_SESSION_TIMEOUT;
+    } // else SOPC_MIN_SESSION_TIMEOUT value kept
 }
 
 void msg_session_bs__write_create_session_msg_server_endpoints(

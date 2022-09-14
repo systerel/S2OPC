@@ -76,18 +76,17 @@ void subscription_core_bs__compute_create_subscription_revised_params(
 {
     *subscription_core_bs__revisedPublishInterval = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
 
-    if (!isnan(subscription_core_bs__p_reqPublishInterval))
+    // IMPORTANT NOTE: if RequestedPublishingInterval is NaN, all comparisons will fail.
+    //                 It means we shall keep SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION as default value in this case.
+    if (subscription_core_bs__p_reqPublishInterval <= SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION &&
+        subscription_core_bs__p_reqPublishInterval >= SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
     {
-        if (subscription_core_bs__p_reqPublishInterval <= SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION &&
-            subscription_core_bs__p_reqPublishInterval >= SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
-        {
-            *subscription_core_bs__revisedPublishInterval = subscription_core_bs__p_reqPublishInterval;
-        }
-        else if (subscription_core_bs__p_reqPublishInterval > SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION)
-        {
-            *subscription_core_bs__revisedPublishInterval = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
-        } // else SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION value kept
+        *subscription_core_bs__revisedPublishInterval = subscription_core_bs__p_reqPublishInterval;
     }
+    else if (subscription_core_bs__p_reqPublishInterval > SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION)
+    {
+        *subscription_core_bs__revisedPublishInterval = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
+    } // else SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION value kept
 
     if (subscription_core_bs__p_reqMaxKeepAlive < SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS)
     {
