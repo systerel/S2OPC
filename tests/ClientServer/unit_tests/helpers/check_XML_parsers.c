@@ -668,7 +668,7 @@ END_TEST
 
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
-static SOPC_ExtensionObject* build_user_token(char* username, char* password)
+static SOPC_ExtensionObject* build_user_name_token(char* username, char* password)
 {
     SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     SOPC_ReturnStatus status;
@@ -688,6 +688,40 @@ static SOPC_ExtensionObject* build_user_token(char* username, char* password)
     return extObject;
 }
 
+static SOPC_ExtensionObject* build_x509_token(char* pathCert)
+{
+    SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    SOPC_ReturnStatus status;
+    OpcUa_X509IdentityToken* token = NULL;
+
+    ck_assert_ptr_nonnull(extObject);
+    SOPC_ExtensionObject_Initialize(extObject);
+    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_Buffer* buffer = NULL;
+    status = SOPC_Buffer_ReadFile(pathCert, &buffer);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    status = SOPC_ByteString_CopyFromBytes(&token->CertificateData, buffer->data, (int32_t) buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_Buffer_Delete(buffer);
+
+    return extObject;
+}
+const char* usr_expectedTrustedRootIssuers[3] = {"trusted_usr/cacert.der", "trusted_usr/ctt_ca1T.der", NULL};
+const char* usr_expectedTrustedIntermediateIssuers[2] = {"trusted_usr/ctt_ca1I_ca2T.der", NULL};
+
+const char* usr_expectedIssuedCerts[6] = {"issued_usr/ctt_usrT.der",           "issued_usr/ctt_usrTE.der",
+                                          "issued_usr/ctt_usrTSincorrect.der", "issued_usr/ctt_usrTV.der",
+                                          "issued_usr/ctt_ca1I_usrT.der",      NULL};
+const char* usr_expectedUntrustedRootIssuers[2] = {"untrusted_usr/ctt_ca1I.der", NULL};
+const char* usr_expectedUntrustedIntermediateIssuers[2] = {"untrusted_usr/ctt_ca1TC_ca2I.der", NULL};
+const char* usr_expectedIssuersCRLs[6] = {"revoked_usr/cacrl.der",          "revoked_usr/ctt_ca1T.crl",
+                                          "revoked_usr/ctt_ca1I_ca2T.crl",  "revoked_usr/ctt_ca1I.crl",
+                                          "revoked_usr/ctt_ca1TC_ca2I.crl", NULL};
+
 static const SOPC_ExtensionObject anonymousIdentityToken = {
     .Encoding = SOPC_ExtObjBodyEncoding_Object,
     .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
@@ -698,12 +732,18 @@ static const SOPC_ExtensionObject anonymousIdentityToken = {
 static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authenticationManager,
                                       SOPC_UserAuthorization_Manager* authorizationManager)
 {
-    SOPC_ExtensionObject* invalidUserNameToken = build_user_token("invalid user name", "12345");
-    SOPC_ExtensionObject* invalidPasswordToken = build_user_token("user1", "01234");
-    SOPC_ExtensionObject* noAccessToken = build_user_token("noaccess", "secret");
-    SOPC_ExtensionObject* writeExecToken = build_user_token("user1", "12345");
-    SOPC_ExtensionObject* readExecToken = build_user_token("user2", "password2");
-    SOPC_ExtensionObject* readWriteToken = build_user_token("user3", "42");
+    SOPC_ExtensionObject* invalidUserNameToken = build_user_name_token("invalid user name", "12345");
+    SOPC_ExtensionObject* invalidPasswordToken = build_user_name_token("user1", "01234");
+    SOPC_ExtensionObject* noAccessToken = build_user_name_token("noaccess", "secret");
+    SOPC_ExtensionObject* writeExecAddToken = build_user_name_token("user1", "12345");
+    SOPC_ExtensionObject* readExecAddToken = build_user_name_token("user2", "password2");
+    SOPC_ExtensionObject* readWriteAddToken = build_user_name_token("user3", "42");
+    SOPC_ExtensionObject* readWriteExecToken = build_user_name_token("user4", "user4");
+    SOPC_ExtensionObject* x509_defaultAccessToken = build_x509_token("issued_usr/ctt_usrT.der");
+    SOPC_ExtensionObject* x509_readExecAddToken = build_x509_token("issued_usr/ctt_usrTE.der");
+    SOPC_ExtensionObject* x509_writeExecAddToken = build_x509_token("issued_usr/ctt_usrTSincorrect.der");
+    SOPC_ExtensionObject* x509_readWriteAddToken = build_x509_token("issued_usr/ctt_usrTV.der");
+    SOPC_ExtensionObject* x509_readWriteExecToken = build_x509_token("issued_usr/ctt_ca1I_usrT.der");
     SOPC_UserAuthentication_Status authenticationRes;
     SOPC_ReturnStatus status =
         SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidUserNameToken, &authenticationRes);
@@ -716,15 +756,20 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, noAccessToken, &authenticationRes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_ACCESS_DENIED, authenticationRes);
-    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, writeExecToken, &authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, writeExecAddToken, &authenticationRes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
-    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readExecToken, &authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readExecAddToken, &authenticationRes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
-    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readWriteToken, &authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readWriteAddToken, &authenticationRes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readWriteExecToken, &authenticationRes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+
+    /* The validity of the x509Identity Token is check with the PKI during the UACTT test */
 
     SOPC_UserWithAuthorization* invalidNoAccesses =
         SOPC_UserWithAuthorization_CreateFromIdentityToken(invalidUserNameToken, authorizationManager);
@@ -735,15 +780,35 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_UserWithAuthorization* noAccess =
         SOPC_UserWithAuthorization_CreateFromIdentityToken(noAccessToken, authorizationManager);
     ck_assert_ptr_nonnull(noAccess);
-    SOPC_UserWithAuthorization* writeExec =
-        SOPC_UserWithAuthorization_CreateFromIdentityToken(writeExecToken, authorizationManager);
-    ck_assert_ptr_nonnull(writeExec);
-    SOPC_UserWithAuthorization* readExec =
-        SOPC_UserWithAuthorization_CreateFromIdentityToken(readExecToken, authorizationManager);
-    ck_assert_ptr_nonnull(readExec);
-    SOPC_UserWithAuthorization* readWrite =
-        SOPC_UserWithAuthorization_CreateFromIdentityToken(readWriteToken, authorizationManager);
-    ck_assert_ptr_nonnull(readWrite);
+    SOPC_UserWithAuthorization* writeExecAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(writeExecAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(writeExecAdd);
+    SOPC_UserWithAuthorization* readExecAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(readExecAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(readExecAdd);
+    SOPC_UserWithAuthorization* readWriteAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(readWriteAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(readWriteAdd);
+    SOPC_UserWithAuthorization* readWriteExec =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(readWriteExecToken, authorizationManager);
+    ck_assert_ptr_nonnull(readWriteExec);
+
+    // x509 token
+    SOPC_UserWithAuthorization* x509_defaultAccess =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_defaultAccessToken, authorizationManager);
+    ck_assert_ptr_nonnull(x509_defaultAccess);
+    SOPC_UserWithAuthorization* x509_readExecAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_readExecAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(x509_readExecAdd);
+    SOPC_UserWithAuthorization* x509_writeExecAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_writeExecAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(x509_writeExecAdd);
+    SOPC_UserWithAuthorization* x509_readWriteAdd =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_readWriteAddToken, authorizationManager);
+    ck_assert_ptr_nonnull(x509_readWriteAdd);
+    SOPC_UserWithAuthorization* x509_readWriteExec =
+        SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_readWriteExecToken, authorizationManager);
+    ck_assert_ptr_nonnull(x509_readWriteExec);
 
     const SOPC_NodeId node = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
     uint32_t attr = 13;
@@ -761,6 +826,10 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
         invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
 
     // anonNoAccesses
     status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
@@ -775,18 +844,8 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
                                                           &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-
-    // anonNoAccesses
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
                                                           &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
@@ -799,72 +858,293 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
                                                           attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // writeExecAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // readExecAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // readWriteAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // readWriteExec
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
+                                                          attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    // x509_defaultAccess --> Read only form SOPC_Test_Users.xml
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-
-    // writeExec
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-
-    // readExec
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr,
-                                                          &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-
-    // readWrite
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWrite, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
                                                           &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
+    // x509_writeExecAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // x509_readExecAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // x509_readWriteAdd
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+
+    // x509_readWriteExec
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
+                                                          &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
+    /* Get the parsed pki paths */
+    SOPC_UsersConfig_PKIPaths* pki_paths = NULL;
+    SOPC_UserConfig_GetPKIPaths(authenticationManager, &pki_paths);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pki_paths);
+    /* Check trusted CAs */
+    int caCounter = 0;
+    // Root CA
+    for (caCounter = 0;
+         pki_paths->trustedRootIssuersList[caCounter] != NULL && usr_expectedTrustedRootIssuers[caCounter]; caCounter++)
+    {
+        int cmp_res = strcmp(pki_paths->trustedRootIssuersList[caCounter], usr_expectedTrustedRootIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->trustedRootIssuersList[caCounter]);
+    ck_assert_ptr_null(usr_expectedTrustedRootIssuers[caCounter]);
+    // Intermediate CA:
+    for (caCounter = 0; pki_paths->trustedIntermediateIssuersList[caCounter] != NULL &&
+                        usr_expectedTrustedIntermediateIssuers[caCounter];
+         caCounter++)
+    {
+        int cmp_res = strcmp(pki_paths->trustedIntermediateIssuersList[caCounter],
+                             usr_expectedTrustedIntermediateIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->trustedIntermediateIssuersList[caCounter]);
+    ck_assert_ptr_null(usr_expectedTrustedIntermediateIssuers[caCounter]);
+
+    /* Check trusted issued certificates */
+    int issuedCounter = 0;
+    for (issuedCounter = 0;
+         pki_paths->issuedCertificatesList[issuedCounter] != NULL && usr_expectedIssuedCerts[issuedCounter];
+         issuedCounter++)
+    {
+        int cmp_res = strcmp(pki_paths->issuedCertificatesList[issuedCounter], usr_expectedIssuedCerts[issuedCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->issuedCertificatesList[issuedCounter]);
+    ck_assert_ptr_null(usr_expectedIssuedCerts[issuedCounter]);
+
+    /* Check untrusted CAs (used to check issued certificate trust chain) */
+    int untrustedCAcounter = 0;
+    // Root CA:
+    for (untrustedCAcounter = 0; pki_paths->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
+                                 usr_expectedUntrustedRootIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(pki_paths->untrustedRootIssuersList[untrustedCAcounter],
+                             usr_expectedUntrustedRootIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->untrustedRootIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(usr_expectedUntrustedRootIssuers[untrustedCAcounter]);
+    // Intermediate CA:
+    for (untrustedCAcounter = 0; pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
+                                 usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter],
+                             usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
+
+    /* Check CRLs */
+    int crlCounter = 0;
+    for (crlCounter = 0;
+         pki_paths->certificateRevocationList[crlCounter] != NULL && usr_expectedIssuersCRLs[crlCounter]; crlCounter++)
+    {
+        int cmp_res = strcmp(pki_paths->certificateRevocationList[crlCounter], usr_expectedIssuersCRLs[crlCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(pki_paths->certificateRevocationList[crlCounter]);
+    ck_assert_ptr_null(usr_expectedIssuersCRLs[crlCounter]);
+
+    SOPC_Free(pki_paths);
+    pki_paths = NULL;
     SOPC_UserWithAuthorization_Free(&invalidNoAccesses);
     SOPC_UserWithAuthorization_Free(&anonNoAccesses);
     SOPC_UserWithAuthorization_Free(&noAccess);
-    SOPC_UserWithAuthorization_Free(&writeExec);
-    SOPC_UserWithAuthorization_Free(&readExec);
-    SOPC_UserWithAuthorization_Free(&readWrite);
+    SOPC_UserWithAuthorization_Free(&writeExecAdd);
+    SOPC_UserWithAuthorization_Free(&readExecAdd);
+    SOPC_UserWithAuthorization_Free(&readWriteAdd);
+    SOPC_UserWithAuthorization_Free(&readWriteExec);
+    SOPC_UserWithAuthorization_Free(&x509_readWriteExec);
+    SOPC_UserWithAuthorization_Free(&x509_readWriteAdd);
+    SOPC_UserWithAuthorization_Free(&x509_writeExecAdd);
+    SOPC_UserWithAuthorization_Free(&x509_readExecAdd);
+    SOPC_UserWithAuthorization_Free(&x509_defaultAccess);
 
     SOPC_ExtensionObject_Clear(invalidUserNameToken);
     SOPC_ExtensionObject_Clear(invalidPasswordToken);
     SOPC_ExtensionObject_Clear(noAccessToken);
-    SOPC_ExtensionObject_Clear(writeExecToken);
-    SOPC_ExtensionObject_Clear(readExecToken);
-    SOPC_ExtensionObject_Clear(readWriteToken);
+    SOPC_ExtensionObject_Clear(writeExecAddToken);
+    SOPC_ExtensionObject_Clear(readExecAddToken);
+    SOPC_ExtensionObject_Clear(readWriteAddToken);
+    SOPC_ExtensionObject_Clear(readWriteExecToken);
+    SOPC_ExtensionObject_Clear(x509_readWriteExecToken);
+    SOPC_ExtensionObject_Clear(x509_readWriteAddToken);
+    SOPC_ExtensionObject_Clear(x509_writeExecAddToken);
+    SOPC_ExtensionObject_Clear(x509_readExecAddToken);
+    SOPC_ExtensionObject_Clear(x509_defaultAccessToken);
+
     SOPC_Free(invalidUserNameToken);
     SOPC_Free(invalidPasswordToken);
     SOPC_Free(noAccessToken);
-    SOPC_Free(writeExecToken);
-    SOPC_Free(readExecToken);
-    SOPC_Free(readWriteToken);
+    SOPC_Free(writeExecAddToken);
+    SOPC_Free(readExecAddToken);
+    SOPC_Free(readWriteAddToken);
+    SOPC_Free(readWriteExecToken);
+    SOPC_Free(x509_readWriteExecToken);
+    SOPC_Free(x509_readWriteAddToken);
+    SOPC_Free(x509_writeExecAddToken);
+    SOPC_Free(x509_readExecAddToken);
+    SOPC_Free(x509_defaultAccessToken);
 }
 #endif
 
