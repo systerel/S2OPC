@@ -285,7 +285,7 @@ OPERATIONS
         p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
-        p_monitored_item_id :(p_monitored_item_id : t_monitoredItemId_i)
+        p_monitored_item_id :: t_monitoredItemId_i
     END
     ;
 

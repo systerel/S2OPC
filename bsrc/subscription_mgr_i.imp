@@ -1186,7 +1186,7 @@ OPERATIONS
     IN
         IF p_prevMonitMode = e_monitoringMode_disabled & p_newMonitMode /= e_monitoringMode_disabled
         THEN
-            /* Generate a notification when the monitoring mode is not anymore disabled */
+            /* Generate a notification when the monitoring mode is not disabled anymore */
             l_monitoredItemId,
             l_subscription,
             l_nid,
