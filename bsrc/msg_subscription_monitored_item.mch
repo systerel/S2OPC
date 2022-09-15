@@ -300,12 +300,12 @@ OPERATIONS
           p_samplingItv : t_opcua_duration_i &
           p_discardOldest : BOOL &
           p_queueSize : t_counter &
-          (p_sc = e_sc_ok  =>
-           ModifyMonitoredItemReq_FilterPresence(p_index) = FALSE &
+          (ModifyMonitoredItemReq_FilterPresence(p_index) = FALSE =>
+           p_sc = e_sc_ok &
            p_monitored_item_id = ModifyMonitoredItemReq_Id(p_index)
            ) &
-           (p_sc = e_sc_bad_monitored_item_filter_unsupported =>
-            ModifyMonitoredItemReq_FilterPresence(p_index) = TRUE
+           (ModifyMonitoredItemReq_FilterPresence(p_index) = TRUE =>
+            p_sc = e_sc_bad_monitored_item_filter_unsupported
            )
          )
     END

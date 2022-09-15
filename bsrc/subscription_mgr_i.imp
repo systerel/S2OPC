@@ -241,7 +241,7 @@ LOCAL_OPERATIONS
                         l_MonitoredItemResp_Id[dom(l_allocMonitoredItemResp_StatusCode |> {e_sc_ok})] = ran(miIndexToMiId)
                     THEN
                         /* Define the queues of monitored items that will be modified */
-                        LET miSubQueue, miIndexToNodeIds, miIndexToQueueSize, s_miNodeQueues, s_miQueues BE
+                        LET miSubQueue, miIndexToNodeIds, s_miNodeQueues, s_miQueues BE
                             miSubQueue = a_monitoredItemQueue(p_subscription) &
                             /* Nodes ids concerned by the new monitored items */
                             miIndexToNodeIds = %mi_index.(mi_index : t_monitoredItemReqIndex &
@@ -249,11 +249,6 @@ LOCAL_OPERATIONS
                                                           l_allocMonitoredItemResp_StatusCode (mi_index) = e_sc_ok
                                                           |
                                                           CreateMonitoredItemReq_NodeId(mi_index)) &
-                            miIndexToQueueSize = %mi_index.(mi_index : t_monitoredItemReqIndex &
-                                                            mi_index : 1..nb_monitored_items &
-                                                            l_allocMonitoredItemResp_StatusCode (mi_index) = e_sc_ok
-                                                            |
-                                                            CreateMonitoredItemReq_NodeId(mi_index)) &
                             s_miNodeQueues = a_nodeToMonitoredItemQueue[ran(miIndexToNodeIds)] &
                             s_miQueues = {miSubQueue} \/ s_miNodeQueues
                         IN
@@ -411,7 +406,6 @@ LOCAL_OPERATIONS
         p_nb_monitored_items = nb_monitored_items
     THEN
         LET l_modifyMonitoredItemResp_StatusCode BE
-            /* Evaluate the expected valid responses for which a monitored item should be deallocated (e_sc_ok case) */
             l_modifyMonitoredItemResp_StatusCode =
             %mi_index.(mi_index : t_monitoredItemReqIndex &
                 mi_index : 1..nb_monitored_items &
@@ -426,8 +420,8 @@ LOCAL_OPERATIONS
         IN
             /* Define the queues of monitored items that will be modified */
             LET l_MonitoredItemIds, l_MonitoredItemPointers BE
-                l_MonitoredItemIds = ModifyMonitoredItemReq_Id[dom(l_modifyMonitoredItemResp_StatusCode |>> {e_sc_ok})] &
-                l_MonitoredItemPointers = a_monitoredItemId~[ModifyMonitoredItemReq_Id[dom(l_modifyMonitoredItemResp_StatusCode |>> {e_sc_ok})]]
+                l_MonitoredItemIds = ModifyMonitoredItemReq_Id[dom(l_modifyMonitoredItemResp_StatusCode |> {e_sc_ok})] &
+                l_MonitoredItemPointers = a_monitoredItemId~[l_MonitoredItemIds]
             IN
                 /* Set response variables */
                 ModifyMonitoredItemResp_StatusCode := l_modifyMonitoredItemResp_StatusCode ||
