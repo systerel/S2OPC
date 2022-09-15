@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 24/08/2022 07:50:32
+ Date                 : 15/09/2022 16:29:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -286,9 +286,8 @@ void io_dispatch_mgr__receive_msg_buffer(
       channel_mgr__is_connected_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_connected_channel);
       service_mgr__decode_msg_type(io_dispatch_mgr__buffer,
+         &io_dispatch_mgr__l_valid_msg_type,
          &io_dispatch_mgr__l_msg_type);
-      service_mgr__is_valid_msg_in_type(io_dispatch_mgr__l_msg_type,
-         &io_dispatch_mgr__l_valid_msg_type);
       if ((io_dispatch_mgr__l_connected_channel == true) &&
          (io_dispatch_mgr__l_valid_msg_type == true)) {
          channel_mgr__is_client_channel(io_dispatch_mgr__channel,

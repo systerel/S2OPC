@@ -47,7 +47,7 @@ INITIALISATION
 
 OPERATIONS
 
-    msg_typ <-- decode_msg_type (msg_buffer) =
+    bres, msg_typ <-- decode_msg_type (msg_buffer) =
     PRE
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
@@ -59,9 +59,11 @@ OPERATIONS
         CHOICE
             a_buffer_in_state := e_buffer_in_msg_type_read ||
             a_msg_in_type :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type) ||
+            bres := TRUE ||
             msg_typ := a_msg_in_type
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
+            bres := FALSE ||
             msg_typ := c_msg_type_indet
         END
     END
@@ -227,14 +229,6 @@ OPERATIONS
         msg : t_msg_i
     THEN
         bres := bool(msg = c_msg_in & c_msg_in : t_msg)
-    END
-    ;
-
-    bres <-- is_valid_msg_in_type (msg_typ) =
-    PRE
-        msg_typ : t_msg_type_i
-    THEN
-        bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
 

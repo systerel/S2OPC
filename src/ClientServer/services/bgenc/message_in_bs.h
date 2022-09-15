@@ -21,7 +21,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 04/08/2022 14:53:32
+ Date                 : 15/09/2022 16:29:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -73,6 +73,7 @@ extern void message_in_bs__decode_msg_header(
    constants__t_msg_header_i * const message_in_bs__msg_header);
 extern void message_in_bs__decode_msg_type(
    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
+   t_bool * const message_in_bs__bres,
    constants__t_msg_type_i * const message_in_bs__msg_typ);
 extern void message_in_bs__decode_service_fault_msg_req_handle(
    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
@@ -92,9 +93,6 @@ extern void message_in_bs__is_valid_msg_in(
    t_bool * const message_in_bs__bres);
 extern void message_in_bs__is_valid_msg_in_header(
    const constants__t_msg_header_i message_in_bs__msg_header,
-   t_bool * const message_in_bs__bres);
-extern void message_in_bs__is_valid_msg_in_type(
-   const constants__t_msg_type_i message_in_bs__msg_typ,
    t_bool * const message_in_bs__bres);
 extern void message_in_bs__is_valid_request_context(
    const constants__t_request_context_i message_in_bs__req_context,

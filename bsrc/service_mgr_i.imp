@@ -47,7 +47,6 @@ IMPORTS
 PROMOTES
     /* message_in_bs */
     decode_msg_type,
-    is_valid_msg_in_type,
     is_valid_request_context,
     is_valid_app_msg_in,
 

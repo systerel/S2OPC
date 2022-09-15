@@ -351,8 +351,7 @@ OPERATIONS
         l_async_resp := FALSE;
         valid_msg := FALSE;
         l_connected_channel <-- is_connected_channel (channel);
-        l_msg_type <-- decode_msg_type (buffer);
-        l_valid_msg_type <-- is_valid_msg_in_type (l_msg_type);
+        l_valid_msg_type, l_msg_type <-- decode_msg_type (buffer);
         IF l_connected_channel = TRUE &
             l_valid_msg_type = TRUE
         THEN

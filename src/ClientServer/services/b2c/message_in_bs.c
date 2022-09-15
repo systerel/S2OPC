@@ -105,8 +105,10 @@ void message_in_bs__dealloc_msg_in_buffer(const constants__t_byte_buffer_i messa
 }
 
 void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_bs__msg_buffer,
+                                    t_bool* const message_in_bs__bres,
                                     constants__t_msg_type_i* const message_in_bs__msg_type)
 {
+    *message_in_bs__bres = false;
     *message_in_bs__msg_type = constants__c_msg_type_indet;
     SOPC_EncodeableType* encType = NULL;
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(message_in_bs__msg_buffer, &encType);
@@ -116,6 +118,7 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
                                SOPC_EncodeableType_GetName(encType));
 
         util_message__get_message_type(encType, message_in_bs__msg_type);
+        *message_in_bs__bres = message_in_bs__msg_type != constants__c_msg_type_indet;
     }
 }
 
@@ -223,12 +226,6 @@ void message_in_bs__is_valid_msg_in_header(const constants__t_msg_header_i messa
                                            t_bool* const message_in_bs__bres)
 {
     message_out_bs__is_valid_msg_out_header((constants__t_msg_i) message_in_bs__msg_header, message_in_bs__bres);
-}
-
-void message_in_bs__is_valid_msg_in_type(const constants__t_msg_type_i message_in_bs__msg_typ,
-                                         t_bool* const message_in_bs__bres)
-{
-    *message_in_bs__bres = message_in_bs__msg_typ != constants__c_msg_type_indet;
 }
 
 void message_in_bs__is_valid_request_context(const constants__t_request_context_i message_in_bs__req_context,
