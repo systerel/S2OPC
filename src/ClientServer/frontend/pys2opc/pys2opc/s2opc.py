@@ -24,6 +24,7 @@ import time
 import os
 import sys
 import json
+import signal
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseClientConnectionHandler
@@ -703,6 +704,11 @@ class PyS2OPC_Server(PyS2OPC):
 
     @staticmethod
     def serve_forever(endpointIndexes=None):
+        def sigterm_handler(_signo, _stack_frame):
+            raise KeyboardInterrupt
+
+        signal.signal(signal.SIGTERM, sigterm_handler)
+
         """
         Open and serve endpoint(s) forever.
         Can be interrupted with a `KeyboardInterrupt` (`SIGINT`).
