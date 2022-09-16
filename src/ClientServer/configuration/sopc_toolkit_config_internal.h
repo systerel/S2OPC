@@ -40,8 +40,8 @@
     ((x) > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS && (x) <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
 
 /**
- *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured
- * required)
+ *  \brief Return the endpoint configuration for the given index or null if not defined.
+ * (::SOPC_ToolkitServer_Configured required)
  *
  *  \param epConfigIdx  The endpoint configuration index requested
  *
@@ -52,7 +52,7 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 
 /**
  *  \brief (SERVER SIDE ONLY) Record the given secure channel configuration in returned index
- *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call)
  * Note: the set of indexes of secure channel configuration for client and server are disjoint
  *
  *  \return secure channel configuration index if configuration succeeded,
@@ -74,7 +74,7 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx);
 
 /**
  *  \brief (SERVER SIDE ONLY) Return the secure channel configuration for the given index or null if not defined.
- * (SOPC_Toolkit_Configured required)
+ * (::SOPC_ToolkitServer_Configured required)
  * Note: the set of indexes of secure channel configuration for client and server are disjoint
  *
  *  \param serverScConfigIdx  The secure channel configuration index requested

@@ -21,10 +21,9 @@
  * - Toolkit configuration
  * - SecureChannel and Session creation
  * Starts in the init state. Shall be configured with a call to StateMachine_ConfigureMachine(), which configures the
- * Toolkit with parameters from config.h. Then SOPC_Toolkit_Configured() shall be called  and the Async
- * processus shall be started using StateMachine_StartSession() or StateMachine_StartDiscovery() function. The
- * StateMachine_EventDispatcher() shall be called on the state machine from the callback given to
- * SOPC_Toolkit_Initialize().
+ * Toolkit with parameters from config.h. Then the Async processus shall be started using StateMachine_StartSession() or
+ * StateMachine_StartDiscovery() function. The StateMachine_EventDispatcher() shall be called on the state machine from
+ * the callback given to SOPC_Toolkit_Initialize().
  */
 
 #ifndef STATE_MACHINE_H_
@@ -76,7 +75,6 @@ StateMachine_Machine* StateMachine_Create(void);
  * If both sign and encrypt are false, security mode is None and policy is None.
  * If sign and/or encrypt are true, security policy is Basic256Sha256 and mode is "Sign" or "SignAndEncrypt".
  *
- * State machines shall be configured before the call to SOPC_Toolkit_Configured().
  */
 SOPC_ReturnStatus StateMachine_ConfigureMachine(StateMachine_Machine* pSM, bool sign, bool encrypt);
 

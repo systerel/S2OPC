@@ -29,9 +29,8 @@
  * - A number of PublishRequest.
  *
  * The machine starts in the init state. It shall be configured with a call to SOPC_StaMac_ConfigureMachine(),
- * which configures the Toolkit. Still, th Then SOPC_Toolkit_Configured(). The
- * SOPC_StaMac_EventDispatcher() shall be called on the state machine from the callback given to
- * SOPC_Toolkit_Initialize().
+ * which configures the Toolkit. TheSOPC_StaMac_EventDispatcher() shall be called on the state machine from the callback
+ * given to ::SOPC_Toolkit_Initialize.
  *
  * The machine API is thread safe.
  *
@@ -157,8 +156,7 @@ SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* p
 void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
 
 /**
- * \brief Creates a session asynchronously. The toolkit shall be configured with
- *        SOPC_Toolkit_Configured() beforehand.
+ * \brief Creates a session asynchronously.
  *
  * The state machine will also create a subscription. See SOPC_StaMac_HasSubscription().
  *

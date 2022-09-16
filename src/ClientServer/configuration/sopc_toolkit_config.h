@@ -71,7 +71,7 @@ void SOPC_Toolkit_Clear(void);
 
 /**
  *  \brief Set the given Address Space for the current toolkit server
- *  (SOPC_ToolkitServer_Initialize required, !SOPC_Toolkit_Configured required).
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
  *  Note: only one address space can be set, further call will be refused.
  *
  *  \param addressSpace  The address space definition
@@ -84,7 +84,9 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
 
 /**
  *  \brief Set the given Address Space modification notification callback
- *  for the current toolkit server (SOPC_ToolkitServer_Initialize required, !SOPC_Toolkit_Configured required).
+ *  for the current toolkit server
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
+ *
  *  Note: only one callback can be set, further call will be refused.
  *
  *  \param pAddSpaceNotifFct  The address space notification event callback definition
@@ -102,7 +104,7 @@ typedef uint32_t SOPC_SecureChannelConfigIdx;
 
 /**
  *  \brief Record the given secure channel configuration for endpoint connection in returned index
- *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
  *
  *  \return secure channel configuration index if configuration succeeded,
  *  0 if toolkit is not initialized, already
@@ -117,7 +119,7 @@ typedef uint32_t SOPC_EndpointConfigIdx;
 
 /**
  *  \brief Record the given endpoint configuration in given index
- *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
  *
  *  Note1: it is forbidden to have 2 configurations with same endpointURL
  *  Note2: if security policy None is not activated, less than SOPC_MAX_SECU_POLICIES_CFG
@@ -135,7 +137,7 @@ typedef uint32_t SOPC_ReverseEndpointConfigIdx;
 
 /**
  *  \brief Record the given client reverse endpoint configuration in returned index
- *  (SOPC_Toolkit_Initialize required)
+ *  (::SOPC_Toolkit_Initialize required).
  *
  *  \param reverseEndpointURL  The client endpointURL for reverse connections from server(s)
  *
