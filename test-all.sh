@@ -126,7 +126,6 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
     fi
 
     cd "${CLIENTSERVER_SAMPLE_DIR}"
-    EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES
     ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
     CTEST_RET3=$?
 else
