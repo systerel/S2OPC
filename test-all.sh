@@ -80,7 +80,11 @@ xml_parser_test.tap'
 PUBSUB_CLIENTSERVER_TAP_FILES='pubsub_server_test.tap'
 
 
-PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap'
+PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc.tap
+pys2opc_server-0-read-write.py.tap
+pys2opc_server-1-browse.py.tap
+pys2opc_server-2-subscribe.py.tap
+pys2opc_server-3-multi-connection-multi-request.py.tap'
 
 rm -f "${TAP_DIR}"/*.tap
 

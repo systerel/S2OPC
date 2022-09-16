@@ -239,5 +239,49 @@ if(ENABLE_SAMPLES)
   set_tests_properties("validation::s2opc_discovery" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_discovery.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
+  ## PyS2OPC library samples tests ##
+
+  if(WIN32)
+    set(ENV_PATH_SEP "\;")
+  else()
+    set(ENV_PATH_SEP ":")
+  endif()
+
+  if(WITH_PYS2OPC)
+    set(PYS2OPC_SRC_PATH "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/pys2opc")
+    set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc")
+    # TODO: This variable must be the one defined in ../src/ClientServer/frontend/pys2opc/CMakeLists.txt
+    set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
+
+    # Validation test
+    function(pys2opc_sample_test name)
+      get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
+      set(test_name "validation::pys2opc_server-${name}")
+      add_test(NAME "${test_name}"
+        WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        COMMAND
+        "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+        "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+        "--server-cmd" "${PYTHON_EXECUTABLE} ${PYS2OPC_TEST_PATH}/server/server.py --config-path ./S2OPC_Server_UACTT_Config.xml"
+        "${PYTHON_EXECUTABLE}" "${PYS2OPC_TEST_PATH}/client/${name}"
+        )
+      # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
+      set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}"
+        "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+        "CK_TAP_LOG_FILE_NAME=pys2opc_server-${name}.tap")
+      if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
+        set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
+      endif()
+      # TODO: make the test depends on pys2opc_install
+      set_tests_properties(${test_name} PROPERTIES
+                           ENVIRONMENT "${new_env}")
+    endfunction()
+
+    pys2opc_sample_test("0-read-write.py")
+    pys2opc_sample_test("1-browse.py")
+    pys2opc_sample_test("2-subscribe.py")
+    pys2opc_sample_test("3-multi-connection-multi-request.py")
+  endif()
+
 
 endif(ENABLE_SAMPLES)
