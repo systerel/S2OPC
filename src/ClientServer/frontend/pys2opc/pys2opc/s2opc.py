@@ -656,7 +656,7 @@ class PyS2OPC_Server(PyS2OPC):
     def mark_configured():
         PyS2OPC.mark_configured()
         try:
-            assert libsub.SOPC_Toolkit_Configured() == ReturnStatus.OK
+            assert libsub.SOPC_ToolkitServer_Configured() == ReturnStatus.OK
         except:
             PyS2OPC._configured = False
             raise
