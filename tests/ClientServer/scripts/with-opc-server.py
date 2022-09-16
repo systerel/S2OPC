@@ -83,7 +83,7 @@ if __name__ == '__main__':
     log('Waiting for server to exit')
     server_ret = server_process.wait()
 
-    log('Done')
+    log('Done with test_ret=%d and server_ret=%d' % (test_ret, server_ret))
     running_in_windows = sys.platform.startswith('win32')
     if test_ret == 0:
         # server return code can be checked on Linux only
