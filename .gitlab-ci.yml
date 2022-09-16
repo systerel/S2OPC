@@ -368,6 +368,7 @@ test-check:
       - 'build/bin/**/*.tap'
       - 'build/bin/**/*.log'
       - 'build/tests/**/Testing'
+      - 'build/samples/**/Testing'
       - 'build/**/*.*.gcda' # coverage analysis
       - 'build/**/*.*.gcno' # coverage analysis
     when: always
