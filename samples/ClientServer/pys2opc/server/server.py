@@ -45,7 +45,7 @@ if __name__ == '__main__':
                         help='The path to the XML configuration of the server endpoints')
     parser.add_argument('--addspace-path', default='S2OPC_Demo_NodeSet.xml',
                         help='The path to the XML configuration of the server address space')
-    parser.add_argument('--log-path', default='/tmp/pys2opc_logs',)
+    parser.add_argument('--log-path', default='/tmp/pys2opc_logs/',)
     args = parser.parse_args()
 
     with PyS2OPC.initialize(logPath=args.log_path):

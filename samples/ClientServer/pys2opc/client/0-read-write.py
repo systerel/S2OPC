@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     # Initialize the toolkit and automatically clean it when the script finishes
     # Set the path for logs to a new temp dir
-    pathLog = tempfile.mkdtemp()
+    pathLog = tempfile.mkdtemp() + "/"
     print('Log saved to', pathLog)
     with PyS2OPC.initialize(logLevel=0, logPath=pathLog):
         # Configure a connection and freeze the S2OPC configurations.
