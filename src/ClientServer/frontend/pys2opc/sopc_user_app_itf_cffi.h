@@ -241,44 +241,56 @@ typedef struct SOPC_S2OPC_Config
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
-    SE_SESSION_ACTIVATION_FAILURE = 0x700, /* id = internal session id (or 0 if not yet defined)
-                                      params = (SOPC_StatusCode)(uintptr_t) status code reason
-                                      auxParam = user application session context
-                                   */
-    SE_ACTIVATED_SESSION,                  /* id = internal session id
-                                              auxParam = user application session context
-                                           */
-    SE_SESSION_REACTIVATING,               /* automatic new SC or manual new user on same SC */
-                                           /* id = internal session id
-                                              auxParam = user application session context
-                                           */
-    SE_RCV_SESSION_RESPONSE,               /* id = internal session id
-                                              params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                              (deallocated by toolkit after callback call ends)
-                                              auxParam = user application request context
-                                           */
-    SE_CLOSED_SESSION,                     /* id = internal session id
-                                              params = (SOPC_StatusCode)(uintptr_t) status code reason
-                                              auxParam = user application session context
-                                            */
-    SE_RCV_DISCOVERY_RESPONSE, /* params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload structure
-                                  (deallocated by toolkit after callback call ends)
-                                  auxParam = user application request context
-                                */
-
-    SE_SND_REQUEST_FAILED, /* idOrStatus = (SOPC_ReturnStatus) status,
-                              params = (SOPC_EncodeableType*) request type (shall not be deallocated)
-                              auxParam = user application request context
-                            */
+    SE_REVERSE_ENDPOINT_CLOSED = 0x700, /**< (Client)<br/>
+                                         *  id = reverse endpoint configuration index<br/>
+                                         *  auxParams = (SOPC_ReturnStatus) status reason
+                                         */
+    SE_SESSION_ACTIVATION_FAILURE,      /**< (Client)<br/>
+                                         *   id = (SOPC_SessionId) internal session id (or 0 if not yet defined)<br/>
+                                         *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_ACTIVATED_SESSION,               /**< (Client)<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_SESSION_REACTIVATING,            /**< (Client) automatic new SC or manual new user on same SC */
+                                        /**< (Client)<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_RCV_SESSION_RESPONSE,            /**< (Client)<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                                         *   (deallocated by toolkit after callback call ends)<br/>
+                                         *   auxParam = user application request context
+                                         */
+    SE_CLOSED_SESSION,                  /**< (Client)<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_RCV_DISCOVERY_RESPONSE,          /**< (Client)<br/>
+                                         *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
+                                         *   structure (deallocated by toolkit after callback call ends) auxParam = user<br/>
+                                         *   application request context
+                                         */
+    SE_SND_REQUEST_FAILED,              /**< (Client)<br/>
+                                         *   idOrStatus = (SOPC_ReturnStatus) status,<br/>
+                                         *   params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
+                                         *   auxParam = user application request context
+                                         */
 
     /* Server application events */
-    SE_CLOSED_ENDPOINT,       /* id = endpoint configuration index,
-                                 auxParam = SOPC_ReturnStatus
-                              */
-    SE_LOCAL_SERVICE_RESPONSE /* id = endpoint configuration index,
-                                 params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure
-                                 (deallocated by toolkit after callback call ends)
-                                 auxParam = user application request context
+    SE_CLOSED_ENDPOINT,       /**< (Server)<br/>
+                               *   id = endpoint configuration index,<br/>
+                               *   auxParam = SOPC_ReturnStatus
+                               */
+    SE_LOCAL_SERVICE_RESPONSE /**< (Server)<br/>
+                               *   id = endpoint configuration index,<br/>
+                               *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                               *   (deallocated by toolkit after callback call ends)<br/>
+                               *   auxParam = user application request context
                                */
 } SOPC_App_Com_Event;
 
