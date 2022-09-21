@@ -218,10 +218,9 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     }
 }
 
-void message_in_bs__get_msg_in_type(const constants__t_msg_i message_in_bs__msg,
-                                    constants__t_msg_type_i* const message_in_bs__msgtype)
+static void get_msg_in_type(const constants__t_msg_i msg, constants__t_msg_type_i* const msgtype)
 {
-    message_out_bs__get_msg_out_type(message_in_bs__msg, message_in_bs__msgtype);
+    message_out_bs__get_msg_out_type(msg, msgtype);
 }
 
 void message_in_bs__is_valid_request_context(const constants__t_request_context_i message_in_bs__req_context,
@@ -239,7 +238,7 @@ void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__
     *message_in_bs__bres = false;
     if (message_in_bs__msg != constants__c_msg_indet)
     {
-        message_in_bs__get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
+        get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
         if (*message_in_bs__msg_typ != constants__c_msg_type_indet)
         {
             *message_in_bs__bres = true;

@@ -228,16 +228,6 @@ OPERATIONS
     END
     ;
 
-    msgtype <-- get_msg_in_type (req_msg) =
-    PRE
-        req_msg : t_msg_i &
-        req_msg = c_msg_in &
-        c_msg_in : t_msg
-    THEN
-        msgtype, a_msg_in_type :( msgtype : t_msg_type_i & msgtype = a_msg_in_type & a_msg_in_type : t_msg_type)
-    END
-    ;
-
     session_token <-- read_msg_req_header_session_token (msg_header) =
     PRE
         msg_header : t_msg_header_i &
