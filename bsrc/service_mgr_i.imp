@@ -648,8 +648,7 @@ OPERATIONS
         l_valid_req := FALSE;
         sc := c_StatusCode_indet;
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
-        l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
+        l_valid_req_header, l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         IF l_valid_req_header = TRUE
         THEN
             l_request_handle <-- server_read_msg_header_req_handle (l_req_msg_header);
@@ -715,8 +714,7 @@ OPERATIONS
         l_validated_req_handle,
         l_session
     IN
-        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
-        l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
+        l_valid_resp_header, l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- client_read_msg_header_req_handle (l_resp_msg_header);
@@ -783,8 +781,7 @@ OPERATIONS
         l_valid_resp_header := FALSE;
         l_resp_msg_allocated := FALSE;
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
-        l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
+        l_valid_req_header, l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         IF l_valid_req_header = TRUE
         THEN
             /* Check request handle */
@@ -902,8 +899,7 @@ OPERATIONS
         l_resp_msg,
         l_valid_resp_msg
     IN
-        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
-        l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
+        l_valid_resp_header, l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- client_read_msg_header_req_handle (l_resp_msg_header);
@@ -960,8 +956,7 @@ OPERATIONS
         sc := c_StatusCode_indet;
         l_valid_req := FALSE;
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
-        l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
+        l_valid_req_header, l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         IF l_valid_req_header = TRUE
         THEN
             /* Check request handle */
@@ -1026,8 +1021,7 @@ OPERATIONS
         l_resp_msg,
         l_valid_resp_msg
     IN
-        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
-        l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
+        l_valid_resp_header, l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- client_read_msg_header_req_handle (l_resp_msg_header);

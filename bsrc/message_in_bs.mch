@@ -89,7 +89,7 @@ OPERATIONS
     END
     ;
 
-    msg_header <-- decode_msg_header (is_request, msg_buffer) =
+    bres, msg_header <-- decode_msg_header (is_request, msg_buffer) =
     PRE
         is_request : BOOL &
         msg_buffer : t_byte_buffer_i &
@@ -103,9 +103,11 @@ OPERATIONS
         CHOICE
             a_buffer_in_state := e_buffer_in_msg_header_read ||
             c_msg_in_header :(c_msg_in_header : t_msg_header_i & c_msg_in_header : t_msg_header) ||
+            bres := TRUE ||
             msg_header := c_msg_in_header
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
+            bres := FALSE ||
             msg_header := c_msg_header_indet
         END
     END
@@ -193,14 +195,6 @@ OPERATIONS
         c_msg_in := c_msg_indet ||
         a_msg_in_type := c_msg_type_indet ||
         c_msg_in_header := c_msg_header_indet
-    END
-    ;
-
-    bres <-- is_valid_msg_in_header (msg_header) =
-    PRE
-        msg_header : t_msg_header_i
-    THEN
-        bres := bool(msg_header = c_msg_in_header & c_msg_in_header : t_msg_header)
     END
     ;
 

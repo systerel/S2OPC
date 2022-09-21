@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 08/09/2022 13:07:08
+ Date                 : 21/09/2022 13:49:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -637,9 +637,8 @@ void service_mgr__server_receive_session_treatment_req(
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_req_header,
          &service_mgr__l_req_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_req_msg_header,
-         &service_mgr__l_valid_req_header);
       if (service_mgr__l_valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
@@ -725,9 +724,8 @@ void service_mgr__client_receive_session_treatment_resp(
       
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_resp_header,
          &service_mgr__l_resp_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_resp_msg_header,
-         &service_mgr__l_valid_resp_header);
       if (service_mgr__l_valid_resp_header == true) {
          message_in_bs__client_read_msg_header_req_handle(service_mgr__l_resp_msg_header,
             &service_mgr__l_request_handle);
@@ -807,9 +805,8 @@ void service_mgr__server_receive_session_service_req(
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_req_header,
          &service_mgr__l_req_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_req_msg_header,
-         &service_mgr__l_valid_req_header);
       if (service_mgr__l_valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
@@ -943,9 +940,8 @@ void service_mgr__client_receive_session_service_resp(
       
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_resp_header,
          &service_mgr__l_resp_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_resp_msg_header,
-         &service_mgr__l_valid_resp_header);
       if (service_mgr__l_valid_resp_header == true) {
          message_in_bs__client_read_msg_header_req_handle(service_mgr__l_resp_msg_header,
             &service_mgr__l_request_handle);
@@ -1022,9 +1018,8 @@ void service_mgr__server_receive_discovery_service_req(
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_req_header,
          &service_mgr__l_req_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_req_msg_header,
-         &service_mgr__l_valid_req_header);
       if (service_mgr__l_valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
@@ -1103,9 +1098,8 @@ void service_mgr__client_receive_discovery_service_resp(
       
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
+         &service_mgr__l_valid_resp_header,
          &service_mgr__l_resp_msg_header);
-      message_in_bs__is_valid_msg_in_header(service_mgr__l_resp_msg_header,
-         &service_mgr__l_valid_resp_header);
       if (service_mgr__l_valid_resp_header == true) {
          message_in_bs__client_read_msg_header_req_handle(service_mgr__l_resp_msg_header,
             &service_mgr__l_request_handle);
