@@ -654,8 +654,7 @@ OPERATIONS
             l_request_handle <-- server_read_msg_header_req_handle (l_req_msg_header);
             l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
             /* TODO: check request session token before decoding message */
-            l_req_msg <-- decode_msg (req_typ, msg_buffer);
-            l_valid_req <-- is_valid_msg_in (l_req_msg);
+            l_valid_req, l_req_msg <-- decode_msg (req_typ, msg_buffer);
             IF l_valid_req = TRUE
             THEN
                 l_resp_msg_typ <-- get_response_type (req_typ);
@@ -721,8 +720,7 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (channel, l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
-                l_valid_resp <-- is_valid_msg_in (l_resp_msg);
+                l_valid_resp, l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 IF l_valid_resp = TRUE
                 THEN
                     l_session <-- client_receive_session_resp (channel, l_request_handle, resp_typ, l_resp_msg_header, l_resp_msg);
@@ -794,8 +792,7 @@ OPERATIONS
             IF l_is_valid_req_on_session = TRUE & l_is_valid_ep_config_idx = TRUE
             THEN
                 /* Decode message */
-                l_req_msg <-- decode_msg (req_typ, msg_buffer);
-                l_valid_req <-- is_valid_msg_in (l_req_msg);
+                l_valid_req, l_req_msg <-- decode_msg (req_typ, msg_buffer);
                 IF l_valid_req = TRUE
                 THEN
                     /* Allocate response message */
@@ -910,8 +907,7 @@ OPERATIONS
                 l_is_valid_session_resp, l_session <-- client_validate_session_service_resp (channel, l_request_handle);
                 IF l_is_valid_session_resp = TRUE
                 THEN
-                    l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
-                    l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
+                    l_valid_resp_msg, l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                     IF l_valid_resp_msg = TRUE &
                         l_is_applicative_response = TRUE
                     THEN
@@ -962,8 +958,7 @@ OPERATIONS
             /* Check request handle */
             l_request_handle <-- server_read_msg_header_req_handle (l_req_msg_header);
             /* Decode message */
-            l_req_msg <-- decode_msg (req_typ, msg_buffer);
-            l_valid_req <-- is_valid_msg_in (l_req_msg);
+            l_valid_req, l_req_msg <-- decode_msg (req_typ, msg_buffer);
             IF l_valid_req = TRUE
             THEN
                 /* Allocate response */
@@ -1029,8 +1024,7 @@ OPERATIONS
             IF l_validated_req_handle = TRUE
             THEN
                 l_is_applicative_response, l_user_app_context <-- get_req_handle_app_context (l_request_handle);
-                l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
-                l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
+                l_valid_resp_msg, l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 IF l_valid_resp_msg = TRUE &
                     l_is_applicative_response = TRUE
                 THEN

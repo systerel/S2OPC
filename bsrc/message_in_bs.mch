@@ -113,7 +113,7 @@ OPERATIONS
     END
     ;
 
-    msg <-- decode_msg (msg_type, msg_buffer) =
+    bres, msg <-- decode_msg (msg_type, msg_buffer) =
     PRE
         msg_type : t_msg_type_i &
         msg_type : t_msg_type &
@@ -131,9 +131,11 @@ OPERATIONS
             // TODO: free the msg buffer ! (except if lazy decoding linked to buffer)
             a_buffer_in_state := e_buffer_in_msg_read ||
             c_msg_in :(c_msg_in : t_msg_i & c_msg_in : t_msg) ||
+            bres := TRUE ||
             msg := c_msg_in
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
+            bres := FALSE ||
             msg := c_msg_indet
         END
     END
@@ -215,14 +217,6 @@ OPERATIONS
             bres := FALSE ||
             msg_typ := c_msg_type_indet
         END
-    END
-    ;
-
-    bres <-- is_valid_msg_in (msg) =
-    PRE
-        msg : t_msg_i
-    THEN
-        bres := bool(msg = c_msg_in & c_msg_in : t_msg)
     END
     ;
 
