@@ -68,6 +68,7 @@ OPERATIONS
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
+        a_msg_in_type = c_msg_type_indet &
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
