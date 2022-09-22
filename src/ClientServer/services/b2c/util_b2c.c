@@ -33,6 +33,8 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
                                        SOPC_EncodeableType** respEncType,
                                        t_bool* isRequest)
 {
+    *isRequest = false;
+
     switch (message__msg_type)
     {
     case constants__e_msg_discovery_find_servers_req:
