@@ -828,18 +828,11 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_indexed_helper(SOPC_Va
                                                                          SOPC_Variant* previous_value)
 {
     bool has_range = false;
-    SOPC_ReturnStatus status = SOPC_Variant_HasRange(node_value, range, &has_range);
+    SOPC_ReturnStatus status = SOPC_Variant_HasRange(node_value, range, true, &has_range);
 
     if (status != SOPC_STATUS_OK)
     {
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "set_value_indexed: matrix index range not supported");
-        }
-
-        return constants_statuscodes_bs__e_sc_bad_index_range_invalid; // In case we do not support  the range
-                                                                       // either (matrix)
+        return constants_statuscodes_bs__e_sc_bad_index_range_invalid;
     }
 
     if (!has_range)

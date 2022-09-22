@@ -1570,16 +1570,10 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Var
     assert(NULL != src);
     assert(NULL != range);
     bool has_range = false;
-    SOPC_ReturnStatus status = SOPC_Variant_HasRange(src, range, &has_range);
+    SOPC_ReturnStatus status = SOPC_Variant_HasRange(src, range, false, &has_range);
 
     if (status != SOPC_STATUS_OK)
     {
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "read_value_indexed: matrix index range not supported");
-        }
-
         return constants_statuscodes_bs__e_sc_bad_index_range_invalid;
     }
 
