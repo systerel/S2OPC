@@ -4591,6 +4591,125 @@ START_TEST(test_ua_variant_get_range_array)
 }
 END_TEST
 
+static SOPC_Variant* create_string_array_variant(const char** strs, size_t n_strs)
+{
+    SOPC_Variant* variant = SOPC_Variant_Create();
+    ck_assert_ptr_nonnull(variant);
+
+    variant->ArrayType = SOPC_VariantArrayType_Array;
+    variant->BuiltInTypeId = SOPC_String_Id;
+    variant->DoNotClear = false;
+    variant->Value.Array.Length = (int32_t) n_strs;
+
+    if (n_strs == 0)
+    {
+        return variant;
+    }
+
+    variant->Value.Array.Content.StringArr = SOPC_Calloc(n_strs, sizeof(SOPC_String));
+    ck_assert_ptr_nonnull(variant->Value.Array.Content.StringArr);
+
+    for (size_t i = 0; i < n_strs; ++i)
+    {
+        ck_assert_uint_eq(SOPC_STATUS_OK,
+                          SOPC_String_CopyFromCString(&variant->Value.Array.Content.StringArr[i], strs[i]));
+    }
+
+    return variant;
+}
+
+START_TEST(test_ua_variant_get_range_matrix)
+{
+    SOPC_NumericRange *matrix_single = NULL, *matrix_range = NULL;
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("2,2", &matrix_single));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("1:2,1:2", &matrix_range));
+
+    SOPC_Variant source;
+    SOPC_Variant_Initialize(&source);
+
+    source.ArrayType = SOPC_VariantArrayType_Matrix;
+    source.BuiltInTypeId = SOPC_UInt16_Id;
+    source.DoNotClear = true;
+    source.Value.Matrix.Dimensions = 2;
+    /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
+     * Higher rank dimensions are serialized first.
+     * For example, an array with dimensions [3,4] is written in this order:
+     * [0,0], [0,1], [0,2], [0,3], [1,0], ...
+     */
+    source.Value.Matrix.ArrayDimensions = (int32_t[]){3, 4};
+    source.Value.Matrix.Content.Uint16Arr = (uint16_t[]){1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+    SOPC_Variant deref;
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, matrix_single));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Matrix, deref.ArrayType);
+    ck_assert_uint_eq(source.BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(2, deref.Value.Matrix.Dimensions);
+    ck_assert_int_eq(1, deref.Value.Matrix.ArrayDimensions[0]);
+    ck_assert_int_eq(1, deref.Value.Matrix.ArrayDimensions[1]);
+    ck_assert_uint_eq(11, deref.Value.Matrix.Content.Uint16Arr[0]);
+    SOPC_Variant_Clear(&deref);
+
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, matrix_range));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Matrix, deref.ArrayType);
+    ck_assert_uint_eq(source.BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(2, deref.Value.Matrix.Dimensions);
+    ck_assert_int_eq(2, deref.Value.Matrix.ArrayDimensions[0]);
+    ck_assert_int_eq(2, deref.Value.Matrix.ArrayDimensions[1]);
+    ck_assert_uint_eq(6, deref.Value.Matrix.Content.Uint16Arr[0]);
+    ck_assert_uint_eq(7, deref.Value.Matrix.Content.Uint16Arr[1]);
+    ck_assert_uint_eq(10, deref.Value.Matrix.Content.Uint16Arr[2]);
+    ck_assert_uint_eq(11, deref.Value.Matrix.Content.Uint16Arr[3]);
+    SOPC_Variant_Clear(&deref);
+
+    /* Use ranges with end index out of range in source array (truncated ranges depending on source) */
+    SOPC_NumericRange_Delete(matrix_range);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("1:3,2:4", &matrix_range));
+
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, &source, matrix_range));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Matrix, deref.ArrayType);
+    ck_assert_uint_eq(source.BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(2, deref.Value.Matrix.Dimensions);
+    ck_assert_int_eq(2, deref.Value.Matrix.ArrayDimensions[0]);
+    ck_assert_int_eq(2, deref.Value.Matrix.ArrayDimensions[1]);
+    ck_assert_uint_eq(7, deref.Value.Matrix.Content.Uint16Arr[0]);
+    ck_assert_uint_eq(8, deref.Value.Matrix.Content.Uint16Arr[1]);
+    ck_assert_uint_eq(11, deref.Value.Matrix.Content.Uint16Arr[2]);
+    ck_assert_uint_eq(12, deref.Value.Matrix.Content.Uint16Arr[3]);
+    SOPC_Variant_Clear(&deref);
+
+    /* Use matrix range on string array */
+    SOPC_Variant* sourceStringArray =
+        create_string_array_variant((const char*[]){"this", "is", "four", "long", "sentences"}, 5);
+
+    /* Use ranges with end index out of range in source array (truncated ranges depending on source) */
+    SOPC_NumericRange_Delete(matrix_range);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("1:3,0:2", &matrix_range));
+
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, sourceStringArray, matrix_range));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Array, deref.ArrayType);
+    ck_assert_uint_eq(sourceStringArray->BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(3, deref.Value.Array.Length);
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[0]), "is");
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[1]), "fou");
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[2]), "lon");
+
+    SOPC_Variant_Clear(&deref);
+
+    SOPC_Variant_Delete(sourceStringArray);
+    SOPC_Variant_Clear(&source);
+    SOPC_NumericRange_Delete(matrix_range);
+    SOPC_NumericRange_Delete(matrix_single);
+}
+END_TEST
+
 static void copy_string_data(SOPC_Variant* variant, const char* data)
 {
     if (strlen(data) == 0)
@@ -4664,7 +4783,7 @@ static void test_ua_variant_set_range_scalar_string(SOPC_BuiltinId type_id,
     copy_string_data(&patch, patch_str);
 
     SOPC_ReturnStatus status = SOPC_Variant_SetRange(&variant, &patch, range);
-    SOPC_ReturnStatus expected_status = (patched_str != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    SOPC_ReturnStatus expected_status = (patched_str != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_PARAMETERS;
 
     ck_assert_uint_eq(expected_status, status);
     ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, variant.ArrayType);
@@ -4719,41 +4838,16 @@ START_TEST(test_ua_variant_set_range_scalar)
     {
         test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "a", "1", "hallo");
         test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxx", "2:4", "hexxx");
-        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxxxx", "2:6", "hexxx");
-        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxx", "8:10", "hello");
+
+        // Expect failure when all values write is not possible or not enough values to write provided
+        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxxxx", "2:6", NULL);
+        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxx", "8:10", NULL);
         test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "xxx", "8:11", NULL);
         test_ua_variant_set_range_scalar_string(STR_TYPES[i], "hello", "", "4", NULL);
-        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "", "x", "1", "");
+        test_ua_variant_set_range_scalar_string(STR_TYPES[i], "", "x", "1", NULL);
     }
 }
 END_TEST
-
-static SOPC_Variant* create_string_array_variant(const char** strs, size_t n_strs)
-{
-    SOPC_Variant* variant = SOPC_Variant_Create();
-    ck_assert_ptr_nonnull(variant);
-
-    variant->ArrayType = SOPC_VariantArrayType_Array;
-    variant->BuiltInTypeId = SOPC_String_Id;
-    variant->DoNotClear = false;
-    variant->Value.Array.Length = (int32_t) n_strs;
-
-    if (n_strs == 0)
-    {
-        return variant;
-    }
-
-    variant->Value.Array.Content.StringArr = SOPC_Calloc(n_strs, sizeof(SOPC_String));
-    ck_assert_ptr_nonnull(variant->Value.Array.Content.StringArr);
-
-    for (size_t i = 0; i < n_strs; ++i)
-    {
-        ck_assert_uint_eq(SOPC_STATUS_OK,
-                          SOPC_String_CopyFromCString(&variant->Value.Array.Content.StringArr[i], strs[i]));
-    }
-
-    return variant;
-}
 
 static void test_ua_variant_set_range_array_helper(const char** initial_strs,
                                                    size_t n_initial_strs,
@@ -4771,7 +4865,7 @@ static void test_ua_variant_set_range_array_helper(const char** initial_strs,
     SOPC_ReturnStatus status = SOPC_Variant_SetRange(variant, patch, range);
 
     SOPC_ReturnStatus expected_status =
-        (initial_strs == NULL || patched_strs != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        (initial_strs == NULL || patched_strs == NULL) ? SOPC_STATUS_INVALID_PARAMETERS : SOPC_STATUS_OK;
     ck_assert_uint_eq(expected_status, status);
 
     const char** expected_strs = (patched_strs != NULL) ? patched_strs : initial_strs;
@@ -4798,15 +4892,130 @@ START_TEST(test_ua_variant_set_range_array)
     test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
                                            (const char*[]){"my", "first", "kiwi"}, 3, "2:4",
                                            (const char*[]){"this", "is", "my", "first", "kiwi"}, 5);
+    // Partial write is invalid case
     test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
-                                           (const char*[]){"my", "first", "kiwi", "in", "Alaska"}, 5, "2:6",
-                                           (const char*[]){"this", "is", "my", "first", "kiwi"}, 5);
+                                           (const char*[]){"my", "first", "kiwi", "in", "Alaska"}, 5, "2:6", NULL, 0);
     test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, (const char*[]){"nothing", "less"}, 2,
-                                           "2:3", (const char*[]){"nothing", "more"}, 2);
+                                           "2:3", NULL, 0);
     test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, (const char*[]){"nothing", "less"}, 2,
                                            "2:4", NULL, 0);
     test_ua_variant_set_range_array_helper((const char*[]){"nothing", "more"}, 2, NULL, 0, "1", NULL, 0);
     test_ua_variant_set_range_array_helper(NULL, 0, (const char*[]){"nothing", "less"}, 2, "2:3", NULL, 0);
+}
+END_TEST
+
+static SOPC_Variant* create_string_matrix_variant(const char*** strs, const size_t* n_strs)
+{
+    SOPC_Variant* variant = SOPC_Variant_Create();
+    ck_assert_ptr_nonnull(variant);
+
+    variant->ArrayType = SOPC_VariantArrayType_Matrix;
+    variant->BuiltInTypeId = SOPC_String_Id;
+    variant->DoNotClear = false;
+    variant->Value.Matrix.Dimensions = 2;
+
+    variant->Value.Matrix.ArrayDimensions = SOPC_Calloc(2, sizeof(*variant->Value.Matrix.ArrayDimensions));
+    ck_assert_ptr_nonnull(variant->Value.Matrix.ArrayDimensions);
+
+    size_t n_total_strs = 1;
+    for (int32_t i = 0; i < 2; i++)
+    {
+        n_total_strs *= n_strs[i];
+        variant->Value.Matrix.ArrayDimensions[i] = (int32_t) n_strs[i];
+    }
+
+    variant->Value.Matrix.Content.StringArr = SOPC_Calloc(n_total_strs, sizeof(SOPC_String));
+    ck_assert_ptr_nonnull(variant->Value.Matrix.Content.StringArr);
+
+    for (size_t i = 0; i < n_strs[0]; i++)
+    {
+        for (size_t j = 0; j < n_strs[1]; j++)
+        {
+            ck_assert_uint_eq(
+                SOPC_STATUS_OK,
+                SOPC_String_CopyFromCString(&variant->Value.Matrix.Content.StringArr[n_strs[1] * i + j], strs[i][j]));
+        }
+    }
+
+    return variant;
+}
+
+static void test_ua_variant_set_range_matrix_helper(const char*** initial_strs,
+                                                    const size_t* n_initial_strs,
+                                                    const char*** patch_strs,
+                                                    const size_t* n_patch_strs,
+                                                    const char* range_str,
+                                                    const char*** patched_strs,
+                                                    const size_t* n_patched_strs)
+{
+    ck_assert(initial_strs != NULL || patched_strs != NULL);
+    SOPC_NumericRange* range = NULL;
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse(range_str, &range));
+
+    SOPC_Variant* variant = create_string_matrix_variant(initial_strs, n_initial_strs);
+    SOPC_Variant* patch = create_string_matrix_variant(patch_strs, n_patch_strs);
+    SOPC_ReturnStatus status = SOPC_Variant_SetRange(variant, patch, range);
+
+    SOPC_ReturnStatus expected_status =
+        (initial_strs == NULL || patched_strs == NULL) ? SOPC_STATUS_INVALID_PARAMETERS : SOPC_STATUS_OK;
+    ck_assert_uint_eq(expected_status, status);
+
+    const char*** expected_strs = (patched_strs != NULL) ? patched_strs : initial_strs;
+    const size_t* n_expected_strs = (patched_strs != NULL) ? n_patched_strs : n_initial_strs;
+    ck_assert_int_eq(variant->Value.Matrix.Dimensions, 2);
+
+    for (size_t i = 0; i < n_expected_strs[0]; i++)
+    {
+        for (size_t j = 0; j < n_expected_strs[1]; ++j)
+        {
+            ck_assert_str_eq(STR_COALESCE(expected_strs[i][j]),
+                             STR_COALESCE(SOPC_String_GetRawCString(
+                                 &variant->Value.Matrix.Content.StringArr[n_expected_strs[1] * i + j])));
+        }
+    }
+
+    SOPC_Variant_Delete(patch);
+    SOPC_Variant_Delete(variant);
+    SOPC_NumericRange_Delete(range);
+}
+
+START_TEST(test_ua_variant_set_range_matrix)
+{
+    test_ua_variant_set_range_matrix_helper(
+        (const char**[]){(const char*[]){"hello", "world"}, (const char*[]){"phone", "home"}}, (size_t[]){2, 2},
+        (const char**[]){(const char*[]){"you"}, (const char*[]){"outer space"}}, (size_t[]){2, 1}, "0:1,1",
+        (const char**[]){(const char*[]){"hello", "you"}, (const char*[]){"phone", "outer space"}}, (size_t[]){2, 2});
+
+    test_ua_variant_set_range_matrix_helper(
+        (const char**[]){(const char*[]){"this", "is", "a", "very"}, (const char*[]){"long", "sentence", "!", ""}},
+        (size_t[]){2, 4}, (const char**[]){(const char*[]){"was", "my"}, (const char*[]){"boat", "journey"}},
+        (size_t[]){2, 2}, "0:1,1:2",
+        (const char**[]){(const char*[]){"this", "was", "my", "very"}, (const char*[]){"long", "boat", "journey", ""}},
+        (size_t[]){2, 4});
+
+    // set_range_array_string
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"one", "two"},
+                                           2, // shall have exact second dimension range length
+                                           "3:4,1:3", (const char*[]){"this", "is", "a", "lone", "stwoence"}, 5);
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"one", "two"},
+                                           2, // shall have exact second dimension range length
+                                           "3:4,1:3", (const char*[]){"this", "is", "a", "lone", "stwoence"}, 5);
+
+    // invalid set range if complete write is not possible
+    test_ua_variant_set_range_matrix_helper(
+        (const char**[]){(const char*[]){"hello", "world"}, (const char*[]){"phone", "home"}}, (size_t[]){2, 2},
+        (const char**[]){(const char*[]){"hi", "you"}, (const char*[]){"call", "outer space"}}, (size_t[]){2, 2},
+        "0:1,1:2", NULL, NULL);
+    test_ua_variant_set_range_matrix_helper(
+        (const char**[]){(const char*[]){"hello"}, (const char*[]){"phone"}}, (size_t[]){2, 1},
+        (const char**[]){(const char*[]){"hi", "you"}, (const char*[]){"call", "outer space"}}, (size_t[]){2, 2},
+        "0:1,0:1", NULL, NULL);
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"one", "two"}, 2, "1:2,0:2", NULL, 0);
+    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
+                                           (const char*[]){"one", "two"}, 2, "4:5,0:2", NULL, 0);
 }
 END_TEST
 
@@ -4865,8 +5074,10 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_ua_types, test_ua_guid_parse);
     tcase_add_test(tc_ua_types, test_ua_variant_get_range_scalar);
     tcase_add_test(tc_ua_types, test_ua_variant_get_range_array);
+    tcase_add_test(tc_ua_types, test_ua_variant_get_range_matrix);
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_scalar);
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_array);
+    tcase_add_test(tc_ua_types, test_ua_variant_set_range_matrix);
     suite_add_tcase(s, tc_ua_types);
 
     return s;
