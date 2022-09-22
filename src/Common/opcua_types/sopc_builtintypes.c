@@ -5204,11 +5204,10 @@ void SOPC_Initialize_Array(int32_t noOfElts,
                            SOPC_EncodeableObject_PfnInitialize* initFct)
 {
     assert(NULL != eltsArray);
-    size_t idx = 0;
     size_t pos = 0;
     SOPC_Byte* byteArray = eltsArray;
 
-    for (idx = 0; idx < (size_t) noOfElts; idx++)
+    for (size_t idx = 0; idx < (size_t) noOfElts; idx++)
     {
         pos = idx * sizeOfElt;
         initFct(&(byteArray[pos]));
@@ -5296,17 +5295,17 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     }
 }
 
-static bool has_range_string(const SOPC_String* str, const SOPC_Dimension* dimension)
+static bool has_range_string(const SOPC_String* str, const SOPC_Dimension* dimension, bool writeRange)
 {
     if (str->Length <= 0)
     {
         return false;
     }
 
-    return dimension->start < ((uint32_t) str->Length);
+    return dimension->start < ((uint32_t) str->Length) && (!writeRange || dimension->end < ((uint32_t) str->Length));
 }
 
-static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range)
+static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
 {
     assert(range->n_dimensions == 1);
 
@@ -5315,11 +5314,11 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
         // Dereferencing scalars is allowed for strings and bytestrings
         if (variant->BuiltInTypeId == SOPC_String_Id)
         {
-            return has_range_string(&variant->Value.String, &range->dimensions[0]);
+            return has_range_string(&variant->Value.String, &range->dimensions[0], writeRange);
         }
         else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return has_range_string(&variant->Value.Bstring, &range->dimensions[0]);
+            return has_range_string(&variant->Value.Bstring, &range->dimensions[0], writeRange);
         }
     }
 
@@ -5336,10 +5335,11 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
      *       if (ArrayDimension[0] != 0 && range->dimensions[0].start >= ArrayDimension[0]) return false
      */
 
-    return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length);
+    return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length) &&
+           (!writeRange || range->dimensions[0].end < ((uint32_t) variant->Value.Array.Length));
 }
 
-static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range)
+static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
 {
     assert(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
@@ -5372,7 +5372,7 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
              i <= range->dimensions[0].end && i < (uint32_t) variant->Value.Array.Length && has_range; i++)
         {
             // Second range dimension limit the part of the string concerned
-            has_range &= has_range_string(&strArray[i], &range->dimensions[1]);
+            has_range &= has_range_string(&strArray[i], &range->dimensions[1], writeRange);
         }
     }
     else
@@ -5390,6 +5390,10 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
         for (size_t i = 0; i < range->n_dimensions && has_range; i++)
         {
             has_range &= range->dimensions[i].start < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
+            if (writeRange)
+            {
+                has_range &= range->dimensions[i].end < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
+            }
         }
     }
     /* Note: we might also detect static range invalid cases but we need the ArrayDimension attribute of Variable node.
@@ -5399,20 +5403,35 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
     return has_range;
 }
 
-SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool* has_range)
+SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
+                                        const SOPC_NumericRange* range,
+                                        bool write_range,
+                                        bool* hasRange)
 {
     switch (range->n_dimensions)
     {
     case 0:
         return SOPC_STATUS_INVALID_PARAMETERS;
     case 1:
-        *has_range = has_range_array(variant, range);
+        *hasRange = has_range_array(variant, range, write_range);
         return SOPC_STATUS_OK;
     default:
-        *has_range = has_range_matrix(variant, range);
+        *hasRange = has_range_matrix(variant, range, write_range);
         return SOPC_STATUS_OK;
     }
 }
+
+typedef struct _SOPC_FlattenedRange
+{
+    uint32_t start; // Inclusive
+    uint32_t end;   // Inclusive
+} SOPC_FlattenedRange;
+
+typedef struct _SOPC_FlattenedRanges
+{
+    size_t n_ranges;
+    SOPC_FlattenedRange* ranges;
+} SOPC_FlattenedRanges;
 
 // Common treatment for slicing both strings and bytestrings
 static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
@@ -5615,13 +5634,160 @@ static SOPC_ReturnStatus get_range_matrix_on_string_array(SOPC_Variant* dst,
 
     SOPC_ReturnStatus grStatus = SOPC_STATUS_OK;
     // First range dimension limit the strings concerned in the string array
-    for (uint32_t i = range->dimensions[0].start; i < array_length && SOPC_STATUS_OK == grStatus; i++)
+    for (uint32_t i = 0; i < array_length && SOPC_STATUS_OK == grStatus; i++)
     {
         // Second range dimension limit the part of the string concerned
-        grStatus = get_range_string_helper(&dstStrArray[i], &srcStrArray[i], &range->dimensions[1]);
+        grStatus = get_range_string_helper(&dstStrArray[i], &srcStrArray[range->dimensions[0].start + i],
+                                           &range->dimensions[1]);
     }
 
     return grStatus;
+}
+
+// Compute the flattened Ranges to apply on flattened representation
+static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* variant,
+                                                       const SOPC_NumericRange* numRanges,
+                                                       SOPC_FlattenedRanges* flatRanges)
+{
+    assert(SOPC_VariantArrayType_Matrix == variant->ArrayType);
+    assert(variant->Value.Matrix.Dimensions > 0);
+    assert(numRanges->n_dimensions == (size_t) variant->Value.Matrix.Dimensions);
+
+    // Number of ranges to set on the flattened representation
+    size_t n_ranges = 1;
+    // Number of elements for an index of each dimension
+    uint32_t* numberOfElementsPerDimensionIndex =
+        SOPC_Calloc((size_t) variant->Value.Matrix.Dimensions, sizeof(*numberOfElementsPerDimensionIndex));
+    if (NULL == numberOfElementsPerDimensionIndex)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    for (int64_t i = (int64_t) numRanges->n_dimensions - 1; i >= 0; i--)
+    {
+        SOPC_Dimension* dim = &numRanges->dimensions[i];
+        uint32_t start_in_dim = dim->start;
+        uint32_t end_in_dim = dim->end;
+        assert(end_in_dim >= start_in_dim);
+        uint32_t elts_in_range = end_in_dim - start_in_dim + 1;
+
+        /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
+         * Higher rank dimensions are serialized first.
+         * For example, an array with dimensions [3,2] is written in this order:
+         * [0,0], [0,1], [0,2], [1,0], [1,1]
+         */
+        // Numbers of elements included in a change of only last dimension index is only one
+        // For other dimensions it is the product of the next dimension: length and number of elements per index
+        // numberOfElementsPerDimensionIndex(dim_<N_MAX>) = 1
+        // numberOfElementsPerDimensionIndex(dim_<n-1>) = Length of dim_<n> * numberOfElementsPerDimensionIndex(dim_<n>)
+        if ((size_t) i < numRanges->n_dimensions - 1)
+        {
+            assert(variant->Value.Matrix.ArrayDimensions[i] > 0);
+            numberOfElementsPerDimensionIndex[i] =
+                numberOfElementsPerDimensionIndex[i + 1] * (uint32_t) variant->Value.Matrix.ArrayDimensions[i + 1];
+
+            if (SIZE_MAX / n_ranges > elts_in_range)
+            {
+                // Number of ranges is multiplied by the number of elements in current range
+                n_ranges *= elts_in_range;
+            }
+            else
+            {
+                return SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        else
+        {
+            // Last dimension is serialized first: 1 element per index in this dimension
+            numberOfElementsPerDimensionIndex[i] = 1;
+
+            // Last dimension range will remain a range because flattened indexes remain consecutive (n_range *= 1)
+        }
+    }
+
+    SOPC_FlattenedRanges result_flat_index_ranges = {
+        .n_ranges = n_ranges, .ranges = SOPC_Calloc(n_ranges, sizeof(*result_flat_index_ranges.ranges))};
+
+    size_t previous_number_of_flat_indexes = 0;
+    uint32_t* previous_flat_indexes = SOPC_Calloc(n_ranges, sizeof(*previous_flat_indexes));
+    size_t next_number_of_flat_indexes = 0;
+    uint32_t* next_flat_indexes = SOPC_Calloc(n_ranges, sizeof(*next_flat_indexes));
+
+    if (NULL == result_flat_index_ranges.ranges || NULL == previous_flat_indexes || NULL == next_flat_indexes)
+    {
+        SOPC_Free(numberOfElementsPerDimensionIndex);
+        SOPC_Free(result_flat_index_ranges.ranges);
+        SOPC_Free(previous_flat_indexes);
+        SOPC_Free(next_flat_indexes);
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    // Start with flattened index value 0 for each ranges of each dimension
+    // previous_flat_indexes => content is already 0
+    // Set number to 1 to obtain number of range elements in first iteration
+    previous_number_of_flat_indexes = 1;
+
+    // For each dimension except last dimension
+    for (size_t i = 0; i < numRanges->n_dimensions - 1; i++)
+    {
+        SOPC_Dimension* dim = &numRanges->dimensions[i];
+        uint32_t start_in_dim = dim->start;
+        uint32_t end_in_dim = dim->end;
+        uint32_t elts_in_range = end_in_dim - start_in_dim + 1;
+
+        if (i < numRanges->n_dimensions - 1)
+        {
+            next_number_of_flat_indexes = elts_in_range * previous_number_of_flat_indexes;
+
+            size_t next_i = 0;
+            // Iterate on current dimension range and compute partially flattened indexes
+            for (uint32_t i_in_dim = start_in_dim; i_in_dim <= end_in_dim; i_in_dim++)
+            {
+                uint32_t numberOfElementForDimensionIndex = i_in_dim * numberOfElementsPerDimensionIndex[i];
+                // Transform previous flattened ranges with current dimension range
+                for (size_t j = 0; j < previous_number_of_flat_indexes; j++)
+                {
+                    // Flattened ranges have unique index until last dimension (ignore end until then)
+                    next_flat_indexes[next_i] = previous_flat_indexes[j] + numberOfElementForDimensionIndex;
+                    next_i++;
+                }
+            }
+            assert(next_i == next_number_of_flat_indexes);
+        }
+
+        // Exchange previous with next flattened indexes for next iteration
+        uint32_t* tmp_indexes = previous_flat_indexes;
+        previous_flat_indexes = next_flat_indexes;
+        next_flat_indexes = tmp_indexes;
+        previous_number_of_flat_indexes = next_number_of_flat_indexes;
+    }
+    // Last dimension treatment
+    {
+        // Last dimension range will remain a range because flattened indexes remain consecutive (n_range *= 1)
+        assert(previous_number_of_flat_indexes == result_flat_index_ranges.n_ranges);
+
+        // Keep last dimension ranges and compute final flattened ranges
+        SOPC_Dimension* dim = &numRanges->dimensions[numRanges->n_dimensions - 1];
+        uint32_t start_in_dim = dim->start;
+        uint32_t end_in_dim = dim->end;
+
+        // Iterate on current dimension range and compute partially flattened indexes
+        for (uint32_t i_in_dim = start_in_dim; i_in_dim <= end_in_dim; i_in_dim++)
+        {
+            // Transform previous flattened ranges with current dimension range
+            for (size_t j = 0; j < previous_number_of_flat_indexes; j++)
+            {
+                result_flat_index_ranges.ranges[j].start = previous_flat_indexes[j] + start_in_dim;
+                result_flat_index_ranges.ranges[j].end = previous_flat_indexes[j] + end_in_dim;
+            }
+        }
+    }
+    SOPC_Free(numberOfElementsPerDimensionIndex);
+    SOPC_Free(previous_flat_indexes);
+    SOPC_Free(next_flat_indexes);
+    *flatRanges = result_flat_index_ranges;
+
+    return SOPC_STATUS_OK;
 }
 
 static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
@@ -5640,7 +5806,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
 
     int32_t n_dimensions = (int32_t) range->n_dimensions;
 
-    if (src->ArrayType == SOPC_VariantArrayType_Array)
+    if (src->ArrayType == SOPC_VariantArrayType_Array && 2 == range->n_dimensions)
     {
         return get_range_matrix_on_string_array(dst, src, range);
     }
@@ -5657,86 +5823,113 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
     dst->BuiltInTypeId = src->BuiltInTypeId;
     dst->DoNotClear = false;
     dst->Value.Matrix.Dimensions = n_dimensions;
+    dst->Value.Matrix.ArrayDimensions = SOPC_Calloc(range->n_dimensions, sizeof(*dst->Value.Matrix.ArrayDimensions));
+    if (NULL == dst->Value.Matrix.ArrayDimensions)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
-    /* Compute total length of destination array: limited by each dimension range and source array length */
-    uint32_t total_dst_len = 0;
-    for (size_t i = 0; i < range->n_dimensions; i++)
+    SOPC_NumericRange truncatedRange = {.n_dimensions = range->n_dimensions,
+                                        .dimensions = SOPC_Calloc(range->n_dimensions, sizeof(*range->dimensions))};
+    if (NULL == truncatedRange.dimensions)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Compute total length of destination array and truncated dimension ranges:
+     * limited by each dimension range and source array length */
+    uint32_t total_dst_len = 1;
+    for (size_t i = 0; i < range->n_dimensions && SOPC_STATUS_OK == status; i++)
     {
         SOPC_Dimension* dim = &range->dimensions[i];
         assert(src->Value.Array.Length >= 0);
-        uint32_t start_in_dim = dim->start;
         uint32_t array_length = (uint32_t) src->Value.Matrix.ArrayDimensions[i];
-        uint32_t end_in_dim = (dim->end >= array_length) ? (array_length - 1) : dim->end;
-        assert(end_in_dim >= start_in_dim);
-        total_dst_len += end_in_dim - start_in_dim + 1;
+        if (array_length <= dim->start)
+        {
+            /* Start index shall be valid in the source variant matrix */
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+            break;
+        }
+        SOPC_Dimension* truncatedDim = &truncatedRange.dimensions[i];
+        truncatedDim->start = dim->start;
+        if (dim->end >= array_length)
+        {
+            // Truncate range end if end index is not in the source variant matrix
+            truncatedDim->end = array_length - 1;
+        }
+        else
+        {
+            truncatedDim->end = dim->end;
+        }
+        uint32_t length_in_dim = truncatedDim->end - truncatedDim->start + 1;
+        if (length_in_dim > INT32_MAX)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+            break;
+        }
+        dst->Value.Matrix.ArrayDimensions[i] = (int32_t) length_in_dim;
+        total_dst_len *= length_in_dim;
     }
-    if (total_dst_len > INT32_MAX)
+    if (SOPC_STATUS_OK == status && total_dst_len > INT32_MAX)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(truncatedRange.dimensions);
+        return status;
     }
 
-    /* Allocate array (flattened matrix) */
-    SOPC_ReturnStatus status =
-        AllocVariantArrayBuiltInType(dst->BuiltInTypeId, &dst->Value.Matrix.Content, (int32_t) total_dst_len);
+    // Allocate array (flattened matrix)
+    status = AllocVariantArrayBuiltInType(dst->BuiltInTypeId, &dst->Value.Matrix.Content, (int32_t) total_dst_len);
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK != status)
     {
         return status;
     }
 
-    uint32_t nextDimStartIdxInSrcArray = 0;
-    uint32_t nextDimStartIdxInDstArray = 0;
-    for (uint32_t i = 0; i < (uint32_t) range->n_dimensions; i++)
+    SOPC_Initialize_Array((int32_t) total_dst_len, *((void**) &dst->Value.Matrix.Content),
+                          SOPC_BuiltInType_HandlingTable[dst->BuiltInTypeId].size,
+                          SOPC_BuiltInType_HandlingTable[dst->BuiltInTypeId].initialize);
+
+    // Compute corresponding flattened ranges that shall be applied to flattened source array
+    SOPC_FlattenedRanges franges = {.n_ranges = 0, .ranges = NULL};
+    status = flatten_matrix_numeric_ranges(src, &truncatedRange, &franges);
+    SOPC_Free(truncatedRange.dimensions);
+    memset(&truncatedRange, 0, sizeof(truncatedRange));
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_Dimension* dim = &range->dimensions[i];
-        assert(src->Value.Array.Length >= 0);
-        uint32_t start_in_dim = dim->start;
-        uint32_t dim_length = (uint32_t) src->Value.Matrix.ArrayDimensions[i];
-        uint32_t end_in_dim = (dim->end >= dim_length) ? (dim_length - 1) : dim->end;
-        assert(end_in_dim >= start_in_dim);
-
-        uint32_t dst_len_in_dim = end_in_dim - start_in_dim + 1;
-
-        if (start_in_dim >= dim_length)
-        {
-            // Nothing to copy
-            return SOPC_STATUS_OK;
-        }
-
-        /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
-         * Higher rank dimensions are serialized first.
-         * For example, an array with dimensions [3,2] is written in this order:
-         * [0,0], [0,1], [0,2], [1,0], [1,1]
-         */
-        uint32_t start_in_src_array = nextDimStartIdxInSrcArray + start_in_dim;
-
-        // Untyped pointer to the source array data at the correct offset
-        const uint8_t* src_j = *((const uint8_t* const*) &src->Value.Matrix.Content) + start_in_src_array * type_size;
-        uint8_t* dst_j = *((uint8_t**) &dst->Value.Matrix.Content) + nextDimStartIdxInDstArray * type_size;
-
-        for (uint32_t j = 0; j < dst_len_in_dim; ++j)
-        {
-            status = copyFunction(dst_j, src_j);
-
-            if (status != SOPC_STATUS_OK)
-            {
-                return status;
-            }
-
-            src_j += type_size;
-            dst_j += type_size;
-
-            // Update array length so that SOPC_Variant_Clear clears the copied
-            // items in case of failure
-            dst->Value.Matrix.ArrayDimensions[i] = (int32_t)(j + 1);
-        }
-        /* Next index in flattened source array is previous + current source array dimension length */
-        nextDimStartIdxInSrcArray += dim_length;
-        /* Next index in flattened destination array is previous + the number of copied elements */
-        nextDimStartIdxInDstArray += dst_len_in_dim;
+        return status;
     }
 
-    return SOPC_STATUS_OK;
+    // Untyped pointer to the source array data at the correct offset
+    const uint8_t* const src_array_origin = *((const uint8_t* const*) &src->Value.Matrix.Content);
+    uint8_t* dst_array_index_k = *((uint8_t**) &dst->Value.Matrix.Content);
+
+    // Now we just have to do copies between the two flattened arrays using flattened ranges
+    for (uint32_t i = 0; i < franges.n_ranges && SOPC_STATUS_OK == status; i++)
+    {
+        SOPC_FlattenedRange* frange = &franges.ranges[i];
+        for (uint32_t j = frange->start; j <= frange->end && SOPC_STATUS_OK == status; j++)
+        {
+            // j represents the index in the source flattened array
+            const uint8_t* src_array_index_j = src_array_origin + j * type_size;
+            status = copyFunction(dst_array_index_k, src_array_index_j);
+
+            // We always increment by 1 for next element in destination flattened array
+            dst_array_index_k += type_size;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        // Clear destination variant
+        SOPC_Variant_Clear(dst);
+    }
+    SOPC_Free(franges.ranges);
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
@@ -5761,18 +5954,12 @@ static SOPC_ReturnStatus set_range_string(SOPC_String* dst, const SOPC_String* s
 
     if (((uint32_t) src->Length) != (end - start + 1))
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (dst->Length <= 0 || ((uint32_t) dst->Length) <= start)
+    if (dst->Length <= 0 || ((uint32_t) dst->Length) <= start || ((uint32_t) dst->Length) <= end)
     {
-        // Nothing to copy
-        return SOPC_STATUS_OK;
-    }
-
-    if (((uint32_t) dst->Length) <= end)
-    {
-        end = (uint32_t)(dst->Length - 1);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     size_t range_len = (size_t)(end - start + 1);
@@ -5802,7 +5989,7 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* 
 
     if (src->ArrayType != SOPC_VariantArrayType_Array)
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     uint32_t start = range->dimensions[0].start;
@@ -5811,18 +5998,13 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* 
 
     if (((uint32_t) src->Value.Array.Length) != (end - start + 1))
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (dst->Value.Array.Length <= 0 || ((uint32_t) dst->Value.Array.Length) <= start)
+    if (dst->Value.Array.Length <= 0 || ((uint32_t) dst->Value.Array.Length) <= start ||
+        ((uint32_t) dst->Value.Array.Length) <= end)
     {
-        // Nothing to copy
-        return SOPC_STATUS_OK;
-    }
-
-    if (((uint32_t) dst->Value.Array.Length) <= end)
-    {
-        end = (uint32_t)(dst->Value.Array.Length - 1);
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
@@ -5880,12 +6062,12 @@ static SOPC_ReturnStatus set_range_matrix_on_string_array(SOPC_Variant* dst,
     assert(dst->ArrayType == SOPC_VariantArrayType_Array);
     assert(2 == range->n_dimensions);
 
-    if (range->dimensions[0].start >= (uint32_t) dst->Value.Array.Length)
+    if (range->dimensions[0].start >= (uint32_t) dst->Value.Array.Length ||
+        range->dimensions[0].end >= (uint32_t) dst->Value.Array.Length)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    bool set_range = true;
     SOPC_String* strArray = NULL;
     if (dst->BuiltInTypeId == SOPC_String_Id)
     {
@@ -5899,28 +6081,23 @@ static SOPC_ReturnStatus set_range_matrix_on_string_array(SOPC_Variant* dst,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint32_t array_end_index = (range->dimensions[0].end < (uint32_t) dst->Value.Array.Length)
-                                   ? range->dimensions[0].end
-                                   : (uint32_t) dst->Value.Array.Length - 1;
+    uint32_t array_end_index = range->dimensions[0].end;
     uint32_t array_length = array_end_index - range->dimensions[0].start + 1;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // First range dimension limit the strings concerned in the string array
-    for (uint32_t i = range->dimensions[0].start; i < array_length && set_range; i++)
+    for (uint32_t i = 0; i < array_length && SOPC_STATUS_OK == status; i++)
     {
         // Second range dimension limit the part of the string concerned
-        set_range &= set_range_string(&strArray[i], &src->Value.Array.Content.StringArr[i], &range->dimensions[1]);
+        status = set_range_string(&strArray[range->dimensions[0].start + i], &src->Value.Array.Content.StringArr[i],
+                                  &range->dimensions[1]);
     }
 
-    if (set_range)
-    {
-        return SOPC_STATUS_OK;
-    }
-    else
-    {
-        return SOPC_STATUS_NOK;
-    }
+    return status;
 }
 
-static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
+static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
+                                          const SOPC_Variant* src,
+                                          const SOPC_NumericRange* numRanges)
 {
     /*
      * Destination matrix: existing matrix to be modify: dimensions lengths might differ from ranges lengths
@@ -5928,15 +6105,15 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
      */
 
     assert(dst->BuiltInTypeId == src->BuiltInTypeId);
-    assert(range->n_dimensions > 1);
-    if (range->n_dimensions > INT32_MAX)
+    assert(numRanges->n_dimensions > 1);
+    if (numRanges->n_dimensions > INT32_MAX)
     {
         return false;
     }
 
-    if (src->ArrayType == SOPC_VariantArrayType_Array)
+    if (src->ArrayType == SOPC_VariantArrayType_Array && 2 == numRanges->n_dimensions)
     {
-        return set_range_matrix_on_string_array(dst, src, range);
+        return set_range_matrix_on_string_array(dst, src, numRanges);
     }
 
     if (src->ArrayType != SOPC_VariantArrayType_Matrix)
@@ -5971,12 +6148,10 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
         *dst = tmp;
     }
 
-    /* Indexes in arrays (flattened matrix) */
-    uint32_t nextDimStartIdxInSrcArray = 0;
-    uint32_t nextDimStartIdxInDstArray = 0;
-    for (size_t i = 0; i < range->n_dimensions; i++)
+    /* Check constraints */
+    for (size_t i = 0; i < numRanges->n_dimensions; i++)
     {
-        SOPC_Dimension* dim = &range->dimensions[i];
+        SOPC_Dimension* dim = &numRanges->dimensions[i];
         uint32_t start_in_dim = dim->start;
         uint32_t end_in_dim = dim->end;
         assert(end_in_dim >= start_in_dim);
@@ -5984,54 +6159,47 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
         /* Source array dimension shall match the range length (values to write in dimension) */
         if (((uint32_t) src->Value.Matrix.ArrayDimensions[i]) != (end_in_dim - start_in_dim + 1))
         {
-            return SOPC_STATUS_NOK;
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
 
         if (dst->Value.Matrix.ArrayDimensions[i] <= 0 ||
-            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= start_in_dim)
+            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= start_in_dim ||
+            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= end_in_dim)
         {
-            // Nothing to copy
-            return SOPC_STATUS_OK;
+            return SOPC_STATUS_INVALID_PARAMETERS;
         }
-
-        if (((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= end_in_dim)
-        {
-            end_in_dim = (uint32_t)(dst->Value.Matrix.ArrayDimensions[i] - 1);
-        }
-        uint32_t dst_len_in_dim = end_in_dim - start_in_dim + 1;
-
-        /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
-         * Higher rank dimensions are serialized first.
-         * For example, an array with dimensions [3,2] is written in this order:
-         * [0,0], [0,1], [0,2], [1,0], [1,1]
-         */
-        uint32_t start_in_dst_array = nextDimStartIdxInDstArray + start_in_dim;
-
-        // Untyped pointer to the source array data at the correct offset
-        const uint8_t* src_j =
-            *((const uint8_t* const*) &src->Value.Matrix.Content) + nextDimStartIdxInSrcArray * type_size;
-        uint8_t* dst_j = *((uint8_t**) &dst->Value.Matrix.Content) + start_in_dst_array * type_size;
-
-        for (uint32_t j = 0; j < dst_len_in_dim; ++j)
-        {
-            clearFunction(dst_j);
-            SOPC_ReturnStatus status = copyFunction(dst_j, src_j);
-
-            if (status != SOPC_STATUS_OK)
-            {
-                return status;
-            }
-
-            src_j += type_size;
-            dst_j += type_size;
-        }
-        /* Next index in flattened source array is previous + current source array dimension length */
-        nextDimStartIdxInSrcArray += (uint32_t) src->Value.Matrix.ArrayDimensions[i];
-        /* Next index in flattened destination array is previous + current dest array dimension length */
-        nextDimStartIdxInDstArray += (uint32_t) dst->Value.Matrix.ArrayDimensions[i];
     }
 
-    return SOPC_STATUS_OK;
+    /* Compute corresponding flattened ranges that shall be applied to flattened destination array */
+    SOPC_FlattenedRanges franges = {.n_ranges = 0, .ranges = NULL};
+    SOPC_ReturnStatus status = flatten_matrix_numeric_ranges(dst, numRanges, &franges);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    // Untyped pointer to the source array data at the correct offset
+    const uint8_t* src_array_index_j = *((const uint8_t* const*) &src->Value.Matrix.Content);
+    uint8_t* const dst_array_origin = *((uint8_t**) &dst->Value.Matrix.Content);
+
+    // Now we just have to do copies between the two flattened arrays using flattened ranges
+    for (uint32_t i = 0; i < franges.n_ranges && SOPC_STATUS_OK == status; i++)
+    {
+        SOPC_FlattenedRange* frange = &franges.ranges[i];
+        for (uint32_t j = frange->start; j <= frange->end && SOPC_STATUS_OK == status; j++)
+        {
+            // j represents the index in the destination flattened array
+            uint8_t* dst_array_index_j = dst_array_origin + j * type_size;
+            clearFunction(dst_array_index_j);
+            status = copyFunction(dst_array_index_j, src_array_index_j);
+
+            // We always increment by 1 for next element in source flattened array
+            src_array_index_j += type_size;
+        }
+    }
+
+    SOPC_Free(franges.ranges);
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)

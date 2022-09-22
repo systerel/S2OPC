@@ -1017,7 +1017,13 @@ SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src);
 void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
-SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool* has_range);
+
+// Note: writeRange shall be set to true in case of range evaluation for a write operation,
+//       in this case range shall be strictly included. If not set, only the range(s) start index shall be included.
+SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
+                                        const SOPC_NumericRange* range,
+                                        bool writeRange,
+                                        bool* hasRange);
 SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
 SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
 
