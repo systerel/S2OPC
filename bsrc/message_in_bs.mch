@@ -58,9 +58,11 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_in_state := e_buffer_in_msg_type_read ||
-            a_msg_in_type :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type) ||
             bres := TRUE ||
-            msg_typ := a_msg_in_type
+            a_msg_in_type, msg_typ
+            :(a_msg_in_type : t_msg_type_i &
+              a_msg_in_type : t_msg_type &
+              msg_typ = a_msg_in_type)
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
             bres := FALSE ||
@@ -102,9 +104,11 @@ OPERATIONS
     THEN
         CHOICE
             a_buffer_in_state := e_buffer_in_msg_header_read ||
-            c_msg_in_header :(c_msg_in_header : t_msg_header_i & c_msg_in_header : t_msg_header) ||
             bres := TRUE ||
-            msg_header := c_msg_in_header
+            c_msg_in_header, msg_header
+            :(c_msg_in_header : t_msg_header_i &
+              c_msg_in_header : t_msg_header &
+              msg_header = c_msg_in_header)
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
             bres := FALSE ||
@@ -130,9 +134,11 @@ OPERATIONS
         CHOICE
             // TODO: free the msg buffer ! (except if lazy decoding linked to buffer)
             a_buffer_in_state := e_buffer_in_msg_read ||
-            c_msg_in :(c_msg_in : t_msg_i & c_msg_in : t_msg) ||
             bres := TRUE ||
-            msg := c_msg_in
+            c_msg_in, msg
+            :(c_msg_in : t_msg_i &
+              c_msg_in : t_msg &
+              msg = c_msg_in)
         OR
             a_buffer_in_state := c_buffer_in_state_indet ||
             bres := FALSE ||
