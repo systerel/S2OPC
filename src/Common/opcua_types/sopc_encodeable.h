@@ -41,7 +41,7 @@
 SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject);
 
 /**
- *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
+ *  \brief           Clear and deallocate an encodeable object of the given encodeable type
  *
  *  \param encTyp    Encodeable type of the encodeable object to deallocate
  *  \param encObject Pointer to the address of the encodeable object to delete (set to NULL if operation succeded)
