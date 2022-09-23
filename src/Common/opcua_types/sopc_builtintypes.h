@@ -773,8 +773,8 @@ SOPC_ReturnStatus SOPC_DataValue_CompareRange(const SOPC_DataValue* left,
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
 void SOPC_DataValue_ClearAux(void* value);
 
-void SOPC_Initialize_Array(int32_t* noOfElts,
-                           void** eltsArray,
+void SOPC_Initialize_Array(int32_t noOfElts,
+                           void* eltsArray,
                            size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct);
 SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,

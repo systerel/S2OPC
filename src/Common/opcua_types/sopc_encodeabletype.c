@@ -315,7 +315,6 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             int32_t* pLength = NULL;
             const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
             void** pArray = NULL;
-            size_t size = 0;
 
             assert(desc->isBuiltIn);
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
@@ -325,10 +324,11 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(arrayDesc);
             initFunction = getPfnInitialize(arrayDesc);
 
-            SOPC_Initialize_Array(pLength, pArray, size, initFunction);
+            // Initialize array fields to 0, array is not allocated by init (unknown length)
+            *pLength = 0;
+            *pArray = NULL;
         }
         else
         {

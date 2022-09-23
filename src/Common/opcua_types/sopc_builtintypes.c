@@ -5137,15 +5137,21 @@ void SOPC_DataValue_Clear(SOPC_DataValue* dataValue)
     }
 }
 
-void SOPC_Initialize_Array(int32_t* noOfElts,
-                           void** eltsArray,
+void SOPC_Initialize_Array(int32_t noOfElts,
+                           void* eltsArray,
                            size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct)
 {
-    SOPC_UNUSED_ARG(initFct);
-    SOPC_UNUSED_ARG(sizeOfElt);
-    *noOfElts = 0;
-    *eltsArray = NULL;
+    assert(NULL != eltsArray);
+    size_t idx = 0;
+    size_t pos = 0;
+    SOPC_Byte* byteArray = eltsArray;
+
+    for (idx = 0; idx < (size_t) noOfElts; idx++)
+    {
+        pos = idx * sizeOfElt;
+        initFct(&(byteArray[pos]));
+    }
 }
 
 SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
