@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_logger.h"
 #include "sopc_network_layer.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_reader_layer.h"
@@ -158,11 +159,11 @@ static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* grou
     assert(NULL != group && uadp_conf != NULL);
     // Find a matching reader in group
     const SOPC_DataSetReader* result = NULL;
+    const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
 
     // Note: it has been checked previously that the group does not contain both zero and non-zero writerId
     if (SOPC_ReaderGroup_HasNonZeroDataSetWriterId(group))
     {
-        const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
         for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
         {
             // Find matching WriterId
@@ -177,8 +178,17 @@ static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* grou
     }
     else
     {
-        // Use configuration order
-        result = SOPC_ReaderGroup_Get_DataSetReader_At(group, dataSetIndex);
+        if (nbReaders <= dataSetIndex)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "No writerId has been given to decrypt the dataSet to be chosen, message droped");
+            result = NULL;
+        }
+        else
+        {
+            // Use configuration order
+            result = SOPC_ReaderGroup_Get_DataSetReader_At(group, dataSetIndex);
+        }
     }
     return result;
 }
