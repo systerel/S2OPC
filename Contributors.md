@@ -27,6 +27,7 @@ the legal rights to contribute.
 * Jeremie Chabod <jeremie.chabod@systerel.fr>
 * sauvegrain <sauvegrain@systerel.fr>
 * Raphal <gael.raphal-stg@systerel.fr>
+* Raphal <gael.raphal@systerel.fr>
 * Shahbaaz Ramjane <shahbaaz.ramjane@systerel.fr>
 * Robin Barrucand <robin.barrucand@systerel.fr>
 * Henri de Pesquidoux <henri.de.pesquidoux-stg@systerel.fr>
