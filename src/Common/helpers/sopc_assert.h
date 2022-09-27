@@ -86,6 +86,7 @@
  * \brief
  * User-defined implementation of Fail-Safe behavior.
  * This method shall be provided when WITH_USER_ASSERT is defined.
+ * This method shall not use any code implementation that relies on SOPC_ASSERT.
  * \param context The context of failed assertion.
  *      Note that when WITH_MINIMAL_FOOTPRINT option is set, this parameter will
  *      always be empty.

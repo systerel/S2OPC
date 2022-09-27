@@ -37,20 +37,21 @@ void SOPC_Assert_Failure(const char* context)
     static bool once = true;
     if (once)
     {
-        // Avoid recursive calls
-        once = false;
         if (NULL == context)
         {
             context = "<NULL>";
         }
 
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Assertion failed. Context = %s", context);
         if (NULL != gUserCallback)
         {
             gUserCallback(context);
         }
         else
         {
+            // Avoid recursive calls
+            once = false;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Assertion failed. Context = %s", context);
+
             const size_t len = strlen(context);
             // MAX_CONTEXT_LEN is used because some specific "print" implementation may truncate the
             // output if exceeding a given size. So as to ensure that the displayed part of context
