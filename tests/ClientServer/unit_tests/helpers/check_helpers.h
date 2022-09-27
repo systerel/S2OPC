@@ -40,6 +40,7 @@ Suite* tests_make_suite_crypto_B256(void);
 Suite* tests_make_suite_crypto_None(void);
 Suite* tests_make_suite_crypto_PubSub256(void);
 Suite* tests_make_suite_crypto_tools(void);
+Suite* tests_make_suite_crypto_user(void);
 
 Suite* tests_make_suite_tools(void);
 
