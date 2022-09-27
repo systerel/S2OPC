@@ -355,4 +355,14 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
 
+/**
+ * \brief Get the server configured address space.
+ *        Note: it might be used after base NodeSet XML parsing to modify / extends it before server starts
+ *
+ *  \return NULL if toolkit not initialized,
+ *          address space not defined or server already started,
+ *          the configured address space otherwise.
+ */
+SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void);
+
 #endif

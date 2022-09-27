@@ -516,6 +516,15 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
     return status;
 }
 
+SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void)
+{
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL == sopc_server_helper_config.addressSpace)
+    {
+        return NULL;
+    }
+    return sopc_server_helper_config.addressSpace;
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr)
 {
