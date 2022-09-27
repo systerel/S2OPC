@@ -110,7 +110,7 @@ class MessageContext:
         self.id = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_ID, 0))
         self.version = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_VERSION, 0))
         self.interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
-        self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,0))
+        self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,-1))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
 
 
