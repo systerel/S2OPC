@@ -335,7 +335,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:6805805e14420a9b635c2305526a4535f9edd191ff22801fc84cca94410b1a03 # digest of check:1.14
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:d2669779db000ffe35634c3f16523c8275f3fefdc508b87973d91d58ad2706d8 # digest of check:1.15
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -344,7 +344,7 @@ test-check:
     - './.format.sh'
     - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
-      DOCKER_IMAGE: 'sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff'
+      DOCKER_IMAGE: 'sha256:068bd9b338a6fa1848d31fee375d779c2351dde8737dc50cb904333dec13d071'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
