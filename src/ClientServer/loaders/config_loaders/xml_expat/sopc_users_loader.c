@@ -27,8 +27,10 @@
 #include "expat.h"
 
 #include "sopc_assert.h"
+#include "sopc_crypto_user.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
+#include "sopc_helper_decode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -54,7 +56,10 @@ typedef struct user_rights
 typedef struct user_password
 {
     SOPC_String user;
-    SOPC_ByteString password;
+    SOPC_ByteString hash;
+    SOPC_ByteString salt;
+    uint32_t iteration_count;
+    bool base64;
     user_rights rights; // mask of SOPC_UserAuthorization_OperationType
 
 } user_password;
@@ -191,6 +196,76 @@ static bool end_userpassword(struct parse_context_t* ctx)
     return true;
 }
 
+static bool get_decode_buffer(const char* buffer, bool base64, SOPC_ByteString* out)
+{
+    size_t outLen = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // Get the output size from the encoding input format
+    if (!base64)
+    {
+        outLen = (strlen(buffer) / 2);
+    }
+    else
+    {
+        int paddingLength = SOPC_HelperDecode_Base64_GetPaddingLength(buffer);
+        outLen = (3 * (strlen(buffer) / 4)) - (size_t) paddingLength;
+    }
+    // Decode
+    unsigned char* decode = SOPC_Malloc(sizeof(unsigned char) * outLen + 1);
+    if (NULL == decode)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    if (base64)
+    {
+        status = SOPC_HelperDecode_Base64(buffer, decode, &outLen);
+    }
+    else
+    {
+        status = SOPC_HelperDecode_Hex(buffer, decode, outLen);
+    }
+    // Copy
+    if (SOPC_STATUS_OK == status)
+    {
+        decode[outLen] = '\0';
+        status = SOPC_String_CopyFromCString((SOPC_String*) out, (char*) decode);
+    }
+    SOPC_Free(decode);
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    return true;
+}
+
+static bool get_pwd(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
+{
+    const char* attr_val = get_attr(ctx, "pwd", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no password defined");
+        return false;
+    }
+
+    return get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->hash);
+}
+
+static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
+{
+    const char* attr_val = get_attr(ctx, "salt", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no salt defined");
+        return false;
+    }
+
+    return get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->salt);
+}
+
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     ctx->currentUserPassword = SOPC_Calloc(1, sizeof(user_password));
@@ -200,7 +275,8 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
         return false;
     }
     SOPC_String_Initialize(&ctx->currentUserPassword->user);
-    SOPC_ByteString_Initialize(&ctx->currentUserPassword->password);
+    SOPC_ByteString_Initialize(&ctx->currentUserPassword->hash);
+    SOPC_ByteString_Initialize(&ctx->currentUserPassword->salt);
 
     const char* attr_val = get_attr(ctx, "user", attrs);
     if (NULL == attr_val)
@@ -221,14 +297,37 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
         return false;
     }
 
-    attr_val = get_attr(ctx, "pwd", attrs);
-    status = SOPC_String_CopyFromCString((SOPC_String*) &ctx->currentUserPassword->password, attr_val);
+    attr_val = get_attr(ctx, "base64", attrs);
+    ctx->currentUserPassword->base64 = attr_val != NULL && 0 == strcmp(attr_val, "true");
+    bool base64 = ctx->currentUserPassword->base64;
 
-    if (SOPC_STATUS_OK != status)
+    bool res = get_pwd(ctx, attrs, base64);
+    if (!res)
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
+
+    res = get_salt(ctx, attrs, base64);
+    if (!res)
+    {
+        return false;
+    }
+
+    attr_val = get_attr(ctx, "iter", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no iteration count defined");
+        return false;
+    }
+
+    char* no_iter;
+    long iter = strtol(attr_val, &no_iter, 10);
+    if (0L == iter && no_iter == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is not an integer");
+        return false;
+    }
+    ctx->currentUserPassword->iteration_count = (uint32_t) iter;
 
     return true;
 }
@@ -397,7 +496,8 @@ static void userpassword_free(void* up)
         user_password* userpassword = up;
 
         SOPC_String_Clear(&userpassword->user);
-        SOPC_String_Clear(&userpassword->password);
+        SOPC_ByteString_Clear(&userpassword->hash);
+        SOPC_ByteString_Clear(&userpassword->salt);
         SOPC_Free(userpassword);
     }
 }
@@ -408,13 +508,13 @@ static void userpassword_free(void* up)
  * @param sRef The reference string to compare
  * @param sCmp The string to compare with.
  */
-static bool secure_password_compare(const user_password* sRef, const SOPC_ByteString* sCmp)
+static bool secure_hash_compare(const user_password* sRef, const SOPC_ByteString* sCmp)
 {
     SOPC_ASSERT(NULL != sCmp);
     const SOPC_Byte* bCmp = sCmp->Data;
     const int32_t lCmp = sCmp->Length;
-    const SOPC_Byte* bRef = (NULL != sRef ? sRef->password.Data : NULL);
-    const int32_t lRef = (NULL != sRef ? sRef->password.Length : -1);
+    const SOPC_Byte* bRef = (NULL != sRef ? sRef->hash.Data : NULL);
+    const int32_t lRef = (NULL != sRef ? sRef->hash.Length : -1);
 
     // Using volatile aspect to avoid compiler optimizations and make iteration time
     // most constant as possible for every cases.
@@ -441,6 +541,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 {
     assert(NULL != authn && NULL != authn->pData && NULL != token && NULL != authenticated);
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UsersConfig* config = authn->pData;
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
@@ -450,36 +551,76 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
         user_password* up = SOPC_Dict_Get(config->users, username, NULL);
-
-        // Note: do not use SOPC_ByteString_Equal for PWD checking, because this may allow an attacker to
-        // find expected PWD length, or beginning based on timed attacks.
-        // Moreover, the comparison is also done if user does not match, to avoid possible detection of usernames.
-
-        const bool pwd_match = secure_password_compare(up, &userToken->Password);
-
-        // Check password
-        if (pwd_match)
+        // Early return if rejected Token
+        if (NULL == up)
         {
-            SOPC_ASSERT(NULL != up);
-            // Check user access
-            if (up->rights.read || up->rights.write || up->rights.exec)
-            {
-                // At least 1 type of access authorized
-                *authenticated = SOPC_USER_AUTHENTICATION_OK;
-            }
-            else
-            {
-                // No user access authorized
+            return SOPC_STATUS_OK;
+        }
 
-                /* This value is described by OPC UA part 4 and tested by UACTT
-                 * but access evaluation shall be enforced on other services calls
-                 * (read, write, callmethod, etc.) */
-                *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+        SOPC_CryptoUser_Ctx* ctx = NULL;
+        SOPC_ReturnStatus status_crypto = SOPC_STATUS_OK;
+        SOPC_ByteString UserPasswordHash;
+        SOPC_ByteString_Initialize(&UserPasswordHash);
+
+        // Context init
+        status_crypto = SOPC_CryptoUser_Ctx_Create(&ctx, PBKDF2_HMAC_SHA256);
+        if (SOPC_STATUS_OK == status_crypto)
+        {
+            // Configure the salt and the counter from the XML
+            status_crypto = SOPC_CryptoUser_Config_PBKDF2(ctx, up->salt.Data, (uint32_t) up->salt.Length,
+                                                          up->iteration_count, (uint32_t) up->hash.Length);
+        }
+        if (SOPC_STATUS_OK == status_crypto)
+        {
+            // Hash the password issued form the userToken
+            status_crypto = SOPC_CryptoUser_Hash(ctx, userToken->Password.Data, (uint32_t) userToken->Password.Length,
+                                                 &UserPasswordHash.Data);
+            UserPasswordHash.Length = up->hash.Length;
+        }
+
+        // Compare the result
+        if (SOPC_STATUS_OK == status_crypto)
+        {
+            // Note: do not use SOPC_ByteString_Equal for PWD checking, because this may allow an attacker to
+            // find expected PWD length, or beginning based on timed attacks.
+            // Moreover, the comparison is also done if user does not match, to avoid possible detection of usernames.
+
+            const bool pwd_match = secure_hash_compare(up, &UserPasswordHash);
+
+            // Check password
+            if (pwd_match)
+            {
+                SOPC_ASSERT(NULL != up);
+                // Check user access
+                if (up->rights.read || up->rights.write || up->rights.exec)
+                {
+                    // At least 1 type of access authorized
+                    *authenticated = SOPC_USER_AUTHENTICATION_OK;
+                }
+                else
+                {
+                    // No user access authorized
+
+                    /* This value is described by OPC UA part 4 and tested by UACTT
+                     * but access evaluation shall be enforced on other services calls
+                     * (read, write, callmethod, etc.) */
+                    *authenticated = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+                }
             }
+        }
+
+        status = status_crypto;
+        if (NULL != UserPasswordHash.Data)
+        {
+            SOPC_Free(UserPasswordHash.Data);
+        }
+        if (NULL != ctx)
+        {
+            SOPC_CryptoUser_Ctx_Free(ctx);
         }
     }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 /** \brief Authorize R/W/X operation callback */
@@ -639,8 +780,9 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     {
         if (NULL != ctx.currentUserPassword)
         {
-            SOPC_String_Delete(&ctx.currentUserPassword->user);
-            SOPC_String_Delete(&ctx.currentUserPassword->password);
+            SOPC_String_Clear(&ctx.currentUserPassword->user);
+            SOPC_String_Clear(&ctx.currentUserPassword->hash);
+            SOPC_String_Clear(&ctx.currentUserPassword->salt);
         }
         SOPC_Dict_Delete(users);
         return false;
