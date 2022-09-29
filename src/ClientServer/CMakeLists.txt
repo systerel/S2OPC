@@ -127,6 +127,7 @@ export(EXPORT s2opc_clientserver-loader-embedded-export
 if (expat_FOUND)
   message(STATUS "Expat library found: XML server config loaders compilation active")
   add_library(s2opc_clientserver-xml-loaders-expat loaders/helpers/sopc_helper_expat.c
+                                             loaders/helpers/sopc_helper_decode.c
                                              loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
                                              loaders/config_loaders/xml_expat/sopc_config_loader.c
                                              loaders/config_loaders/xml_expat/sopc_users_loader.c)
