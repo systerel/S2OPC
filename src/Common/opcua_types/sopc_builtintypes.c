@@ -4757,11 +4757,15 @@ SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Vari
                                 error = true;
                             }
                         }
-                        if (false == error && *comparison == 0)
+                        if (matrixLength <= 0 || matrixLength > INT32_MAX)
+                        {
+                            error = true;
+                        }
+                        if (!error && *comparison == 0)
                         {
                             status = CompareVariantArrayBuiltInType(left->BuiltInTypeId, &left->Value.Matrix.Content,
                                                                     &right->Value.Matrix.Content,
-                                                                    left->Value.Array.Length, compFunction, comparison);
+                                                                    (int32_t) matrixLength, compFunction, comparison);
                         }
                     }
                     break;
