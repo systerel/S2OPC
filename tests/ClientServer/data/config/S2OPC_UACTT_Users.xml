@@ -3,13 +3,13 @@
   <Anonymous>
     <UserAuthorization write="true" read="true" execute="true" addnode="true" />
   </Anonymous>
-  <UserPassword user="user1" pwd="password">
+  <UserPassword user="user1" pwd="cYgA0qffTvGYn4JFNMtwyy/7xHgG3SNfSyZn2U9e/fU=" salt="cy7PLE59LTnr1vV00OnyVA==" iter="1000000" base64="true">
     <UserAuthorization write="true" read="true" execute="true" addnode="true" />
   </UserPassword>
-  <UserPassword user="user2" pwd="password1">
+  <UserPassword user="user2" pwd="fvp1FxTuKFjdnWc08HzdvZYWD0PK2PBhqXD/LH+Od+I=" salt="eatVUCTdclE1OCOk1vpyCw==" iter="1000000" base64="true">
     <UserAuthorization write="true" read="true" execute="true" addnode="true" />
   </UserPassword>
-  <UserPassword user="username" pwd="password">
+  <UserPassword user="username" pwd="+P1XO5f43/EBzjiKGWI7OqlYQAFtNPjeJqLceCv4r7o=" salt="9yuu5eKolyp4OLS++9tT4g==" iter="1000000" base64="true">
     <!-- user with no right: refused with use access denied -->
     <UserAuthorization/>
   </UserPassword>

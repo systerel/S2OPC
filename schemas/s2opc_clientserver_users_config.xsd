@@ -18,6 +18,9 @@
     </xs:sequence>
     <xs:attribute type="xs:string" name="user" use="required"/>
     <xs:attribute type="xs:string" name="pwd" use="required"/>
+    <xs:attribute type="xs:string" name="salt" use="required"/>
+    <xs:attribute type="xs:string" name="iter" use="required"/>
+    <xs:attribute type="xs:string" name="base64" use="optional"/>
   </xs:complexType>
   <xs:complexType name="S2OPC_UsersType">
     <xs:sequence>
