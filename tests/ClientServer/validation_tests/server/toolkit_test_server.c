@@ -888,6 +888,106 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
+static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    SOPC_AddressSpace* addSpace = SOPC_HelperConfigServer_GetAddressSpace();
+    if (NULL == addSpace)
+    {
+        return status;
+    }
+    bool found = false;
+    const char* boolMatrixStr = "ns=1;s=Bool_Matrix";
+    SOPC_NodeId* boolMatrixId = SOPC_NodeId_FromCString(boolMatrixStr, (int32_t) strlen(boolMatrixStr));
+    SOPC_AddressSpace_Node* boolMatrix = SOPC_AddressSpace_Get_Node(addSpace, boolMatrixId, &found);
+    SOPC_NodeId_Clear(boolMatrixId);
+    SOPC_Free(boolMatrixId);
+    if (found)
+    {
+        SOPC_Variant* boolMatrixVar = SOPC_AddressSpace_Get_Value(addSpace, boolMatrix);
+        assert(NULL != boolMatrixVar);
+        SOPC_Variant_Clear(boolMatrixVar);
+        boolMatrixVar->BuiltInTypeId = SOPC_Boolean_Id;
+        boolMatrixVar->ArrayType = SOPC_VariantArrayType_Matrix;
+        boolMatrixVar->Value.Matrix.ArrayDimensions =
+            SOPC_Calloc(2, sizeof(*boolMatrixVar->Value.Matrix.ArrayDimensions));
+        if (NULL == boolMatrixVar->Value.Matrix.ArrayDimensions)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            boolMatrixVar->Value.Matrix.Dimensions = 2;
+            boolMatrixVar->Value.Matrix.ArrayDimensions[0] = 5;
+            boolMatrixVar->Value.Matrix.ArrayDimensions[1] = 10;
+            size_t arrayLength = (size_t)(boolMatrixVar->Value.Matrix.ArrayDimensions[0] *
+                                          boolMatrixVar->Value.Matrix.ArrayDimensions[1]);
+            boolMatrixVar->Value.Matrix.Content.BooleanArr =
+                SOPC_Calloc(arrayLength, sizeof(*boolMatrixVar->Value.Matrix.Content.BooleanArr));
+            if (NULL == boolMatrixVar->Value.Matrix.Content.BooleanArr)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                bool res = SOPC_AddressSpace_Set_StatusCode(addSpace, boolMatrix, SOPC_GoodGenericStatus);
+                status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Variant_Clear(boolMatrixVar);
+        }
+    }
+
+    const char* byteMatrixIdStr = "ns=1;s=Byte_Matrix3D";
+    SOPC_NodeId* byteMatrixId = SOPC_NodeId_FromCString(byteMatrixIdStr, (int32_t) strlen(byteMatrixIdStr));
+    SOPC_AddressSpace_Node* byteMatrix = SOPC_AddressSpace_Get_Node(addSpace, byteMatrixId, &found);
+    SOPC_NodeId_Clear(byteMatrixId);
+    SOPC_Free(byteMatrixId);
+    if (found)
+    {
+        SOPC_Variant* byteMatrixVar = SOPC_AddressSpace_Get_Value(addSpace, byteMatrix);
+        assert(NULL != byteMatrixVar);
+        SOPC_Variant_Clear(byteMatrixVar);
+        byteMatrixVar->BuiltInTypeId = SOPC_Byte_Id;
+        byteMatrixVar->ArrayType = SOPC_VariantArrayType_Matrix;
+        byteMatrixVar->Value.Matrix.ArrayDimensions =
+            SOPC_Calloc(3, sizeof(*byteMatrixVar->Value.Matrix.ArrayDimensions));
+        if (NULL == byteMatrixVar->Value.Matrix.ArrayDimensions)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            byteMatrixVar->Value.Matrix.Dimensions = 3;
+            byteMatrixVar->Value.Matrix.ArrayDimensions[0] = 5;
+            byteMatrixVar->Value.Matrix.ArrayDimensions[1] = 7;
+            byteMatrixVar->Value.Matrix.ArrayDimensions[2] = 9;
+            size_t arrayLength = (size_t)(byteMatrixVar->Value.Matrix.ArrayDimensions[0] *
+                                          byteMatrixVar->Value.Matrix.ArrayDimensions[1] *
+                                          byteMatrixVar->Value.Matrix.ArrayDimensions[2]);
+            byteMatrixVar->Value.Matrix.Content.ByteArr =
+                SOPC_Calloc(arrayLength, sizeof(*byteMatrixVar->Value.Matrix.Content.ByteArr));
+            if (NULL == byteMatrixVar->Value.Matrix.Content.ByteArr)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                bool res = SOPC_AddressSpace_Set_StatusCode(addSpace, byteMatrix, SOPC_GoodGenericStatus);
+                status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Variant_Clear(byteMatrixVar);
+        }
+    }
+
+    return status;
+}
+
 static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
@@ -925,6 +1025,12 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
     if (SOPC_STATUS_OK == status && NULL == xml_address_space_config_path)
     {
         status = Server_SetDefaultAddressSpace();
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Set multi-dimensional properties (not available yet in parsers)
+        status = Server_SetMatrixVariablesProperties();
     }
 
     if (SOPC_STATUS_OK == status && NULL == xml_users_config_path)
