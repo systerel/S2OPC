@@ -35,9 +35,17 @@ The following sections only concern the C source documentation.
 You will find documentation on the Python binding for S2OPC on following page:
 <a href="pys2opc/index.html">Go to PyS2OPC documentation</a>
 
-\section common High-level Common API
+\section common High-level Common API 
 
-The high-level common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API.
+The high-level common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API or pubsub API.
+Those functions are shared between all high-level API when including the S2OPC Common library:
+- ::SOPC_Common_Initialize shall be called before any other high-level API function to initialize S2OPC toolkits.
+- ::SOPC_Common_Clear shall be called after any other high-level API function to clear S2OPC toolkits.
+- ::SOPC_Common_GetDefaultLogConfiguration retrieve default log configuration.
+
+\section common_client_server High-level Common Client/Server API
+
+The high-level common Client/Server API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API.
 Those functions are shared between high-level server/client API:
 - ::SOPC_CommonHelper_Initialize shall be called before any other high-level API function to initialize S2OPC client/server tooklit.
 - ::SOPC_CommonHelper_Clear shall be called after any other high-level API function to clear S2OPC client/server tooklit.
@@ -213,6 +221,9 @@ The handler shall be built using ::SOPC_PubSourceVariableConfig_Create, by provi
 
 For a Subscriber application, a data target handler shall be defined to set the data from configured information in the DataSetReader.
 The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by providing a function with the signature ::SOPC_SetTargetVariables_Func, and shall then be provided on Subscriber start.
+
+\subsection pubsub_sks Configure local SecurityKeyServices API 
+The PubSub local SKS configuration API is provided through sopc_pubsub_local_sks.h .key files are load using the function ::SOPC_LocalSKS_init.  
 
 \subsection pubsub_lifecycle PubSub lifecycle
 
