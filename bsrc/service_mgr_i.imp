@@ -52,7 +52,6 @@ PROMOTES
 
     /* message_out_bs */
     is_valid_app_msg_out,
-    is_valid_buffer_out,
     bless_msg_out,
     dealloc_msg_out,
 

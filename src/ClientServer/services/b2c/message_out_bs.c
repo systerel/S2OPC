@@ -410,12 +410,6 @@ void message_out_bs__is_valid_app_msg_out(const constants__t_msg_i message_out_b
     }
 }
 
-void message_out_bs__is_valid_buffer_out(const constants__t_byte_buffer_i message_out_bs__buffer,
-                                         t_bool* const message_out_bs__bres)
-{
-    *message_out_bs__bres = message_out_bs__buffer != constants__c_byte_buffer_indet;
-}
-
 void message_out_bs__is_valid_msg_out(const constants__t_msg_i message_out_bs__msg, t_bool* const message_out_bs__bres)
 {
     constants__t_msg_type_i message__msg_type = constants__c_msg_type_indet;

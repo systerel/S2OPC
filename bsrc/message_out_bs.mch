@@ -201,14 +201,6 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_valid_buffer_out (buffer) =
-    PRE
-        buffer : t_byte_buffer_i
-    THEN
-        bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
-    END
-    ;
-
     bres <-- is_valid_msg_out (msg) =
     PRE
         msg : t_msg_i

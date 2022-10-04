@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 04/08/2022 14:53:32
+ Date                 : 04/10/2022 15:40:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -92,9 +92,6 @@ extern void message_out_bs__is_valid_app_msg_out(
    const constants__t_msg_i message_out_bs__msg,
    t_bool * const message_out_bs__bres,
    constants__t_msg_type_i * const message_out_bs__msg_typ);
-extern void message_out_bs__is_valid_buffer_out(
-   const constants__t_byte_buffer_i message_out_bs__buffer,
-   t_bool * const message_out_bs__bres);
 extern void message_out_bs__is_valid_msg_out(
    const constants__t_msg_i message_out_bs__msg,
    t_bool * const message_out_bs__bres);
