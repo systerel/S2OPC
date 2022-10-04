@@ -341,7 +341,6 @@ OPERATIONS
         l_msg_header_type,
         l_msg_service_class,
         l_buffer_out,
-        l_valid_buffer_out,
         l_valid_req_context,
         l_valid_req,
         l_async_resp,
@@ -383,8 +382,7 @@ OPERATIONS
                             END
                         END;
                         /* Send the response message on secure channel if available */
-                        l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                        IF l_valid_req = TRUE & l_valid_buffer_out = TRUE
+                        IF l_valid_req = TRUE & l_buffer_out /= c_byte_buffer_indet
                         THEN
                             send_channel_msg_buffer (channel, l_buffer_out, request_context)
                         ELSIF l_valid_req = TRUE & l_async_resp = FALSE
@@ -727,7 +725,6 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
         l_req_handle,
         l_req_handle_in_req_id
     IN
@@ -740,8 +737,7 @@ OPERATIONS
         ELSE
             l_buffer_out, l_req_handle <-- client_service_create_session (session, l_channel);
             /* Send the response message on secure channel if available */
-            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-            IF l_valid_buffer_out = TRUE
+            IF l_buffer_out /= c_byte_buffer_indet
             THEN
                 /* Since request Id is not used on client side, store req handle for context in case of snd failure */
                 l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
@@ -756,7 +752,6 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
         l_req_handle,
         l_req_handle_in_req_id
     IN
@@ -765,8 +760,7 @@ OPERATIONS
         IF l_connected_channel = TRUE
         THEN
             l_buffer_out, l_req_handle <-- client_service_activate_orphaned_session (session, l_channel);
-            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-            IF l_valid_buffer_out = TRUE
+            IF l_buffer_out /= c_byte_buffer_indet
             THEN
                 /* Since request Id is not used on client side, store req handle for context in case of snd failure */
                 l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);

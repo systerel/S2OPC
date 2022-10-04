@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 06/10/2022 15:51:07
+ Date                 : 06/10/2022 15:54:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -274,7 +274,6 @@ void io_dispatch_mgr__receive_msg_buffer(
       constants__t_msg_header_type_i io_dispatch_mgr__l_msg_header_type;
       constants__t_msg_service_class_i io_dispatch_mgr__l_msg_service_class;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       t_bool io_dispatch_mgr__l_valid_req_context;
       t_bool io_dispatch_mgr__l_valid_req;
       t_bool io_dispatch_mgr__l_async_resp;
@@ -337,10 +336,8 @@ void io_dispatch_mgr__receive_msg_buffer(
                   io_dispatch_mgr__l_sc = constants_statuscodes_bs__c_StatusCode_indet;
                   break;
                }
-               service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-                  &io_dispatch_mgr__l_valid_buffer_out);
                if ((io_dispatch_mgr__l_valid_req == true) &&
-                  (io_dispatch_mgr__l_valid_buffer_out == true)) {
+                  (io_dispatch_mgr__l_buffer_out != constants__c_byte_buffer_indet)) {
                   channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_buffer_out,
                      io_dispatch_mgr__request_context);
@@ -789,7 +786,6 @@ void io_dispatch_mgr__internal_client_create_session(
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
       
@@ -806,9 +802,7 @@ void io_dispatch_mgr__internal_client_create_session(
             io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_req_handle);
-         service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-            &io_dispatch_mgr__l_valid_buffer_out);
-         if (io_dispatch_mgr__l_valid_buffer_out == true) {
+         if (io_dispatch_mgr__l_buffer_out != constants__c_byte_buffer_indet) {
             service_mgr__client_req_handle_to_request_id(io_dispatch_mgr__l_req_handle,
                &io_dispatch_mgr__l_req_handle_in_req_id);
             channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
@@ -826,7 +820,6 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
       
@@ -839,9 +832,7 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
             io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_buffer_out,
             &io_dispatch_mgr__l_req_handle);
-         service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-            &io_dispatch_mgr__l_valid_buffer_out);
-         if (io_dispatch_mgr__l_valid_buffer_out == true) {
+         if (io_dispatch_mgr__l_buffer_out != constants__c_byte_buffer_indet) {
             service_mgr__client_req_handle_to_request_id(io_dispatch_mgr__l_req_handle,
                &io_dispatch_mgr__l_req_handle_in_req_id);
             channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
