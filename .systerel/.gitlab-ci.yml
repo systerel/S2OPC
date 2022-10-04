@@ -217,12 +217,12 @@ build-win32:
 
 build-rpi:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/rpi-build@sha256:977b5d7083659af98a6279ee12d7d3ca1c94195b8b954c72c605a22386446a7c # digest of rpi-build:1.4
+  image: docker.aix.systerel.fr/c838/rpi-build@sha256:9a0d79a685ca3c17664561a16344ddb2fb8fd2641791d26982ddeb6912bd340b # digest of rpi-build:1.5
   script:
     - *build_command_line
   variables:
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_IMAGE: 'sha256:1d0eb4c4f99214faf186b4af677f138ef6e01945053e1b7533c99edfdf469f0f'
+    DOCKER_IMAGE: 'sha256:464cfa4e22af6d1933a17b14db182632dfd28febc3495adbd286aa1e5d8265e4'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
   artifacts:
