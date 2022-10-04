@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 21/09/2022 14:05:51
+ Date                 : 06/10/2022 16:01:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -514,7 +514,6 @@ void service_mgr__local_client_discovery_service_request(
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
       constants__t_byte_buffer_i service_mgr__l_buffer;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
@@ -555,9 +554,7 @@ void service_mgr__local_client_discovery_service_request(
                service_mgr__req_msg,
                service_mgr__ret,
                &service_mgr__l_buffer);
-            message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-               &service_mgr__l_valid_buffer);
-            if (service_mgr__l_valid_buffer == false) {
+            if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
                service_mgr__l_req_handle = constants__c_client_request_handle_indet;
             }
          }
@@ -629,7 +626,6 @@ void service_mgr__server_receive_session_treatment_req(
       constants__t_session_i service_mgr__l_session;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_valid_req = false;
@@ -683,9 +679,7 @@ void service_mgr__server_receive_session_treatment_req(
                   service_mgr__l_resp_msg,
                   service_mgr__sc,
                   &service_mgr__l_buffer_out);
-               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
-                  &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == false) {
+               if (*service_mgr__sc != constants_statuscodes_bs__e_sc_ok) {
                   session_mgr__server_close_session(service_mgr__l_session,
                      constants_statuscodes_bs__e_sc_bad_encoding_error);
                }
@@ -1229,7 +1223,6 @@ void service_mgr__client_service_create_session(
       t_bool service_mgr__l_valid_msg;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_sc;
-      t_bool service_mgr__l_valid_buffer;
       t_bool service_mgr__l_bret;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
@@ -1271,9 +1264,7 @@ void service_mgr__client_service_create_session(
                   service_mgr__l_req_msg,
                   &service_mgr__l_sc,
                   &service_mgr__l_buffer);
-               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                  &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == false) {
+               if (service_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   session_mgr__client_close_session(service_mgr__session,
                      service_mgr__l_sc);
@@ -1313,7 +1304,6 @@ void service_mgr__client_service_activate_orphaned_session(
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_sc;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
@@ -1357,9 +1347,7 @@ void service_mgr__client_service_activate_orphaned_session(
                   service_mgr__l_req_msg,
                   &service_mgr__l_sc,
                   &service_mgr__l_buffer);
-               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                  &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == false) {
+               if (service_mgr__l_sc != constants_statuscodes_bs__e_sc_ok) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   session_mgr__client_close_session(service_mgr__session,
                      service_mgr__l_sc);
@@ -1396,7 +1384,6 @@ void service_mgr__client_service_activate_session(
       t_bool service_mgr__l_valid_req_handle;
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_channel = constants__c_channel_indet;
@@ -1442,9 +1429,7 @@ void service_mgr__client_service_activate_session(
                   service_mgr__l_req_msg,
                   &service_mgr__l_ret,
                   &service_mgr__l_buffer);
-               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                  &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == false) {
+               if (service_mgr__l_ret != constants_statuscodes_bs__e_sc_ok) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   service_mgr__l_channel = constants__c_channel_indet;
                   session_mgr__client_close_session(service_mgr__session,
@@ -1492,7 +1477,6 @@ void service_mgr__client_service_close_session(
       t_bool service_mgr__l_valid_req_handle;
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       service_mgr__l_channel = constants__c_channel_indet;
@@ -1537,9 +1521,7 @@ void service_mgr__client_service_close_session(
                   service_mgr__l_req_msg,
                   service_mgr__ret,
                   &service_mgr__l_buffer);
-               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                  &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == false) {
+               if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
                   service_mgr__l_channel = constants__c_channel_indet;
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   session_mgr__client_close_session(service_mgr__session,
@@ -1581,7 +1563,6 @@ void service_mgr__client_service_request(
       t_bool service_mgr__l_valid_req_handle;
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_byte_buffer_i service_mgr__l_buffer;
-      t_bool service_mgr__l_valid_buffer;
       t_bool service_mgr__l_valid_channel;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
@@ -1660,9 +1641,7 @@ void service_mgr__client_service_request(
                      service_mgr__req_msg,
                      service_mgr__ret,
                      &service_mgr__l_buffer);
-                  message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                     &service_mgr__l_valid_buffer);
-                  if (service_mgr__l_valid_buffer == false) {
+                  if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
                      service_mgr__l_channel = constants__c_channel_indet;
                   }
                }
@@ -1812,7 +1791,6 @@ void service_mgr__server_send_publish_response(
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
-      t_bool service_mgr__l_valid_buffer;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
       *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
@@ -1844,9 +1822,7 @@ void service_mgr__server_send_publish_response(
                service_mgr__sc,
                &service_mgr__l_buffer_out);
             message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
-            message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
-               &service_mgr__l_valid_buffer);
-            if (service_mgr__l_valid_buffer == true) {
+            if (*service_mgr__sc == constants_statuscodes_bs__e_sc_ok) {
                *service_mgr__buffer_out = service_mgr__l_buffer_out;
                *service_mgr__bres = true;
             }

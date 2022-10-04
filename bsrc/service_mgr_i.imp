@@ -551,7 +551,6 @@ OPERATIONS
         l_req_handle,
         l_valid_req_handle,
         l_buffer,
-        l_valid_buffer,
         l_channel_cfg
     IN
         l_buffer := c_byte_buffer_indet;
@@ -578,8 +577,7 @@ OPERATIONS
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                     l_channel_cfg <-- get_channel_info (channel);
                     ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, l_req_typ, l_msg_header, req_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    IF ret /= e_sc_ok
                     THEN
                         l_req_handle := c_client_request_handle_indet
                     END
@@ -642,7 +640,6 @@ OPERATIONS
         l_session,
         l_ret,
         l_buffer_out,
-        l_valid_buffer,
         l_channel_cfg
     IN
         l_valid_req := FALSE;
@@ -674,8 +671,7 @@ OPERATIONS
                     server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
                     l_channel_cfg <-- get_channel_info (channel);
                     sc, l_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
-                    IF l_valid_buffer = FALSE
+                    IF sc /= e_sc_ok
                     THEN
                         /* invalid encoding => close session */
                         server_close_session (l_session, e_sc_bad_encoding_error)
@@ -1111,7 +1107,6 @@ OPERATIONS
         l_valid_msg,
         l_buffer,
         l_sc,
-        l_valid_buffer,
         l_bret,
         l_channel_cfg
     IN
@@ -1137,8 +1132,7 @@ OPERATIONS
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                     l_channel_cfg <-- get_channel_info (channel);
                     l_sc, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_create_req, l_msg_header, l_req_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    IF l_sc /= e_sc_ok
                     THEN
                         /* Close session if impossible to create session */
                         client_remove_req_handle (l_req_handle);
@@ -1171,7 +1165,6 @@ OPERATIONS
         l_session_token,
         l_buffer,
         l_sc,
-        l_valid_buffer,
         l_channel_cfg
     IN
         l_buffer := c_byte_buffer_indet;
@@ -1197,8 +1190,7 @@ OPERATIONS
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
                     l_channel_cfg <-- get_channel_info (channel);
                     l_sc, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_activate_req, l_msg_header, l_req_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    IF l_sc /= e_sc_ok
                     THEN
                         /* If reactivation encoding failed, close the session */
                         client_remove_req_handle (l_req_handle);
@@ -1228,7 +1220,6 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token,
         l_buffer,
-        l_valid_buffer,
         l_channel_cfg
     IN
         l_channel := c_channel_indet;
@@ -1255,8 +1246,7 @@ OPERATIONS
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
                     l_channel_cfg <-- get_channel_info (l_channel);
                     l_ret , l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_activate_req, l_msg_header, l_req_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    IF l_ret /= e_sc_ok
                     THEN
                         client_remove_req_handle (l_req_handle);
                         l_channel := c_channel_indet;
@@ -1293,7 +1283,6 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token,
         l_buffer,
-        l_valid_buffer,
         l_channel_cfg
     IN
         l_channel := c_channel_indet;
@@ -1321,8 +1310,7 @@ OPERATIONS
                     write_msg_out_header_session_token(l_msg_header, l_session_token);
                     l_channel_cfg <-- get_channel_info (l_channel);
                     ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_close_req, l_msg_header, l_req_msg);
-                    l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                    IF l_valid_buffer = FALSE
+                    IF ret /= e_sc_ok
                     THEN
                         l_channel := c_channel_indet;
                         client_remove_req_handle (l_req_handle);
@@ -1355,7 +1343,6 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token,
         l_buffer,
-        l_valid_buffer,
         l_valid_channel,
         l_channel_cfg
     IN
@@ -1416,8 +1403,7 @@ OPERATIONS
                             write_msg_out_header_session_token (l_msg_header, l_session_token);
                             l_channel_cfg <-- get_channel_info (l_channel);
                             ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
-                            l_valid_buffer <-- is_valid_buffer_out (l_buffer);
-                            IF l_valid_buffer = FALSE
+                            IF ret /= e_sc_ok
                             THEN
                                 l_channel := c_channel_indet
                             END
@@ -1534,7 +1520,6 @@ OPERATIONS
         l_ret,
         l_resp_msg_header,
         l_buffer_out,
-        l_valid_buffer,
         l_channel_cfg
     IN
         sc := e_sc_bad_session_id_invalid;
@@ -1556,8 +1541,7 @@ OPERATIONS
                 l_channel_cfg <-- get_channel_info (channel);
                 sc, l_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, resp_typ, l_resp_msg_header, publish_resp_msg);
                 dealloc_msg_header_out (l_resp_msg_header);
-                l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
-                IF l_valid_buffer = TRUE
+                IF sc = e_sc_ok
                 THEN
                     buffer_out := l_buffer_out;
                     bres := TRUE
