@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 15/09/2022 16:29:24
+ Date                 : 06/10/2022 15:51:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -557,7 +557,6 @@ void io_dispatch_mgr__client_reactivate_session_new_user(
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
       
@@ -573,10 +572,7 @@ void io_dispatch_mgr__client_reactivate_session_new_user(
          if (io_dispatch_mgr__l_ret == constants_statuscodes_bs__e_sc_ok) {
             channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
                &io_dispatch_mgr__l_connected_channel);
-            service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-               &io_dispatch_mgr__l_valid_buffer_out);
-            if ((io_dispatch_mgr__l_connected_channel == true) &&
-               (io_dispatch_mgr__l_valid_buffer_out == true)) {
+            if (io_dispatch_mgr__l_connected_channel == true) {
                service_mgr__client_req_handle_to_request_id(io_dispatch_mgr__l_req_handle,
                   &io_dispatch_mgr__l_req_handle_in_req_id);
                channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
@@ -600,7 +596,6 @@ void io_dispatch_mgr__client_send_service_request(
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
       
@@ -621,10 +616,7 @@ void io_dispatch_mgr__client_send_service_request(
          if (*io_dispatch_mgr__ret == constants_statuscodes_bs__e_sc_ok) {
             channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
                &io_dispatch_mgr__l_connected_channel);
-            service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-               &io_dispatch_mgr__l_valid_buffer_out);
-            if ((io_dispatch_mgr__l_connected_channel == true) &&
-               (io_dispatch_mgr__l_valid_buffer_out == true)) {
+            if (io_dispatch_mgr__l_connected_channel == true) {
                service_mgr__client_req_handle_to_request_id(io_dispatch_mgr__l_req_handle,
                   &io_dispatch_mgr__l_req_handle_in_req_id);
                channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
@@ -761,7 +753,6 @@ void io_dispatch_mgr__client_send_close_session_request(
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
       
@@ -776,10 +767,7 @@ void io_dispatch_mgr__client_send_close_session_request(
          if (*io_dispatch_mgr__ret == constants_statuscodes_bs__e_sc_ok) {
             channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
                &io_dispatch_mgr__l_connected_channel);
-            service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
-               &io_dispatch_mgr__l_valid_buffer_out);
-            if ((io_dispatch_mgr__l_connected_channel == true) &&
-               (io_dispatch_mgr__l_valid_buffer_out == true)) {
+            if (io_dispatch_mgr__l_connected_channel == true) {
                service_mgr__client_req_handle_to_request_id(io_dispatch_mgr__l_req_handle,
                   &io_dispatch_mgr__l_req_handle_in_req_id);
                channel_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,

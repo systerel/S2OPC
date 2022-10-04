@@ -554,7 +554,6 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
         l_req_handle,
         l_req_handle_in_req_id
     IN
@@ -565,9 +564,7 @@ OPERATIONS
             IF l_ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
-                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                IF l_connected_channel = TRUE &
-                    l_valid_buffer_out = TRUE
+                IF l_connected_channel = TRUE
                 THEN
                     /* Since request Id is not used on client side, store req handle for context in case of snd failure */
                     l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
@@ -586,7 +583,6 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
         l_req_handle,
         l_req_handle_in_req_id
     IN
@@ -597,11 +593,8 @@ OPERATIONS
             ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, req_msg, app_context);
             IF ret = e_sc_ok
             THEN
-                /* TODO: remove since it is guaranteed by obligation proof of client_service_request result (ret = ok) ? */
                 l_connected_channel <-- is_connected_channel (l_channel);
-                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                IF l_connected_channel = TRUE &
-                    l_valid_buffer_out = TRUE
+                IF l_connected_channel = TRUE
                 THEN
                     /* Since request Id is not used on client side, store req handle for context in case of snd failure */
                     l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
@@ -706,7 +699,6 @@ OPERATIONS
         l_channel,
         l_connected_channel,
         l_buffer_out,
-        l_valid_buffer_out,
         l_req_handle,
         l_req_handle_in_req_id
     IN
@@ -717,9 +709,7 @@ OPERATIONS
             IF ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
-                l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
-                IF l_connected_channel = TRUE &
-                    l_valid_buffer_out = TRUE
+                IF l_connected_channel = TRUE
                 THEN
                     /* Since request Id is not used on client side, store req handle for context in case of snd failure */
                     l_req_handle_in_req_id <-- client_req_handle_to_request_id (l_req_handle);
