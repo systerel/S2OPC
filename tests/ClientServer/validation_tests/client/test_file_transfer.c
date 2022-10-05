@@ -156,7 +156,7 @@ static int32_t client_create_configuration(void)
         return res;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (char*[]){"fr-FR", "en-US"});
+    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
 
     if (SOPC_STATUS_OK == status)
     {
