@@ -87,19 +87,17 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
     SOPC_EncodeableType* reqEncTyp = NULL;
     SOPC_EncodeableType* respEncTyp = NULL;
     t_bool isReq = false;
-    util_message__get_encodeable_type(message_out_bs__msg_type, &reqEncTyp, &respEncTyp, &isReq);
 
-    if (NULL != reqEncTyp || NULL != respEncTyp)
+    util_message__get_encodeable_type(message_out_bs__msg_type, &reqEncTyp, &respEncTyp, &isReq);
+    if (isReq != false)
     {
-        if (isReq != false)
-        {
-            encTyp = reqEncTyp;
-        }
-        else
-        {
-            encTyp = respEncTyp;
-        }
+        encTyp = reqEncTyp;
     }
+    else
+    {
+        encTyp = respEncTyp;
+    }
+
     if (NULL != encTyp)
     {
         status = SOPC_Encodeable_Create(encTyp, &msg);
