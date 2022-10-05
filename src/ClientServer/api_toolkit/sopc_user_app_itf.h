@@ -259,6 +259,7 @@ struct SOPC_Server_Config
                                                      The callback indicates if it should be considered known by server
                                                      (and might exist later).
                                                      See ::SOPC_CreateMI_NodeAvailFunc for details. */
+    bool serverkeyEncrypted;                    /**< Boolean to indicate if the private key is encrypted */
 };
 
 /**
