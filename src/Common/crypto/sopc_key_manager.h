@@ -187,6 +187,19 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const c
                                                                          SOPC_SerializedAsymmetricKey** key);
 
 /**
+ * \brief Creates a serialized asymmetric key from an SOPC_AsymmetricKey structure.
+ *
+ * \param pKey      A valid pointer to the asymmetric key (public/private) to serialize.
+ * \param is_public Whether the key is public or private.
+ * \param out       out parameter, the newly allocated serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricKey* pKey,
+                                                          bool is_public,
+                                                          SOPC_SerializedAsymmetricKey** out);
+
+/**
  * \brief Deserializes a serialized key.
  *
  * \param key        the serialized key
