@@ -52,6 +52,29 @@ void message_out_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+static void* internal_alloc_msg_header(const t_bool is_request)
+{
+    SOPC_EncodeableType* encType = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    void* header = NULL;
+
+    if (is_request)
+    {
+        encType = &OpcUa_RequestHeader_EncodeableType;
+    }
+    else
+    {
+        encType = &OpcUa_ResponseHeader_EncodeableType;
+    }
+
+    status = SOPC_Encodeable_Create(encType, &header);
+    if (SOPC_STATUS_OK != status)
+    {
+        header = NULL;
+    }
+    return header;
+}
+
 static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message_out_bs__msg_type,
                                            constants__t_msg_header_i* const message_out_bs__nmsg_header,
                                            constants__t_msg_i* const message_out_bs__nmsg)
@@ -82,21 +105,14 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
         status = SOPC_Encodeable_Create(encTyp, &msg);
         if (SOPC_STATUS_OK == status)
         {
-            if (false == isReq)
-            {
-                status = SOPC_Encodeable_Create(&OpcUa_ResponseHeader_EncodeableType, &header);
-            }
-            else
-            {
-                status = SOPC_Encodeable_Create(&OpcUa_RequestHeader_EncodeableType, &header);
-            }
+            header = internal_alloc_msg_header(isReq);
         }
         else
         {
             SOPC_Encodeable_Delete(encTyp, &msg);
         }
     }
-    if (SOPC_STATUS_OK == status)
+    if (NULL == header)
     {
         *message_out_bs__nmsg = (constants__t_msg_i) msg;
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
@@ -110,25 +126,7 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
 void message_out_bs__alloc_msg_header(const t_bool message_out_bs__p_is_request,
                                       constants__t_msg_header_i* const message_out_bs__nmsg_header)
 {
-    void* header = NULL;
-    SOPC_EncodeableType* encType = NULL;
-    if (message_out_bs__p_is_request == false)
-    {
-        encType = &OpcUa_ResponseHeader_EncodeableType;
-    }
-    else
-    {
-        encType = &OpcUa_RequestHeader_EncodeableType;
-    }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &header);
-    if (SOPC_STATUS_OK == status)
-    {
-        *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
-    }
-    else
-    {
-        *message_out_bs__nmsg_header = constants__c_msg_header_indet;
-    }
+    *message_out_bs__nmsg_header = internal_alloc_msg_header(message_out_bs__p_is_request);
 }
 
 void message_out_bs__alloc_req_msg(const constants__t_msg_type_i message_out_bs__msg_type,
