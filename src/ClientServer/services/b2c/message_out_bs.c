@@ -101,23 +101,24 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
     if (NULL != encTyp)
     {
         status = SOPC_Encodeable_Create(encTyp, &msg);
-        if (SOPC_STATUS_OK == status)
-        {
-            header = internal_alloc_msg_header(isReq);
-        }
-        else
-        {
-            SOPC_Encodeable_Delete(encTyp, &msg);
-        }
     }
-    if (NULL == header)
+
+    if (SOPC_STATUS_OK == status)
+    {
+        header = internal_alloc_msg_header(isReq);
+    }
+
+    if (NULL != header)
     {
         *message_out_bs__nmsg = (constants__t_msg_i) msg;
         *message_out_bs__nmsg_header = (constants__t_msg_header_i) header;
     }
     else
     {
+        SOPC_Encodeable_Delete(encTyp, &msg);
+
         *message_out_bs__nmsg = constants__c_msg_indet;
+        *message_out_bs__nmsg_header = constants__c_msg_header_indet;
     }
 }
 
