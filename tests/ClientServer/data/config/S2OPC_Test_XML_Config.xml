@@ -12,7 +12,7 @@
     </Locales>
     <ApplicationCertificates>
       <ServerCertificate path="/mypath/mycert.der"/>
-      <ServerKey path="/mypath/mykey.pem"/>
+      <ServerKey path="/mypath/mykey.pem" encrypt="true"/>
       <TrustedIssuers>
         <TrustedIssuer root="true" cert_path="/mypath/cacert.der" revocation_list_path="/mypath/cacrl.der"/>
         <TrustedIssuer root="true" cert_path="/mypath/othercacert.der" revocation_list_path="/mypath/othercacrl.der"/>
