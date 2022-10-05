@@ -208,6 +208,42 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     return status;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricKey* pKey,
+                                                          bool is_public,
+                                                          SOPC_SerializedAsymmetricKey** out)
+{
+    if (NULL == pKey || NULL == out)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
+    if (lenBits > UINT32_MAX)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t lenBytes = (uint32_t)(lenBits / 8);
+    uint8_t* buffer =
+        SOPC_Malloc(sizeof(uint8_t) * lenBytes * 8); // a value of 8 times the key length in bytes is recommended
+    if (NULL == buffer)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    uint32_t pLenWritten = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_ToDER(pKey, is_public, buffer, lenBytes * 8, &pLenWritten);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(buffer, pLenWritten, out);
+    }
+
+    SOPC_Free(buffer);
+
+    return status;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Cert API
  * ------------------------------------------------------------------------------------------------
