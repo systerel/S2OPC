@@ -107,6 +107,87 @@ void msg_subscription_monitored_item_bs__get_msg_create_monitored_items_req_time
         util_TimestampsToReturn__C_to_B(createReq->TimestampsToReturn);
 }
 
+static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* filter,
+                                                         SOPC_AttributeId attributeId,
+                                                         constants_statuscodes_bs__t_StatusCode_i* sc)
+{
+    assert(NULL != filter);
+    assert(NULL != sc);
+
+    if (filter->Length > 0)
+    {
+        if (attributeId != SOPC_AttributeId_Value)
+        {
+            *sc = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
+        }
+        else if (SOPC_ExtObjBodyEncoding_Object != filter->Encoding ||
+                 &OpcUa_DataChangeFilter_EncodeableType != filter->Body.Object.ObjType)
+        {
+            if (SOPC_ExtObjBodyEncoding_Object != filter->Encoding ||
+                (&OpcUa_AggregateFilter_EncodeableType != filter->Body.Object.ObjType &&
+                 &OpcUa_EventFilter_EncodeableType != filter->Body.Object.ObjType))
+            {
+                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+            }
+            else
+            {
+                // AggregateFilter or EventFilter are not supported
+                // Note: DataChangeFilter does not have result and thus does not provide revised value in response
+                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+            }
+        }
+        else
+        {
+            OpcUa_DataChangeFilter* dcf = filter->Body.Object.Value;
+            bool validFilter = true;
+            bool supportedFilter = true;
+            switch (dcf->Trigger)
+            {
+            case OpcUa_DataChangeTrigger_Status:
+            case OpcUa_DataChangeTrigger_StatusValue:
+            case OpcUa_DataChangeTrigger_StatusValueTimestamp:
+                validFilter &= true;
+                break;
+            default:
+                validFilter = false;
+                break;
+            }
+            switch (dcf->DeadbandType)
+            {
+            case OpcUa_DeadbandType_None:
+            case OpcUa_DeadbandType_Absolute:
+                validFilter &= true;
+                break;
+            case OpcUa_DeadbandType_Percent: // Not supported for now
+                supportedFilter = false;
+                validFilter &= true;
+                break;
+            default:
+                supportedFilter = false;
+                break;
+            }
+            if (!validFilter)
+            {
+                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+            }
+            else if (!supportedFilter)
+            {
+                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+    else
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params(
     const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
     const t_entier4 msg_subscription_monitored_item_bs__p_index,
@@ -117,6 +198,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
     constants__t_monitoringMode_i* const msg_subscription_monitored_item_bs__p_monitMode,
     constants__t_client_handle_i* const msg_subscription_monitored_item_bs__p_clientHandle,
     constants__t_opcua_duration_i* const msg_subscription_monitored_item_bs__p_samplingItv,
+    constants__t_monitoringFilter_i* const msg_subscription_monitored_item_bs__p_filter,
     t_bool* const msg_subscription_monitored_item_bs__p_discardOldest,
     t_entier4* const msg_subscription_monitored_item_bs__p_queueSize,
     constants__t_IndexRange_i* const msg_subscription_monitored_item_bs__p_indexRange)
@@ -124,6 +206,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
     *msg_subscription_monitored_item_bs__p_aid = constants__c_AttributeId_indet;
     *msg_subscription_monitored_item_bs__p_monitMode = constants__c_monitoringMode_indet;
     *msg_subscription_monitored_item_bs__p_clientHandle = 0;
+    *msg_subscription_monitored_item_bs__p_filter = constants__c_monitoringFilter_indet;
     *msg_subscription_monitored_item_bs__p_samplingItv = 0;
     *msg_subscription_monitored_item_bs__p_queueSize = 0;
     OpcUa_CreateMonitoredItemsRequest* createReq =
@@ -185,13 +268,15 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
             *msg_subscription_monitored_item_bs__p_queueSize = INT32_MAX;
         }
 
-        // Check no filter active since not supported by server
-        if (monitReq->RequestedParameters.Filter.Length > 0)
+        *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
+            &monitReq->RequestedParameters.Filter, monitReq->ItemToMonitor.AttributeId,
+            msg_subscription_monitored_item_bs__p_sc);
+
+        if (*msg_subscription_monitored_item_bs__p_bres)
         {
-            // We do not support filter but there is one requested
-            *msg_subscription_monitored_item_bs__p_bres = false;
-            *msg_subscription_monitored_item_bs__p_sc =
-                constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+            *msg_subscription_monitored_item_bs__p_filter =
+                (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
+            SOPC_ExtensionObject_Initialize(&monitReq->RequestedParameters.Filter);
         }
     }
 
@@ -288,10 +373,12 @@ void msg_subscription_monitored_item_bs__get_msg_modify_monitored_items_req_time
 void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params(
     const constants__t_msg_i msg_subscription_monitored_item_bs__p_req_msg,
     const t_entier4 msg_subscription_monitored_item_bs__p_index,
+    t_bool* const msg_subscription_monitored_item_bs__p_bres,
     constants_statuscodes_bs__t_StatusCode_i* const msg_subscription_monitored_item_bs__p_sc,
     constants__t_monitoredItemId_i* const msg_subscription_monitored_item_bs__p_monitored_item_id,
     constants__t_client_handle_i* const msg_subscription_monitored_item_bs__p_clientHandle,
     constants__t_opcua_duration_i* const msg_subscription_monitored_item_bs__p_samplingItv,
+    constants__t_monitoringFilter_i* const msg_subscription_monitored_item_bs__p_filter,
     t_bool* const msg_subscription_monitored_item_bs__p_discardOldest,
     t_entier4* const msg_subscription_monitored_item_bs__p_queueSize)
 {
@@ -303,16 +390,18 @@ void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
     OpcUa_MonitoredItemModifyRequest* monitReq =
         &modifyReq->ItemsToModify[msg_subscription_monitored_item_bs__p_index - 1];
 
-    // Check no filter active since not supported by server
-    if (monitReq->RequestedParameters.Filter.Length > 0)
-    {
-        // We do not support filter but there is one requested
-        *msg_subscription_monitored_item_bs__p_sc =
-            constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
-    }
-    else
+    // Note: we have to consider attribute is a Value attribute since we have no access to information here
+    *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
+        &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc);
+
+    // Check active filter is valid type
+    if (*msg_subscription_monitored_item_bs__p_bres)
     {
         *msg_subscription_monitored_item_bs__p_sc = constants_statuscodes_bs__e_sc_ok;
+
+        *msg_subscription_monitored_item_bs__p_filter =
+            (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
+        SOPC_ExtensionObject_Initialize(&monitReq->RequestedParameters.Filter);
 
         *msg_subscription_monitored_item_bs__p_monitored_item_id = monitReq->MonitoredItemId;
         *msg_subscription_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;

@@ -39,6 +39,8 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
         SOPC_Free(mi->nid);
         SOPC_String_Clear(mi->indexRangeString);
         SOPC_Free(mi->indexRangeString);
+        OpcUa_DataChangeFilter_Clear(mi->filter);
+        SOPC_Free(mi->filter);
         SOPC_Free(mi);
     }
 }
@@ -109,6 +111,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
+    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
@@ -165,6 +168,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
+        monitItem->filter = monitored_item_pointer_bs__p_filter;
         monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
         monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
@@ -224,6 +228,7 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
+    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize)
 {
@@ -231,6 +236,9 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
     monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
     monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
+    OpcUa_DataChangeFilter_Clear(monitItem->filter);
+    SOPC_Free(monitItem->filter);
+    monitItem->filter = monitored_item_pointer_bs__p_filter;
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 }
@@ -332,10 +340,12 @@ void monitored_item_pointer_bs__is_notification_triggered(
     const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,
     t_bool* const monitored_item_pointer_bs__bres)
 {
+    /* TODO: add filter + manage NaN in Variant_CompareRange to answer NaN == NaN ??? */
     *monitored_item_pointer_bs__bres = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int32_t dtCompare = 0;
     SOPC_InternalMontitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
+    OpcUa_DataChangeFilter* filter = monitItem->filter;
     // We already know that it is the same NodeId, check for attribute Id
     // TODO: check index if monitored item on an index of an array !
 
@@ -346,9 +356,24 @@ void monitored_item_pointer_bs__is_notification_triggered(
         if (monitored_item_pointer_bs__p_old_wv_pointer->Value.Status ==
             monitored_item_pointer_bs__p_new_wv_pointer->Value.Status)
         {
-            status = SOPC_Variant_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
-                                               &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
-                                               monitItem->indexRange, &dtCompare);
+            if (NULL != filter && OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger)
+            {
+                if (monitored_item_pointer_bs__p_old_wv_pointer->Value.SourceTimestamp !=
+                        monitored_item_pointer_bs__p_new_wv_pointer->Value.SourceTimestamp ||
+                    monitored_item_pointer_bs__p_old_wv_pointer->Value.SourcePicoSeconds !=
+                        monitored_item_pointer_bs__p_new_wv_pointer->Value.SourcePicoSeconds)
+                {
+                    // Timestamp change
+                    dtCompare = -1;
+                }
+            }
+            if (0 == dtCompare && (NULL == filter || OpcUa_DataChangeTrigger_StatusValue == filter->Trigger ||
+                                   OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger))
+            {
+                status = SOPC_Variant_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
+                                                   &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
+                                                   monitItem->indexRange, &dtCompare);
+            }
         }
         else
         {
@@ -360,6 +385,22 @@ void monitored_item_pointer_bs__is_notification_triggered(
         {
             if (dtCompare != 0)
             {
+                // TODO: evaluate deadband filter
+                switch (filter->DeadbandType)
+                {
+                case OpcUa_DeadbandType_None:
+                    break;
+                case OpcUa_DeadbandType_Absolute:
+                    /* TODO: shall be Numeric */
+                    break;
+                case OpcUa_DeadbandType_Percent:
+                    /* TODO: shall be AnalogItemType + valid EU Range */
+                    break;
+                default:
+                    // Already checked when retrieved in message
+                    assert(false && "invalid deadband type");
+                }
+
                 // Generate a notification
                 *monitored_item_pointer_bs__bres = true;
             }

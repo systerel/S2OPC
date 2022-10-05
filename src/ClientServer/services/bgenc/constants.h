@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 01/09/2022 16:35:46
+ Date                 : 05/10/2022 10:04:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -91,6 +91,7 @@
 #define constants__t_monitoredItemPointer_i constants_bs__t_monitoredItemPointer_i
 #define constants__t_monitoredItemQueueIterator_i constants_bs__t_monitoredItemQueueIterator_i
 #define constants__t_monitoredItemQueue_i constants_bs__t_monitoredItemQueue_i
+#define constants__t_monitoringFilter_i constants_bs__t_monitoringFilter_i
 #define constants__t_msg_header_i constants_bs__t_msg_header_i
 #define constants__t_msg_i constants_bs__t_msg_i
 #define constants__t_notifRepublishQueueIterator_i constants_bs__t_notifRepublishQueueIterator_i
@@ -365,6 +366,7 @@ typedef enum {
 #define constants__t_monitoredItemPointer_i_max constants_bs__t_monitoredItemPointer_i_max
 #define constants__t_monitoredItemQueueIterator_i_max constants_bs__t_monitoredItemQueueIterator_i_max
 #define constants__t_monitoredItemQueue_i_max constants_bs__t_monitoredItemQueue_i_max
+#define constants__t_monitoringFilter_i_max constants_bs__t_monitoringFilter_i_max
 #define constants__t_msg_header_i_max constants_bs__t_msg_header_i_max
 #define constants__t_msg_i_max constants_bs__t_msg_i_max
 #define constants__t_notifRepublishQueueIterator_i_max constants_bs__t_notifRepublishQueueIterator_i_max
@@ -441,6 +443,7 @@ typedef enum {
 #define constants__c_monitoredItemPointer_indet constants_bs__c_monitoredItemPointer_indet
 #define constants__c_monitoredItemQueueIterator_indet constants_bs__c_monitoredItemQueueIterator_indet
 #define constants__c_monitoredItemQueue_indet constants_bs__c_monitoredItemQueue_indet
+#define constants__c_monitoringFilter_indet constants_bs__c_monitoringFilter_indet
 #define constants__c_msg_header_indet constants_bs__c_msg_header_indet
 #define constants__c_msg_indet constants_bs__c_msg_indet
 #define constants__c_no_application_context constants_bs__c_no_application_context

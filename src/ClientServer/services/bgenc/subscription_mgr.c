@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 22/12/2022 10:07:04
+ Date                 : 14/02/2023 10:16:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -173,6 +173,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
       constants__t_monitoringMode_i subscription_mgr__l_monitMode;
       constants__t_client_handle_i subscription_mgr__l_clientHandle;
       constants__t_opcua_duration_i subscription_mgr__l_samplingItv;
+      constants__t_monitoringFilter_i subscription_mgr__l_filter;
       t_bool subscription_mgr__l_discardOldest;
       t_entier4 subscription_mgr__l_queueSize;
       constants__t_Node_i subscription_mgr__l_node;
@@ -209,6 +210,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
             &subscription_mgr__l_monitMode,
             &subscription_mgr__l_clientHandle,
             &subscription_mgr__l_samplingItv,
+            &subscription_mgr__l_filter,
             &subscription_mgr__l_discardOldest,
             &subscription_mgr__l_queueSize,
             &subscription_mgr__l_indexRange);
@@ -273,6 +275,7 @@ void subscription_mgr__fill_response_subscription_create_monitored_items(
                      subscription_mgr__p_tsToReturn,
                      subscription_mgr__l_monitMode,
                      subscription_mgr__l_clientHandle,
+                     subscription_mgr__l_filter,
                      subscription_mgr__l_discardOldest,
                      subscription_mgr__l_revQueueSize,
                      &subscription_mgr__l_sc,
@@ -520,9 +523,11 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
       t_bool subscription_mgr__l_continue;
       t_entier4 subscription_mgr__l_index;
       constants__t_monitoredItemId_i subscription_mgr__l_id;
+      t_bool subscription_mgr__l_bres;
       constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
       constants__t_client_handle_i subscription_mgr__l_clientHandle;
       constants__t_opcua_duration_i subscription_mgr__l_samplingItv;
+      constants__t_monitoringFilter_i subscription_mgr__l_filter;
       t_bool subscription_mgr__l_discardOldest;
       t_entier4 subscription_mgr__l_queueSize;
       constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
@@ -537,19 +542,22 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
             &subscription_mgr__l_index);
          msg_subscription_monitored_item__getall_modify_monitored_item_req_params(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
+            &subscription_mgr__l_bres,
             &subscription_mgr__l_sc,
             &subscription_mgr__l_id,
             &subscription_mgr__l_clientHandle,
             &subscription_mgr__l_samplingItv,
+            &subscription_mgr__l_filter,
             &subscription_mgr__l_discardOldest,
             &subscription_mgr__l_queueSize);
-         if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
+         if (subscription_mgr__l_bres == true) {
             subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
                &subscription_mgr__l_revSamplingItv,
                &subscription_mgr__l_revQueueSize);
             subscription_core__modify_monitored_item(subscription_mgr__l_id,
                subscription_mgr__p_tsToReturn,
                subscription_mgr__l_clientHandle,
+               subscription_mgr__l_filter,
                subscription_mgr__l_discardOldest,
                subscription_mgr__l_revQueueSize,
                &subscription_mgr__l_sc);

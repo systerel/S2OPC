@@ -990,6 +990,7 @@ OPERATIONS
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle,
+                                                                                         p_filter,
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     VAR
@@ -1009,6 +1010,7 @@ OPERATIONS
                                             p_timestampToReturn,
                                             p_monitoringMode,
                                             p_clientHandle,
+                                            p_filter,
                                             p_discardOldest,
                                             p_queueSize);
         IF StatusCode_service = e_sc_ok
@@ -1082,7 +1084,7 @@ OPERATIONS
     END
     ;
 
-    p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_discardOldest, p_queueSize) =
+    p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     VAR
         bres,
         l_monitoredItemPointer
@@ -1093,6 +1095,7 @@ OPERATIONS
             modify_monitored_item_pointer(l_monitoredItemPointer,
                                           p_timestampToReturn,
                                           p_clientHandle,
+                                          p_filter,
                                           p_discardOldest,
                                           p_queueSize);
             resize_monitored_item_notification_queue(l_monitoredItemPointer);

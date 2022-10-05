@@ -195,7 +195,8 @@ LOCAL_OPERATIONS
                                                                        CreateMonitoredItemReq_AttributeId(mi_index)) = FALSE))
                                                 }(bool(CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
                                                        CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
-                                     }(bool(CreateMonitoredItemReq_FilterPresence(mi_index) = TRUE))
+                                     }(bool(CreateMonitoredItemReq_Filter(mi_index) = c_monitoringFilter_indet or
+                                            CreateMonitoredItemReq_Filter(mi_index) : t_monitoringFilter))
                             }(bool(CreateMonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
                 }(bool(mi_index /: dom(CreateMonitoredItemReq_AttributeId)))
             )
@@ -412,7 +413,8 @@ LOCAL_OPERATIONS
                 {TRUE |-> e_sc_bad_monitored_item_id_invalid,
                  FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
                             FALSE |-> e_sc_ok
-                           }(bool(ModifyMonitoredItemReq_FilterPresence(mi_index) = TRUE))
+                           }(bool(ModifyMonitoredItemReq_Filter(mi_index) = c_monitoringFilter_indet or
+                                  ModifyMonitoredItemReq_Filter(mi_index) : t_monitoringFilter))
                 }(bool(ModifyMonitoredItemReq_Id(mi_index) /: s_monitoredItemId))
             )
         IN
@@ -799,6 +801,7 @@ OPERATIONS
         l_monitMode,
         l_clientHandle,
         l_samplingItv,
+        l_filter,
         l_discardOldest,
         l_queueSize,
         l_node,
@@ -823,7 +826,7 @@ OPERATIONS
             l_revQueueSize := 0;
             l_indexRange := c_IndexRange_indet;
             l_continue, l_index <-- continue_iter_monitored_item_request;
-            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_discardOldest, l_queueSize, l_indexRange
+            l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_filter, l_discardOldest, l_queueSize, l_indexRange
               <-- getall_create_monitored_item_req_params(p_req_msg, l_index);
             /* Check validity of NodeId */
             IF l_bres = TRUE
@@ -861,6 +864,7 @@ OPERATIONS
                     IF l_sc = e_sc_ok
                     THEN
                         l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
+                        /* TODO: evaluate filter regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
                         l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
                                                                                                    l_nid,
                                                                                                    l_aid,
@@ -872,6 +876,7 @@ OPERATIONS
                                                                                                    p_tsToReturn,
                                                                                                    l_monitMode,
                                                                                                    l_clientHandle,
+                                                                                                   l_filter,
                                                                                                    l_discardOldest,
                                                                                                    l_revQueueSize);
                         read_AddressSpace_free_variant(l_value)
@@ -1098,9 +1103,11 @@ OPERATIONS
         l_continue,
         l_index,
         l_id,
+        l_bres,
         l_sc,
         l_clientHandle,
         l_samplingItv,
+        l_filter,
         l_discardOldest,
         l_queueSize,
         l_revSamplingItv,
@@ -1111,11 +1118,14 @@ OPERATIONS
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_monitored_item_request;
-            l_sc, l_id, l_clientHandle, l_samplingItv, l_discardOldest, l_queueSize <-- getall_modify_monitored_item_req_params (p_req_msg, l_index);
-            IF l_sc = e_sc_ok
+            l_bres, l_sc, l_id, l_clientHandle, l_samplingItv, l_filter, l_discardOldest, l_queueSize
+              <-- getall_modify_monitored_item_req_params (p_req_msg, l_index);
+            IF l_bres = TRUE
             THEN
                 l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
-                l_sc <-- modify_monitored_item (l_id, p_tsToReturn, l_clientHandle, l_discardOldest, l_revQueueSize)
+                /* TODO: evaluate filter regarding attribute (filter presence <=> Value attribute) */
+                /* TODO: evaluate filter regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
+                l_sc <-- modify_monitored_item (l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_revQueueSize)
             END
             ;
             setall_msg_modify_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_revSamplingItv, l_revQueueSize)

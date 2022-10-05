@@ -61,7 +61,7 @@ OPERATIONS
     END
     ;
 
-    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize, p_indexRange
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_filter, p_discardOldest, p_queueSize, p_indexRange
       <-- getall_create_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -71,12 +71,15 @@ OPERATIONS
         p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
-        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_discardOldest, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv,
+        p_filter, p_indexRange, p_discardOldest, p_queueSize
         :(p_bres : BOOL &
           p_sc : t_StatusCode_i &
           p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid,
                   e_sc_bad_monitoring_mode_invalid,
-                  e_sc_bad_monitored_item_filter_unsupported} &
+                  e_sc_bad_monitored_item_filter_unsupported,
+                  e_sc_bad_monitored_item_filter_invalid,
+                  e_sc_bad_filter_not_allowed} &
           p_nid : t_NodeId_i &
           p_aid : t_AttributeId_i &
           p_monitMode : t_monitoringMode_i &
@@ -85,11 +88,14 @@ OPERATIONS
           p_discardOldest : BOOL &
           p_queueSize : t_counter &
           p_indexRange : t_IndexRange_i &
+          p_filter : t_monitoringFilter_i &
           (p_bres = TRUE =>
            p_sc = e_sc_ok &
            p_nid : t_NodeId &
            p_aid : t_AttributeId &
-           p_monitMode : t_monitoringMode))
+           p_monitMode : t_monitoringMode &
+           (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)) &
+          (p_bres = FALSE => p_sc /= e_sc_ok))
     END
     ;
 
@@ -125,7 +131,7 @@ OPERATIONS
     END
     ;
 
-    p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
+    p_bres, p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_filter, p_discardOldest, p_queueSize
     <-- getall_modify_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -135,15 +141,23 @@ OPERATIONS
         p_index : NAT &
         p_index : t_monitoredItemReqIndex
     THEN
-        p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
-        :(p_sc : t_StatusCode_i &
+        p_bres, p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_filter, p_discardOldest, p_queueSize
+        :(p_bres : BOOL &
+          p_sc : t_StatusCode_i &
           p_sc : {e_sc_ok,
-                  e_sc_bad_monitored_item_filter_unsupported} &
+                  e_sc_bad_monitored_item_filter_unsupported,
+                  e_sc_bad_monitored_item_filter_invalid} &
           p_monitored_item_id : t_monitoredItemId_i &
           p_clientHandle : t_client_handle_i &
           p_samplingItv : t_opcua_duration_i &
           p_discardOldest : BOOL &
-          p_queueSize : t_counter)
+          p_queueSize : t_counter  &
+          p_filter : t_monitoringFilter_i &
+          (p_bres = TRUE =>
+           p_sc = e_sc_ok &
+           (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)) &
+          (p_bres = FALSE => p_sc /= e_sc_ok)
+        )
     END
     ;
 

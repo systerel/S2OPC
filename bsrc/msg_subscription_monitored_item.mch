@@ -33,7 +33,7 @@ DEFINITIONS
         CreateMonitoredItemReq_AttributeId : t_monitoredItemReqIndex +-> t_AttributeId_i &
         CreateMonitoredItemReq_IndexRange  : t_monitoredItemReqIndex +-> t_IndexRange_i &
         CreateMonitoredItemReq_ValidMonitoringMode : t_monitoredItemReqIndex +-> BOOL &
-        CreateMonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
+        CreateMonitoredItemReq_Filter : t_monitoredItemReqIndex +-> t_monitoringFilter_i &
 
         CreateMonitoredItemResp_Allocated : BOOL &
         CreateMonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
@@ -42,7 +42,7 @@ DEFINITIONS
 
     d_inv_modify == (
         ModifyMonitoredItemReq_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
-        ModifyMonitoredItemReq_FilterPresence : t_monitoredItemReqIndex +-> BOOL &
+        ModifyMonitoredItemReq_Filter : t_monitoredItemReqIndex +-> t_monitoringFilter_i &
         ModifyMonitoredItemResp_Allocated : BOOL &
         ModifyMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode
     );
@@ -64,13 +64,13 @@ ABSTRACT_VARIABLES
     CreateMonitoredItemReq_AttributeId,
     CreateMonitoredItemReq_IndexRange,
     CreateMonitoredItemReq_ValidMonitoringMode,
-    CreateMonitoredItemReq_FilterPresence,
+    CreateMonitoredItemReq_Filter,
     CreateMonitoredItemResp_Allocated,
     CreateMonitoredItemResp_Id,
     CreateMonitoredItemResp_StatusCode,
 
     ModifyMonitoredItemReq_Id,
-    ModifyMonitoredItemReq_FilterPresence,
+    ModifyMonitoredItemReq_Filter,
     ModifyMonitoredItemResp_Allocated,
     ModifyMonitoredItemResp_StatusCode,
 
@@ -97,13 +97,13 @@ INITIALISATION
     CreateMonitoredItemReq_AttributeId := {} ||
     CreateMonitoredItemReq_IndexRange := {} ||
     CreateMonitoredItemReq_ValidMonitoringMode := {} ||
-    CreateMonitoredItemReq_FilterPresence := {} ||
+    CreateMonitoredItemReq_Filter := {} ||
     CreateMonitoredItemResp_Allocated := FALSE ||
     CreateMonitoredItemResp_Id := {}         ||
     CreateMonitoredItemResp_StatusCode := {} ||
 
     ModifyMonitoredItemReq_Id := {} ||
-    ModifyMonitoredItemReq_FilterPresence := {} ||
+    ModifyMonitoredItemReq_Filter := {} ||
     ModifyMonitoredItemResp_Allocated := FALSE ||
     ModifyMonitoredItemResp_StatusCode := {} ||
 
@@ -133,7 +133,7 @@ OPERATIONS
         CreateMonitoredItemReq_AttributeId,
         CreateMonitoredItemReq_IndexRange,
         CreateMonitoredItemReq_ValidMonitoringMode,
-        CreateMonitoredItemReq_FilterPresence
+        CreateMonitoredItemReq_Filter
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
@@ -149,7 +149,7 @@ OPERATIONS
                 CreateMonitoredItemReq_AttributeId : 1..nb_monitored_items --> t_AttributeId_i &
                 CreateMonitoredItemReq_IndexRange : 1..nb_monitored_items --> t_IndexRange_i &
                 CreateMonitoredItemReq_ValidMonitoringMode : 1..nb_monitored_items --> BOOL &
-                CreateMonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
+                CreateMonitoredItemReq_Filter : 1..nb_monitored_items --> t_monitoringFilter_i &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 =>
@@ -162,8 +162,7 @@ OPERATIONS
     END
     ;
 
-    /* Filters not extracted => not managed */
-    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize, p_indexRange
+    p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_filter, p_discardOldest, p_queueSize, p_indexRange
       <-- getall_create_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -175,12 +174,14 @@ OPERATIONS
         p_index > 0 &
         p_index <= nb_monitored_items
     THEN
-        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_discardOldest, p_queueSize
+        p_bres, p_sc, p_nid, p_aid, p_monitMode, p_clientHandle, p_samplingItv, p_indexRange, p_discardOldest, p_queueSize, p_filter
         :(p_bres : BOOL &
           p_sc : t_StatusCode_i & p_sc : t_StatusCode &
           p_sc : {e_sc_ok, e_sc_bad_attribute_id_invalid,
                   e_sc_bad_monitoring_mode_invalid,
-                  e_sc_bad_monitored_item_filter_unsupported} &
+                  e_sc_bad_monitored_item_filter_unsupported,
+                  e_sc_bad_monitored_item_filter_invalid,
+                  e_sc_bad_filter_not_allowed} &
           p_nid : t_NodeId_i &
           p_aid : t_AttributeId_i &
           p_monitMode : t_monitoringMode_i &
@@ -189,12 +190,15 @@ OPERATIONS
           p_discardOldest : BOOL &
           p_queueSize : t_counter &
           p_indexRange : t_IndexRange_i &
+          p_filter : t_monitoringFilter_i &
+          p_filter = CreateMonitoredItemReq_Filter(p_index) &
           (p_bres = TRUE =>
            p_sc = e_sc_ok &
            p_nid = CreateMonitoredItemReq_NodeId(p_index) &
            CreateMonitoredItemReq_AttributeId(p_index) : t_AttributeId &
            p_indexRange = CreateMonitoredItemReq_IndexRange(p_index) &
            p_aid = CreateMonitoredItemReq_AttributeId(p_index) &
+           (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) & // No filter or filter valid
            p_monitMode : t_monitoringMode) &
           (p_bres = FALSE => p_sc /= e_sc_ok) &
           (CreateMonitoredItemReq_AttributeId(p_index) /: t_AttributeId =>
@@ -206,8 +210,14 @@ OPERATIONS
 
           (CreateMonitoredItemReq_AttributeId(p_index) : t_AttributeId &
            CreateMonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
-           CreateMonitoredItemReq_FilterPresence(p_index) = TRUE =>
-           p_sc = e_sc_bad_monitored_item_filter_unsupported)
+           (p_filter /= c_monitoringFilter_indet & p_filter /: t_monitoringFilter =>
+               p_sc = e_sc_bad_monitored_item_filter_invalid or p_sc = e_sc_bad_monitored_item_filter_unsupported) &
+           (p_filter /= c_monitoringFilter_indet &
+            p_filter : t_monitoringFilter &
+            CreateMonitoredItemReq_AttributeId(p_index) /= e_aid_Value =>
+               p_sc = e_sc_bad_filter_not_allowed
+           )
+          )
          )
     END
     ;
@@ -266,7 +276,7 @@ OPERATIONS
         p_nb_monitored_items,
         nb_monitored_items,
         ModifyMonitoredItemReq_Id,
-        ModifyMonitoredItemReq_FilterPresence
+        ModifyMonitoredItemReq_Filter
         :(  p_sc                 : t_StatusCode &
             p_subscription       : t_subscription_i &
             p_timestampToRet     : t_TimestampsToReturn_i &
@@ -279,7 +289,7 @@ OPERATIONS
                 p_nb_monitored_items <= k_n_monitoredItem_max &
                 nb_monitored_items = p_nb_monitored_items &
                 ModifyMonitoredItemReq_Id : 1..nb_monitored_items --> t_monitoredItemId_i &
-                ModifyMonitoredItemReq_FilterPresence : 1..nb_monitored_items --> BOOL &
+                ModifyMonitoredItemReq_Filter : 1..nb_monitored_items --> t_monitoringFilter_i &
                 p_timestampToRet : t_TimestampsToReturn) &
             (p_sc /= e_sc_ok
                 =>
@@ -292,8 +302,7 @@ OPERATIONS
     END
     ;
 
-    /* Filters not extracted => not managed */
-    p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
+    p_bres, p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_filter, p_discardOldest, p_queueSize
       <-- getall_modify_monitored_item_req_params (p_req_msg, p_index) =
     PRE
         p_req_msg : t_msg_i &
@@ -305,23 +314,26 @@ OPERATIONS
         p_index > 0 &
         p_index <= nb_monitored_items
     THEN
-        p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize
-        :(p_sc : t_StatusCode_i & p_sc : t_StatusCode &
+        p_bres, p_sc, p_monitored_item_id, p_clientHandle, p_samplingItv, p_discardOldest, p_queueSize, p_filter
+        :(p_bres : BOOL &
+          p_sc : t_StatusCode_i & p_sc : t_StatusCode &
           p_sc : {e_sc_ok,
-                  e_sc_bad_monitored_item_filter_unsupported} &
+                  e_sc_bad_monitored_item_filter_unsupported,
+                  e_sc_bad_monitored_item_filter_invalid} &
           p_monitored_item_id : t_monitoredItemId_i &
           p_clientHandle : t_client_handle_i &
           p_samplingItv : t_opcua_duration_i &
           p_discardOldest : BOOL &
           p_queueSize : t_counter &
-          (ModifyMonitoredItemReq_FilterPresence(p_index) = FALSE =>
+          p_filter : t_monitoringFilter_i &
+          p_filter = ModifyMonitoredItemReq_Filter(p_index) &
+          (p_bres = TRUE =>
            p_sc = e_sc_ok &
-           p_monitored_item_id = ModifyMonitoredItemReq_Id(p_index)
-           ) &
-           (ModifyMonitoredItemReq_FilterPresence(p_index) = TRUE =>
-            p_sc = e_sc_bad_monitored_item_filter_unsupported
-           )
-         )
+           (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)) & // No filter or filter valid
+          (p_bres = FALSE => p_sc /= e_sc_ok) &
+          (p_filter /= c_monitoringFilter_indet & p_filter /: t_monitoringFilter =>
+            p_sc = e_sc_bad_monitored_item_filter_invalid or p_sc = e_sc_bad_monitored_item_filter_unsupported)
+       )
     END
     ;
 

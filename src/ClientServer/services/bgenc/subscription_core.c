@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 09/09/2022 08:18:18
+ Date                 : 05/10/2022 10:05:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -825,6 +825,7 @@ void subscription_core__create_monitored_item(
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_monitoringMode_i subscription_core__p_monitoringMode,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const constants__t_monitoringFilter_i subscription_core__p_filter,
    const t_bool subscription_core__p_discardOldest,
    const t_entier4 subscription_core__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
@@ -845,6 +846,7 @@ void subscription_core__create_monitored_item(
          subscription_core__p_timestampToReturn,
          subscription_core__p_monitoringMode,
          subscription_core__p_clientHandle,
+         subscription_core__p_filter,
          subscription_core__p_discardOldest,
          subscription_core__p_queueSize,
          subscription_core__StatusCode_service,
@@ -929,6 +931,7 @@ void subscription_core__modify_monitored_item(
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const constants__t_monitoringFilter_i subscription_core__p_filter,
    const t_bool subscription_core__p_discardOldest,
    const t_entier4 subscription_core__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc) {
@@ -943,6 +946,7 @@ void subscription_core__modify_monitored_item(
          monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
             subscription_core__p_timestampToReturn,
             subscription_core__p_clientHandle,
+            subscription_core__p_filter,
             subscription_core__p_discardOldest,
             subscription_core__p_queueSize);
          monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);

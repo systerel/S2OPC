@@ -69,6 +69,7 @@ OPERATIONS
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle,
+                                                                                         p_filter,
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     PRE
@@ -84,6 +85,8 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode_i &
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i &
+        p_filter : t_monitoringFilter_i &
+        (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -121,6 +124,7 @@ OPERATIONS
     modify_monitored_item_pointer(p_monitoredItemPointer,
                                   p_timestampToReturn,
                                   p_clientHandle,
+                                  p_filter,
                                   p_discardOldest,
                                   p_queueSize) =
     PRE
@@ -129,6 +133,8 @@ OPERATIONS
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
         p_clientHandle : t_client_handle_i &
+        p_filter : t_monitoringFilter_i &
+        (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
