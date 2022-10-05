@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 06/10/2022 15:54:31
+ Date                 : 06/10/2022 16:21:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -595,6 +595,7 @@ void io_dispatch_mgr__client_send_service_request(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
+      t_bool io_dispatch_mgr__l_dummy;
       
       service_mgr__is_valid_session(io_dispatch_mgr__session,
          &io_dispatch_mgr__l_valid_session);
@@ -625,7 +626,8 @@ void io_dispatch_mgr__client_send_service_request(
       else {
          *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
          if (io_dispatch_mgr__l_valid_msg == true) {
-            service_mgr__bless_msg_out(io_dispatch_mgr__req_msg);
+            service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
+               &io_dispatch_mgr__l_dummy);
             service_mgr__dealloc_msg_out(io_dispatch_mgr__req_msg);
          }
       }
@@ -643,6 +645,7 @@ void io_dispatch_mgr__client_send_discovery_request(
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
       t_bool io_dispatch_mgr__l_valid_channel_config;
       t_bool io_dispatch_mgr__l_bres;
+      t_bool io_dispatch_mgr__l_dummy;
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
@@ -676,7 +679,8 @@ void io_dispatch_mgr__client_send_discovery_request(
                   *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_ok;
                }
                else {
-                  service_mgr__bless_msg_out(io_dispatch_mgr__req_msg);
+                  service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
+                     &io_dispatch_mgr__l_dummy);
                   service_mgr__dealloc_msg_out(io_dispatch_mgr__req_msg);
                   *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_too_many_ops;
                }
@@ -704,7 +708,8 @@ void io_dispatch_mgr__client_send_discovery_request(
       else {
          *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
          if (io_dispatch_mgr__l_valid_msg == true) {
-            service_mgr__bless_msg_out(io_dispatch_mgr__req_msg);
+            service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
+               &io_dispatch_mgr__l_dummy);
             service_mgr__dealloc_msg_out(io_dispatch_mgr__req_msg);
          }
       }

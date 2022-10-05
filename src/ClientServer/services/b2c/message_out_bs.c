@@ -145,10 +145,28 @@ void message_out_bs__alloc_resp_msg(const constants__t_msg_type_i message_out_bs
     util_message_out_bs__alloc_msg(message_out_bs__msg_type, message_out_bs__nmsg_header, message_out_bs__nmsg);
 }
 
-void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg)
+void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg, t_bool* const message_out_bs__ok)
 {
-    /* NOTHING TO DO: in B model now message_out_bs__msg = c_msg_out now */
-    SOPC_UNUSED_ARG(message_out_bs__msg);
+    /*
+     * We check that the message looks good: non-NULL pointer and contains a
+     * valid encodeable type.  This is therefore not exactly what is specified in
+     * the B model.  We work on a best effort basis and mostly trust the
+     * the piece of code which passed the message.
+     */
+    SOPC_EncodeableType* encType = NULL;
+    constants__t_msg_type_i msg_type = constants__c_msg_type_indet;
+    *message_out_bs__ok = false;
+    if (constants__c_msg_indet == message_out_bs__msg)
+    {
+        return;
+    }
+    encType = *(SOPC_EncodeableType**) message_out_bs__msg;
+    if (NULL == encType)
+    {
+        return;
+    }
+    util_message__get_message_type(encType, &msg_type);
+    *message_out_bs__ok = msg_type != constants__c_msg_type_indet;
 }
 
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)

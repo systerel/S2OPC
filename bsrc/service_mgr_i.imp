@@ -1349,8 +1349,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         /* Set application message as output message */
-        bless_msg_out (req_msg);
-        l_valid_msg <-- is_valid_msg_out (req_msg);
+        l_valid_msg <-- bless_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
             l_req_typ <-- get_msg_out_type (req_msg);
@@ -1452,8 +1451,7 @@ OPERATIONS
     VAR
         l_valid_msg
     IN
-        bless_msg_out (req_msg);
-        l_valid_msg <-- is_valid_msg_out (req_msg);
+        l_valid_msg <-- bless_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
             ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context)
@@ -1514,6 +1512,7 @@ OPERATIONS
 
     bres, sc, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
+        l_dummy,
         l_is_valid_resp,
         l_is_valid_header,
         l_ret,
@@ -1526,7 +1525,7 @@ OPERATIONS
         buffer_out := c_byte_buffer_indet;
         channel := c_channel_indet;
         /* Set provided message as output message to be encoded and deallocated*/
-        bless_msg_out (publish_resp_msg);
+        l_dummy <-- bless_msg_out (publish_resp_msg);
         l_is_valid_resp, l_ret, channel <-- server_validate_session_service_resp (session);
         IF l_is_valid_resp = TRUE
         THEN

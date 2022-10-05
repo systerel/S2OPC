@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 06/10/2022 16:01:47
+ Date                 : 06/10/2022 16:21:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1569,8 +1569,7 @@ void service_mgr__client_service_request(
       service_mgr__l_channel = constants__c_channel_indet;
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
-      message_out_bs__bless_msg_out(service_mgr__req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__req_msg,
+      message_out_bs__bless_msg_out(service_mgr__req_msg,
          &service_mgr__l_valid_msg);
       if (service_mgr__l_valid_msg == true) {
          message_out_bs__get_msg_out_type(service_mgr__req_msg,
@@ -1701,8 +1700,7 @@ void service_mgr__client_discovery_service_request(
    {
       t_bool service_mgr__l_valid_msg;
       
-      message_out_bs__bless_msg_out(service_mgr__req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__req_msg,
+      message_out_bs__bless_msg_out(service_mgr__req_msg,
          &service_mgr__l_valid_msg);
       if (service_mgr__l_valid_msg == true) {
          service_mgr__local_client_discovery_service_request(service_mgr__channel,
@@ -1786,6 +1784,7 @@ void service_mgr__server_send_publish_response(
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_channel_i * const service_mgr__channel) {
    {
+      t_bool service_mgr__l_dummy;
       t_bool service_mgr__l_is_valid_resp;
       t_bool service_mgr__l_is_valid_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
@@ -1797,7 +1796,8 @@ void service_mgr__server_send_publish_response(
       *service_mgr__bres = false;
       *service_mgr__buffer_out = constants__c_byte_buffer_indet;
       *service_mgr__channel = constants__c_channel_indet;
-      message_out_bs__bless_msg_out(service_mgr__publish_resp_msg);
+      message_out_bs__bless_msg_out(service_mgr__publish_resp_msg,
+         &service_mgr__l_dummy);
       session_mgr__server_validate_session_service_resp(service_mgr__session,
          &service_mgr__l_is_valid_resp,
          &service_mgr__l_ret,

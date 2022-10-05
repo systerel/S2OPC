@@ -582,7 +582,8 @@ OPERATIONS
         l_connected_channel,
         l_buffer_out,
         l_req_handle,
-        l_req_handle_in_req_id
+        l_req_handle_in_req_id,
+        l_dummy
     IN
         l_valid_session <-- is_valid_session (session);
         l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
@@ -604,7 +605,7 @@ OPERATIONS
             IF l_valid_msg = TRUE
             THEN
                 /* Guarantee deallocation in error case */
-                bless_msg_out (req_msg);
+                l_dummy <-- bless_msg_out (req_msg);
                 dealloc_msg_out (req_msg)
             END
         END
@@ -617,6 +618,7 @@ OPERATIONS
         l_msg_typ,
         l_valid_channel_config,
         l_bres,
+        l_dummy,
         l_channel,
         l_connected_channel,
         l_buffer_out,
@@ -643,7 +645,7 @@ OPERATIONS
                         ret := e_sc_ok
                     ELSE
                         /* Guarantee deallocation in error case */
-                        bless_msg_out (req_msg);
+                        l_dummy <-- bless_msg_out (req_msg);
                         dealloc_msg_out (req_msg);
                         ret := e_sc_bad_too_many_ops /* Too many requests already recorded to be sent when SC will be connected */
                     END
@@ -666,7 +668,7 @@ OPERATIONS
             IF l_valid_msg = TRUE
             THEN
                 /* Guarantee deallocation in error case */
-                bless_msg_out (req_msg);
+                l_dummy <-- bless_msg_out (req_msg);
                 dealloc_msg_out (req_msg)
             END
         END

@@ -84,14 +84,22 @@ OPERATIONS
     END
     ;
 
-    /* Accept a message that was allocated by another part of the program */
-    bless_msg_out (msg) =
+    /*
+     * Accept a message that was allocated by another part of the program.  We
+     * consider the message as correct if the pointer is not NULL, and contains
+     * a valid encodeable type.
+     */
+    ok <-- bless_msg_out (msg) =
     PRE
-        msg : t_msg_i &
-        msg : t_msg
+        msg : t_msg_i
     THEN
-        c_msg_out := msg ||
-        a_msg_out_type :: t_msg_type
+        CHOICE
+            ok := TRUE ||
+            c_msg_out :(c_msg_out : t_msg_i & c_msg_out : t_msg & c_msg_out = msg) ||
+            a_msg_out_type :: t_msg_type
+        OR
+            ok := FALSE
+        END
     END
     ;
 
