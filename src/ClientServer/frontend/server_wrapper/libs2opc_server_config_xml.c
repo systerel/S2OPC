@@ -20,6 +20,7 @@
 // WARNING: this source file is only included if the XML library (Expat) is available
 
 #include <stdio.h>
+#include <string.h> // TODO RBA: to be remove
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
@@ -80,16 +81,52 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
             SOPC_LOG_MODULE_CLIENTSERVER,
             "Failed to load server certificate file %s. Please check it is a X509 certificate at DER format.",
             serverConfig->serverCertPath);
-        res = false;
     }
-    status =
-        SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath, &serverConfig->serverKey);
+
+    if (serverConfig->serverkeyEncrypted)
+    {
+        char* password = "password";
+        SOPC_AsymmetricKey* pKey = NULL;
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(serverConfig->serverKeyPath, &pKey, password,
+                                                              (uint32_t) strlen(password));
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Failed to load server encrypted private key file %s. Please check the password or "
+                                   "it is a private key at DER or PEM format",
+                                   serverConfig->serverKeyPath);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_SerializedAsymmetricKey(pKey, false, &serverConfig->serverKey);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Failed to serialize server private key from file %s",
+                                       serverConfig->serverKeyPath);
+            }
+        }
+
+        if (NULL != pKey)
+        {
+            SOPC_KeyManager_AsymmetricKey_Free(pKey);
+        }
+    }
+    else
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
+                                                                        &serverConfig->serverKey);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Failed to load server private key file %s. Please check it is a private key at DER or PEM format.",
+                serverConfig->serverKeyPath);
+        }
+    }
+
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "Failed to load server private key file %s. Please check it is a private key at DER or PEM format.",
-            serverConfig->serverKeyPath);
         res = false;
     }
     return res;
