@@ -633,9 +633,7 @@ OPERATIONS
         l_session_token,
         l_resp_msg_typ,
         l_resp_msg,
-        l_valid_msg,
         l_resp_msg_header,
-        l_valid_resp_header,
         l_session,
         l_ret,
         l_buffer_out,
@@ -655,10 +653,7 @@ OPERATIONS
             THEN
                 l_resp_msg_typ <-- get_response_type (req_typ);
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
-                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
-                IF l_valid_msg = TRUE &
-                    l_valid_resp_header = TRUE
+                IF l_resp_msg /= c_msg_indet
                 THEN
                     l_session, l_ret <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
                     IF l_ret /= e_sc_ok
@@ -751,9 +746,7 @@ OPERATIONS
         l_resp_msg_allocated,
         l_resp_msg_typ,
         l_resp_msg,
-        l_valid_msg,
         l_resp_msg_header,
-        l_valid_resp_header,
         l_ret,
         l_ret2,
         l_is_valid_resp,
@@ -770,8 +763,6 @@ OPERATIONS
         l_resp_msg_header := c_msg_header_indet;
         l_resp_msg := c_msg_indet;
         async_resp := FALSE;
-        l_valid_msg := FALSE;
-        l_valid_resp_header := FALSE;
         l_resp_msg_allocated := FALSE;
         l_buffer_out := c_byte_buffer_indet;
         l_valid_req_header, l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
@@ -793,10 +784,7 @@ OPERATIONS
                     /* Allocate response message */
                     l_resp_msg_typ <-- get_response_type (req_typ);
                     l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
-                    l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                    l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
-                    IF l_valid_msg = TRUE &
-                        l_valid_resp_header = TRUE
+                    IF l_resp_msg /= c_msg_indet
                     THEN
                         l_resp_msg_allocated := TRUE;
                         // Call local operation to dispatch the service request on right service
@@ -833,13 +821,10 @@ OPERATIONS
             END; /* VALID SESSION REQ CHECK */
             IF l_resp_msg_allocated = FALSE THEN
                 /* Allocate error response message if not allocated (degraded case) */
-                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp);
-                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
             END;
             /* Encode the message (nominal and degraded cases) */
-            IF l_valid_msg = TRUE &
-               l_valid_resp_header = TRUE &
+            IF l_resp_msg /= c_msg_indet &
                async_resp = FALSE
             THEN
                 IF l_ret /= e_sc_ok
@@ -855,8 +840,7 @@ OPERATIONS
                 /* response message structures not necessary anymore */
                 dealloc_msg_header_out (l_resp_msg_header);
                 dealloc_msg_out (l_resp_msg)
-            ELSIF l_valid_msg = TRUE &
-                    l_valid_resp_header = TRUE &
+            ELSIF l_resp_msg /= c_msg_indet &
                     async_resp = TRUE
             THEN
                 /* response header is deallocated but
@@ -936,9 +920,7 @@ OPERATIONS
         l_valid_req,
         l_resp_msg_typ,
         l_resp_msg,
-        l_valid_msg,
         l_resp_msg_header,
-        l_valid_resp_header,
         l_endpoint_config_idx,
         l_ret,
         l_buffer_out,
@@ -959,10 +941,7 @@ OPERATIONS
                 /* Allocate response */
                 l_resp_msg_typ <-- get_response_type (req_typ);
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
-                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
-                IF l_valid_msg = TRUE &
-                    l_valid_resp_header = TRUE
+                IF l_resp_msg /= c_msg_indet
                 THEN
                     l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                     l_ret <-- treat_discovery_service_req (l_endpoint_config_idx, req_typ, l_req_msg, l_resp_msg);
@@ -1048,8 +1027,6 @@ OPERATIONS
         l_resp_msg_typ,
         l_resp_msg_header,
         l_resp_msg,
-        l_valid_msg,
-        l_valid_resp_header,
         l_ret
     IN
         l_prev_local_treatment <-- is_local_service_treatment;
@@ -1059,17 +1036,12 @@ OPERATIONS
                 e_msg_discovery_service_class
             THEN
                 l_resp_msg_typ <-- get_response_type (req_typ);
-                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
-                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ)
             ELSE
-                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp);
-                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header)
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
             END
         END;
-        IF l_valid_msg = TRUE &
-            l_valid_resp_header = TRUE
+        IF l_resp_msg /= c_msg_indet
         THEN
             ret := e_sc_ok;
             bless_msg_in (req_msg);

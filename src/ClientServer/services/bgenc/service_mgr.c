@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 06/10/2022 16:21:47
+ Date                 : 10/10/2022 09:29:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -620,9 +620,7 @@ void service_mgr__server_receive_session_treatment_req(
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
-      t_bool service_mgr__l_valid_resp_header;
       constants__t_session_i service_mgr__l_session;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
@@ -650,12 +648,7 @@ void service_mgr__server_receive_session_treatment_req(
             message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
                &service_mgr__l_resp_msg_header,
                &service_mgr__l_resp_msg);
-            message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-               &service_mgr__l_valid_msg);
-            message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-               &service_mgr__l_valid_resp_header);
-            if ((service_mgr__l_valid_msg == true) &&
-               (service_mgr__l_valid_resp_header == true)) {
+            if (service_mgr__l_resp_msg != constants__c_msg_indet) {
                session_mgr__server_receive_session_req(service_mgr__channel,
                   service_mgr__l_session_token,
                   service_mgr__l_req_msg,
@@ -772,9 +765,7 @@ void service_mgr__server_receive_session_service_req(
       t_bool service_mgr__l_resp_msg_allocated;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
-      t_bool service_mgr__l_valid_resp_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret2;
       t_bool service_mgr__l_is_valid_resp;
@@ -791,8 +782,6 @@ void service_mgr__server_receive_session_service_req(
       service_mgr__l_resp_msg_header = constants__c_msg_header_indet;
       service_mgr__l_resp_msg = constants__c_msg_indet;
       *service_mgr__async_resp = false;
-      service_mgr__l_valid_msg = false;
-      service_mgr__l_valid_resp_header = false;
       service_mgr__l_resp_msg_allocated = false;
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
@@ -825,12 +814,7 @@ void service_mgr__server_receive_session_service_req(
                message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
                   &service_mgr__l_resp_msg_header,
                   &service_mgr__l_resp_msg);
-               message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-                  &service_mgr__l_valid_msg);
-               message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-                  &service_mgr__l_valid_resp_header);
-               if ((service_mgr__l_valid_msg == true) &&
-                  (service_mgr__l_valid_resp_header == true)) {
+               if (service_mgr__l_resp_msg != constants__c_msg_indet) {
                   service_mgr__l_resp_msg_allocated = true;
                   service_mgr__treat_session_service_req(service_mgr__l_endpoint_config_idx,
                      service_mgr__l_session,
@@ -866,13 +850,8 @@ void service_mgr__server_receive_session_service_req(
             message_out_bs__alloc_resp_msg(constants__e_msg_service_fault_resp,
                &service_mgr__l_resp_msg_header,
                &service_mgr__l_resp_msg);
-            message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-               &service_mgr__l_valid_msg);
-            message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-               &service_mgr__l_valid_resp_header);
          }
-         if (((service_mgr__l_valid_msg == true) &&
-            (service_mgr__l_valid_resp_header == true)) &&
+         if ((service_mgr__l_resp_msg != constants__c_msg_indet) &&
             (*service_mgr__async_resp == false)) {
             if (service_mgr__l_ret != constants_statuscodes_bs__e_sc_ok) {
                service_mgr__l_resp_msg_typ = constants__e_msg_service_fault_resp;
@@ -893,8 +872,7 @@ void service_mgr__server_receive_session_service_req(
             message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
             message_out_bs__dealloc_msg_out(service_mgr__l_resp_msg);
          }
-         else if (((service_mgr__l_valid_msg == true) &&
-            (service_mgr__l_valid_resp_header == true)) &&
+         else if ((service_mgr__l_resp_msg != constants__c_msg_indet) &&
             (*service_mgr__async_resp == true)) {
             message_out_bs__forget_resp_msg_out(service_mgr__l_resp_msg_header,
                service_mgr__l_resp_msg);
@@ -995,9 +973,7 @@ void service_mgr__server_receive_discovery_service_req(
       t_bool service_mgr__l_valid_req;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
-      t_bool service_mgr__l_valid_resp_header;
       constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
@@ -1023,12 +999,7 @@ void service_mgr__server_receive_discovery_service_req(
             message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
                &service_mgr__l_resp_msg_header,
                &service_mgr__l_resp_msg);
-            message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-               &service_mgr__l_valid_msg);
-            message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-               &service_mgr__l_valid_resp_header);
-            if ((service_mgr__l_valid_msg == true) &&
-               (service_mgr__l_valid_resp_header == true)) {
+            if (service_mgr__l_resp_msg != constants__c_msg_indet) {
                channel_mgr__server_get_endpoint_config(service_mgr__channel,
                   &service_mgr__l_endpoint_config_idx);
                service_mgr__treat_discovery_service_req(service_mgr__l_endpoint_config_idx,
@@ -1139,8 +1110,6 @@ void service_mgr__server_receive_local_service_req(
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_msg;
-      t_bool service_mgr__l_valid_resp_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       
       address_space_itf__is_local_service_treatment(&service_mgr__l_prev_local_treatment);
@@ -1153,23 +1122,14 @@ void service_mgr__server_receive_local_service_req(
          message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
             &service_mgr__l_resp_msg_header,
             &service_mgr__l_resp_msg);
-         message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-            &service_mgr__l_valid_msg);
-         message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-            &service_mgr__l_valid_resp_header);
          break;
       default:
          message_out_bs__alloc_resp_msg(constants__e_msg_service_fault_resp,
             &service_mgr__l_resp_msg_header,
             &service_mgr__l_resp_msg);
-         message_out_bs__is_valid_msg_out(service_mgr__l_resp_msg,
-            &service_mgr__l_valid_msg);
-         message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-            &service_mgr__l_valid_resp_header);
          break;
       }
-      if ((service_mgr__l_valid_msg == true) &&
-         (service_mgr__l_valid_resp_header == true)) {
+      if (service_mgr__l_resp_msg != constants__c_msg_indet) {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_ok;
          message_in_bs__bless_msg_in(service_mgr__req_msg);
          switch (service_mgr__req_class) {
