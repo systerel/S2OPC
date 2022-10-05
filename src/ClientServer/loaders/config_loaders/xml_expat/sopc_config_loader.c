@@ -85,6 +85,7 @@ struct parse_context_t
     bool appCertSet;
     char* serverCertificate;
     char* serverKey;
+    bool serverkeyEncrypted;
     bool trustedIssuersSet;
     SOPC_Array* trustedRootIssuers;
     SOPC_Array* trustedIntermediateIssuers;
@@ -469,6 +470,9 @@ static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs
     }
 
     ctx->serverKey = path;
+
+    attr_val = get_attr(ctx, "encrypt", attrs);
+    ctx->serverkeyEncrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     ctx->state = PARSE_SERVER_KEY;
 
@@ -1568,6 +1572,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
         config->serverConfig.nbEndpoints = (uint8_t) nbEndpoints;
         config->serverConfig.serverCertPath = ctx.serverCertificate;
         config->serverConfig.serverKeyPath = ctx.serverKey;
+        config->serverConfig.serverkeyEncrypted = ctx.serverkeyEncrypted;
         config->serverConfig.serverDescription = ctx.appDesc;
         return true;
     }
