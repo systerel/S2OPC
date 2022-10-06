@@ -25,6 +25,7 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -59,6 +60,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .nbEndpoints = 0,
     .endpointIndexes = NULL,
     .endpointClosed = NULL,
+    .serverKeyUsrPwdCb = NULL,
 };
 
 SOPC_ServerHelper_Config sopc_server_helper_config;
@@ -512,6 +514,20 @@ void SOPC_HelperConfigServer_Clear(void)
 
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
     Mutex_Clear(&sopc_server_helper_config.stateMutex);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(SOPC_ServerKeyUsrPwd_Fct* serverKeyUsrPwdCb)
+{
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == serverKeyUsrPwdCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    sopc_server_helper_config.serverKeyUsrPwdCb = serverKeyUsrPwdCb;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm)

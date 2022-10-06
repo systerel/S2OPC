@@ -79,6 +79,11 @@ typedef struct SOPC_ServerHelper_Config
     SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb;
     // Application asynchronous local service response callback record
     SOPC_LocalServiceAsyncResp_Fct* asyncRespCb;
+    // Application server private key user password callbask record
+    SOPC_ServerKeyUsrPwd_Fct* serverKeyUsrPwdCb; /* If it is defined and if the serverKey is encrypted,
+                                                    then the callback is called before the instantiation of the
+                                                    serialized serverKey. The callback allows to retrieve
+                                                    the user's password for decryption */
 
     // Synchronous local service response management
     Condition syncLocalServiceCond;
@@ -178,6 +183,9 @@ void SOPC_ServerInternal_SetStoppedState(void);
 // Note: temporarily necessary until low-level configuration also define managers at server configuration instead of
 //       endpoint configuration level.
 void SOPC_ServerInternal_SetEndpointsUserMgr(void);
+
+// Get user password to decrypt server private key from internal callback
+void SOPC_ServerInternal_ServerKeyUsrPwdCb(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus);
 
 // Local service synchronous internal callback
 void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,

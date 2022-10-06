@@ -64,6 +64,18 @@ static void SOPC_HelperInternal_StopSignal(int sig)
     }
 }
 
+void SOPC_ServerInternal_ServerKeyUsrPwdCb(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
+{
+    if (NULL == sopc_server_helper_config.serverKeyUsrPwdCb)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "The following user callback is missing: SOPC_ServerKeyUsrPwd_Fct");
+        *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+        return;
+    }
+    sopc_server_helper_config.serverKeyUsrPwdCb(ppPassword, writtenStatus);
+}
+
 void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
                                             void* response,
                                             SOPC_HelperConfigInternal_Ctx* helperCtx)
