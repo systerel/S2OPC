@@ -715,6 +715,47 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
+static void LoadUserPassword_FromEnv(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus, const char* password_ref)
+{
+    /* Allocation */
+    *ppPassword = SOPC_String_Create();
+    if (NULL == *ppPassword)
+    {
+        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
+        return;
+    }
+
+    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
+    if (SOPC_STATUS_OK != *writtenStatus)
+    {
+        printf("Failed to copy user password from environment variable TEST_SERVER_PRIVATE_KEY_PWD\n");
+        SOPC_String_Delete(*ppPassword);
+    }
+}
+
+static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
+{
+    /* Retrieve the user password to decrypt the server private key from environment variable
+     * TEST_SERVER_PRIVATE_KEY_PWD.
+     */
+
+    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+    const char* password_ref = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
+
+    if (NULL == ppPassword)
+    {
+        return;
+    }
+    if (NULL == password_ref)
+    {
+        printf(
+            "Error: XML library is available but the environement variable TEST_SERVER_PRIVATE_KEY_PWD is not defined");
+        return;
+    }
+    // from environment variable
+    LoadUserPassword_FromEnv(ppPassword, writtenStatus, password_ref);
+}
+
 static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
@@ -785,6 +826,15 @@ int main(int argc, char* argv[])
 
     /* Initialize the server library (start library threads) */
     status = Server_Initialize(logDirPath);
+
+#ifdef WITH_EXPAT
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(&Server_PrivateKey_LoadUserPassword);
+    }
+
+#endif
 
     /* Configuration of:
      * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
