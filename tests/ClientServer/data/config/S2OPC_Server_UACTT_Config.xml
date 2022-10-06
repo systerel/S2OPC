@@ -10,7 +10,7 @@
     </Locales>
     <ApplicationCertificates>
       <ServerCertificate path="./server_public/server_2k_cert.der"/>
-      <ServerKey path="./server_private/server_2k_key.pem" encrypt="false"/>
+      <ServerKey path="./server_private/encrypted_server_2k_key.pem" encrypt="true"/>
       <TrustedIssuers>
         <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
         <TrustedIssuer root="true" cert_path="trusted/ctt_ca1T.der" revocation_list_path="revoked/ctt_ca1T.crl"/>
