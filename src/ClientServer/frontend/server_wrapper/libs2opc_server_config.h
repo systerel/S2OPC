@@ -82,6 +82,35 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
                                                            SOPC_ConfigServerXML_Custom* customConfig);
 
 /**
+ * \brief Type of callback to receive user password for decryption of the server private key.
+ *
+ * \param ppPassword      out parameter, the newly allocated password.
+ * \param writtenStatus   out parameter, the status code of the callback process.
+ *
+ * \warning The callback function shall not do anything blocking or long treatment.
+ *          The implementation of the user callback must free the \p ppPassword in case of failure.
+ */
+typedef void SOPC_ServerKeyUsrPwd_Fct(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus);
+
+/**
+ * \brief Define the server private key password callback to be used.
+ *
+ * This is optional but if used it shall be defined before starting server and loading its configuration.
+ *
+ * \param serverKeyUsrPwdCb  The user callback to retrieve the password
+ *
+ * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p serverKeyUsrPwdCb is
+ * invalid or SOPC_STATUS_INVALID_STATE if the configuration is not possible (toolkit not initialized, server already
+ * started).
+ *
+ * \note   This function must be called after the initialization functions of the server library.
+ *         When the callback is configured, it is called before the instantiation of the serialized serverKey.
+ *
+ * \warning The callback function shall not do anything blocking or long treatment.
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(SOPC_ServerKeyUsrPwd_Fct* serverKeyUsrPwdCb);
+
+/**
  * \brief Method Call service configuration.
  *
  * It can be instantiated with ::SOPC_MethodCallManager_Create() or specific code by applicative code.
