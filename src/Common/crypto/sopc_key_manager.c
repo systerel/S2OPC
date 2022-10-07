@@ -32,6 +32,7 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -90,6 +91,45 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC
     const SOPC_ExposedBuffer* buf = SOPC_SecretBuffer_Expose(cert);
     SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(buf, len, is_public, res);
     SOPC_SecretBuffer_Unexpose(buf, cert);
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_DecryptPrivateKeyFromPath(const char* keyPath,
+                                                            SOPC_String* password,
+                                                            SOPC_SerializedAsymmetricKey** out)
+{
+    if (NULL == keyPath || NULL == password || NULL == out)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (0 > password->Length || NULL == password->Data)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, (char*) password->Data,
+                                                                            (uint32_t) password->Length);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Failed to load encrypted private key file %s. Please check the password or it is a "
+                               "private key at DER or PEM format",
+                               keyPath);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey(pKey, false, out);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to serialize private key from file %s",
+                                   keyPath);
+        }
+    }
+
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
+
     return status;
 }
 
