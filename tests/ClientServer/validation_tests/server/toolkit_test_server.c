@@ -45,6 +45,9 @@
 static char* default_server_cert = "server_public/server_2k_cert.der";
 static char* default_key_cert = "server_private/server_2k_key.pem";
 
+// Default server Private Key
+static char* default_server_private_key = "password";
+
 static char* default_trusted_root_issuers[] = {
     "trusted/cacert.der",    /* Demo CA */
     "trusted/ctt_ca1TC.der", /* Will be ignored because no CRL associated. Tests 042, 043 */
@@ -715,8 +718,10 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
-static void LoadUserPassword_FromEnv(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus, const char* password_ref)
+static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
 {
+    /* Retrieve the user password to decrypt the server private key */
+
     /* Allocation */
     *ppPassword = SOPC_String_Create();
     if (NULL == *ppPassword)
@@ -725,35 +730,12 @@ static void LoadUserPassword_FromEnv(SOPC_String** ppPassword, SOPC_StatusCode* 
         return;
     }
 
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
+    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, default_server_private_key);
     if (SOPC_STATUS_OK != *writtenStatus)
     {
-        printf("Failed to copy user password from environment variable TEST_SERVER_PRIVATE_KEY_PWD\n");
+        printf("Server_PrivateKey_LoadUserPassword > Failed to copy user password\n");
         SOPC_String_Delete(*ppPassword);
     }
-}
-
-static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the server private key from environment variable
-     * TEST_SERVER_PRIVATE_KEY_PWD.
-     */
-
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    const char* password_ref = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
-
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    if (NULL == password_ref)
-    {
-        printf(
-            "Error: XML library is available but the environement variable TEST_SERVER_PRIVATE_KEY_PWD is not defined");
-        return;
-    }
-    // from environment variable
-    LoadUserPassword_FromEnv(ppPassword, writtenStatus, password_ref);
 }
 
 static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
