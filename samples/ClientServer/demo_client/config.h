@@ -85,6 +85,14 @@ extern struct argparse_option CONN_OPTIONS[16];
 SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcUa_MessageSecurityMode msgSecurityMode);
 
 /**
+ * \brief   Function to set the password of the client private key during the validation test
+ *
+ * \param password  The password
+ *
+ */
+void Config_SetTest_ClientKeyPassword(char* password);
+
+/**
  * \brief   Frees the secure channel configuration, and the underlying certificates/PKI, if any.
  *
  * This function acts as a garbage collector: once the last configuration using certificates and PKI
