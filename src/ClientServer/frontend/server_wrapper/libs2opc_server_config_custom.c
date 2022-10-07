@@ -217,11 +217,29 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCertPath, &serverCert);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverKeyPath, &serverKey);
-        if (SOPC_STATUS_OK != status)
+        if (pConfig->serverConfig.serverkeyEncrypted)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server key from path %s\n",
-                                   serverKeyPath);
+            SOPC_String* password = NULL;
+            SOPC_ServerInternal_ServerKeyUsrPwdCb(&password, &status);
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_DecryptPrivateKeyFromPath(serverKeyPath, password, &serverKey);
+            }
+
+            if (NULL != password)
+            {
+                SOPC_String_Delete(password);
+            }
+        }
+        else
+        {
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverKeyPath, &serverKey);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server key from path %s\n",
+                                       serverKeyPath);
+            }
         }
     }
     else
