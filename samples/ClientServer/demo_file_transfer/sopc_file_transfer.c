@@ -737,20 +737,16 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     }
 
     bool found = false;
-    SOPC_FileType* file = NULL;
     SOPC_StatusCode result_code_service = result_code;
-    if (0 == (result_code & SOPC_GoodStatusOppositeMask))
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    if ((false == found) && (0 == (result_code_service & SOPC_GoodStatusOppositeMask)))
     {
-        file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
-        if (false == found)
-        {
-            char* C_objectId = SOPC_NodeId_ToCString(objectId);
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "FileTransfer:Method_Read: unable to retrieve FileType in the API from nodeId %s",
-                                   C_objectId);
-            SOPC_Free(C_objectId);
-            result_code_service = OpcUa_BadUnexpectedError;
-        }
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Read: unable to retrieve FileType in the API from nodeId %s",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        result_code_service = OpcUa_BadUnexpectedError;
     }
 
     int filedes = -1;
