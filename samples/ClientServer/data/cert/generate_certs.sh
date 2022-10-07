@@ -17,6 +17,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
+
+# /!\ NOTES: To encrypt private key with AES-256-CBC,
+#  please use the following command after running this script:
+#  <openssl rsa -in generated_key.pem -aes-256-cbc -out encrypted_client_4k_key.pem>
+#  You will need to enter a password.
+
 set -e
 rm -f index.txt serial.txt
 touch index.txt
