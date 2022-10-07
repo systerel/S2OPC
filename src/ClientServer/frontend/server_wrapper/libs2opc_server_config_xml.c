@@ -88,41 +88,22 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
     {
         SOPC_String* password = NULL;
         SOPC_ServerInternal_ServerKeyUsrPwdCb(&password, &status);
-        if (SOPC_STATUS_OK != status)
-        {
-            if (NULL != password)
-            {
-                SOPC_String_Delete(password);
-            }
-            return false;
-        }
-
-        SOPC_AsymmetricKey* pKey = NULL;
-        status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(serverConfig->serverKeyPath, &pKey,
-                                                              (char*) password->Data, (uint32_t) password->Length);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Failed to load server encrypted private key file %s. Please check the password or "
-                                   "it is a private key at DER or PEM format",
-                                   serverConfig->serverKeyPath);
-            res = false;
-        }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey(pKey, false, &serverConfig->serverKey);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Failed to serialize server private key from file %s",
-                                       serverConfig->serverKeyPath);
-                res = false;
-            }
+            status = SOPC_KeyManager_DecryptPrivateKeyFromPath(serverConfig->serverKeyPath, password,
+                                                               &serverConfig->serverKey);
         }
 
-        SOPC_KeyManager_AsymmetricKey_Free(pKey);
-        SOPC_String_Delete(password);
+        if (SOPC_STATUS_OK != status)
+        {
+            res = false;
+        }
+
+        if (NULL != password)
+        {
+            SOPC_String_Delete(password);
+        }
     }
     else
     {
