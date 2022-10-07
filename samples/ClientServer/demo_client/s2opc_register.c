@@ -55,14 +55,15 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t iWait = 0;
 
-    struct argparse_option options[] = {OPT_HELP(),      CONN_OPTIONS[0], CONN_OPTIONS[1], CONN_OPTIONS[2],
-                                        CONN_OPTIONS[3], CONN_OPTIONS[4], CONN_OPTIONS[5], CONN_OPTIONS[6],
-                                        CONN_OPTIONS[7], CONN_OPTIONS[8], CONN_OPTIONS[9], CONN_OPTIONS[10],
-                                        OPT_END()};
+    struct argparse_option options[] = {OPT_HELP(),       CONN_OPTIONS[0], CONN_OPTIONS[1], CONN_OPTIONS[2],
+                                        CONN_OPTIONS[3],  CONN_OPTIONS[4], CONN_OPTIONS[5], CONN_OPTIONS[6],
+                                        CONN_OPTIONS[7],  CONN_OPTIONS[8], CONN_OPTIONS[9], CONN_OPTIONS[10],
+                                        CONN_OPTIONS[15], OPT_END()};
     struct argparse argparse;
 
     argparse_init(&argparse, options, usage, 0);
-    argparse_describe(&argparse, "S2OPC register demo: send a register server request to server", NULL);
+    argparse_describe(&argparse, "S2OPC register demo: send a register server request to server",
+                      "\n Example: ./s2opc_register --private_key_password password");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC register server demo.\n");

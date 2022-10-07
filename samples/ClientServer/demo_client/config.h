@@ -60,7 +60,7 @@ extern char* USER_PWD;
 extern char* SESSION_NAME;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[15];
+extern struct argparse_option CONN_OPTIONS[16];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200

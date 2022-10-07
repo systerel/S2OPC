@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
                                         CONN_OPTIONS[12],
                                         CONN_OPTIONS[13],
                                         CONN_OPTIONS[14],
+                                        CONN_OPTIONS[15],
                                         OPT_END()};
 
     struct argparse argparse;
@@ -115,7 +116,7 @@ int main(int argc, char* argv[])
                       "\n                Historizing | 20"
                       "\n                 Executable | 21"
                       "\n             UserExecutable | 22"
-                      "\n E.g.: ./s2opc_read -n i=2259 -a 13");
+                      "\n E.g.: ./s2opc_read -n i=2259 -a 13 --private_key_password password");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC read demo.\n");
