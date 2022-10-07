@@ -342,6 +342,8 @@ int main(void)
     char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
     char* keyLocation = "./client_private/client_2k_key.pem";
+    // Client private key password
+    char* KeyPassword = "password";
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
     // Get Toolkit Configuration
@@ -386,13 +388,38 @@ int main(void)
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        // Private key: load
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
-        if (SOPC_STATUS_OK != status)
+        // Private key: Decrypt and Load
+        SOPC_String* key_password = SOPC_String_Create();
+        if (NULL == key_password)
         {
-            printf(">>Stub_Client: Failed to load private key\n");
+            printf(">>Stub_Client: Failed to create string\n");
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        else
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_String_CopyFromCString(key_password, KeyPassword);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf(">>Stub_Client: Failed to copy password from Cstring\n");
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_DecryptPrivateKeyFromPath(keyLocation, key_password, &priv_cli);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf(
+                    ">>Stub_Client: Failed to decrypt client private key, please check the password or key format "
+                    "(PEM)\n");
+            }
+        }
+
+        if (NULL != key_password)
+        {
+            SOPC_String_Delete(key_password);
+        }
+
+        if (SOPC_STATUS_OK == status)
         {
             printf(">>Stub_Client: Client private key loaded\n");
             scConfig.key_priv_cli = priv_cli;
