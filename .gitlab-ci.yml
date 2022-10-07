@@ -54,7 +54,6 @@
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
-  TEST_SERVER_PRIVATE_KEY_PWD: password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
