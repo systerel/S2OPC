@@ -33,6 +33,7 @@
 #include <stddef.h>
 
 #include "sopc_buffer.h"
+#include "sopc_builtintypes.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_secret_buffer.h"
 
@@ -211,6 +212,19 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricK
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* key,
                                                                       bool is_public,
                                                                       SOPC_AsymmetricKey** res);
+
+/**
+ * \brief Decrypt private key from path (PEM format)
+ *
+ * \param keyPath    Path to the file
+ * \param password   Password to decrypt the key
+ * \param out        out parameter, the newly allocated serialized and decrypted key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_DecryptPrivateKeyFromPath(const char* keyPath,
+                                                            SOPC_String* password,
+                                                            SOPC_SerializedAsymmetricKey** out);
 
 /**
  * \brief Releases all resources associated to a serialized asymmetric key.
