@@ -284,6 +284,12 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     }
 }
 
+/* Only for validation testing */
+void Config_SetTest_ClientKeyPassword(char* password)
+{
+    PRIVATE_KEY_PWD = password;
+}
+
 SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

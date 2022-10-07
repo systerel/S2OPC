@@ -203,7 +203,7 @@ if(ENABLE_SAMPLES)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_write>" -u user1 -p password -n "ns=1;s=Byte_001" -t 3 42)
+  "$<TARGET_FILE:s2opc_write>" -u user1 -p password -n "ns=1;s=Byte_001" -K password -t 3 42)
   set_tests_properties("validation::s2opc_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
@@ -215,7 +215,7 @@ if(ENABLE_SAMPLES)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_read>" -a 1 -n "ns=1;s=Array_Boolean_097")
+  "$<TARGET_FILE:s2opc_read>" -a 1 -n "ns=1;s=Array_Boolean_097" -K password)
   set_tests_properties("validation::s2opc_read" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_read.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
@@ -227,7 +227,7 @@ if(ENABLE_SAMPLES)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002")
+  "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002" -K password)
   set_tests_properties("validation::s2opc_browse" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_browse.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
@@ -239,7 +239,7 @@ if(ENABLE_SAMPLES)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_discovery>" --none)
+  "$<TARGET_FILE:s2opc_discovery>" --none -K password)
   set_tests_properties("validation::s2opc_discovery" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_discovery.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
