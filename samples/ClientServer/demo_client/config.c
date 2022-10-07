@@ -36,7 +36,7 @@ char* APPLICATION_NAME = "S2OPC_DemoClient";
 char* APPLICATION_URI = "urn:S2OPC:localhost";
 
 char* PATH_CLIENT_PUBL = "./client_public/client_4k_cert.der";
-char* PATH_CLIENT_PRIV = "./client_private/client_4k_key.pem";
+char* PATH_CLIENT_PRIV = "./client_private/encrypted_client_4k_key.pem";
 char* PATH_SERVER_PUBL = "./server_public/server_4k_cert.der";
 char* PATH_CACERT_PUBL = "./trusted/cacert.der";
 char* PATH_CACRL = "./revoked/cacrl.der";
@@ -45,10 +45,11 @@ char* PATH_ISSUED = NULL;
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 char* USER_PWD = NULL;
+char* PRIVATE_KEY_PWD = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
 
-struct argparse_option CONN_OPTIONS[15] = {
+struct argparse_option CONN_OPTIONS[16] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -90,7 +91,7 @@ struct argparse_option CONN_OPTIONS[15] = {
     OPT_STRING(0,
                "client_key",
                &PATH_CLIENT_PRIV,
-               "(default: ./client_private/client_4k_key.pem) path to the client private key to use",
+               "(default: ./client_private/encrypted_client_4k_key.pem) path to the client private key to use",
                NULL,
                0,
                0),
@@ -147,6 +148,13 @@ struct argparse_option CONN_OPTIONS[15] = {
                "sessionName",
                &SESSION_NAME,
                "(default: 'S2OPC_client_session') the session name indicated server on session creation",
+               NULL,
+               0,
+               0),
+    OPT_STRING('K',
+               "private_key_password",
+               &PRIVATE_KEY_PWD,
+               "(if private key is encrypted) the password of the user used to decrypt the private key",
                NULL,
                0,
                0)};
@@ -301,10 +309,43 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli);
-                if (SOPC_STATUS_OK != status)
+                if (NULL != PRIVATE_KEY_PWD)
                 {
-                    printf("# Error: Failed to load client private key\n");
+                    SOPC_String* password = SOPC_String_Create();
+                    if (NULL == password)
+                    {
+                        printf("# Error: Failed to create string\n");
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        status = SOPC_String_CopyFromCString(password, PRIVATE_KEY_PWD);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            printf("# Error: Failed to copy password from Cstring\n");
+                        }
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        status = SOPC_KeyManager_DecryptPrivateKeyFromPath(PATH_CLIENT_PRIV, password, &pKeyCli);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            printf("# Error: Failed to decrypt client private key, please check the password\n");
+                        }
+                    }
+
+                    if (NULL != password)
+                    {
+                        SOPC_String_Delete(password);
+                    }
+                }
+                else
+                {
+                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        printf("# Error: Failed to load client private key\n");
+                    }
                 }
             }
         } // else configuration with client/server certificates already created and shared
