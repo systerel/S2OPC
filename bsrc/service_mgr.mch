@@ -421,10 +421,11 @@ OPERATIONS
     END
     ;
 
-    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_typ, req_msg, app_context) =
     PRE
         channel     : t_channel_i &
         channel     : t_channel &
+        req_typ     : t_msg_type_i &
         req_msg     : t_msg_i &
         req_msg     : t_msg &
         app_context : t_application_context_i &

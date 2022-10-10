@@ -229,17 +229,19 @@ LOCAL_OPERATIONS
     END
     ;
 
-    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context) =
+    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context) =
     PRE
         channel     : t_channel_i &
         channel     : t_channel &
+        req_typ     : t_msg_type_i &
+        req_typ     : s_discovery_service_reqs &
         req_msg     : t_msg_i &
         req_msg     : t_msg &
         app_context : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */
         c_msg_out = req_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type : s_discovery_service_reqs
+        a_msg_out_type = req_typ
     THEN
         s_client_request_handle,
         a_client_request_type,
@@ -541,10 +543,9 @@ OPERATIONS
         StatusCode_service := l_ret
     END;
 
-    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context) =
+    ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context) =
     VAR
         l_msg_header,
-        l_req_typ,
         l_resp_typ,
         l_req_handle,
         l_valid_req_handle,
@@ -554,8 +555,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         /* Set application message as output message */
-        l_req_typ <-- get_msg_out_type (req_msg);
-        CASE l_req_typ OF
+        CASE req_typ OF
             /* Checks the type is a discovery request */
             EITHER e_msg_discovery_find_servers_req,
                 e_msg_discovery_find_servers_on_network_req,
@@ -563,9 +563,9 @@ OPERATIONS
                 e_msg_discovery_register_server_req,
                 e_msg_discovery_register_server2_req
             THEN
-                l_resp_typ <-- get_response_type (l_req_typ);
+                l_resp_typ <-- get_response_type (req_typ);
                 l_msg_header <-- alloc_msg_header (TRUE);
-                l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
+                l_req_handle <-- client_fresh_req_handle (req_typ, l_resp_typ, TRUE, app_context);
                 l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                 IF l_valid_req_handle = TRUE &
                     l_msg_header /= c_msg_header_indet
@@ -573,7 +573,7 @@ OPERATIONS
                     set_req_handle_channel (l_req_handle, channel);
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
                     l_channel_cfg <-- get_channel_info (channel);
-                    ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, l_req_typ, l_msg_header, req_msg);
+                    ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, req_typ, l_msg_header, req_msg);
                     IF ret /= e_sc_ok
                     THEN
                         l_req_handle := c_client_request_handle_indet
@@ -1371,7 +1371,7 @@ OPERATIONS
                     IF l_valid_channel = TRUE
                     THEN
                         /* Use discovery operation since header shall not contain session information (see part 4) */
-                        ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_msg, app_context);
+                        ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_typ, req_msg, app_context);
                         IF ret /= e_sc_ok
                         THEN
                             l_channel := c_channel_indet
@@ -1393,14 +1393,14 @@ OPERATIONS
     END
     ;
 
-    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_msg, app_context) =
+    ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_typ, req_msg, app_context) =
     VAR
         l_valid_msg
     IN
         l_valid_msg <-- bless_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
-            ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context)
+            ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context)
         ELSE
             ret := e_sc_bad_invalid_argument;
             buffer_out := c_byte_buffer_indet;

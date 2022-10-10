@@ -655,7 +655,7 @@ OPERATIONS
             ELSE
                 /* Already connected channel: will trigger a create session event synchronously
                 and then activate session event asynchronously */
-                ret, l_buffer_out, l_req_handle <-- client_discovery_service_request (l_channel, req_msg, app_context);
+                ret, l_buffer_out, l_req_handle <-- client_discovery_service_request (l_channel, l_msg_typ, req_msg, app_context);
                 IF ret = e_sc_ok
                 THEN
                     /* Since request Id is not used on client side, store req handle for context in case of snd failure */

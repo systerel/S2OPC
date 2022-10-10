@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 12:17:50
+ Date                 : 10/10/2022 12:40:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -501,6 +501,7 @@ void service_mgr__treat_discovery_service_req(
 
 void service_mgr__local_client_discovery_service_request(
    const constants__t_channel_i service_mgr__channel,
+   const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_application_context_i service_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__ret,
@@ -508,7 +509,6 @@ void service_mgr__local_client_discovery_service_request(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      constants__t_msg_type_i service_mgr__l_req_typ;
       constants__t_msg_type_i service_mgr__l_resp_typ;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
@@ -517,19 +517,17 @@ void service_mgr__local_client_discovery_service_request(
       
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
-      message_out_bs__get_msg_out_type(service_mgr__req_msg,
-         &service_mgr__l_req_typ);
-      switch (service_mgr__l_req_typ) {
+      switch (service_mgr__req_typ) {
       case constants__e_msg_discovery_find_servers_req:
       case constants__e_msg_discovery_find_servers_on_network_req:
       case constants__e_msg_discovery_get_endpoints_req:
       case constants__e_msg_discovery_register_server_req:
       case constants__e_msg_discovery_register_server2_req:
-         service_mgr__get_response_type(service_mgr__l_req_typ,
+         service_mgr__get_response_type(service_mgr__req_typ,
             &service_mgr__l_resp_typ);
          message_out_bs__alloc_msg_header(true,
             &service_mgr__l_msg_header);
-         request_handle_bs__client_fresh_req_handle(service_mgr__l_req_typ,
+         request_handle_bs__client_fresh_req_handle(service_mgr__req_typ,
             service_mgr__l_resp_typ,
             true,
             service_mgr__app_context,
@@ -546,7 +544,7 @@ void service_mgr__local_client_discovery_service_request(
                &service_mgr__l_channel_cfg);
             message_out_bs__encode_msg(service_mgr__l_channel_cfg,
                constants__e_msg_request_type,
-               service_mgr__l_req_typ,
+               service_mgr__req_typ,
                service_mgr__l_msg_header,
                service_mgr__req_msg,
                service_mgr__ret,
@@ -1586,6 +1584,7 @@ void service_mgr__client_service_request(
                &service_mgr__l_channel);
             if (service_mgr__l_valid_channel == true) {
                service_mgr__local_client_discovery_service_request(service_mgr__l_channel,
+                  service_mgr__req_typ,
                   service_mgr__req_msg,
                   service_mgr__app_context,
                   service_mgr__ret,
@@ -1616,6 +1615,7 @@ void service_mgr__client_service_request(
 
 void service_mgr__client_discovery_service_request(
    const constants__t_channel_i service_mgr__channel,
+   const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_application_context_i service_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__ret,
@@ -1628,6 +1628,7 @@ void service_mgr__client_discovery_service_request(
          &service_mgr__l_valid_msg);
       if (service_mgr__l_valid_msg == true) {
          service_mgr__local_client_discovery_service_request(service_mgr__channel,
+            service_mgr__req_typ,
             service_mgr__req_msg,
             service_mgr__app_context,
             service_mgr__ret,
