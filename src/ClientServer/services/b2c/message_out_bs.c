@@ -136,7 +136,8 @@ void message_out_bs__alloc_resp_msg(const constants__t_msg_type_i message_out_bs
     util_message_out_bs__alloc_msg(message_out_bs__msg_type, message_out_bs__nmsg_header, message_out_bs__nmsg);
 }
 
-void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg, t_bool* const message_out_bs__ok)
+void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg,
+                                   constants__t_msg_type_i* const message_out_bs__msg_typ)
 {
     /*
      * We check that the message looks good: non-NULL pointer and contains a
@@ -145,8 +146,7 @@ void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg,
      * the piece of code which passed the message.
      */
     SOPC_EncodeableType* encType = NULL;
-    constants__t_msg_type_i msg_type = constants__c_msg_type_indet;
-    *message_out_bs__ok = false;
+    *message_out_bs__msg_typ = constants__c_msg_type_indet;
     if (constants__c_msg_indet == message_out_bs__msg)
     {
         return;
@@ -156,8 +156,7 @@ void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg,
     {
         return;
     }
-    util_message__get_message_type(encType, &msg_type);
-    *message_out_bs__ok = msg_type != constants__c_msg_type_indet;
+    util_message__get_message_type(encType, message_out_bs__msg_typ);
 }
 
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)

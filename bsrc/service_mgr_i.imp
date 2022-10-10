@@ -1282,6 +1282,7 @@ OPERATIONS
 
     ret, channel, buffer_out, req_handle <-- client_service_request (session, req_typ, req_msg, app_context) =
     VAR
+        l_msg_typ,
         l_msg_header,
         l_resp_typ,
         l_valid_msg,
@@ -1297,8 +1298,8 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         /* Set application message as output message */
-        l_valid_msg <-- bless_msg_out (req_msg);
-        IF l_valid_msg = TRUE
+        l_msg_typ <-- bless_msg_out (req_msg);
+        IF l_msg_typ /= c_msg_type_indet
         THEN
             CASE req_typ OF
                 /* Only checks the type is a request (<=> not invalid & not a response) */
@@ -1395,10 +1396,11 @@ OPERATIONS
 
     ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_typ, req_msg, app_context) =
     VAR
+        l_msg_typ,
         l_valid_msg
     IN
-        l_valid_msg <-- bless_msg_out (req_msg);
-        IF l_valid_msg = TRUE
+        l_msg_typ <-- bless_msg_out (req_msg);
+        IF l_msg_typ /= c_msg_type_indet
         THEN
             ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context)
         ELSE

@@ -670,16 +670,17 @@ OPERATIONS
     END
     ;
 
-    ok <-- bless_msg_out (msg) =
+    msg_typ <-- bless_msg_out (msg) =
     PRE
         msg : t_msg_i
     THEN
         CHOICE
-            ok := TRUE ||
             c_msg_out :(c_msg_out : t_msg_i & c_msg_out : t_msg & c_msg_out = msg) ||
-            a_msg_out_type :: t_msg_type
+            msg_typ, a_msg_out_type :(msg_typ : t_msg_type_i &
+                                      msg_typ : t_msg_type &
+                                      a_msg_out_type = msg_typ)
         OR
-            ok := FALSE
+            msg_typ := c_msg_type_indet
         END
     END
     ;

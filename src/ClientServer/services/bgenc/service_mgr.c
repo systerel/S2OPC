@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 12:40:01
+ Date                 : 10/10/2022 14:19:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1481,9 +1481,9 @@ void service_mgr__client_service_request(
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
+      constants__t_msg_type_i service_mgr__l_msg_typ;
       constants__t_msg_header_i service_mgr__l_msg_header;
       constants__t_msg_type_i service_mgr__l_resp_typ;
-      t_bool service_mgr__l_valid_msg;
       constants__t_channel_i service_mgr__l_channel;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
@@ -1496,8 +1496,8 @@ void service_mgr__client_service_request(
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
       message_out_bs__bless_msg_out(service_mgr__req_msg,
-         &service_mgr__l_valid_msg);
-      if (service_mgr__l_valid_msg == true) {
+         &service_mgr__l_msg_typ);
+      if (service_mgr__l_msg_typ != constants__c_msg_type_indet) {
          switch (service_mgr__req_typ) {
          case constants__e_msg_node_add_nodes_req:
          case constants__e_msg_node_add_references_req:
@@ -1622,11 +1622,11 @@ void service_mgr__client_discovery_service_request(
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
-      t_bool service_mgr__l_valid_msg;
+      constants__t_msg_type_i service_mgr__l_msg_typ;
       
       message_out_bs__bless_msg_out(service_mgr__req_msg,
-         &service_mgr__l_valid_msg);
-      if (service_mgr__l_valid_msg == true) {
+         &service_mgr__l_msg_typ);
+      if (service_mgr__l_msg_typ != constants__c_msg_type_indet) {
          service_mgr__local_client_discovery_service_request(service_mgr__channel,
             service_mgr__req_typ,
             service_mgr__req_msg,
@@ -1709,7 +1709,7 @@ void service_mgr__server_send_publish_response(
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_channel_i * const service_mgr__channel) {
    {
-      t_bool service_mgr__l_dummy;
+      constants__t_msg_type_i service_mgr__l_dummy;
       t_bool service_mgr__l_is_valid_resp;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;

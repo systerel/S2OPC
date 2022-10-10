@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 10/10/2022 13:35:06
+ Date                 : 10/10/2022 14:19:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -595,7 +595,7 @@ void io_dispatch_mgr__client_send_service_request(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
-      t_bool io_dispatch_mgr__l_dummy;
+      constants__t_msg_type_i io_dispatch_mgr__l_dummy;
       
       service_mgr__is_valid_session(io_dispatch_mgr__session,
          &io_dispatch_mgr__l_valid_session);
@@ -646,7 +646,7 @@ void io_dispatch_mgr__client_send_discovery_request(
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
       t_bool io_dispatch_mgr__l_valid_channel_config;
       t_bool io_dispatch_mgr__l_bres;
-      t_bool io_dispatch_mgr__l_dummy;
+      constants__t_msg_type_i io_dispatch_mgr__l_dummy;
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;

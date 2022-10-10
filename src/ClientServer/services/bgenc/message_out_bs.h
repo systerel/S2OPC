@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 10/10/2022 13:57:37
+ Date                 : 10/10/2022 14:19:48
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -64,7 +64,7 @@ extern void message_out_bs__alloc_resp_msg(
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__bless_msg_out(
    const constants__t_msg_i message_out_bs__msg,
-   t_bool * const message_out_bs__ok);
+   constants__t_msg_type_i * const message_out_bs__msg_typ);
 extern void message_out_bs__client_write_msg_out_header_req_handle(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_client_request_handle_i message_out_bs__req_handle);
