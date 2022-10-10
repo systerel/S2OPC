@@ -209,16 +209,6 @@ OPERATIONS
     END
     ;
 
-    msgtype <-- get_msg_out_type (msg) =
-    PRE
-        msg : t_msg_i &
-        msg = c_msg_out &
-        c_msg_out : t_msg
-    THEN
-        msgtype := a_msg_out_type
-    END
-    ;
-
     write_msg_out_header_session_token (msg_header, session_token) =
     PRE
         msg_header : t_msg_header_i &
