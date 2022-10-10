@@ -1280,10 +1280,9 @@ OPERATIONS
     END
     ;
 
-    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_msg, app_context) =
+    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_typ, req_msg, app_context) =
     VAR
         l_msg_header,
-        l_req_typ,
         l_resp_typ,
         l_valid_msg,
         l_channel,
@@ -1301,8 +1300,7 @@ OPERATIONS
         l_valid_msg <-- bless_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
-            l_req_typ <-- get_msg_out_type (req_msg);
-            CASE l_req_typ OF
+            CASE req_typ OF
                 /* Only checks the type is a request (<=> not invalid & not a response) */
                 EITHER e_msg_node_add_nodes_req,
                     e_msg_node_add_references_req,
@@ -1334,9 +1332,9 @@ OPERATIONS
                     e_msg_subscription_transfer_subscriptions_req,
                     e_msg_subscription_delete_subscriptions_req
                 THEN
-                    l_resp_typ <-- get_response_type (l_req_typ);
+                    l_resp_typ <-- get_response_type (req_typ);
                     l_msg_header <-- alloc_msg_header (TRUE);
-                    l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
+                    l_req_handle <-- client_fresh_req_handle (req_typ, l_resp_typ, TRUE, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_msg_header /= c_msg_header_indet

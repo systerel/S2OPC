@@ -388,10 +388,11 @@ OPERATIONS
     END
     ;
 
-    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_msg, app_context) =
+    ret, channel, buffer_out, req_handle <-- client_service_request (session, req_typ, req_msg, app_context) =
     PRE
         session         : t_session_i &
         session         : t_session &
+        req_typ         : t_msg_type_i &
         req_msg         : t_msg_i &
         app_context     : t_application_context_i &
         /* message is not yet set as output before call and deallocated after operation */

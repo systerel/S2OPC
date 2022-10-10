@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 04/10/2022 15:39:59
+ Date                 : 10/10/2022 12:17:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -206,6 +206,7 @@ extern void service_mgr__client_service_fault_to_resp_type(
    constants__t_msg_type_i * const service_mgr__resp_typ);
 extern void service_mgr__client_service_request(
    const constants__t_session_i service_mgr__session,
+   const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_msg_i service_mgr__req_msg,
    const constants__t_application_context_i service_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__ret,

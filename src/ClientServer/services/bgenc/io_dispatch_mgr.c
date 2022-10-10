@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 06/10/2022 16:21:31
+ Date                 : 10/10/2022 12:17:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -605,6 +605,7 @@ void io_dispatch_mgr__client_send_service_request(
       if ((io_dispatch_mgr__l_valid_session == true) &&
          (io_dispatch_mgr__l_valid_msg == true)) {
          service_mgr__client_service_request(io_dispatch_mgr__session,
+            io_dispatch_mgr__l_msg_typ,
             io_dispatch_mgr__req_msg,
             io_dispatch_mgr__app_context,
             io_dispatch_mgr__ret,

@@ -589,7 +589,7 @@ OPERATIONS
         l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
         IF l_valid_session = TRUE & l_valid_msg = TRUE
         THEN
-            ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, req_msg, app_context);
+            ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, l_msg_typ, req_msg, app_context);
             IF ret = e_sc_ok
             THEN
                 l_connected_channel <-- is_connected_channel (l_channel);
