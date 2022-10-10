@@ -1071,11 +1071,9 @@ OPERATIONS
     buffer_out, req_handle <-- client_service_create_session (session, channel) =
     VAR
         l_msg_header,
-        l_valid_msg_header,
         l_req_msg,
         l_req_handle,
         l_valid_req_handle,
-        l_valid_msg,
         l_buffer,
         l_sc,
         l_bret,
@@ -1084,10 +1082,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_create_req);
-        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-        l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-        IF l_valid_msg_header = TRUE &
-            l_valid_msg = TRUE
+        IF l_req_msg /= c_msg_indet
         THEN
             l_req_handle <-- client_fresh_req_handle (e_msg_session_create_req,
                                                       e_msg_session_create_resp,
@@ -1128,8 +1123,6 @@ OPERATIONS
     VAR
         l_msg_header,
         l_req_msg,
-        l_valid_msg,
-        l_valid_msg_header,
         l_req_handle,
         l_valid_req_handle,
         l_ret,
@@ -1141,10 +1134,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
-        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-        l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-        IF l_valid_msg = TRUE &
-            l_valid_msg_header = TRUE
+        IF l_req_msg /= c_msg_indet
         THEN
             l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_req,
                                                       e_msg_session_activate_resp,
@@ -1182,9 +1172,7 @@ OPERATIONS
     ret, channel, buffer_out, req_handle <-- client_service_activate_session (session, p_user_token) =
     VAR
         l_msg_header,
-        l_valid_msg_header,
         l_req_msg,
-        l_valid_msg,
         l_ret,
         l_channel,
         l_req_handle,
@@ -1197,10 +1185,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
-        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-        l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-        IF l_valid_msg = TRUE &
-            l_valid_msg_header = TRUE
+        IF l_req_msg /= c_msg_indet
         THEN
             l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_req,
                                                       e_msg_session_activate_resp,
@@ -1246,9 +1231,7 @@ OPERATIONS
     ret, channel, buffer_out, req_handle <-- client_service_close_session (session) =
     VAR
         l_msg_header,
-        l_valid_msg_header,
         l_req_msg,
-        l_valid_msg,
         l_channel,
         l_req_handle,
         l_valid_req_handle,
@@ -1260,10 +1243,7 @@ OPERATIONS
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
         l_msg_header, l_req_msg <-- alloc_req_msg (e_msg_session_close_req);
-        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-        l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-        IF l_valid_msg = TRUE &
-            l_valid_msg_header = TRUE
+        IF l_req_msg /= c_msg_indet
         THEN
             l_req_handle <-- client_fresh_req_handle (e_msg_session_close_req,
                                                       e_msg_session_close_resp,

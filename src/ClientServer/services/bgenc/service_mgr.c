@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 09:29:41
+ Date                 : 10/10/2022 09:32:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1176,11 +1176,9 @@ void service_mgr__client_service_create_session(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
-      t_bool service_mgr__l_valid_msg;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_sc;
       t_bool service_mgr__l_bret;
@@ -1191,12 +1189,7 @@ void service_mgr__client_service_create_session(
       message_out_bs__alloc_req_msg(constants__e_msg_session_create_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__l_req_msg,
-         &service_mgr__l_valid_msg);
-      message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-         &service_mgr__l_valid_msg_header);
-      if ((service_mgr__l_valid_msg_header == true) &&
-         (service_mgr__l_valid_msg == true)) {
+      if (service_mgr__l_req_msg != constants__c_msg_indet) {
          request_handle_bs__client_fresh_req_handle(constants__e_msg_session_create_req,
             constants__e_msg_session_create_resp,
             false,
@@ -1256,8 +1249,6 @@ void service_mgr__client_service_activate_orphaned_session(
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
-      t_bool service_mgr__l_valid_msg;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
@@ -1271,12 +1262,7 @@ void service_mgr__client_service_activate_orphaned_session(
       message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__l_req_msg,
-         &service_mgr__l_valid_msg);
-      message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-         &service_mgr__l_valid_msg_header);
-      if ((service_mgr__l_valid_msg == true) &&
-         (service_mgr__l_valid_msg_header == true)) {
+      if (service_mgr__l_req_msg != constants__c_msg_indet) {
          request_handle_bs__client_fresh_req_handle(constants__e_msg_session_activate_req,
             constants__e_msg_session_activate_resp,
             false,
@@ -1335,9 +1321,7 @@ void service_mgr__client_service_activate_session(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
-      t_bool service_mgr__l_valid_msg;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_channel_i service_mgr__l_channel;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
@@ -1352,12 +1336,7 @@ void service_mgr__client_service_activate_session(
       message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__l_req_msg,
-         &service_mgr__l_valid_msg);
-      message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-         &service_mgr__l_valid_msg_header);
-      if ((service_mgr__l_valid_msg == true) &&
-         (service_mgr__l_valid_msg_header == true)) {
+      if (service_mgr__l_req_msg != constants__c_msg_indet) {
          request_handle_bs__client_fresh_req_handle(constants__e_msg_session_activate_req,
             constants__e_msg_session_activate_resp,
             false,
@@ -1429,9 +1408,7 @@ void service_mgr__client_service_close_session(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
-      t_bool service_mgr__l_valid_msg;
       constants__t_channel_i service_mgr__l_channel;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
@@ -1445,12 +1422,7 @@ void service_mgr__client_service_close_session(
       message_out_bs__alloc_req_msg(constants__e_msg_session_close_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
-      message_out_bs__is_valid_msg_out(service_mgr__l_req_msg,
-         &service_mgr__l_valid_msg);
-      message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-         &service_mgr__l_valid_msg_header);
-      if ((service_mgr__l_valid_msg == true) &&
-         (service_mgr__l_valid_msg_header == true)) {
+      if (service_mgr__l_req_msg != constants__c_msg_indet) {
          request_handle_bs__client_fresh_req_handle(constants__e_msg_session_close_req,
             constants__e_msg_session_close_resp,
             false,
