@@ -21,7 +21,7 @@
 
  File Name            : service_mgr_bs.h
 
- Date                 : 24/08/2022 07:51:10
+ Date                 : 10/10/2022 13:35:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,6 +51,7 @@ extern void service_mgr_bs__INITIALISATION(void);
   --------------------*/
 extern void service_mgr_bs__client_async_discovery_request_without_channel(
    const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
+   const constants__t_msg_type_i service_mgr_bs__req_typ,
    const constants__t_msg_i service_mgr_bs__req_msg,
    const constants__t_application_context_i service_mgr_bs__app_context,
    t_bool * const service_mgr_bs__bres);

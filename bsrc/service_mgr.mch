@@ -500,10 +500,12 @@ OPERATIONS
 
     /* PROMOTES */
 
-    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context) =
+    bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_typ, req_msg, app_context) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
+        req_typ            : t_msg_type_i &
+        req_typ            : t_msg_type &
         req_msg            : t_msg_i &
         req_msg            : t_msg &
         app_context        : t_application_context_i

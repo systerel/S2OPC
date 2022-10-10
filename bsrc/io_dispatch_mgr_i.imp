@@ -639,7 +639,7 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     /* No connected channel: will trigger to send discovery request on channel connection event */
-                    l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, req_msg, app_context);
+                    l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, l_msg_typ, req_msg, app_context);
                     IF l_bres = TRUE
                     THEN
                         ret := e_sc_ok

@@ -63,6 +63,7 @@ void service_mgr_bs__INITIALISATION(void)
   --------------------*/
 void service_mgr_bs__client_async_discovery_request_without_channel(
     const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx,
+    const constants__t_msg_type_i service_mgr_bs__req_typ,
     const constants__t_msg_i service_mgr_bs__req_msg,
     const constants__t_application_context_i service_mgr_bs__app_context,
     t_bool* const service_mgr_bs__bres)
@@ -87,7 +88,7 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
         if (NULL != sLinkedList && NULL != elt)
         {
             elt->msgToSend = service_mgr_bs__req_msg;
-            message_out_bs__get_msg_out_type(service_mgr_bs__req_msg, &elt->msgType);
+            elt->msgType = service_mgr_bs__req_typ;
             elt->msgAppContext = service_mgr_bs__app_context;
             addedMsg = SOPC_SLinkedList_Append(sLinkedList, 0, elt);
         }

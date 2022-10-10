@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 10/10/2022 12:33:25
+ Date                 : 10/10/2022 13:35:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -673,6 +673,7 @@ void io_dispatch_mgr__client_send_discovery_request(
                &io_dispatch_mgr__l_bres);
             if (io_dispatch_mgr__l_bres == true) {
                service_mgr__client_async_discovery_request_without_channel(io_dispatch_mgr__channel_config_idx,
+                  io_dispatch_mgr__l_msg_typ,
                   io_dispatch_mgr__req_msg,
                   io_dispatch_mgr__app_context,
                   &io_dispatch_mgr__l_bres);
