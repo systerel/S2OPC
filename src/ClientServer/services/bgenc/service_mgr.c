@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 14:19:37
+ Date                 : 10/10/2022 14:47:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1481,7 +1481,6 @@ void service_mgr__client_service_request(
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
-      constants__t_msg_type_i service_mgr__l_msg_typ;
       constants__t_msg_header_i service_mgr__l_msg_header;
       constants__t_msg_type_i service_mgr__l_resp_typ;
       constants__t_channel_i service_mgr__l_channel;
@@ -1495,118 +1494,110 @@ void service_mgr__client_service_request(
       service_mgr__l_channel = constants__c_channel_indet;
       service_mgr__l_buffer = constants__c_byte_buffer_indet;
       service_mgr__l_req_handle = constants__c_client_request_handle_indet;
-      message_out_bs__bless_msg_out(service_mgr__req_msg,
-         &service_mgr__l_msg_typ);
-      if (service_mgr__l_msg_typ != constants__c_msg_type_indet) {
-         switch (service_mgr__req_typ) {
-         case constants__e_msg_node_add_nodes_req:
-         case constants__e_msg_node_add_references_req:
-         case constants__e_msg_node_delete_nodes_req:
-         case constants__e_msg_node_delete_references_req:
-         case constants__e_msg_view_browse_req:
-         case constants__e_msg_view_browse_next_req:
-         case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
-         case constants__e_msg_view_register_nodes_req:
-         case constants__e_msg_view_unregister_nodes_req:
-         case constants__e_msg_query_first_req:
-         case constants__e_msg_query_next_req:
-         case constants__e_msg_attribute_read_req:
-         case constants__e_msg_attribute_history_read_req:
-         case constants__e_msg_attribute_write_req:
-         case constants__e_msg_attribute_history_update_req:
-         case constants__e_msg_method_call_req:
-         case constants__e_msg_monitored_items_create_req:
-         case constants__e_msg_monitored_items_modify_req:
-         case constants__e_msg_monitored_items_set_monitoring_mode_req:
-         case constants__e_msg_monitored_items_set_monitoring_mode_resp:
-         case constants__e_msg_monitored_items_set_triggering_req:
-         case constants__e_msg_monitored_items_delete_req:
-         case constants__e_msg_subscription_create_req:
-         case constants__e_msg_subscription_modify_req:
-         case constants__e_msg_subscription_set_publishing_mode_req:
-         case constants__e_msg_subscription_publish_req:
-         case constants__e_msg_subscription_republish_req:
-         case constants__e_msg_subscription_transfer_subscriptions_req:
-         case constants__e_msg_subscription_delete_subscriptions_req:
-            service_mgr__get_response_type(service_mgr__req_typ,
-               &service_mgr__l_resp_typ);
-            message_out_bs__alloc_msg_header(true,
-               &service_mgr__l_msg_header);
-            request_handle_bs__client_fresh_req_handle(service_mgr__req_typ,
-               service_mgr__l_resp_typ,
-               true,
-               service_mgr__app_context,
-               &service_mgr__l_req_handle);
-            request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
-               &service_mgr__l_valid_req_handle);
-            if ((service_mgr__l_valid_req_handle == true) &&
-               (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
-               session_mgr__client_validate_session_service_req(service_mgr__session,
-                  service_mgr__l_req_handle,
-                  service_mgr__ret,
-                  &service_mgr__l_channel,
-                  &service_mgr__l_session_token);
-               if (*service_mgr__ret == constants_statuscodes_bs__e_sc_ok) {
-                  request_handle_bs__set_req_handle_channel(service_mgr__l_req_handle,
-                     service_mgr__l_channel);
-                  message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
-                     service_mgr__l_req_handle);
-                  message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
-                     service_mgr__l_session_token);
-                  channel_mgr__get_channel_info(service_mgr__l_channel,
-                     &service_mgr__l_channel_cfg);
-                  message_out_bs__encode_msg(service_mgr__l_channel_cfg,
-                     constants__e_msg_request_type,
-                     constants__e_msg_session_close_req,
-                     service_mgr__l_msg_header,
-                     service_mgr__req_msg,
-                     service_mgr__ret,
-                     &service_mgr__l_buffer);
-                  if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
-                     service_mgr__l_channel = constants__c_channel_indet;
-                  }
-               }
-            }
-            else {
-               *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-            }
-            if (service_mgr__l_msg_header != constants__c_msg_header_indet) {
-               message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
-            }
-            break;
-         case constants__e_msg_discovery_find_servers_req:
-         case constants__e_msg_discovery_find_servers_on_network_req:
-         case constants__e_msg_discovery_get_endpoints_req:
-         case constants__e_msg_discovery_register_server_req:
-         case constants__e_msg_discovery_register_server2_req:
-            session_mgr__getall_valid_session_channel(service_mgr__session,
-               &service_mgr__l_valid_channel,
-               &service_mgr__l_channel);
-            if (service_mgr__l_valid_channel == true) {
-               service_mgr__local_client_discovery_service_request(service_mgr__l_channel,
-                  service_mgr__req_typ,
+      switch (service_mgr__req_typ) {
+      case constants__e_msg_node_add_nodes_req:
+      case constants__e_msg_node_add_references_req:
+      case constants__e_msg_node_delete_nodes_req:
+      case constants__e_msg_node_delete_references_req:
+      case constants__e_msg_view_browse_req:
+      case constants__e_msg_view_browse_next_req:
+      case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+      case constants__e_msg_view_register_nodes_req:
+      case constants__e_msg_view_unregister_nodes_req:
+      case constants__e_msg_query_first_req:
+      case constants__e_msg_query_next_req:
+      case constants__e_msg_attribute_read_req:
+      case constants__e_msg_attribute_history_read_req:
+      case constants__e_msg_attribute_write_req:
+      case constants__e_msg_attribute_history_update_req:
+      case constants__e_msg_method_call_req:
+      case constants__e_msg_monitored_items_create_req:
+      case constants__e_msg_monitored_items_modify_req:
+      case constants__e_msg_monitored_items_set_monitoring_mode_req:
+      case constants__e_msg_monitored_items_set_monitoring_mode_resp:
+      case constants__e_msg_monitored_items_set_triggering_req:
+      case constants__e_msg_monitored_items_delete_req:
+      case constants__e_msg_subscription_create_req:
+      case constants__e_msg_subscription_modify_req:
+      case constants__e_msg_subscription_set_publishing_mode_req:
+      case constants__e_msg_subscription_publish_req:
+      case constants__e_msg_subscription_republish_req:
+      case constants__e_msg_subscription_transfer_subscriptions_req:
+      case constants__e_msg_subscription_delete_subscriptions_req:
+         service_mgr__get_response_type(service_mgr__req_typ,
+            &service_mgr__l_resp_typ);
+         message_out_bs__alloc_msg_header(true,
+            &service_mgr__l_msg_header);
+         request_handle_bs__client_fresh_req_handle(service_mgr__req_typ,
+            service_mgr__l_resp_typ,
+            true,
+            service_mgr__app_context,
+            &service_mgr__l_req_handle);
+         request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
+            &service_mgr__l_valid_req_handle);
+         if ((service_mgr__l_valid_req_handle == true) &&
+            (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
+            session_mgr__client_validate_session_service_req(service_mgr__session,
+               service_mgr__l_req_handle,
+               service_mgr__ret,
+               &service_mgr__l_channel,
+               &service_mgr__l_session_token);
+            if (*service_mgr__ret == constants_statuscodes_bs__e_sc_ok) {
+               request_handle_bs__set_req_handle_channel(service_mgr__l_req_handle,
+                  service_mgr__l_channel);
+               message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
+                  service_mgr__l_req_handle);
+               message_out_bs__write_msg_out_header_session_token(service_mgr__l_msg_header,
+                  service_mgr__l_session_token);
+               channel_mgr__get_channel_info(service_mgr__l_channel,
+                  &service_mgr__l_channel_cfg);
+               message_out_bs__encode_msg(service_mgr__l_channel_cfg,
+                  constants__e_msg_request_type,
+                  constants__e_msg_session_close_req,
+                  service_mgr__l_msg_header,
                   service_mgr__req_msg,
-                  service_mgr__app_context,
                   service_mgr__ret,
-                  &service_mgr__l_buffer,
-                  &service_mgr__l_req_handle);
+                  &service_mgr__l_buffer);
                if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
                   service_mgr__l_channel = constants__c_channel_indet;
                }
             }
-            else {
-               *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-            }
-            break;
-         default:
-            *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-            break;
          }
-      }
-      else {
+         else {
+            *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         }
+         if (service_mgr__l_msg_header != constants__c_msg_header_indet) {
+            message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
+         }
+         break;
+      case constants__e_msg_discovery_find_servers_req:
+      case constants__e_msg_discovery_find_servers_on_network_req:
+      case constants__e_msg_discovery_get_endpoints_req:
+      case constants__e_msg_discovery_register_server_req:
+      case constants__e_msg_discovery_register_server2_req:
+         session_mgr__getall_valid_session_channel(service_mgr__session,
+            &service_mgr__l_valid_channel,
+            &service_mgr__l_channel);
+         if (service_mgr__l_valid_channel == true) {
+            service_mgr__local_client_discovery_service_request(service_mgr__l_channel,
+               service_mgr__req_typ,
+               service_mgr__req_msg,
+               service_mgr__app_context,
+               service_mgr__ret,
+               &service_mgr__l_buffer,
+               &service_mgr__l_req_handle);
+            if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
+               service_mgr__l_channel = constants__c_channel_indet;
+            }
+         }
+         else {
+            *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
+         }
+         break;
+      default:
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
+         break;
       }
-      message_out_bs__dealloc_msg_out(service_mgr__req_msg);
       *service_mgr__channel = service_mgr__l_channel;
       *service_mgr__req_handle = service_mgr__l_req_handle;
       *service_mgr__buffer_out = service_mgr__l_buffer;

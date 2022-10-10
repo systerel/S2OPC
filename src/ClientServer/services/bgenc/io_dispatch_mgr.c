@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 10/10/2022 14:19:34
+ Date                 : 10/10/2022 14:47:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -588,22 +588,19 @@ void io_dispatch_mgr__client_send_service_request(
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret) {
    {
       t_bool io_dispatch_mgr__l_valid_session;
-      t_bool io_dispatch_mgr__l_valid_msg;
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
       constants__t_channel_i io_dispatch_mgr__l_channel;
       t_bool io_dispatch_mgr__l_connected_channel;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       constants__t_client_request_handle_i io_dispatch_mgr__l_req_handle;
       constants__t_request_context_i io_dispatch_mgr__l_req_handle_in_req_id;
-      constants__t_msg_type_i io_dispatch_mgr__l_dummy;
       
       service_mgr__is_valid_session(io_dispatch_mgr__session,
          &io_dispatch_mgr__l_valid_session);
-      service_mgr__is_valid_app_msg_out(io_dispatch_mgr__req_msg,
-         &io_dispatch_mgr__l_valid_msg,
+      service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
          &io_dispatch_mgr__l_msg_typ);
       if ((io_dispatch_mgr__l_valid_session == true) &&
-         (io_dispatch_mgr__l_valid_msg == true)) {
+         (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet)) {
          service_mgr__client_service_request(io_dispatch_mgr__session,
             io_dispatch_mgr__l_msg_typ,
             io_dispatch_mgr__req_msg,
@@ -626,11 +623,9 @@ void io_dispatch_mgr__client_send_service_request(
       }
       else {
          *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-         if (io_dispatch_mgr__l_valid_msg == true) {
-            service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
-               &io_dispatch_mgr__l_dummy);
-            service_mgr__dealloc_msg_out(io_dispatch_mgr__req_msg);
-         }
+      }
+      if (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) {
+         service_mgr__dealloc_msg_out(io_dispatch_mgr__req_msg);
       }
    }
 }

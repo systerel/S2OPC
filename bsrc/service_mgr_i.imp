@@ -1282,10 +1282,8 @@ OPERATIONS
 
     ret, channel, buffer_out, req_handle <-- client_service_request (session, req_typ, req_msg, app_context) =
     VAR
-        l_msg_typ,
         l_msg_header,
         l_resp_typ,
-        l_valid_msg,
         l_channel,
         l_req_handle,
         l_valid_req_handle,
@@ -1297,97 +1295,89 @@ OPERATIONS
         l_channel := c_channel_indet;
         l_buffer := c_byte_buffer_indet;
         l_req_handle := c_client_request_handle_indet;
-        /* Set application message as output message */
-        l_msg_typ <-- bless_msg_out (req_msg);
-        IF l_msg_typ /= c_msg_type_indet
-        THEN
-            CASE req_typ OF
-                /* Only checks the type is a request (<=> not invalid & not a response) */
-                EITHER e_msg_node_add_nodes_req,
-                    e_msg_node_add_references_req,
-                    e_msg_node_delete_nodes_req,
-                    e_msg_node_delete_references_req,
-                    e_msg_view_browse_req,
-                    e_msg_view_browse_next_req,
-                    e_msg_view_translate_browse_paths_to_node_ids_req,
-                    e_msg_view_register_nodes_req,
-                    e_msg_view_unregister_nodes_req,
-                    e_msg_query_first_req,
-                    e_msg_query_next_req,
-                    e_msg_attribute_read_req,
-                    e_msg_attribute_history_read_req,
-                    e_msg_attribute_write_req,
-                    e_msg_attribute_history_update_req,
-                    e_msg_method_call_req,
-                    e_msg_monitored_items_create_req,
-                    e_msg_monitored_items_modify_req,
-                    e_msg_monitored_items_set_monitoring_mode_req,
-                    e_msg_monitored_items_set_monitoring_mode_resp,
-                    e_msg_monitored_items_set_triggering_req,
-                    e_msg_monitored_items_delete_req,
-                    e_msg_subscription_create_req,
-                    e_msg_subscription_modify_req,
-                    e_msg_subscription_set_publishing_mode_req,
-                    e_msg_subscription_publish_req,
-                    e_msg_subscription_republish_req,
-                    e_msg_subscription_transfer_subscriptions_req,
-                    e_msg_subscription_delete_subscriptions_req
+        CASE req_typ OF
+            /* Only checks the type is a request (<=> not invalid & not a response) */
+            EITHER e_msg_node_add_nodes_req,
+                e_msg_node_add_references_req,
+                e_msg_node_delete_nodes_req,
+                e_msg_node_delete_references_req,
+                e_msg_view_browse_req,
+                e_msg_view_browse_next_req,
+                e_msg_view_translate_browse_paths_to_node_ids_req,
+                e_msg_view_register_nodes_req,
+                e_msg_view_unregister_nodes_req,
+                e_msg_query_first_req,
+                e_msg_query_next_req,
+                e_msg_attribute_read_req,
+                e_msg_attribute_history_read_req,
+                e_msg_attribute_write_req,
+                e_msg_attribute_history_update_req,
+                e_msg_method_call_req,
+                e_msg_monitored_items_create_req,
+                e_msg_monitored_items_modify_req,
+                e_msg_monitored_items_set_monitoring_mode_req,
+                e_msg_monitored_items_set_monitoring_mode_resp,
+                e_msg_monitored_items_set_triggering_req,
+                e_msg_monitored_items_delete_req,
+                e_msg_subscription_create_req,
+                e_msg_subscription_modify_req,
+                e_msg_subscription_set_publishing_mode_req,
+                e_msg_subscription_publish_req,
+                e_msg_subscription_republish_req,
+                e_msg_subscription_transfer_subscriptions_req,
+                e_msg_subscription_delete_subscriptions_req
+            THEN
+                l_resp_typ <-- get_response_type (req_typ);
+                l_msg_header <-- alloc_msg_header (TRUE);
+                l_req_handle <-- client_fresh_req_handle (req_typ, l_resp_typ, TRUE, app_context);
+                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                IF l_valid_req_handle = TRUE &
+                    l_msg_header /= c_msg_header_indet
                 THEN
-                    l_resp_typ <-- get_response_type (req_typ);
-                    l_msg_header <-- alloc_msg_header (TRUE);
-                    l_req_handle <-- client_fresh_req_handle (req_typ, l_resp_typ, TRUE, app_context);
-                    l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-                    IF l_valid_req_handle = TRUE &
-                        l_msg_header /= c_msg_header_indet
+                    ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle);
+                    IF ret = e_sc_ok
                     THEN
-                        ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle);
-                        IF ret = e_sc_ok
-                        THEN
-                            set_req_handle_channel (l_req_handle, l_channel);
-                            client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
-                            write_msg_out_header_session_token (l_msg_header, l_session_token);
-                            l_channel_cfg <-- get_channel_info (l_channel);
-                            ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
-                            IF ret /= e_sc_ok
-                            THEN
-                                l_channel := c_channel_indet
-                            END
-                        END
-                    ELSE
-                        ret := e_sc_bad_out_of_memory
-                    END;
-                    IF l_msg_header /= c_msg_header_indet
-                    THEN
-                        dealloc_msg_header_out (l_msg_header)
-                    END
-                OR
-                    /* discovery services */
-                    e_msg_discovery_find_servers_req,
-                    e_msg_discovery_find_servers_on_network_req,
-                    e_msg_discovery_get_endpoints_req,
-                    e_msg_discovery_register_server_req,
-                    e_msg_discovery_register_server2_req
-                THEN
-                    l_valid_channel, l_channel <-- getall_valid_session_channel (session);
-                    IF l_valid_channel = TRUE
-                    THEN
-                        /* Use discovery operation since header shall not contain session information (see part 4) */
-                        ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_typ, req_msg, app_context);
+                        set_req_handle_channel (l_req_handle, l_channel);
+                        client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
+                        write_msg_out_header_session_token (l_msg_header, l_session_token);
+                        l_channel_cfg <-- get_channel_info (l_channel);
+                        ret, l_buffer <-- encode_msg (l_channel_cfg, e_msg_request_type, e_msg_session_close_req, l_msg_header, req_msg);
                         IF ret /= e_sc_ok
                         THEN
                             l_channel := c_channel_indet
                         END
-                    ELSE
-                        ret := e_sc_bad_invalid_argument
+                    END
+                ELSE
+                    ret := e_sc_bad_out_of_memory
+                END;
+                IF l_msg_header /= c_msg_header_indet
+                THEN
+                    dealloc_msg_header_out (l_msg_header)
+                END
+            OR
+                /* discovery services */
+                e_msg_discovery_find_servers_req,
+                e_msg_discovery_find_servers_on_network_req,
+                e_msg_discovery_get_endpoints_req,
+                e_msg_discovery_register_server_req,
+                e_msg_discovery_register_server2_req
+            THEN
+                l_valid_channel, l_channel <-- getall_valid_session_channel (session);
+                IF l_valid_channel = TRUE
+                THEN
+                    /* Use discovery operation since header shall not contain session information (see part 4) */
+                    ret, l_buffer, l_req_handle <-- local_client_discovery_service_request (l_channel, req_typ, req_msg, app_context);
+                    IF ret /= e_sc_ok
+                    THEN
+                        l_channel := c_channel_indet
                     END
                 ELSE
                     ret := e_sc_bad_invalid_argument
                 END
+            ELSE
+                ret := e_sc_bad_invalid_argument
             END
-        ELSE
-            ret := e_sc_bad_invalid_argument
         END;
-        dealloc_msg_out (req_msg);
         channel := l_channel;
         req_handle := l_req_handle;
         buffer_out := l_buffer

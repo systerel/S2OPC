@@ -576,18 +576,17 @@ OPERATIONS
     ret <-- client_send_service_request (session, req_msg, app_context) =
     VAR
         l_valid_session,
-        l_valid_msg,
         l_msg_typ,
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_req_handle,
-        l_req_handle_in_req_id,
-        l_dummy
+        l_req_handle_in_req_id
     IN
         l_valid_session <-- is_valid_session (session);
-        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
-        IF l_valid_session = TRUE & l_valid_msg = TRUE
+        /* Set application message as output message */
+        l_msg_typ <-- bless_msg_out (req_msg);
+        IF l_valid_session = TRUE & l_msg_typ /= c_msg_type_indet
         THEN
             ret, l_channel, l_buffer_out, l_req_handle <-- client_service_request (session, l_msg_typ, req_msg, app_context);
             IF ret = e_sc_ok
@@ -601,13 +600,11 @@ OPERATIONS
                 END
             END
         ELSE
-            ret := e_sc_bad_invalid_argument;
-            IF l_valid_msg = TRUE
-            THEN
-                /* Guarantee deallocation in error case */
-                l_dummy <-- bless_msg_out (req_msg);
-                dealloc_msg_out (req_msg)
-            END
+            ret := e_sc_bad_invalid_argument
+        END;
+        IF l_msg_typ /= c_msg_type_indet
+        THEN
+            dealloc_msg_out (req_msg)
         END
     END
     ;
