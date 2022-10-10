@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 09:32:51
+ Date                 : 10/10/2022 09:40:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -508,7 +508,6 @@ void service_mgr__local_client_discovery_service_request(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_msg_type_i service_mgr__l_req_typ;
       constants__t_msg_type_i service_mgr__l_resp_typ;
       constants__t_client_request_handle_i service_mgr__l_req_handle;
@@ -530,8 +529,6 @@ void service_mgr__local_client_discovery_service_request(
             &service_mgr__l_resp_typ);
          message_out_bs__alloc_msg_header(true,
             &service_mgr__l_msg_header);
-         message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-            &service_mgr__l_valid_msg_header);
          request_handle_bs__client_fresh_req_handle(service_mgr__l_req_typ,
             service_mgr__l_resp_typ,
             true,
@@ -540,7 +537,7 @@ void service_mgr__local_client_discovery_service_request(
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
          if ((service_mgr__l_valid_req_handle == true) &&
-            (service_mgr__l_valid_msg_header == true)) {
+            (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
             request_handle_bs__set_req_handle_channel(service_mgr__l_req_handle,
                service_mgr__channel);
             message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
@@ -562,7 +559,7 @@ void service_mgr__local_client_discovery_service_request(
             service_mgr__l_req_handle = constants__c_client_request_handle_indet;
             *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-         if (service_mgr__l_valid_msg_header == true) {
+         if (service_mgr__l_msg_header != constants__c_msg_header_indet) {
             message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
          }
          break;
@@ -1486,7 +1483,6 @@ void service_mgr__client_service_request(
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
-      t_bool service_mgr__l_valid_msg_header;
       constants__t_msg_type_i service_mgr__l_req_typ;
       constants__t_msg_type_i service_mgr__l_resp_typ;
       t_bool service_mgr__l_valid_msg;
@@ -1540,8 +1536,6 @@ void service_mgr__client_service_request(
                &service_mgr__l_resp_typ);
             message_out_bs__alloc_msg_header(true,
                &service_mgr__l_msg_header);
-            message_out_bs__is_valid_msg_out_header(service_mgr__l_msg_header,
-               &service_mgr__l_valid_msg_header);
             request_handle_bs__client_fresh_req_handle(service_mgr__l_req_typ,
                service_mgr__l_resp_typ,
                true,
@@ -1550,7 +1544,7 @@ void service_mgr__client_service_request(
             request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
                &service_mgr__l_valid_req_handle);
             if ((service_mgr__l_valid_req_handle == true) &&
-               (service_mgr__l_valid_msg_header == true)) {
+               (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
                session_mgr__client_validate_session_service_req(service_mgr__session,
                   service_mgr__l_req_handle,
                   service_mgr__ret,
@@ -1580,7 +1574,7 @@ void service_mgr__client_service_request(
             else {
                *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
-            if (service_mgr__l_valid_msg_header == true) {
+            if (service_mgr__l_msg_header != constants__c_msg_header_indet) {
                message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
             }
             break;
@@ -1718,7 +1712,6 @@ void service_mgr__server_send_publish_response(
    {
       t_bool service_mgr__l_dummy;
       t_bool service_mgr__l_is_valid_resp;
-      t_bool service_mgr__l_is_valid_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
@@ -1737,9 +1730,7 @@ void service_mgr__server_send_publish_response(
       if (service_mgr__l_is_valid_resp == true) {
          message_out_bs__alloc_msg_header(false,
             &service_mgr__l_resp_msg_header);
-         message_out_bs__is_valid_msg_out_header(service_mgr__l_resp_msg_header,
-            &service_mgr__l_is_valid_header);
-         if (service_mgr__l_is_valid_header == true) {
+         if (service_mgr__l_resp_msg_header != constants__c_msg_header_indet) {
             message_out_bs__server_write_msg_out_header_req_handle(service_mgr__l_resp_msg_header,
                service_mgr__req_handle);
             message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,

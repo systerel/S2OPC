@@ -544,7 +544,6 @@ OPERATIONS
     ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_msg, app_context) =
     VAR
         l_msg_header,
-        l_valid_msg_header,
         l_req_typ,
         l_resp_typ,
         l_req_handle,
@@ -566,11 +565,10 @@ OPERATIONS
             THEN
                 l_resp_typ <-- get_response_type (l_req_typ);
                 l_msg_header <-- alloc_msg_header (TRUE);
-                l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                 l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                 l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                 IF l_valid_req_handle = TRUE &
-                    l_valid_msg_header = TRUE
+                    l_msg_header /= c_msg_header_indet
                 THEN
                     set_req_handle_channel (l_req_handle, channel);
                     client_write_msg_out_header_req_handle (l_msg_header, l_req_handle);
@@ -584,7 +582,7 @@ OPERATIONS
                     l_req_handle := c_client_request_handle_indet;
                     ret := e_sc_bad_out_of_memory
                 END;
-                IF l_valid_msg_header = TRUE
+                IF l_msg_header /= c_msg_header_indet
                 THEN
                     dealloc_msg_header_out (l_msg_header)
                 END
@@ -1285,7 +1283,6 @@ OPERATIONS
     ret, channel, buffer_out, req_handle <-- client_service_request (session, req_msg, app_context) =
     VAR
         l_msg_header,
-        l_valid_msg_header,
         l_req_typ,
         l_resp_typ,
         l_valid_msg,
@@ -1339,11 +1336,10 @@ OPERATIONS
                 THEN
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_msg_header (TRUE);
-                    l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                     l_req_handle <-- client_fresh_req_handle (l_req_typ, l_resp_typ, TRUE, app_context);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
-                        l_valid_msg_header = TRUE
+                        l_msg_header /= c_msg_header_indet
                     THEN
                         ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle);
                         IF ret = e_sc_ok
@@ -1361,7 +1357,7 @@ OPERATIONS
                     ELSE
                         ret := e_sc_bad_out_of_memory
                     END;
-                    IF l_valid_msg_header = TRUE
+                    IF l_msg_header /= c_msg_header_indet
                     THEN
                         dealloc_msg_header_out (l_msg_header)
                     END
@@ -1466,7 +1462,6 @@ OPERATIONS
     VAR
         l_dummy,
         l_is_valid_resp,
-        l_is_valid_header,
         l_ret,
         l_resp_msg_header,
         l_buffer_out,
@@ -1482,8 +1477,7 @@ OPERATIONS
         IF l_is_valid_resp = TRUE
         THEN
             l_resp_msg_header <-- alloc_msg_header (FALSE);
-            l_is_valid_header <-- is_valid_msg_out_header (l_resp_msg_header);
-            IF l_is_valid_header = TRUE
+            IF l_resp_msg_header /= c_msg_header_indet
             THEN
                 server_write_msg_out_header_req_handle (l_resp_msg_header, req_handle);
                 write_msg_resp_header_service_status (l_resp_msg_header, statusCode);
