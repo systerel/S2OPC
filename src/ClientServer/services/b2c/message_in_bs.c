@@ -68,7 +68,7 @@ void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg)
 void message_in_bs__copy_msg_resp_header_into_msg(const constants__t_msg_header_i message_in_bs__msg_header,
                                                   const constants__t_msg_i message_in_bs__msg)
 {
-    message_out_bs__copy_msg_resp_header_into_msg_out(message_in_bs__msg_header, message_in_bs__msg);
+    util_message__copy_resp_header_into_msg(message_in_bs__msg_header, message_in_bs__msg);
 }
 
 void message_in_bs__dealloc_msg_in_header(const constants__t_msg_header_i message_in_bs__msg_header)

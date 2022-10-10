@@ -40,6 +40,8 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
 
 void util_message__get_message_type(SOPC_EncodeableType* encType, constants__t_msg_type_i* message__msg_type);
 
+void util_message__copy_resp_header_into_msg(const constants__t_msg_header_i header, const constants__t_msg_i msg);
+
 void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, SOPC_StatusCode* status);
 
 void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__t_StatusCode_i* bstatus);

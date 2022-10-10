@@ -38,12 +38,6 @@
 #include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 
-typedef struct SOPC_OpcUaResponseMsgStructureStart
-{
-    SOPC_EncodeableType* encodeableType;
-    OpcUa_ResponseHeader ResponseHeader;
-} SOPC_OpcUaResponseMsgStructureStart;
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -396,9 +390,7 @@ void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message
 void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
                                                        const constants__t_msg_i message_out_bs__msg)
 {
-    SOPC_OpcUaResponseMsgStructureStart* respMsg = (SOPC_OpcUaResponseMsgStructureStart*) message_out_bs__msg;
-    OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
-    respMsg->ResponseHeader = *respHeader;
+    util_message__copy_resp_header_into_msg(message_out_bs__msg_header, message_out_bs__msg);
 }
 
 void message_out_bs__get_msg_out_type(const constants__t_msg_i message_out_bs__msg,

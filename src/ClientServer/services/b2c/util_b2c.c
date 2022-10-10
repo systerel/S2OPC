@@ -623,6 +623,23 @@ void util_message__get_message_type(SOPC_EncodeableType* encType, constants__t_m
     }
 }
 
+/*
+ * We take here advantage that the header is always stored as the second field
+ * of any response struct.
+ */
+typedef struct SOPC_OpcUaResponseMsgStructureStart
+{
+    SOPC_EncodeableType* encodeableType;
+    OpcUa_ResponseHeader ResponseHeader;
+} SOPC_OpcUaResponseMsgStructureStart;
+
+void util_message__copy_resp_header_into_msg(const constants__t_msg_header_i header, const constants__t_msg_i msg)
+{
+    OpcUa_ResponseHeader* respHeader = (OpcUa_ResponseHeader*) header;
+    SOPC_OpcUaResponseMsgStructureStart* respMsg = (SOPC_OpcUaResponseMsgStructureStart*) msg;
+    respMsg->ResponseHeader = *respHeader;
+}
+
 void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, SOPC_StatusCode* status)
 {
     switch (bstatus)
