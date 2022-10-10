@@ -27,7 +27,6 @@
 #include "util_b2c.h"
 
 #include "message_in_bs.h"
-#include "message_out_bs.h"
 
 #include "constants_bs.h"
 
@@ -220,7 +219,8 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
 
 static void get_msg_in_type(const constants__t_msg_i msg, constants__t_msg_type_i* const msgtype)
 {
-    message_out_bs__get_msg_out_type(msg, msgtype);
+    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg;
+    util_message__get_message_type(encType, msgtype);
 }
 
 void message_in_bs__is_valid_request_context(const constants__t_request_context_i message_in_bs__req_context,
