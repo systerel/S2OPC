@@ -209,22 +209,6 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_valid_msg_out (msg) =
-    PRE
-        msg : t_msg_i
-    THEN
-        bres := bool(msg = c_msg_out & c_msg_out : t_msg)
-    END
-    ;
-
-    bres <-- is_valid_msg_out_header (msg_header) =
-    PRE
-        msg_header : t_msg_header_i
-    THEN
-        bres := bool(msg_header = c_msg_out_header & c_msg_out_header : t_msg_header)
-    END
-    ;
-
     msgtype <-- get_msg_out_type (msg) =
     PRE
         msg : t_msg_i &
