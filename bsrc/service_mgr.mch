@@ -429,12 +429,13 @@ OPERATIONS
         channel     : t_channel &
         req_typ     : t_msg_type_i &
         req_msg     : t_msg_i &
-        req_msg     : t_msg &
         app_context : t_application_context_i &
-        /* message is not yet set as output before call and deallocated after operation */
-        c_msg_out = c_msg_indet &
+        /* The message must have been blessed */
+        c_msg_out        = req_msg &
+        c_msg_out        : t_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type   = req_typ &
+        a_msg_out_type   : t_msg_type
     THEN
         CHOICE
             ret :: {e_sc_bad_out_of_memory,

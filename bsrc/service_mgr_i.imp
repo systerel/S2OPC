@@ -237,12 +237,13 @@ LOCAL_OPERATIONS
         req_typ     : t_msg_type_i &
         req_typ     : s_discovery_service_reqs &
         req_msg     : t_msg_i &
-        req_msg     : t_msg &
         app_context : t_application_context_i &
-        /* message is not yet set as output before call and deallocated after operation */
-        c_msg_out = req_msg &
+        /* The message must have been blessed */
+        c_msg_out        = req_msg &
+        c_msg_out        : t_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = req_typ
+        a_msg_out_type   = req_typ &
+        a_msg_out_type   : s_discovery_service_reqs
     THEN
         s_client_request_handle,
         a_client_request_type,
@@ -1386,20 +1387,8 @@ OPERATIONS
     ;
 
     ret, buffer_out, req_handle <-- client_discovery_service_request (channel, req_typ, req_msg, app_context) =
-    VAR
-        l_msg_typ,
-        l_valid_msg
-    IN
-        l_msg_typ <-- bless_msg_out (req_msg);
-        IF l_msg_typ /= c_msg_type_indet
-        THEN
-            ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context)
-        ELSE
-            ret := e_sc_bad_invalid_argument;
-            buffer_out := c_byte_buffer_indet;
-            req_handle := c_client_request_handle_indet
-        END;
-        dealloc_msg_out (req_msg)
+    BEGIN
+        ret, buffer_out, req_handle <-- local_client_discovery_service_request (channel, req_typ, req_msg, app_context)
     END
     ;
 

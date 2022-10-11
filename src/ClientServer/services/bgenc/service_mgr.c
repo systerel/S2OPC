@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/10/2022 14:47:36
+ Date                 : 11/10/2022 16:43:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1612,27 +1612,13 @@ void service_mgr__client_discovery_service_request(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__ret,
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_client_request_handle_i * const service_mgr__req_handle) {
-   {
-      constants__t_msg_type_i service_mgr__l_msg_typ;
-      
-      message_out_bs__bless_msg_out(service_mgr__req_msg,
-         &service_mgr__l_msg_typ);
-      if (service_mgr__l_msg_typ != constants__c_msg_type_indet) {
-         service_mgr__local_client_discovery_service_request(service_mgr__channel,
-            service_mgr__req_typ,
-            service_mgr__req_msg,
-            service_mgr__app_context,
-            service_mgr__ret,
-            service_mgr__buffer_out,
-            service_mgr__req_handle);
-      }
-      else {
-         *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-         *service_mgr__buffer_out = constants__c_byte_buffer_indet;
-         *service_mgr__req_handle = constants__c_client_request_handle_indet;
-      }
-      message_out_bs__dealloc_msg_out(service_mgr__req_msg);
-   }
+   service_mgr__local_client_discovery_service_request(service_mgr__channel,
+      service_mgr__req_typ,
+      service_mgr__req_msg,
+      service_mgr__app_context,
+      service_mgr__ret,
+      service_mgr__buffer_out,
+      service_mgr__req_handle);
 }
 
 void service_mgr__client_snd_msg_failure(

@@ -611,11 +611,9 @@ OPERATIONS
 
     ret <-- client_send_discovery_request (channel_config_idx, reverse_endpoint_config_idx, req_msg, app_context) =
     VAR
-        l_valid_msg,
         l_msg_typ,
         l_valid_channel_config,
         l_bres,
-        l_dummy,
         l_channel,
         l_connected_channel,
         l_buffer_out,
@@ -623,9 +621,9 @@ OPERATIONS
         l_req_handle_in_req_id,
         l_is_one_sc_closing
     IN
-        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (req_msg);
+        l_msg_typ <-- bless_msg_out (req_msg);
         l_valid_channel_config <-- is_valid_channel_config_idx (channel_config_idx);
-        IF l_valid_msg = TRUE & l_valid_channel_config = TRUE
+        IF l_msg_typ /= c_msg_type_indet & l_valid_channel_config = TRUE
         THEN
             l_channel <-- get_connected_channel (channel_config_idx);
             l_connected_channel <-- is_connected_channel (l_channel);
@@ -639,11 +637,10 @@ OPERATIONS
                     l_bres <-- client_async_discovery_request_without_channel (channel_config_idx, l_msg_typ, req_msg, app_context);
                     IF l_bres = TRUE
                     THEN
+                        forget_msg_out (req_msg);
+                        l_msg_typ := c_msg_type_indet;
                         ret := e_sc_ok
                     ELSE
-                        /* Guarantee deallocation in error case */
-                        l_dummy <-- bless_msg_out (req_msg);
-                        dealloc_msg_out (req_msg);
                         ret := e_sc_bad_too_many_ops /* Too many requests already recorded to be sent when SC will be connected */
                     END
                 ELSE
@@ -661,13 +658,11 @@ OPERATIONS
                 END
             END
         ELSE
-            ret := e_sc_bad_invalid_argument;
-            IF l_valid_msg = TRUE
-            THEN
-                /* Guarantee deallocation in error case */
-                l_dummy <-- bless_msg_out (req_msg);
-                dealloc_msg_out (req_msg)
-            END
+            ret := e_sc_bad_invalid_argument
+        END;
+        IF l_msg_typ /= c_msg_type_indet
+        THEN
+            dealloc_msg_out (req_msg)
         END
     END
     ;
