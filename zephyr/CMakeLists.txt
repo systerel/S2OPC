@@ -48,6 +48,7 @@ zephyr_include_directories(
     ${S2OPC_SRC}/Common/crypto
     ${S2OPC_SRC}/Common/crypto/mbedtls
     ${S2OPC_SRC}/ClientServer/api_toolkit
+    ${S2OPC_SRC}/ClientServer/frontend/helper_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/client_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/common_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper
