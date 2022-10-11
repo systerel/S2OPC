@@ -377,6 +377,12 @@ void message_out_bs__encode_msg(const constants__t_channel_config_idx_i message_
     }
 }
 
+void message_out_bs__forget_msg_out(const constants__t_msg_i message_out_bs__msg)
+{
+    // The message is now owned by another part of the code
+    SOPC_UNUSED_ARG(message_out_bs__msg);
+}
+
 void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
                                          const constants__t_msg_i message_out_bs__msg)
 {

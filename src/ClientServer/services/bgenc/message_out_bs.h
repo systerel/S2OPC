@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 10/10/2022 14:19:48
+ Date                 : 11/10/2022 16:15:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -83,6 +83,8 @@ extern void message_out_bs__encode_msg(
    const constants__t_msg_i message_out_bs__msg,
    constants_statuscodes_bs__t_StatusCode_i * const message_out_bs__sc,
    constants__t_byte_buffer_i * const message_out_bs__buffer);
+extern void message_out_bs__forget_msg_out(
+   const constants__t_msg_i message_out_bs__msg);
 extern void message_out_bs__forget_resp_msg_out(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_msg_i message_out_bs__msg);

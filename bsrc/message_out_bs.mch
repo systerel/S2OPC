@@ -104,6 +104,20 @@ OPERATIONS
     END
     ;
 
+    /* Consider message as deallocated since it has been transferred to a local queue */
+    forget_msg_out (msg) =
+    PRE
+        msg : t_msg_i &
+        c_msg_out = msg &
+        c_msg_out : t_msg &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type : t_msg_type
+    THEN
+        c_msg_out := c_msg_indet ||
+        a_msg_out_type := c_msg_type_indet
+    END
+    ;
+
     /* Consider response message as deallocated since responsibility was forwarded to application or postponed */
     forget_resp_msg_out (msg_header, msg) =
     PRE
