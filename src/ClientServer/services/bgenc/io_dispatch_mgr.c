@@ -955,7 +955,6 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
    t_bool * const io_dispatch_mgr__bres) {
    {
       t_bool io_dispatch_mgr__l_valid_session;
-      t_bool io_dispatch_mgr__l_valid_msg;
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
       t_bool io_dispatch_mgr__l_valid_req_context;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
@@ -965,13 +964,11 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
       
       service_mgr__is_valid_session(io_dispatch_mgr__p_session,
          &io_dispatch_mgr__l_valid_session);
-      service_mgr__is_valid_app_msg_out(io_dispatch_mgr__p_publish_resp_msg,
-         &io_dispatch_mgr__l_valid_msg,
+      service_mgr__bless_msg_out(io_dispatch_mgr__p_publish_resp_msg,
          &io_dispatch_mgr__l_msg_typ);
       service_mgr__is_valid_request_context(io_dispatch_mgr__p_req_context,
          &io_dispatch_mgr__l_valid_req_context);
-      if (((((io_dispatch_mgr__l_valid_session == true) &&
-         (io_dispatch_mgr__l_valid_msg == true)) &&
+      if ((((io_dispatch_mgr__l_valid_session == true) &&
          (io_dispatch_mgr__l_msg_typ == constants__e_msg_subscription_publish_resp)) &&
          (io_dispatch_mgr__l_valid_req_context == true)) &&
          (io_dispatch_mgr__p_statusCode != constants_statuscodes_bs__c_StatusCode_indet)) {
@@ -999,10 +996,10 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
          }
       }
       else {
-         if (io_dispatch_mgr__l_valid_msg == true) {
-            service_mgr__dealloc_msg_out(io_dispatch_mgr__p_publish_resp_msg);
-         }
          *io_dispatch_mgr__bres = false;
+      }
+      if (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) {
+         service_mgr__dealloc_msg_out(io_dispatch_mgr__p_publish_resp_msg);
       }
    }
 }

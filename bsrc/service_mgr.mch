@@ -477,14 +477,15 @@ OPERATIONS
         req_handle : t_server_request_handle_i &
         statusCode : t_StatusCode_i &
         statusCode : t_StatusCode &
+        resp_typ : t_msg_type_i &
         publish_resp_msg : t_msg_i &
-        publish_resp_msg : t_msg &
-        resp_typ = e_msg_subscription_publish_resp &
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
-        c_msg_out = c_msg_indet &
+        /* The message must have been blessed */
+        c_msg_out = publish_resp_msg &
+        c_msg_out : t_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = e_msg_subscription_publish_resp
     THEN
         CHOICE
             bres := TRUE ||

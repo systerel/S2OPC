@@ -867,9 +867,9 @@ OPERATIONS
         l_connected_channel
     IN
         l_valid_session <-- is_valid_session (p_session);
-        l_valid_msg, l_msg_typ <-- is_valid_app_msg_out (p_publish_resp_msg);
+        l_msg_typ <-- bless_msg_out (p_publish_resp_msg);
         l_valid_req_context <-- is_valid_request_context (p_req_context);
-        IF l_valid_session = TRUE & l_valid_msg = TRUE & l_msg_typ = e_msg_subscription_publish_resp &
+        IF l_valid_session = TRUE & l_msg_typ = e_msg_subscription_publish_resp &
             l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet
         THEN
             bres, l_sc, l_buffer_out, l_channel
@@ -885,11 +885,11 @@ OPERATIONS
                 // Note: keep bres = FALSE, it will generate a log error
             END
         ELSE
-            IF l_valid_msg = TRUE
-            THEN
-                dealloc_msg_out (p_publish_resp_msg)
-            END;
             bres := FALSE
+        END;
+        IF l_msg_typ /= c_msg_type_indet
+        THEN
+            dealloc_msg_out (p_publish_resp_msg)
         END
     END
     ;

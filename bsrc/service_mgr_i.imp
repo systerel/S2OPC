@@ -1440,7 +1440,6 @@ OPERATIONS
 
     bres, sc, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     VAR
-        l_dummy,
         l_is_valid_resp,
         l_ret,
         l_resp_msg_header,
@@ -1451,8 +1450,6 @@ OPERATIONS
         bres := FALSE;
         buffer_out := c_byte_buffer_indet;
         channel := c_channel_indet;
-        /* Set provided message as output message to be encoded and deallocated*/
-        l_dummy <-- bless_msg_out (publish_resp_msg);
         l_is_valid_resp, l_ret, channel <-- server_validate_session_service_resp (session);
         IF l_is_valid_resp = TRUE
         THEN
@@ -1473,8 +1470,7 @@ OPERATIONS
             ELSE
                 sc := e_sc_bad_out_of_memory
             END
-        END;
-        dealloc_msg_out (publish_resp_msg)
+        END
     END
     ;
 
