@@ -97,23 +97,6 @@ OPERATIONS
     END
     ;
 
-    /* Consider response message as deallocated since responsibility was forwarded to application or postponed */
-    forget_resp_msg_out (msg_header, msg) =
-    PRE
-        msg_header : t_msg_header_i &
-        msg_header = c_msg_out_header &
-        msg : t_msg_i &
-        msg = c_msg_out &
-        c_msg_out : t_msg &
-        c_msg_out_header : t_msg_header &
-        a_msg_out_type : s_service_resps
-    THEN
-        c_msg_out := c_msg_indet ||
-        a_msg_out_type := c_msg_type_indet ||
-        c_msg_out_header := c_msg_header_indet
-    END
-    ;
-
     nmsg_header, nmsg <-- alloc_req_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &

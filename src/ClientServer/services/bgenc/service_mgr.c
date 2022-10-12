@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 12/10/2022 08:09:17
+ Date                 : 12/10/2022 09:04:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -869,8 +869,8 @@ void service_mgr__server_receive_session_service_req(
          }
          else if ((service_mgr__l_resp_msg != constants__c_msg_indet) &&
             (*service_mgr__async_resp == true)) {
-            message_out_bs__forget_resp_msg_out(service_mgr__l_resp_msg_header,
-               service_mgr__l_resp_msg);
+            message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
+            message_out_bs__forget_msg_out(service_mgr__l_resp_msg);
          }
          else {
             *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -1150,11 +1150,11 @@ void service_mgr__server_receive_local_service_req(
             service_mgr__l_ret);
          message_out_bs__copy_msg_resp_header_into_msg_out(service_mgr__l_resp_msg_header,
             service_mgr__l_resp_msg);
+         message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
          service_response_cb_bs__srv_service_response(service_mgr__endpoint_config_idx,
             service_mgr__l_resp_msg,
             service_mgr__app_context);
-         message_out_bs__forget_resp_msg_out(service_mgr__l_resp_msg_header,
-            service_mgr__l_resp_msg);
+         message_out_bs__forget_msg_out(service_mgr__l_resp_msg);
          message_in_bs__dealloc_msg_in(service_mgr__req_msg);
       }
       else {

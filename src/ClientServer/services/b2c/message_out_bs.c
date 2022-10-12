@@ -383,15 +383,6 @@ void message_out_bs__forget_msg_out(const constants__t_msg_i message_out_bs__msg
     SOPC_UNUSED_ARG(message_out_bs__msg);
 }
 
-void message_out_bs__forget_resp_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
-                                         const constants__t_msg_i message_out_bs__msg)
-{
-    SOPC_UNUSED_ARG(message_out_bs__msg);
-    // In this case the message header shall have been copied into msg, we should free the header structure since then
-    // Message structure dealloaction is now responsibility of the user application
-    SOPC_Free(message_out_bs__msg_header);
-}
-
 void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_header_i message_out_bs__msg_header,
                                                        const constants__t_msg_i message_out_bs__msg)
 {
