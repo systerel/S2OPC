@@ -41,6 +41,7 @@
 #include "sopc_toolkit_config.h"
 
 #include "network_init.h"
+#include "p_threads.h"
 #include "static_certificates.h"
 #include "threading_alt.h"
 
@@ -90,6 +91,7 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
                              SOPC_StatusCode writeStatus);
 static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext);
 static bool Server_LocalWriteSingleNode(SOPC_NodeId* pNid, SOPC_DataValue* pDv);
+static void cyclic_test(void);
 
 /***************************************************/
 /**               HELPER LOG MACROS                */
@@ -444,9 +446,16 @@ int main(int argc, char* argv[])
     PRINT("# Server started on <%s>\n", g_epConfig->endpointURL);
     PRINT("# Type 'demo help' in console for help\n");
 
+    int cycle = 0;
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
     {
+        if (cycle == 0)
+        {
+            cyclic_test();
+        }
         k_sleep(K_MSEC(50));
+        cycle++;
+        cycle %= 20 * 5; // loop every 5 seconds
     }
 
     /// Note : in current example, the server is already down when reaching this point
@@ -568,3 +577,24 @@ SHELL_STATIC_SUBCMD_SET_CREATE(sub_demo,
 
 /* Creating root (level 0) command "demo" */
 SHELL_CMD_REGISTER(demo, &sub_demo, "Demo commands", NULL);
+
+#ifdef CONFIG_SOPC_HELPER_IMPL_INSTRUM
+extern const size_t SOPC_MemAlloc_Nb_Allocs(void);
+static void cyclic_test(void)
+{
+    printk("----- t=%d s-------------\n", k_uptime_get_32() / 1000);
+    printk("Nb Allocs: %u\n", SOPC_MemAlloc_Nb_Allocs());
+
+    const SOPC_Thread_Info* pInfos = SOPC_Thread_GetAllThreadsInfo();
+    size_t idx = 0;
+    while (NULL != pInfos && pInfos->stack_size > 0)
+    {
+        idx++;
+        printk("Thr #%02u (%.08s): (%05u / %05u bytes used) = %02d%%\n", idx, pInfos->name, pInfos->stack_usage,
+               pInfos->stack_size, (100 * pInfos->stack_usage) / pInfos->stack_size);
+        pInfos++;
+    }
+}
+#else
+static void cyclic_test(void) {}
+#endif
