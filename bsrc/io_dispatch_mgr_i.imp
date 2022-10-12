@@ -885,6 +885,10 @@ OPERATIONS
                 // Note: keep bres = FALSE, it will generate a log error
             END
         ELSE
+            IF l_valid_msg = TRUE
+            THEN
+                dealloc_msg_out (p_publish_resp_msg)
+            END;
             bres := FALSE
         END
     END

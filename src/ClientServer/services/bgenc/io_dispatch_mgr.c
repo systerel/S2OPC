@@ -999,6 +999,9 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
          }
       }
       else {
+         if (io_dispatch_mgr__l_valid_msg == true) {
+            service_mgr__dealloc_msg_out(io_dispatch_mgr__p_publish_resp_msg);
+         }
          *io_dispatch_mgr__bres = false;
       }
    }
