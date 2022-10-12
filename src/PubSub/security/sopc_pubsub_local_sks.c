@@ -43,56 +43,53 @@ struct security_config_type
     uint32_t uwKeyNonceSize;
 };
 
-static struct security_config_type pubsub_local_sks_keys_files = //
-    {
-        .signing_key = NULL,       //
-        .encrypt_key = NULL,       //
-        .key_nonce = NULL,         //
-        .bUseStaticConfig = false, //
-        .uwSigningKeySize = 0,     //
-        .uwEncryptKeySize = 0,     //
-        .uwKeyNonceSize = 0,       //
-        .sSigningKey = NULL,       //
-        .sEncryptKey = NULL,       //
-        .sKeyNonce = NULL          //
-};                                 //
+static struct security_config_type pubsub_key_bunch = {.signing_key = NULL,
+                                                       .encrypt_key = NULL,
+                                                       .key_nonce = NULL,
+                                                       .bUseStaticConfig = false,
+                                                       .uwSigningKeySize = 0,
+                                                       .uwEncryptKeySize = 0,
+                                                       .uwKeyNonceSize = 0,
+                                                       .sSigningKey = NULL,
+                                                       .sEncryptKey = NULL,
+                                                       .sKeyNonce = NULL};
 
-void SOPC_LocalSKS_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce)
+void SOPC_KeyBunch_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce)
 {
     // SOPC_LocalSKS_GetSecurityKeys will get key from files
-    pubsub_local_sks_keys_files.signing_key = pathSigningKey;
-    pubsub_local_sks_keys_files.encrypt_key = pathEncryptKey;
-    pubsub_local_sks_keys_files.key_nonce = pathKeyNonce;
-    pubsub_local_sks_keys_files.bUseStaticConfig = false;
-    pubsub_local_sks_keys_files.sSigningKey = NULL;
-    pubsub_local_sks_keys_files.sEncryptKey = NULL;
-    pubsub_local_sks_keys_files.sKeyNonce = NULL;
-    pubsub_local_sks_keys_files.uwSigningKeySize = 0;
-    pubsub_local_sks_keys_files.uwEncryptKeySize = 0;
-    pubsub_local_sks_keys_files.uwKeyNonceSize = 0;
+    pubsub_key_bunch.signing_key = pathSigningKey;
+    pubsub_key_bunch.encrypt_key = pathEncryptKey;
+    pubsub_key_bunch.key_nonce = pathKeyNonce;
+    pubsub_key_bunch.bUseStaticConfig = false;
+    pubsub_key_bunch.sSigningKey = NULL;
+    pubsub_key_bunch.sEncryptKey = NULL;
+    pubsub_key_bunch.sKeyNonce = NULL;
+    pubsub_key_bunch.uwSigningKeySize = 0;
+    pubsub_key_bunch.uwEncryptKeySize = 0;
+    pubsub_key_bunch.uwKeyNonceSize = 0;
 }
 
-void SOPC_LocalSKS_init_static(const uint8_t* signingKey, //
-                               uint32_t lenSigningKey,    //
-                               const uint8_t* encryptKey, //
-                               uint32_t lenEncryptKey,    //
-                               const uint8_t* keyNonce,   //
-                               uint32_t lenKeyNonce)      //
+void SOPC_KeyBunch_init_static(const uint8_t* signingKey,
+                               uint32_t lenSigningKey,
+                               const uint8_t* encryptKey,
+                               uint32_t lenEncryptKey,
+                               const uint8_t* keyNonce,
+                               uint32_t lenKeyNonce)
 {
     // SOPC_LocalSKS_GetSecurityKeys will get key from constant uint8_t buffer
-    pubsub_local_sks_keys_files.signing_key = NULL;
-    pubsub_local_sks_keys_files.encrypt_key = NULL;
-    pubsub_local_sks_keys_files.key_nonce = NULL;
-    pubsub_local_sks_keys_files.bUseStaticConfig = true;
-    pubsub_local_sks_keys_files.sSigningKey = signingKey;
-    pubsub_local_sks_keys_files.sEncryptKey = encryptKey;
-    pubsub_local_sks_keys_files.sKeyNonce = keyNonce;
-    pubsub_local_sks_keys_files.uwSigningKeySize = lenSigningKey;
-    pubsub_local_sks_keys_files.uwEncryptKeySize = lenEncryptKey;
-    pubsub_local_sks_keys_files.uwKeyNonceSize = lenKeyNonce;
+    pubsub_key_bunch.signing_key = NULL;
+    pubsub_key_bunch.encrypt_key = NULL;
+    pubsub_key_bunch.key_nonce = NULL;
+    pubsub_key_bunch.bUseStaticConfig = true;
+    pubsub_key_bunch.sSigningKey = signingKey;
+    pubsub_key_bunch.sEncryptKey = encryptKey;
+    pubsub_key_bunch.sKeyNonce = keyNonce;
+    pubsub_key_bunch.uwSigningKeySize = lenSigningKey;
+    pubsub_key_bunch.uwEncryptKeySize = lenEncryptKey;
+    pubsub_key_bunch.uwKeyNonceSize = lenKeyNonce;
 }
 
-SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId)
+SOPC_KeyBunch_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId)
 {
     if (SOPC_PUBSUB_SKS_DEFAULT_GROUPID != groupid)
     {
@@ -102,56 +99,53 @@ SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tok
     { // Token Id is not managed
         return NULL;
     }
-    SOPC_LocalSKS_Keys* keys = SOPC_Calloc(1, sizeof(SOPC_LocalSKS_Keys));
+    SOPC_KeyBunch_Keys* keys = SOPC_Calloc(1, sizeof(SOPC_KeyBunch_Keys));
     if (NULL == keys)
     {
         return NULL;
     }
     keys->tokenId = SOPC_PUBSUB_SKS_DEFAULT_TOKENID;
 
-    if (pubsub_local_sks_keys_files.bUseStaticConfig)
+    if (pubsub_key_bunch.bUseStaticConfig)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 
-        SOPC_CONSOLE_PRINTF("# Load security signing key from static buffers... slen = %u\n", //
-                            pubsub_local_sks_keys_files.uwSigningKeySize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security signing key from static buffers... slen = %u\n",
+                            pubsub_key_bunch.uwSigningKeySize);
 
-        keys->signingKey =
-            SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sSigningKey, //
-                                                   pubsub_local_sks_keys_files.uwSigningKeySize);                 //
+        keys->signingKey = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sSigningKey,
+                                                                  pubsub_key_bunch.uwSigningKeySize);
 
-        SOPC_CONSOLE_PRINTF("# Load security encrypt key from static buffers... slen = %u\n", //
-                            pubsub_local_sks_keys_files.uwEncryptKeySize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security encrypt key from static buffers... slen = %u\n",
+                            pubsub_key_bunch.uwEncryptKeySize);
 
-        keys->encryptKey =
-            SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sEncryptKey, //
-                                                   pubsub_local_sks_keys_files.uwEncryptKeySize);                 //
+        keys->encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sEncryptKey,
+                                                                  pubsub_key_bunch.uwEncryptKeySize);
 
-        SOPC_CONSOLE_PRINTF("# Load security nonce key from static buffers... slen = %u\n", //
-                            pubsub_local_sks_keys_files.uwKeyNonceSize);                    //
+        SOPC_CONSOLE_PRINTF("# Load security nonce key from static buffers... slen = %u\n",
+                            pubsub_key_bunch.uwKeyNonceSize);
 
-        keys->keyNonce =
-            SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_local_sks_keys_files.sKeyNonce, //
-                                                   pubsub_local_sks_keys_files.uwKeyNonceSize);                 //
+        keys->keyNonce = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sKeyNonce,
+                                                                pubsub_key_bunch.uwKeyNonceSize);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
     else
     {
-        keys->signingKey = SOPC_SecretBuffer_NewFromFile(pubsub_local_sks_keys_files.signing_key);
-        keys->encryptKey = SOPC_SecretBuffer_NewFromFile(pubsub_local_sks_keys_files.encrypt_key);
-        keys->keyNonce = SOPC_SecretBuffer_NewFromFile(pubsub_local_sks_keys_files.key_nonce);
+        keys->signingKey = SOPC_SecretBuffer_NewFromFile(pubsub_key_bunch.signing_key);
+        keys->encryptKey = SOPC_SecretBuffer_NewFromFile(pubsub_key_bunch.encrypt_key);
+        keys->keyNonce = SOPC_SecretBuffer_NewFromFile(pubsub_key_bunch.key_nonce);
     }
 
     if (NULL == keys->signingKey || NULL == keys->encryptKey || NULL == keys->keyNonce)
     {
-        SOPC_LocalSKS_Keys_Delete(keys);
+        SOPC_KeyBunch_Keys_Delete(keys);
         SOPC_Free(keys);
         keys = NULL;
     }
     return keys;
 }
 
-void SOPC_LocalSKS_Keys_Delete(SOPC_LocalSKS_Keys* keys)
+void SOPC_KeyBunch_Keys_Delete(SOPC_KeyBunch_Keys* keys)
 {
     if (NULL != keys)
     {

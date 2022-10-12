@@ -154,7 +154,7 @@ static struct
     // One per connection
     SOPC_PubScheduler_TransportCtx* transport;
 
-    //  SOPC_LocalSKS_Keys *keys;
+    //  SOPC_KeyBunch_Keys *keys;
     // A strictly monotonically increasing sequence number for a SecurityTokenId and PublisherId combination.
     uint32_t sequenceNumber;
 
@@ -212,7 +212,7 @@ static void SOPC_PubScheduler_Context_Clear(void)
     pubSchedulerCtx.nbConnection = 0;
     pubSchedulerCtx.config = NULL;
     pubSchedulerCtx.sourceConfig = NULL;
-    // TODO SOPC_LocalSKS_Keys_Delete(pubSchedulerCtx.keys);
+    // TODO SOPC_KeyBunch_Keys_Delete(pubSchedulerCtx.keys);
     /* Don't reset the sequenceNumber on Stop(). But for now, there is no other place to reset it */
     // pubSchedulerCtx.sequenceNumber = 1;
 }

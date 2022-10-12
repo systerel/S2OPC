@@ -181,7 +181,7 @@ void SOPC_PubSub_Security_Clear(SOPC_PubSub_SecurityType* security)
 {
     if (NULL != security)
     {
-        SOPC_LocalSKS_Keys_Delete(security->groupKeys);
+        SOPC_KeyBunch_Keys_Delete(security->groupKeys);
         SOPC_Free(security->groupKeys);
         security->groupKeys = NULL;
         SOPC_Free(security->msgNonceRandom);

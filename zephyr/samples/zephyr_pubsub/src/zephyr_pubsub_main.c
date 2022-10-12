@@ -155,8 +155,7 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         // Configure SKS for PubSub
-        SOPC_LocalSKS_init_static(pubSub_keySign, sizeof(pubSub_keySign),       //
-                                  pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt), //
+        SOPC_KeyBunch_init_static(pubSub_keySign, sizeof(pubSub_keySign), pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt),
                                   pubSub_keyNonce, sizeof(pubSub_keyNonce));
 
         Cache_Initialize(pPubSubConfig);

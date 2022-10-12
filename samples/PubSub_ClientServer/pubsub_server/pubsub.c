@@ -185,12 +185,11 @@ bool PubSub_Start(void)
 #ifdef WITH_STATIC_SECURITY_DATA
     printf("# Info: initialize local SKS with static security data\n");
 
-    SOPC_LocalSKS_init_static(pubSub_keySign, sizeof(pubSub_keySign),       //
-                              pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt), //
-                              pubSub_keyNonce, sizeof(pubSub_keyNonce));    //
+    SOPC_KeyBunch_init_static(pubSub_keySign, sizeof(pubSub_keySign), pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt),
+                              pubSub_keyNonce, sizeof(pubSub_keyNonce));
 #else
     printf("# Info: initialize local SKS with dynamic security data\n");
-    SOPC_LocalSKS_init(PUBSUB_SKS_SIGNING_KEY, PUBSUB_SKS_ENCRYPT_KEY, PUBSUB_SKS_KEY_NONCE);
+    SOPC_KeyBunch_init(PUBSUB_SKS_SIGNING_KEY, PUBSUB_SKS_ENCRYPT_KEY, PUBSUB_SKS_KEY_NONCE);
 #endif
     if (sub_nb_connections > 0)
     {

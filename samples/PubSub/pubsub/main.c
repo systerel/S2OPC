@@ -223,7 +223,7 @@ int main(int argc, char* const argv[])
     printf("SKS_SIGNING_KEY: %s\n", signing_key);
     printf("SKS_ENCRYPTION_KEY: %s\n", encryption_key);
     printf("SKS_KEY_NONCE: %s\n", nonce);
-    SOPC_LocalSKS_init(signing_key, encryption_key, nonce);
+    SOPC_KeyBunch_init(signing_key, encryption_key, nonce);
 
     /* Initialize the Cache with the PubSub configuration */
     if (SOPC_STATUS_OK == status)

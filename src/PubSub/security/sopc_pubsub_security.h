@@ -32,7 +32,7 @@ typedef struct SOPC_PubSub_SecurityType
 {
     SOPC_SecurityMode_Type mode;
     SOPC_CryptoProvider* provider;
-    SOPC_LocalSKS_Keys* groupKeys;
+    SOPC_KeyBunch_Keys* groupKeys;
     SOPC_ExposedBuffer* msgNonceRandom;
     uint32_t sequenceNumber;
 } SOPC_PubSub_SecurityType;

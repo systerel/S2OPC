@@ -17,6 +17,13 @@
  * under the License.
  */
 
+/** \file
+ *
+ *  Disclaimer: Actually this file only implements a bunch of key which doesn't correspond to a real SKS
+ *  it is used as a stub until the SKS is developed
+ *
+ */
+
 #ifndef SOPC_PUBSUB_LOCAL_SKS_H_
 #define SOPC_PUBSUB_LOCAL_SKS_H_
 
@@ -27,7 +34,7 @@
 // To requested current token in getSecurityKey
 #define SOPC_PUBSUB_SKS_CURRENT_TOKENID 0
 
-typedef struct SOPC_LocalSKS_Keys
+typedef struct SOPC_KeyBunch_Keys
 {
     // The ID of the security token that identifies the security key in a SecurityGroup.
     // not managed. Shall be one
@@ -36,27 +43,30 @@ typedef struct SOPC_LocalSKS_Keys
     SOPC_SecretBuffer* signingKey;
     SOPC_SecretBuffer* encryptKey;
     SOPC_SecretBuffer* keyNonce;
-} SOPC_LocalSKS_Keys;
+} SOPC_KeyBunch_Keys;
 
 /**
- * \brief Initialise the LocalSKS with keys file path
+ * \brief Initialise the KeyBunch with keys file path
  *
+ * \note The keyBunch SHALL NOT be initialize twice
  */
-void SOPC_LocalSKS_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce);
+void SOPC_KeyBunch_init(const char* pathSigningKey, const char* pathEncryptKey, const char* pathKeyNonce);
 
 /**
- * \brief Initialise the LocalSKS with static keys values
+ * \brief Initialise the KeyBunch with static keys values
  *
+ * \note The keyBunch SHALL NOT be initialize twice
  */
-void SOPC_LocalSKS_init_static(const uint8_t* signingKey, //
-                               uint32_t lenSigningKey,    //
-                               const uint8_t* encryptKey, //
-                               uint32_t lenEncryptKey,    //
-                               const uint8_t* keyNonce,   //
-                               uint32_t lenKeyNonce);     //
+void SOPC_KeyBunch_init_static(const uint8_t* signingKey,
+                               uint32_t lenSigningKey,
+                               const uint8_t* encryptKey,
+                               uint32_t lenEncryptKey,
+                               const uint8_t* keyNonce,
+                               uint32_t lenKeyNonce);
 
 /**
- * \brief Return security key from a security group id.
+ * \brief Return security key from a security group id. The returned pointer must be freed by user with \a
+ * SOPC_KeyBunch_Keys_Delete
  *
  * Only SOPC_PUBSUB_SKS_DEFAULT_GROUPID is accepted in this version
  *
@@ -65,15 +75,15 @@ void SOPC_LocalSKS_init_static(const uint8_t* signingKey, //
  * \return tokenid and group keys
  *
  */
-SOPC_LocalSKS_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId);
+SOPC_KeyBunch_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId);
 
 /**
- * \brief Clear a SOPC_LocalSKS_Keys
+ * \brief Clear a SOPC_KeyBunch_Keys
  * the given parameter can be freed after the function returns.
  *
  * \param keys object to clear
  *
  */
-void SOPC_LocalSKS_Keys_Delete(SOPC_LocalSKS_Keys* keys);
+void SOPC_KeyBunch_Keys_Delete(SOPC_KeyBunch_Keys* keys);
 
 #endif /* SOPC_PUBSUB_LOCAL_SKS_H_ */
