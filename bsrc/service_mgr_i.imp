@@ -51,7 +51,6 @@ PROMOTES
     is_valid_app_msg_in,
 
     /* message_out_bs */
-    is_valid_app_msg_out,
     bless_msg_out,
     forget_msg_out,
     dealloc_msg_out,

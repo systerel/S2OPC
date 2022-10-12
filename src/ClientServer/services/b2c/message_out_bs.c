@@ -398,24 +398,6 @@ void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_he
     util_message__copy_resp_header_into_msg(message_out_bs__msg_header, message_out_bs__msg);
 }
 
-void message_out_bs__is_valid_app_msg_out(const constants__t_msg_i message_out_bs__msg,
-                                          t_bool* const message_out_bs__bres,
-                                          constants__t_msg_type_i* const message_out_bs__msg_typ)
-{
-    // Since message is provided from application, we have to check it is non NULL and the message type is known
-    *message_out_bs__msg_typ = constants__c_msg_type_indet;
-    *message_out_bs__bres = false;
-    if (message_out_bs__msg != constants__c_msg_indet)
-    {
-        SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_out_bs__msg;
-        util_message__get_message_type(encType, message_out_bs__msg_typ);
-        if (*message_out_bs__msg_typ != constants__c_msg_type_indet)
-        {
-            *message_out_bs__bres = true;
-        }
-    }
-}
-
 void message_out_bs__server_write_msg_out_header_req_handle(
     const constants__t_msg_header_i message_out_bs__msg_header,
     const constants__t_server_request_handle_i message_out_bs__req_handle)

@@ -63,27 +63,6 @@ OPERATIONS
     END
     ;
 
-    bres, msg_typ <-- is_valid_app_msg_out (msg) =
-    PRE
-        msg : t_msg_i
-    THEN
-        /* Validates message is not null and has a known type */
-        IF msg : t_msg
-        THEN
-            CHOICE
-                bres := TRUE ||
-                msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type)
-            OR
-                bres := FALSE ||
-                msg_typ := c_msg_type_indet
-            END
-        ELSE
-            bres := FALSE ||
-            msg_typ := c_msg_type_indet
-        END
-    END
-    ;
-
     /*
      * Accept a message that was allocated by another part of the program.  We
      * consider the message as correct if the pointer is not NULL, and contains
