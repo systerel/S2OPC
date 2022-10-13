@@ -25,6 +25,8 @@ HOST_DIR=$(pwd)
 
 source .docker-images.sh
 rm -rf build_zephyr/* 2>/dev/null
+mkdir -p build_zephyr
+chmod a+rw zephyr/samples
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 (docker run --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE} zephyr/${SCRIPT})&
 
