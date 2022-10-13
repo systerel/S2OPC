@@ -196,9 +196,9 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
 
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 size_t index,
-                                                SOPC_NodeId* nodeId,
+                                                const SOPC_NodeId* nodeId,
                                                 SOPC_AttributeId attribute,
-                                                SOPC_String* indexRange)
+                                                const SOPC_String* indexRange)
 {
     OpcUa_ReadValueId* readVal = ReadRequest_InitializeReadvalPointer(readRequest, index, attribute);
     if (NULL == readVal)
@@ -219,7 +219,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
 
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* readRequest,
                                                             size_t index,
-                                                            SOPC_QualifiedName* dataEncoding)
+                                                            const SOPC_QualifiedName* dataEncoding)
 {
     if (!CHECK_ELEMENT_EXISTS(readRequest, NoOfNodesToRead, index))
     {
@@ -284,7 +284,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
                                                              const char* nodeId,
                                                              SOPC_AttributeId attribute,
                                                              const char* indexRange,
-                                                             SOPC_DataValue* value)
+                                                             const SOPC_DataValue* value)
 {
     OpcUa_WriteValue* writeVal = WriteRequest_InitializeWritevalPointer(writeRequest, index, attribute);
     if (NULL == writeVal)
@@ -309,10 +309,10 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
 
 SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeRequest,
                                                   size_t index,
-                                                  SOPC_NodeId* nodeId,
+                                                  const SOPC_NodeId* nodeId,
                                                   SOPC_AttributeId attribute,
-                                                  SOPC_String* indexRange,
-                                                  SOPC_DataValue* value)
+                                                  const SOPC_String* indexRange,
+                                                  const SOPC_DataValue* value)
 {
     OpcUa_WriteValue* writeVal = WriteRequest_InitializeWritevalPointer(writeRequest, index, attribute);
     if (NULL == writeVal)
@@ -337,7 +337,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
 
 OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
                                                size_t maxReferencesPerNode,
-                                               OpcUa_ViewDescription* optView)
+                                               const OpcUa_ViewDescription* optView)
 {
     OpcUa_BrowseRequest* req = NULL;
     if (nbNodesToBrowse > INT32_MAX || maxReferencesPerNode > INT32_MAX)
@@ -434,9 +434,9 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
 
 SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* browseRequest,
                                                           size_t index,
-                                                          SOPC_NodeId* nodeId,
+                                                          const SOPC_NodeId* nodeId,
                                                           OpcUa_BrowseDirection browseDirection,
-                                                          SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_NodeId* referenceTypeId,
                                                           bool includeSubtypes,
                                                           SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                           SOPC_BrowseRequest_ResultMask resultMask)
@@ -499,7 +499,7 @@ OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationP
 
 SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRequest* browseNextRequest,
                                                               size_t index,
-                                                              SOPC_ByteString* continuationPoint)
+                                                              const SOPC_ByteString* continuationPoint)
 {
     if (!CHECK_ELEMENT_EXISTS(browseNextRequest, NoOfContinuationPoints, index) || NULL == continuationPoint)
     {
@@ -639,7 +639,7 @@ OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElement
 
 SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathElement* pathElementsArray,
                                                            size_t index,
-                                                           SOPC_NodeId* referenceTypeId,
+                                                           const SOPC_NodeId* referenceTypeId,
                                                            bool isInverse,
                                                            bool includeSubtypes,
                                                            uint16_t targetNsIndex,

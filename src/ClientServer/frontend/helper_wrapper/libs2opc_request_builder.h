@@ -119,9 +119,9 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
  */
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 size_t index,
-                                                SOPC_NodeId* nodeId,
+                                                const SOPC_NodeId* nodeId,
                                                 SOPC_AttributeId attribute,
-                                                SOPC_String* indexRange);
+                                                const SOPC_String* indexRange);
 
 /**
  * \brief Set the data encoding of the value to read.
@@ -133,7 +133,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
  */
 SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* readRequest,
                                                             size_t index,
-                                                            SOPC_QualifiedName* dataEncoding);
+                                                            const SOPC_QualifiedName* dataEncoding);
 
 /**
  * \brief Create a write request
@@ -187,7 +187,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
                                                              const char* nodeId,
                                                              SOPC_AttributeId attribute,
                                                              const char* indexRange,
-                                                             SOPC_DataValue* value);
+                                                             const SOPC_DataValue* value);
 
 /**
  * \brief Set the value to write at given index in write request
@@ -223,10 +223,10 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
  */
 SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeRequest,
                                                   size_t index,
-                                                  SOPC_NodeId* nodeId,
+                                                  const SOPC_NodeId* nodeId,
                                                   SOPC_AttributeId attribute,
-                                                  SOPC_String* indexRange,
-                                                  SOPC_DataValue* value);
+                                                  const SOPC_String* indexRange,
+                                                  const SOPC_DataValue* value);
 
 /**
  * \brief Enumerated node class mask values authorized for use with ::SOPC_BrowseRequest_SetBrowseDescription.
@@ -277,7 +277,7 @@ typedef enum
  */
 OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
                                                size_t maxReferencesPerNode,
-                                               OpcUa_ViewDescription* optView);
+                                               const OpcUa_ViewDescription* optView);
 
 /**
  * \brief Set the node to browse at given index in browse request (using C strings for node id and reference type id)
@@ -364,9 +364,9 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
  */
 SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* browseRequest,
                                                           size_t index,
-                                                          SOPC_NodeId* nodeId,
+                                                          const SOPC_NodeId* nodeId,
                                                           OpcUa_BrowseDirection browseDirection,
-                                                          SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_NodeId* referenceTypeId,
                                                           bool includeSubtypes,
                                                           SOPC_BrowseRequest_NodeClassMask nodeClassMask,
                                                           SOPC_BrowseRequest_ResultMask resultMask);
@@ -506,7 +506,7 @@ OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElement
  */
 SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathElement* pathElementsArray,
                                                            size_t index,
-                                                           SOPC_NodeId* referenceTypeId,
+                                                           const SOPC_NodeId* referenceTypeId,
                                                            bool isInverse,
                                                            bool includeSubtypes,
                                                            uint16_t targetNsIndex,
@@ -528,7 +528,7 @@ SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathEle
  */
 SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRequest* browseNextRequest,
                                                               size_t index,
-                                                              SOPC_ByteString* continuationPoint);
+                                                              const SOPC_ByteString* continuationPoint);
 
 /**
  * \brief Create a GetEndpoint request for the given endpoint URL
