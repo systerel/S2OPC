@@ -39,13 +39,21 @@
 #error "CONFIG_SOPC_SUBSCRIBER_ADDRESS is not defined!"
 #endif
 
-#define PUBSUB_VAR_STRING "ns=1;s=aString"
-#define PUBSUB_VAR_BYTE "ns=1;s=aByte"
-#define PUBSUB_VAR_UINT32 "ns=1;s=aUINT32"
-#define PUBSUB_VAR_INT16 "ns=1;s=aINT16"
-#define PUBSUB_VAR_BOOL "ns=1;s=aBOOL"
-#define PUBSUB_VAR_STATUS "ns=1;s=aStatusCode"
-#define NB_PUBSUB_VARS 6
+#define PUB_VAR_STRING "ns=1;s=pubString"
+#define PUB_VAR_BYTE "ns=1;s=pubByte"
+#define PUB_VAR_UINT32 "ns=1;s=pubUINT32"
+#define PUB_VAR_INT16 "ns=1;s=pubINT16"
+#define PUB_VAR_BOOL "ns=1;s=pubBOOL"
+#define PUB_VAR_STATUS "ns=1;s=pubStatusCode"
+#define NB_PUB_VARS 6
+
+#define SUB_VAR_STRING "ns=1;s=subString"
+#define SUB_VAR_BYTE "ns=1;s=subByte"
+#define SUB_VAR_UINT32 "ns=1;s=subUINT32"
+#define SUB_VAR_INT16 "ns=1;s=subINT16"
+#define SUB_VAR_BOOL "ns=1;s=subBOOL"
+#define SUB_VAR_STATUS "ns=1;s=subStatusCode"
+#define NB_SUB_VARS 6
 
 #define PUBLISHER_ID 42
 #define MESSAGE_ID 20
@@ -197,17 +205,17 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_PublishedDataSet* dataset = NULL;
     if (alloc)
     {
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, NB_PUBSUB_VARS);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, NB_PUB_VARS);
         alloc = NULL != dataset;
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, PUBSUB_VAR_STRING, SOPC_String_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, PUBSUB_VAR_UINT32, SOPC_UInt32_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, PUBSUB_VAR_INT16, SOPC_Int16_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, PUBSUB_VAR_BOOL, SOPC_Boolean_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, PUBSUB_VAR_STATUS, SOPC_StatusCode_Id);
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, PUBSUB_VAR_BYTE, SOPC_Byte_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, PUB_VAR_STRING, SOPC_String_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, PUB_VAR_UINT32, SOPC_UInt32_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, PUB_VAR_INT16, SOPC_Int16_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, PUB_VAR_BOOL, SOPC_Boolean_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, PUB_VAR_STATUS, SOPC_StatusCode_Id);
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, PUB_VAR_BYTE, SOPC_Byte_Id);
     }
 
     /* 1 connection Sub */
@@ -240,16 +248,16 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, NB_PUBSUB_VARS);
+        alloc = SOPC_PubSubConfig_SetSubNbVariables(reader, NB_SUB_VARS);
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 0, PUBSUB_VAR_STRING, SOPC_String_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 1, PUBSUB_VAR_UINT32, SOPC_UInt32_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 2, PUBSUB_VAR_INT16, SOPC_Int16_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 3, PUBSUB_VAR_BOOL, SOPC_Boolean_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 4, PUBSUB_VAR_STATUS, SOPC_StatusCode_Id);
-        SOPC_PubSubConfig_SetSubVariableAt(reader, 5, PUBSUB_VAR_BYTE, SOPC_Byte_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 0, SUB_VAR_STRING, SOPC_String_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 1, SUB_VAR_UINT32, SOPC_UInt32_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 2, SUB_VAR_INT16, SOPC_Int16_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 3, SUB_VAR_BOOL, SOPC_Boolean_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 4, SUB_VAR_STATUS, SOPC_StatusCode_Id);
+        SOPC_PubSubConfig_SetSubVariableAt(reader, 5, SUB_VAR_BYTE, SOPC_Byte_Id);
     }
 
     if (!alloc)
