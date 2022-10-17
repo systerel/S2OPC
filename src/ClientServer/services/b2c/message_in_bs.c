@@ -121,6 +121,12 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
     }
 }
 
+void message_in_bs__forget_msg_in(const constants__t_msg_i message_in_bs__msg)
+{
+    // The message is now owned by the application
+    SOPC_UNUSED_ARG(message_in_bs__msg);
+}
+
 void message_in_bs__forget_resp_msg_in(const constants__t_msg_header_i message_in_bs__msg_header,
                                        const constants__t_msg_i message_in_bs__msg)
 {

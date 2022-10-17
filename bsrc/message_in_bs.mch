@@ -189,6 +189,18 @@ OPERATIONS
     END
     ;
 
+    /* Consider message as deallocated since ownership was transferred to the application */
+    forget_msg_in (msg) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg
+    THEN
+        c_msg_in := c_msg_indet ||
+        a_msg_in_type := c_msg_type_indet
+    END
+    ;
+
     /* Consider response message as deallocated since responsibility was forwarded to application */
     forget_resp_msg_in (msg_header, msg) =
     PRE
