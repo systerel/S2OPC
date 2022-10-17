@@ -669,22 +669,21 @@ OPERATIONS
 
     ret <-- server_treat_local_service_request (endpoint_config_idx, req_msg, app_context) =
     VAR
-        l_valid_msg,
         l_msg_typ,
         l_msg_service_class,
         l_valid_endpoint_config
     IN
         ret := e_sc_bad_invalid_argument;
-        l_valid_msg, l_msg_typ <-- is_valid_app_msg_in (req_msg);
-        IF l_valid_msg = TRUE
+        l_msg_typ <-- bless_msg_in (req_msg);
+        IF l_msg_typ /= c_msg_type_indet
         THEN
             l_valid_endpoint_config <-- is_valid_endpoint_config_idx (endpoint_config_idx);
             IF l_valid_endpoint_config = TRUE
             THEN
                 l_msg_service_class <-- get_msg_service_class (l_msg_typ);
                 ret <-- server_receive_local_service_req  (endpoint_config_idx, l_msg_service_class, l_msg_typ, req_msg, app_context)
-            END
-            /* TODO deallocate message */
+            END;
+            dealloc_msg_in (req_msg)
         END
     END
     ;

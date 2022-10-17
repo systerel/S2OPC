@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 12/10/2022 08:18:44
+ Date                 : 17/10/2022 15:34:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,6 +69,7 @@ extern void service_mgr__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define service_mgr__bless_msg_in message_in_bs__bless_msg_in
 #define service_mgr__bless_msg_out message_out_bs__bless_msg_out
 #define service_mgr__client_async_activate_new_session_with_channel session_mgr__client_async_activate_new_session_with_channel
 #define service_mgr__client_async_activate_new_session_without_channel session_mgr__client_async_activate_new_session_without_channel
@@ -81,6 +82,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__client_req_handle_to_request_id request_handle_bs__client_req_handle_to_request_id
 #define service_mgr__client_request_id_to_req_handle request_handle_bs__client_request_id_to_req_handle
 #define service_mgr__client_secure_channel_lost_session_sm session_mgr__client_secure_channel_lost_session_sm
+#define service_mgr__dealloc_msg_in message_in_bs__dealloc_msg_in
 #define service_mgr__dealloc_msg_out message_out_bs__dealloc_msg_out
 #define service_mgr__decode_msg_type message_in_bs__decode_msg_type
 #define service_mgr__find_channel_to_close session_mgr__find_channel_to_close

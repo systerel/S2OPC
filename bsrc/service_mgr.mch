@@ -257,17 +257,14 @@ OPERATIONS
         req_class : t_msg_service_class &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
-        a_msg_in_type : s_service_on_session_reqs \/ s_discovery_service_reqs &
         req_msg : t_msg_i &
-        req_msg : t_msg &
+        req_msg = c_msg_in &
         app_context : t_application_context_i &
-        /* No message allocation before and remaining after operation */
-        c_msg_in = c_msg_indet &
+        /* The input message must have been blessed */
+        c_msg_in : t_msg &
+        a_msg_in_type : s_service_on_session_reqs \/ s_discovery_service_reqs &
         c_msg_in_header = c_msg_header_indet
     THEN
-        a_msg_in_type    :: t_msg_type_i   ||
-        c_msg_out_header :: t_msg_header_i ||
-        c_msg_out        :: t_msg_i        ||
         ret              :: {e_sc_ok,
                              e_sc_bad_out_of_memory}
     END
@@ -636,6 +633,35 @@ OPERATIONS
             bres := FALSE ||
             msg_typ := c_msg_type_indet
         END
+    END
+    ;
+
+    msg_typ <-- bless_msg_in (msg) =
+    PRE
+        msg : t_msg_i &
+        c_msg_in = c_msg_indet &
+        a_msg_in_type = c_msg_type_indet
+    THEN
+        CHOICE
+            c_msg_in :(c_msg_in : t_msg_i & c_msg_in : t_msg & c_msg_in = msg) ||
+            msg_typ, a_msg_in_type :(msg_typ : t_msg_type_i &
+                                     msg_typ = a_msg_in_type &
+                                     a_msg_in_type : t_msg_type)
+        OR
+            msg_typ := c_msg_type_indet
+        END
+    END
+    ;
+
+    dealloc_msg_in (msg) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type : t_msg_type
+    THEN
+        c_msg_in := c_msg_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 

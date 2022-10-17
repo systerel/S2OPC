@@ -48,6 +48,8 @@ PROMOTES
     /* message_in_bs */
     decode_msg_type,
     is_valid_request_context,
+    bless_msg_in,
+    dealloc_msg_in,
     is_valid_app_msg_in,
 
     /* message_out_bs */
@@ -1004,7 +1006,6 @@ OPERATIONS
         l_resp_msg_typ,
         l_resp_msg_header,
         l_resp_msg,
-        l_dummy,
         l_ret
     IN
         l_prev_local_treatment <-- is_local_service_treatment;
@@ -1022,7 +1023,6 @@ OPERATIONS
         IF l_resp_msg /= c_msg_indet
         THEN
             ret := e_sc_ok;
-            l_dummy <-- bless_msg_in (req_msg);
             CASE req_class OF
                 EITHER e_msg_session_service_class THEN
                     l_ret <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, l_resp_msg)
@@ -1036,8 +1036,7 @@ OPERATIONS
             copy_msg_resp_header_into_msg_out (l_resp_msg_header, l_resp_msg);
             dealloc_msg_header_out (l_resp_msg_header);
             srv_service_response (endpoint_config_idx, l_resp_msg, app_context);
-            forget_msg_out (l_resp_msg);
-            dealloc_msg_in (req_msg)
+            forget_msg_out (l_resp_msg)
         ELSE
             ret := e_sc_bad_out_of_memory
         END;

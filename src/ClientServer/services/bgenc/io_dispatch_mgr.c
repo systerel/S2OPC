@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 17/10/2022 15:19:57
+ Date                 : 17/10/2022 15:34:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -714,16 +714,14 @@ void io_dispatch_mgr__server_treat_local_service_request(
    const constants__t_application_context_i io_dispatch_mgr__app_context,
    constants_statuscodes_bs__t_StatusCode_i * const io_dispatch_mgr__ret) {
    {
-      t_bool io_dispatch_mgr__l_valid_msg;
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
       constants__t_msg_service_class_i io_dispatch_mgr__l_msg_service_class;
       t_bool io_dispatch_mgr__l_valid_endpoint_config;
       
       *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-      service_mgr__is_valid_app_msg_in(io_dispatch_mgr__req_msg,
-         &io_dispatch_mgr__l_valid_msg,
+      service_mgr__bless_msg_in(io_dispatch_mgr__req_msg,
          &io_dispatch_mgr__l_msg_typ);
-      if (io_dispatch_mgr__l_valid_msg == true) {
+      if (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) {
          channel_mgr__is_valid_endpoint_config_idx(io_dispatch_mgr__endpoint_config_idx,
             &io_dispatch_mgr__l_valid_endpoint_config);
          if (io_dispatch_mgr__l_valid_endpoint_config == true) {
@@ -736,6 +734,7 @@ void io_dispatch_mgr__server_treat_local_service_request(
                io_dispatch_mgr__app_context,
                io_dispatch_mgr__ret);
          }
+         service_mgr__dealloc_msg_in(io_dispatch_mgr__req_msg);
       }
    }
 }

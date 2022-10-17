@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 17/10/2022 13:07:50
+ Date                 : 17/10/2022 15:34:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1082,7 +1082,6 @@ void service_mgr__server_receive_local_service_req(
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_msg_i service_mgr__l_resp_msg;
-      constants__t_msg_type_i service_mgr__l_dummy;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
       
       address_space_itf__is_local_service_treatment(&service_mgr__l_prev_local_treatment);
@@ -1104,8 +1103,6 @@ void service_mgr__server_receive_local_service_req(
       }
       if (service_mgr__l_resp_msg != constants__c_msg_indet) {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_ok;
-         message_in_bs__bless_msg_in(service_mgr__req_msg,
-            &service_mgr__l_dummy);
          switch (service_mgr__req_class) {
          case constants__e_msg_session_service_class:
             service_mgr__treat_session_local_service_req(service_mgr__endpoint_config_idx,
@@ -1134,7 +1131,6 @@ void service_mgr__server_receive_local_service_req(
             service_mgr__l_resp_msg,
             service_mgr__app_context);
          message_out_bs__forget_msg_out(service_mgr__l_resp_msg);
-         message_in_bs__dealloc_msg_in(service_mgr__req_msg);
       }
       else {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
