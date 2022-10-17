@@ -679,12 +679,9 @@ OPERATIONS
                 END;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
-            END /* DECODE REQ CHECK */
-        END; /* DECODE REQ HEADER CHECK */
-        IF l_valid_req_header = TRUE
-        THEN
+            END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
-        END;
+        END; /* DECODE REQ HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
@@ -718,14 +715,9 @@ OPERATIONS
                     dealloc_msg_in (l_resp_msg)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
-            END /* VALID RESP HEADER CHECK */
-        END; /* DECODE RESP HEADER CHECK */
-
-        IF l_valid_resp_header = TRUE
-        THEN
-            /* resp header message not used anymore => deallocate */
+            END; /* VALID RESP HEADER CHECK */
             dealloc_msg_in_header (l_resp_msg_header)
-        END;
+        END; /* DECODE RESP HEADER CHECK */
 
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
@@ -848,12 +840,9 @@ OPERATIONS
             ELSE
                 /* Failed to allocate the response */
                 sc := e_sc_bad_out_of_memory
-            END
-        END; /* DECODE REQ HEADER CHECK */
-        IF l_valid_req_header = TRUE
-        THEN
+            END;
             dealloc_msg_in_header (l_req_msg_header)
-        END;
+        END; /* DECODE REQ HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
@@ -892,18 +881,12 @@ OPERATIONS
                         copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                         /* For services on session IN response messages is provided to applicative */
                         cli_service_response (l_session, l_resp_msg, l_user_app_context);
-                        forget_msg_in (l_resp_msg);
-                        dealloc_msg_in_header (l_resp_msg_header)
-                    ELSE
-                        dealloc_msg_in_header (l_resp_msg_header)
+                        forget_msg_in (l_resp_msg)
                     END /* DECODE RESP CHECK */
-                ELSE
-                    dealloc_msg_in_header (l_resp_msg_header)
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
-            ELSE
-                dealloc_msg_in_header (l_resp_msg_header)
-            END /* VALID REQ HANDLE */
+            END; /* VALID REQ HANDLE */
+            dealloc_msg_in_header (l_resp_msg_header)
         END; /* DECODE RESP HEADER CHECK */
 
         /* In any case buffer will not be used anymore after this operation */
@@ -966,12 +949,9 @@ OPERATIONS
                 END;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
-            END /* DECODE REQ CHECK */
-        END; /* DECODE REQ HEADER CHECK */
-        IF l_valid_req_header = TRUE
-        THEN
+            END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
-        END;
+        END; /* DECODE REQ HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
@@ -1005,15 +985,11 @@ OPERATIONS
                     copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                     /* For services on session IN response messages is provided to applicative */
                     cli_service_response (c_session_indet, l_resp_msg, l_user_app_context);
-                    forget_msg_in (l_resp_msg);
-                    dealloc_msg_in_header (l_resp_msg_header)
-                ELSE
-                    dealloc_msg_in_header (l_resp_msg_header)
+                    forget_msg_in (l_resp_msg)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
-            ELSE
-                dealloc_msg_in_header (l_resp_msg_header)
-            END /* VALID REQ HANDLE */
+            END; /* VALID REQ HANDLE */
+            dealloc_msg_in_header (l_resp_msg_header)
         END; /* DECODE RESP HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)

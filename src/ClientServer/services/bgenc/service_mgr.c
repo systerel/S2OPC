@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 17/10/2022 10:22:10
+ Date                 : 17/10/2022 10:32:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -679,8 +679,6 @@ void service_mgr__server_receive_session_treatment_req(
             }
             message_in_bs__dealloc_msg_in(service_mgr__l_req_msg);
          }
-      }
-      if (service_mgr__l_valid_req_header == true) {
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
@@ -731,8 +729,6 @@ void service_mgr__client_receive_session_treatment_resp(
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
          }
-      }
-      if (service_mgr__l_valid_resp_header == true) {
          message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
@@ -875,8 +871,6 @@ void service_mgr__server_receive_session_service_req(
          else {
             *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-      }
-      if (service_mgr__l_valid_req_header == true) {
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
@@ -934,20 +928,11 @@ void service_mgr__client_receive_session_service_resp(
                      service_mgr__l_resp_msg,
                      service_mgr__l_user_app_context);
                   message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
-                  message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
                }
-               else {
-                  message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
-               }
-            }
-            else {
-               message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
          }
-         else {
-            message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
-         }
+         message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
@@ -1026,8 +1011,6 @@ void service_mgr__server_receive_discovery_service_req(
             }
             message_in_bs__dealloc_msg_in(service_mgr__l_req_msg);
          }
-      }
-      if (service_mgr__l_valid_req_header == true) {
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
@@ -1078,16 +1061,10 @@ void service_mgr__client_receive_discovery_service_resp(
                   service_mgr__l_resp_msg,
                   service_mgr__l_user_app_context);
                message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
-               message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
-            }
-            else {
-               message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
          }
-         else {
-            message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
-         }
+         message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
