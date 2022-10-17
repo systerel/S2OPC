@@ -70,13 +70,15 @@ OPERATIONS
      */
     msg_typ <-- bless_msg_out (msg) =
     PRE
-        msg : t_msg_i
+        msg : t_msg_i &
+        c_msg_out = c_msg_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         CHOICE
             c_msg_out :(c_msg_out : t_msg_i & c_msg_out : t_msg & c_msg_out = msg) ||
             msg_typ, a_msg_out_type :(msg_typ : t_msg_type_i &
-                                      msg_typ : t_msg_type &
-                                      a_msg_out_type = msg_typ)
+                                      msg_typ = a_msg_out_type &
+                                      a_msg_out_type : t_msg_type)
         OR
             msg_typ := c_msg_type_indet
         END
@@ -89,7 +91,6 @@ OPERATIONS
         msg : t_msg_i &
         c_msg_out = msg &
         c_msg_out : t_msg &
-        c_msg_out_header = c_msg_header_indet &
         a_msg_out_type : t_msg_type
     THEN
         c_msg_out := c_msg_indet ||
@@ -102,7 +103,8 @@ OPERATIONS
         msg_type : t_msg_type_i &
         msg_type : t_msg_type &
         c_msg_out_header = c_msg_header_indet &
-        c_msg_out = c_msg_indet
+        c_msg_out = c_msg_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         CHOICE
             nmsg_header, c_msg_out_header
@@ -110,8 +112,8 @@ OPERATIONS
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
         OR
-            nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header) ||
-            nmsg :( nmsg = c_msg_indet & nmsg = c_msg_out)
+            nmsg_header := c_msg_header_indet ||
+            nmsg := c_msg_indet
         END
     END
     ;
@@ -122,7 +124,7 @@ OPERATIONS
         msg_type : t_msg_type &
         c_msg_out_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
-        c_msg_in : t_msg
+        a_msg_out_type = c_msg_type_indet
     THEN
         CHOICE
             nmsg_header, c_msg_out_header
@@ -130,8 +132,8 @@ OPERATIONS
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
         OR
-            nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header) ||
-            nmsg :( nmsg = c_msg_indet & nmsg = c_msg_out)
+            nmsg_header := c_msg_header_indet ||
+            nmsg := c_msg_indet
         END
     END
     ;
