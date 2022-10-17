@@ -232,23 +232,6 @@ void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg,
     }
 }
 
-void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__msg,
-                                        t_bool* const message_in_bs__bres,
-                                        constants__t_msg_type_i* const message_in_bs__msg_typ)
-{
-    // Since message is provided from application, we have to check it is non NULL and the message type is known
-    *message_in_bs__msg_typ = constants__c_msg_type_indet;
-    *message_in_bs__bres = false;
-    if (message_in_bs__msg != constants__c_msg_indet)
-    {
-        get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
-        if (*message_in_bs__msg_typ != constants__c_msg_type_indet)
-        {
-            *message_in_bs__bres = true;
-        }
-    }
-}
-
 void message_in_bs__read_activate_req_msg_identity_token(const constants__t_msg_i message_in_bs__p_msg,
                                                          t_bool* const message_in_bs__p_valid_user_token,
                                                          constants__t_user_token_i* const message_in_bs__p_user_token)

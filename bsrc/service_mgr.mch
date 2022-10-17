@@ -665,20 +665,6 @@ OPERATIONS
     END
     ;
 
-    bres, msg_typ <-- is_valid_app_msg_in (msg) =
-    PRE
-        msg : t_msg_i
-    THEN
-        CHOICE
-            bres := FALSE ||
-            msg_typ := c_msg_type_indet
-        OR
-            bres := TRUE ||
-            msg_typ :(msg_typ : t_msg_type_i & msg_typ : t_msg_type)
-        END
-    END
-    ;
-
     msg_typ <-- bless_msg_out (msg) =
     PRE
         msg : t_msg_i

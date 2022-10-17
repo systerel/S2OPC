@@ -212,26 +212,6 @@ OPERATIONS
     END
     ;
 
-    bres, msg_typ <-- is_valid_app_msg_in (msg) =
-    PRE
-        msg : t_msg_i
-    THEN
-        IF msg : t_msg
-        THEN
-        CHOICE
-            bres := TRUE ||
-                msg_typ :( msg_typ : t_msg_type_i & msg_typ : t_msg_type)
-        OR
-            bres := FALSE ||
-            msg_typ := c_msg_type_indet
-        END
-        ELSE
-            bres := FALSE ||
-            msg_typ := c_msg_type_indet
-        END
-    END
-    ;
-
     bres <-- is_valid_request_context (req_context) =
     PRE
         req_context : t_request_context_i

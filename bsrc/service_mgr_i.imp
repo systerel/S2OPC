@@ -50,7 +50,6 @@ PROMOTES
     is_valid_request_context,
     bless_msg_in,
     dealloc_msg_in,
-    is_valid_app_msg_in,
 
     /* message_out_bs */
     bless_msg_out,
