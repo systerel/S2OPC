@@ -222,8 +222,8 @@ The handler shall be built using ::SOPC_PubSourceVariableConfig_Create, by provi
 For a Subscriber application, a data target handler shall be defined to set the data from configured information in the DataSetReader.
 The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by providing a function with the signature ::SOPC_SetTargetVariables_Func, and shall then be provided on Subscriber start.
 
-\subsection pubsub_sks Configure local SecurityKeyServices API 
-The PubSub local SKS configuration API is provided through sopc_pubsub_local_sks.h .key files are load using the function ::SOPC_LocalSKS_init.  
+\subsection pubsub_sks Configure local Key Bunch API
+The PubSub local Key Bunch API is provided through sopc_pubsub_local_sks.h .key files are load using the function ::SOPC_KeyBunch_init.  
 
 \subsection pubsub_lifecycle PubSub lifecycle
 
