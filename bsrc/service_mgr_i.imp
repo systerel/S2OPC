@@ -892,7 +892,8 @@ OPERATIONS
                         copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                         /* For services on session IN response messages is provided to applicative */
                         cli_service_response (l_session, l_resp_msg, l_user_app_context);
-                        forget_resp_msg_in (l_resp_msg_header, l_resp_msg)
+                        forget_msg_in (l_resp_msg);
+                        dealloc_msg_in_header (l_resp_msg_header)
                     ELSE
                         dealloc_msg_in_header (l_resp_msg_header)
                     END /* DECODE RESP CHECK */
@@ -1004,7 +1005,8 @@ OPERATIONS
                     copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
                     /* For services on session IN response messages is provided to applicative */
                     cli_service_response (c_session_indet, l_resp_msg, l_user_app_context);
-                    forget_resp_msg_in (l_resp_msg_header, l_resp_msg)
+                    forget_msg_in (l_resp_msg);
+                    dealloc_msg_in_header (l_resp_msg_header)
                 ELSE
                     dealloc_msg_in_header (l_resp_msg_header)
                 END; /* DECODE RESP CHECK */

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 12/10/2022 09:04:41
+ Date                 : 17/10/2022 10:22:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -933,8 +933,8 @@ void service_mgr__client_receive_session_service_resp(
                   service_response_cb_bs__cli_service_response(service_mgr__l_session,
                      service_mgr__l_resp_msg,
                      service_mgr__l_user_app_context);
-                  message_in_bs__forget_resp_msg_in(service_mgr__l_resp_msg_header,
-                     service_mgr__l_resp_msg);
+                  message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+                  message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
                }
                else {
                   message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
@@ -1077,8 +1077,8 @@ void service_mgr__client_receive_discovery_service_resp(
                service_response_cb_bs__cli_service_response(constants__c_session_indet,
                   service_mgr__l_resp_msg,
                   service_mgr__l_user_app_context);
-               message_in_bs__forget_resp_msg_in(service_mgr__l_resp_msg_header,
-                  service_mgr__l_resp_msg);
+               message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+               message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
             }
             else {
                message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);

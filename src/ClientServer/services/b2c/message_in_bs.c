@@ -127,15 +127,6 @@ void message_in_bs__forget_msg_in(const constants__t_msg_i message_in_bs__msg)
     SOPC_UNUSED_ARG(message_in_bs__msg);
 }
 
-void message_in_bs__forget_resp_msg_in(const constants__t_msg_header_i message_in_bs__msg_header,
-                                       const constants__t_msg_i message_in_bs__msg)
-{
-    SOPC_UNUSED_ARG(message_in_bs__msg);
-    // In this case the message header shall have been copied into msg, we should free the header structure since then
-    // Message structure dealloaction is now responsibility of the user application
-    SOPC_Free(message_in_bs__msg_header);
-}
-
 void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
                                       const constants__t_byte_buffer_i message_in_bs__msg_buffer,
                                       t_bool* const message_in_bs__bres,

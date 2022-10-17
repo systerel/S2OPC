@@ -201,23 +201,6 @@ OPERATIONS
     END
     ;
 
-    /* Consider response message as deallocated since responsibility was forwarded to application */
-    forget_resp_msg_in (msg_header, msg) =
-    PRE
-        msg_header : t_msg_header_i &
-        msg_header = c_msg_in_header &
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        c_msg_in_header : t_msg_header &
-        a_msg_in_type : s_service_resps
-    THEN
-        c_msg_in := c_msg_indet ||
-        a_msg_in_type := c_msg_type_indet ||
-        c_msg_in_header := c_msg_header_indet
-    END
-    ;
-
     bres, msg_typ <-- is_valid_app_msg_in (msg) =
     PRE
         msg : t_msg_i
