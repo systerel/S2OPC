@@ -676,11 +676,15 @@ OPERATIONS
     IN
         ret := e_sc_bad_invalid_argument;
         l_valid_msg, l_msg_typ <-- is_valid_app_msg_in (req_msg);
-        l_valid_endpoint_config <-- is_valid_endpoint_config_idx (endpoint_config_idx);
-        IF l_valid_msg = TRUE & l_valid_endpoint_config = TRUE
+        IF l_valid_msg = TRUE
         THEN
-            l_msg_service_class <-- get_msg_service_class (l_msg_typ);
-            ret <-- server_receive_local_service_req  (endpoint_config_idx, l_msg_service_class, l_msg_typ, req_msg, app_context)
+            l_valid_endpoint_config <-- is_valid_endpoint_config_idx (endpoint_config_idx);
+            IF l_valid_endpoint_config = TRUE
+            THEN
+                l_msg_service_class <-- get_msg_service_class (l_msg_typ);
+                ret <-- server_receive_local_service_req  (endpoint_config_idx, l_msg_service_class, l_msg_typ, req_msg, app_context)
+            END
+            /* TODO deallocate message */
         END
     END
     ;

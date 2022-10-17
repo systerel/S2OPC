@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 12/10/2022 10:27:38
+ Date                 : 17/10/2022 15:19:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -723,18 +723,19 @@ void io_dispatch_mgr__server_treat_local_service_request(
       service_mgr__is_valid_app_msg_in(io_dispatch_mgr__req_msg,
          &io_dispatch_mgr__l_valid_msg,
          &io_dispatch_mgr__l_msg_typ);
-      channel_mgr__is_valid_endpoint_config_idx(io_dispatch_mgr__endpoint_config_idx,
-         &io_dispatch_mgr__l_valid_endpoint_config);
-      if ((io_dispatch_mgr__l_valid_msg == true) &&
-         (io_dispatch_mgr__l_valid_endpoint_config == true)) {
-         io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_typ,
-            &io_dispatch_mgr__l_msg_service_class);
-         service_mgr__server_receive_local_service_req(io_dispatch_mgr__endpoint_config_idx,
-            io_dispatch_mgr__l_msg_service_class,
-            io_dispatch_mgr__l_msg_typ,
-            io_dispatch_mgr__req_msg,
-            io_dispatch_mgr__app_context,
-            io_dispatch_mgr__ret);
+      if (io_dispatch_mgr__l_valid_msg == true) {
+         channel_mgr__is_valid_endpoint_config_idx(io_dispatch_mgr__endpoint_config_idx,
+            &io_dispatch_mgr__l_valid_endpoint_config);
+         if (io_dispatch_mgr__l_valid_endpoint_config == true) {
+            io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_typ,
+               &io_dispatch_mgr__l_msg_service_class);
+            service_mgr__server_receive_local_service_req(io_dispatch_mgr__endpoint_config_idx,
+               io_dispatch_mgr__l_msg_service_class,
+               io_dispatch_mgr__l_msg_typ,
+               io_dispatch_mgr__req_msg,
+               io_dispatch_mgr__app_context,
+               io_dispatch_mgr__ret);
+         }
       }
    }
 }
