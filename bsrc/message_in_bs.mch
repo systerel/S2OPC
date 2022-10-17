@@ -178,14 +178,25 @@ OPERATIONS
     END
     ;
 
-    /* Accept a message that was allocated by another part of the program */
-    bless_msg_in (msg) =
+    /*
+     * Accept a message that was allocated by another part of the program.  We
+     * consider the message as correct if the pointer is not NULL, and contains
+     * a valid encodeable type.
+     */
+    msg_typ <-- bless_msg_in (msg) =
     PRE
         msg : t_msg_i &
-        msg : t_msg
+        c_msg_in = c_msg_indet &
+        a_msg_in_type = c_msg_type_indet
     THEN
-        c_msg_in := msg ||
-        a_msg_in_type :: t_msg_type
+        CHOICE
+            c_msg_in :(c_msg_in : t_msg_i & c_msg_in : t_msg & c_msg_in = msg) ||
+            msg_typ, a_msg_in_type :(msg_typ : t_msg_type_i &
+                                     msg_typ = a_msg_in_type &
+                                     a_msg_in_type : t_msg_type)
+        OR
+            msg_typ := c_msg_type_indet
+        END
     END
     ;
 

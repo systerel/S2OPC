@@ -1004,6 +1004,7 @@ OPERATIONS
         l_resp_msg_typ,
         l_resp_msg_header,
         l_resp_msg,
+        l_dummy,
         l_ret
     IN
         l_prev_local_treatment <-- is_local_service_treatment;
@@ -1021,7 +1022,7 @@ OPERATIONS
         IF l_resp_msg /= c_msg_indet
         THEN
             ret := e_sc_ok;
-            bless_msg_in (req_msg);
+            l_dummy <-- bless_msg_in (req_msg);
             CASE req_class OF
                 EITHER e_msg_session_service_class THEN
                     l_ret <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, l_resp_msg)

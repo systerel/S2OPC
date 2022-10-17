@@ -21,7 +21,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 17/10/2022 10:22:21
+ Date                 : 17/10/2022 13:08:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,7 +50,8 @@ extern void message_in_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void message_in_bs__bless_msg_in(
-   const constants__t_msg_i message_in_bs__msg);
+   const constants__t_msg_i message_in_bs__msg,
+   constants__t_msg_type_i * const message_in_bs__msg_typ);
 extern void message_in_bs__client_read_msg_header_req_handle(
    const constants__t_msg_header_i message_in_bs__msg_header,
    constants__t_client_request_handle_i * const message_in_bs__handle);

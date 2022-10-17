@@ -58,12 +58,6 @@ void message_in_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg)
-{
-    /* NOTHING TO DO: in B model now message_in_bs__msg = c_msg_in now */
-    SOPC_UNUSED_ARG(message_in_bs__msg);
-}
-
 void message_in_bs__copy_msg_resp_header_into_msg(const constants__t_msg_header_i message_in_bs__msg_header,
                                                   const constants__t_msg_i message_in_bs__msg)
 {
@@ -224,6 +218,18 @@ void message_in_bs__is_valid_request_context(const constants__t_request_context_
                                              t_bool* const message_in_bs__bres)
 {
     *message_in_bs__bres = (message_in_bs__req_context != constants__c_request_context_indet);
+}
+
+void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg,
+                                 constants__t_msg_type_i* const message_in_bs__msg_typ)
+{
+    // Since message is provided from application, we have to check it is non NULL
+    // and extract its message type (the caller will check that information)
+    *message_in_bs__msg_typ = constants__c_msg_type_indet;
+    if (message_in_bs__msg != constants__c_msg_indet)
+    {
+        get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
+    }
 }
 
 void message_in_bs__is_valid_app_msg_in(const constants__t_msg_i message_in_bs__msg,
