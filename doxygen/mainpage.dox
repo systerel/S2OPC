@@ -35,7 +35,7 @@ The following sections only concern the C source documentation.
 You will find documentation on the Python binding for S2OPC on following page:
 <a href="pys2opc/index.html">Go to PyS2OPC documentation</a>
 
-\section common High-level Common API 
+\section common High-level Common API
 
 The high-level common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API or pubsub API.
 Those functions are shared between all high-level API when including the S2OPC Common library:
@@ -223,7 +223,11 @@ For a Subscriber application, a data target handler shall be defined to set the 
 The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by providing a function with the signature ::SOPC_SetTargetVariables_Func, and shall then be provided on Subscriber start.
 
 \subsection pubsub_sks Configure local Key Bunch API
-The PubSub local Key Bunch API is provided through sopc_pubsub_local_sks.h .key files are load using the function ::SOPC_KeyBunch_init.  
+
+For Publisher and Subscriber applications a key bunch is used to permit encrypted/signed communication. The PubSub local Key Bunch API is provided through sopc_pubsub_local_sks.h .key files are loaded using the function ::SOPC_KeyBunch_init.
+
+\note A Security Key Services (SKS) is being develloped. Key bunch act as a stub to permit encrypted/signed PubSub communication unitl SKS is finished.
+
 
 \subsection pubsub_lifecycle PubSub lifecycle
 
