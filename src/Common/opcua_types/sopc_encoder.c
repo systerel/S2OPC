@@ -2003,21 +2003,13 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
                 extObj->TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
             {
                 encType = SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Data.Numeric);
-                if (NULL == encType)
-                {
-                    status = SOPC_STATUS_ENCODING_ERROR;
-                }
-                else
+                if (NULL != encType)
                 {
                     encodingByte = SOPC_ExtObjBodyEncoding_Object;
                     extObj->Body.Object.ObjType = encType;
                     SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_ENCODING_ERROR;
-            }
+                } // else: Keep it as a byte string since we do not know its type
+            }     // else: Keep it as a byte string since we do not know its type
         }
         else if (encodingByte == SOPC_ExtObjBodyEncoding_Object)
         {
@@ -2035,6 +2027,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             break;
         case SOPC_ExtObjBodyEncoding_XMLElement:
             status = SOPC_XmlElement_Read(&extObj->Body.Xml, buf, nestedStructLevel);
+            break;
+        case SOPC_ExtObjBodyEncoding_ByteString:
+            status = SOPC_ByteString_Read(&extObj->Body.Bstring, buf, nestedStructLevel);
             break;
         case SOPC_ExtObjBodyEncoding_Object:
             status = SOPC_Int32_Read(&extObj->Length, buf, nestedStructLevel);
