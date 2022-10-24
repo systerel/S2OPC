@@ -94,17 +94,17 @@ if(ENABLE_TESTING)
 
   s2opc_unit_test(pubsub_modules_test)
 
-  add_executable(mqtt_pub_test "unit_tests/mqtt_pub_test.c")
-  target_link_libraries(mqtt_pub_test PRIVATE s2opc_pubsub ${CHECK_LIBRARIES})
-  target_compile_options(mqtt_pub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(mqtt_pub_test PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(mqtt_pubsub_test "unit_tests/mqtt_pubsub_test.c")
+  target_link_libraries(mqtt_pubsub_test PRIVATE s2opc_pubsub Check::check)
+  target_compile_options(mqtt_pubsub_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(mqtt_pubsub_test PRIVATE ${S2OPC_DEFINITIONS})
 
   add_custom_command(
-    TARGET mqtt_pub_test POST_BUILD
+    TARGET mqtt_pubsub_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/mosquitto.conf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
 
-  s2opc_unit_test(mqtt_pub_test)
+  s2opc_unit_test(mqtt_pubsub_test)
 
 
 ## S2OPC PubSub validation tests ##

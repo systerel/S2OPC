@@ -115,8 +115,8 @@ XML_PUBSUB_LOOP = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttTopic="S2OPC">
-        <message groupId="1" publishingInterval="1000" groupVersion="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -125,9 +125,9 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttTopic="S2OPC">
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50">
+            <dataset writerId="50" mqttTopic="S2OPC">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -137,9 +137,40 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            </dataset>
+        </message>
+        <message groupId="2" publishingInterval="1000" groupVersion="1" mqttTopic="Test">
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
+            <dataset writerId="50" mqttTopic="S2OPC">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            </dataset>
+        </message>
+        <message groupId="2" publishingInterval="1000" groupVersion="1" publisherId="1">
+            <dataset writerId="51" mqttTopic="Test">
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+                <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
 XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user1" mqttPassword="password" mqttTopic="S2OPC">
-        <message groupId="1" publishingInterval="1000" groupVersion="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user1" mqttPassword="password">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -148,9 +179,9 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" mqttTopic="S2OPC">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50">
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" >
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
+            <dataset writerId="50" mqttTopic="S2OPC">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -161,8 +192,8 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user" mqttPassword="passwor" mqttTopic="S2OPC">
-        <message groupId="1" publishingInterval="1000" groupVersion="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user" mqttPassword="passwor">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -171,9 +202,9 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password"  mqttTopic="S2OPC">
+    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50">
+            <dataset writerId="50" mqttTopic="S2OPC">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -599,46 +630,46 @@ def helpAssertState(psserver, expected, pLogger):
     pLogger.add_test(f'PubSub Module state is {state}, should be {expected}', state == expected)
 
 def helperTestPubSubConnectionFail(pubsubserver, xmlfile, logger, possibleFail=False):
-    
+
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger, possibleFail=possibleFail)
-        
+
     # Init Subscriber variables
     helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
     helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
     helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
-    
+
     # Change Publisher variables
     helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
     helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
-    
+
     sleep(DYN_CONF_PUB_INTERVAL_200)
     logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
     logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
-    
+
     if not possibleFail:
         helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
 def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
-    
+
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger)
-    
+
     # Init Subscriber variables
     helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
     helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
     helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
-    
+
     # Change Publisher variables
     helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
     helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
-    
+
     sleep(DYN_CONF_PUB_INTERVAL_200)
     logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
     logger.add_test('Subscriber uint16 is changed', 456 == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is changed', 789 == pubsubserver.getValue(NID_SUB_INT))
-        
+
     helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
 def testPubSubDynamicConf():
@@ -805,7 +836,7 @@ def testPubSubDynamicConf():
         #        and the one on Subscriber  => subscriber variables do not change
         #
         logger.begin_section("TC 7 : Publisher Subscriber not consistent")
-        
+
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE, logger)
 
         #
@@ -843,7 +874,7 @@ def testPubSubDynamicConf():
         #         but only sign for subscriber => subscriber variables do not change
         #
         logger.begin_section('TC 11 : Inconsistent security mode - publisher is signAndEncrypt, subscriber is sign;')
-        
+
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_SECU_FAIL_2, logger, possibleFail=True)
 
         helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
@@ -863,9 +894,9 @@ def testPubSubDynamicConf():
         #         for both publisher and subscriber => subscriber variables change
         #
         logger.begin_section("TC 13 : Security mode sign and encrypt")
-        
+
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED, logger)
-        
+
         #
         # TC 14 : Test with message configured with security mode sign
         #         for both publisher and subscriber => subscriber variables change
@@ -879,33 +910,33 @@ def testPubSubDynamicConf():
         #         for publisher => subscriber variables do not change
         #
         logger.begin_section('TC 15 : Inconsistent security mode - publisher is sign, subscriber is None;')
-        
+
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4, logger, possibleFail=True)
-        
+
         #
         # TC 16 : Test with invalid mixing of DSM with null and non null writerId
         #         => subscriber variables do not change
         #
-        logger.begin_section('TC 16 : Inconsistent writer ids ') 
-        
+        logger.begin_section('TC 16 : Inconsistent writer ids ')
+
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_INVALID_DSM_WRITERID, logger, possibleFail=True)
-        
+
         #
         # TC 17 : Test with mismatching writerId
         #         => subscriber variables does not change
         #
         logger.begin_section("TC 17 : Mismatching writerId")
-        
+
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_MISMATCHING_WRITERID, logger)
-        
+
         #
         # TC 18 : Test with no writer Id on subscriber (no filter)
         #         => subscriber variables change
         #
         logger.begin_section("TC 18 : No writerId on subscriber")
-        
+
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_NO_SUB_WRITER_ID, logger)
-        
+
         #
         # TC 19 : Test with second writer Id match writer Id on subscriber (1st is filtered out)
         #         => subscriber variables change
@@ -921,16 +952,16 @@ def testPubSubDynamicConf():
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
-        
+
         # TC 20 : Test with duplicate writer Id on same group
         #         => server does not start
         #
         logger.begin_section("TC 20 : Duplicate writerId")
         # helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_DUPLICATE_WRITERID, logger)
-        
+
         helpConfigurationChange(pubsubserver, XML_PUBSUB_DUPLICATE_WRITERID, logger)
         helpRestart(pubsubserver, logger, possibleFail=True)
-        
+
         helpAssertState(pubsubserver, PubSubState.DISABLED, logger)
 
         # TC 21 : Test with username and password from mqtt security  ==> subscriber variables change through Pub/Sub
@@ -961,7 +992,31 @@ def testPubSubDynamicConf():
         # TC 22 : Test with bad username and bad password from mqtt security
         logger.begin_section("TC 22 : Test with Publisher and Subscriber bad security configuration (MQTT) ")
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU_FAIL, logger, possibleFail=True)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)  
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # TC 23 : Test with various topics
+        logger.begin_section("TC 23 : Test with Publisher and Subscriber various topic (MQTT)")
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_STRING, "Test MQTT From Publisher", logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
 
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)

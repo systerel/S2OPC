@@ -69,6 +69,7 @@ ll_multi_pub_sub_test.tap
 ll_pub_sub_conf_test.tap
 ll_pub_sub_test.tap
 ll_pub_sub_xml_test.tap
+mqtt_pubsub_test.tap
 pubsub_scheduler_udp.tap
 pubsub_sched_ethernet.tap
 pubsub_sched_ethernet_with_recv_itf.tap
