@@ -4043,10 +4043,11 @@ static SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId built
                                                             int32_t* comparison,
                                                             SOPC_EncodeableObject_PfnComp* compAuxFunction)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOT_SUPPORTED;
     switch (builtInTypeId)
     {
     case SOPC_Null_Id:
+        status = SOPC_STATUS_OK;
         *comparison = 0;
         break;
     case SOPC_Boolean_Id:
@@ -4139,7 +4140,7 @@ static SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTy
                                                         SOPC_EncodeableObject_PfnComp* compAuxFunction,
                                                         int32_t* comparison)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOT_SUPPORTED;
     switch (builtInTypeId)
     {
     case SOPC_Null_Id:
