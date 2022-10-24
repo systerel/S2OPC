@@ -82,7 +82,6 @@
 #define ATTR_CONNECTION_IFNAME "interfaceName"
 #define ATTR_CONNECTION_MQTTUSERNAME "mqttUsername"
 #define ATTR_CONNECTION_MQTTPASSWORD "mqttPassword"
-#define ATTR_CONNECTION_MQTTTOPIC "mqttTopic"
 
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
@@ -93,8 +92,10 @@
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 #define ATTR_MESSAGE_GROUP_ID "groupId"
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
+#define ATTR_MESSAGE_MQTTOPIC "mqttTopic"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
+#define ATTR_DATASET_MQTTTOPIC "mqttTopic"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -125,6 +126,7 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_dataset_t
 {
     uint16_t writer_id;
+    char* mqttSubscriberTopic;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -139,6 +141,7 @@ struct sopc_xml_pubsub_message_t
     uint16_t nb_datasets;
     uint16_t groupId;
     uint32_t groupVersion;
+    char* mqttPublisherTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
 };
 
@@ -398,10 +401,6 @@ static bool parse_connection_attributes(const char* attr_name,
     {
         result = copy_any_string_attribute_value(&connection->mqttPassword, attr_val);
     }
-    else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTTOPIC, attr_name))
-    {
-        result = copy_any_string_attribute_value(&connection->mqttTopic, attr_val);
-    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'connection' attribute <%s>", attr_name);
@@ -500,6 +499,10 @@ static bool parse_message_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
         result &= msg->groupVersion > 0;
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_MQTTOPIC, attr_name))
+    {
+        result = copy_any_string_attribute_value(&msg->mqttPublisherTopic, attr_val);
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'message' attribute <%s>", attr_name);
@@ -570,6 +573,10 @@ static bool parse_dataset_attributes(const char* attr_name,
         // If present, the writerId cannot be equal to 0
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
+    }
+    else if (TEXT_EQUALS(ATTR_DATASET_MQTTTOPIC, attr_name))
+    {
+        result = copy_any_string_attribute_value(&ds->mqttSubscriberTopic, attr_val);
     }
     else
     {
@@ -1006,6 +1013,15 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
+                if (NULL != msg->mqttPublisherTopic && allocSuccess)
+                {
+                    allocSuccess = SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttPublisherTopic);
+                }
+                if (NULL == msg->mqttPublisherTopic && allocSuccess)
+                {
+                    allocSuccess =
+                        SOPC_WriterGroup_Set_Default_MqttTopic(writerGroup, p_connection->publisher_id, msg->groupId);
+                }
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
@@ -1077,6 +1093,11 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
                         dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
 
+                    if (NULL != ds->mqttSubscriberTopic && allocSuccess)
+                    {
+                        allocSuccess = SOPC_DataSetReader_Set_MqttTopic(dataSetReader, ds->mqttSubscriberTopic);
+                    }
+
                     for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
                     {
                         struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
@@ -1117,10 +1138,6 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
         {
             allocSuccess = SOPC_PubSubConnection_Set_MqttPassword(connection, p_connection->mqttPassword);
         }
-        if (allocSuccess && NULL != p_connection->mqttTopic)
-        {
-            allocSuccess = SOPC_PubSubConnection_Set_MqttTopic(connection, p_connection->mqttTopic);
-        }
     }
     if (!allocSuccess)
     {
@@ -1156,18 +1173,20 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                 }
                 SOPC_Free(ds->variableArr);
                 ds->variableArr = NULL;
+                SOPC_Free(ds->mqttSubscriberTopic);
+                ds->mqttSubscriberTopic = NULL;
             }
 
             SOPC_Free(msg->datasetArr);
             msg->datasetArr = NULL;
+            SOPC_Free(msg->mqttPublisherTopic);
+            msg->mqttPublisherTopic = NULL;
         }
 
         SOPC_Free(p_connection->address);
         p_connection->address = NULL;
         SOPC_Free(p_connection->interfaceName);
         p_connection->interfaceName = NULL;
-        SOPC_Free(p_connection->mqttTopic);
-        p_connection->mqttTopic = NULL;
         SOPC_Free(p_connection->mqttUsername);
         p_connection->mqttUsername = NULL;
         SOPC_Free(p_connection->mqttPassword);

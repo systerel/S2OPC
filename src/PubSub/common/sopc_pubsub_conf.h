@@ -22,6 +22,12 @@
 
 #include "sopc_builtintypes.h"
 
+#define SOPC_MAX_LENGTH_UINT64_TO_STRING                                                                              \
+    20 /* 2^64 = 1.8447*10^19 maximum number you could represent that use maximum chars would be 1.8447*10^19 plus \0 \
+          at the end */
+#define SOPC_MAX_LENGTH_UINT16_TO_STRING \
+    6 /* 2^16 = 65536 maximum number you could represent using maximum chars would be 65536 plus \0 at the end */
+
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;
 typedef struct SOPC_PublishedDataSet SOPC_PublishedDataSet;
@@ -152,9 +158,6 @@ bool SOPC_PubSubConnection_Set_MqttUsername(SOPC_PubSubConnection* connection, c
 const char* SOPC_PubSubConnection_Get_MqttPassword(const SOPC_PubSubConnection* connection);
 bool SOPC_PubSubConnection_Set_MqttPassword(SOPC_PubSubConnection* connection, const char* password);
 
-const char* SOPC_PubSubConnection_Get_MqttTopic(const SOPC_PubSubConnection* connection);
-bool SOPC_PubSubConnection_Set_MqttTopic(SOPC_PubSubConnection* connection, const char* topic);
-
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb);
 uint16_t SOPC_PubSubConnection_Nb_WriterGroup(const SOPC_PubSubConnection* connection);
 SOPC_WriterGroup* SOPC_PubSubConnection_Get_WriterGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);
@@ -210,6 +213,9 @@ bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
 uint16_t SOPC_DataSetReader_Nb_FieldMetaData(const SOPC_DataSetReader* reader);
 SOPC_FieldMetaData* SOPC_DataSetReader_Get_FieldMetaData_At(const SOPC_DataSetReader* reader, uint16_t index);
 
+const char* SOPC_DataSetReader_Get_MqttTopic(const SOPC_DataSetReader* reader);
+bool SOPC_DataSetReader_Set_MqttTopic(SOPC_DataSetReader* reader, const char* topic);
+
 /**********************/
 /** SOPC_FieldTarget **/
 /**********************/
@@ -257,6 +263,10 @@ void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
 
 SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
+
+const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer);
+bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic);
+bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t publisherId, uint16_t writerGroupId);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);

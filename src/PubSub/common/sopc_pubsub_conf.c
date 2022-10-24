@@ -18,10 +18,14 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_conf.h"
 
@@ -77,7 +81,6 @@ struct SOPC_PubSubConnection
     char* mqttUsername;
     // Password for MQTT protocol
     char* mqttPassword;
-    char* mqttTopic;
 
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
@@ -130,6 +133,9 @@ struct SOPC_WriterGroup
 
     SOPC_SecurityMode_Type securityMode;
 
+    // Topic Specific to Mqtt
+    char* mqttTopic;
+
     // For the next version:
     // KeepAliveTime
     // Priority
@@ -173,6 +179,9 @@ struct SOPC_DataSetReader
     SOPC_DataSetMetaData metaData;
     SOPC_SubscribedDataSetType targetType;
     double messageReceiveTimeout; /* ms */
+
+    // Topic Specific to Mqtt
+    char* mqttTopic;
 
     // These fields below are defined in Spec but not used
     // DataSetFieldContentMask
@@ -368,7 +377,6 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
         SOPC_Conf_PublisherId_Clear(&connection->publisherId);
         SOPC_Free(connection->address);
         SOPC_Free(connection->interfaceName);
-        SOPC_Free(connection->mqttTopic);
         SOPC_Free(connection->mqttUsername);
         SOPC_Free(connection->mqttPassword);
         SOPC_Free(connection->transportProfileUri);
@@ -507,19 +515,6 @@ bool SOPC_PubSubConnection_Set_MqttPassword(SOPC_PubSubConnection* connection, c
     assert(NULL != password);
     connection->mqttPassword = SOPC_PubSub_String_Copy(password);
     return (NULL != connection->mqttPassword);
-}
-
-const char* SOPC_PubSubConnection_Get_MqttTopic(const SOPC_PubSubConnection* connection)
-{
-    assert(NULL != connection);
-    return connection->mqttTopic;
-}
-
-bool SOPC_PubSubConnection_Set_MqttTopic(SOPC_PubSubConnection* connection, const char* topic)
-{
-    assert(NULL != topic);
-    connection->mqttTopic = SOPC_PubSub_String_Copy(topic);
-    return (NULL != connection->mqttTopic);
 }
 
 bool SOPC_PubSubConnection_Allocate_WriterGroup_Array(SOPC_PubSubConnection* connection, uint16_t nb)
@@ -718,6 +713,19 @@ void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t
     assert(!(reader->group->hasNonZeroWriterIds && reader->group->hasZeroWriterIds));
 
     reader->dataSetWriterId = id;
+}
+
+const char* SOPC_DataSetReader_Get_MqttTopic(const SOPC_DataSetReader* reader)
+{
+    assert(NULL != reader);
+    return reader->mqttTopic;
+}
+
+bool SOPC_DataSetReader_Set_MqttTopic(SOPC_DataSetReader* reader, const char* topic)
+{
+    assert(NULL != topic);
+    reader->mqttTopic = SOPC_PubSub_String_Copy(topic);
+    return (NULL != reader->mqttTopic);
 }
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
@@ -936,6 +944,73 @@ SOPC_DataSetWriter* SOPC_WriterGroup_Get_DataSetWriter_At(const SOPC_WriterGroup
     return &group->dataSetWriters[index];
 }
 
+const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer)
+{
+    assert(NULL != writer);
+    return writer->mqttTopic;
+}
+
+bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic)
+{
+    assert(NULL != topic);
+    writer->mqttTopic = SOPC_PubSub_String_Copy(topic);
+    return (NULL != writer->mqttTopic);
+}
+
+bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t publisherId, uint16_t writerGroupId)
+{
+    char charPublisherId[SOPC_MAX_LENGTH_UINT64_TO_STRING];
+    char charWriterGroupId[SOPC_MAX_LENGTH_UINT16_TO_STRING];
+    const char* dot = ".";
+    const long unsigned int lengthDot = 2;
+    const long unsigned int lengthDefaultTopic =
+        SOPC_MAX_LENGTH_UINT64_TO_STRING + lengthDot + SOPC_MAX_LENGTH_UINT16_TO_STRING;
+
+    char* defaultTopic = SOPC_Calloc(lengthDefaultTopic, sizeof(char));
+
+    memset(charPublisherId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
+    memset(charWriterGroupId, 0, SOPC_MAX_LENGTH_UINT16_TO_STRING);
+
+    int res = snprintf(charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING, "%" PRIu64, publisherId);
+    if (res < 0)
+    {
+        defaultTopic = NULL;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Failed to convert publisherId to string with error value %d",
+                                 errno);
+    }
+    else
+    {
+        res = snprintf(charWriterGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING, "%d", writerGroupId);
+        if (res < 0)
+        {
+            defaultTopic = NULL;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "Failed to convert writerGroupId to string with error value %d", errno);
+        }
+    }
+
+    if (res >= 0)
+    {
+        /* snprintf guarrantees the strings terminate by \0 */
+        defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
+        strncat(defaultTopic, dot, lengthDot);
+        strncat(defaultTopic, charWriterGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
+    }
+
+    bool result = SOPC_WriterGroup_Set_MqttTopic(writer, defaultTopic);
+    if (result)
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Default value of MqttTopic set to %s", defaultTopic);
+    }
+    else
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MqttTopic");
+    }
+
+    SOPC_Free(defaultTopic);
+    return result;
+}
+
 /** DataSetWriter **/
 uint16_t SOPC_DataSetWriter_Get_Id(const SOPC_DataSetWriter* writer)
 {
@@ -1123,6 +1198,7 @@ static void SOPC_WriterGroup_Clear(SOPC_WriterGroup* group)
         /* IMPORTANT NOTE: No memory management to do in dataSetWriter(s), publishedDataSet managed in config struct
          * => no need to iterate on array */
         SOPC_Free(group->dataSetWriters);
+        SOPC_Free(group->mqttTopic);
     }
 }
 
@@ -1133,6 +1209,7 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
         for (int i = 0; i < group->dataSetReaders_length; i++)
         {
             SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
+            SOPC_Free(group->dataSetReaders[i].mqttTopic);
         }
         group->dataSetReaders_length = 0;
         SOPC_Free(group->dataSetReaders);
