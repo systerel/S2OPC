@@ -66,10 +66,9 @@ OPERATIONS
     THEN
         CHOICE
             valid := TRUE ||
-            resp_typ, a_msg_in_type
+            resp_typ
             :(resp_typ : t_msg_type_i &
-              resp_typ : s_service_resps - {e_msg_service_fault_resp} &
-              a_msg_in_type = resp_typ)
+              resp_typ : s_service_resps - {e_msg_service_fault_resp})
         OR
             valid := FALSE ||
             resp_typ := c_msg_type_indet
