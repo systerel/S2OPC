@@ -17,6 +17,14 @@
  * under the License.
  */
 
+/** \file
+ *
+ * \brief Entry point for tools tests. Tests use libcheck.
+ *
+ * If you want to debug the exe, you should define env var CK_FORK=no
+ * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
+ */
+
 #include <check.h>
 #include <stdlib.h>
 
