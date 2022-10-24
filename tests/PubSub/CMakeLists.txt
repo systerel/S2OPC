@@ -102,7 +102,6 @@ if(ENABLE_TESTING)
   add_custom_command(
     TARGET mqtt_pub_test POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/mosquitto.conf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/passwordfile.txt ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
 
   s2opc_unit_test(mqtt_pub_test)

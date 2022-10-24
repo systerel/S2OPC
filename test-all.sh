@@ -116,7 +116,7 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
    fi
 
     # Manage tests in samples/ directory
-    if [ ! -f "${CLIENTSERVER_SAMPLE_CTEST_FILE}" ]; then      
+    if [ ! -f "${CLIENTSERVER_SAMPLE_CTEST_FILE}" ]; then
        CLIENTSERVER_SAMPLE_DIR=${BIN_DIR}/samples/ClientServer
        CLIENTSERVER_SAMPLE_CTEST_FILE="${CLIENTSERVER_SAMPLE_DIR}/CTestTestfile.cmake"
        TAP_DIR="${BIN_DIR}"
@@ -138,8 +138,10 @@ else
 fi
 
 if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
-   adduser --system mosquitto 
-   echo "password_file  ${BUILD_DIR}/bin/passwordfile.txt" > ${BUILD_DIR}/bin/mosquitto.conf
+   adduser --system mosquitto
+   touch ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt
+   mosquitto_passwd -b ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt user1 password # fill file with username and password
+   echo "password_file  ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt" > ${BUILD_DIR}/bin/mosquitto.conf # load file to allow authentification with username and password
    echo "allow_anonymous true" >> ${BUILD_DIR}/bin/mosquitto.conf
    mosquitto -c ${BUILD_DIR}/bin/mosquitto.conf &
 
