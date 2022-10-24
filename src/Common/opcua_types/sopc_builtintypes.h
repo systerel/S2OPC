@@ -1004,7 +1004,30 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
 /**** Variant ****/
-/** \brief allocates and return a SOPC_Variant*/
+
+/**
+ * \brief Generic comparison function type for values contained in a variant
+ *
+ * \param customContext  The custom context provided to the custom comparison function
+ * \param builtInTypeId  The value type of \p left and \p right comparison operands
+ * \param left           The left operand for which type is defined by \p builtInTypeId
+ * \param right          The right operand for which type is defined by \p builtInTypeId
+ * \param[out]           The comparison result set when status returned is ::SOPC_STATUS_OK.
+ *                       When result is set it is expected to be:
+ *                       - (-1) if left < right
+ *                       - (0) if left == right
+ *                       - (+1) if left > right
+ *
+ * \return               SOPC_STATUS_OK if the comparison succeeded,
+ *                       SOPC_STATUS_UNSUPPORTED if the type is not supported.
+ */
+typedef SOPC_ReturnStatus(SOPC_VariantValue_PfnCompCustom)(const void* customContext,
+                                                           SOPC_BuiltinId builtInTypeId,
+                                                           const void* left,
+                                                           const void* right,
+                                                           int32_t* compResult);
+
+/** \brief allocates and return a SOPC_Variant */
 SOPC_Variant* SOPC_Variant_Create(void);
 /** \brief Initialize a Variant. Do not initialize existing variants without clearing them first.*/
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
@@ -1057,14 +1080,25 @@ SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dst, const SOPC_Variant
 // to dst).
 void SOPC_Variant_Move(SOPC_Variant* dest, SOPC_Variant* src);
 
-// Compare only single value for some basic types (integers, statuses, nodeId, string): otherwise
-// SOPC_STATUS_NOT_SUPPORTED
 SOPC_ReturnStatus SOPC_Variant_Compare(const SOPC_Variant* left, const SOPC_Variant* right, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Variant_CompareAux(const void* left, const void* right, int32_t* comparison);
+SOPC_ReturnStatus SOPC_Variant_CompareCustom(SOPC_VariantValue_PfnCompCustom* compCustom,
+                                             const void* compCustomContext,
+                                             const SOPC_Variant* left,
+                                             const SOPC_Variant* right,
+                                             int32_t* comparison);
 SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
                                             const SOPC_Variant* right,
                                             const SOPC_NumericRange* range,
                                             int32_t* comparison);
+
+SOPC_ReturnStatus SOPC_Variant_CompareCustomRange(SOPC_VariantValue_PfnCompCustom* compCustom,
+                                                  const void* compCustomContext,
+                                                  const SOPC_Variant* left,
+                                                  const SOPC_Variant* right,
+                                                  const SOPC_NumericRange* range,
+                                                  int32_t* comparison);
+
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
@@ -1107,11 +1141,19 @@ SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
                                 size_t sizeOfElt,
                                 SOPC_EncodeableObject_PfnCopy* opFct);
 SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
-                                  void* eltsArrayLeft,
-                                  void* eltsArrayRight,
+                                  const void* eltsArrayLeft,
+                                  const void* eltsArrayRight,
                                   size_t sizeOfElt,
                                   SOPC_EncodeableObject_PfnComp* compFct,
-                                  int32_t* comparison);
+                                  int32_t* comparisonResult);
+SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
+                                        const void* eltsArrayLeft,
+                                        const void* eltsArrayRight,
+                                        size_t sizeOfElt,
+                                        SOPC_VariantValue_PfnCompCustom* compCustomFct,
+                                        const void* customCompContext,
+                                        SOPC_BuiltinId builtInId,
+                                        int32_t* comparisonResult);
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOPC_EncodeableObject_PfnClear* clearFct);
 
 /**
