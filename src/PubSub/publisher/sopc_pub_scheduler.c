@@ -58,12 +58,6 @@ static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 // Send an UDP message. Implements SOPC_PubScheduler_TransportCtx_Send
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
 
-// Specific callback for MQTT message. No treatment for PUBLISHER.
-static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport context handle */
-                                     uint8_t* data,             /* Data received */
-                                     uint16_t size,             /* Size of data received, in bytes. */
-                                     void* pUserContext);       /* User context, used as pub sub connection */
-
 // Clear a Transport MQTT context. Implements SOPC_PubScheduler_TransportCtx_Clear
 static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 
@@ -87,7 +81,8 @@ struct SOPC_PubScheduler_TransportCtx
     SOPC_PubScheduler_TransportCtx_Send* pFctSend;
 
     // specific to SOPC_PubSubProtocol_MQTT
-    MqttTransportHandle* mqttHandle;
+    MqttContextClient* mqttClient;
+    const char* mqttTopic;
 };
 
 typedef struct MessageCtx
@@ -99,7 +94,8 @@ typedef struct MessageCtx
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
     uint64_t publishingIntervalUs;
     int32_t publishingOffsetUs; /**< Negative = not used */
-    bool warned;                /**< Have we warned about expired messages yet? */
+    const char* mqttTopic;
+    bool warned; /**< Have we warned about expired messages yet? */
 } MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
@@ -263,6 +259,14 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
     MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
 
     context->transport = ctx;
+    if (NULL != ctx->mqttClient)
+    {
+        context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+    }
+    else
+    {
+        context->mqttTopic = NULL;
+    }
     context->group = group;
     context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
     context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
@@ -479,6 +483,8 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             security->msgNonceRandom = NULL;
         }
 
+        context->transport->mqttTopic = context->mqttTopic;
+
         context->transport->pFctSend(context->transport, buffer);
         SOPC_Buffer_Delete(buffer);
         buffer = NULL;
@@ -675,7 +681,6 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
     size_t hostnameLength = 0;
     size_t portIdx = 0;
     size_t portLength = 0;
-    MqttManagerHandle* handleMqttManager = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (protocol)
@@ -712,16 +717,19 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
                 return false;
             }
         }
-        handleMqttManager = SOPC_PubSub_Protocol_GetMqttManagerHandle();
-        pubSchedulerCtx.transport[index].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-            handleMqttManager, &address[strlen(MQTT_PREFIX)], SOPC_PubSubConnection_Get_MqttTopic(connection),
-            SOPC_PubSubConnection_Get_MqttUsername(connection), SOPC_PubSubConnection_Get_MqttPassword(connection),
-            on_mqtt_message_received, NULL);
-
-        if (pubSchedulerCtx.transport[index].mqttHandle == NULL)
+        status = SOPC_MQTT_Create_Client(&pubSchedulerCtx.transport[index].mqttClient);
+        if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Publisher MQTT configuration failed: check if topic is set");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Not enougth space to allocate mqttClient");
+            return false;
+        }
+        status = SOPC_MQTT_Initialize_Client(pubSchedulerCtx.transport[index].mqttClient, &address[strlen(MQTT_PREFIX)],
+                                             SOPC_PubSubConnection_Get_MqttUsername(connection),
+                                             SOPC_PubSubConnection_Get_MqttPassword(connection), NULL, 0, NULL, NULL);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher MQTT configuration failed");
             return false;
         }
 
@@ -786,33 +794,20 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     }
 }
 
-// Specific callback for MQTT message
-static void on_mqtt_message_received(MqttTransportHandle* pCtx, /* Transport context handle */
-                                     uint8_t* data,             /* Data received */
-                                     uint16_t size,             /* Size of data received, in bytes. */
-                                     void* pUserContext)        /* User context, used as pub sub connection */
-{
-    SOPC_UNUSED_ARG(pCtx);
-    SOPC_UNUSED_ARG(data);
-    SOPC_UNUSED_ARG(size);
-    SOPC_UNUSED_ARG(pUserContext);
-    return;
-}
-
 static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx)
 {
-    if (ctx != NULL && ctx->mqttHandle != NULL)
-    {
-        SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(&(ctx->mqttHandle));
-        ctx->mqttHandle = NULL;
-    }
+    SOPC_MQTT_Release_Client(ctx->mqttClient);
 }
 
 static void SOPC_PubScheduler_CtxMqtt_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
 {
-    if (ctx != NULL && ctx->mqttHandle != NULL && buffer != NULL && buffer->data != NULL && buffer->length > 0)
+    if (ctx != NULL && ctx->mqttClient != NULL && buffer != NULL && buffer->data != NULL && buffer->length > 0)
     {
-        SOPC_MQTT_TRANSPORT_SYNCH_SendMessage(ctx->mqttHandle, buffer->data, (uint16_t) buffer->length, 0);
+        SOPC_ReturnStatus result = SOPC_MQTT_Send_Message(ctx->mqttClient, ctx->mqttTopic, *buffer);
+        if (SOPC_STATUS_OK != result)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to send MQTT message");
+        }
     }
 }
 

@@ -169,7 +169,7 @@ struct SOPC_SubScheduler_TransportCtx
     Socket sock;
 
     // specific to SOPC_PubSubProtocol_MQTT
-    MqttTransportHandle* mqttHandle;
+    MqttContextClient* mqttClient;
 
     // specific to SOPC_PubSubProtocol_ETH
     SOPC_ETH_Socket_ReceiveAddressInfo* ethAddr;
@@ -253,9 +253,8 @@ static void on_socket_message_received(void* pInputIdentifier, Socket sock);
  * \param size  Size of data received, in bytes
  * \param pInputIdentifier  User context identifying the connection
  */
-static void on_mqtt_message_received(MqttTransportHandle* pCtx, uint8_t* data, uint16_t size, void* pInputIdentifier)
+static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
-    SOPC_UNUSED_ARG(pCtx);
     assert(NULL != pInputIdentifier);
 
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
@@ -462,7 +461,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                     SOPC_Socket_AddressInfo* multicastAddr = NULL;
                     SOPC_Socket_AddressInfo* localAddr = NULL;
-                    MqttManagerHandle* handleMqttMgr = NULL;
                     size_t hostnameLength = 0;
                     size_t portIdx = 0;
                     size_t portLength = 0;
@@ -511,29 +509,46 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         break;
                     case SOPC_PubSubProtocol_MQTT:
                     {
-                        handleMqttMgr = SOPC_PubSub_Protocol_GetMqttManagerHandle();
-
-                        if (handleMqttMgr == NULL)
+                        if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
+                                                                &portLength) == false)
                         {
                             status = SOPC_STATUS_NOK;
                         }
                         else
                         {
-                            if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
-                                                                    &portLength) == false)
+                            /* Extract all topics */
+                            uint16_t nbTopic = 0;
+                            uint16_t offset = 0;
+                            const char* topic[MQTT_LIB_MAX_NB_TOPIC_NAME];
+                            for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
                             {
-                                status = SOPC_STATUS_NOK;
+                                SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
+                                uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
+                                nbTopic = nbTopic + nbDataSetReader;
+                                for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME;
+                                     dsr_i++)
+                                {
+                                    SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
+                                    topic[offset + dsr_i] = SOPC_DataSetReader_Get_MqttTopic(reader);
+                                }
+                                offset += nbTopic;
+                            }
+                            status = SOPC_MQTT_Create_Client(&schedulerCtx.transport[iIter].mqttClient);
+                            if (SOPC_STATUS_OK != status)
+                            {
+                                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                                       "Not enougth space to allocate mqttClient");
+                                result = false;
                             }
                             else
                             {
-                                schedulerCtx.transport[iIter].mqttHandle = SOPC_MQTT_TRANSPORT_SYNCH_GetHandle(
-                                    handleMqttMgr, &address[strlen(MQTT_PREFIX)],
-                                    SOPC_PubSubConnection_Get_MqttTopic(connection),
+                                status = SOPC_MQTT_Initialize_Client(
+                                    schedulerCtx.transport[iIter].mqttClient, &address[strlen(MQTT_PREFIX)],
                                     SOPC_PubSubConnection_Get_MqttUsername(connection),
-                                    SOPC_PubSubConnection_Get_MqttPassword(connection), on_mqtt_message_received,
-                                    schedulerCtx.transport[iIter].connection);
+                                    SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbTopic,
+                                    on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
 
-                                if (schedulerCtx.transport[iIter].mqttHandle == NULL)
+                                if (SOPC_STATUS_OK != status)
                                 {
                                     SOPC_Logger_TraceError(
                                         SOPC_LOG_MODULE_PUBSUB,
@@ -547,15 +562,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                     schedulerCtx.transport[iIter].sock = -1;
                                 }
                             }
-                        }
-
-                        if (SOPC_STATUS_OK != status)
-                        {
-                            schedulerCtx.transport[iIter].fctClear = NULL;
-                            schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_UNKOWN;
-                            schedulerCtx.transport[iIter].sock = -1;
-                            /* Call uninit because at least one error */
-                            result = false;
                         }
                     }
                     break;
@@ -588,9 +594,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             SOPC_SubScheduler_CtxEth_Clear(&schedulerCtx.transport[iIter]);
                             result = false;
                         }
-
                         break;
                     case SOPC_PubSubProtocol_UNKOWN:
+
                     default:
                         status = SOPC_STATUS_INVALID_PARAMETERS;
                         result = false;
@@ -745,11 +751,7 @@ static void SOPC_SubScheduler_CtxUdp_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 
 static void SOPC_SubScheduler_CtxMqtt_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 {
-    if (ctx != NULL && ctx->mqttHandle != NULL)
-    {
-        SOPC_MQTT_TRANSPORT_SYNCH_ReleaseHandle(&(ctx->mqttHandle));
-        ctx->mqttHandle = NULL;
-    }
+    SOPC_MQTT_Release_Client(ctx->mqttClient);
 }
 
 static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)

@@ -220,7 +220,6 @@ void PubSub_Stop(void)
     SOPC_Atomic_Int_Set(&pubsubOnline, 0);
     SOPC_SubScheduler_Stop();
     SOPC_PubScheduler_Stop();
-    SOPC_PubSub_Protocol_ReleaseMqttManagerHandle();
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatus(SOPC_PubSubState_Disabled);
 }
