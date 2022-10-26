@@ -18,9 +18,14 @@
  */
 
 #include "sopc_mqtt_transport_layer.h"
+#include "sopc_macros.h"
+
+#ifndef USE_MQTT_PAHO
+#define USE_MQTT_PAHO 0
+#endif
+#if USE_MQTT_PAHO == 1
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
-#include "sopc_macros.h"
 
 #include "MQTTAsync.h"
 
@@ -245,3 +250,40 @@ int32_t get_unique_id(void)
     unique_client_id += random;
     return SOPC_Atomic_Int_Add(&unique_client_id, 1);
 }
+
+#else
+
+SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
+{
+    SOPC_UNUSED_ARG(contextClient);
+    SOPC_UNUSED_ARG(topic);
+    SOPC_UNUSED_ARG(message);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
+                                              const char* uri,
+                                              const char* username,
+                                              const char* password,
+                                              const char** subTopic,
+                                              uint16_t nbSubTopic,
+                                              FctMessageReceived* cbMessageReceived,
+                                              void* userContext)
+{
+    SOPC_UNUSED_ARG(contextClient);
+    SOPC_UNUSED_ARG(uri);
+    SOPC_UNUSED_ARG(username);
+    SOPC_UNUSED_ARG(password);
+    SOPC_UNUSED_ARG(subTopic);
+    SOPC_UNUSED_ARG(nbSubTopic);
+    SOPC_UNUSED_ARG(cbMessageReceived);
+    SOPC_UNUSED_ARG(userContext);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient)
+{
+    SOPC_UNUSED_ARG(contextClient);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif

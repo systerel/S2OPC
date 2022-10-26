@@ -22,6 +22,9 @@
 #ifndef SOPC_MQTT
 #define SOPC_MQTT
 
+#include <stdio.h>
+#include <string.h>
+
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
