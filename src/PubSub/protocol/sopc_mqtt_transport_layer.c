@@ -286,4 +286,9 @@ SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient)
     SOPC_UNUSED_ARG(contextClient);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
+
+void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
+{
+    SOPC_UNUSED_ARG(contextClient);
+}
 #endif
