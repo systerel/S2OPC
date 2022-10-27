@@ -524,14 +524,14 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             {
                                 SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
                                 uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
-                                nbTopic = nbTopic + nbDataSetReader;
+                                nbTopic = (uint16_t)(nbTopic + (uint16_t) nbDataSetReader);
                                 for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME;
                                      dsr_i++)
                                 {
                                     SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
                                     topic[offset + dsr_i] = SOPC_DataSetReader_Get_MqttTopic(reader);
                                 }
-                                offset += nbTopic;
+                                offset = (uint16_t)(offset + nbTopic);
                             }
                             status = SOPC_MQTT_Create_Client(&schedulerCtx.transport[iIter].mqttClient);
                             if (SOPC_STATUS_OK != status)
