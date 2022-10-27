@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 
 #include "sopc_dict.h"
 #include "sopc_logger.h"
@@ -334,28 +335,134 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;
 }
 
+// Note: second comparison allows to eliminate the NaN value for FP which shall be considered equals
+#define COMPARE_DEADBAND_ABSOLUTE_NUMERIC_VALUE(sopcTypeid, ntype, tmpVarType) \
+    case sopcTypeid:                                                           \
+        left##tmpVarType = *(const ntype*) left;                               \
+        right##tmpVarType = *(const ntype*) right;                             \
+        if (left##tmpVarType > right##tmpVarType)                              \
+        {                                                                      \
+            compareValue = 1;                                                  \
+            diff = (double) (left##tmpVarType - right##tmpVarType);            \
+        }                                                                      \
+        else if (right##tmpVarType > left##tmpVarType)                         \
+        {                                                                      \
+            compareValue = -1;                                                 \
+            diff = (double) (right##tmpVarType - left##tmpVarType);            \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            compareValue = 0;                                                  \
+        }                                                                      \
+        break;
+
+#define FOR_EACH_NUMERIC_TYPE(x)                                                                                       \
+    x(SOPC_Byte_Id, SOPC_Byte, uint64_t) x(SOPC_UInt16_Id, uint16_t, uint64_t) x(SOPC_UInt32_Id, uint32_t, uint64_t)   \
+        x(SOPC_UInt64_Id, uint64_t, uint64_t) x(SOPC_SByte_Id, SOPC_SByte, int64_t) x(SOPC_Int16_Id, int16_t, int64_t) \
+            x(SOPC_Int32_Id, int32_t, int64_t) x(SOPC_Int64_Id, int64_t, int64_t) x(SOPC_Float_Id, float, double)      \
+                x(SOPC_Double_Id, double, double)
+
+static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
+                                                   SOPC_BuiltinId builtInTypeId,
+                                                   const void* left,
+                                                   const void* right,
+                                                   int32_t* compResult)
+{
+    double deadband = *(const double*) customContext;
+    if (deadband < 0.0)
+    {
+        // TODO: check prior and replace by an assertion
+        // Cannot be greater than an absolute value
+        compResult = 0;
+        return SOPC_STATUS_OK;
+    }
+    int32_t compareValue = 0;
+    uint64_t leftuint64_t = 0;
+    uint64_t rightuint64_t = 0;
+    int64_t leftint64_t = 0;
+    int64_t rightint64_t = 0;
+    double leftdouble = 0;
+    double rightdouble = 0;
+    double diff = 0.0;
+    switch (builtInTypeId)
+    {
+        FOR_EACH_NUMERIC_TYPE(COMPARE_DEADBAND_ABSOLUTE_NUMERIC_VALUE)
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (compareValue != 0)
+    {
+        // Check absolute value of the difference
+        diff = fabs(diff);
+        if (diff > deadband)
+        {
+            *compResult = compareValue;
+        }
+    }
+    else
+    {
+        // Equality detected (including NaN equality for FP)
+        *compResult = compareValue;
+    }
+    return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* numRange,
+                                                       const OpcUa_DataChangeFilter* filter,
+                                                       const SOPC_Variant* old,
+                                                       const SOPC_Variant* new,
+                                                       int32_t* comparison)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (NULL != filter && OpcUa_DeadbandType_None != filter->DeadbandType)
+    {
+        switch (filter->DeadbandType)
+        {
+        case OpcUa_DeadbandType_None:
+            assert(false && "already evaluated case");
+            break;
+        case OpcUa_DeadbandType_Absolute:
+            /* TODO: shall be Numeric */
+            status = SOPC_Variant_CompareCustomRange(&compare_deadband_absolute, &filter->DeadbandValue, old, new,
+                                                     numRange, comparison);
+            break;
+        case OpcUa_DeadbandType_Percent:
+            /* TODO: shall be AnalogItemType + valid EU Range */
+            status = SOPC_STATUS_NOT_SUPPORTED;
+            break;
+        default:
+            // Already checked when retrieved in message
+            assert(false && "invalid deadband type");
+        }
+    }
+    else
+    {
+        // No filter active
+        status = SOPC_Variant_CompareRange(old, new, numRange, comparison);
+    }
+    return status;
+}
+
 void monitored_item_pointer_bs__is_notification_triggered(
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
     const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_old_wv_pointer,
     const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,
     t_bool* const monitored_item_pointer_bs__bres)
 {
-    /* TODO: add filter + manage NaN in Variant_CompareRange to answer NaN == NaN ??? */
     *monitored_item_pointer_bs__bres = false;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t dtCompare = 0;
     SOPC_InternalMontitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
     OpcUa_DataChangeFilter* filter = monitItem->filter;
-    // We already know that it is the same NodeId, check for attribute Id
-    // TODO: check index if monitored item on an index of an array !
 
     if (monitItem->aid != constants__c_AttributeId_indet &&
         monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == (uint32_t) monitItem->aid)
     {
-        // Same attribute, now compare values (no filters managed for now: STATUS_VALUE_1 behavior)
+        // Compare statuses first: DataChangeTrigger contains at least Status
         if (monitored_item_pointer_bs__p_old_wv_pointer->Value.Status ==
             monitored_item_pointer_bs__p_new_wv_pointer->Value.Status)
         {
+            // If DataChangeTrigger defined, check if timestamp is included in change detection
             if (NULL != filter && OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger)
             {
                 if (monitored_item_pointer_bs__p_old_wv_pointer->Value.SourceTimestamp !=
@@ -367,49 +474,33 @@ void monitored_item_pointer_bs__is_notification_triggered(
                     dtCompare = -1;
                 }
             }
+            // If no changed detected and value change detection is active, compare values
             if (0 == dtCompare && (NULL == filter || OpcUa_DataChangeTrigger_StatusValue == filter->Trigger ||
                                    OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger))
             {
-                status = SOPC_Variant_CompareRange(&monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
-                                                   &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
-                                                   monitItem->indexRange, &dtCompare);
+                status = compare_monitored_item_values(
+                    monitItem->indexRange, filter, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
+                    &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
             }
         }
         else
         {
             // Statuses are differents
-            status = SOPC_STATUS_OK;
             dtCompare = -1;
         }
         if (SOPC_STATUS_OK == status)
         {
-            if (dtCompare != 0)
-            {
-                // TODO: evaluate deadband filter
-                switch (filter->DeadbandType)
-                {
-                case OpcUa_DeadbandType_None:
-                    break;
-                case OpcUa_DeadbandType_Absolute:
-                    /* TODO: shall be Numeric */
-                    break;
-                case OpcUa_DeadbandType_Percent:
-                    /* TODO: shall be AnalogItemType + valid EU Range */
-                    break;
-                default:
-                    // Already checked when retrieved in message
-                    assert(false && "invalid deadband type");
-                }
-
-                // Generate a notification
-                *monitored_item_pointer_bs__bres = true;
-            }
+            // Generate a notification if change detected
+            *monitored_item_pointer_bs__bres = dtCompare != 0;
         }
         else
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
-                "MonitoredItem notification trigger: comparison of data values failed with (type, array type)=(%d, %d)",
+                "MonitoredItem notification trigger: comparison of MI id=%" PRIu32
+                " data values failed with (deadband, type, array type)=(%" PRIu32 ", %d, %d)",
+                monitItem->monitoredItemId,
+                NULL == monitItem->filter ? OpcUa_DeadbandType_None : monitItem->filter->DeadbandType,
                 (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
                 (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
         }
