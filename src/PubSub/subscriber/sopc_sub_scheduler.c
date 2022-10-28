@@ -237,6 +237,28 @@ static void set_new_state(SOPC_PubSubState new)
     schedulerCtx.state = new;
 }
 
+/* Get all topics from each data set reader and store it in an array, inform number of subscription topic on parameter
+ * nbTopic */
+static void get_mqtt_topic_from_dataSetReader(const char** topic,
+                                              uint16_t* nbTopic,
+                                              SOPC_PubSubConnection* connection,
+                                              uint16_t nbReaderGroups)
+{
+    uint16_t offset = 0;
+    for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
+    {
+        SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
+        uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
+        *nbTopic = (uint16_t)(*nbTopic + (uint16_t) nbDataSetReader);
+        for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && *nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME; dsr_i++)
+        {
+            SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
+            topic[offset + dsr_i] = SOPC_DataSetReader_Get_MqttTopic(reader);
+        }
+        offset = (uint16_t)(offset + *nbTopic);
+    }
+}
+
 /* The generic callback that decode message and call the configuration-defined callback SetVariables */
 static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderContext,
                                              SOPC_PubSubState state,
@@ -516,23 +538,10 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         }
                         else
                         {
-                            /* Extract all topics */
-                            uint16_t nbTopic = 0;
-                            uint16_t offset = 0;
                             const char* topic[MQTT_LIB_MAX_NB_TOPIC_NAME];
-                            for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
-                            {
-                                SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
-                                uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
-                                nbTopic = (uint16_t)(nbTopic + (uint16_t) nbDataSetReader);
-                                for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME;
-                                     dsr_i++)
-                                {
-                                    SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
-                                    topic[offset + dsr_i] = SOPC_DataSetReader_Get_MqttTopic(reader);
-                                }
-                                offset = (uint16_t)(offset + nbTopic);
-                            }
+                            uint16_t nbTopic = 0;
+                            get_mqtt_topic_from_dataSetReader(topic, &nbTopic, connection, nbReaderGroups);
+
                             status = SOPC_MQTT_Create_Client(&schedulerCtx.transport[iIter].mqttClient);
                             if (SOPC_STATUS_OK != status)
                             {
