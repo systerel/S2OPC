@@ -201,6 +201,13 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
         *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
         *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
+
+        char* nidStr = SOPC_NodeId_ToCString(nid);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "monitored_item_pointer_bs_create_monitored_item_pointer: subscriptionId=%" PRIu32
+                               " monitoredItemId=%" PRIu32 " creation for NodeId=%s AttributeId=%d",
+                               monitItem->subId, monitItem->monitoredItemId, nidStr, monitItem->aid);
+        SOPC_Free(nidStr);
     }
     else
     {
@@ -233,6 +240,11 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
 {
     SOPC_InternalMontitoredItem* monitItem =
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                           "monitored_item_pointer_bs__delete_monitored_item_pointer: monitoredItemId=%" PRIu32
+                           " deletion",
+                           monitItem->monitoredItemId);
+
     uintptr_t appended = (uintptr_t) SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
                                                              (void*) (uintptr_t) monitItem->monitoredItemId);
 
