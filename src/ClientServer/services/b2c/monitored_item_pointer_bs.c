@@ -42,6 +42,7 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
         SOPC_Free(mi->indexRangeString);
         OpcUa_DataChangeFilter_Clear(mi->filter);
         SOPC_Free(mi->filter);
+        SOPC_Variant_Delete(mi->lastCachedValueForFilter);
         SOPC_Free(mi);
     }
 }
@@ -242,6 +243,14 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     monitItem->filter = monitored_item_pointer_bs__p_filter;
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
+
+    // If a cached value exists and no filter defined, reset the last cache value for filter
+    if (NULL != monitItem->lastCachedValueForFilter &&
+        (NULL == monitItem->filter || OpcUa_DeadbandType_None == monitItem->filter->DeadbandType))
+    {
+        SOPC_Variant_Delete(monitItem->lastCachedValueForFilter);
+        monitItem->lastCachedValueForFilter = NULL;
+    }
 }
 
 void monitored_item_pointer_bs__delete_monitored_item_pointer(
@@ -409,8 +418,8 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
 
 static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* numRange,
                                                        const OpcUa_DataChangeFilter* filter,
-                                                       const SOPC_Variant* old,
-                                                       const SOPC_Variant* new,
+                                                       const SOPC_Variant* oldValue,
+                                                       const SOPC_Variant* newValue,
                                                        int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -423,8 +432,8 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
             break;
         case OpcUa_DeadbandType_Absolute:
             /* TODO: shall be Numeric */
-            status = SOPC_Variant_CompareCustomRange(&compare_deadband_absolute, &filter->DeadbandValue, old, new,
-                                                     numRange, comparison);
+            status = SOPC_Variant_CompareCustomRange(&compare_deadband_absolute, &filter->DeadbandValue, oldValue,
+                                                     newValue, numRange, comparison);
             break;
         case OpcUa_DeadbandType_Percent:
             /* TODO: shall be AnalogItemType + valid EU Range */
@@ -438,9 +447,53 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
     else
     {
         // No filter active
-        status = SOPC_Variant_CompareRange(old, new, numRange, comparison);
+        status = SOPC_Variant_CompareRange(oldValue, newValue, numRange, comparison);
     }
     return status;
+}
+
+static SOPC_ReturnStatus monitored_item_update_last_cached_value(SOPC_InternalMontitoredItem* monitItem,
+                                                                 const SOPC_Variant* lastNotifiedValue)
+{
+    // See part 4 DataChangeFilterDataChangeFilter definition for cache necessity:
+    // The last cached value is defined as the last value pushed to the queue [of notification]
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    // Cache the last notified value when filter are active (needed for next comparison)
+    if (NULL != monitItem->filter && OpcUa_DeadbandType_None != monitItem->filter->DeadbandType)
+    {
+        SOPC_Variant_Clear(monitItem->lastCachedValueForFilter);
+        if (NULL == monitItem->lastCachedValueForFilter)
+        {
+            monitItem->lastCachedValueForFilter = SOPC_Variant_Create();
+            status = (NULL == monitItem->lastCachedValueForFilter) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Variant_Copy(monitItem->lastCachedValueForFilter, lastNotifiedValue);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(monitItem->lastCachedValueForFilter);
+                monitItem->lastCachedValueForFilter = NULL;
+            }
+        }
+    }
+    return status;
+}
+
+static const SOPC_Variant* monitored_item_get_last_cached_value(const SOPC_InternalMontitoredItem* monitItem,
+                                                                const SOPC_Variant* oldAddressSpaceValue)
+{
+    if (monitItem->filter != NULL && OpcUa_DeadbandType_None != monitItem->filter->DeadbandType)
+    {
+        // We shall use the last cached value if available
+        if (NULL != monitItem->lastCachedValueForFilter)
+        {
+            return monitItem->lastCachedValueForFilter;
+        }
+    }
+    // Previous address space value <=> cached value
+    return oldAddressSpaceValue;
 }
 
 void monitored_item_pointer_bs__is_notification_triggered(
@@ -454,6 +507,7 @@ void monitored_item_pointer_bs__is_notification_triggered(
     int32_t dtCompare = 0;
     SOPC_InternalMontitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
     OpcUa_DataChangeFilter* filter = monitItem->filter;
+    const SOPC_Variant* lastCachedValue = NULL;
 
     if (monitItem->aid != constants__c_AttributeId_indet &&
         monitored_item_pointer_bs__p_new_wv_pointer->AttributeId == (uint32_t) monitItem->aid)
@@ -478,9 +532,11 @@ void monitored_item_pointer_bs__is_notification_triggered(
             if (0 == dtCompare && (NULL == filter || OpcUa_DataChangeTrigger_StatusValue == filter->Trigger ||
                                    OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger))
             {
-                status = compare_monitored_item_values(
-                    monitItem->indexRange, filter, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value,
-                    &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
+                lastCachedValue = monitored_item_get_last_cached_value(
+                    monitItem, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value);
+                status = compare_monitored_item_values(monitItem->indexRange, filter, lastCachedValue,
+                                                       &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
+                                                       &dtCompare);
             }
         }
         else
@@ -490,8 +546,14 @@ void monitored_item_pointer_bs__is_notification_triggered(
         }
         if (SOPC_STATUS_OK == status)
         {
-            // Generate a notification if change detected
-            *monitored_item_pointer_bs__bres = dtCompare != 0;
+            if (dtCompare != 0)
+            {
+                // Generate a notification if change detected
+                *monitored_item_pointer_bs__bres = true;
+                // Cache last value notified if value filtered
+                monitored_item_update_last_cached_value(monitItem,
+                                                        &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value);
+            }
         }
         else
         {
