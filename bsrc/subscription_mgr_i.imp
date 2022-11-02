@@ -182,12 +182,18 @@ LOCAL_OPERATIONS
                             FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
                                        FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
                                                   FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
-                                                             FALSE |-> {FALSE |-> e_sc_bad_index_range_invalid,
-                                                                        TRUE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
-                                                                                  FALSE |-> e_sc_ok
-                                                                                 }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
-                                                                                        t_monitoredItemId = s_monitoredItemId))
-                                                                        }(bool(CreateMonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
+                                                             FALSE |-> {TRUE |-> e_sc_bad_filter_not_allowed,
+                                                                        FALSE |-> {FALSE |-> e_sc_bad_index_range_invalid,
+                                                                                   TRUE |-> {TRUE |-> e_sc_bad_out_of_memory,
+                                                                                             FALSE |-> e_sc_ok
+                                                                                            }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
+                                                                                                   t_monitoredItemId = s_monitoredItemId))
+                                                                                   }(bool(CreateMonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
+                                                                       }(bool(CreateMonitoredItemReq_Filter(mi_index) /= c_monitoringFilter_indet &
+                                                                               not(CreateMonitoredItemReq_NodeId(mi_index) : ran(a_NodeId) &
+                                                                                   CreateMonitoredItemReq_AttributeId(mi_index) = e_aid_Value &
+                                                                                   (a_NodeId~(CreateMonitoredItemReq_NodeId(mi_index)) |->
+                                                                                    CreateMonitoredItemReq_Filter(mi_index)) : a_monitoredItemNodeFilterValid)))
                                                            }(bool(a_NodeId~(CreateMonitoredItemReq_NodeId(mi_index)) /:
                                                                    dom(AttributeID_Node_Variant(CreateMonitoredItemReq_AttributeId(mi_index))) or
                                                                    a_NodeClass_Attribute
@@ -864,7 +870,6 @@ OPERATIONS
                     IF l_sc = e_sc_ok
                     THEN
                         l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
-                        /* TODO: evaluate filter regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
                         l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
                                                                                                    l_nid,
                                                                                                    l_aid,
@@ -1123,8 +1128,6 @@ OPERATIONS
             IF l_bres = TRUE
             THEN
                 l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
-                /* TODO: evaluate filter regarding attribute (filter presence <=> Value attribute) */
-                /* TODO: evaluate filter regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
                 l_sc <-- modify_monitored_item (l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_revQueueSize)
             END
             ;

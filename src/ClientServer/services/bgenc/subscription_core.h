@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 05/10/2022 10:05:16
+ Date                 : 03/11/2022 10:22:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,6 +57,7 @@
 /*--------------
    SEES Clause
   --------------*/
+#include "address_space_itf.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
@@ -98,6 +99,12 @@ extern void subscription_core__INITIALISATION(void);
 extern void subscription_core__get_fresh_subscription(
    t_bool * const subscription_core__bres,
    constants__t_subscription_i * const subscription_core__p_subscription);
+extern void subscription_core__local_check_monitored_item_filter_valid(
+   const constants__t_NodeId_i subscription_core__p_nid,
+   const constants__t_AttributeId_i subscription_core__p_aid,
+   const constants__t_monitoringFilter_i subscription_core__p_filter,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode,
+   constants__t_monitoringFilterCtx_i * const subscription_core__filterCtx);
 extern void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
 extern void subscription_core__local_fill_notification_message(

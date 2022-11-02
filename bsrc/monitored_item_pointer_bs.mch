@@ -30,6 +30,8 @@ ABSTRACT_VARIABLES
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId,
+    a_monitoredItemNodeFilterValid,
+    a_monitoredItemAttributeId,
     a_monitoredItemMonitMode,
     a_monitoredItemQueueSize
 
@@ -40,6 +42,8 @@ INVARIANT
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+    a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i &
+    a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
     a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
     a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter
 
@@ -50,6 +54,8 @@ INITIALISATION
     a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
     a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {}) ||
     a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {}) ||
+    a_monitoredItemNodeFilterValid :(a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i) ||
+    a_monitoredItemAttributeId :(a_monitoredItemAttributeId : s_monitoredItemPointer <-> t_AttributeId & a_monitoredItemAttributeId = {}) ||
     a_monitoredItemMonitMode :(a_monitoredItemMonitMode : s_monitoredItemPointer <-> t_monitoringMode & a_monitoredItemMonitMode = {}) ||
     a_monitoredItemQueueSize :(a_monitoredItemQueueSize : s_monitoredItemPointer <-> t_counter & a_monitoredItemQueueSize = {})
 
@@ -62,6 +68,25 @@ OPERATIONS
     END
     ;
 
+    StatusCode, filterCtx <-- check_monitored_item_filter_valid (p_node, p_filter) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node &
+        p_filter : t_monitoringFilter_i &
+        p_filter : t_monitoringFilter
+    THEN
+        /* Check filter validity regarding node DataType is Number (absolute) / Variable AnalogItem type EU range (percent) */
+        IF (p_node |-> p_filter) : a_monitoredItemNodeFilterValid
+        THEN
+            filterCtx :(filterCtx : t_monitoringFilterCtx_i & (filterCtx = c_monitoringFilterCtx_indet or filterCtx : t_monitoringFilterCtx)) ||
+            StatusCode := e_sc_ok
+        ELSE
+            filterCtx := c_monitoringFilterCtx_indet ||
+            StatusCode := e_sc_bad_filter_not_allowed
+        END
+    END
+    ;
+
     StatusCode, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
                                                                                          p_nid,
                                                                                          p_aid,
@@ -70,6 +95,7 @@ OPERATIONS
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle,
                                                                                          p_filter,
+                                                                                         p_filterCtx,
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     PRE
@@ -87,6 +113,9 @@ OPERATIONS
         p_clientHandle : t_client_handle_i &
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
+        p_filterCtx : t_monitoringFilterCtx_i &
+        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
+        (p_filter = c_monitoringFilter_indet => p_filterCtx = c_monitoringFilterCtx_indet) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -108,6 +137,7 @@ OPERATIONS
                 a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                 a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
                 a_monitoredItemNodeId (l_monitoredItem) := p_nid ||
+                a_monitoredItemAttributeId (l_monitoredItem) := p_aid ||
                 a_monitoredItemMonitMode (l_monitoredItem) := p_monitoringMode ||
                 a_monitoredItemQueueSize (l_monitoredItem) := p_queueSize ||
                 monitoredItemPointer := l_monitoredItem ||
@@ -125,6 +155,7 @@ OPERATIONS
                                   p_timestampToReturn,
                                   p_clientHandle,
                                   p_filter,
+                                  p_filterCtx,
                                   p_discardOldest,
                                   p_queueSize) =
     PRE
@@ -135,6 +166,9 @@ OPERATIONS
         p_clientHandle : t_client_handle_i &
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
+        p_filterCtx : t_monitoringFilterCtx_i &
+        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
+        (p_filter = c_monitoringFilter_indet => p_filterCtx = c_monitoringFilterCtx_indet) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -196,7 +230,7 @@ OPERATIONS
           p_nid : t_NodeId_i &
           p_nid = a_monitoredItemNodeId(p_monitoredItemPointer) &
           p_aid : t_AttributeId_i &
-          p_aid : t_AttributeId &
+          p_aid = a_monitoredItemAttributeId(p_monitoredItemPointer) &
           p_indexRange : t_IndexRange_i &
           p_timestampToReturn : t_TimestampsToReturn_i &
           p_timestampToReturn : t_TimestampsToReturn &

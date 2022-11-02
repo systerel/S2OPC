@@ -172,6 +172,7 @@ SETS
     };
 
     t_monitoringFilter_i;
+    t_monitoringFilterCtx_i;
 
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
@@ -385,6 +386,7 @@ CONCRETE_CONSTANTS
     c_monitoredItemQueue_indet,
     c_monitoredItemQueueIterator_indet,
     c_monitoringFilter_indet,
+    c_monitoringFilterCtx_indet,
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
     c_msg_header_indet,
@@ -495,6 +497,7 @@ ABSTRACT_CONSTANTS
     t_monitoredItemQueueIterator,
     t_monitoringMode,
     t_monitoringFilter,
+    t_monitoringFilterCtx,
     t_monitoredItemReqIndex,
     t_monitoredItemPointer,
     t_monitoredItemId,
@@ -821,6 +824,10 @@ PROPERTIES
     t_monitoringFilter <: t_monitoringFilter_i &
     c_monitoringFilter_indet : t_monitoringFilter_i &
     c_monitoringFilter_indet /: t_monitoringFilter &
+
+    t_monitoringFilterCtx <: t_monitoringFilterCtx_i &
+    c_monitoringFilterCtx_indet : t_monitoringFilterCtx_i &
+    c_monitoringFilterCtx_indet /: t_monitoringFilterCtx &
 
     t_monitoredItemPointer <: t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet : t_monitoredItemPointer_i &

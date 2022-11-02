@@ -212,6 +212,8 @@ OPERATIONS
            CreateMonitoredItemReq_ValidMonitoringMode(p_index) = TRUE &
            (p_filter /= c_monitoringFilter_indet & p_filter /: t_monitoringFilter =>
                p_sc = e_sc_bad_monitored_item_filter_invalid or p_sc = e_sc_bad_monitored_item_filter_unsupported) &
+           /* Note: attribute validity is also checked later but it is usefull to keep
+                    this earlier verification for UACTT tests (UACTT does not expect unsupported attributes) */
            (p_filter /= c_monitoringFilter_indet &
             p_filter : t_monitoringFilter &
             CreateMonitoredItemReq_AttributeId(p_index) /= e_aid_Value =>

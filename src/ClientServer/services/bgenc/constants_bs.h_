@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 05/10/2022 10:05:27
+ Date                 : 03/11/2022 10:22:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -87,6 +87,7 @@
 #define constants_bs__t_monitoredItemPointer_i t_entier4
 #define constants_bs__t_monitoredItemQueueIterator_i t_entier4
 #define constants_bs__t_monitoredItemQueue_i t_entier4
+#define constants_bs__t_monitoringFilterCtx_i t_entier4
 #define constants_bs__t_monitoringFilter_i t_entier4
 #define constants_bs__t_msg_header_i t_entier4
 #define constants_bs__t_msg_i t_entier4
@@ -161,6 +162,7 @@
 #define constants_bs__t_monitoredItemPointer_i_max (-1)
 #define constants_bs__t_monitoredItemQueueIterator_i_max (-1)
 #define constants_bs__t_monitoredItemQueue_i_max (-1)
+#define constants_bs__t_monitoringFilterCtx_i_max (-1)
 #define constants_bs__t_monitoringFilter_i_max (-1)
 #define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
@@ -234,6 +236,7 @@
 #define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0
 #define constants_bs__c_monitoredItemQueue_indet 0
+#define constants_bs__c_monitoringFilterCtx_indet 0
 #define constants_bs__c_monitoringFilter_indet 0
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0

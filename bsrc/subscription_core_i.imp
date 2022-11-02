@@ -23,6 +23,7 @@ REFINES
     subscription_core
 
 SEES
+    address_space_itf,
     constants,
     constants_statuscodes_bs,
     message_in_bs,
@@ -333,6 +334,29 @@ LOCAL_OPERATIONS
     THEN
         p_nb_available_notifs :=
         card(a_notification_queue_notifications[{a_monitored_item_notification_queue(p_monitoredItemPointer)}])
+    END
+    ;
+
+    StatusCode, filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
+    PRE
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
+        p_filter : t_monitoringFilter_i &
+        (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)
+    THEN
+        StatusCode, filterCtx
+        :(StatusCode : t_StatusCode_i & StatusCode : t_StatusCode &
+          filterCtx : t_monitoringFilterCtx_i &
+            (p_filter = c_monitoringFilter_indet => StatusCode = e_sc_ok & filterCtx = c_monitoringFilterCtx_indet) &
+            (not (p_filter = c_monitoringFilter_indet) &
+                (p_nid : ran(a_NodeId) & p_aid = e_aid_Value & (a_NodeId~(p_nid) |-> p_filter) : a_monitoredItemNodeFilterValid
+                    => StatusCode = e_sc_ok  & filterCtx : t_monitoringFilterCtx_i) &
+                (not (p_nid : ran(a_NodeId) & p_aid = e_aid_Value & (a_NodeId~(p_nid) |-> p_filter) : a_monitoredItemNodeFilterValid)
+                    => StatusCode = e_sc_bad_filter_not_allowed & filterCtx = c_monitoringFilterCtx_indet)
+            )
+        )
     END
 
 OPERATIONS
@@ -690,6 +714,35 @@ OPERATIONS
     END
     ;
 
+    StatusCode, filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
+    VAR
+        l_bres_presentNode,
+        l_node
+    IN
+        filterCtx := c_monitoringFilterCtx_indet;
+        IF p_filter /= c_monitoringFilter_indet
+        THEN
+            IF p_aid = e_aid_Value
+            THEN
+                l_bres_presentNode, l_node <-- readall_AddressSpace_Node (p_nid);
+                IF l_bres_presentNode = TRUE
+                THEN
+                    /* Check filter validity regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
+                    StatusCode, filterCtx <-- check_monitored_item_filter_valid (l_node, p_filter)
+                ELSE
+                    /* Node not present for now, impossible to check filter validity */
+                    StatusCode := e_sc_bad_filter_not_allowed
+                END
+            ELSE
+                /* Attribute is not a Value */
+                StatusCode := e_sc_bad_filter_not_allowed
+            END
+        ELSE
+            StatusCode := e_sc_ok
+        END
+    END
+    ;
+
     /* END OF LOCAL OPERATIONS */
 
     is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
@@ -994,6 +1047,7 @@ OPERATIONS
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     VAR
+        l_filterCtx,
         l_bres,
         l_sub_monitIt_queue,
         l_node_monitIt_queue,
@@ -1001,18 +1055,26 @@ OPERATIONS
         l_ts_src,
         l_ts_srv
     IN
+        monitoredItemPointer := c_monitoredItemPointer_indet;
+        monitoredItemId := c_monitoredItemId_indet;
+        /* Check constraints on node for MI filter */
+        StatusCode_service, l_filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter);
         /* Create monitored item */
-        StatusCode_service, monitoredItemPointer, monitoredItemId
-          <-- create_monitored_item_pointer(p_subscription,
-                                            p_nid,
-                                            p_aid,
-                                            p_indexRange,
-                                            p_timestampToReturn,
-                                            p_monitoringMode,
-                                            p_clientHandle,
-                                            p_filter,
-                                            p_discardOldest,
-                                            p_queueSize);
+        IF StatusCode_service = e_sc_ok
+        THEN
+            StatusCode_service, monitoredItemPointer, monitoredItemId
+              <-- create_monitored_item_pointer(p_subscription,
+                                                p_nid,
+                                                p_aid,
+                                                p_indexRange,
+                                                p_timestampToReturn,
+                                                p_monitoringMode,
+                                                p_clientHandle,
+                                                p_filter,
+                                                l_filterCtx,
+                                                p_discardOldest,
+                                                p_queueSize)
+        END;
         IF StatusCode_service = e_sc_ok
         THEN
             l_bres, l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
@@ -1087,19 +1149,42 @@ OPERATIONS
     p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     VAR
         bres,
-        l_monitoredItemPointer
+        l_monitoredItemPointer,
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle,
+        l_filterCtx
     IN
         bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
         IF bres = TRUE
         THEN
-            modify_monitored_item_pointer(l_monitoredItemPointer,
-                                          p_timestampToReturn,
-                                          p_clientHandle,
-                                          p_filter,
-                                          p_discardOldest,
-                                          p_queueSize);
-            resize_monitored_item_notification_queue(l_monitoredItemPointer);
-            p_sc := e_sc_ok
+            l_monitoredItemId,
+            l_subscription,
+            l_nid,
+            l_aid,
+            l_indexRange,
+            l_timestampToReturn,
+            l_monitoringMode,
+            l_clientHandle
+              <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            /* Check constraints on node for MI filter */
+            p_sc, l_filterCtx <-- local_check_monitored_item_filter_valid (l_nid, l_aid, p_filter);
+            IF p_sc = e_sc_ok
+            THEN
+                modify_monitored_item_pointer(l_monitoredItemPointer,
+                                              p_timestampToReturn,
+                                              p_clientHandle,
+                                              p_filter,
+                                              l_filterCtx,
+                                              p_discardOldest,
+                                              p_queueSize);
+                resize_monitored_item_notification_queue(l_monitoredItemPointer)
+            END
         ELSE
             p_sc := e_sc_bad_monitored_item_id_invalid
         END

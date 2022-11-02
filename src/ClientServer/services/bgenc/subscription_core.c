@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 05/10/2022 10:05:16
+ Date                 : 03/11/2022 10:39:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -392,6 +392,42 @@ void subscription_core__local_monitored_item_nb_available_notifications(
       if (subscription_core__l_bres == true) {
          monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_mi_notif_queue,
             subscription_core__p_nb_available_notifs);
+      }
+   }
+}
+
+void subscription_core__local_check_monitored_item_filter_valid(
+   const constants__t_NodeId_i subscription_core__p_nid,
+   const constants__t_AttributeId_i subscription_core__p_aid,
+   const constants__t_monitoringFilter_i subscription_core__p_filter,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode,
+   constants__t_monitoringFilterCtx_i * const subscription_core__filterCtx) {
+   {
+      t_bool subscription_core__l_bres_presentNode;
+      constants__t_Node_i subscription_core__l_node;
+      
+      *subscription_core__filterCtx = constants__c_monitoringFilterCtx_indet;
+      if (subscription_core__p_filter != constants__c_monitoringFilter_indet) {
+         if (subscription_core__p_aid == constants__e_aid_Value) {
+            address_space_itf__readall_AddressSpace_Node(subscription_core__p_nid,
+               &subscription_core__l_bres_presentNode,
+               &subscription_core__l_node);
+            if (subscription_core__l_bres_presentNode == true) {
+               monitored_item_pointer_bs__check_monitored_item_filter_valid(subscription_core__l_node,
+                  subscription_core__p_filter,
+                  subscription_core__StatusCode,
+                  subscription_core__filterCtx);
+            }
+            else {
+               *subscription_core__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
+            }
+         }
+         else {
+            *subscription_core__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
+         }
+      }
+      else {
+         *subscription_core__StatusCode = constants_statuscodes_bs__e_sc_ok;
       }
    }
 }
@@ -832,6 +868,7 @@ void subscription_core__create_monitored_item(
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
    constants__t_monitoredItemId_i * const subscription_core__monitoredItemId) {
    {
+      constants__t_monitoringFilterCtx_i subscription_core__l_filterCtx;
       t_bool subscription_core__l_bres;
       constants__t_monitoredItemQueue_i subscription_core__l_sub_monitIt_queue;
       constants__t_monitoredItemQueue_i subscription_core__l_node_monitIt_queue;
@@ -839,19 +876,29 @@ void subscription_core__create_monitored_item(
       constants__t_Timestamp subscription_core__l_ts_src;
       constants__t_Timestamp subscription_core__l_ts_srv;
       
-      monitored_item_pointer_bs__create_monitored_item_pointer(subscription_core__p_subscription,
-         subscription_core__p_nid,
+      *subscription_core__monitoredItemPointer = constants__c_monitoredItemPointer_indet;
+      *subscription_core__monitoredItemId = constants__c_monitoredItemId_indet;
+      subscription_core__local_check_monitored_item_filter_valid(subscription_core__p_nid,
          subscription_core__p_aid,
-         subscription_core__p_indexRange,
-         subscription_core__p_timestampToReturn,
-         subscription_core__p_monitoringMode,
-         subscription_core__p_clientHandle,
          subscription_core__p_filter,
-         subscription_core__p_discardOldest,
-         subscription_core__p_queueSize,
          subscription_core__StatusCode_service,
-         subscription_core__monitoredItemPointer,
-         subscription_core__monitoredItemId);
+         &subscription_core__l_filterCtx);
+      if (*subscription_core__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
+         monitored_item_pointer_bs__create_monitored_item_pointer(subscription_core__p_subscription,
+            subscription_core__p_nid,
+            subscription_core__p_aid,
+            subscription_core__p_indexRange,
+            subscription_core__p_timestampToReturn,
+            subscription_core__p_monitoringMode,
+            subscription_core__p_clientHandle,
+            subscription_core__p_filter,
+            subscription_core__l_filterCtx,
+            subscription_core__p_discardOldest,
+            subscription_core__p_queueSize,
+            subscription_core__StatusCode_service,
+            subscription_core__monitoredItemPointer,
+            subscription_core__monitoredItemId);
+      }
       if (*subscription_core__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
          subscription_core_bs__get_nodeToMonitoredItemQueue(subscription_core__p_nid,
             &subscription_core__l_bres,
@@ -938,19 +985,44 @@ void subscription_core__modify_monitored_item(
    {
       t_bool subscription_core__bres;
       constants__t_monitoredItemPointer_i subscription_core__l_monitoredItemPointer;
+      constants__t_monitoredItemId_i subscription_core__l_monitoredItemId;
+      constants__t_subscription_i subscription_core__l_subscription;
+      constants__t_NodeId_i subscription_core__l_nid;
+      constants__t_AttributeId_i subscription_core__l_aid;
+      constants__t_IndexRange_i subscription_core__l_indexRange;
+      constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
+      constants__t_monitoringMode_i subscription_core__l_monitoringMode;
+      constants__t_client_handle_i subscription_core__l_clientHandle;
+      constants__t_monitoringFilterCtx_i subscription_core__l_filterCtx;
       
       monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
          &subscription_core__bres,
          &subscription_core__l_monitoredItemPointer);
       if (subscription_core__bres == true) {
-         monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
-            subscription_core__p_timestampToReturn,
-            subscription_core__p_clientHandle,
+         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+            &subscription_core__l_monitoredItemId,
+            &subscription_core__l_subscription,
+            &subscription_core__l_nid,
+            &subscription_core__l_aid,
+            &subscription_core__l_indexRange,
+            &subscription_core__l_timestampToReturn,
+            &subscription_core__l_monitoringMode,
+            &subscription_core__l_clientHandle);
+         subscription_core__local_check_monitored_item_filter_valid(subscription_core__l_nid,
+            subscription_core__l_aid,
             subscription_core__p_filter,
-            subscription_core__p_discardOldest,
-            subscription_core__p_queueSize);
-         monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
+            subscription_core__p_sc,
+            &subscription_core__l_filterCtx);
+         if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
+            monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
+               subscription_core__p_timestampToReturn,
+               subscription_core__p_clientHandle,
+               subscription_core__p_filter,
+               subscription_core__l_filterCtx,
+               subscription_core__p_discardOldest,
+               subscription_core__p_queueSize);
+            monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
+         }
       }
       else {
          *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;

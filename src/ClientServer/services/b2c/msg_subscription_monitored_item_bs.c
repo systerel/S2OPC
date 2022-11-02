@@ -398,7 +398,8 @@ void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
     OpcUa_MonitoredItemModifyRequest* monitReq =
         &modifyReq->ItemsToModify[msg_subscription_monitored_item_bs__p_index - 1];
 
-    // Note: we have to consider attribute is a Value attribute since we have no access to information here
+    // Note: we have to consider attribute is a Value attribute since we have no access to information here.
+    //       Its validity is checked later.
     *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
         &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc);
 
