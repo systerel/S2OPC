@@ -378,13 +378,8 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
                                                    int32_t* compResult)
 {
     double deadband = *(const double*) customContext;
-    if (deadband < 0.0)
-    {
-        // TODO: check prior and replace by an assertion
-        // Cannot be greater than an absolute value
-        compResult = 0;
-        return SOPC_STATUS_OK;
-    }
+    // Checked on filter creation
+    assert(!(deadband < 0.0));
     int32_t compareValue = 0;
     uint64_t leftuint64_t = 0;
     uint64_t rightuint64_t = 0;

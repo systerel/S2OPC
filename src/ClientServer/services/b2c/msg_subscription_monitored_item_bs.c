@@ -29,6 +29,7 @@
 
 #include "util_b2c.h"
 
+#include "sopc_logger.h"
 #include "sopc_types.h"
 
 /*------------------------
@@ -156,7 +157,14 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             {
             case OpcUa_DeadbandType_None:
             case OpcUa_DeadbandType_Absolute:
-                validFilter &= true;
+                // Check deadband value is positive (absolute value expected)
+                if (dcf->DeadbandValue < 0.0)
+                {
+                    validFilter = false;
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Failed to create a MI filter with an absolute deadband value negative: %lf",
+                                           dcf->DeadbandValue);
+                }
                 break;
             case OpcUa_DeadbandType_Percent: // Not supported for now
                 supportedFilter = false;
