@@ -17,15 +17,20 @@
           <xs:element type="UserAuthorizationType" name="UserAuthorization"/>
     </xs:sequence>
     <xs:attribute type="xs:string" name="user" use="required"/>
-    <xs:attribute type="xs:string" name="pwd" use="required"/>
+    <xs:attribute type="xs:string" name="hash" use="required"/>
     <xs:attribute type="xs:string" name="salt" use="required"/>
-    <xs:attribute type="xs:string" name="iter" use="required"/>
     <xs:attribute type="xs:string" name="base64" use="optional"/>
+  </xs:complexType>
+  <xs:complexType name="UserPasswordConfigurationType">
+    <xs:sequence>
+      <xs:element type="UserPasswordType" name="UserPassword" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="hash_iteration_count" use="required"/>
   </xs:complexType>
   <xs:complexType name="S2OPC_UsersType">
     <xs:sequence>
       <xs:element type="AnonymousType" name="Anonymous" minOccurs="0"/>
-      <xs:element type="UserPasswordType" name="UserPassword" maxOccurs="unbounded"/>
+      <xs:element type="UserPasswordConfigurationType" name="UserPasswordConfiguration" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

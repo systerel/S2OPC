@@ -37,13 +37,20 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
+/* Default user password configuration for rejected token with wrong username (to avoid timing attack) */
+#define REJECTED_USER "rejectedUser"
+#define REJECTED_HASH "2/uIDCHytBMdVkCsWgcjyLRksoWZZIFGpxcRd+b0ISE="
+#define REJECTED_SALT "lnpfeUrWa41tYNvDuyXh4A=="
+#define REJECTED_ITER_COUNT 10000u
+
 typedef enum
 {
-    PARSE_START,             // Beginning of file
-    PARSE_S2OPC_USERS,       // In a S2OPC_Users
-    PARSE_ANONYMOUS,         // ..In a Anonymous tag
-    PARSE_USERPASSWORD,      // ..In a UserPassword tag
-    PARSE_USERAUTHORIZATION, // ....In a UserAuthorization tag
+    PARSE_START,                      // Beginning of file
+    PARSE_S2OPC_USERS,                // In a S2OPC_Users
+    PARSE_ANONYMOUS,                  // ..In a Anonymous tag
+    PARSE_USERPASSWORD_CONFIGURATION, // ..In UserPasswordConfiguration tag
+    PARSE_USERPASSWORD,               // ....In a UserPassword tag
+    PARSE_USERAUTHORIZATION,          // ......In a UserAuthorization tag
 } parse_state_t;
 
 typedef struct user_rights
@@ -81,6 +88,7 @@ struct parse_context_t
     user_rights anonymousRights;
 
     user_password* currentUserPassword;
+    uint32_t hashIterationCount;
 
     parse_state_t state;
 };
@@ -225,6 +233,7 @@ static bool get_decode_buffer(const char* buffer, bool base64, SOPC_ByteString* 
         outLen = (3 * (strlen(buffer) / 4)) - paddingLength;
     }
     // Decode
+    SOPC_ByteString_Initialize(out);
     out->Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
     out->Length = (int32_t) outLen;
     if (NULL == out->Data)
@@ -283,6 +292,25 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
     return res;
 }
 
+static bool start_user_password_configuration(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* attr_val = get_attr(ctx, "hash_iteration_count", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no iteration count defined");
+        return false;
+    }
+
+    SOPC_ReturnStatus status = SOPC_strtouint32_t(attr_val, &ctx->hashIterationCount, 10, '\0');
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is not an integer");
+        return false;
+    }
+
+    return true;
+}
+
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     ctx->currentUserPassword = SOPC_Calloc(1, sizeof(user_password));
@@ -291,6 +319,7 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
+    ctx->currentUserPassword->iteration_count = ctx->hashIterationCount;
     SOPC_String_Initialize(&ctx->currentUserPassword->user);
     SOPC_ByteString_Initialize(&ctx->currentUserPassword->hash);
     SOPC_ByteString_Initialize(&ctx->currentUserPassword->salt);
@@ -318,32 +347,11 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
     bool base64 = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     bool res = get_hash(ctx, attrs, base64);
-    if (!res)
+    if (res)
     {
-        return false;
+        res = get_salt(ctx, attrs, base64);
     }
-
-    res = get_salt(ctx, attrs, base64);
-    if (!res)
-    {
-        return false;
-    }
-
-    attr_val = get_attr(ctx, "iter", attrs);
-    if (NULL == attr_val)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no iteration count defined");
-        return false;
-    }
-
-    status = SOPC_strtouint32_t(attr_val, &ctx->currentUserPassword->iteration_count, 10, '\0');
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is not an integer");
-        return false;
-    }
-
-    return true;
+    return res;
 }
 
 static bool start_authorization(struct parse_context_t* ctx, const XML_Char** attrs)
@@ -392,14 +400,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         ctx->state = PARSE_S2OPC_USERS;
         break;
     case PARSE_S2OPC_USERS:
-        if (0 == strcmp(name, "UserPassword"))
+        if (0 == strcmp(name, "UserPasswordConfiguration"))
         {
-            if (!start_userpassword(ctx, attrs))
+            if (!start_user_password_configuration(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-            ctx->state = PARSE_USERPASSWORD;
+            ctx->state = PARSE_USERPASSWORD_CONFIGURATION;
         }
         else if (0 == strcmp(name, "Anonymous"))
         {
@@ -409,6 +417,24 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
                 return;
             }
             ctx->state = PARSE_ANONYMOUS;
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+
+        break;
+    case PARSE_USERPASSWORD_CONFIGURATION:
+        if (0 == strcmp(name, "UserPassword"))
+        {
+            if (!start_userpassword(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+            ctx->state = PARSE_USERPASSWORD;
         }
         else
         {
@@ -479,6 +505,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
+        ctx->state = PARSE_USERPASSWORD_CONFIGURATION;
+        break;
+    case PARSE_USERPASSWORD_CONFIGURATION:
         ctx->state = PARSE_S2OPC_USERS;
         break;
     case PARSE_S2OPC_USERS:
@@ -549,6 +578,66 @@ static bool secure_hash_compare(const user_password* sRef, const SOPC_ByteString
     return result && (lRef == lCmp);
 }
 
+static SOPC_ReturnStatus set_default_password_hash(user_password** up)
+{
+    size_t outLen = 0;
+    size_t paddingLength = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+
+    // Allocate the user password structure
+    user_password* pwd = SOPC_Malloc(sizeof(user_password) * 1);
+    if (NULL == pwd)
+    {
+        return status;
+    }
+
+    // Allocate the default hash
+    status = SOPC_HelperDecode_Base64_GetPaddingLength(REJECTED_HASH, &paddingLength);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_ByteString_Initialize(&pwd->hash);
+    if (SOPC_STATUS_OK == status)
+    {
+        outLen = (3 * (strlen(REJECTED_HASH) / 4)) - paddingLength;
+        pwd->hash.Length = (int32_t) outLen;
+        pwd->hash.Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
+        if (NULL == pwd->hash.Data)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        status = SOPC_HelperDecode_Base64(REJECTED_HASH, pwd->hash.Data, &outLen);
+    }
+
+    // Allocate the default salt
+    status = SOPC_HelperDecode_Base64_GetPaddingLength(REJECTED_SALT, &paddingLength);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_ByteString_Initialize(&pwd->salt);
+    if (SOPC_STATUS_OK == status)
+    {
+        outLen = (3 * (strlen(REJECTED_SALT) / 4)) - paddingLength;
+        pwd->salt.Length = (int32_t) outLen;
+        pwd->salt.Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
+        if (NULL == pwd->salt.Data)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        status = SOPC_HelperDecode_Base64(REJECTED_SALT, pwd->salt.Data, &outLen);
+    }
+
+    // Set the default iteration count
+    pwd->iteration_count = REJECTED_ITER_COUNT;
+    // Allocate the default user
+    SOPC_String_Initialize(&pwd->user);
+    status = SOPC_String_CopyFromCString((SOPC_String*) &pwd->user, REJECTED_USER);
+    // Clear the structure in case of error
+    if (SOPC_STATUS_OK != status)
+    {
+        userpassword_free(pwd);
+    }
+
+    *up = pwd;
+    return status;
+}
+
 static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* authn,
                                             const SOPC_ExtensionObject* token,
                                             SOPC_UserAuthentication_Status* authenticated)
@@ -557,6 +646,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UsersConfig* config = authn->pData;
+    bool wrong_username = false;
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
     assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
@@ -565,10 +655,17 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
         user_password* up = SOPC_Dict_Get(config->users, username, NULL);
-        // Early return if rejected Token
+        // if rejected Token with wrong username: set default password hash configuration to avoid timing attack (to
+        // have a constant time during authentication process)
         if (NULL == up)
         {
-            return SOPC_STATUS_OK;
+            wrong_username = true;
+            status = set_default_password_hash(&up);
+            if (SOPC_STATUS_OK != status)
+            {
+                //  Even if the default hash setting failed, then the token is rejected
+                return SOPC_STATUS_OK;
+            }
         }
 
         SOPC_CryptoUser_Ctx* ctx = NULL;
@@ -631,6 +728,12 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         if (NULL != ctx)
         {
             SOPC_CryptoUser_Ctx_Free(ctx);
+        }
+
+        // Free the default user password hash in case of wrong username
+        if (wrong_username)
+        {
+            userpassword_free(up);
         }
     }
 
