@@ -30,8 +30,9 @@
 #include "sopc_crypto_user.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
-#include "sopc_helper_decode.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
@@ -59,7 +60,6 @@ typedef struct user_password
     SOPC_ByteString hash;
     SOPC_ByteString salt;
     uint32_t iteration_count;
-    bool base64;
     user_rights rights; // mask of SOPC_UserAuthorization_OperationType
 
 } user_password;
@@ -196,62 +196,74 @@ static bool end_userpassword(struct parse_context_t* ctx)
     return true;
 }
 
-static bool get_decode_buffer(const char* buffer, bool base64, SOPC_ByteString* out)
+static bool get_decode_buffer(const char* buffer, bool base64, SOPC_ByteString* out, XML_Parser parser)
 {
+    SOPC_ASSERT(NULL != buffer);
     size_t outLen = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Get the output size from the encoding input format
     if (!base64)
     {
+        if (0 != strlen(buffer) % 2)
+        {
+            LOG_XML_ERROR(parser, "Hash hex format must be a multiple of 2 bytes");
+            return false;
+        }
         outLen = (strlen(buffer) / 2);
     }
     else
     {
-        int paddingLength = SOPC_HelperDecode_Base64_GetPaddingLength(buffer);
-        outLen = (3 * (strlen(buffer) / 4)) - (size_t) paddingLength;
+        if (0 != strlen(buffer) % 4)
+        {
+            LOG_XML_ERROR(parser, "Hash base64 format must be a multiple of 4 bytes");
+            return false;
+        }
+        size_t paddingLength = 0;
+        status = SOPC_HelperDecode_Base64_GetPaddingLength(buffer, &paddingLength);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        outLen = (3 * (strlen(buffer) / 4)) - paddingLength;
     }
     // Decode
-    unsigned char* decode = SOPC_Malloc(sizeof(unsigned char) * outLen + 1);
-    if (NULL == decode)
+    out->Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
+    out->Length = (int32_t) outLen;
+    if (NULL == out->Data)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
     if (base64)
     {
-        status = SOPC_HelperDecode_Base64(buffer, decode, &outLen);
+        status = SOPC_HelperDecode_Base64(buffer, out->Data, &outLen);
     }
     else
     {
-        status = SOPC_HelperDecode_Hex(buffer, decode, outLen);
+        status = SOPC_HelperDecode_Hex(buffer, out->Data, outLen);
     }
-    // Copy
-    if (SOPC_STATUS_OK == status)
-    {
-        decode[outLen] = '\0';
-        status = SOPC_String_CopyFromCString((SOPC_String*) out, (char*) decode);
-    }
-    SOPC_Free(decode);
+
     if (SOPC_STATUS_OK != status)
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
+        SOPC_Free(out->Data);
     }
 
-    return true;
+    return SOPC_STATUS_OK == status;
 }
 
-static bool get_pwd(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
+static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
 {
-    const char* attr_val = get_attr(ctx, "pwd", attrs);
+    const char* attr_val = get_attr(ctx, "hash", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no password defined");
         return false;
     }
 
-    return get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->hash);
+    bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
+    if (!res)
+    {
+        SOPC_Free(&ctx->currentUserPassword->hash);
+    }
+    return res;
 }
 
 static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
@@ -263,7 +275,12 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
         return false;
     }
 
-    return get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->salt);
+    bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
+    if (!res)
+    {
+        SOPC_Free(&ctx->currentUserPassword->salt);
+    }
+    return res;
 }
 
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
@@ -298,10 +315,9 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
     }
 
     attr_val = get_attr(ctx, "base64", attrs);
-    ctx->currentUserPassword->base64 = attr_val != NULL && 0 == strcmp(attr_val, "true");
-    bool base64 = ctx->currentUserPassword->base64;
+    bool base64 = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
-    bool res = get_pwd(ctx, attrs, base64);
+    bool res = get_hash(ctx, attrs, base64);
     if (!res)
     {
         return false;
@@ -320,14 +336,12 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
         return false;
     }
 
-    char* no_iter;
-    long iter = strtol(attr_val, &no_iter, 10);
-    if (0L == iter && no_iter == attr_val)
+    status = SOPC_strtouint32_t(attr_val, &ctx->currentUserPassword->iteration_count, 10, '\0');
+    if (SOPC_STATUS_OK != status)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is not an integer");
         return false;
     }
-    ctx->currentUserPassword->iteration_count = (uint32_t) iter;
 
     return true;
 }
@@ -781,8 +795,8 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         if (NULL != ctx.currentUserPassword)
         {
             SOPC_String_Clear(&ctx.currentUserPassword->user);
-            SOPC_String_Clear(&ctx.currentUserPassword->hash);
-            SOPC_String_Clear(&ctx.currentUserPassword->salt);
+            SOPC_ByteString_Clear(&ctx.currentUserPassword->hash);
+            SOPC_ByteString_Clear(&ctx.currentUserPassword->salt);
         }
         SOPC_Dict_Delete(users);
         return false;
