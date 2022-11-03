@@ -111,7 +111,7 @@ void message_in_bs__decode_msg_type(const constants__t_byte_buffer_i message_in_
                                SOPC_EncodeableType_GetName(encType));
 
         util_message__get_message_type(encType, message_in_bs__msg_type);
-        *message_in_bs__bres = message_in_bs__msg_type != constants__c_msg_type_indet;
+        *message_in_bs__bres = *message_in_bs__msg_type != constants__c_msg_type_indet;
     }
 }
 
