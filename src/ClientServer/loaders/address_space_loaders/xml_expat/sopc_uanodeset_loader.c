@@ -33,6 +33,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
@@ -1225,136 +1226,18 @@ static uint8_t type_width(SOPC_BuiltinId ty)
         return false;                                                          \
     }
 
-/* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C_2
- * to decode base64 */
-#define WHITESPACE 64
-#define EQUALS 65
-#define INVALID 66
-
-static const unsigned char d[] = {
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, WHITESPACE, INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, 62,      INVALID, INVALID, INVALID,    63,
-    52,      53,      54,      55,      56,      57,      58,      59,      60,      61,      INVALID,    INVALID,
-    INVALID, EQUALS,  INVALID, INVALID, INVALID, 0,       1,       2,       3,       4,       5,          6,
-    7,       8,       9,       10,      11,      12,      13,      14,      15,      16,      17,         18,
-    19,      20,      21,      22,      23,      24,      25,      INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, 26,      27,      28,      29,      30,      31,      32,      33,      34,      35,         36,
-    37,      38,      39,      40,      41,      42,      43,      44,      45,      46,      47,         48,
-    49,      50,      51,      INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID};
-
-/* This function decodes a base64 ByteString. Base64 ByteString shall be null terminated.
- * Otherwise, the result is undefined.*/
-static bool base64decode(const char* input, unsigned char* out, size_t* outLen)
-{
-    if (NULL == input || NULL == out || NULL == outLen)
-    {
-        return false;
-    }
-
-    const char* end = input + strlen(input);
-    char iter = 0;
-    uint32_t buf = 0;
-    size_t len = 0;
-    bool return_status = true;
-
-    while (return_status && input < end)
-    {
-        unsigned char c = d[(int) *input];
-        input++;
-
-        switch (c)
-        {
-        case WHITESPACE:
-            break; /* skip whitespace */
-        case INVALID:
-            return_status = false; /* invalid input, return error */
-            break;
-        case EQUALS: /* pad character, end of data */
-            input = end;
-            break;
-        default:
-            assert(c < 64);
-            buf = buf << 6 | c;
-            iter++; // increment the number of iteration
-            /* If the buffer is full, split it into bytes */
-            if (iter == 4)
-            {
-                len += 3;
-                if (len > *outLen)
-                {
-                    return_status = false; /* buffer overflow */
-                }
-                else
-                {
-                    *(out++) = (buf >> 16) & 255;
-                    *(out++) = (buf >> 8) & 255;
-                    *(out++) = buf & 255;
-                    buf = 0;
-                    iter = 0;
-                }
-            }
-            break;
-        }
-    }
-
-    if (return_status && iter == 3)
-    {
-        if ((len += 2) > *outLen)
-        {
-            return_status = false; /* buffer overflow */
-        }
-        else
-        {
-            *(out++) = (buf >> 10) & 255;
-            *(out++) = (buf >> 2) & 255;
-        }
-    }
-    else if (return_status && iter == 2)
-    {
-        if (++len > *outLen)
-        {
-            return_status = false; /* buffer overflow */
-        }
-        else
-        {
-            *(out++) = (buf >> 4) & 255;
-        }
-    }
-
-    if (return_status)
-    {
-        *outLen = len; /* modify to reflect the actual output size */
-    }
-
-    return return_status;
-}
-
 /* This function computes the variant corresponding to a base64 ByteString.
  * Base64 ByteString shall be null terminated. Otherwise, the result is undefined. */
 static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str)
 {
     size_t length = strlen(bstring_str);
     SOPC_ReturnStatus status;
-    bool return_code;
 
     /* By definition, ByteString base64 length is greater than its corresponding string length */
     unsigned char* str = SOPC_Calloc(1, length);
 
-    return_code = base64decode(bstring_str, str, &length);
-    assert(true == return_code);
+    status = SOPC_HelperDecode_Base64(bstring_str, str, &length);
+    assert(SOPC_STATUS_OK == status);
 
     status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
     SOPC_Free(str);

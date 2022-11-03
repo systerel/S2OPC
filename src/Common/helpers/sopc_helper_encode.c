@@ -23,7 +23,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
-#include "sopc_helper_decode.h"
+#include "sopc_helper_encode.h"
 
 // Return the decimal value of hexadecimal digit (0 for errors)
 static uint8_t char_to_decimal(char c, bool* error)
@@ -133,7 +133,7 @@ static bool base64decode(const char* input, unsigned char* out, size_t* outLen)
             input = end;
             break;
         default:
-            assert(c < 64);
+            SOPC_ASSERT(c < 64);
             buf = buf << 6 | c;
             iter++; // increment the number of iteration
             /* If the buffer is full, split it into bytes */
@@ -201,12 +201,12 @@ SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* src, unsigned char* dst, siz
     return (0 < res ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 }
 
-int SOPC_HelperDecode_Base64_GetPaddingLength(const char* input)
+SOPC_ReturnStatus SOPC_HelperDecode_Base64_GetPaddingLength(const char* input, size_t* outLen)
 {
-    int padding_length = -1;
+    size_t padding_length = 0;
     if (NULL == input)
     {
-        return padding_length;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     for (size_t i = 0; i < strlen(input); i++)
@@ -216,5 +216,6 @@ int SOPC_HelperDecode_Base64_GetPaddingLength(const char* input)
             padding_length++;
         }
     }
-    return padding_length;
+    *outLen = padding_length;
+    return SOPC_STATUS_OK;
 }

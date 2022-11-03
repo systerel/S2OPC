@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef SOPC_HELPER_DECODE_H_
-#define SOPC_HELPER_DECODE_H_
+#ifndef SOPC_HELPER_ENCODE_H_
+#define SOPC_HELPER_ENCODE_H_
 
 #include <stddef.h>
 #include "sopc_enums.h"
@@ -26,11 +26,13 @@
 /**
  * \brief  Get the number of padding characters for base64 ('=')
  *
- * \param input  A valid pointer to the input.
+ * \param input     A valid pointer to the input.
  *
- * \return  The number of padding characters.
+ * \param outLen    the number of padding characters.
+ *
+ * \return   SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS.
  */
-int SOPC_HelperDecode_Base64_GetPaddingLength(const char* input);
+SOPC_ReturnStatus SOPC_HelperDecode_Base64_GetPaddingLength(const char* input, size_t* outLen);
 
 /**
  * \brief  This function decodes a base64 ByteString. Base64 ByteString shall be null terminated.
@@ -38,12 +40,12 @@ int SOPC_HelperDecode_Base64_GetPaddingLength(const char* input);
  *
  * \param input     A valid pointer to the input.
  *
- * \param out       A valid pointer to the output (must be allocated by the caller thank
- *                  SOPC_HelperDecode_Base64_GetPaddingLength)
+ * \param out       A valid pointer to the output (you should allocate
+ *                  (3 * (strlen( \p input )/ 4)) - paddingLength)
  *
  * \param outLen    The size of the \p out comptuted during the function execution.
  *
- * \return  true when successful otherwise false.
+ * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* input, unsigned char* out, size_t* outLen);
 
@@ -57,8 +59,8 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* input, unsigned char* out
  *
  * \param inputLen    The size of the \p input .
  *
- * \return  Returns n the number of translated couples (< 0 for errors)
+ * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* input, unsigned char* out, size_t inputLen);
 
-#endif /* SOPC_HELPER_DECODE_H_ */
+#endif /* SOPC_HELPER_ENCODE_H_ */
