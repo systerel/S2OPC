@@ -90,18 +90,17 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
-            a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
                             (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
@@ -148,13 +147,13 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         /* The input buffer and associated types have been freed */
         a_buffer_in_state := c_buffer_in_state_indet ||
@@ -210,18 +209,17 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_type_read &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         c_msg_in_header   :: t_msg_header_i ||
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
         CHOICE
-            a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
                             (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
@@ -286,14 +284,13 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel &
         channel : s_channel_connected &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
-            a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out := c_byte_buffer_indet ||
             req_handle := c_client_request_handle_indet
         OR
@@ -314,7 +311,8 @@ OPERATIONS
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
             ret :: {e_sc_bad_out_of_memory,
@@ -332,6 +330,7 @@ OPERATIONS
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
@@ -345,14 +344,13 @@ OPERATIONS
         session : t_session &
         channel : t_channel_i &
         channel : s_channel_connected &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
-            a_buffer_out_state := c_buffer_out_state_indet ||
             buffer_out := c_byte_buffer_indet ||
             req_handle := c_client_request_handle_indet
         OR
@@ -367,11 +365,11 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session &
-        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
             ret :: {e_sc_bad_encoding_error,
@@ -387,6 +385,7 @@ OPERATIONS
         OR
             ret        := e_sc_ok ||
             channel    :(channel : t_channel_i & channel : s_channel_connected) ||
+            a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
@@ -405,7 +404,8 @@ OPERATIONS
         c_msg_out        : t_msg &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type   = req_typ &
-        a_msg_out_type   : t_msg_type
+        a_msg_out_type   : t_msg_type &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
             ret :: {e_sc_bad_invalid_state,  /* session is not in a valid state */
@@ -422,6 +422,7 @@ OPERATIONS
         OR
             ret        := e_sc_ok ||
             channel    :(channel : t_channel_i & channel : s_channel_connected) ||
+            a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
@@ -440,7 +441,8 @@ OPERATIONS
         c_msg_out        : t_msg &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type   = req_typ &
-        a_msg_out_type   : t_msg_type
+        a_msg_out_type   : t_msg_type &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
             ret :: {e_sc_bad_out_of_memory,
@@ -450,6 +452,7 @@ OPERATIONS
             req_handle := c_client_request_handle_indet
         OR
             ret        := e_sc_ok ||
+            a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
@@ -490,12 +493,13 @@ OPERATIONS
         c_msg_out = publish_resp_msg &
         c_msg_out : t_msg &
         c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = e_msg_subscription_publish_resp
+        a_msg_out_type = e_msg_subscription_publish_resp &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         CHOICE
             bres := TRUE ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             channel :(channel : t_channel_i & channel : t_channel) ||
             sc := e_sc_ok
         OR
