@@ -773,6 +773,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid:
         *status = OpcUa_BadMonitoredItemFilterInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_deadband_filter_invalid:
+        *status = OpcUa_BadDeadbandFilterInvalid;
+        break;
     case constants_statuscodes_bs__e_sc_bad_filter_not_allowed:
         *status = OpcUa_BadFilterNotAllowed;
         break;
@@ -1136,6 +1139,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadMonitoredItemFilterInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+        break;
+    case OpcUa_BadDeadbandFilterInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_deadband_filter_invalid;
         break;
     case OpcUa_BadFilterNotAllowed:
         *bstatus = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;

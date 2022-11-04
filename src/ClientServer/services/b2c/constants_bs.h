@@ -106,7 +106,7 @@ typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
 typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
-typedef void* constants_bs__t_monitoringFilterCtx_i;
+typedef double constants_bs__t_monitoringFilterCtx_i;
 typedef OpcUa_DataChangeFilter* constants_bs__t_monitoringFilter_i;
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
 typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
@@ -194,7 +194,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0
 #define constants_bs__c_monitoredItemQueue_indet 0
-#define constants_bs__c_monitoringFilterCtx_indet NULL
+#define constants_bs__c_monitoringFilterCtx_indet 0.0
 #define constants_bs__c_monitoringFilter_indet NULL
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0

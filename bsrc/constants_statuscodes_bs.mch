@@ -77,6 +77,7 @@ SETS
                       e_sc_bad_monitoring_mode_invalid,
                       e_sc_bad_monitored_item_filter_unsupported,
                       e_sc_bad_monitored_item_filter_invalid,
+                      e_sc_bad_deadband_filter_invalid,
                       e_sc_bad_filter_not_allowed,
                       e_sc_bad_too_many_publish_requests,
                       e_sc_bad_message_not_available,

@@ -47,7 +47,7 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
-#define sopc_address_space_bs__InputArguments_BrowseName "InputArguments"
+#define EURAnge_BrowseName "InputArguments"
 
 static bool is_inputArgument(const OpcUa_VariableNode* node);
 
@@ -1170,8 +1170,7 @@ static bool is_inputArgument(const OpcUa_VariableNode* node)
         return false;
     }
 
-    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name),
-                   sopc_address_space_bs__InputArguments_BrowseName) == 0);
+    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name), EURAnge_BrowseName) == 0);
 }
 
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,

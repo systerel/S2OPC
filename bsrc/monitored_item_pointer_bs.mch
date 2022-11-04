@@ -68,20 +68,22 @@ OPERATIONS
     END
     ;
 
-    StatusCode, filterCtx <-- check_monitored_item_filter_valid (p_node, p_filter) =
+    StatusCode, filterAbsDeadbandCtx <-- check_monitored_item_filter_valid (p_node, p_filter) =
     PRE
         p_node : t_Node_i &
         p_node : t_Node &
         p_filter : t_monitoringFilter_i &
         p_filter : t_monitoringFilter
     THEN
-        /* Check filter validity regarding node DataType is Number (absolute) / Variable AnalogItem type EU range (percent) */
+        /* Check filter validity regarding node DataType is Number (absolute) / Variable AnalogItem type EU range (percent)
+           and returns an absolute deadband context for any deadband type (pre-computed from EURange if PercentDeadband) */
         IF (p_node |-> p_filter) : a_monitoredItemNodeFilterValid
         THEN
-            filterCtx :(filterCtx : t_monitoringFilterCtx_i & (filterCtx = c_monitoringFilterCtx_indet or filterCtx : t_monitoringFilterCtx)) ||
+            filterAbsDeadbandCtx :(filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
+                                   (filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or filterAbsDeadbandCtx : t_monitoringFilterCtx)) ||
             StatusCode := e_sc_ok
         ELSE
-            filterCtx := c_monitoringFilterCtx_indet ||
+            filterAbsDeadbandCtx := c_monitoringFilterCtx_indet ||
             StatusCode := e_sc_bad_filter_not_allowed
         END
     END
@@ -95,7 +97,7 @@ OPERATIONS
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle,
                                                                                          p_filter,
-                                                                                         p_filterCtx,
+                                                                                         p_filterAbsDeadbandCtx,
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     PRE
@@ -113,9 +115,9 @@ OPERATIONS
         p_clientHandle : t_client_handle_i &
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
-        p_filterCtx : t_monitoringFilterCtx_i &
-        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
-        (p_filter = c_monitoringFilter_indet => p_filterCtx = c_monitoringFilterCtx_indet) &
+        p_filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
+        (p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or p_filterAbsDeadbandCtx : t_monitoringFilterCtx) &
+        (p_filter = c_monitoringFilter_indet => p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -155,7 +157,7 @@ OPERATIONS
                                                  p_timestampToReturn,
                                                  p_clientHandle,
                                                  p_filter,
-                                                 p_filterCtx,
+                                                 p_filterAbsDeadbandCtx,
                                                  p_discardOldest,
                                                  p_queueSize) =
     PRE
@@ -166,9 +168,9 @@ OPERATIONS
         p_clientHandle : t_client_handle_i &
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
-        p_filterCtx : t_monitoringFilterCtx_i &
-        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
-        (p_filter = c_monitoringFilter_indet => p_filterCtx = c_monitoringFilterCtx_indet) &
+        p_filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
+        (p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or p_filterAbsDeadbandCtx : t_monitoringFilterCtx) &
+        (p_filter = c_monitoringFilter_indet => p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN

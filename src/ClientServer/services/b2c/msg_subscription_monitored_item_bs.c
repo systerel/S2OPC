@@ -141,6 +141,7 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
         {
             OpcUa_DataChangeFilter* dcf = filter->Body.Object.Value;
             bool validFilter = true;
+            bool validPercent = true;
             bool supportedFilter = true;
             switch (dcf->Trigger)
             {
@@ -167,14 +168,25 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
                 }
                 break;
             case OpcUa_DeadbandType_Percent: // Not supported for now
-                supportedFilter = false;
-                validFilter &= true;
+                // Check deadband value is between 0.0 and 100.0 (percent expected)
+                if (dcf->DeadbandValue < 0.0 || dcf->DeadbandValue > 100.0)
+                {
+                    validPercent = false;
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "Failed to create a MI filter with an percent deadband value out of range [0.0, 100.0] : %lf",
+                        dcf->DeadbandValue);
+                }
                 break;
             default:
                 supportedFilter = false;
                 break;
             }
-            if (!validFilter)
+            if (!validPercent)
+            {
+                *sc = constants_statuscodes_bs__e_sc_bad_deadband_filter_invalid;
+            }
+            else if (!validFilter)
             {
                 *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
             }

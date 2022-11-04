@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 04/11/2022 16:06:36
+ Date                 : 07/11/2022 10:15:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -401,12 +401,12 @@ void subscription_core__local_check_monitored_item_filter_valid(
    const constants__t_AttributeId_i subscription_core__p_aid,
    const constants__t_monitoringFilter_i subscription_core__p_filter,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode,
-   constants__t_monitoringFilterCtx_i * const subscription_core__filterCtx) {
+   constants__t_monitoringFilterCtx_i * const subscription_core__filterAbsDeadbandCtx) {
    {
       t_bool subscription_core__l_bres_presentNode;
       constants__t_Node_i subscription_core__l_node;
       
-      *subscription_core__filterCtx = constants__c_monitoringFilterCtx_indet;
+      *subscription_core__filterAbsDeadbandCtx = constants__c_monitoringFilterCtx_indet;
       if (subscription_core__p_filter != constants__c_monitoringFilter_indet) {
          if (subscription_core__p_aid == constants__e_aid_Value) {
             address_space_itf__readall_AddressSpace_Node(subscription_core__p_nid,
@@ -416,7 +416,7 @@ void subscription_core__local_check_monitored_item_filter_valid(
                monitored_item_pointer_bs__check_monitored_item_filter_valid(subscription_core__l_node,
                   subscription_core__p_filter,
                   subscription_core__StatusCode,
-                  subscription_core__filterCtx);
+                  subscription_core__filterAbsDeadbandCtx);
             }
             else {
                *subscription_core__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
@@ -868,7 +868,7 @@ void subscription_core__create_monitored_item(
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
    constants__t_monitoredItemId_i * const subscription_core__monitoredItemId) {
    {
-      constants__t_monitoringFilterCtx_i subscription_core__l_filterCtx;
+      constants__t_monitoringFilterCtx_i subscription_core__l_filterAbsDeadbandCtx;
       t_bool subscription_core__l_bres;
       constants__t_monitoredItemQueue_i subscription_core__l_sub_monitIt_queue;
       constants__t_monitoredItemQueue_i subscription_core__l_node_monitIt_queue;
@@ -882,7 +882,7 @@ void subscription_core__create_monitored_item(
          subscription_core__p_aid,
          subscription_core__p_filter,
          subscription_core__StatusCode_service,
-         &subscription_core__l_filterCtx);
+         &subscription_core__l_filterAbsDeadbandCtx);
       if (*subscription_core__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
          monitored_item_pointer_bs__create_monitored_item_pointer(subscription_core__p_subscription,
             subscription_core__p_nid,
@@ -892,7 +892,7 @@ void subscription_core__create_monitored_item(
             subscription_core__p_monitoringMode,
             subscription_core__p_clientHandle,
             subscription_core__p_filter,
-            subscription_core__l_filterCtx,
+            subscription_core__l_filterAbsDeadbandCtx,
             subscription_core__p_discardOldest,
             subscription_core__p_queueSize,
             subscription_core__StatusCode_service,
@@ -993,7 +993,7 @@ void subscription_core__modify_monitored_item(
       constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_core__l_monitoringMode;
       constants__t_client_handle_i subscription_core__l_clientHandle;
-      constants__t_monitoringFilterCtx_i subscription_core__l_filterCtx;
+      constants__t_monitoringFilterCtx_i subscription_core__l_filterAbsDeadbandCtx;
       
       monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
          &subscription_core__bres,
@@ -1012,13 +1012,13 @@ void subscription_core__modify_monitored_item(
             subscription_core__l_aid,
             subscription_core__p_filter,
             subscription_core__p_sc,
-            &subscription_core__l_filterCtx);
+            &subscription_core__l_filterAbsDeadbandCtx);
          if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
             monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
                subscription_core__p_timestampToReturn,
                subscription_core__p_clientHandle,
                subscription_core__p_filter,
-               subscription_core__l_filterCtx,
+               subscription_core__l_filterAbsDeadbandCtx,
                subscription_core__p_discardOldest,
                subscription_core__p_queueSize,
                subscription_core__p_sc);

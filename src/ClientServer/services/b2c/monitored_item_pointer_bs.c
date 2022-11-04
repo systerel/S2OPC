@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
+#include <string.h>
 
 #include "sopc_dict.h"
 #include "sopc_logger.h"
@@ -110,18 +111,81 @@ void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+#define EURAnge_BrowseName "EURange"
+
+static bool is_EURange(const OpcUa_VariableNode* node)
+{
+    if (NULL == node || &OpcUa_VariableNode_EncodeableType != node->encodeableType)
+    {
+        return false;
+    }
+
+    /* Type shall be Range */
+    if (!(SOPC_IdentifierType_Numeric == node->DataType.IdentifierType && OpcUaId_Range == node->DataType.Data.Numeric))
+    {
+        return false;
+    }
+
+    /* Browse shall be EURange (and should be in NS=O but we don't check it) */
+    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name), EURAnge_BrowseName) == 0);
+}
+
+static bool check_percent_deadband_filter_allowed(SOPC_AddressSpace_Node* variableNode, OpcUa_Range** range)
+{
+    SOPC_AddressSpace_Node* targetNode = NULL;
+    bool found = false;
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, variableNode);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, variableNode);
+    SOPC_Variant* euRangeVariant = NULL;
+    OpcUa_Range* euRangeValue = NULL;
+    for (int32_t i = 0; i < *n_refs && NULL == euRangeVariant; ++i)
+    { /* stop when input argument is found */
+        OpcUa_ReferenceNode* ref = &(*refs)[i];
+        if (util_addspace__is_property(ref))
+        {
+            if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
+            { // Shall be on same server and shall use only NodeId
+                targetNode = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, &ref->TargetId.NodeId, &found);
+                if (found && NULL != targetNode && OpcUa_NodeClass_Variable == targetNode->node_class)
+                {
+                    if (is_EURange(&targetNode->data.variable))
+                    {
+                        euRangeVariant = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, targetNode);
+                    }
+                }
+            }
+        }
+    }
+    if (euRangeVariant != NULL && SOPC_VariantArrayType_SingleValue == euRangeVariant->ArrayType &&
+        SOPC_ExtensionObject_Id == euRangeVariant->BuiltInTypeId &&
+        SOPC_ExtObjBodyEncoding_Object == euRangeVariant->Value.ExtObject->Encoding &&
+        &OpcUa_Range_EncodeableType == euRangeVariant->Value.ExtObject->Body.Object.ObjType)
+    {
+        /* Important note: here we make the choice that the EURange for the MI is the one during MI
+         * creation/modification, the EURange value / node might be changed in the future but we will ignore it. */
+        euRangeValue = (OpcUa_Range*) euRangeVariant->Value.ExtObject->Body.Object.Value;
+        if (euRangeValue->High >= euRangeValue->Low)
+        {
+            *range = euRangeValue;
+            return true;
+        }
+    }
+    return false;
+}
+
 void monitored_item_pointer_bs__check_monitored_item_filter_valid(
     const constants__t_Node_i monitored_item_pointer_bs__p_node,
     const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
-    constants__t_monitoringFilterCtx_i* const monitored_item_pointer_bs__filterCtx)
+    constants__t_monitoringFilterCtx_i* const monitored_item_pointer_bs__filterAbsDeadbandCtx)
 {
-    *monitored_item_pointer_bs__filterCtx = NULL;
+    *monitored_item_pointer_bs__filterAbsDeadbandCtx = constants_bs__c_monitoringFilterCtx_indet;
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
     assert(NULL != monitored_item_pointer_bs__p_filter);
     OpcUa_NodeClass* ncl = NULL;
     SOPC_NodeId* dataTypeId = NULL;
     bool result = false;
+    OpcUa_Range* euRange = NULL;
     switch (monitored_item_pointer_bs__p_filter->DeadbandType)
     {
     case OpcUa_DeadbandType_None:
@@ -135,6 +199,8 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
             dataTypeId = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
             result = util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, dataTypeId, dataTypeId,
                                                                     &Number_DataType);
+            /* Keep the absolute deadband value as context */
+            *monitored_item_pointer_bs__filterAbsDeadbandCtx = monitored_item_pointer_bs__p_filter->DeadbandValue;
             if (result)
             {
                 *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
@@ -142,8 +208,19 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         }
         break;
     case OpcUa_DeadbandType_Percent:
-        /* TODO: shall be AnalogItemType + valid EU Range */
-        assert(false && "unsupported type");
+        ncl = SOPC_AddressSpace_Get_NodeClass(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
+        assert(NULL != ncl);
+        if (OpcUa_NodeClass_Variable == *ncl)
+        {
+            result = check_percent_deadband_filter_allowed(monitored_item_pointer_bs__p_node, &euRange);
+            if (result)
+            {
+                /* Pre-compute the deadband as an absolute value using formula from Part 8 */
+                *monitored_item_pointer_bs__filterAbsDeadbandCtx =
+                    (monitored_item_pointer_bs__p_filter->DeadbandValue / 100.0) * (euRange->High - euRange->Low);
+                *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
+            }
+        }
         break;
     default:
         // Already checked when retrieved in message
@@ -160,7 +237,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
     const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
+    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
@@ -231,7 +308,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
-        monitItem->filterContext = monitored_item_pointer_bs__p_filterCtx;
+        monitItem->filterAbsoluteDeadandeContext = monitored_item_pointer_bs__p_filterAbsDeadbandCtx;
         monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
         monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
@@ -293,7 +370,7 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
     const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
+    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode)
@@ -318,7 +395,7 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
             *monitItem->filter = *monitored_item_pointer_bs__p_filter;
         }
     }
-    monitItem->filterContext = monitored_item_pointer_bs__p_filterCtx;
+    monitItem->filterAbsoluteDeadandeContext = monitored_item_pointer_bs__p_filterAbsDeadbandCtx;
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
@@ -480,6 +557,10 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
         {
             *compResult = compareValue;
         }
+        else
+        {
+            *compResult = 0;
+        }
     }
     else
     {
@@ -491,6 +572,7 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
 
 static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* numRange,
                                                        const OpcUa_DataChangeFilter* filter,
+                                                       const void* filterAbsDeadandCtx,
                                                        const SOPC_Variant* oldValue,
                                                        const SOPC_Variant* newValue,
                                                        int32_t* comparison)
@@ -504,13 +586,17 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
             assert(false && "already evaluated case");
             break;
         case OpcUa_DeadbandType_Absolute:
-            /* Variable DataType already verified to have (sub)type Number */
-            status = SOPC_Variant_CompareCustomRange(&compare_deadband_absolute, &filter->DeadbandValue, oldValue,
-                                                     newValue, numRange, comparison);
-            break;
+            /* Variable DataType already verified to have (sub)type Number.
+             * \p filterAbsDeadandCtx contains the absolute deadband.
+             */
         case OpcUa_DeadbandType_Percent:
-            /* TODO: shall be AnalogItemType + valid EU Range */
-            status = SOPC_STATUS_NOT_SUPPORTED;
+            /* Variable had a valid EURange property that was used to compute the \p filterAbsDeadandCtx
+             * absolute deadband using percent value and range.
+             * Note: we did not check the type was AnalogItemType and thus allow any variable with a valid EURange
+             * property.
+             */
+            status = SOPC_Variant_CompareCustomRange(&compare_deadband_absolute, filterAbsDeadandCtx, oldValue,
+                                                     newValue, numRange, comparison);
             break;
         default:
             // Already checked when retrieved in message
@@ -607,9 +693,9 @@ void monitored_item_pointer_bs__is_notification_triggered(
             {
                 lastCachedValue = monitored_item_get_last_cached_value(
                     monitItem, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value);
-                status = compare_monitored_item_values(monitItem->indexRange, filter, lastCachedValue,
-                                                       &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value,
-                                                       &dtCompare);
+                status = compare_monitored_item_values(
+                    monitItem->indexRange, filter, &monitItem->filterAbsoluteDeadandeContext, lastCachedValue,
+                    &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
             }
         }
         else

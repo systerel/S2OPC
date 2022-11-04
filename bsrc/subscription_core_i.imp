@@ -337,7 +337,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    StatusCode, filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
+    StatusCode, filterAbsDeadbandCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
     PRE
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
@@ -346,15 +346,15 @@ LOCAL_OPERATIONS
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)
     THEN
-        StatusCode, filterCtx
+        StatusCode, filterAbsDeadbandCtx
         :(StatusCode : t_StatusCode_i & StatusCode : t_StatusCode &
-          filterCtx : t_monitoringFilterCtx_i &
-            (p_filter = c_monitoringFilter_indet => StatusCode = e_sc_ok & filterCtx = c_monitoringFilterCtx_indet) &
+          filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
+            (p_filter = c_monitoringFilter_indet => StatusCode = e_sc_ok & filterAbsDeadbandCtx = c_monitoringFilterCtx_indet) &
             (not (p_filter = c_monitoringFilter_indet) &
                 (p_nid : ran(a_NodeId) & p_aid = e_aid_Value & (a_NodeId~(p_nid) |-> p_filter) : a_monitoredItemNodeFilterValid
-                    => StatusCode = e_sc_ok  & filterCtx : t_monitoringFilterCtx_i) &
+                    => StatusCode = e_sc_ok  & filterAbsDeadbandCtx : t_monitoringFilterCtx_i) &
                 (not (p_nid : ran(a_NodeId) & p_aid = e_aid_Value & (a_NodeId~(p_nid) |-> p_filter) : a_monitoredItemNodeFilterValid)
-                    => StatusCode = e_sc_bad_filter_not_allowed & filterCtx = c_monitoringFilterCtx_indet)
+                    => StatusCode = e_sc_bad_filter_not_allowed & filterAbsDeadbandCtx = c_monitoringFilterCtx_indet)
             )
         )
     END
@@ -714,12 +714,12 @@ OPERATIONS
     END
     ;
 
-    StatusCode, filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
+    StatusCode, filterAbsDeadbandCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter) =
     VAR
         l_bres_presentNode,
         l_node
     IN
-        filterCtx := c_monitoringFilterCtx_indet;
+        filterAbsDeadbandCtx := c_monitoringFilterCtx_indet;
         IF p_filter /= c_monitoringFilter_indet
         THEN
             IF p_aid = e_aid_Value
@@ -728,7 +728,7 @@ OPERATIONS
                 IF l_bres_presentNode = TRUE
                 THEN
                     /* Check filter validity regarding node DataType (absolute) / Variable AnalogItem type EU range (percent) */
-                    StatusCode, filterCtx <-- check_monitored_item_filter_valid (l_node, p_filter)
+                    StatusCode, filterAbsDeadbandCtx <-- check_monitored_item_filter_valid (l_node, p_filter)
                 ELSE
                     /* Node not present for now, impossible to check filter validity */
                     StatusCode := e_sc_bad_filter_not_allowed
@@ -1047,7 +1047,7 @@ OPERATIONS
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     VAR
-        l_filterCtx,
+        l_filterAbsDeadbandCtx,
         l_bres,
         l_sub_monitIt_queue,
         l_node_monitIt_queue,
@@ -1058,7 +1058,7 @@ OPERATIONS
         monitoredItemPointer := c_monitoredItemPointer_indet;
         monitoredItemId := c_monitoredItemId_indet;
         /* Check constraints on node for MI filter */
-        StatusCode_service, l_filterCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter);
+        StatusCode_service, l_filterAbsDeadbandCtx <-- local_check_monitored_item_filter_valid (p_nid, p_aid, p_filter);
         /* Create monitored item */
         IF StatusCode_service = e_sc_ok
         THEN
@@ -1071,7 +1071,7 @@ OPERATIONS
                                                 p_monitoringMode,
                                                 p_clientHandle,
                                                 p_filter,
-                                                l_filterCtx,
+                                                l_filterAbsDeadbandCtx,
                                                 p_discardOldest,
                                                 p_queueSize)
         END;
@@ -1158,7 +1158,7 @@ OPERATIONS
         l_timestampToReturn,
         l_monitoringMode,
         l_clientHandle,
-        l_filterCtx
+        l_filterAbsDeadbandCtx
     IN
         bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
         IF bres = TRUE
@@ -1173,14 +1173,14 @@ OPERATIONS
             l_clientHandle
               <--getall_monitoredItemPointer (l_monitoredItemPointer);
             /* Check constraints on node for MI filter */
-            p_sc, l_filterCtx <-- local_check_monitored_item_filter_valid (l_nid, l_aid, p_filter);
+            p_sc, l_filterAbsDeadbandCtx <-- local_check_monitored_item_filter_valid (l_nid, l_aid, p_filter);
             IF p_sc = e_sc_ok
             THEN
                 p_sc <-- modify_monitored_item_pointer(l_monitoredItemPointer,
                                                        p_timestampToReturn,
                                                        p_clientHandle,
                                                        p_filter,
-                                                       l_filterCtx,
+                                                       l_filterAbsDeadbandCtx,
                                                        p_discardOldest,
                                                        p_queueSize);
                 IF p_sc = e_sc_ok
