@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 24/08/2022 07:50:56
+ Date                 : 04/11/2022 14:14:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -72,13 +72,5 @@ extern void channel_mgr_bs__prepare_cli_open_secure_channel(
    const constants__t_reverse_endpoint_config_idx_i channel_mgr_bs__p_reverse_endpoint_config_idx);
 extern void channel_mgr_bs__reset_SecurityPolicy(
    const constants__t_channel_i channel_mgr_bs__channel);
-extern void channel_mgr_bs__send_channel_error_msg(
-   const constants__t_channel_i channel_mgr_bs__channel,
-   const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__status_code,
-   const constants__t_request_context_i channel_mgr_bs__request_context);
-extern void channel_mgr_bs__send_channel_msg_buffer(
-   const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
-   const constants__t_request_context_i channel_mgr_bs__request_context);
 
 #endif

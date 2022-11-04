@@ -34,6 +34,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_toolkit_config_internal.h"
@@ -216,4 +217,22 @@ void service_mgr_bs__service_mgr_bs_UNINITIALISATION(void)
             discovery_reqs_to_send[idx] = NULL;
         }
     }
+}
+
+void service_mgr_bs__send_channel_error_msg(const constants__t_channel_i service_mgr_bs__channel,
+                                            const constants_statuscodes_bs__t_StatusCode_i service_mgr_bs__status_code,
+                                            const constants__t_request_context_i service_mgr_bs__request_context)
+{
+    SOPC_StatusCode status = SOPC_BadStatusMask;
+    util_status_code__B_to_C(service_mgr_bs__status_code, &status);
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_ERR, service_mgr_bs__channel, (uintptr_t) status,
+                                     service_mgr_bs__request_context);
+}
+
+void service_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i service_mgr_bs__channel,
+                                             const constants__t_byte_buffer_i service_mgr_bs__buffer,
+                                             const constants__t_request_context_i service_mgr_bs__request_context)
+{
+    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, service_mgr_bs__channel, (uintptr_t) service_mgr_bs__buffer,
+                                     service_mgr_bs__request_context);
 }

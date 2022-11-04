@@ -48,8 +48,6 @@ INITIALISATION
 PROMOTES
     is_valid_channel_config_idx,
     is_valid_endpoint_config_idx,
-    send_channel_msg_buffer,
-    send_channel_error_msg,
     server_get_endpoint_config,
     is_client_channel,
     get_channel_info,

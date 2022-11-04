@@ -161,34 +161,6 @@ OPERATIONS
     END
     ;
 
-    send_channel_msg_buffer (channel, buffer, request_context) =
-    PRE
-        channel         : t_channel_i &
-        channel         : s_channel_connected &
-        buffer          : t_byte_buffer_i &
-        buffer          : t_byte_buffer &
-        /* a_buffer_out_state = e_buffer_out_msg_written */
-        /* ISSUE: not possible to see message_out_bs with AtelierB => TC failure / m -tc OK */
-        request_context : t_request_context_i
-    THEN
-        /* No return status code, it is an asynchronous action */
-        skip
-    END
-    ;
-
-    send_channel_error_msg (channel, status_code, request_context) =
-    PRE
-        channel         : t_channel_i &
-        channel         : s_channel_connected &
-        status_code     : t_StatusCode_i &
-        status_code     : t_StatusCode &
-        request_context : t_request_context_i
-    THEN
-        /* No return status code, it is an asynchronous action */
-        skip
-    END
-    ;
-
     bres <-- cli_set_connected_channel (config_idx, reverse_endpoint_config_idx, channel) =
     PRE
         channel : t_channel_i &

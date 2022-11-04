@@ -131,24 +131,6 @@ void channel_mgr_bs__last_connected_channel_lost(const t_bool channel_mgr_bs__p_
                            (uintptr_t) channel_mgr_bs__p_clientOnly, 0);
 }
 
-void channel_mgr_bs__send_channel_error_msg(const constants__t_channel_i channel_mgr_bs__channel,
-                                            const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__status_code,
-                                            const constants__t_request_context_i channel_mgr_bs__request_context)
-{
-    SOPC_StatusCode status = SOPC_BadStatusMask;
-    util_status_code__B_to_C(channel_mgr_bs__status_code, &status);
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_ERR, channel_mgr_bs__channel, (uintptr_t) status,
-                                     channel_mgr_bs__request_context);
-}
-
-void channel_mgr_bs__send_channel_msg_buffer(const constants__t_channel_i channel_mgr_bs__channel,
-                                             const constants__t_byte_buffer_i channel_mgr_bs__buffer,
-                                             const constants__t_request_context_i channel_mgr_bs__request_context)
-{
-    SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, channel_mgr_bs__channel, (uintptr_t) channel_mgr_bs__buffer,
-                                     channel_mgr_bs__request_context);
-}
-
 extern void channel_mgr_bs__define_SecurityPolicy(const constants__t_channel_i channel_mgr_bs__p_channel)
 {
     // Nothing to do since config is static, it is only for B model

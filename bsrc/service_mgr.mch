@@ -537,6 +537,31 @@ OPERATIONS
     END
     ;
 
+    send_channel_msg_buffer (channel, buffer, request_context) =
+    PRE
+        channel         : t_channel_i &
+        channel         : s_channel_connected &
+        buffer          : t_byte_buffer_i &
+        buffer          : t_byte_buffer &
+        request_context : t_request_context_i
+    THEN
+        skip
+    END
+    ;
+
+    send_channel_error_msg (channel, status_code, request_context) =
+    PRE
+        channel         : t_channel_i &
+        channel         : s_channel_connected &
+        status_code     : t_StatusCode_i &
+        status_code     : t_StatusCode &
+        request_context : t_request_context_i
+    THEN
+        /* No return status code, it is an asynchronous action */
+        skip
+    END
+    ;
+
     /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, p_user_token, app_context) =
     PRE

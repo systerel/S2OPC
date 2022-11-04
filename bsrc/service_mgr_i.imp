@@ -60,6 +60,8 @@ PROMOTES
     client_async_discovery_request_without_channel,
     client_channel_connected_event_discovery,
     client_discovery_req_failures_on_final_connection_failure,
+    send_channel_msg_buffer,
+    send_channel_error_msg,
 
     /* request_handle_bs */
     client_req_handle_to_request_id,

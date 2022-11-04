@@ -21,7 +21,7 @@
 
  File Name            : service_mgr_bs.h
 
- Date                 : 10/10/2022 13:35:27
+ Date                 : 04/11/2022 14:14:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,6 +40,7 @@
   --------------*/
 #include "channel_mgr.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -61,6 +62,14 @@ extern void service_mgr_bs__client_channel_connected_event_discovery(
    const constants__t_channel_i service_mgr_bs__channel);
 extern void service_mgr_bs__client_discovery_req_failures_on_final_connection_failure(
    const constants__t_channel_config_idx_i service_mgr_bs__channel_config_idx);
+extern void service_mgr_bs__send_channel_error_msg(
+   const constants__t_channel_i service_mgr_bs__channel,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr_bs__status_code,
+   const constants__t_request_context_i service_mgr_bs__request_context);
+extern void service_mgr_bs__send_channel_msg_buffer(
+   const constants__t_channel_i service_mgr_bs__channel,
+   const constants__t_byte_buffer_i service_mgr_bs__buffer,
+   const constants__t_request_context_i service_mgr_bs__request_context);
 extern void service_mgr_bs__service_mgr_bs_UNINITIALISATION(void);
 
 #endif
