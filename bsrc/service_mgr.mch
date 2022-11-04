@@ -544,9 +544,11 @@ OPERATIONS
         channel         : s_channel_connected &
         buffer          : t_byte_buffer_i &
         buffer          : t_byte_buffer &
-        request_context : t_request_context_i
+        request_context : t_request_context_i &
+        a_buffer_out_state = e_buffer_out_msg_written
     THEN
-        skip
+        /* The output buffer is no longer available. */
+        a_buffer_out_state := c_buffer_out_state_indet
     END
     ;
 
