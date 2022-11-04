@@ -88,6 +88,7 @@ OPERATIONS
     END
     ;
 
+    /* Sends asynchronously the buffer on the secure channel */
     send_channel_msg_buffer (channel, buffer, request_context) =
     PRE
         channel         : t_channel_i &
@@ -100,6 +101,7 @@ OPERATIONS
     END
     ;
 
+    /* Sends asynchronously an error message on the secure channel */
     send_channel_error_msg (channel, status_code, request_context) =
     PRE
         channel         : t_channel_i &
