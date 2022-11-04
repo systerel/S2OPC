@@ -559,9 +559,9 @@ OPERATIONS
         channel         : s_channel_connected &
         status_code     : t_StatusCode_i &
         status_code     : t_StatusCode &
-        request_context : t_request_context_i
+        request_context : t_request_context_i &
+        status_code /= e_sc_ok
     THEN
-        /* No return status code, it is an asynchronous action */
         skip
     END
     ;
