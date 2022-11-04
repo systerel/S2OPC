@@ -56,6 +56,11 @@ PROMOTES
     forget_msg_out,
     dealloc_msg_out,
 
+    /* service_mgr_bs */
+    client_async_discovery_request_without_channel,
+    client_channel_connected_event_discovery,
+    client_discovery_req_failures_on_final_connection_failure,
+
     /* request_handle_bs */
     client_req_handle_to_request_id,
     client_request_id_to_req_handle,
@@ -67,9 +72,6 @@ PROMOTES
     client_async_activate_new_session_without_channel,
     client_async_activate_new_session_with_channel,
     client_channel_connected_event_session,
-    client_async_discovery_request_without_channel,
-    client_discovery_req_failures_on_final_connection_failure,
-    client_channel_connected_event_discovery,
     client_close_sessions_on_final_connection_failure,
     client_close_session,
     server_evaluate_session_timeout,
