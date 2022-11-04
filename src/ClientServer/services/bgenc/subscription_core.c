@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 03/11/2022 10:39:15
+ Date                 : 04/11/2022 16:06:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1020,8 +1020,11 @@ void subscription_core__modify_monitored_item(
                subscription_core__p_filter,
                subscription_core__l_filterCtx,
                subscription_core__p_discardOldest,
-               subscription_core__p_queueSize);
-            monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
+               subscription_core__p_queueSize,
+               subscription_core__p_sc);
+            if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
+               monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
+            }
          }
       }
       else {

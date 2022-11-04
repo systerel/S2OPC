@@ -284,7 +284,6 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
         {
             *msg_subscription_monitored_item_bs__p_filter =
                 (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
-            SOPC_ExtensionObject_Initialize(&monitReq->RequestedParameters.Filter);
         }
     }
 
@@ -410,7 +409,6 @@ void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
 
         *msg_subscription_monitored_item_bs__p_filter =
             (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
-        SOPC_ExtensionObject_Initialize(&monitReq->RequestedParameters.Filter);
 
         *msg_subscription_monitored_item_bs__p_monitored_item_id = monitReq->MonitoredItemId;
         *msg_subscription_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;

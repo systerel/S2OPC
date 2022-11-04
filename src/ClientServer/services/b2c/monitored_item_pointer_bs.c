@@ -204,7 +204,21 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_index_range_invalid;
         }
     }
-
+    if (SOPC_STATUS_OK == retStatus)
+    {
+        if (NULL != monitored_item_pointer_bs__p_filter)
+        {
+            monitItem->filter = SOPC_Malloc(sizeof(*monitored_item_pointer_bs__p_filter));
+            if (NULL == monitItem->filter)
+            {
+                retStatus = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                *monitItem->filter = *monitored_item_pointer_bs__p_filter;
+            }
+        }
+    }
     if (SOPC_STATUS_OK == retStatus)
     {
         bool dictInsertionOK = false;
@@ -217,7 +231,6 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
-        monitItem->filter = monitored_item_pointer_bs__p_filter;
         monitItem->filterContext = monitored_item_pointer_bs__p_filterCtx;
         monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
         monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
@@ -266,6 +279,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     else
     {
         SOPC_NumericRange_Delete(range);
+        SOPC_Free(monitItem->filter);
         SOPC_Free(monitItem);
         SOPC_NodeId_Clear(nid);
         SOPC_Free(nid);
@@ -281,15 +295,29 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
     const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
-    const t_entier4 monitored_item_pointer_bs__p_queueSize)
+    const t_entier4 monitored_item_pointer_bs__p_queueSize,
+    constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode)
 {
+    *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
     SOPC_InternalMontitoredItem* monitItem =
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
     monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
     monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
     OpcUa_DataChangeFilter_Clear(monitItem->filter);
     SOPC_Free(monitItem->filter);
-    monitItem->filter = monitored_item_pointer_bs__p_filter;
+    monitItem->filter = NULL;
+    if (NULL != monitored_item_pointer_bs__p_filter)
+    {
+        monitItem->filter = SOPC_Malloc(sizeof(*monitored_item_pointer_bs__p_filter));
+        if (NULL == monitItem->filter)
+        {
+            *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        }
+        else
+        {
+            *monitItem->filter = *monitored_item_pointer_bs__p_filter;
+        }
+    }
     monitItem->filterContext = monitored_item_pointer_bs__p_filterCtx;
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;

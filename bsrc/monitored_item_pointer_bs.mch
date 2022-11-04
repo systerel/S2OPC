@@ -151,13 +151,13 @@ OPERATIONS
     END
     ;
 
-    modify_monitored_item_pointer(p_monitoredItemPointer,
-                                  p_timestampToReturn,
-                                  p_clientHandle,
-                                  p_filter,
-                                  p_filterCtx,
-                                  p_discardOldest,
-                                  p_queueSize) =
+    StatusCode <-- modify_monitored_item_pointer(p_monitoredItemPointer,
+                                                 p_timestampToReturn,
+                                                 p_clientHandle,
+                                                 p_filter,
+                                                 p_filterCtx,
+                                                 p_discardOldest,
+                                                 p_queueSize) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
@@ -172,7 +172,12 @@ OPERATIONS
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
-        a_monitoredItemQueueSize (p_monitoredItemPointer) := p_queueSize
+        CHOICE
+            StatusCode := e_sc_bad_out_of_memory
+        OR
+            StatusCode := e_sc_ok ||
+            a_monitoredItemQueueSize (p_monitoredItemPointer) := p_queueSize
+        END
     END
     ;
 

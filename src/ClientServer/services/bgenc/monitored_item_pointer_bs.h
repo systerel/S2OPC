@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 03/11/2022 10:39:26
+ Date                 : 04/11/2022 16:06:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -97,7 +97,8 @@ extern void monitored_item_pointer_bs__modify_monitored_item_pointer(
    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
    const t_bool monitored_item_pointer_bs__p_discardOldest,
-   const t_entier4 monitored_item_pointer_bs__p_queueSize);
+   const t_entier4 monitored_item_pointer_bs__p_queueSize,
+   constants_statuscodes_bs__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode);
 extern void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void);
 extern void monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,

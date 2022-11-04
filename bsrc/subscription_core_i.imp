@@ -1176,14 +1176,17 @@ OPERATIONS
             p_sc, l_filterCtx <-- local_check_monitored_item_filter_valid (l_nid, l_aid, p_filter);
             IF p_sc = e_sc_ok
             THEN
-                modify_monitored_item_pointer(l_monitoredItemPointer,
-                                              p_timestampToReturn,
-                                              p_clientHandle,
-                                              p_filter,
-                                              l_filterCtx,
-                                              p_discardOldest,
-                                              p_queueSize);
-                resize_monitored_item_notification_queue(l_monitoredItemPointer)
+                p_sc <-- modify_monitored_item_pointer(l_monitoredItemPointer,
+                                                       p_timestampToReturn,
+                                                       p_clientHandle,
+                                                       p_filter,
+                                                       l_filterCtx,
+                                                       p_discardOldest,
+                                                       p_queueSize);
+                IF p_sc = e_sc_ok
+                THEN
+                    resize_monitored_item_notification_queue(l_monitoredItemPointer)
+                END
             END
         ELSE
             p_sc := e_sc_bad_monitored_item_id_invalid
