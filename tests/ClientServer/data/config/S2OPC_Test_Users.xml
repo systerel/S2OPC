@@ -3,21 +3,21 @@
   <Anonymous>
     <UserAuthorization/>
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="1000000">
+  <UserPasswordConfiguration hash_iteration_count="10000">
     <!-- user="noaccess" pwd="secret" -->
-    <UserPassword user="noaccess" hash="acpYCbcva41fgXR5lWu9LAQUAK7SEiNKI2+3hOULASM=" salt="49squ1J2GYW5fIJx3DwNdQ==" base64="true">
+    <UserPassword user="noaccess" hash="nB2iURQGOgMGXcfUY1f8psiE5DmXXAvhl1eMhDJFA5Y=" salt="anv9SGojovLlHSO15B2mJQ==" base64="true">
       <UserAuthorization/>
     </UserPassword>
     <!-- user="user1" pwd="12345" -->
-    <UserPassword user="user1" hash="SEKXuAwH5xlhNmheox0g0tprkxvr1ALl7K3O8n7Zlbc=" salt="x3raGtWgTTrdV00TSOHogw==" base64="true">
+    <UserPassword user="user1" hash="Ye5QyEeOyFRbfW1OtHpcVPRY+t8QLo+vW+WCppq6txE=" salt="lz3CUN7CL0dmMTKuuVcEuA==" base64="true">
       <UserAuthorization write="true" read="false" execute="true" />
     </UserPassword>
     <!-- user="user2" pwd="password2" -->
-    <UserPassword user="user2" hash="Xq8N0qmhigKguRlxMbCpDVBGEPZS4tGU1C7NrmiGt1U=" salt="FvOoOKJaLHnmH9FEt78nhg==" base64="true">
+    <UserPassword user="user2" hash="xYYT0kp7za+mOd31UeiEGoI5MaW2Nw1a8cxs+IRimGk=" salt="SpWQOki2RGBZ9Rn2+gBnqQ==" base64="true">
       <UserAuthorization write="false" read="true" execute="true" />
     </UserPassword>
     <!-- user="user3" pwd="42" -->
-    <UserPassword user="user3" hash="b399cf45e23d609b1d2673eda7890fe501b0075f489271fdb32b3eb161ac7796" salt="eb4730f39ab2ad487fab46a848bae2b2" base64="false">
+    <UserPassword user="user3" hash="24b30f26f6ea3206ddc4bb945f560f0fcd0242e63a265bcff7805d812840cb23" salt="988ec81df723d4e94be791dec58b321d" base64="false">
       <UserAuthorization  write="true" read="true" execute="false" />
     </UserPassword>
   </UserPasswordConfiguration>

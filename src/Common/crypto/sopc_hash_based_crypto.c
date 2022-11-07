@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/** \file sopc_crypto_user.c
+/** \file sopc_hash_based_crypto.c
  *
  * Provides cryptographic functions to manage hash mechanisms.
  */

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/** \file crypto_user_lib.c
+/** \file hash_based_crypto_lib.c
  *
  * Gathers the definitions of the lib-specific and crypto-related functions to performing hash mechanisms.
  *

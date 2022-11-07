@@ -17,9 +17,9 @@
  * under the License.
  */
 
-/** \file check_crypto_user.c
+/** \file check_hash_based_crypto.c
  *
- * \brief Cryptographic test suite of the SOPC_CryptoUser API.
+ * \brief Cryptographic test suite of the SOPC_HashBasedCrypto API.
  *
  * See check_stack.c for more details.
  */
@@ -29,7 +29,7 @@
 
 #include "check_helpers.h"
 #include "hexlify.h"
-#include "sopc_crypto_user.h"
+#include "sopc_hash_based_crypto.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 
@@ -37,11 +37,16 @@
 
 START_TEST(test_pbkdf2_hmac_sha256)
 {
-    SOPC_ExposedBuffer password[MAX_BUFFER_SIZE], salt[MAX_BUFFER_SIZE];
-    SOPC_ExposedBuffer hashHex[MAX_BUFFER_SIZE];
-    SOPC_ExposedBuffer* hash = NULL;
-    SOPC_CryptoUser_Ctx* ctx = NULL;
+    SOPC_ByteString password;
+    SOPC_ByteString salt;
+    SOPC_ByteString hashHex;
+    SOPC_ByteString* hash = NULL;
+    SOPC_HashBasedCrypto_Config config;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    SOPC_ByteString_Initialize(&password);
+    SOPC_ByteString_Initialize(&salt);
+    SOPC_ByteString_Initialize(&hashHex);
 
     /*
     Part 11 of [RFC7914] https://www.rfc-editor.org/rfc/rfc7914.txt
@@ -71,104 +76,104 @@ START_TEST(test_pbkdf2_hmac_sha256)
     /*
         test [RFC7914] PBKDF2-HMAC-SHA-256 (P="passwd", S="salt", c=1, dkLen=64)
     */
-    uint32_t lenPassword = 6;
-    uint32_t lenSalt = 4;
-    uint32_t lenHash = 64;
-    uint32_t iteration_count = 1;
 
-    // Context init
-    status = SOPC_CryptoUser_Ctx_Create(&ctx, PBKDF2_HMAC_SHA256);
-    ck_assert(SOPC_STATUS_OK == status);
-    ck_assert_ptr_nonnull(ctx);
+    password.Data = (SOPC_Byte*) "passwd";
+    password.Length = 6;
+    salt.Data = (SOPC_Byte*) "salt";
+    salt.Length = 4;
+
+    size_t lenHash = 64;
+    size_t iteration_count = 1;
+
     // Set the salt and the counter
-    ck_assert(unhexlify("73616c74", salt, lenSalt) == (int32_t) lenSalt);
-    status = SOPC_CryptoUser_Config_PBKDF2(ctx, salt, lenSalt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
-    ck_assert(unhexlify("706173737764", password, lenPassword) == (int32_t) lenPassword);
-    status = SOPC_CryptoUser_Hash(ctx, password, lenPassword, &hash);
+    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
-    ck_assert(hexlify(hash, (char*) hashHex, lenHash) == (int32_t) lenHash);
-    ck_assert(memcmp(hashHex,
+    hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1);
+    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    ck_assert(memcmp(hashHex.Data,
                      "55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317"
                      "c71b845b1e30bd509112041d3a19783",
                      2 * lenHash) == 0);
 
     // Prepare next TC
-    SOPC_Free(hash);
-    hash = NULL;
+    SOPC_ByteString_Clear(&hashHex);
+    SOPC_ByteString_Delete(hash);
 
     /*
         test [RFC7914] PBKDF2-HMAC-SHA-256 (P="Password", S="NaCl", c=80000, dkLen=64)
     */
 
-    lenPassword = 8;
-    lenSalt = 4;
-    lenHash = 64;
+    password.Data = (SOPC_Byte*) "Password";
+    password.Length = 8;
+    salt.Data = (SOPC_Byte*) "NaCl";
+    salt.Length = 4;
+
     iteration_count = 80000;
 
-    // Set the salt and the counter
-    ck_assert(unhexlify("4e61436c", salt, lenSalt) == (int32_t) lenSalt);
-    status = SOPC_CryptoUser_Config_PBKDF2(ctx, salt, lenSalt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
-    ck_assert(unhexlify("50617373776f7264", password, lenPassword) == (int32_t) lenPassword);
-    status = SOPC_CryptoUser_Hash(ctx, password, lenPassword, &hash);
+    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
-    ck_assert(hexlify(hash, (char*) hashHex, lenHash) == (int32_t) lenHash);
-    ck_assert(memcmp(hashHex,
+    hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1); // need '\0' to hexlify
+    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    ck_assert(memcmp(hashHex.Data,
                      "4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176"
                      "a272bdebba1d078478f62b397f33c8d",
                      2 * lenHash) == 0);
 
     // Prepare next TC
-    SOPC_Free(hash);
-    hash = NULL;
+    SOPC_ByteString_Clear(&hashHex);
+    SOPC_ByteString_Delete(hash);
 
     /*
         To be sure, another test from PyCryptodome, a standalone Python package of low-level cryptographic primitives.
-        PBKDF2-HMAC-SHA-256 (P="2022-my_LonG_pas2word!\@", S= 128 bit random value, c=10000000, dkLen=32)
+        PBKDF2-HMAC-SHA-256 (P="this_is_a_test", S= 128 bit random value, c=10000, dkLen=32)
     */
 
-    lenPassword = 24;
-    lenSalt = 16;
+    password.Data = (SOPC_Byte*) "this_is_a_test";
+    password.Length = 24;
+    salt.Length = 16;
+    salt.Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) salt.Length);
+    ck_assert(unhexlify("f595e6284725a66b07c3575d9dfa95b9", salt.Data, (size_t) salt.Length) == salt.Length);
     lenHash = 32;
-    iteration_count = 10000000;
+    iteration_count = 10000;
 
-    // Set the salt and the counter
-    ck_assert(unhexlify("f595e6284725a66b07c3575d9dfa95b9", salt, lenSalt) == (int32_t) lenSalt);
-    status = SOPC_CryptoUser_Config_PBKDF2(ctx, salt, lenSalt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
-    ck_assert(unhexlify("323032322d6d795f4c6f6e475f70617332776f7264215c40", password, lenPassword) ==
-              (int32_t) lenPassword);
-    status = SOPC_CryptoUser_Hash(ctx, password, lenPassword, &hash);
+    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
-    ck_assert(hexlify(hash, (char*) hashHex, lenHash) == (int32_t) lenHash);
-    ck_assert(memcmp(hashHex, "05ed6d82d4ef3ccec2a3eda5fb850806fd2734a80152885c34cdb0eaca302688", 2 * lenHash) == 0);
+    hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1); // need '\0' to hexlify
+    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    ck_assert(memcmp(hashHex.Data, "797968c54e66bb8334571fb1b0f2edd014baf19dfb8a423f5352d6c13514f4d8", 2 * lenHash) ==
+              0);
 
-    SOPC_Free(hash);
-    SOPC_CryptoUser_Ctx_Free(ctx);
+    SOPC_ByteString_Clear(&hashHex);
+    SOPC_ByteString_Clear(&salt);
+    SOPC_ByteString_Delete(hash);
 }
 END_TEST
 
-Suite* tests_make_suite_crypto_user(void)
+Suite* tests_make_suite_hash_based_crypto(void)
 {
     Suite* s;
-    TCase* tc_crypto_user;
+    TCase* tc_hash_based_crypto;
 
-    s = suite_create("Crypto user tests");
-    tc_crypto_user = tcase_create("test of PBKDF2_HMAC_SHA256");
-    tcase_set_timeout(tc_crypto_user, 20); // Set 20s timeout
-    tcase_add_test(tc_crypto_user, test_pbkdf2_hmac_sha256);
+    s = suite_create("Hash based crypto tests");
+    tc_hash_based_crypto = tcase_create("test of PBKDF2_HMAC_SHA256");
+    tcase_add_test(tc_hash_based_crypto, test_pbkdf2_hmac_sha256);
 
-    suite_add_tcase(s, tc_crypto_user);
+    suite_add_tcase(s, tc_hash_based_crypto);
 
     return s;
 }
