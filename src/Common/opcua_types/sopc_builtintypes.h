@@ -703,7 +703,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
  */
 SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_ExtensionObject* src);
 SOPC_ReturnStatus SOPC_ExtensionObject_CopyAux(void* dest, const void* src);
-// Only for non object representation
 SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
                                                const SOPC_ExtensionObject* right,
                                                int32_t* comparison);
