@@ -19,13 +19,13 @@
 
 /** \file crypto_user_lib.c
  *
- * Gathers the sources of the lib-specific and crypto-related functions for the user authentication purpose.
+ * Gathers the definitions of the lib-specific and crypto-related functions to performing hash mechanisms.
  *
  * \warning     These functions should only be called through the stack API, as they don't verify
  *              nor sanitize their arguments.
  */
 
-#include "crypto_user_lib.h"
+#include "hash_based_crypto_lib.h"
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
@@ -34,13 +34,13 @@
 #include "mbedtls/pkcs5.h"
 #include "mbedtls_common.h"
 
-SOPC_ReturnStatus CryptoUser_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
-                                                             uint32_t lenSecret,
-                                                             const SOPC_ExposedBuffer* pSalt,
-                                                             uint32_t lenSalt,
-                                                             uint32_t iteration_count,
-                                                             SOPC_ExposedBuffer** ppOutput,
-                                                             uint32_t lenOutput)
+SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
+                                                                  uint32_t lenSecret,
+                                                                  const SOPC_ExposedBuffer* pSalt,
+                                                                  uint32_t lenSalt,
+                                                                  uint32_t iteration_count,
+                                                                  SOPC_ExposedBuffer** ppOutput,
+                                                                  uint32_t lenOutput)
 {
     if (NULL == pSecret || NULL == pSalt || NULL == ppOutput || 0 == lenSalt || 0 == lenOutput)
     {

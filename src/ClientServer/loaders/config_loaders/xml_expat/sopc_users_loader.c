@@ -27,9 +27,9 @@
 #include "expat.h"
 
 #include "sopc_assert.h"
-#include "sopc_crypto_user.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
+#include "sopc_hash_based_crypto.h"
 #include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
@@ -66,7 +66,7 @@ typedef struct user_password
     SOPC_String user;
     SOPC_ByteString hash;
     SOPC_ByteString salt;
-    uint32_t iteration_count;
+    size_t iteration_count;
     user_rights rights; // mask of SOPC_UserAuthorization_OperationType
 
 } user_password;
@@ -88,7 +88,7 @@ struct parse_context_t
     user_rights anonymousRights;
 
     user_password* currentUserPassword;
-    uint32_t hashIterationCount;
+    size_t hashIterationCount;
 
     parse_state_t state;
 };
@@ -301,7 +301,7 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    SOPC_ReturnStatus status = SOPC_strtouint32_t(attr_val, &ctx->hashIterationCount, 10, '\0');
+    SOPC_ReturnStatus status = SOPC_strtouint32_t(attr_val, (uint32_t*) &ctx->hashIterationCount, 10, '\0');
     if (SOPC_STATUS_OK != status)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is not an integer");
@@ -646,7 +646,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UsersConfig* config = authn->pData;
-    bool wrong_username = false;
+    bool wrongUsername = false;
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
     assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
@@ -659,7 +659,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         // have a constant time during authentication process)
         if (NULL == up)
         {
-            wrong_username = true;
+            wrongUsername = true;
             status = set_default_password_hash(&up);
             if (SOPC_STATUS_OK != status)
             {
@@ -668,25 +668,17 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
             }
         }
 
-        SOPC_CryptoUser_Ctx* ctx = NULL;
+        SOPC_HashBasedCrypto_Config configHash;
         SOPC_ReturnStatus status_crypto = SOPC_STATUS_OK;
-        SOPC_ByteString UserPasswordHash;
-        SOPC_ByteString_Initialize(&UserPasswordHash);
+        SOPC_ByteString* UserPasswordHash = NULL;
 
-        // Context init
-        status_crypto = SOPC_CryptoUser_Ctx_Create(&ctx, PBKDF2_HMAC_SHA256);
-        if (SOPC_STATUS_OK == status_crypto)
-        {
-            // Configure the salt and the counter from the XML
-            status_crypto = SOPC_CryptoUser_Config_PBKDF2(ctx, up->salt.Data, (uint32_t) up->salt.Length,
-                                                          up->iteration_count, (uint32_t) up->hash.Length);
-        }
+        // Configure the salt and the counter from the XML
+        status_crypto =
+            SOPC_HashBasedCrypto_Config_PBKDF2(&configHash, &up->salt, up->iteration_count, (size_t) up->hash.Length);
         if (SOPC_STATUS_OK == status_crypto)
         {
             // Hash the password issued form the userToken
-            status_crypto = SOPC_CryptoUser_Hash(ctx, userToken->Password.Data, (uint32_t) userToken->Password.Length,
-                                                 &UserPasswordHash.Data);
-            UserPasswordHash.Length = up->hash.Length;
+            status_crypto = SOPC_HashBasedCrypto_Run(&configHash, &userToken->Password, &UserPasswordHash);
         }
 
         // Compare the result
@@ -696,7 +688,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
             // find expected PWD length, or beginning based on timed attacks.
             // Moreover, the comparison is also done if user does not match, to avoid possible detection of usernames.
 
-            const bool pwd_match = secure_hash_compare(up, &UserPasswordHash);
+            const bool pwd_match = secure_hash_compare(up, UserPasswordHash);
 
             // Check password
             if (pwd_match)
@@ -721,17 +713,10 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         }
 
         status = status_crypto;
-        if (NULL != UserPasswordHash.Data)
-        {
-            SOPC_Free(UserPasswordHash.Data);
-        }
-        if (NULL != ctx)
-        {
-            SOPC_CryptoUser_Ctx_Free(ctx);
-        }
+        SOPC_ByteString_Delete(UserPasswordHash);
 
         // Free the default user password hash in case of wrong username
-        if (wrong_username)
+        if (wrongUsername)
         {
             userpassword_free(up);
         }

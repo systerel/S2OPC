@@ -19,11 +19,11 @@
 
 /** \file crypto_user_lib.h
  *
- * Gathers the definitions of the lib-specific and crypto-related functions for the user authentication purpose.
+ * Gathers the definitions of the lib-specific and crypto-related functions to performing hash mechanisms.
  */
 
-#ifndef SOPC_CRYPTO_USER_LIB_H_
-#define SOPC_CRYPTO_USER_LIB_H_
+#ifndef SOPC_HASH_BASED_CRYPTO_LIB_H_
+#define SOPC_HASH_BASED_CRYPTO_LIB_H_
 
 #include "sopc_enums.h"
 #include "sopc_secret_buffer.h"
@@ -43,18 +43,18 @@
  * \note            \p lenSecret must not exceed 64 bytes because if the HMAC key is longer than the blocks in the hash
  * function then the \p pSecret is hashed beforehand, which can reduce the entropy of the derived \p ppOutput .
  *
- * \note            Content of the \p ppOutput is unspecified when return value is not SOPC_STATUS_OK.
+ * \note            You doesn't have to free the content of \p ppOutput when there is an error.
  *
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error (e.g. no entropy source).
  */
-SOPC_ReturnStatus CryptoUser_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
-                                                             uint32_t lenSecret,
-                                                             const SOPC_ExposedBuffer* pSalt,
-                                                             uint32_t lenSalt,
-                                                             uint32_t iteration_count,
-                                                             SOPC_ExposedBuffer** ppOutput,
-                                                             uint32_t lenOutput);
+SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
+                                                                  uint32_t lenSecret,
+                                                                  const SOPC_ExposedBuffer* pSalt,
+                                                                  uint32_t lenSalt,
+                                                                  uint32_t iteration_count,
+                                                                  SOPC_ExposedBuffer** ppOutput,
+                                                                  uint32_t lenOutput);
 
-#endif /* SOPC_CRYPTO_USER_LIB_H_ */
+#endif /* SOPC_HASH_BASED_CRYPTO_LIB_H_ */
