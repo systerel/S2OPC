@@ -947,8 +947,6 @@ OPERATIONS
                 */
                 l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
             END
-        ELSE
-            l_valid_user_access := FALSE
         END
         ;
         IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting

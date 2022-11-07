@@ -347,9 +347,6 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
                &subscription_mgr__l_valid_user_access);
          }
       }
-      else {
-         subscription_mgr__l_valid_user_access = false;
-      }
       if (((subscription_mgr__l_valid_user_access == true) &&
          (subscription_mgr__l_notification_triggered == true)) &&
          (subscription_mgr__l_monitoringMode == constants__e_monitoringMode_reporting)) {
