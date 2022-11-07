@@ -232,6 +232,19 @@ static parse_complex_value_tag_t complex_value_ext_obj_argument_tags[] = {
      false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
+/* ExtensionObject Body content complex values definition */
+static parse_complex_value_tag_t complex_value_ext_obj_enum_value_type_tags[] = {
+    {"EnumValueType", false,
+     (parse_complex_value_tag_t[]){
+         {"Value", false, NULL, false, NULL, NULL, NULL},
+         {"DisplayName", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
+          NULL},
+         {"Description", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
+          NULL},
+         END_COMPLEX_VALUE_TAG},
+     false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
 /*
  * Returns the extension object body tags expected for given TypeId nodeId as output parameter if available.
  * In case of success the EncodeableType pointer is returned and shall be used to create the extension object.
@@ -244,10 +257,15 @@ static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_comp
 
     switch (nid_in_NS0)
     {
-    case 296: // Argument datatype nodeId
-    case 297: // Argument XML encoding nodeId
+    case OpcUaId_Argument:                     // Argument datatype nodeId
+    case OpcUaId_Argument_Encoding_DefaultXml: // Argument XML encoding nodeId
         encType = &OpcUa_Argument_EncodeableType;
         *body_tags = complex_value_ext_obj_argument_tags;
+        break;
+    case OpcUaId_EnumValueType:
+    case OpcUaId_EnumValueType_Encoding_DefaultXml:
+        encType = &OpcUa_EnumValueType_EncodeableType;
+        *body_tags = complex_value_ext_obj_enum_value_type_tags;
         break;
     default:
         encType = NULL;
@@ -1541,6 +1559,68 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
     return result;
 }
 
+static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumValueType,
+                                                     parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    bool result = true;
+
+    parse_complex_value_tag_t* enumValueTypeTagCtx = NULL;
+    bool enumValueType_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("EnumValueType", bodyChildsTagContext, &enumValueTypeTagCtx);
+    assert(enumValueType_tag_ok);
+
+    parse_complex_value_tag_t* valueTagCtx = NULL;
+    bool name_tag_ok = complex_value_tag_from_tag_name_no_namespace("Value", enumValueTypeTagCtx->childs, &valueTagCtx);
+    assert(name_tag_ok);
+
+    parse_complex_value_tag_t* displayNameTagCtx = NULL;
+    bool displayName_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("DisplayName", enumValueTypeTagCtx->childs, &displayNameTagCtx);
+    assert(displayName_tag_ok);
+
+    parse_complex_value_tag_t* descriptionTagCtx = NULL;
+    bool description_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Description", enumValueTypeTagCtx->childs, &descriptionTagCtx);
+    assert(description_tag_ok);
+
+    if (result && valueTagCtx->set)
+    {
+        result = SOPC_strtoint(valueTagCtx->single_value, (size_t) strlen(valueTagCtx->single_value), 64,
+                               &enumValueType->Value);
+    }
+
+    if (result)
+    {
+        SOPC_LocalizedText* lt = NULL;
+        result = set_variant_value_localized_text(&lt, displayNameTagCtx->childs);
+
+        if (result)
+        {
+            enumValueType->DisplayName = *lt;
+            SOPC_Free(lt);
+        }
+    }
+
+    if (result)
+    {
+        SOPC_LocalizedText* lt = NULL;
+        result = set_variant_value_localized_text(&lt, descriptionTagCtx->childs);
+
+        if (result)
+        {
+            enumValueType->Description = *lt;
+            SOPC_Free(lt);
+        }
+    }
+
+    if (!result)
+    {
+        OpcUa_EnumValueType_Clear(enumValueType);
+    }
+
+    return result;
+}
+
 static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
                                               parse_complex_value_tag_array_t tagsContext)
 {
@@ -1589,6 +1669,9 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     {
     case OpcUaId_Argument:
         result = set_variant_value_extobj_argument((OpcUa_Argument*) object, bodyTagCtx->childs);
+        break;
+    case OpcUaId_EnumValueType:
+        result = set_variant_value_extobj_enum_value_type((OpcUa_EnumValueType*) object, bodyTagCtx->childs);
         break;
     default:
         assert(false);
