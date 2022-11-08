@@ -18,11 +18,6 @@
 # under the License.
 
 
-# /!\ NOTES: To encrypt private key with AES-256-CBC,
-#  please use the following command after running this script:
-#  <openssl rsa -in generated_key.pem -aes-256-cbc -out encrypted_client_4k_key.pem>
-#  You will need to enter a password.
-
 set -e
 rm -f index.txt serial.txt
 touch index.txt
@@ -64,6 +59,14 @@ openssl ca -batch -config $CONF_FILE -policy signing_policy -extensions server_s
 for fradix in ca client_2k_ client_4k_ server_2k_ server_4k_; do
     openssl x509 -in ${fradix}cert.pem -out ${fradix}cert.der -outform der
 done
+
+# Generate, for the client and the server, the encrypted private keys (these commands require the password).
+echo "****** Server private keys encryption ******"
+openssl rsa -in server_2k_key.pem -aes-256-cbc -out encrypted_server_2k_key.pem
+openssl rsa -in server_4k_key.pem -aes-256-cbc -out encrypted_server_4k_key.pem
+echo "****** Client private keys encryption ******"
+openssl rsa -in client_2k_key.pem -aes-256-cbc -out encrypted_client_2k_key.pem
+openssl rsa -in client_4k_key.pem -aes-256-cbc -out encrypted_client_4k_key.pem
 
 # Output hexlified certificate to include in check_crypto_certificates.c
 echo "Server signed public key:"
