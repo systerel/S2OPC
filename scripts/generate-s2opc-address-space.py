@@ -93,11 +93,17 @@ UA_VALUE_DATATYPE_TAG = UA_TYPES_NS + 'DataType'
 UA_VALUE_VALUERANK_TAG = UA_TYPES_NS + 'ValueRank'
 UA_VALUE_ARRAYDIMENSIONS_TAG = UA_TYPES_NS + 'ArrayDimensions'
 UA_VALUE_DESCRIPTION_TAG = UA_TYPES_NS + 'Description'
+# EnumValueType structure tags
 UA_VALUE_ENUM_TAG = UA_TYPES_NS + 'EnumValueType'
+# EUInformation structure tags
 UA_VALUE_EU_INFO_TAG = UA_TYPES_NS + 'EUInformation'
 UA_VALUE_NS_URI_TAG = UA_TYPES_NS + 'NamespaceUri'
 UA_VALUE_UNIT_ID_TAG = UA_TYPES_NS + 'UnitId'
 UA_VALUE_NAMESPACE_INDEX_TAG = UA_TYPES_NS + 'NamespaceIndex'
+# Range structure tags
+UA_VALUE_RANGE_TAG = UA_TYPES_NS + 'Range'
+UA_VALUE_LOW_TAG = UA_TYPES_NS + 'Low'
+UA_VALUE_HIGH_TAG = UA_TYPES_NS + 'High'
 
 VALUE_TYPE_BOOL = 0
 VALUE_TYPE_BYTE = 1
@@ -122,6 +128,7 @@ VALUE_TYPE_LOCALIZEDTEXT = 19
 VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE = 20
 VALUE_TYPE_ENGINEERING_UNIT_INFO = 21
 VALUE_TYPE_QUALIFIED_NAME = 22
+VALUE_TYPE_RANGE = 23
 
 UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_DATETIME}
 
@@ -374,6 +381,15 @@ class EUInformation(ExtensionObject):
         self.displayname = displayname
         self.description = description
 
+class Range(ExtensionObject):
+    __slots__ = 'low', 'high'
+
+    def __init__(self, low, high):
+        self.extobj_typeid = NodeId.parse('i=886') # use binary encoding of datatype
+        self.extobj_objtype = '&OpcUa_Range_EncodeableType'
+        self.low = low
+        self.high = high
+
 def expect_element(source, name=None):
     ev, n = next(source)
 
@@ -616,6 +632,23 @@ def parse_engineering_unit_info_body(n):
 
     return EUInformation(namespaceuri.text, unit_id.text, displayName, description)
 
+def parse_range_body(n):
+    vRange = n.find(UA_VALUE_RANGE_TAG)
+
+    if vRange is None:
+        raise ParseError('Range extension object without Range tag')
+    
+    low = vRange.find(UA_VALUE_LOW_TAG)
+    high = vRange.find(UA_VALUE_HIGH_TAG)
+
+    if low is None:
+        raise ParseError('Range without Low tag')
+    
+    if high is None:
+        raise ParseError('Range without High tag')
+     
+    return Range(low.text, high.text)
+
 def parse_qualified_name(n):
 
     namespace_index = n.find(UA_VALUE_NAMESPACE_INDEX_TAG)
@@ -639,7 +672,11 @@ EXTENSION_OBJECT_PARSERS_DICT = {
     # Engineering Unit datatype nodeId
     887: (parse_engineering_unit_info_body, VALUE_TYPE_ENGINEERING_UNIT_INFO),
 
-    # EnumValueType XML encoding nodeId
+    # Range datatype and XML encoding ids
+    884: (parse_range_body, VALUE_TYPE_RANGE),
+    885: (parse_range_body, VALUE_TYPE_RANGE),
+
+    # EnumValueType datataype nodeId
     7616 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
     # EnumValueType datataype nodeId
     7594 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
@@ -950,6 +987,19 @@ def generate_engineering_unit_ext_obj(obj):
             )
            )
 
+def generate_range_ext_obj(obj):
+    return ('''
+               (OpcUa_Range[])
+               {{%s,
+                 %s,
+                 %s}}
+            ''' %
+            (obj.extobj_objtype,
+             obj.low,
+             obj.high
+            )
+           )
+
 def parse_xml_datetime(val):
     dt = re.match('''^
       (?P<year>-?([1-9][0-9]{3,}|0[0-9]{3})) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
@@ -1109,6 +1159,12 @@ def generate_value_variant(val):
         # Partial evaluation of generate_extension_object to make it compatible with generate_variant
         extension_object_generator = partial(generate_extension_object,
                                              gen=generate_engineering_unit_ext_obj, is_array=val.is_array)
+        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
+                                val.val, val.is_array, extension_object_generator)
+    elif val.ty == VALUE_TYPE_RANGE:
+        # Partial evaluation of generate_extension_object to make it compatible with generate_variant
+        extension_object_generator = partial(generate_extension_object,
+                                             gen=generate_range_ext_obj, is_array=val.is_array)
         return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
                                 val.val, val.is_array, extension_object_generator)
     elif val.ty == VALUE_TYPE_DATETIME:

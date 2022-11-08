@@ -257,6 +257,14 @@ static parse_complex_value_tag_t complex_value_ext_obj_eu_information_tags[] = {
      false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
+static parse_complex_value_tag_t complex_value_ext_obj_range_tags[] = {
+    {"Range", false,
+     (parse_complex_value_tag_t[]){{"Low", false, NULL, false, NULL, NULL, NULL},
+                                   {"High", false, NULL, false, NULL, NULL, NULL},
+                                   END_COMPLEX_VALUE_TAG},
+     false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
 /*
  * Returns the extension object body tags expected for given TypeId nodeId as output parameter if available.
  * In case of success the EncodeableType pointer is returned and shall be used to create the extension object.
@@ -283,6 +291,11 @@ static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_comp
     case OpcUaId_EUInformation_Encoding_DefaultXml:
         encType = &OpcUa_EUInformation_EncodeableType;
         *body_tags = complex_value_ext_obj_eu_information_tags;
+        break;
+    case OpcUaId_Range:
+    case OpcUaId_Range_Encoding_DefaultXml:
+        encType = &OpcUa_Range_EncodeableType;
+        *body_tags = complex_value_ext_obj_range_tags;
         break;
     default:
         encType = NULL;
@@ -1717,6 +1730,40 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
     return result;
 }
 
+static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    bool result = true;
+
+    parse_complex_value_tag_t* rangeTagCtx = NULL;
+    bool range_tag_ok = complex_value_tag_from_tag_name_no_namespace("Range", bodyChildsTagContext, &rangeTagCtx);
+    assert(range_tag_ok);
+
+    parse_complex_value_tag_t* lowTagCtx = NULL;
+    bool low_tag_ok = complex_value_tag_from_tag_name_no_namespace("Low", rangeTagCtx->childs, &lowTagCtx);
+    assert(low_tag_ok);
+
+    parse_complex_value_tag_t* highTagCtx = NULL;
+    bool high_tag_ok = complex_value_tag_from_tag_name_no_namespace("High", rangeTagCtx->childs, &highTagCtx);
+    assert(high_tag_ok);
+
+    if (result && lowTagCtx->set)
+    {
+        result = SOPC_strtodouble(lowTagCtx->single_value, strlen(lowTagCtx->single_value), 64, &range->Low);
+    }
+
+    if (result && highTagCtx->set)
+    {
+        result = SOPC_strtodouble(highTagCtx->single_value, strlen(highTagCtx->single_value), 64, &range->High);
+    }
+
+    if (!result)
+    {
+        SOPC_EncodeableObject_Clear(range->encodeableType, range);
+    }
+
+    return result;
+}
+
 static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
                                               parse_complex_value_tag_array_t tagsContext)
 {
@@ -1771,6 +1818,9 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
         break;
     case OpcUaId_EUInformation:
         result = set_variant_value_extobj_eu_information((OpcUa_EUInformation*) object, bodyTagCtx->childs);
+        break;
+    case OpcUaId_Range:
+        result = set_variant_value_extobj_range((OpcUa_Range*) object, bodyTagCtx->childs);
         break;
     default:
         assert(false);
