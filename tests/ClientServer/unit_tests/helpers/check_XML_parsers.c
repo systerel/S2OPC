@@ -93,10 +93,15 @@ static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
 
     SOPC_ReturnStatus status = SOPC_Variant_Compare(SOPC_AddressSpace_Get_Value(leftSpace, left),
                                                     SOPC_AddressSpace_Get_Value(rightSpace, right), &compare);
-    // Note: we can't compare value if comparison not supported
-    if (SOPC_STATUS_NOT_SUPPORTED != status)
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    if (compare != 0)
     {
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(leftSpace, left));
+        printf("ERROR: AddressSpace variants from Python and Expat parser are differents for nodeId='%s':\n",
+               nodeIdStr);
+        SOPC_Free(nodeIdStr);
+        SOPC_Variant_Print(SOPC_AddressSpace_Get_Value(leftSpace, left));
+        SOPC_Variant_Print(SOPC_AddressSpace_Get_Value(rightSpace, right));
     }
     ck_assert_int_eq(0, compare);
 
