@@ -206,6 +206,7 @@ set(LIBSUBSCRIBE_PATH "frontend/client_wrapper")
 add_library(s2opc_clientwrapper "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
                                 "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
+                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_toolkit_config.c"
                                 "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
                                 "${LIBSUBSCRIBE_PATH}/state_machine.c"
                                 "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
@@ -221,7 +222,8 @@ target_include_directories(s2opc_clientwrapper
 
 list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${LIBSUBSCRIBE_PATH}/libs2opc_client.h"
                                          "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.h"
-                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.h")
+                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.h"
+                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_toolkit_config.h")
 set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${CLIENT_WRAPPER_INCLUDE_FILES}")
 
 install(TARGETS s2opc_clientwrapper
