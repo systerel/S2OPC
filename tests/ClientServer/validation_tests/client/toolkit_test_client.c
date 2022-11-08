@@ -21,6 +21,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
@@ -342,8 +343,7 @@ int main(void)
     char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
     char* keyLocation = "./client_private/client_2k_key.pem";
-    // Client private key password
-    char* KeyPassword = "password";
+
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
     // Get Toolkit Configuration
@@ -388,16 +388,27 @@ int main(void)
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        // Private key: Decrypt and Load
-        SOPC_String* key_password = SOPC_String_Create();
-        if (NULL == key_password)
+        // Private key: Retrieve the password from TEST_SERVER_PRIVATE_KEY_PWD environement variable
+        const char* password = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+        if (NULL == password)
         {
-            printf(">>Stub_Client: Failed to create string\n");
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            printf(">>Stub_Client: The following environment variable is missing: TEST_CLIENT_PRIVATE_KEY_PWD\n");
+            status = SOPC_STATUS_NOK;
+        }
+        SOPC_String* key_password = NULL;
+        // Private key: Decrypt and Load
+        if (SOPC_STATUS_OK == status)
+        {
+            key_password = SOPC_String_Create();
+            if (NULL == key_password)
+            {
+                printf(">>Stub_Client: Failed to create string\n");
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_String_CopyFromCString(key_password, KeyPassword);
+            status = SOPC_String_CopyFromCString(key_password, password);
             if (SOPC_STATUS_OK != status)
             {
                 printf(">>Stub_Client: Failed to copy password from Cstring\n");
