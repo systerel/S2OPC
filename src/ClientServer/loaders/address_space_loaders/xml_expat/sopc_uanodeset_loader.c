@@ -1464,11 +1464,6 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
         complex_value_tag_from_tag_name_no_namespace("DataType", argumentTagCtx->childs, &dataTypeTagCtx);
     assert(dataType_tag_ok);
 
-    parse_complex_value_tag_t* dataTypeIdTagCtx = NULL;
-    bool id_tag_ok =
-        complex_value_tag_from_tag_name_no_namespace("Identifier", dataTypeTagCtx->childs, &dataTypeIdTagCtx);
-    assert(id_tag_ok);
-
     parse_complex_value_tag_t* valueRankTagCtx = NULL;
     bool valueRank_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("ValueRank", argumentTagCtx->childs, &valueRankTagCtx);
@@ -1489,6 +1484,8 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
         complex_value_tag_from_tag_name_no_namespace("Description", argumentTagCtx->childs, &descriptionTagCtx);
     assert(description_tag_ok);
 
+    // Note: "tagCtx->set" is only set when the context contains a parsed string (not set in complex type parent tag)
+
     if (nameTagCtx->set)
     {
         SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&argument->Name, nameTagCtx->single_value);
@@ -1499,20 +1496,16 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
         }
     }
 
-    if (result && dataTypeIdTagCtx->set)
+    if (result)
     {
-        SOPC_NodeId* nodeId =
-            SOPC_NodeId_FromCString(dataTypeIdTagCtx->single_value, (int32_t) strlen(dataTypeIdTagCtx->single_value));
-        if (NULL == nodeId)
-        {
-            LOG_MEMORY_ALLOCATION_FAILURE;
-            result = false;
-        }
-        else
+        SOPC_NodeId* nodeId = NULL;
+        result = set_variant_value_nodeid(&nodeId, dataTypeTagCtx->childs);
+
+        if (result)
         {
             argument->DataType = *nodeId;
+            SOPC_Free(nodeId);
         }
-        SOPC_Free(nodeId);
     }
 
     if (result && valueRankTagCtx->set)
@@ -1528,7 +1521,7 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
         arrayDimUInt32TagCtx->array_values = NULL;
     }
 
-    if (result && descriptionTagCtx->set)
+    if (result)
     {
         SOPC_LocalizedText* lt = NULL;
         result = set_variant_value_localized_text(&lt, descriptionTagCtx->childs);
