@@ -10,7 +10,7 @@
     </Locales>
     <ApplicationCertificates>
       <ServerCertificate path="server_public/server_4k_cert.der"/>
-      <ServerKey path="server_private/encrypted_server_4k_key.pem" encrypt="true"/>
+      <ServerKey path="server_private/encrypted_server_4k_key.pem" encrypted="true"/>
       <TrustedIssuers>
         <!-- List of trusted CAs for which issued certificates are trusted -->
         <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>

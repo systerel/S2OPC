@@ -471,7 +471,7 @@ static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs
 
     ctx->serverKey = path;
 
-    attr_val = get_attr(ctx, "encrypt", attrs);
+    attr_val = get_attr(ctx, "encrypted", attrs);
     ctx->serverkeyEncrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     ctx->state = PARSE_SERVER_KEY;
