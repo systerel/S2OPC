@@ -232,11 +232,23 @@ static parse_complex_value_tag_t complex_value_ext_obj_argument_tags[] = {
      false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
-/* ExtensionObject Body content complex values definition */
 static parse_complex_value_tag_t complex_value_ext_obj_enum_value_type_tags[] = {
     {"EnumValueType", false,
      (parse_complex_value_tag_t[]){
          {"Value", false, NULL, false, NULL, NULL, NULL},
+         {"DisplayName", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
+          NULL},
+         {"Description", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
+          NULL},
+         END_COMPLEX_VALUE_TAG},
+     false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
+static parse_complex_value_tag_t complex_value_ext_obj_eu_information_tags[] = {
+    {"EUInformation", false,
+     (parse_complex_value_tag_t[]){
+         {"NamespaceUri", false, NULL, false, NULL, NULL, NULL},
+         {"UnitId", false, NULL, false, NULL, NULL, NULL},
          {"DisplayName", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
           NULL},
          {"Description", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_LOCALIZED_TEXT_TAGS, false, NULL, NULL,
@@ -266,6 +278,11 @@ static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_comp
     case OpcUaId_EnumValueType_Encoding_DefaultXml:
         encType = &OpcUa_EnumValueType_EncodeableType;
         *body_tags = complex_value_ext_obj_enum_value_type_tags;
+        break;
+    case OpcUaId_EUInformation:
+    case OpcUaId_EUInformation_Encoding_DefaultXml:
+        encType = &OpcUa_EUInformation_EncodeableType;
+        *body_tags = complex_value_ext_obj_eu_information_tags;
         break;
     default:
         encType = NULL;
@@ -1570,8 +1587,9 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
     assert(enumValueType_tag_ok);
 
     parse_complex_value_tag_t* valueTagCtx = NULL;
-    bool name_tag_ok = complex_value_tag_from_tag_name_no_namespace("Value", enumValueTypeTagCtx->childs, &valueTagCtx);
-    assert(name_tag_ok);
+    bool value_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Value", enumValueTypeTagCtx->childs, &valueTagCtx);
+    assert(value_tag_ok);
 
     parse_complex_value_tag_t* displayNameTagCtx = NULL;
     bool displayName_tag_ok =
@@ -1616,6 +1634,84 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
     if (!result)
     {
         OpcUa_EnumValueType_Clear(enumValueType);
+    }
+
+    return result;
+}
+
+static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInformation,
+                                                    parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    bool result = true;
+
+    parse_complex_value_tag_t* euInformationTagCtx = NULL;
+    bool euInformation_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("EUInformation", bodyChildsTagContext, &euInformationTagCtx);
+    assert(euInformation_tag_ok);
+
+    parse_complex_value_tag_t* nsUriTagCtx = NULL;
+    bool nsUri_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("NamespaceUri", euInformationTagCtx->childs, &nsUriTagCtx);
+    assert(nsUri_tag_ok);
+
+    parse_complex_value_tag_t* unitIdTagCtx = NULL;
+    bool unitId_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("UnitId", euInformationTagCtx->childs, &unitIdTagCtx);
+    assert(unitId_tag_ok);
+
+    parse_complex_value_tag_t* displayNameTagCtx = NULL;
+    bool displayName_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("DisplayName", euInformationTagCtx->childs, &displayNameTagCtx);
+    assert(displayName_tag_ok);
+
+    parse_complex_value_tag_t* descriptionTagCtx = NULL;
+    bool description_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Description", euInformationTagCtx->childs, &descriptionTagCtx);
+    assert(description_tag_ok);
+
+    if (result && nsUriTagCtx->set)
+    {
+        SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&euInformation->NamespaceUri, nsUriTagCtx->single_value);
+        if (SOPC_STATUS_OK != status)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            result = false;
+        }
+    }
+
+    if (result && unitIdTagCtx->set)
+    {
+        result = SOPC_strtoint(unitIdTagCtx->single_value, (size_t) strlen(unitIdTagCtx->single_value), 32,
+                               &euInformation->UnitId);
+    }
+
+    if (result)
+    {
+        SOPC_LocalizedText* lt = NULL;
+        result = set_variant_value_localized_text(&lt, displayNameTagCtx->childs);
+
+        if (result)
+        {
+            euInformation->DisplayName = *lt;
+            SOPC_Free(lt);
+        }
+    }
+
+    if (result)
+    {
+        SOPC_LocalizedText* lt = NULL;
+        result = set_variant_value_localized_text(&lt, descriptionTagCtx->childs);
+
+        if (result)
+        {
+            euInformation->Description = *lt;
+            SOPC_Free(lt);
+        }
+    }
+
+    if (!result)
+    {
+        SOPC_EncodeableObject_Clear(euInformation->encodeableType, euInformation);
     }
 
     return result;
@@ -1672,6 +1768,9 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
         break;
     case OpcUaId_EnumValueType:
         result = set_variant_value_extobj_enum_value_type((OpcUa_EnumValueType*) object, bodyTagCtx->childs);
+        break;
+    case OpcUaId_EUInformation:
+        result = set_variant_value_extobj_eu_information((OpcUa_EUInformation*) object, bodyTagCtx->childs);
         break;
     default:
         assert(false);
