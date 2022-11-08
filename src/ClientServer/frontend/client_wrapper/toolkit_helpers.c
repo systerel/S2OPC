@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "libs2opc_client_toolkit_config.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
@@ -154,10 +155,34 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli);
-            if (SOPC_STATUS_OK != status)
+            bool clientKeyEncrypted = SOPC_HelperConfigClient_IsEncryptedClientKey();
+            if (clientKeyEncrypted)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
+                SOPC_String* password = NULL;
+                SOPC_HelperConfigClient_ClientKeyUsrPwdCb(&password, &status);
+                if (SOPC_STATUS_OK != status)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                "Failed to retrieve the password of the client's private key from callback.");
+                }
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_KeyManager_DecryptPrivateKeyFromPath(szPathKeyClient, password, &pKeyCli);
+                }
+
+                if (NULL != password)
+                {
+                    SOPC_String_Delete(password);
+                }
+            }
+            else
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli);
+                if (SOPC_STATUS_OK != status)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
+                }
             }
         }
     }
