@@ -19,6 +19,7 @@
 
 #include <check.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "sopc_atomic.h"
 #include "sopc_common.h"
@@ -47,7 +48,9 @@ START_TEST(test_getEndpoints)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    Config_SetTest_ClientKeyPassword("password");
+    char* password = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+    ck_assert(NULL != password && "missing TEST_CLIENT_PRIVATE_KEY_PWD environement variable");
+    Config_SetTest_ClientKeyPassword(password);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
@@ -176,6 +179,8 @@ START_TEST(test_registerServer)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
+    char* password = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+    ck_assert(NULL != password && "missing TEST_CLIENT_PRIVATE_KEY_PWD environement variable");
     Config_SetTest_ClientKeyPassword("password");
     ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
 

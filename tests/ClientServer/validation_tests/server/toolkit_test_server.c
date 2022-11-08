@@ -45,9 +45,6 @@
 static char* default_server_cert = "server_public/server_2k_cert.der";
 static char* default_key_cert = "server_private/server_2k_key.pem";
 
-// Default server Private Key
-static char* default_server_private_key = "password";
-
 static char* default_trusted_root_issuers[] = {
     "trusted/cacert.der",    /* Demo CA */
     "trusted/ctt_ca1TC.der", /* Will be ignored because no CRL associated. Tests 042, 043 */
@@ -720,7 +717,22 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 
 static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
 {
-    /* Retrieve the user password to decrypt the server private key */
+    /* Retrieve the user password to decrypt the server private key from TEST_SERVER_PRIVATE_KEY_PWD environement
+     * variable*/
+
+    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == ppPassword)
+    {
+        return;
+    }
+    const char* password = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
+    if (NULL == password)
+    {
+        printf(
+            "<Server_PrivateKey_LoadUserPassword > The following environment variable is missing: "
+            "TEST_SERVER_PRIVATE_KEY_PWD\n");
+        return;
+    }
 
     /* Allocation */
     *ppPassword = SOPC_String_Create();
@@ -730,7 +742,7 @@ static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_St
         return;
     }
 
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, default_server_private_key);
+    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password);
     if (SOPC_STATUS_OK != *writtenStatus)
     {
         printf("Server_PrivateKey_LoadUserPassword > Failed to copy user password\n");
