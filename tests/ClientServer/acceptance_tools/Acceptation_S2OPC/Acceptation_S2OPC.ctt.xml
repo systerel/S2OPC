@@ -4398,7 +4398,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemVar"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -5770,7 +5770,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=MultiStateDiscreteItemVar"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -5960,7 +5960,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=TwoStateDiscreteItemVar"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>

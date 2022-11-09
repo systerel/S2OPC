@@ -170,6 +170,33 @@
     </TestCases>
    </ConformanceUnit>
   </ConformanceGroup>
+  <ConformanceGroup name="Data Access">
+   <ConformanceUnit name="Data Access PercentDeadBand">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="005.js"/>
+     <TestCase name="006.js"/>
+     <TestCase name="007.js"/>
+     <TestCase name="008.js"/>
+     <TestCase name="009.js"/>
+     <TestCase name="010.js"/>
+     <TestCase name="011.js"/>
+     <TestCase name="014.js"/>
+     <TestCase name="015.js"/>
+     <TestCase name="016.js"/>
+     <TestCase name="017.js"/>
+     <TestCase name="018.js"/>
+     <TestCase name="Err-001.js"/>
+     <TestCase name="Err-002.js"/>
+     <TestCase name="Err-003.js"/>
+     <TestCase name="Err-004.js"/>
+     <TestCase name="Err-005.js"/>
+    </TestCases>
+   </ConformanceUnit>
+  </ConformanceGroup>
   <ConformanceGroup name="Discovery Services">
    <ConformanceUnit name="Discovery Get Endpoints">
     <TestCases>
