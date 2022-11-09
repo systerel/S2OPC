@@ -39,6 +39,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_user_app_itf.h"
@@ -886,6 +887,11 @@ START_TEST(test_XML_users_configuration)
 }
 END_TEST
 
+static void setup(void)
+{
+    SOPC_Helper_EndiannessCfg_Initialize();
+}
+
 Suite* tests_make_suite_XML_parsers(void)
 {
     Suite* s;
@@ -893,6 +899,7 @@ Suite* tests_make_suite_XML_parsers(void)
 
     s = suite_create("XML parsers tests");
     tc_XML_parsers = tcase_create("XML parsers");
+    tcase_add_checked_fixture(tc_XML_parsers, setup, NULL);
     tcase_add_test(tc_XML_parsers, test_same_address_space_results);
     tcase_add_test(tc_XML_parsers, test_XML_server_configuration);
     tcase_add_test(tc_XML_parsers, test_XML_users_configuration);
