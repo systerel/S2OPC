@@ -3,17 +3,17 @@
   <Anonymous>
     <UserAuthorization write="true" read="true" execute="true" addnode="true" />
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="1000000">
+  <UserPasswordConfiguration hash_iteration_count="10000">
     <!-- user="user1" pwd="password" -->
-    <UserPassword user="user1" hash="cYgA0qffTvGYn4JFNMtwyy/7xHgG3SNfSyZn2U9e/fU=" salt="cy7PLE59LTnr1vV00OnyVA==" base64="true">
+    <UserPassword user="user1" hash="rHOX8eI0E4KQCofDzC2B5ZKdzerB6uGUD+UiiJm46D0=" salt="cy7PLE59LTnr1vV00OnyVA==" base64="true">
       <UserAuthorization write="true" read="true" execute="true" addnode="true" />
     </UserPassword>
     <!-- user="user2" pwd="password1" -->
-    <UserPassword user="user2" hash="fvp1FxTuKFjdnWc08HzdvZYWD0PK2PBhqXD/LH+Od+I=" salt="eatVUCTdclE1OCOk1vpyCw==" base64="true">
+    <UserPassword user="user2" hash="viEkI60UZsgXvm5kDLlFTdl7+LU0UghVzX1Juzl3N/0=" salt="eatVUCTdclE1OCOk1vpyCw==" base64="true">
       <UserAuthorization write="true" read="true" execute="true" addnode="true" />
     </UserPassword>
     <!-- user="username" pwd="password" -->
-    <UserPassword user="username" hash="+P1XO5f43/EBzjiKGWI7OqlYQAFtNPjeJqLceCv4r7o=" salt="9yuu5eKolyp4OLS++9tT4g==" base64="true">
+    <UserPassword user="username" hash="HTxRrFWu/C+WRWuHIRMl64lCFsEUNr/Lht0zDYua9gM=" salt="9yuu5eKolyp4OLS++9tT4g==" base64="true">
       <!-- user with no right: refused with use access denied -->
       <UserAuthorization/>
     </UserPassword>

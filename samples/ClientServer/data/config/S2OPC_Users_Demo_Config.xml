@@ -4,16 +4,16 @@
     <!-- Anonymous is read only -->
     <UserAuthorization write="false" read="true" execute="false" />
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="1000000">
+  <UserPasswordConfiguration hash_iteration_count="10000">
     <!-- "user1" pwd=password cannot call methods of address space -->
-    <UserPassword user="user1" hash="Sg8e3MDeZPb4BJVhS9gtHj/f6Z0jJpLMkfu0YdzP15U=" salt="M59HxepygLeEw5sqFJ+Zgw==" base64="true">
+    <UserPassword user="user1" hash="q9UVP2qKV+xvxWlXbHjl//OLy+gBFf5yipvO9uOybIM=" salt="M59HxepygLeEw5sqFJ+Zgw==" base64="true">
       <UserAuthorization write="true" read="true" execute="false" />
     </UserPassword>
     <!-- "me" pwd=1234 has all right accesses.
         note: still restricted by nodes static access rights in address space.
         note: if base64="false" or missing then hex encoding is used
     -->
-    <UserPassword user="me" hash="a572fd833c41539dcfbbb67b26bc99cf201d52d37d539cef5d302eac97c2e774" salt="17faf802f81c2503d3043042e79004b4">
+    <UserPassword user="me" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
       <UserAuthorization write="true" read="true" execute="true" />
     </UserPassword>
   </UserPasswordConfiguration>
