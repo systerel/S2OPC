@@ -703,26 +703,45 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_ExtensionObject* readExecToken = build_user_token("user2", "password2");
     SOPC_ExtensionObject* readWriteToken = build_user_token("user3", "42");
     SOPC_UserAuthentication_Status authenticationRes;
+    int64_t SOPC_500_MILLISECOND_TO_100_NANOSECONDS = 5000000;
+    SOPC_DateTime t0 = SOPC_Time_GetCurrentTimeUTC();
     SOPC_ReturnStatus status =
         SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidUserNameToken, &authenticationRes);
+    SOPC_DateTime t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_REJECTED_TOKEN, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
+    t0 = SOPC_Time_GetCurrentTimeUTC();
     status =
         SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidPasswordToken, &authenticationRes);
+    t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_REJECTED_TOKEN, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
+    t0 = SOPC_Time_GetCurrentTimeUTC();
     status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, noAccessToken, &authenticationRes);
+    t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_ACCESS_DENIED, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
+    t0 = SOPC_Time_GetCurrentTimeUTC();
     status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, writeExecToken, &authenticationRes);
+    t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
+    t0 = SOPC_Time_GetCurrentTimeUTC();
     status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readExecToken, &authenticationRes);
+    t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
+    t0 = SOPC_Time_GetCurrentTimeUTC();
     status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, readWriteToken, &authenticationRes);
+    t1 = SOPC_Time_GetCurrentTimeUTC();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_USER_AUTHENTICATION_OK, authenticationRes);
+    ck_assert_int_gt(SOPC_500_MILLISECOND_TO_100_NANOSECONDS, t1 - t0);
 
     SOPC_UserWithAuthorization* invalidNoAccesses =
         SOPC_UserWithAuthorization_CreateFromIdentityToken(invalidUserNameToken, authorizationManager);
