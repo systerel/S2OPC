@@ -556,6 +556,255 @@
       </LocalizedText>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemVar" BrowseName="1:AnalogItem" DataType="Float" ValueRank="-1">
+    <DisplayName>AnalogItem</DisplayName>
+    <Description>AnalogItem description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <uax:Float>42.42</uax:Float>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemVarEURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>0.0</Low>
+            <High>1000.0</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemVarEU" BrowseName="0:EngineeringUnits" DataType="i=887" ValueRank="-1">
+    <DisplayName>EngineeringUnits</DisplayName>
+    <Description>EngineeringUnits description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=888</Identifier>
+        </TypeId>
+        <Body>
+          <EUInformation>
+            <NamespaceUri>http://www.opcfoundation.org/UA/units/un/cefact</NamespaceUri>
+            <UnitId>5655636</UnitId>
+            <DisplayName>
+              <Locale/>
+              <Text>V</Text>
+            </DisplayName>
+            <Description>
+              <Locale/>
+              <Text>volt</Text>
+            </Description>
+          </EUInformation>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemVarInstrumentRange" BrowseName="0:InstrumentRange" DataType="i=884" ValueRank="-1">
+    <DisplayName>InstrumentRange</DisplayName>
+    <Description>InstrumentRange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>0.01</Low>
+            <High>230.0</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=MultiStateDiscreteItemVar" BrowseName="1:MultiStateDiscreteItem" DataType="UInt32" ValueRank="-1">
+    <DisplayName>MultiStateDiscreteItem</DisplayName>
+    <Description>MultiStateDiscreteItem description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2376</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>2</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=MultiStateDiscreteItemVarEnumStrings" BrowseName="0:EnumStrings" DataType="LocalizedText" ValueRank="1">
+    <DisplayName>EnumStrings</DisplayName>
+    <Description>EnumStrings description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MultiStateDiscreteItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ListOfLocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <LocalizedText>
+          <Locale>en-US</Locale>
+          <Text>FirstStateName</Text>
+        </LocalizedText>
+        <LocalizedText>
+          <Locale>en-US</Locale>
+          <Text>SecondStateName</Text>
+        </LocalizedText>
+        <LocalizedText>
+          <Locale>en-US</Locale>
+          <Text>FirstStateName</Text>
+        </LocalizedText>
+      </ListOfLocalizedText>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=MultiStateValueDiscreteItemVar" BrowseName="1:MultiStateValueDiscreteItem" DataType="UInt32" ValueRank="-1">
+    <DisplayName>MultiStateValueDiscreteItem</DisplayName>
+    <Description>MultiStateValueDiscreteItem description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2376</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>2</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=MultiStateValueDiscreteItemVarEnumValues" BrowseName="0:EnumValues" DataType="i=7594" ValueRank="1">
+    <DisplayName>EnumValues</DisplayName>
+    <Description>EnumValues description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MultiStateValueDiscreteItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=7616</Identifier>
+          </TypeId>
+          <Body>
+            <EnumValueType>
+              <Value>1</Value>
+              <DisplayName>
+                <Locale>en-US</Locale>
+                <Text>StateOne</Text>
+              </DisplayName>
+              <Description>
+                <Locale>
+                </Locale>
+                <Text>1 = StateOne</Text>
+              </Description>
+            </EnumValueType>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=7616</Identifier>
+          </TypeId>
+          <Body>
+            <EnumValueType>
+              <Value>2</Value>
+              <DisplayName>
+                <Locale>en-US</Locale>
+                <Text>StateTwo</Text>
+              </DisplayName>
+              <Description>
+                <Locale>
+                </Locale>
+                <Text>2 = StateTwo</Text>
+              </Description>
+            </EnumValueType>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=7616</Identifier>
+          </TypeId>
+          <Body>
+            <EnumValueType>
+              <Value>3</Value>
+              <DisplayName>
+                <Locale>en-US</Locale>
+                <Text>State3</Text>
+              </DisplayName>
+              <Description>
+                <Locale/>
+                <Text>State3=3</Text>
+              </Description>
+            </EnumValueType>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+    <UAVariable NodeId="ns=1;s=MultiStateValueDiscreteItemVarValueAsText" BrowseName="0:ValueAsText" DataType="LocalizedText" ValueRank="-1">
+    <DisplayName>ValueAsText</DisplayName>
+    <Description>ValueAsText description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MultiStateValueDiscreteItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <Locale>en-US</Locale>
+        <Text>StateTwo</Text>
+      </LocalizedText>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=TwoStateDiscreteItemVar" BrowseName="1:TwoStateDiscreteItem" DataType="Boolean" ValueRank="-1">
+    <DisplayName>TwoStateDiscreteItem</DisplayName>
+    <Description>TwoStateDiscreteItem description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2376</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>true</uax:Boolean>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=TwoStateDiscreteItemVarFalseState" BrowseName="0:FalseState" DataType="LocalizedText" ValueRank="-1">
+    <DisplayName>FalseState</DisplayName>
+    <Description>FalseState description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=TwoStateDiscreteItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+        <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+          <Locale>fr-FR</Locale>
+          <Text>Faux</Text>
+        </LocalizedText>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=TwoStateDiscreteItemVarTrueState" BrowseName="0:TrueState" DataType="LocalizedText" ValueRank="-1">
+    <DisplayName>TrueState</DisplayName>
+    <Description>TrueState description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=TwoStateDiscreteItemVar</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+        <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+          <Locale>fr-FR</Locale>
+          <Text>Vrai</Text>
+        </LocalizedText>
+    </Value>
+  </UAVariable>
   <!-- Nodes for UACTT tests on references and paths -->
   <UAObject BrowseName="1:TestReferencesFolder" NodeId="ns=1;s=TestReferencesFolder" ParentNodeId="i=85">
     <DisplayName>TestReferencesFolder</DisplayName>
