@@ -4360,7 +4360,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemVar"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -4398,7 +4398,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemVar"/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemInt16"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -4436,7 +4436,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemInt32"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -4474,7 +4474,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemInt64"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -4588,7 +4588,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemUInt32"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -4893,7 +4893,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=AnalogItemArrayInt32"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
