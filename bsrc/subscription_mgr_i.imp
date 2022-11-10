@@ -30,7 +30,8 @@ SEES
     write_value_pointer_bs,
     address_space_itf,
     request_handle_bs,
-    session_mgr
+    session_mgr,
+    channel_mgr
 
 DEFINITIONS
     "definitions.def"
@@ -142,7 +143,98 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    local_treat_create_monitored_item_index
+      (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_index) =
+    PRE
+        p_session : t_session_i & p_session : t_session &
+        p_session : ran(a_subscription_session) &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
+        p_tsToReturn : t_TimestampsToReturn_i &
+        p_tsToReturn : t_TimestampsToReturn &
+        p_user : t_user_i &
+        p_user : t_user   &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds &
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_subscription_publish_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_subscription_publish_resp &
+        p_index : NAT1 &
+        p_index : t_monitoredItemReqIndex &
+        p_index /: dom(CreateMonitoredItemResp_StatusCode) &
+        p_index /: dom(CreateMonitoredItemResp_Id)
+    THEN
+        s_monitoredItemPointer,
+        s_monitoredItemId,
+        a_monitoredItemId,
+        a_monitoredItemSubs,
+        a_monitoredItemNodeId,
+        a_monitoredItemAttributeId,
+        a_monitoredItemMonitMode,
+        a_monitoredItemQueueSize,
+        a_monitored_item_notification_queue,
+        a_notification_queue_notifications,
+        a_defined_monitored_items,
+
+        CreateMonitoredItemResp_Id,
+        CreateMonitoredItemResp_StatusCode
+        :(s_monitoredItemPointer <: t_monitoredItemPointer &
+          s_monitoredItemId <: t_monitoredItemId &
+          a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
+          a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
+          a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+          a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
+          a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
+          a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
+          a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
+          a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+          a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
+
+          CreateMonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
+          CreateMonitoredItemResp_Id$0 <: CreateMonitoredItemResp_Id &
+          dom(CreateMonitoredItemResp_Id) = dom(CreateMonitoredItemResp_Id$0) \/ {p_index} &
+          CreateMonitoredItemResp_StatusCode : t_monitoredItemReqIndex +-> t_StatusCode &
+          CreateMonitoredItemResp_StatusCode$0 <: CreateMonitoredItemResp_StatusCode &
+          dom(CreateMonitoredItemResp_StatusCode) = dom(CreateMonitoredItemResp_StatusCode$0) \/ {p_index} &
+
+          CreateMonitoredItemResp_StatusCode(p_index) : {e_sc_bad_unexpected_error,
+                                                         e_sc_bad_attribute_id_invalid,
+                                                         e_sc_bad_monitoring_mode_invalid,
+                                                         e_sc_bad_monitored_item_filter_unsupported,
+                                                         e_sc_bad_monitored_item_filter_invalid,
+                                                         e_sc_bad_deadband_filter_invalid,
+                                                         e_sc_bad_filter_not_allowed,
+                                                         e_sc_bad_node_id_unknown,
+                                                         e_sc_bad_index_range_invalid,
+                                                         e_sc_bad_out_of_memory,
+                                                         e_sc_ok} &
+            (CreateMonitoredItemResp_StatusCode(p_index) /= e_sc_ok =>
+             s_monitoredItemPointer = s_monitoredItemPointer$0 &
+             s_monitoredItemId = s_monitoredItemId$0 &
+             a_monitoredItemId = a_monitoredItemId$0 &
+             a_monitoredItemSubs = a_monitoredItemSubs$0 &
+             a_monitoredItemNodeId = a_monitoredItemNodeId$0 &
+             a_monitoredItemAttributeId = a_monitoredItemAttributeId$0 &
+             a_monitoredItemMonitMode = a_monitoredItemMonitMode$0 &
+             a_monitoredItemQueueSize = a_monitoredItemQueueSize$0 &
+             a_monitored_item_notification_queue = a_monitored_item_notification_queue$0 &
+             a_notification_queue_notifications = a_notification_queue_notifications$0 &
+             a_defined_monitored_items = a_defined_monitored_items$0 &
+             CreateMonitoredItemResp_Id(p_index) = c_monitoredItemId_indet
+            ) &
+            (CreateMonitoredItemResp_StatusCode(p_index) = e_sc_ok => CreateMonitoredItemResp_Id(p_index) = c_monitoredItemId_indet &
+             CreateMonitoredItemResp_Id(p_index) : s_monitoredItemId &
+             CreateMonitoredItemResp_Id(p_index) /: s_monitoredItemId$0)
+        )
+    END
+    ;
+
+    local_treat_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         p_session : t_session_i & p_session : t_session &
         p_session : ran(a_subscription_session) &
@@ -157,155 +249,44 @@ LOCAL_OPERATIONS
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_subscription_publish_req &
+        a_msg_in_type = e_msg_monitored_items_create_req &
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_subscription_publish_resp &
+        a_msg_out_type = e_msg_monitored_items_create_resp &
         p_nb_monitored_items : NAT &
         p_nb_monitored_items : t_monitoredItemReqIndex &
         p_nb_monitored_items = nb_monitored_items
     THEN
-        LET l_monitoredItemResp_StatusCode BE
-            /* Evaluate the expected valid responses for which a monitored item should be allocated (e_sc_ok case) */
-            l_monitoredItemResp_StatusCode =
-            %mi_index.(mi_index : t_monitoredItemReqIndex &
-                mi_index : 1..nb_monitored_items &
-                /* ith node id has a node in the Address Space */
-                mi_index : dom(CreateMonitoredItemReq_NodeId) &
-                /* Node is in the domain of the attribute */
-                mi_index : dom(CreateMonitoredItemReq_AttributeId)
-                /* TODO: add use-access levels */
-                |
-                {TRUE |-> e_sc_bad_attribute_id_invalid,
-                 FALSE |-> {TRUE |-> e_sc_bad_monitoring_mode_invalid,
-                            FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
-                                       FALSE |-> {TRUE |-> e_sc_bad_node_id_unknown,
-                                                  FALSE |-> {TRUE |-> e_sc_bad_attribute_id_invalid,
-                                                             FALSE |-> {TRUE |-> e_sc_bad_filter_not_allowed,
-                                                                        FALSE |-> {FALSE |-> e_sc_bad_index_range_invalid,
-                                                                                   TRUE |-> {TRUE |-> e_sc_bad_out_of_memory,
-                                                                                             FALSE |-> e_sc_ok
-                                                                                            }(bool(t_monitoredItemPointer = s_monitoredItemPointer or
-                                                                                                   t_monitoredItemId = s_monitoredItemId))
-                                                                                   }(bool(CreateMonitoredItemReq_IndexRange(mi_index) : t_IndexRange))
-                                                                       }(bool(CreateMonitoredItemReq_Filter(mi_index) /= c_monitoringFilter_indet &
-                                                                               not(CreateMonitoredItemReq_NodeId(mi_index) : ran(a_NodeId) &
-                                                                                   CreateMonitoredItemReq_AttributeId(mi_index) = e_aid_Value &
-                                                                                   (a_NodeId~(CreateMonitoredItemReq_NodeId(mi_index)) |->
-                                                                                    CreateMonitoredItemReq_Filter(mi_index)) : a_monitoredItemNodeFilterValid)))
-                                                           }(bool(a_NodeId~(CreateMonitoredItemReq_NodeId(mi_index)) /:
-                                                                   dom(AttributeID_Node_Variant(CreateMonitoredItemReq_AttributeId(mi_index))) or
-                                                                   a_NodeClass_Attribute
-                                                                    (a_Node_availableInFuture(CreateMonitoredItemReq_NodeId(mi_index)) |->
-                                                                       CreateMonitoredItemReq_AttributeId(mi_index)) = FALSE))
-                                                }(bool(CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_NodeId~) &
-                                                       CreateMonitoredItemReq_NodeId(mi_index) /: dom(a_Node_availableInFuture)))
-                                     }(bool(CreateMonitoredItemReq_Filter(mi_index) = c_monitoringFilter_indet or
-                                            CreateMonitoredItemReq_Filter(mi_index) : t_monitoringFilter))
-                            }(bool(CreateMonitoredItemReq_ValidMonitoringMode(mi_index) = FALSE))
-                }(bool(mi_index /: dom(CreateMonitoredItemReq_AttributeId)))
-            )
-        IN
-            ANY max_mi_ids, max_mi_pointers, s_maximums, nb_allocated_monitored_items WHERE
-                /* Define the number of really allocated monitored items (minimum between expected and available) */
-                max_mi_ids = card(t_monitoredItemId - s_monitoredItemId) &
-                max_mi_pointers = card(t_monitoredItemPointer - s_monitoredItemPointer) &
-                s_maximums = {max_mi_ids} \/ {max_mi_pointers} \/ {card((l_monitoredItemResp_StatusCode |> {e_sc_ok}))} &
-                nb_allocated_monitored_items = min(s_maximums)
-            THEN
-                LET l_allocMonitoredItemResp_StatusCode BE
-                    /* Define the valid responses restricted by number of allocated monitored items */
-                    l_allocMonitoredItemResp_StatusCode =
-                      %mi_index.(mi_index : t_monitoredItemReqIndex &
-                                 mi_index : 1..nb_monitored_items
-                                 |
-                                 {TRUE |-> l_monitoredItemResp_StatusCode(mi_index), /* Copy if no restriction due to allocation */
-                                  FALSE |-> {TRUE |-> e_sc_bad_out_of_memory, /* Since we do not have limit it is the case when no more MI */
-                                             FALSE |-> l_monitoredItemResp_StatusCode(mi_index) /* Copy result if not e_sc_ok */
-                                            }(bool(l_monitoredItemResp_StatusCode(mi_index) = e_sc_ok))
-                                 }(bool(card((1..mi_index <| l_monitoredItemResp_StatusCode |> {e_sc_ok})) <
-                                               nb_allocated_monitored_items))
-                                )
-                IN
-                    /* Define monitored items allocated (with unique id) */
-                    ANY s_newMonitoredItemId, miIndexToMiId, s_newMonitoredItemPointer, l_MonitoredItemResp_Id WHERE
+        s_monitoredItemPointer,
+        s_monitoredItemId,
+        a_monitoredItemId,
+        a_monitoredItemSubs,
+        a_monitoredItemNodeId,
+        a_monitoredItemAttributeId,
+        a_monitoredItemMonitMode,
+        a_monitoredItemQueueSize,
+        a_monitored_item_notification_queue,
+        a_notification_queue_notifications,
+        a_defined_monitored_items,
 
-                        /* Allocate the new monitored items */
-                        s_newMonitoredItemId <: t_monitoredItemId &
-                        s_newMonitoredItemId /\ s_monitoredItemId = {} &
+        CreateMonitoredItemResp_Id,
+        CreateMonitoredItemResp_StatusCode
+        :(s_monitoredItemPointer <: t_monitoredItemPointer &
+          s_monitoredItemId <: t_monitoredItemId &
+          a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
+          a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
+          a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+          a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
+          a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
+          a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
+          a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
+          a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+          a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
 
-                        miIndexToMiId : dom(l_allocMonitoredItemResp_StatusCode |> {e_sc_ok}) >-> t_monitoredItemId &
-                        ran(miIndexToMiId) = s_newMonitoredItemId &
-
-                        s_newMonitoredItemPointer <: t_monitoredItemPointer &
-                        s_newMonitoredItemPointer /\ s_monitoredItemPointer = {} &
-                        card(s_newMonitoredItemPointer) = card(s_newMonitoredItemId) &
-
-                        /* Reserve those new monitored items for the response */
-                        l_MonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
-                        l_MonitoredItemResp_Id[dom(l_allocMonitoredItemResp_StatusCode |>> {e_sc_ok})] = {c_monitoredItemId_indet} &
-                        l_MonitoredItemResp_Id[dom(l_allocMonitoredItemResp_StatusCode |> {e_sc_ok})] = ran(miIndexToMiId)
-                    THEN
-                        /* Define the queues of monitored items that will be modified */
-                        LET miSubQueue, miIndexToNodeIds, s_miNodeQueues, s_miQueues BE
-                            miSubQueue = a_monitoredItemQueue(p_subscription) &
-                            /* Nodes ids concerned by the new monitored items */
-                            miIndexToNodeIds = %mi_index.(mi_index : t_monitoredItemReqIndex &
-                                                          mi_index : 1..nb_monitored_items &
-                                                          l_allocMonitoredItemResp_StatusCode (mi_index) = e_sc_ok
-                                                          |
-                                                          CreateMonitoredItemReq_NodeId(mi_index)) &
-                            s_miNodeQueues = a_nodeToMonitoredItemQueue[ran(miIndexToNodeIds)] &
-                            s_miQueues = {miSubQueue} \/ s_miNodeQueues
-                        IN
-                            /* Set response variables */
-                            CreateMonitoredItemResp_StatusCode := l_allocMonitoredItemResp_StatusCode ||
-                            CreateMonitoredItemResp_Id := l_MonitoredItemResp_Id ||
-
-                            /* Update set of valid monitored items and their properties */
-                            s_monitoredItemId := s_monitoredItemId \/ s_newMonitoredItemId ||
-                            s_monitoredItemPointer := s_monitoredItemPointer \/ s_newMonitoredItemPointer ||
-                            a_monitoredItemId, a_monitoredItemSubs, a_monitoredItemNodeId, a_monitoredItemQueueSize,
-                            a_monitored_item_notification_queue, a_notification_queue_notifications,
-                            a_defined_monitored_items
-                            :(/* Associate new pointers with new ids */
-                              a_monitoredItemId <: a_monitoredItemId$0 &
-                              s_newMonitoredItemPointer <<| a_monitoredItemId =
-                               s_newMonitoredItemPointer <<| a_monitoredItemId$0 &
-                              a_monitoredItemId[s_newMonitoredItemPointer] = s_newMonitoredItemId &
-                              /* Associate new pointers with nodeIds */
-                              a_monitoredItemNodeId <: a_monitoredItemNodeId$0 &
-                              s_newMonitoredItemPointer <<| a_monitoredItemNodeId =
-                               s_newMonitoredItemPointer <<| a_monitoredItemNodeId$0 &
-                              a_monitoredItemNodeId[s_newMonitoredItemPointer] = ran(miIndexToNodeIds) &
-                              s_newMonitoredItemPointer <<| a_monitoredItemQueueSize = a_monitoredItemQueueSize$0 &
-                              s_newMonitoredItemPointer <: dom(a_monitoredItemQueueSize) &
-                              /* Associate new pointers with current subscription */
-                              a_monitoredItemSubs <: a_monitoredItemSubs$0 &
-                              s_newMonitoredItemPointer <<| a_monitoredItemSubs =
-                               s_newMonitoredItemPointer <<| a_monitoredItemSubs$0 &
-                              a_monitoredItemSubs[s_newMonitoredItemPointer] = {p_subscription} &
-                              /* Add monitored item notification queue and initial notification */
-                              a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
-                              a_monitored_item_notification_queue$0 <: a_monitored_item_notification_queue &
-                              s_newMonitoredItemPointer <: dom(a_monitored_item_notification_queue) &
-                              a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
-                              a_monitored_item_notification_queue[s_newMonitoredItemPointer] <<| a_notification_queue_notifications$0 =
-                              a_monitored_item_notification_queue[s_newMonitoredItemPointer] <<| a_notification_queue_notifications &
-                              card(a_notification_queue_notifications[a_monitored_item_notification_queue[s_newMonitoredItemPointer]]) =
-                                card(s_newMonitoredItemPointer) &
-                              /* Add monitored items to the monitored items queues */
-                              a_defined_monitored_items <: a_defined_monitored_items$0 &
-                              s_miQueues <<| a_defined_monitored_items =
-                               s_miQueues <<| a_defined_monitored_items$0 &
-                              a_defined_monitored_items[s_miQueues] = s_monitoredItemPointer
-                            )
-                       END
-                    END
-                END
-            END
-        END
+          CreateMonitoredItemResp_Id : 1..nb_monitored_items --> t_monitoredItemId_i &
+          CreateMonitoredItemResp_StatusCode : 1..nb_monitored_items --> t_StatusCode
+        )
     END
     ;
 
@@ -793,15 +774,10 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    local_treat_create_monitored_item_index
+      (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_index) =
     VAR
-        l_endpoint_config_idx,
-        l_continue,
-        l_index,
         l_bres,
-        l_bres_presentNode,
-        l_bres_absent_knownNode,
-        l_knownNodeClass,
         l_nid,
         l_aid,
         l_monitMode,
@@ -810,30 +786,36 @@ OPERATIONS
         l_filter,
         l_discardOldest,
         l_queueSize,
-        l_node,
         l_sc,
+        l_monitoredItemId,
+        l_revSamplingItv,
+        l_revQueueSize,
+        l_indexRange,
+        l_endpoint_config_idx,
+        l_bres_presentNode,
+        l_node,
+        l_bres_absent_knownNode,
+        l_knownNodeClass,
         l_value,
         l_valueSc,
         l_val_ts_src,
         l_val_ts_srv,
-        l_monitoredItemPointer,
-        l_monitoredItemId,
-        l_revSamplingItv,
-        l_revQueueSize,
-        l_indexRange
+        l_monitoredItemPointer
     IN
+        l_monitoredItemId := c_monitoredItemId_indet;
+        l_revSamplingItv := c_opcua_duration_indet;
+        l_revQueueSize := 0;
+        l_node := c_Node_indet;
+        l_value := c_Variant_indet;
+        l_sc := e_sc_bad_unexpected_error;
+
         l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
-        l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
-        WHILE l_continue = TRUE DO
-            l_node := c_Node_indet;
-            l_value := c_Variant_indet;
-            l_monitoredItemId := c_monitoredItemId_indet;
-            l_revSamplingItv := c_opcua_duration_indet;
-            l_revQueueSize := 0;
-            l_indexRange := c_IndexRange_indet;
-            l_continue, l_index <-- continue_iter_monitored_item_request;
+        l_bres <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
+
+        IF l_bres = TRUE
+        THEN
             l_bres, l_sc, l_nid, l_aid, l_monitMode, l_clientHandle, l_samplingItv, l_filter, l_discardOldest, l_queueSize, l_indexRange
-              <-- getall_create_monitored_item_req_params(p_req_msg, l_index);
+            <-- getall_create_monitored_item_req_params(p_req_msg, p_index);
             /* Check validity of NodeId */
             IF l_bres = TRUE
             THEN
@@ -853,15 +835,15 @@ OPERATIONS
                     END;
                     /* Create monitored item */
                     /* From part 4:
-                       When a user adds a monitored item that the user is denied read access to, the add operation for
-                       the item shall succeed and the bad status Bad_NotReadable or Bad_UserAccessDenied shall be
-                       returned in the Publish response.
-                       The same procedure shall be applied for an IndexRange that does not deliver data
-                       for the current value but could deliver data in the future.
+                    When a user adds a monitored item that the user is denied read access to, the add operation for
+                    the item shall succeed and the bad status Bad_NotReadable or Bad_UserAccessDenied shall be
+                    returned in the Publish response.
+                    The same procedure shall be applied for an IndexRange that does not deliver data
+                    for the current value but could deliver data in the future.
                     */
                     IF l_sc /= e_sc_ok & (l_sc = e_sc_bad_not_readable or
-                                          l_sc = e_sc_bad_user_access_denied or
-                                          l_sc = e_sc_bad_index_range_no_data)
+                            l_sc = e_sc_bad_user_access_denied or
+                            l_sc = e_sc_bad_index_range_no_data)
                     THEN
                         /* For PublishResponse */
                         l_valueSc <-- getall_conv_StatusCode_To_RawStatusCode(l_sc);
@@ -871,34 +853,46 @@ OPERATIONS
                     THEN
                         l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
                         l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
-                                                                                                   l_nid,
-                                                                                                   l_aid,
-                                                                                                   l_indexRange,
-                                                                                                   l_value,
-                                                                                                   l_valueSc,
-                                                                                                   l_val_ts_src,
-                                                                                                   l_val_ts_srv,
-                                                                                                   p_tsToReturn,
-                                                                                                   l_monitMode,
-                                                                                                   l_clientHandle,
-                                                                                                   l_filter,
-                                                                                                   l_discardOldest,
-                                                                                                   l_revQueueSize);
+                            l_nid,
+                            l_aid,
+                            l_indexRange,
+                            l_value,
+                            l_valueSc,
+                            l_val_ts_src,
+                            l_val_ts_srv,
+                            p_tsToReturn,
+                            l_monitMode,
+                            l_clientHandle,
+                            l_filter,
+                            l_discardOldest,
+                            l_revQueueSize);
                         read_AddressSpace_free_variant(l_value)
                     END
                 END
             END
-            ;
-            setall_msg_create_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
+        END
+        ;
 
+        setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
+    END
+    ;
+
+    local_treat_create_monitored_items (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    VAR
+        l_continue,
+        l_index
+    IN
+        l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
+        WHILE l_continue = TRUE DO
+            l_continue, l_index <-- continue_iter_monitored_item_request;
+            local_treat_create_monitored_item_index
+              (p_session, p_subscription, p_tsToReturn, p_user, p_locales, p_req_msg, p_resp_msg, l_index)
         INVARIANT
             rreqs_to_iterate <: t_monitoredItemReqIndex &
             rreqs_iterated   <: t_monitoredItemReqIndex &
             rreqs_to_iterate /\ rreqs_iterated = {} &
             rreqs_to_iterate \/ rreqs_iterated = 1..nb_monitored_items &
             l_continue = bool(rreqs_to_iterate /= {})
-
-            /* TODO: reprendre les propriétés de fill_response_subscription_create_monitored_items */
         VARIANT
             card(rreqs_to_iterate)
         END
@@ -1561,7 +1555,7 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     l_locales <-- get_server_session_preferred_locales(p_session);
-                    fill_response_subscription_create_monitored_items
+                    local_treat_create_monitored_items
                       (p_session, l_subscription, l_timestampToRet, p_user, l_locales, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE

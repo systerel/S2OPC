@@ -897,6 +897,7 @@ OPERATIONS
                     a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
                     a_monitoredItemSubs(l_monitoredItem) := p_subscription ||
                     a_monitoredItemNodeId(l_monitoredItem) := p_nid ||
+                    a_monitoredItemAttributeId(l_monitoredItem) := p_aid ||
                     a_monitoredItemMonitMode(l_monitoredItem) := p_monitoringMode ||
                     a_monitoredItemQueueSize(l_monitoredItem) := p_queueSize ||
                     monitoredItemPointer := l_monitoredItem ||

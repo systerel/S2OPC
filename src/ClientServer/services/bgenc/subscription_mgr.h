@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 22/12/2022 10:07:04
+ Date                 : 14/02/2023 10:44:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,6 +51,7 @@
    SEES Clause
   --------------*/
 #include "address_space_itf.h"
+#include "channel_mgr.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
@@ -98,15 +99,6 @@ extern void subscription_mgr__fill_publish_response_msg_available_seq_nums(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const constants__t_notifRepublishQueue_i subscription_mgr__republishQueue,
    const t_entier4 subscription_mgr__nb_seq_nums);
-extern void subscription_mgr__fill_response_subscription_create_monitored_items(
-   const constants__t_session_i subscription_mgr__p_session,
-   const constants__t_subscription_i subscription_mgr__p_subscription,
-   const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
-   const constants__t_user_i subscription_mgr__p_user,
-   const constants__t_LocaleIds_i subscription_mgr__p_locales,
-   const constants__t_msg_i subscription_mgr__p_req_msg,
-   const constants__t_msg_i subscription_mgr__p_resp_msg,
-   const t_entier4 subscription_mgr__p_nb_monitored_items);
 extern void subscription_mgr__fill_response_subscription_delete_monitored_items(
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_msg_i subscription_mgr__p_req_msg,
@@ -141,6 +133,24 @@ extern void subscription_mgr__local_create_notification_on_monitored_items_if_da
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
+extern void subscription_mgr__local_treat_create_monitored_item_index(
+   const constants__t_session_i subscription_mgr__p_session,
+   const constants__t_subscription_i subscription_mgr__p_subscription,
+   const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
+   const constants__t_user_i subscription_mgr__p_user,
+   const constants__t_LocaleIds_i subscription_mgr__p_locales,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   const t_entier4 subscription_mgr__p_index);
+extern void subscription_mgr__local_treat_create_monitored_items(
+   const constants__t_session_i subscription_mgr__p_session,
+   const constants__t_subscription_i subscription_mgr__p_subscription,
+   const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
+   const constants__t_user_i subscription_mgr__p_user,
+   const constants__t_LocaleIds_i subscription_mgr__p_locales,
+   const constants__t_msg_i subscription_mgr__p_req_msg,
+   const constants__t_msg_i subscription_mgr__p_resp_msg,
+   const t_entier4 subscription_mgr__p_nb_monitored_items);
 
 /*--------------------
    OPERATIONS Clause

@@ -181,6 +181,7 @@ OPERATIONS
                   e_sc_bad_monitoring_mode_invalid,
                   e_sc_bad_monitored_item_filter_unsupported,
                   e_sc_bad_monitored_item_filter_invalid,
+                  e_sc_bad_deadband_filter_invalid,
                   e_sc_bad_filter_not_allowed} &
           p_nid : t_NodeId_i &
           p_aid : t_AttributeId_i &
