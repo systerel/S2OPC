@@ -638,6 +638,173 @@
       </ExtensionObject>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemInt16" BrowseName="1:AnalogItem" DataType="Int16" ValueRank="-1">
+    <DisplayName>AnalogItemInt16</DisplayName>
+    <Description>AnalogItemInt16 description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <uax:Int16>99</uax:Int16>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemInt16EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemInt16</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>1</Low>
+            <High>150</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemUInt32" BrowseName="1:AnalogItem" DataType="UInt32" ValueRank="-1">
+    <DisplayName>AnalogItemUInt32</DisplayName>
+    <Description>AnalogItemUInt32 description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>51</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemUInt32EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemUInt32</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>10</Low>
+            <High>100</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemInt64" BrowseName="1:AnalogItem" DataType="Int64" ValueRank="-1">
+    <DisplayName>AnalogItemInt64</DisplayName>
+    <Description>AnalogItemInt64 description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <uax:Int64>-10</uax:Int64>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemInt64EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemInt64</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>-100</Low>
+            <High>100</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemInt32" BrowseName="1:AnalogItem" DataType="Int32" ValueRank="-1">
+    <DisplayName>AnalogItemInt32</DisplayName>
+    <Description>AnalogItemInt32 description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <uax:Int32>-50</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemInt32EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemInt32</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>-200</Low>
+            <High>-10</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemArrayInt32" BrowseName="1:AnalogItem" DataType="Int32" ValueRank="1">
+    <DisplayName>AnalogItemArrayInt32</DisplayName>
+    <Description>AnalogItemArrayInt32 description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+    </References>
+    <Value>
+      <ListOfInt32 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <uax:Int32>5</uax:Int32>
+        <uax:Int32>4</uax:Int32>
+        <uax:Int32>3</uax:Int32>
+        <uax:Int32>2</uax:Int32>
+        <uax:Int32>1</uax:Int32>
+        <uax:Int32>0</uax:Int32>
+      </ListOfInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=AnalogItemArrayInt32EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+    <DisplayName>EURange</DisplayName>
+    <Description>EURange description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AnalogItemArrayInt32</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=885</Identifier>
+        </TypeId>
+        <Body>
+          <Range>
+            <Low>0</Low>
+            <High>1000</High>
+          </Range>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
   <UAVariable AccessLevel="99" NodeId="ns=1;s=MultiStateDiscreteItemVar" BrowseName="1:MultiStateDiscreteItem" DataType="UInt32" ValueRank="-1">
     <DisplayName>MultiStateDiscreteItem</DisplayName>
     <Description>MultiStateDiscreteItem description</Description>
