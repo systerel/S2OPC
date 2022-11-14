@@ -262,6 +262,9 @@ OPERATIONS
           p_nbReferences : NAT &
           p_continuationPointId : t_ContinuationPointId_i &
           isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points) &
+
+          d_inv_persist &
+
           (p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points =>
               out_BrowseResult_nb_References     : NAT                        &
               out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
