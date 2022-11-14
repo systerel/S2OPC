@@ -279,89 +279,16 @@ LOCAL_OPERATIONS
                         browseResult_to_iterate = browseResult_to_iterate$0 \/ {nextBrowseResult$0} &
                         nextBrowseResult = nextBrowseResult$0 + 1 &
                         p_continue = bool(nextBrowseResult$0 + 1 < nb_browseResult_max_refs) &
-                        out_BrowseResult_NodeId = out_BrowseResult_NodeId$0 <+
-                                                  {l_browseResultIdx |-> Reference_TargetNode(p_ref)} &
+
                         out_BrowseResult_nb_References = l_browseResultIdx &
 
-                        /* Node is known and NodeClass is compatible with NodeClassMask */
-                        (Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
-                         conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId)
-                        =>
-                            (p_resultMask : mask_hasBrowseName =>
-                                out_BrowseResult_BrowseName = out_BrowseResult_BrowseName$0 <+
-                                    {l_browseResultIdx |->
-                                     a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))}
-                            ) &
-                            (not(p_resultMask : mask_hasBrowseName) =>
-                                out_BrowseResult_BrowseName = out_BrowseResult_BrowseName$0 <+
-                                    {l_browseResultIdx |-> c_QualifiedName_indet}
-                            ) &
-
-                            (p_resultMask : mask_hasDisplayName =>
-                                out_BrowseResult_DisplayName = out_BrowseResult_DisplayName$0 <+
-                                    {l_browseResultIdx |->
-                                     a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))}
-                            ) &
-                            (not(p_resultMask : mask_hasDisplayName) =>
-                                out_BrowseResult_DisplayName = out_BrowseResult_DisplayName$0 <+
-                                    {l_browseResultIdx |-> c_LocalizedText_indet}
-                            ) &
-
-                            (p_resultMask : mask_hasNodeClass =>
-                                out_BrowseResult_NodeClass = out_BrowseResult_NodeClass$0 <+
-                                    {l_browseResultIdx |->
-                                     a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))}
-                            ) &
-                            (not(p_resultMask : mask_hasNodeClass) =>
-                                out_BrowseResult_NodeClass = out_BrowseResult_NodeClass$0 <+
-                                    {l_browseResultIdx |-> c_NodeClass_indet}
-                            ) &
-
-                            (p_resultMask : mask_hasTypeDefinition =>
-                                out_BrowseResult_TypeDefinition = out_BrowseResult_TypeDefinition$0<+
-                                    {l_browseResultIdx |->
-                                     Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))}
-                            ) &
-                            (not(p_resultMask : mask_hasTypeDefinition) =>
-                                out_BrowseResult_TypeDefinition = out_BrowseResult_TypeDefinition$0<+
-                                    {l_browseResultIdx |-> c_ExpandedNodeId_indet}
-                            )
-                        ) &
-                        /* Node is unknown */
-                        (not(Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
-                             conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId))
-                        =>
-                            out_BrowseResult_BrowseName = out_BrowseResult_BrowseName$0<+
-                                {l_browseResultIdx |-> c_QualifiedName_indet} &
-                            out_BrowseResult_DisplayName = out_BrowseResult_DisplayName$0<+
-                                {l_browseResultIdx |-> c_LocalizedText_indet} &
-                            out_BrowseResult_NodeClass = out_BrowseResult_NodeClass$0<+
-                                {l_browseResultIdx |-> c_NodeClass_indet} &
-                            out_BrowseResult_TypeDefinition = out_BrowseResult_TypeDefinition$0<+
-                                {l_browseResultIdx |-> c_ExpandedNodeId_indet}
-                        ) &
-
-                        (p_resultMask : mask_hasReferenceType
-                        =>
-                            out_BrowseResult_ReferenceTypeId = out_BrowseResult_ReferenceTypeId$0<+
-                                {l_browseResultIdx |-> Reference_ReferenceType(p_ref)}
-                        ) &
-                        (not(p_resultMask : mask_hasReferenceType)
-                        =>
-                            out_BrowseResult_ReferenceTypeId = out_BrowseResult_ReferenceTypeId$0<+
-                                {l_browseResultIdx |-> c_NodeId_indet}
-                        ) &
-
-                        (p_resultMask : mask_hasIsForward
-                        =>
-                            out_BrowseResult_isForward = out_BrowseResult_isForward$0<+
-                                {l_browseResultIdx |-> Reference_IsForward(p_ref)}
-                        ) &
-                        (not(p_resultMask : mask_hasIsForward)
-                        =>
-                            out_BrowseResult_isForward = out_BrowseResult_isForward$0<+
-                                {l_browseResultIdx |-> FALSE}
-                        )
+                        out_BrowseResult_NodeId          : NAT +-> t_ExpandedNodeId   &
+                        out_BrowseResult_BrowseName      : NAT +-> t_QualifiedName_i  &
+                        out_BrowseResult_DisplayName     : NAT +-> t_LocalizedText_i  &
+                        out_BrowseResult_NodeClass       : NAT +-> t_NodeClass_i      &
+                        out_BrowseResult_TypeDefinition  : NAT +-> t_ExpandedNodeId_i &
+                        out_BrowseResult_ReferenceTypeId : NAT +-> t_NodeId_i         &
+                        out_BrowseResult_isForward       : NAT +-> BOOL
                     )
                 END
             OR
