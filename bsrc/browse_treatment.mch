@@ -237,10 +237,6 @@ OPERATIONS
         isBrowseValueContextDefined = TRUE &
         isBrowseResultComputed = FALSE
     THEN
-        LET l_maxTargetRef BE
-            l_maxTargetRef = {TRUE|-> in_maxReferencesPerNode, FALSE|-> k_n_BrowseTarget_max}
-                              (bool(0 /= in_maxReferencesPerNode & k_n_BrowseTarget_max > in_maxReferencesPerNode))
-        IN
         d_variables_out,
         p_serviceStatusCode,
         p_continuationPointId,
@@ -298,7 +294,6 @@ OPERATIONS
           (p_serviceStatusCode /= e_sc_ok =>
               p_continuationPointId = c_ContinuationPointId_indet)
           )
-        END
     END
     ;
 
