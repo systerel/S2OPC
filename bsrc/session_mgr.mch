@@ -167,7 +167,7 @@ OPERATIONS
             channel :(channel : t_channel_i & channel : t_channel)
         OR
             is_valid_res := FALSE ||
-            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state, e_sc_bad_secure_channel_id_invalid} ||
+            status_code_err :: {e_sc_bad_session_id_invalid, e_sc_bad_invalid_state} ||
             channel :(channel : t_channel_i  & channel = c_channel_indet)
         END
     END

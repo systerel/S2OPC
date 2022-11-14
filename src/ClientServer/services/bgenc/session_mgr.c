@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 14/11/2022 15:24:15
+ Date                 : 14/11/2022 15:34:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -568,12 +568,7 @@ void session_mgr__server_validate_async_session_service_resp(
          }
          else {
             *session_mgr__is_valid_res = false;
-            if (session_mgr__l_session_channel == *session_mgr__channel) {
-               *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_bad_invalid_state;
-            }
-            else {
-               *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_bad_secure_channel_id_invalid;
-            }
+            *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_bad_invalid_state;
          }
       }
       else {

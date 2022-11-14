@@ -600,12 +600,8 @@ OPERATIONS
                 channel := l_session_channel
             ELSE
                 is_valid_res := FALSE;
-                IF l_session_channel = channel THEN
-                    /* Invalid session state */
-                    status_code_err := e_sc_bad_invalid_state
-                ELSE
-                    status_code_err := e_sc_bad_secure_channel_id_invalid
-                END
+                /* Invalid session state */
+                status_code_err := e_sc_bad_invalid_state
             END
         ELSE
             is_valid_res := FALSE;
