@@ -64,16 +64,13 @@ build_app() {
 }
 
 # Build SERVER demo on stm32h735g_disco
-build_app stm32h735g_disco zephyr_server || exit 10
+build_app stm32h735g_disco zephyr_pubsub_server || exit 10
 
 # Build SERVER demo on mimxrt1064_evk
-build_app mimxrt1064_evk zephyr_server || exit 11
-
-# Build PUBSUB demo on stm32h735g_disco
-build_app stm32h735g_disco zephyr_pubsub || exit 12
+build_app mimxrt1064_evk zephyr_pubsub_server || exit 11
 
 # Build CLIENTdemo on stm32h735g_disco
-build_app stm32h735g_disco zephyr_client || exit 13
+build_app stm32h735g_disco zephyr_client || exit 12
 
 ls -l ${OUTDIR}/
 

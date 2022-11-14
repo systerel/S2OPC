@@ -54,7 +54,7 @@ K_MUTEX_DEFINE(subscriberDictgMutex);
 // Thread-related data
 #define SYNCH_STACK_SIZE 500
 #define SYNCH_PRIORITY (CONFIG_NUM_PREEMPT_PRIORITIES - 1)
-static void synch_entry_point(void*, void*, void*);
+static void synch_entry_point(void *p1, void *p2, void *p3);
 K_THREAD_DEFINE(my_tid, SYNCH_STACK_SIZE, synch_entry_point, NULL, NULL, NULL, SYNCH_PRIORITY, 0, 0);
 
 // This semaphore is used to trigger synch_entry_point task
@@ -95,8 +95,11 @@ static void subscriber_pushToWriteRequest(const void* key, const void* value, vo
     }
 }
 
-static void synch_entry_point(void*, void*, void*)
+static void synch_entry_point(void *p1, void *p2, void *p3)
 {
+    (void) p1;
+    (void) p2;
+    (void) p3;
     pSubscriberPendingUpdates = SOPC_NodeId_Dict_Create(true, NULL);
     SOPC_ASSERT(NULL != pSubscriberPendingUpdates && "SOPC_Dict_Create failed");
 
