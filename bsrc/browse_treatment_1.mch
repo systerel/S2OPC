@@ -90,7 +90,6 @@ OPERATIONS
         :(
           p_BrowseName : t_QualifiedName_i &
           p_DisplayName : t_LocalizedText_i &
-          p_DisplayName : t_LocalizedText &
           p_NodeClass : t_NodeClass_i &
           p_TypeDefinition : t_ExpandedNodeId_i &
           (p_TargetNodeId : dom(conv_ExpandedNodeId_NodeId) &
