@@ -818,7 +818,9 @@ OPERATIONS
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
             END;
             /* Encode the message (nominal and degraded cases) */
-            IF l_resp_msg /= c_msg_indet &
+            IF l_resp_msg /= c_msg_indet
+            THEN
+            IF
                async_resp = FALSE
             THEN
                 IF l_ret /= e_sc_ok
@@ -834,12 +836,11 @@ OPERATIONS
                 /* response message structures not necessary anymore */
                 dealloc_msg_header_out (l_resp_msg_header);
                 dealloc_msg_out (l_resp_msg)
-            ELSIF l_resp_msg /= c_msg_indet &
-                    async_resp = TRUE
-            THEN
+            ELSE
                 dealloc_msg_header_out (l_resp_msg_header);
                 /* response message is not deallocated since it will be sent later */
                 forget_msg_out(l_resp_msg)
+            END
             ELSE
                 /* Failed to allocate the response */
                 sc := e_sc_bad_out_of_memory
