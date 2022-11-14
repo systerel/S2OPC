@@ -56,7 +56,8 @@ DEFINITIONS
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
         out_BrowseResultReferences,
-        isBrowseResultComputed
+        isBrowseResultComputed,
+        isBrowseResultAllocated
     ;
 
     d_inv_in ==
@@ -92,7 +93,8 @@ DEFINITIONS
         out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
         out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
         out_BrowseResultReferences         : t_BrowseResultReferences_i &
-        isBrowseResultComputed             : BOOL
+        isBrowseResultComputed             : BOOL                       &
+        isBrowseResultAllocated            : BOOL
     ;
     d_init_in ==
         d_variables_in
@@ -131,7 +133,8 @@ DEFINITIONS
             out_BrowseResult_NodeClass         = {}                         &
             out_BrowseResult_TypeDefinition    = {}                         &
             out_BrowseResultReferences         = c_BrowseResultReferences_indet &
-            isBrowseResultComputed             = FALSE
+            isBrowseResultComputed             = FALSE                      &
+            isBrowseResultAllocated            = FALSE
         )
 
 
@@ -235,7 +238,8 @@ OPERATIONS
     p_serviceStatusCode, p_continuationPointId, p_nbReferences <-- compute_browse_result =
     PRE
         isBrowseValueContextDefined = TRUE &
-        isBrowseResultComputed = FALSE
+        isBrowseResultComputed = FALSE     &
+        isBrowseResultAllocated = FALSE
     THEN
         d_variables_out,
         p_serviceStatusCode,
