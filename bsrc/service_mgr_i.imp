@@ -214,6 +214,53 @@ LOCAL_OPERATIONS
     END
     ;
 
+    p_sc, p_buffer_out <-- encode_session_service_resp (p_request_handle, p_channel, p_msg_sc,
+                                                        p_msg_type, p_msg_header, p_msg, p_async) =
+    PRE
+        p_request_handle : t_server_request_handle_i &
+        p_channel : t_channel_i &
+        p_channel : t_channel &
+        p_msg_sc : t_StatusCode_i &
+        p_msg_sc : t_StatusCode &
+        p_msg_type : t_msg_type_i &
+        p_msg_type = a_msg_out_type &
+        a_msg_out_type : t_msg_type &
+        a_msg_out_type : s_service_resps &
+        p_msg_header : t_msg_header_i &
+        p_msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
+        p_msg : t_msg_i &
+        p_msg = c_msg_out &
+        c_msg_out : t_msg &
+        p_async : BOOL &
+        p_buffer_out : t_byte_buffer_i &
+        p_buffer_out = c_byte_buffer_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
+    THEN
+        p_sc, p_buffer_out, a_buffer_out_state, c_msg_out_header, c_msg_out, a_msg_out_type :(
+            p_sc : t_StatusCode_i &
+            p_sc : {c_StatusCode_indet, e_sc_ok, e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory} &
+            p_buffer_out : t_byte_buffer_i &
+            a_buffer_out_state : t_buffer_out_state_i &
+            c_msg_out_header : t_msg_header_i &
+            c_msg_out_header = c_msg_header_indet &
+            c_msg_out : t_msg_i &
+            c_msg_out = c_msg_indet &
+            a_msg_out_type : t_msg_type_i &
+            a_msg_out_type = c_msg_type_indet &
+
+            (p_sc = e_sc_ok & p_async = FALSE =>
+                p_buffer_out : t_byte_buffer &
+                a_buffer_out_state = e_buffer_out_msg_written) &
+
+            (not (p_sc = e_sc_ok & p_async = FALSE) =>
+                p_buffer_out = c_byte_buffer_indet &
+                a_buffer_out_state = c_buffer_out_state_indet) &
+
+            ((p_async = TRUE) <=> (p_sc = c_StatusCode_indet))
+        )
+    END;
+
     StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -528,6 +575,39 @@ OPERATIONS
     END
     ;
 
+    p_sc, p_buffer_out <-- encode_session_service_resp (p_request_handle, p_channel, p_msg_sc,
+                                                        p_msg_type, p_msg_header, p_msg, p_async) =
+    VAR
+        l_msg_type,
+        l_channel_cfg
+    IN
+        p_sc := c_StatusCode_indet;
+        p_buffer_out := c_byte_buffer_indet;
+        IF p_async = FALSE
+        THEN
+            IF p_msg_sc = e_sc_ok
+            THEN
+                l_msg_type := p_msg_type
+            ELSE
+                /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
+                /* Note: The allocated message is large enough to encode this type. */
+                l_msg_type := e_msg_service_fault_resp
+            END;
+            server_write_msg_out_header_req_handle (p_msg_header, p_request_handle);
+            write_msg_resp_header_service_status (p_msg_header, p_msg_sc);
+            /* Response message encoded */
+            l_channel_cfg <-- get_channel_info (p_channel);
+            p_sc, p_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, l_msg_type, p_msg_header, p_msg);
+            /* response message structures not necessary anymore */
+            dealloc_msg_header_out (p_msg_header);
+            dealloc_msg_out (p_msg)
+        ELSE
+            dealloc_msg_header_out (p_msg_header);
+            /* response message is not deallocated since it will be sent later */
+            forget_msg_out (p_msg)
+        END
+    END;
+
     StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
         l_ret
@@ -748,8 +828,7 @@ OPERATIONS
         l_buffer_out,
         l_session_channel,
         l_endpoint_config_idx,
-        l_is_valid_ep_config_idx,
-        l_channel_cfg
+        l_is_valid_ep_config_idx
     IN
         sc := c_StatusCode_indet;
         l_is_valid_req_on_session := FALSE;
@@ -817,30 +896,10 @@ OPERATIONS
                 /* Allocate error response message if not allocated (degraded case) */
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
             END;
-            /* Encode the message (nominal and degraded cases) */
             IF l_resp_msg /= c_msg_indet
             THEN
-            IF
-               async_resp = FALSE
-            THEN
-                IF l_ret /= e_sc_ok
-                THEN
-                    /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
-                    l_resp_msg_typ := e_msg_service_fault_resp
-                END;
-                server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
-                /* Response message encoded */
-                l_channel_cfg <-- get_channel_info (channel);
-                sc, l_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
-                /* response message structures not necessary anymore */
-                dealloc_msg_header_out (l_resp_msg_header);
-                dealloc_msg_out (l_resp_msg)
-            ELSE
-                dealloc_msg_header_out (l_resp_msg_header);
-                /* response message is not deallocated since it will be sent later */
-                forget_msg_out(l_resp_msg)
-            END
+                sc, l_buffer_out <-- encode_session_service_resp (l_request_handle, channel, l_ret, l_resp_msg_typ,
+                                                                  l_resp_msg_header, l_resp_msg, async_resp)
             ELSE
                 /* Failed to allocate the response */
                 sc := e_sc_bad_out_of_memory

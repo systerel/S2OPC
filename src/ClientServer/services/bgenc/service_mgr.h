@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 04/11/2022 14:14:34
+ Date                 : 07/11/2022 14:41:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -106,6 +106,16 @@ extern void service_mgr__INITIALISATION(void);
 extern void service_mgr__dealloc_msg_in_header_if_cond(
    const t_bool service_mgr__p_cond,
    const constants__t_msg_header_i service_mgr__p_req_msg_header);
+extern void service_mgr__encode_session_service_resp(
+   const constants__t_server_request_handle_i service_mgr__p_request_handle,
+   const constants__t_channel_i service_mgr__p_channel,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr__p_msg_sc,
+   const constants__t_msg_type_i service_mgr__p_msg_type,
+   const constants__t_msg_header_i service_mgr__p_msg_header,
+   const constants__t_msg_i service_mgr__p_msg,
+   const t_bool service_mgr__p_async,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__p_sc,
+   constants__t_byte_buffer_i * const service_mgr__p_buffer_out);
 extern void service_mgr__get_response_type(
    const constants__t_msg_type_i service_mgr__req_msg_typ,
    constants__t_msg_type_i * const service_mgr__resp_msg_typ);
