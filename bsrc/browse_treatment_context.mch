@@ -162,8 +162,7 @@ OPERATIONS
 
    bres <-- is_NodeClass_in_NodeClassMask(p_nodeClass) =
    PRE
-        p_nodeClass : t_NodeClass_i &
-        p_nodeClass : t_NodeClass
+        p_nodeClass : t_NodeClass_i
    THEN
         bres := bool(p_nodeClass : in_BrowseValue_NodeClassesInMask)
    END
