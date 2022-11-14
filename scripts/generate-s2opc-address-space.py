@@ -94,7 +94,7 @@ UA_VALUE_VALUERANK_TAG = UA_TYPES_NS + 'ValueRank'
 UA_VALUE_ARRAYDIMENSIONS_TAG = UA_TYPES_NS + 'ArrayDimensions'
 UA_VALUE_DESCRIPTION_TAG = UA_TYPES_NS + 'Description'
 UA_VALUE_ENUM_TAG = UA_TYPES_NS + 'EnumValueType'
-UA_VALUE_EU_TAG = UA_TYPES_NS + 'EUInformation'
+UA_VALUE_EU_INFO_TAG = UA_TYPES_NS + 'EUInformation'
 UA_VALUE_NS_URI_TAG = UA_TYPES_NS + 'NamespaceUri'
 UA_VALUE_UNIT_ID_TAG = UA_TYPES_NS + 'UnitId'
 UA_VALUE_NAMESPACE_INDEX_TAG = UA_TYPES_NS + 'NamespaceIndex'
@@ -120,7 +120,7 @@ VALUE_TYPE_EXTENSIONOBJECT = 17
 VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT = 18
 VALUE_TYPE_LOCALIZEDTEXT = 19
 VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE = 20
-VALUE_TYPE_ENGINEERING_UNIT = 21
+VALUE_TYPE_ENGINEERING_UNIT_INFO = 21
 VALUE_TYPE_QUALIFIED_NAME = 22
 
 UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_DATETIME}
@@ -357,29 +357,22 @@ class EnumValueType(ExtensionObject):
     __slots__ = 'value', 'displayname', 'description'
 
     def __init__(self, value, displayname, description):
-        self.extobj_typeid = NodeId.parse('i=298') # use binary encoding of datatype
+        self.extobj_typeid = NodeId.parse('i=8251') # use binary encoding of datatype
         self.extobj_objtype = '&OpcUa_EnumValueType_EncodeableType'
         self.value = int(value)
-        self.displayname = displayname        
+        self.displayname = displayname
         self.description = description
 
-class EngineeringUnit(ExtensionObject):
+class EUInformation(ExtensionObject):
     __slots__ = 'namespaceuri', 'unit_id', 'displayname', 'description'
 
     def __init__(self, namespaceuri, unit_id, displayname, description):
-        self.extobj_typeid = NodeId.parse('i=298') # use binary encoding of datatype
+        self.extobj_typeid = NodeId.parse('i=889') # use binary encoding of datatype
         self.extobj_objtype = '&OpcUa_EUInformation_EncodeableType'
         self.namespaceuri = namespaceuri
         self.unit_id = int(unit_id)
-        self.displayname = displayname        
+        self.displayname = displayname
         self.description = description
-
-class QualifiedName(object):
-    __slots__ = 'namespace_index', 'value'
-
-    def __init__(self, namespace_index, value):
-        self.namespace_index = namespace_index
-        self.value = value
 
 def expect_element(source, name=None):
     ev, n = next(source)
@@ -566,7 +559,7 @@ def parse_argument_body(n):
     if arraydimensions is None:
         arraydimensions_list = []
     else:
-        arraydimensions_list = collect_list_items(arraydimensions, UA_VALUE_TYPE_UINT32, True, int)
+        arraydimensions_list = collect_list_items(arraydimensions, UA_VALUE_TYPE_UINT32, True, str)
     if descriptions is not None:
         descriptions = parse_localized_text(descriptions)
 
@@ -595,8 +588,8 @@ def parse_enum_value_type_body(n):
 
     return EnumValueType(value.text, displayName, descriptions)
 
-def parse_engineering_unit_body(n):
-    eu = n.find(UA_VALUE_EU_TAG)
+def parse_engineering_unit_info_body(n):
+    eu = n.find(UA_VALUE_EU_INFO_TAG)
 
     if eu is None:
         raise ParseError('EUInformation extension object without EUInformation tag')
@@ -605,7 +598,7 @@ def parse_engineering_unit_body(n):
     unit_id = eu.find(UA_VALUE_UNIT_ID_TAG)
 
     displayName = eu.find(UA_VALUE_DISPLAY_NAME_TAG)
-    descriptions = eu.find(UA_VALUE_DESCRIPTION_TAG)
+    description= eu.find(UA_VALUE_DESCRIPTION_TAG)
 
     if namespaceuri is None:
         raise ParseError('EUInformation extension object without NamespaceUri')
@@ -618,15 +611,15 @@ def parse_engineering_unit_body(n):
     else:
         displayName = parse_localized_text(displayName)
   
-    if descriptions is not None:
-        descriptions = parse_localized_text(descriptions)
+    if description is not None:
+        description = parse_localized_text(description)
 
-    return EngineeringUnit(namespaceuri.text, unit_id.text, displayName, descriptions)
+    return EUInformation(namespaceuri.text, unit_id.text, displayName, description)
 
 def parse_qualified_name(n):
 
     namespace_index = n.find(UA_VALUE_NAMESPACE_INDEX_TAG)
-    name = n.find(UA_VALUE_NAME_TAG)    
+    name = n.find(UA_VALUE_NAME_TAG)
     
     if namespace_index is None:
         raise ParseError('QualifiedName without NamespaceIndex')
@@ -640,13 +633,16 @@ EXTENSION_OBJECT_PARSERS_DICT = {
     297: (parse_argument_body, VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT),
     # Argument datatype nodeId
     296: (parse_argument_body, VALUE_TYPE_EXTENSIONOBJECT_ARGUMENT),
-    # Engineering Unit
-    888: (parse_engineering_unit_body, VALUE_TYPE_ENGINEERING_UNIT),
 
-    # EnumValueType datataype nodeId
+    # Engineering Unit XML encoding nodeId
+    888: (parse_engineering_unit_info_body, VALUE_TYPE_ENGINEERING_UNIT_INFO),
+    # Engineering Unit datatype nodeId
+    887: (parse_engineering_unit_info_body, VALUE_TYPE_ENGINEERING_UNIT_INFO),
+
+    # EnumValueType XML encoding nodeId
     7616 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
     # EnumValueType datataype nodeId
-    7594 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),    
+    7594 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
 }
 
 def get_extension_object_parser_and_type(nodeid):
@@ -655,7 +651,7 @@ def get_extension_object_parser_and_type(nodeid):
         # support only some of OPC UA namespace types
         nodeid_int =  int(nodeid.data)
         if nodeid_int in EXTENSION_OBJECT_PARSERS_DICT:
-            return EXTENSION_OBJECT_PARSERS_DICT.get(nodeid_int, None)        
+            return EXTENSION_OBJECT_PARSERS_DICT.get(nodeid_int, None)
     return (None, None)
 
 def get_extension_object_type(n):
@@ -857,7 +853,7 @@ def generate_localized_text(text):
         return '{%s, %s}' % (generate_string(None), generate_string(None))
     
     if text.locale is not None:
-       # remove linebreaks and whitespaces (should not exist in locale)
+        # remove linebreaks and whitespaces (should not exist in locale)
         text.locale = text.locale.replace('\n', '').replace('\r', '').replace(' ','')
 
     return '{%s, %s}' % (generate_string(text.locale), generate_string(text.text))
@@ -899,9 +895,9 @@ def generate_extension_object(ext_obj, gen=None, is_array=False):
 
 # Specific extension object content generators
 
-def generate_argument_ext_obj(obj):
+def generate_argument_ext_obj(obj):    
     array_dimensions =('(uint32_t[]){%s}' % ','.join(obj.arraydimensions)
-                       if obj.arraydimensions not in (None, [], [0]) else 'NULL')
+                       if obj.arraydimensions not in (None, []) else 'NULL')
     return ('''
                (OpcUa_Argument[])
                {{%s,
@@ -1109,7 +1105,7 @@ def generate_value_variant(val):
                                              gen=generate_enum_value_type_ext_obj, is_array=val.is_array)
         return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
                                 val.val, val.is_array, extension_object_generator)
-    elif val.ty == VALUE_TYPE_ENGINEERING_UNIT:
+    elif val.ty == VALUE_TYPE_ENGINEERING_UNIT_INFO:
         # Partial evaluation of generate_extension_object to make it compatible with generate_variant
         extension_object_generator = partial(generate_extension_object,
                                              gen=generate_engineering_unit_ext_obj, is_array=val.is_array)
