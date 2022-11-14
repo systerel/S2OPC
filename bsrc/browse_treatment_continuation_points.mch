@@ -102,7 +102,6 @@ OPERATIONS
         p_session : t_session &
         p_continuationPointId : t_ContinuationPointId_i
     THEN
-        s_ContinuationPoints, id_ContinuationPoint, session_ContinuationPoint,
         bres, p_nextIndex, p_maxTargetRef, p_browseView, p_nodeId,
         p_browseDirection, p_referenceType, p_includeSubtypes,
         p_nodeClassMask, p_resultMask
