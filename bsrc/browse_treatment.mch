@@ -252,48 +252,8 @@ OPERATIONS
           p_continuationPointId : t_ContinuationPointId_i &
           isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points) &
 
-          d_inv_persist &
-
-          (p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points =>
-              out_BrowseResult_nb_References     : NAT                        &
-              out_BrowseResult_nb_References     <= in_maxReferencesPerNode   &
-              p_nbReferences = out_BrowseResult_nb_References &
-              out_BrowseResult_ReferenceTypeId   : 1..p_nbReferences --> t_NodeId &
-              out_BrowseResult_isForward         : 1..p_nbReferences --> BOOL     &
-              out_BrowseResult_NodeId            : 1..p_nbReferences --> t_ExpandedNodeId   &
-              out_BrowseResult_BrowseName        : 1..p_nbReferences --> t_QualifiedName_i  & /* TODO: restrict to t_QualifiedName if Node in server */
-              out_BrowseResult_DisplayName       : 1..p_nbReferences --> t_LocalizedText_i  &
-              out_BrowseResult_NodeClass         : 1..p_nbReferences --> t_NodeClass_i      & /* TODO: restrict to t_NodeClass if Node in server */
-              out_BrowseResult_TypeDefinition    : 1..p_nbReferences --> t_ExpandedNodeId_i & /* TODO: restrict to t_ExpandedNodeId if Node in server */
-              out_BrowseResultReferences : t_BrowseResultReferences & /* Results are defined */
-              /* ContinuationPoint defined constraints: */
-              (out_BrowseResult_ContinuationPointId /= c_ContinuationPointId_indet =>
-                  p_nbReferences = in_maxReferencesPerNode & /* Maximum reached if continuation point defined */
-                  /* No continuation point already defined for current session or automatic release of previous continuation point set */
-                  (in_session /: dom(session_ContinuationPoint$0~) or in_ReleasePrevContinuationPoint = TRUE) &
-
-                  /* No continuation point already defined, only add a new one */
-                  (in_session /: dom(session_ContinuationPoint$0~) =>
-                      out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
-                      id_ContinuationPoint$0 <: id_ContinuationPoint &
-                      out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) & /* Continuation point added to valid continuation points */
-                      s_ContinuationPoints = s_ContinuationPoints$0 \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
-                      session_ContinuationPoint = session_ContinuationPoint$0 <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session}) &
-                  /* OR Continuation point already defined, remove previous one and replace by the new one */
-                  (in_session : dom(session_ContinuationPoint$0~) =>
-                      out_BrowseResult_ContinuationPointId : t_ContinuationPointId & /* Returned continuation point is associated with current session */
-                      {session_ContinuationPoint$0~(in_session)} <<| id_ContinuationPoint$0 <: id_ContinuationPoint &
-                      out_BrowseResult_ContinuationPointId : ran(id_ContinuationPoint) & /* Continuation point added to valid continuation points */
-                      s_ContinuationPoints = s_ContinuationPoints$0
-                                              - {session_ContinuationPoint$0~(in_session)}
-                                              \/ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId)} &
-                      session_ContinuationPoint = session_ContinuationPoint$0 |>> {in_session} <+ {id_ContinuationPoint~(out_BrowseResult_ContinuationPointId) |-> in_session})
-              ) &
-              p_continuationPointId = out_BrowseResult_ContinuationPointId
-          ) &
-          (p_serviceStatusCode /= e_sc_ok =>
-              p_continuationPointId = c_ContinuationPointId_indet)
-          )
+          d_inv_persist
+        )
     END
     ;
 
