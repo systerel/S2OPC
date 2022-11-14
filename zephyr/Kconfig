@@ -78,13 +78,6 @@ config SOPC_PUBSUB_USES_CACHE
 	help
 	  This value is used by Server and Client sample
 
-config SOPC_SUBSCRIBER_SYNCH_TIME_MS
-	int "Sychronisation period of AddressSpace from Subscriber"
-	default 100
-	depends on S2OPC
-	help
-	  If ZERO then the update is synchronous
-	  
 config SOPC_USER_STACK_SIZE
 	int "Stack size of applicative (in Kb) user tasks if called by P_THREAD_Create or P_THREAD_CreatePrioritized"
 	default 4

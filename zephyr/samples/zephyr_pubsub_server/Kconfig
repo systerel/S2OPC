@@ -1,0 +1,13 @@
+# Private config options for mqtt-azure sample app
+
+# Copyright (c) 2019 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "Zephyr S2OPC server + PubSub demo"
+
+config DEMO_CACHE_SYNCH
+    boolean "false"
+    help
+      Use synchronous cache and address space synchronization
+
+source "Kconfig.zephyr"

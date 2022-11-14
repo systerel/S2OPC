@@ -38,17 +38,18 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_local_sks.h"
 #include "sopc_sub_scheduler.h"
-#include "sopc_mem_alloc.h"
-#include "sopc_pki_stack.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
 // project includes
 #include "cache.h"
+#include "cache_sync.h"
 #include "network_init.h"
 #include "pubsub_config_static.h"
 #include "static_security_data.h"
@@ -76,14 +77,7 @@
 #ifndef CONFIG_SOPC_ENDPOINT_ADDRESS
 #error "CONFIG_SOPC_ENDPOINT_ADDRESS not defined"
 #endif
-#ifndef CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS
-#error "CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS not defined"
-#endif
-#if CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS == 0
-#define DEMO_CYCLE_MS 100
-#else
-#define DEMO_CYCLE_MS CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS
-#endif
+#define DEMO_CYCLE_MS 10
 
 /***************************************************/
 /**               MISC FUNCTIONS                   */
@@ -150,11 +144,6 @@ static SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
 static bool gPubStarted = false;
 static bool gSubStarted = false;
 static bool gSubOperational = false;
-
-/** A dictionary, but actually only used for Keys {NodeId* : NULL}
- * It contains the nodeId that have been received on Subscriber but not yet updated onto the server */
-static SOPC_Dict* pSubscriberPendingUpdates = NULL;
-K_MUTEX_DEFINE(subscriberDictgMutex);
 
 /***************************************************/
 /**               HELPER LOG MACROS                */
@@ -279,6 +268,8 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
         INFO("A client updated the content of node <%s> with a value of type %d", nodeId,
              writeValue->Value.Value.BuiltInTypeId);
         SOPC_Free(nodeId);
+        // Synchronize cache for PubSub
+        cacheSync_WriteToCache(&writeValue->NodeId, &writeValue->Value);
     }
     else
     {
@@ -297,10 +288,10 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
  */
 static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
 {
-    // This check ensures we receive a OpcUa_WriteResponse
     if (encType == &OpcUa_WriteResponse_EncodeableType)
     {
-        SOPC_ASSERT(appContext == ASYNCH_CONTEXT_PARAM);
+        // This check ensures we receive a OpcUa_WriteResponse
+        SOPC_ASSERT(appContext == ASYNCH_CONTEXT_PARAM || appContext == ASYNCH_CONTEXT_CACHE_SYNC);
 
         OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
         // Example: only check that the result is OK
@@ -335,6 +326,9 @@ static bool Server_LocalWriteSingleNode(SOPC_NodeId* pNid, SOPC_DataValue* pDv)
     }
     else
     {
+        // Synchronize cache for PubSub
+        cacheSync_WriteToCache(pNid, pDv);
+
         // param is not used here because this is a static context. In a more complex application,
         // param can be set to any context pointer that way be required by the application
         // We use a simple marker to show data transmission from here to localServiceAsyncRespCallback
@@ -389,106 +383,6 @@ static SOPC_DataValue* Server_LocalReadSingleNode(SOPC_NodeId* pNid)
     OpcUa_ReadResponse_Clear(response);
     SOPC_Free(response);
     return result;
-}
-
-/**
- * @brief Event called when the subscriber receives new values
- * @param nodesToWrite An array of write events
- * @param nbValues The nulber of elements in nodesToWrite
- */
-static bool Sub_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
-{
-    if (CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS == 0)
-    {
-        // The AddressSpace is updated synchronously
-        WARNING("TODO : CONFIG_SOPC_SUBSCRIBER_SYNCH_TIME_MS == 0");
-    }
-    else
-    {
-        // Memorize elements updated until next refresh
-        for (size_t idx = 0; idx < nbValues; idx++)
-        {
-            SOPC_NodeId* copy = (SOPC_NodeId*) SOPC_Malloc(sizeof(*copy));
-            SOPC_ASSERT(NULL != copy);
-            SOPC_NodeId_Copy(copy, &nodesToWrite->NodeId);
-            k_mutex_lock(&subscriberDictgMutex, K_FOREVER);
-            SOPC_Dict_Insert(pSubscriberPendingUpdates, copy, NULL);
-            k_mutex_unlock(&subscriberDictgMutex);
-        }
-    }
-
-    return Cache_SetTargetVariables(nodesToWrite, nbValues);
-}
-
-typedef struct
-{
-    OpcUa_WriteRequest* req;
-    size_t size;
-    size_t next;
-} Write_Request_Context;
-
-/**
- * Update address space for the given NodeId*(key)
- */
-static void subscriber_pushToWriteRequest(const void* key, const void* value, void* user_data)
-{
-    (void) value;
-    SOPC_ASSERT(NULL != user_data);
-
-    Write_Request_Context* context = (Write_Request_Context*) user_data;
-    OpcUa_WriteRequest* writeRequest = context->req;
-
-    const SOPC_NodeId* pNodeId = (const SOPC_NodeId*) key;
-    if (NULL != pNodeId && NULL != writeRequest)
-    {
-        SOPC_ReturnStatus status;
-        SOPC_ASSERT(context->next < context->size);
-        Cache_Lock();
-        // Retreive the value from the cache
-        SOPC_DataValue* pDv = Cache_Get(pNodeId);
-        status = SOPC_WriteRequest_SetWriteValue(writeRequest, context->next, pNodeId, SOPC_AttributeId_Value, NULL, pDv);
-        SOPC_ASSERT(status == SOPC_STATUS_OK);
-        Cache_Unlock();
-        context->next++;
-    }
-}
-
-static void Sub_SynchronizeAddSpace(void)
-{
-    SOPC_ReturnStatus status;
-    OpcUa_WriteRequest* request = NULL;
-    Write_Request_Context context;
-
-    // Report the values received from Subscriber to AddessSpace
-    k_mutex_lock(&subscriberDictgMutex, K_FOREVER);
-    const size_t nbRequests = SOPC_Dict_Size(pSubscriberPendingUpdates);
-
-    if (nbRequests > 0)
-    {
-        request = SOPC_WriteRequest_Create(nbRequests);
-        context.next = 0;
-        context.size = nbRequests;
-        context.req = request;
-
-        SOPC_Dict_ForEach(pSubscriberPendingUpdates, &subscriber_pushToWriteRequest, (void*) &context);
-        // Clear and recreate an empty dictionary
-        SOPC_Dict_Delete(pSubscriberPendingUpdates);
-        pSubscriberPendingUpdates = SOPC_NodeId_Dict_Create(true, NULL);
-        SOPC_ASSERT(NULL != pSubscriberPendingUpdates && "SOPC_Dict_Create failed");
-    }
-    k_mutex_unlock(&subscriberDictgMutex);
-
-    // Process to update if there are some values
-    if (NULL != request)
-    {
-        SOPC_ASSERT(context.next == context.size);
-        status = SOPC_ServerHelper_LocalServiceAsync(request, ASYNCH_CONTEXT_PARAM);
-        if (status != SOPC_STATUS_OK)
-        {
-            WARNING("LocalServiceAsync failed with code  (%d)", status);
-            SOPC_Free(request);
-        }
-    }
 }
 
 /***
@@ -660,7 +554,7 @@ static void setupPubSub(void)
     SOPC_ASSERT(NULL != pPubSubConfig && "SOPC_PubSubConfig_GetStatic failed");
 
     /* Sub target configuration */
-    pTargetConfig = SOPC_SubTargetVariableConfig_Create(&Sub_SetTargetVariables);
+    pTargetConfig = SOPC_SubTargetVariableConfig_Create(&cacheSync_SetTargetVariables);
     SOPC_ASSERT(NULL != pTargetConfig && "SOPC_SubTargetVariableConfig_Create failed");
 
     /* Pub target configuration */
@@ -670,9 +564,6 @@ static void setupPubSub(void)
     // Configure SKS for PubSub
     SOPC_KeyBunch_init_static(pubSub_keySign, sizeof(pubSub_keySign), pubSub_keyEncrypt, sizeof(pubSub_keyEncrypt),
                               pubSub_keyNonce, sizeof(pubSub_keyNonce));
-
-    pSubscriberPendingUpdates = SOPC_NodeId_Dict_Create(true, NULL);
-    SOPC_ASSERT(NULL != pSubscriberPendingUpdates && "SOPC_Dict_Create failed");
 
     Cache_Initialize(pPubSubConfig);
 }
@@ -710,7 +601,6 @@ int main(int argc, char* argv[])
 
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
     {
-        Sub_SynchronizeAddSpace();
         k_sleep(K_MSEC(DEMO_CYCLE_MS));
     }
 
@@ -822,7 +712,8 @@ static int cmd_demo_sub(const struct shell* shell, size_t argc, char** argv)
     {
         // start subscriber (will fail if already started)
         bool bResult;
-        bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
+        bResult =
+            SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
         if (!bResult)
         {
             printk("\r\nFailed to start Subscriber!\r\n");
@@ -852,13 +743,15 @@ static int cmd_demo_write(const struct shell* shell, size_t argc, char** argv)
     if (argc < 3)
     {
         PRINT("usage: demo write <nodeid> <value>\n");
-        PRINT("<value> must be prefixed by b for a BOOL s for a String.\n");
+        PRINT("<value> must be prefixed by b for a BOOL s for a String; i for a 32 bit INT.\n");
         PRINT("Other formats not implemented here.\n");
         return 0;
     }
 
     const char* nodeIdC = argv[1];
     const char* dvC = argv[2];
+
+    PRINT("nodeIdC='%s', dvC='%s'\n", nodeIdC, dvC);
 
     SOPC_NodeId nid;
     SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, strlen(nodeIdC));
@@ -877,6 +770,18 @@ static int cmd_demo_write(const struct shell* shell, size_t argc, char** argv)
         dv.Value.BuiltInTypeId = SOPC_Boolean_Id;
 
         dv.Value.Value.Boolean = atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'i')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Int32_Id;
+
+        dv.Value.Value.Int32 = atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'u')
+    {
+        dv.Value.BuiltInTypeId = SOPC_UInt32_Id;
+
+        dv.Value.Value.Uint32 = atoi(dvC + 1);
     }
     else
     {
@@ -978,7 +883,7 @@ static void cmd_demo_instrum(const struct shell* shell, size_t argc, char** argv
     {
         idx++;
         PRINT("Thr #%02u (%.08s): (%05u / %05u bytes used) = %02d%%\n", idx, pInfos->name, pInfos->stack_usage,
-               pInfos->stack_size, (100 * pInfos->stack_usage) / pInfos->stack_size);
+              pInfos->stack_size, (100 * pInfos->stack_usage) / pInfos->stack_size);
         pInfos++;
     }
 }

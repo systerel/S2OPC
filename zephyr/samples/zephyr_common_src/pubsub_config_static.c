@@ -39,20 +39,20 @@
 #error "CONFIG_SOPC_SUBSCRIBER_ADDRESS is not defined!"
 #endif
 
-#define PUB_VAR_STRING "ns=1;s=pubString"
-#define PUB_VAR_BYTE "ns=1;s=pubByte"
-#define PUB_VAR_UINT32 "ns=1;s=pubUINT32"
-#define PUB_VAR_INT16 "ns=1;s=pubINT16"
-#define PUB_VAR_BOOL "ns=1;s=pubBOOL"
-#define PUB_VAR_STATUS "ns=1;s=pubStatusCode"
+#define PUB_VAR_STRING "ns=1;s=PubString"
+#define PUB_VAR_BYTE "ns=1;s=PubByte"
+#define PUB_VAR_UINT32 "ns=1;s=PubUInt32"
+#define PUB_VAR_INT16 "ns=1;s=PubIn16"
+#define PUB_VAR_BOOL "ns=1;s=PubBool"
+#define PUB_VAR_STATUS "ns=1;s=PubStatusCode"
 #define NB_PUB_VARS 6
 
-#define SUB_VAR_STRING "ns=1;s=subString"
-#define SUB_VAR_BYTE "ns=1;s=subByte"
-#define SUB_VAR_UINT32 "ns=1;s=subUINT32"
-#define SUB_VAR_INT16 "ns=1;s=subINT16"
-#define SUB_VAR_BOOL "ns=1;s=subBOOL"
-#define SUB_VAR_STATUS "ns=1;s=subStatusCode"
+#define SUB_VAR_STRING "ns=1;s=SubString"
+#define SUB_VAR_BYTE "ns=1;s=SubByte"
+#define SUB_VAR_UINT32 "ns=1;s=ns=1;s=SubUInt32"
+#define SUB_VAR_INT16 "ns=1;s=SubInt16"
+#define SUB_VAR_BOOL "ns=1;s=SubBool"
+#define SUB_VAR_STATUS "ns=1;s=SubStatusCode"
 #define NB_SUB_VARS 6
 
 #define PUBLISHER_ID 42

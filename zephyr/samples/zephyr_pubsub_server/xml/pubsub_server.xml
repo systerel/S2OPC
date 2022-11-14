@@ -928,9 +928,42 @@
       <uax:UInt16>1</uax:UInt16>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:varUInt32" DataType="UInt32" NodeId="ns=1;s=SubUInt32" ParentNodeId="ns=1;s=SubVars">
-    <DisplayName>subVarUInt32</DisplayName>
-    <Description>subVarUInt32Desc</Description>
+  <UAVariable AccessLevel="3" BrowseName="1:pubString" DataType="String" NodeId="ns=1;s=PubString" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubString</DisplayName>
+    <Description>pubStringDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:subString" DataType="String" NodeId="ns=1;s=SubString" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subString</DisplayName>
+    <Description>subStringDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:pubUInt32" DataType="UInt32" NodeId="ns=1;s=PubUInt32" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>pubUInt32</DisplayName>
+    <Description>pubUInt32Desc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>1</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:subUInt32" DataType="UInt32" NodeId="ns=1;s=SubUInt32" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>subUInt32</DisplayName>
+    <Description>subUInt32Desc</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
