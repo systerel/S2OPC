@@ -830,10 +830,7 @@ OPERATIONS
         l_resp_msg,
         l_resp_msg_header,
         l_ret,
-        l_ret2,
-        l_is_valid_resp,
         l_buffer_out,
-        l_session_channel,
         l_endpoint_config_idx,
         l_is_valid_ep_config_idx
     IN
@@ -875,19 +872,7 @@ OPERATIONS
                                                              req_context,
                                                              l_req_msg_header,
                                                              l_req_msg,
-                                                             l_resp_msg);
-
-                        // TODO: next operation not necessary ?
-                        l_is_valid_resp, l_ret2, l_session_channel
-                          <-- server_validate_session_service_resp (l_session);
-                        IF l_ret2 /= e_sc_ok
-                        THEN
-                            /* In case there is an issue with the session, it overwrites the possible service issue */
-                            l_ret := l_ret2
-                        ELSIF l_session_channel /= channel
-                        THEN
-                            l_ret := e_sc_bad_unexpected_error
-                        END
+                                                             l_resp_msg)
                     END;
                     /* request message not necessary anymore */
                     dealloc_msg_in (l_req_msg)

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 14/11/2022 09:50:50
+ Date                 : 14/11/2022 15:17:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -803,10 +803,7 @@ void service_mgr__server_receive_session_service_req(
       constants__t_msg_i service_mgr__l_resp_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
-      constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret2;
-      t_bool service_mgr__l_is_valid_resp;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
-      constants__t_channel_i service_mgr__l_session_channel;
       constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
       t_bool service_mgr__l_is_valid_ep_config_idx;
       
@@ -859,16 +856,6 @@ void service_mgr__server_receive_session_service_req(
                      service_mgr__l_resp_msg,
                      &service_mgr__l_ret,
                      service_mgr__async_resp);
-                  session_mgr__server_validate_session_service_resp(service_mgr__l_session,
-                     &service_mgr__l_is_valid_resp,
-                     &service_mgr__l_ret2,
-                     &service_mgr__l_session_channel);
-                  if (service_mgr__l_ret2 != constants_statuscodes_bs__e_sc_ok) {
-                     service_mgr__l_ret = service_mgr__l_ret2;
-                  }
-                  else if (service_mgr__l_session_channel != service_mgr__channel) {
-                     service_mgr__l_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-                  }
                }
                message_in_bs__dealloc_msg_in(service_mgr__l_req_msg);
             }
