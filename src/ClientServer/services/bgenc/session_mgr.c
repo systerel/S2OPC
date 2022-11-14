@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 04/08/2022 14:53:19
+ Date                 : 14/11/2022 15:24:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -541,7 +541,7 @@ void session_mgr__server_validate_session_service_req(
    }
 }
 
-void session_mgr__server_validate_session_service_resp(
+void session_mgr__server_validate_async_session_service_resp(
    const constants__t_session_i session_mgr__session,
    t_bool * const session_mgr__is_valid_res,
    constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err,

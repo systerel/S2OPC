@@ -579,7 +579,7 @@ OPERATIONS
     END
     ;
 
-    is_valid_res, status_code_err, channel <-- server_validate_session_service_resp (session) =
+    is_valid_res, status_code_err, channel <-- server_validate_async_session_service_resp (session) =
     VAR
         l_valid_session,
         l_session_state,

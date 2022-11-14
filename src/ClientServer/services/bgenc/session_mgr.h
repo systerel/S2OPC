@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 04/08/2022 14:53:19
+ Date                 : 14/11/2022 15:24:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -166,17 +166,17 @@ extern void session_mgr__server_receive_session_req(
    const constants__t_msg_i session_mgr__resp_msg,
    constants__t_session_i * const session_mgr__session,
    constants_statuscodes_bs__t_StatusCode_i * const session_mgr__service_ret);
+extern void session_mgr__server_validate_async_session_service_resp(
+   const constants__t_session_i session_mgr__session,
+   t_bool * const session_mgr__is_valid_res,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err,
+   constants__t_channel_i * const session_mgr__channel);
 extern void session_mgr__server_validate_session_service_req(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_session_token_i session_mgr__session_token,
    t_bool * const session_mgr__is_valid_res,
    constants__t_session_i * const session_mgr__session,
    constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err);
-extern void session_mgr__server_validate_session_service_resp(
-   const constants__t_session_i session_mgr__session,
-   t_bool * const session_mgr__is_valid_res,
-   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__status_code_err,
-   constants__t_channel_i * const session_mgr__channel);
 extern void session_mgr__session_get_endpoint_config(
    const constants__t_session_i session_mgr__p_session,
    constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);

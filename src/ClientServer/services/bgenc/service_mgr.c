@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 14/11/2022 15:17:51
+ Date                 : 14/11/2022 15:24:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1685,7 +1685,7 @@ void service_mgr__server_send_publish_response(
       *service_mgr__bres = false;
       *service_mgr__buffer_out = constants__c_byte_buffer_indet;
       *service_mgr__channel = constants__c_channel_indet;
-      session_mgr__server_validate_session_service_resp(service_mgr__session,
+      session_mgr__server_validate_async_session_service_resp(service_mgr__session,
          &service_mgr__l_is_valid_resp,
          &service_mgr__l_ret,
          service_mgr__channel);

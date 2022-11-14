@@ -1481,7 +1481,7 @@ OPERATIONS
         bres := FALSE;
         buffer_out := c_byte_buffer_indet;
         channel := c_channel_indet;
-        l_is_valid_resp, l_ret, channel <-- server_validate_session_service_resp (session);
+        l_is_valid_resp, l_ret, channel <-- server_validate_async_session_service_resp (session);
         IF l_is_valid_resp = TRUE
         THEN
             l_resp_msg_header <-- alloc_msg_header (FALSE);
