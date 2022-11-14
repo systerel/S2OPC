@@ -171,14 +171,10 @@ OPERATIONS
         p_autoReleaseCP : BOOL                      &
         p_includeSubtypes : BOOL
     THEN
-        /* Reset output result on new context*/
-        d_variables_out,
         /* Set new input context */
         p_service_StatusCode,
         d_variables_in
-        :(      d_inv_out &
-
-                p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
+        :(      p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
                 d_inv_in &
                 (p_service_StatusCode = e_sc_ok =>
                  in_session                       = p_session         &
@@ -206,15 +202,12 @@ OPERATIONS
         p_session : t_session &
         p_continuationPointId : t_ContinuationPointId_i
     THEN
-        /* Reset output result on new context*/
-        d_variables_out,
         /* Set new input context */
         d_variables_in,
         d_variables_persist,
         p_service_StatusCode
         :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_continuation_point_invalid} &
             d_inv_in &
-            d_inv_out &
 
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok) &
             /* If context is set then the continuation point is released */
