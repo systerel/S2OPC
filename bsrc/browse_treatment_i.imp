@@ -169,7 +169,8 @@ LOCAL_OPERATIONS
         p_includeSubtypes : BOOL                     &
         p_resultMask      : t_BrowseResultMask_i     &
         isBrowseResultAllocated = TRUE               &
-        max_nb_references = p_max_nb_results
+        max_nb_references = p_max_nb_results         &
+        isBrowseResultAllocated = TRUE
     THEN
         p_serviceStatusCode,
         p_toContinue,
@@ -240,7 +241,8 @@ LOCAL_OPERATIONS
             p_referenceType : t_NodeId)         &
         p_includeSubtypes : BOOL                &
 
-        browseResult_to_iterate /= {}
+        browseResult_to_iterate /= {}           &
+        isBrowseResultAllocated = TRUE
     THEN
         IF Is_Dir_Forward_Compatible(p_browseDirection |-> Reference_IsForward(p_ref)) = TRUE &
             (p_refType_defined = FALSE or
