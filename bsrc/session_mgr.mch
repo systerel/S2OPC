@@ -136,7 +136,6 @@ OPERATIONS
         channel : t_channel_i &
         channel : s_channel_connected &
         session_token : t_session_token_i &
-        c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_reqs
     THEN
         CHOICE
