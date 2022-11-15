@@ -199,10 +199,7 @@ LOCAL_OPERATIONS
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition
         :(
-            nb_browseResult_max_refs : NAT &
-            browseResult_to_iterate <: NAT1 &
-            browseResult_iterated   <: NAT1 &
-            nextBrowseResult : NAT1 &
+            d_inv_result_it &
 
             out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
             out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
