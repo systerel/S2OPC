@@ -244,64 +244,36 @@ LOCAL_OPERATIONS
         nextBrowseResult <= nb_browseResult_max_refs  &
         isBrowseResultAllocated = TRUE
     THEN
-        IF Is_Dir_Forward_Compatible(p_browseDirection |-> Reference_IsForward(p_ref)) = TRUE &
-            (p_refType_defined = FALSE or
-             p_referenceType = Reference_ReferenceType(p_ref) or
-             Reference_ReferenceType(p_ref) |-> p_referenceType : Type_IsTransitiveSubtype) &
-             /* Node is unknown or Node is known and NodeClass is compatible with NodeClassMask */
-             (not (Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
-                   conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId))
-              or
-              (Reference_TargetNode(p_ref) : dom(conv_ExpandedNodeId_NodeId) &
-               conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) : ran(a_NodeId) &
-               a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) : in_BrowseValue_NodeClassesInMask
-              )
-             )
-        THEN
-            CHOICE
-                LET l_browseResultIdx BE
-                    l_browseResultIdx = nextBrowseResult
-                IN
-                    p_alloc_failed := FALSE ||
-                    /* Compatible reference, add it in a available reference index of the browse result */
-                    p_continue,
-                    browseResult_iterated, browseResult_to_iterate, nextBrowseResult,
-                    out_BrowseResult_NodeId,
-                    out_BrowseResult_nb_References,
-                    out_BrowseResult_BrowseName,
-                    out_BrowseResult_DisplayName,
-                    out_BrowseResult_NodeClass,
-                    out_BrowseResult_TypeDefinition,
-                    out_BrowseResult_ReferenceTypeId,
-                    out_BrowseResult_isForward:(
-                        p_continue : BOOL &
-                        d_inv_result_it &
+        p_continue, p_alloc_failed,
+        browseResult_iterated, browseResult_to_iterate, nextBrowseResult,
+        out_BrowseResult_NodeId,
+        out_BrowseResult_nb_References,
+        out_BrowseResult_BrowseName,
+        out_BrowseResult_DisplayName,
+        out_BrowseResult_NodeClass,
+        out_BrowseResult_TypeDefinition,
+        out_BrowseResult_ReferenceTypeId,
+        out_BrowseResult_isForward:(
+            p_continue : BOOL &
+            p_alloc_failed : BOOL &
 
-                        browseResult_iterated = browseResult_iterated$0 - {nextBrowseResult$0} &
-                        browseResult_to_iterate = browseResult_to_iterate$0 \/ {nextBrowseResult$0} &
-                        nextBrowseResult = nextBrowseResult$0 + 1 &
-                        p_continue = bool(nextBrowseResult$0 + 1 < nb_browseResult_max_refs) &
+            d_inv_result_it &
 
-                        out_BrowseResult_nb_References = l_browseResultIdx &
+            out_BrowseResult_nb_References   : NAT                        &
+            out_BrowseResult_NodeId          : NAT +-> t_ExpandedNodeId_i &
+            out_BrowseResult_BrowseName      : NAT +-> t_QualifiedName_i  &
+            out_BrowseResult_DisplayName     : NAT +-> t_LocalizedText_i  &
+            out_BrowseResult_NodeClass       : NAT +-> t_NodeClass_i      &
+            out_BrowseResult_TypeDefinition  : NAT +-> t_ExpandedNodeId_i &
+            out_BrowseResult_ReferenceTypeId : NAT +-> t_NodeId_i         &
+            out_BrowseResult_isForward       : NAT +-> BOOL               &
 
-                        out_BrowseResult_NodeId          : NAT +-> t_ExpandedNodeId   &
-                        out_BrowseResult_BrowseName      : NAT +-> t_QualifiedName_i  &
-                        out_BrowseResult_DisplayName     : NAT +-> t_LocalizedText_i  &
-                        out_BrowseResult_NodeClass       : NAT +-> t_NodeClass_i      &
-                        out_BrowseResult_TypeDefinition  : NAT +-> t_ExpandedNodeId_i &
-                        out_BrowseResult_ReferenceTypeId : NAT +-> t_NodeId_i         &
-                        out_BrowseResult_isForward       : NAT +-> BOOL
-                    )
-                END
-            OR
-                p_alloc_failed := TRUE ||
-                p_continue := FALSE
-            END
-        ELSE
-            /* if reference filtered, nothing to do and there are still browse result reference index available for next call */
-            p_continue := TRUE ||
-            p_alloc_failed := FALSE
-        END
+            (p_alloc_failed = TRUE => p_continue = FALSE) &
+            (p_continue = TRUE =>
+                nextBrowseResult <= nb_browseResult_max_refs) &
+            (p_continue = FALSE & p_alloc_failed = FALSE =>
+                browseResult_to_iterate = {})
+        )
     END
 
 OPERATIONS
