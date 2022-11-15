@@ -43,6 +43,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Configurable OPC UA server')
     parser.add_argument('--config-path', default='S2OPC_Server_Demo_Config.xml',
                         help='The path to the XML configuration of the server endpoints')
+    parser.add_argument('--users-path', default='S2OPC_Users_Demo_Config.xml',
+                        help='The path to the XML configuration of the user authentications and authorization')
     parser.add_argument('--addspace-path', default='S2OPC_Demo_NodeSet.xml',
                         help='The path to the XML configuration of the server address space')
     parser.add_argument('--log-path', default='/tmp/pys2opc_logs/',)
@@ -50,12 +52,10 @@ if __name__ == '__main__':
 
     with PyS2OPC.initialize(logPath=args.log_path):
         # Thread safety on callbacks?
-        PyS2OPC.load_address_space(args.addspace_path)
-        PyS2OPC.load_configuration(args.config_path,
-                                   address_space_handler=AddressSpaceHandler(),
-                                   user_handler=None,
-                                   method_handler=None,
-                                   pki_handler=None)
+        PyS2OPC.load_server_configuration_from_files(args.addspace_path,
+                                                     args.users_path,
+                                                     args.config_path,
+                                                     address_space_handler=AddressSpaceHandler())
         PyS2OPC.mark_configured()
         PyS2OPC.serve_forever()  # Should return exit reason
         #with PyS2OPC.serve():
