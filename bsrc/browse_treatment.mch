@@ -82,8 +82,6 @@ DEFINITIONS
         out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
         out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
         out_BrowseResult_nb_References     : NAT                        &
-        (isBrowseValueContextDefined = TRUE =>
-            out_BrowseResult_nb_References <= in_maxReferencesPerNode)  &
         out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
         out_BrowseResult_isForward         : NAT +-> BOOL               &
         out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
