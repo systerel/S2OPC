@@ -124,7 +124,7 @@ OPERATIONS
         msg_type = a_msg_in_type &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
-        a_buffer_in_state = e_buffer_in_msg_type_read &
+        a_buffer_in_state = e_buffer_in_msg_header_read &
         c_msg_in_header : t_msg_header_i &
         c_msg_in_header : t_msg_header &
         c_msg_in = c_msg_indet &
