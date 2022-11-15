@@ -393,8 +393,7 @@ static void forEach_CacheInit(const SOPC_NodeId* nid, SOPC_DataValue* dv)
     SOPC_Free(asDv);
 }
 
-static
-void initializeCacheFromAddrSpace(void)
+static void initializeCacheFromAddrSpace(void)
 {
     Cache_Lock();
     Cache_ForEach(forEach_CacheInit);

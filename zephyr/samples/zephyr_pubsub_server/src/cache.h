@@ -77,7 +77,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv);
  */
 void Cache_Dump(void);
 
-typedef void (Cache_ForEach_Exec) (const SOPC_NodeId* nid, SOPC_DataValue* dv);
+typedef void(Cache_ForEach_Exec)(const SOPC_NodeId* nid, SOPC_DataValue* dv);
 /**
  * Execute a callback for each element of the cache.
  */

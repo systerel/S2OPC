@@ -584,8 +584,8 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
 
 static void forEach_DoExec(const void* key, const void* value, void* user_data)
 {
-    Cache_ForEach_Exec* exec = (Cache_ForEach_Exec*)user_data;
-    exec((const SOPC_NodeId*)key, (SOPC_DataValue*)value);
+    Cache_ForEach_Exec* exec = (Cache_ForEach_Exec*) user_data;
+    exec((const SOPC_NodeId*) key, (SOPC_DataValue*) value);
 }
 
 static void Cache_ForEach_Dump(const void* key, const void* value, void* user_data)
@@ -605,7 +605,7 @@ void Cache_Dump_NodeId(const SOPC_NodeId* pNid)
 void Cache_ForEach(Cache_ForEach_Exec* exec)
 {
     Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (void*)exec);
+    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (void*) exec);
     Cache_Unlock();
 }
 

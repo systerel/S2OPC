@@ -54,7 +54,7 @@ K_MUTEX_DEFINE(subscriberDictgMutex);
 // Thread-related data
 #define SYNCH_STACK_SIZE 1024
 #define SYNCH_PRIORITY (CONFIG_NUM_PREEMPT_PRIORITIES - 1)
-static void synch_entry_point(void *p1, void *p2, void *p3);
+static void synch_entry_point(void* p1, void* p2, void* p3);
 K_THREAD_DEFINE(my_tid, SYNCH_STACK_SIZE, synch_entry_point, NULL, NULL, NULL, SYNCH_PRIORITY, 0, 0);
 
 // This semaphore is used to trigger synch_entry_point task
@@ -103,8 +103,14 @@ static void subscriber_pushToWriteRequest(const void* key, const void* value, vo
 }
 
 #if CONFIG_DEMO_CACHE_SYNCH_PERIOD_MS == 0
-#define CACHE_SYNCH_WAIT_NEXT_EVENT(...) do {} while(0)
-#define CACHE_SYNCH_INIT_NEXT_EVENT(...) do {} while(0)
+#define CACHE_SYNCH_WAIT_NEXT_EVENT(...) \
+    do                                   \
+    {                                    \
+    } while (0)
+#define CACHE_SYNCH_INIT_NEXT_EVENT(...) \
+    do                                   \
+    {                                    \
+    } while (0)
 
 #else
 
@@ -127,7 +133,7 @@ static inline void CACHE_SYNCH_WAIT_NEXT_EVENT(void)
 
 #endif
 
-static void synch_entry_point(void *p1, void *p2, void *p3)
+static void synch_entry_point(void* p1, void* p2, void* p3)
 {
     (void) p1;
     (void) p2;
@@ -186,12 +192,11 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
         }
         if (NULL != response)
         {
-            for (int32_t i =0 ; i < response->NoOfResults; i++)
+            for (int32_t i = 0; i < response->NoOfResults; i++)
             {
                 if (response->Results[i] != SOPC_GoodGenericStatus)
                 {
-                    WARNING("[SYNC]Could not update node %s, code=0x%08X",
-                            context.nodeIds[i], response->Results[i]);
+                    WARNING("[SYNC]Could not update node %s, code=0x%08X", context.nodeIds[i], response->Results[i]);
                 }
             }
 
@@ -201,7 +206,7 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
 
         if (NULL != context.nodeIds)
         {
-            for (int32_t i = 0 ; i < nbRequests; i++)
+            for (int32_t i = 0; i < nbRequests; i++)
             {
                 SOPC_Free(context.nodeIds[i]);
             }
@@ -251,4 +256,3 @@ int cacheSync_LastReceptionDateMs(void)
     const int64_t now = k_uptime_get();
     return now - gLastReceptionDateMs;
 }
-

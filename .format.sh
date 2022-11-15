@@ -27,7 +27,7 @@ SAMPLE_DIR=./samples
 ZEPHYR_SAMPLES_DIR=./zephyr/samples
 
 find $SRCS_DIR $TEST_DIR $SAMPLE_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
-find $ZEPHYR_SAMPLES_DIR -name "*.[hc]" ! -name "test_address_space.c" -exec clang-format -style=file -i '{}' \;
+find $ZEPHYR_SAMPLES_DIR -wholename "*/*src/*.[hc]" ! -name "test_address_space.c" -exec clang-format -style=file -i '{}' \;
 find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\t/    /g' -i '{}' \;
 find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\s\+$//g' -i '{}' \;
 find . -name CMakeLists.txt -exec sed 's/\t/    /g' -i '{}' \;
