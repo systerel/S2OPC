@@ -50,14 +50,14 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : s_Node   &
         p_startIndex : NAT &
-        p_startIndex : t_RefIndex &
-        p_startIndex > 0
+        p_startIndex : t_RefIndex
     THEN
         starting_node := p_node ||
         next_reference_index := p_startIndex ||
         references_to_iterate := p_startIndex..Node_RefIndexEnd(p_node) ||
         references_iterated := {} ||
-        p_continue := bool(Node_RefIndexEnd(p_node) > 0 &  p_startIndex <= Node_RefIndexEnd(p_node))
+        p_continue := bool(p_startIndex > 0 &
+                           p_startIndex <= Node_RefIndexEnd(p_node))
     END
     ;
 
