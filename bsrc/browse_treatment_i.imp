@@ -241,7 +241,7 @@ LOCAL_OPERATIONS
             p_referenceType : t_NodeId)         &
         p_includeSubtypes : BOOL                &
 
-        browseResult_to_iterate /= {}           &
+        nextBrowseResult <= nb_browseResult_max_refs  &
         isBrowseResultAllocated = TRUE
     THEN
         IF Is_Dir_Forward_Compatible(p_browseDirection |-> Reference_IsForward(p_ref)) = TRUE &
@@ -512,6 +512,8 @@ OPERATIONS
                 /* Number of results is maximum number of results in this case */
                 nb_browseResult_max_refs = card(browseResult_iterated)
             ) &
+            (l_continue_bri = TRUE =>
+                nextBrowseResult <= nb_browseResult_max_refs) &
 
             (browseResult_iterated /= {} =>
                 /* Mandatory defined part of browse result for iterated indexes */
