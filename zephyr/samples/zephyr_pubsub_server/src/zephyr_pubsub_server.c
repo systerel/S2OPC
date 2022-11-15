@@ -132,8 +132,8 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
                              OpcUa_WriteValue* writeValue,
                              SOPC_StatusCode writeStatus);
 static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext);
-static bool Server_LocalWriteSingleNode(SOPC_NodeId* pNid, SOPC_DataValue* pDv);
-static SOPC_DataValue* Server_LocalReadSingleNode(SOPC_NodeId* pNid);
+static bool Server_LocalWriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv);
+static SOPC_DataValue* Server_LocalReadSingleNode(const SOPC_NodeId* pNid);
 
 /***************************************************/
 /**               PUBSUB VARIABLES CONTENT         */
@@ -312,7 +312,7 @@ static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* re
  * @param pDv The DataValue to write
  * @post \a localServiceAsyncRespCallback will be called with operation result
  */
-static bool Server_LocalWriteSingleNode(SOPC_NodeId* pNid, SOPC_DataValue* pDv)
+static bool Server_LocalWriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv)
 {
     OpcUa_WriteRequest* request = SOPC_WriteRequest_Create(1);
     SOPC_ASSERT(NULL != request);
@@ -344,12 +344,12 @@ static bool Server_LocalWriteSingleNode(SOPC_NodeId* pNid, SOPC_DataValue* pDv)
 }
 
 /***
- * Send a read requset to the server and wait for the response
+ * Send a read request to the server and wait for the response
  * @param pNid The nodeId to read
  * @return a new allocated DataValue containing the result (or NULL in case of failure).
  *      Shall be freed by caller after use.
  */
-static SOPC_DataValue* Server_LocalReadSingleNode(SOPC_NodeId* pNid)
+static SOPC_DataValue* Server_LocalReadSingleNode(const SOPC_NodeId* pNid)
 {
     OpcUa_ReadRequest* request = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
     OpcUa_ReadResponse* response = NULL;
@@ -383,6 +383,22 @@ static SOPC_DataValue* Server_LocalReadSingleNode(SOPC_NodeId* pNid)
     OpcUa_ReadResponse_Clear(response);
     SOPC_Free(response);
     return result;
+}
+
+static void forEach_CacheInit(const SOPC_NodeId* nid, SOPC_DataValue* dv)
+{
+    SOPC_DataValue* asDv = Server_LocalReadSingleNode(nid);
+    SOPC_DataValue_Copy(dv, asDv);
+    SOPC_DataValue_Clear(asDv);
+    SOPC_Free(asDv);
+}
+
+static
+void initializeCacheFromAddrSpace(void)
+{
+    Cache_Lock();
+    Cache_ForEach(forEach_CacheInit);
+    Cache_Unlock();
 }
 
 /***
@@ -594,8 +610,10 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig);
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_CommonHelper_Initialize failed");
 
-    setupPubSub();
     setupServer();
+    setupPubSub();
+
+    initializeCacheFromAddrSpace();
 
     PRINT("# Type 'demo help' in console for help\n");
 

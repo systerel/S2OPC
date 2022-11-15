@@ -582,7 +582,13 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
     SOPC_Free(nidStr);
 }
 
-static void Cache_ForEach_Fct(const void* key, const void* value, void* user_data)
+static void forEach_DoExec(const void* key, const void* value, void* user_data)
+{
+    Cache_ForEach_Exec* exec = (Cache_ForEach_Exec*)user_data;
+    exec((const SOPC_NodeId*)key, (SOPC_DataValue*)value);
+}
+
+static void Cache_ForEach_Dump(const void* key, const void* value, void* user_data)
 {
     (void) user_data;
     Cache_Dump_VarValue(key, value);
@@ -596,11 +602,18 @@ void Cache_Dump_NodeId(const SOPC_NodeId* pNid)
     Cache_Unlock();
 }
 
+void Cache_ForEach(Cache_ForEach_Exec* exec)
+{
+    Cache_Lock();
+    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (void*)exec);
+    Cache_Unlock();
+}
+
 void Cache_Dump(void)
 {
     SOPC_ASSERT(NULL != g_cache);
     Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Fct, NULL);
+    SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Dump, NULL);
     Cache_Unlock();
 }
 

@@ -77,6 +77,12 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv);
  */
 void Cache_Dump(void);
 
+typedef void (Cache_ForEach_Exec) (const SOPC_NodeId* nid, SOPC_DataValue* dv);
+/**
+ * Execute a callback for each element of the cache.
+ */
+void Cache_ForEach(Cache_ForEach_Exec* exec);
+
 /** The Cache shall be locked before accessing data (and its content, to prevent it from being freed) */
 void Cache_Lock(void);
 /** Unlock the cache previously locked by ::Cache_Lock */
