@@ -55,6 +55,11 @@ bool cacheSync_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
  */
 void cacheSync_WriteToCache(const SOPC_NodeId* pNid, const SOPC_DataValue* pDv);
 
-#endif
+/**
+ * Return the number of milliseconds since last call to cacheSync_SetTargetVariables
+ */
+int cacheSync_LastReceptionDateMs(void);
+
+#endif  // ASYNCH (CONFIG_DEMO_CACHE_SYNCH = 0)
 
 #endif // CACHE_SYNCH_H_

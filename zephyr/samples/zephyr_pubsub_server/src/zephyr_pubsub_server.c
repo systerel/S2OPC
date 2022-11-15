@@ -300,7 +300,7 @@ static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* re
             const SOPC_StatusCode status = writeResp->Results[i];
             if (status != 0)
             {
-                WARNING("Internal data update[%d] failed with code 0x%08X", i, status);
+                WARNING("Internal data update[%d/%d] failed with code 0x%08X", i, writeResp->NoOfResults, status);
             }
         }
     }
@@ -633,7 +633,10 @@ static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
     PRINT("Publisher period      : %d ms\n", CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000);
     PRINT("Subscriber address    : %s\n", CONFIG_SOPC_SUBSCRIBER_ADDRESS);
     PRINT("Subscriber running    : %s\n", YES_NO(gSubStarted));
-    PRINT("Subscriber operat.    : %s\n", YES_NO(gSubOperational));
+    if (gSubOperational)
+    {
+        PRINT("Subscriber last rcpt  : %d ms\n", cacheSync_LastReceptionDateMs());
+    }
 
     return 0;
 }
@@ -750,8 +753,6 @@ static int cmd_demo_write(const struct shell* shell, size_t argc, char** argv)
 
     const char* nodeIdC = argv[1];
     const char* dvC = argv[2];
-
-    PRINT("nodeIdC='%s', dvC='%s'\n", nodeIdC, dvC);
 
     SOPC_NodeId nid;
     SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, strlen(nodeIdC));

@@ -52,7 +52,7 @@ static SOPC_Dict* pSubscriberPendingUpdates = NULL;
 K_MUTEX_DEFINE(subscriberDictgMutex);
 
 // Thread-related data
-#define SYNCH_STACK_SIZE 500
+#define SYNCH_STACK_SIZE 1024
 #define SYNCH_PRIORITY (CONFIG_NUM_PREEMPT_PRIORITIES - 1)
 static void synch_entry_point(void *p1, void *p2, void *p3);
 K_THREAD_DEFINE(my_tid, SYNCH_STACK_SIZE, synch_entry_point, NULL, NULL, NULL, SYNCH_PRIORITY, 0, 0);
@@ -61,9 +61,14 @@ K_THREAD_DEFINE(my_tid, SYNCH_STACK_SIZE, synch_entry_point, NULL, NULL, NULL, S
 struct k_sem my_sem;
 K_SEM_DEFINE(sync_sem, 0, 1);
 
+// Date of last reception
+static int64_t gLastReceptionDateMs = 0;
+
 typedef struct
 {
     OpcUa_WriteRequest* req;
+    // nodeIds is only used to monitor failing updates.
+    char** nodeIds;
     size_t size;
     size_t next;
 } Write_Request_Context;
@@ -91,6 +96,8 @@ static void subscriber_pushToWriteRequest(const void* key, const void* value, vo
             SOPC_WriteRequest_SetWriteValue(writeRequest, context->next, pNodeId, SOPC_AttributeId_Value, NULL, pDv);
         SOPC_ASSERT(status == SOPC_STATUS_OK);
         Cache_Unlock();
+
+        context->nodeIds[context->next] = SOPC_NodeId_ToCString(pNodeId);
         context->next++;
     }
 }
@@ -112,7 +119,9 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
 
         SOPC_ReturnStatus status;
         OpcUa_WriteRequest* request = NULL;
+        OpcUa_WriteResponse* response = NULL;
         Write_Request_Context context;
+        context.nodeIds = NULL;
 
         // Report the values received from Subscriber to AddessSpace
         k_mutex_lock(&subscriberDictgMutex, K_FOREVER);
@@ -124,6 +133,8 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
             context.next = 0;
             context.size = nbRequests;
             context.req = request;
+            context.nodeIds = SOPC_Malloc(sizeof(char*) * nbRequests);
+            SOPC_ASSERT(NULL != context.nodeIds);
 
             // Fill OpcUa_WriteRequest
             SOPC_Dict_ForEach(pSubscriberPendingUpdates, &subscriber_pushToWriteRequest, (void*) &context);
@@ -139,18 +150,42 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
         if (NULL != request)
         {
             SOPC_ASSERT(context.next == context.size);
-            status = SOPC_ServerHelper_LocalServiceAsync(request, ASYNCH_CONTEXT_CACHE_SYNC);
+            status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &response);
             if (status != SOPC_STATUS_OK)
             {
-                WARNING("LocalServiceAsync failed with code  (%d)", status);
+                WARNING("SOPC_ServerHelper_LocalServiceSync failed with code  (%d)", status);
                 SOPC_Free(request);
             }
+        }
+        if (NULL != response)
+        {
+            for (int32_t i =0 ; i < response->NoOfResults; i++)
+            {
+                if (response->Results[i] != SOPC_GoodGenericStatus)
+                {
+                    WARNING("[SYNC]Could not update node %s, code=0x%08X",
+                            context.nodeIds[i], response->Results[i]);
+                }
+            }
+
+            OpcUa_WriteResponse_Clear(response);
+            SOPC_Free(response);
+        }
+
+        if (NULL != context.nodeIds)
+        {
+            for (int32_t i = 0 ; i < nbRequests; i++)
+            {
+                SOPC_Free(context.nodeIds[i]);
+            }
+            SOPC_Free(context.nodeIds);
         }
     }
 }
 
 bool cacheSync_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
+    gLastReceptionDateMs = k_uptime_get();
     if (pSubscriberPendingUpdates != NULL)
     {
         k_mutex_lock(&subscriberDictgMutex, K_FOREVER);
@@ -160,7 +195,7 @@ bool cacheSync_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValu
             // Memorize elements updated until next refresh
             SOPC_NodeId* copy = (SOPC_NodeId*) SOPC_Malloc(sizeof(*copy));
             SOPC_ASSERT(NULL != copy);
-            SOPC_NodeId_Copy(copy, &nodesToWrite->NodeId);
+            SOPC_NodeId_Copy(copy, &nodesToWrite[idx].NodeId);
             SOPC_Dict_Insert(pSubscriberPendingUpdates, copy, NULL);
         }
         k_mutex_unlock(&subscriberDictgMutex);
@@ -182,6 +217,12 @@ void cacheSync_WriteToCache(const SOPC_NodeId* pNid, const SOPC_DataValue* pDv)
         SOPC_DataValue_Copy(pDvCache, pDv);
     }
     Cache_Unlock();
+}
+
+int cacheSync_LastReceptionDateMs(void)
+{
+    const int64_t now = k_uptime_get();
+    return now - gLastReceptionDateMs;
 }
 
 #endif
