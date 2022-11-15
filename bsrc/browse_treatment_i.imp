@@ -475,28 +475,14 @@ OPERATIONS
             browseResult_to_iterate /\ browseResult_iterated = {} &
             nb_browseResult_max_refs = p_max_nb_results &
             nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
-            /* Number of results is at least number of references iterated */
-            next_reference_index - p_startIndex >= card(browseResult_iterated) &
+
             (l_continue_bri = FALSE & l_alloc_failed = FALSE =>
                 /* Number of results is maximum number of results in this case */
                 nb_browseResult_max_refs = card(browseResult_iterated)
             ) &
             (l_continue_bri = TRUE =>
                 nextBrowseResult <= nb_browseResult_max_refs) &
-
-            (browseResult_iterated /= {} =>
-                /* Mandatory defined part of browse result for iterated indexes */
-                out_BrowseResult_ReferenceTypeId : browseResult_iterated --> t_NodeId_i &
-                out_BrowseResult_isForward : browseResult_iterated --> BOOL &
-                out_BrowseResult_NodeId : browseResult_iterated --> t_ExpandedNodeId &
-                /* Optional defined part of browse result for iterated indexes (external target node or degraded case if target node not found) */
-                out_BrowseResult_BrowseName : browseResult_iterated --> t_QualifiedName_i &
-                out_BrowseResult_DisplayName : browseResult_iterated --> t_LocalizedText_i &
-                out_BrowseResult_NodeClass : browseResult_iterated --> t_NodeClass_i &
-                out_BrowseResult_TypeDefinition : browseResult_iterated --> t_ExpandedNodeId_i &
-
-                out_BrowseResult_nb_References = card(browseResult_iterated)
-            )
+            (l_continue_ref = TRUE => references_to_iterate /= {})
         VARIANT
             card(references_to_iterate)
         END;
