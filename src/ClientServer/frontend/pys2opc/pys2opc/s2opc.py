@@ -25,6 +25,7 @@ import os
 import sys
 import json
 import signal
+from collections import namedtuple
 
 from _pys2opc import ffi, lib as libsub
 from .connection import BaseClientConnectionHandler
@@ -418,6 +419,10 @@ class PyS2OPC_Server(PyS2OPC):
     The Server side of the PyS2OPC library.
     When the toolkit is `PyS2OPC_Server.initialize`d for a server, it cannot be `PyS2OPC_Client.initialize`d for a client before it is `PyS2OPC_Server.clear`ed.
     """
+
+    # Tuple to manage the user authentications and authorizations
+    UserManager = namedtuple('UserManager', ['authentication', 'authorization'])
+
     _adds_handler = None  # Instance of BaseAddressSpaceHandler
     _adds = None  # The address space loaded through the xml loader
     _config = None  # SOPC_S2OPC_Config
@@ -426,6 +431,7 @@ class PyS2OPC_Server(PyS2OPC):
     _dEpIdx = {}  # {endpoint_index: SOPC_Endpoint_Config}
     _dOpenedEp = {}  # Opened endpoint {endpoint_index: True}
     _req_hdler = LocalAsyncRequestHandler()
+    _user_manager = None # user authentications and authorizations
 
     @staticmethod
     @contextmanager
@@ -490,6 +496,7 @@ class PyS2OPC_Server(PyS2OPC):
         if PyS2OPC_Server._config is not None:
             libsub.SOPC_S2OPC_Config_Clear(PyS2OPC_Server._config)
             PyS2OPC_Server._config = None
+            PyS2OPC_Server._user_manager = None
 
     @staticmethod
     def _callback_toolkit_event(event, epIdx, param, appContext, timestamp):
@@ -545,6 +552,33 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server._adds = space  # Kept to avoid double inits, and to clear it
 
     @staticmethod
+    def load_users(xml_path):
+        """
+        Loads configuration for the user authentications and authorizations from the XML file `xml_path`.
+        This must be done after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured` and \
+        `PyS2OPC_Server.load_configuration`.
+
+        Args:
+            xml_path: Path to XML file compliant with s2opc_clientserver_users_config.xsd schema.
+        """
+       
+        assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
+            'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
+        assert PyS2OPC_Server._config is None, 'Server is already configure'
+        assert PyS2OPC_Server._user_manager is None, 'user authentications and authorizations are already configure'
+
+        # Creates the user authentication manager
+        ppAuthenticationManager = ffi.new('SOPC_UserAuthentication_Manager **')
+        # Creates the user authorization manager
+        ppAuthorizationManager = ffi.new('SOPC_UserAuthorization_Manager **')
+        with open(xml_path, 'r') as fd:
+            res = libsub.SOPC_UsersConfig_Parse(fd, ppAuthenticationManager, ppAuthorizationManager)
+            assert res, 'Cannot load user configuration from file {}'.format(xml_path)
+        pAuthenticationManager = ppAuthenticationManager[0]
+        pAuthorizationManager = ppAuthorizationManager[0]
+        PyS2OPC_Server._user_manager = PyS2OPC_Server.UserManager(pAuthenticationManager, pAuthorizationManager) 
+
+    @staticmethod
     def load_configuration(xml_path, address_space_handler=None, user_handler=None, method_handler=None, pki_handler=None):
         """
         Creates a configuration structure for a server from an XML file.
@@ -557,7 +591,7 @@ class PyS2OPC_Server(PyS2OPC):
         If handlers are left None, the following default behaviors are used:
 
         - address space: no notification of address space events,
-        - user authentications and authorizations: allow all user and all operations,
+        - user authentications and authorizations: allow all user and all operations if `PyS2OPC_Server.load_users` is not called,
         - methods: no callable methods,
         - pki: the default secure Public Key Infrastructure,
           which thoroughly checks the validity of certificates based on trusted issuers, untrusted issuers, and issued certificates.
@@ -571,7 +605,7 @@ class PyS2OPC_Server(PyS2OPC):
             xml_path: Path to the configuration in the s2opc_config.xsd format
             address_space_handler: None (no notification) or an instance of a subclass of
                                    `pys2opc.server_callbacks.BaseAddressSpaceHandler`
-            user_handler: None (authenticate all user and authorize all operations)
+            user_handler: None (authenticate all user and authorize all operations if `PyS2OPC_Server.load_users` is not called)
             method_handler: None (no method available)
             pki_handler: None (certificate authentications based on certificate authorities)
         """
@@ -629,9 +663,14 @@ class PyS2OPC_Server(PyS2OPC):
             # Endpoints have the user management
             for i in range(serverCfg.nbEndpoints):
                 endpoint = serverCfg.endpoints[i]
-                # By default, creates user managers that accept all users and allow all operations
-                endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
-                endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
+                if PyS2OPC_Server._user_manager is None:
+                    # By default, creates user managers that accept all users and allow all operations
+                    endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
+                    endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
+                else:
+                    # Use the user authentications and authorizations configured with the user XML file
+                    endpoint.authenticationManager = PyS2OPC_Server._user_manager.authentication
+                    endpoint.authorizationManager = PyS2OPC_Server._user_manager.authorization
                 assert endpoint.authenticationManager != NULL and endpoint.authorizationManager != NULL
 
                 # Register endpoint
@@ -652,6 +691,26 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._adds_handler = address_space_handler
             # Note: SetAddressSpaceNotifCb cannot be called twice, or with NULL
             assert libsub.SOPC_ToolkitServer_SetAddressSpaceNotifCb(libsub._callback_address_space_event) == ReturnStatus.OK
+
+    @staticmethod
+    def load_server_configuration_from_files(xml_address_space_config_path, xml_users_config_path, xml_server_config_path, address_space_handler=None):
+        """
+        Configure server from XML configuration files for: server endpoints, address space and users credential and rights.
+        This function must be called after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured`.
+
+        Args:
+            xml_address_space_config_path: path to address space configuration XML file (UANodeSet.xsd schema)
+            xml_users_config_path: path to users credential and rights configuration XML file (s2opc_clientserver_users_config.xsd schema)
+            xml_server_config_path: path to server configuration XML file (s2opc_clientserver_config.xsd schema)
+            address_space_handler: None (no notification) or an instance of a subclass of `pys2opc.server_callbacks.BaseAddressSpaceHandler`
+        """
+        PyS2OPC_Server.load_address_space(xml_address_space_config_path)
+        PyS2OPC_Server.load_users(xml_users_config_path)
+        PyS2OPC_Server.load_configuration(xml_server_config_path,
+                                          address_space_handler=address_space_handler,
+                                          user_handler=None,
+                                          method_handler=None,
+                                          pki_handler=None)
 
     @staticmethod
     def mark_configured():
