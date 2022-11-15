@@ -5,9 +5,10 @@
 
 mainmenu "Zephyr S2OPC server + PubSub demo"
 
-config DEMO_CACHE_SYNCH
-    boolean "false"
+config DEMO_CACHE_SYNCH_PERIOD_MS
+    int "0"
     help
-      Use synchronous cache and address space synchronization
+      Refresh period of Cache into AddressSpace. If set to 0, then updates are done
+      as soon as possible on Subscriber reception.
 
 source "Kconfig.zephyr"

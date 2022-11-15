@@ -33,10 +33,6 @@
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
 
-#if CONFIG_DEMO_CACHE_SYNCH
-#error "Not implemented"
-#else
-
 #define ASYNCH_CONTEXT_CACHE_SYNC 0xCAC3E51Cu
 
 /**
@@ -59,7 +55,5 @@ void cacheSync_WriteToCache(const SOPC_NodeId* pNid, const SOPC_DataValue* pDv);
  * Return the number of milliseconds since last call to cacheSync_SetTargetVariables
  */
 int cacheSync_LastReceptionDateMs(void);
-
-#endif  // ASYNCH (CONFIG_DEMO_CACHE_SYNCH = 0)
 
 #endif // CACHE_SYNCH_H_

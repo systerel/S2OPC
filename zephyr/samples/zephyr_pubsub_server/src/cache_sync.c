@@ -25,6 +25,7 @@
 // S2OPC includes
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
+#include "p_time.h"
 #include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -32,10 +33,9 @@
 // Demo includes
 #include "cache.h"
 
-#if CONFIG_DEMO_CACHE_SYNCH
-#error "Not implemented"
-
-#else
+#ifndef CONFIG_DEMO_CACHE_SYNCH_PERIOD_MS
+#error "CONFIG_DEMO_CACHE_SYNCH_PERIOD_MS is not defined"
+#endif
 
 /***************************************************/
 /**               HELPER LOG MACROS                */
@@ -102,6 +102,31 @@ static void subscriber_pushToWriteRequest(const void* key, const void* value, vo
     }
 }
 
+#if CONFIG_DEMO_CACHE_SYNCH_PERIOD_MS == 0
+#define CACHE_SYNCH_WAIT_NEXT_EVENT(...) do {} while(0)
+#define CACHE_SYNCH_INIT_NEXT_EVENT(...) do {} while(0)
+
+#else
+
+static SOPC_RealTime* next_event = NULL;
+#define CACHE_SYNCH_INIT_NEXT_EVENT() next_event = SOPC_RealTime_Create(NULL)
+
+static inline void CACHE_SYNCH_WAIT_NEXT_EVENT(void)
+{
+    if (SOPC_RealTime_IsExpired(next_event, NULL))
+    {
+        // Immediate return and restart timer from now
+        SOPC_RealTime_GetTime(next_event);
+    }
+    else
+    {
+        SOPC_RealTime_SleepUntil(next_event);
+    }
+    SOPC_RealTime_AddSynchedDuration(next_event, CONFIG_DEMO_CACHE_SYNCH_PERIOD_MS * 1000, 0);
+}
+
+#endif
+
 static void synch_entry_point(void *p1, void *p2, void *p3)
 {
     (void) p1;
@@ -110,8 +135,10 @@ static void synch_entry_point(void *p1, void *p2, void *p3)
     pSubscriberPendingUpdates = SOPC_NodeId_Dict_Create(true, NULL);
     SOPC_ASSERT(NULL != pSubscriberPendingUpdates && "SOPC_Dict_Create failed");
 
+    CACHE_SYNCH_INIT_NEXT_EVENT();
     while (true)
     {
+        CACHE_SYNCH_WAIT_NEXT_EVENT();
         // wait for event!
         k_sem_take(&sync_sem, K_FOREVER);
 
@@ -225,4 +252,3 @@ int cacheSync_LastReceptionDateMs(void)
     return now - gLastReceptionDateMs;
 }
 
-#endif
