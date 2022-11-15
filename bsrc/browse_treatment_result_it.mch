@@ -66,7 +66,6 @@ OPERATIONS
 
     p_continue, p_browseResultIdx <-- continue_iter_browseResult =
     PRE
-        nb_browseResult_max_refs > 0 &
         nextBrowseResult <= nb_browseResult_max_refs
     THEN
         browseResult_iterated   := 1 .. nextBrowseResult ||
