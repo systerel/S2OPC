@@ -155,10 +155,6 @@ OPERATIONS
     is_valid_res, status_code_err, channel <-- server_validate_async_session_service_resp (session) =
     PRE
         session  : t_session_i &
-        /* Remove constraint due to asynchronous response */
-        /* c_msg_in : t_msg &
-        a_msg_in_type : s_service_on_session_reqs & */
-        c_msg_out : t_msg  &
         a_msg_out_type : s_service_on_session_resps
     THEN
         CHOICE
