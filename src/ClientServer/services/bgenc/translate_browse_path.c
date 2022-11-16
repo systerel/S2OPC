@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 16/11/2022 15:58:57
+ Date                 : 16/11/2022 16:30:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -71,10 +71,8 @@ void translate_browse_path__treat_one_translate_browse_path(
       constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_operation_2;
       t_bool translate_browse_path__l_continue;
       constants__t_RelativePath_i translate_browse_path__l_relativePath;
-      constants__t_RelativePathElt_i translate_browse_path__l_relativePathElt;
-      t_entier4 translate_browse_path__l_index;
       constants__t_NodeId_i translate_browse_path__l_source;
-      constants__t_NodeId_i translate_browse_path__l_source_copy;
+      constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_init;
       
       msg_translate_browse_path_bs__read_BrowsePath_RelativePath(translate_browse_path__browsePath,
          &translate_browse_path__l_relativePath);
@@ -93,32 +91,10 @@ void translate_browse_path__treat_one_translate_browse_path(
             translate_browse_path__l_statusCode_operation);
       }
       else {
-         node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__l_source,
-            &translate_browse_path__l_continue,
-            &translate_browse_path__l_source_copy);
-         translate_browse_path__l_index = 0;
-         if (translate_browse_path__l_continue == true) {
-            translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
-         }
-         else {
-            translate_browse_path__l_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-         }
-         while (translate_browse_path__l_continue == true) {
-            translate_browse_path__free_BrowsePathResult();
-            translate_browse_path_element_it__continue_iter_relativePath(&translate_browse_path__l_continue,
-               &translate_browse_path__l_relativePathElt,
-               &translate_browse_path__l_index);
-            translate_browse_path__treat_one_relative_path_element(translate_browse_path__l_relativePathElt,
-               translate_browse_path__l_index,
-               &translate_browse_path__l_statusCode_operation);
-            translate_browse_path__free_BrowsePathSource();
-            translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
-               ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
-               (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
-            if (translate_browse_path__l_continue == true) {
-               translate_browse_path__copy_browsePathResult_to_source(&translate_browse_path__l_statusCode_operation);
-            }
-         }
+         translate_browse_path__l_statusCode_init = translate_browse_path__l_statusCode_operation;
+         translate_browse_path__treat_one_translate_browse_path_1(translate_browse_path__l_statusCode_init,
+            translate_browse_path__l_source,
+            &translate_browse_path__l_statusCode_operation);
          if ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
             (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
             translate_browse_path__l_statusCode_operation_2 = translate_browse_path__l_statusCode_operation;
@@ -622,6 +598,46 @@ void translate_browse_path__treat_browse_result_one_source(
             (((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
             (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) ||
             (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_bad_no_match)));
+      }
+   }
+}
+
+void translate_browse_path__treat_one_translate_browse_path_1(
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_init,
+   const constants__t_NodeId_i translate_browse_path__source,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
+   {
+      t_bool translate_browse_path__l_continue;
+      constants__t_NodeId_i translate_browse_path__l_source_copy;
+      t_entier4 translate_browse_path__l_index;
+      constants__t_RelativePathElt_i translate_browse_path__l_relativePathElt;
+      
+      *translate_browse_path__statusCode_operation = translate_browse_path__statusCode_init;
+      node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__source,
+         &translate_browse_path__l_continue,
+         &translate_browse_path__l_source_copy);
+      translate_browse_path__l_index = 0;
+      if (translate_browse_path__l_continue == true) {
+         translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
+      }
+      else {
+         *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+      }
+      while (translate_browse_path__l_continue == true) {
+         translate_browse_path__free_BrowsePathResult();
+         translate_browse_path_element_it__continue_iter_relativePath(&translate_browse_path__l_continue,
+            &translate_browse_path__l_relativePathElt,
+            &translate_browse_path__l_index);
+         translate_browse_path__treat_one_relative_path_element(translate_browse_path__l_relativePathElt,
+            translate_browse_path__l_index,
+            translate_browse_path__statusCode_operation);
+         translate_browse_path__free_BrowsePathSource();
+         translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
+            ((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
+            (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
+         if (translate_browse_path__l_continue == true) {
+            translate_browse_path__copy_browsePathResult_to_source(translate_browse_path__statusCode_operation);
+         }
       }
    }
 }
