@@ -901,7 +901,7 @@ OPERATIONS
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
-        valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
+        valid_req := l_valid_req
     END
     ;
 
