@@ -1614,7 +1614,7 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
         complex_value_tag_from_tag_name_no_namespace("Description", enumValueTypeTagCtx->childs, &descriptionTagCtx);
     assert(description_tag_ok);
 
-    if (result && valueTagCtx->set)
+    if (valueTagCtx->set)
     {
         result = SOPC_strtoint(valueTagCtx->single_value, (size_t) strlen(valueTagCtx->single_value), 64,
                                &enumValueType->Value);
@@ -1682,7 +1682,7 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
         complex_value_tag_from_tag_name_no_namespace("Description", euInformationTagCtx->childs, &descriptionTagCtx);
     assert(description_tag_ok);
 
-    if (result && nsUriTagCtx->set)
+    if (nsUriTagCtx->set)
     {
         SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&euInformation->NamespaceUri, nsUriTagCtx->single_value);
         if (SOPC_STATUS_OK != status)
@@ -1746,7 +1746,7 @@ static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_val
     bool high_tag_ok = complex_value_tag_from_tag_name_no_namespace("High", rangeTagCtx->childs, &highTagCtx);
     assert(high_tag_ok);
 
-    if (result && lowTagCtx->set)
+    if (lowTagCtx->set)
     {
         result = SOPC_strtodouble(lowTagCtx->single_value, strlen(lowTagCtx->single_value), 64, &range->Low);
     }
