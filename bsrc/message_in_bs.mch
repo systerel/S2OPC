@@ -174,7 +174,8 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 
