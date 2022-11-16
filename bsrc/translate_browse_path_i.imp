@@ -52,6 +52,41 @@ PROMOTES
     set_session_closed,
     continuation_points_UNINITIALISATION
 
+DEFINITIONS
+    d_var_browse_result_out ==
+        out_BrowseResult_BrowseStatus,
+        out_BrowseResult_ContinuationPointId,
+        out_BrowseResult_nb_References,
+        out_BrowseResult_ReferenceTypeId,
+        out_BrowseResult_isForward,
+        out_BrowseResult_NodeId,
+        out_BrowseResult_BrowseName,
+        out_BrowseResult_DisplayName,
+        out_BrowseResult_NodeClass,
+        out_BrowseResult_TypeDefinition,
+        out_BrowseResultReferences,
+
+        isBrowseResultComputed,
+        isBrowseResultAllocated
+        ;
+
+    d_inv_browse_result_out ==
+    (   out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
+        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
+        out_BrowseResult_nb_References     : NAT                        &
+        out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
+        out_BrowseResult_isForward         : NAT +-> BOOL               &
+        out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
+        out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
+        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  &
+        out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
+        out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
+        out_BrowseResultReferences         : t_BrowseResultReferences_i &
+
+        isBrowseResultComputed             : BOOL                       &
+        isBrowseResultAllocated            : BOOL
+    )
+
 
 LOCAL_OPERATIONS
 
@@ -106,6 +141,10 @@ LOCAL_OPERATIONS
                 =>
                 size(BrowsePathRemainingNodeId) > 0
             )
+        ) ||
+
+        d_var_browse_result_out:(
+            d_inv_browse_result_out
         )
     END
     ;
