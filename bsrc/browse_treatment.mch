@@ -170,7 +170,8 @@ OPERATIONS
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_resultMask    : t_BrowseResultMask_i      &
         p_autoReleaseCP : BOOL                      &
-        p_includeSubtypes : BOOL
+        p_includeSubtypes : BOOL                    &
+        p_maxTargetRef <= k_n_BrowseTarget_max
     THEN
         /* Set new input context */
         p_service_StatusCode,
