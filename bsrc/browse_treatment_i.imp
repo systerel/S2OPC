@@ -45,6 +45,20 @@ SEES
    address_space_itf
 
 DEFINITIONS
+    d_var_result_it ==
+        browseResult_to_iterate,
+        browseResult_iterated,
+        nb_browseResult_max_refs,
+        nextBrowseResult
+    ;
+
+    d_var_reference_it ==
+        starting_node,
+        references_to_iterate,
+        references_iterated,
+        next_reference_index
+    ;
+
     d_inv_result_it ==
     (   nb_browseResult_max_refs : NAT &
         browseResult_to_iterate <: NAT1 &
@@ -52,6 +66,14 @@ DEFINITIONS
         browseResult_to_iterate /\ browseResult_iterated = {} &
         nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
         nextBrowseResult : NAT1
+    );
+
+    d_inv_reference_it ==
+    (   starting_node : t_Node_i &
+        references_to_iterate <: NAT &
+        references_iterated   <: NAT &
+        references_to_iterate /\ references_iterated = {} &
+        next_reference_index : NAT
     )
 
 
@@ -185,10 +207,8 @@ LOCAL_OPERATIONS
               p_nextIndex : p_startIndex + p_max_nb_results .. Node_RefIndexEnd(p_src_node))
         ) ||
         /* Use of BrowseResult iterator */
-        browseResult_to_iterate,
-        browseResult_iterated,
-        nb_browseResult_max_refs,
-        nextBrowseResult,
+        d_var_result_it,
+
         /* out BrowseResult */
         out_BrowseResult_NodeId,
         out_BrowseResult_ReferenceTypeId,
@@ -211,14 +231,8 @@ LOCAL_OPERATIONS
             out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i
         ) ||
         /* Use of reference targets iterator */
-        starting_node,
-        references_to_iterate,
-        references_iterated,
-        next_reference_index :(
-        starting_node : t_Node_i &
-        references_to_iterate <: NAT &
-        references_iterated   <: NAT &
-        next_reference_index : NAT)
+        d_var_reference_it :(d_inv_reference_it)
+
     END
     ;
 
