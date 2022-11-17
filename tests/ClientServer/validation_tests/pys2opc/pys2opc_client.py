@@ -70,6 +70,9 @@ config_security = {'security_mode': SecurityMode.Sign,
                    'path_cert_srv': BINARY_DIR + '/server_public/server_2k_cert.der',
                    'path_cert_cli': BINARY_DIR + '/client_public/client_2k_cert.der',
                    'path_key_cli': BINARY_DIR + '/client_private/client_2k_key.pem',
+                   'policy_id': 'username',
+                   'username': 'user1',
+                   'password': 'password',
                    'add_configuration_function': PyS2OPC.add_configuration_secured}
 
 
