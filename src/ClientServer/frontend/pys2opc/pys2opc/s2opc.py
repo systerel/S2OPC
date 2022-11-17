@@ -439,7 +439,7 @@ class PyS2OPC_Server(PyS2OPC):
     """
 
     # Tuple to manage the user authentications and authorizations
-    UserManager = namedtuple('UserManager', ['authentication', 'authorization'])
+    XMLUserManager = namedtuple('XMLUserManager', ['authentication', 'authorization'])
 
     _adds_handler = None  # Instance of BaseAddressSpaceHandler
     _adds = None  # The address space loaded through the xml loader
@@ -449,7 +449,8 @@ class PyS2OPC_Server(PyS2OPC):
     _dEpIdx = {}  # {endpoint_index: SOPC_Endpoint_Config}
     _dOpenedEp = {}  # Opened endpoint {endpoint_index: True}
     _req_hdler = LocalAsyncRequestHandler()
-    _user_manager = None # user authentications and authorizations
+    _xml_user_manager = None # XML user authentications and authorizations
+    _custom_user_handler = None # User defined user authentications and authorizations functions (instance of BaseUserHandler)
 
     @staticmethod
     @contextmanager
@@ -512,9 +513,20 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._adds = None
         PyS2OPC_Server._dEpIdx = {}
         if PyS2OPC_Server._config is not None:
+            # Avoid double free during SOPC_EndpointConfig_Clear in case of user XML configuration
+            # Indeed, we use a shared authenticationManager and authorizationManager for all the endpoints (same address)
+            serverCfg = PyS2OPC_Server._config.serverConfig
+            for i in range(serverCfg.nbEndpoints):
+                endpoint = serverCfg.endpoints[i]
+                # Free only the first authenticationManager and authorizationManager
+                # Avoid the others by seting to NULL (avoid the double free)
+                if PyS2OPC_Server._xml_user_handler is not None and i > 0:
+                    endpoint.authenticationManager = NULL
+                    endpoint.authorizationManager = NULL
             libsub.SOPC_S2OPC_Config_Clear(PyS2OPC_Server._config)
             PyS2OPC_Server._config = None
-            PyS2OPC_Server._user_manager = None
+            PyS2OPC_Server._xml_user_manager = None
+            PyS2OPC_Server._custom_user_manager = None
 
     @staticmethod
     def _callback_toolkit_event(event, epIdx, param, appContext, timestamp):
@@ -538,13 +550,11 @@ class PyS2OPC_Server(PyS2OPC):
 
     @staticmethod
     def _callback_validate_user_identity(authenticationManager, pUser, pUserAuthenticated):
-        # TODO: This call must be as fast as possible, to avoid stalling the toolkit
-        return ReturnStatus.NOT_SUPPORTED
+        return PyS2OPC_Server._custom_user_handler._on_user_authentication(authenticationManager, pUser, pUserAuthenticated) 
 
     @staticmethod
     def _callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
-        # TODO: This call must be as fast as possible, to avoid stalling the toolkit
-        return ReturnStatus.NOT_SUPPORTED
+        return PyS2OPC_Server._custom_user_handler._on_user_authorisation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized)
 
     @staticmethod
     def load_address_space(xml_path):
@@ -583,7 +593,7 @@ class PyS2OPC_Server(PyS2OPC):
         assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
             'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
         assert PyS2OPC_Server._config is None, 'Server is already configure'
-        assert PyS2OPC_Server._user_manager is None, 'user authentications and authorizations are already configure'
+        assert PyS2OPC_Server._xml_user_manager is None, 'user authentications and authorizations are already configure'
 
         # Creates the user authentication manager
         ppAuthenticationManager = ffi.new('SOPC_UserAuthentication_Manager **')
@@ -594,10 +604,10 @@ class PyS2OPC_Server(PyS2OPC):
             assert res, 'Cannot load user configuration from file {}'.format(xml_path)
         pAuthenticationManager = ppAuthenticationManager[0]
         pAuthorizationManager = ppAuthorizationManager[0]
-        PyS2OPC_Server._user_manager = PyS2OPC_Server.UserManager(pAuthenticationManager, pAuthorizationManager) 
+        PyS2OPC_Server._xml_user_manager = PyS2OPC_Server.XMLUserManager(pAuthenticationManager, pAuthorizationManager) 
 
     @staticmethod
-    def load_configuration(xml_path, address_space_handler=None, user_handler=None, method_handler=None, pki_handler=None):
+    def load_configuration(xml_path, address_space_handler=None, custom_user_handler=None, method_handler=None, pki_handler=None):
         """
         Creates a configuration structure for a server from an XML file.
         This configuration is later used to open an endpoint.
@@ -623,14 +633,15 @@ class PyS2OPC_Server(PyS2OPC):
             xml_path: Path to the configuration in the s2opc_config.xsd format
             address_space_handler: None (no notification) or an instance of a subclass of
                                    `pys2opc.server_callbacks.BaseAddressSpaceHandler`
-            user_handler: None (authenticate all user and authorize all operations if `PyS2OPC_Server.load_users` is not called)
+            custom_user_handler: None (authenticate all user and authorize all operations if `PyS2OPC_Server.load_users` is not called)
             method_handler: None (no method available)
             pki_handler: None (certificate authentications based on certificate authorities)
         """
         assert PyS2OPC._initialized_srv and not PyS2OPC._configured and PyS2OPC_Server._config is None,\
             'Toolkit is either not initialized, initialized as a Client, or already configured.'
 
-        assert user_handler is None, 'Custom User Manager not implemented yet'
+        # assert custom_user_handler is None and PyS2OPC_Server._xml_user_manager is not None
+        assert custom_user_handler is None, 'Custom User Manager not implemented yet'
         assert method_handler is None, 'Custom Method Manager not implemented yet'
         assert pki_handler is None, 'Custom PKI Manager not implemented yet'
         if address_space_handler is not None:
@@ -681,14 +692,18 @@ class PyS2OPC_Server(PyS2OPC):
             # Endpoints have the user management
             for i in range(serverCfg.nbEndpoints):
                 endpoint = serverCfg.endpoints[i]
-                if PyS2OPC_Server._user_manager is None:
+                if PyS2OPC_Server._xml_user_manager is None and PyS2OPC_Server.custom_user_handler is None:
                     # By default, creates user managers that accept all users and allow all operations
                     endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
                     endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
-                else:
+                elif PyS2OPC_Server._xml_user_manager is not None :
                     # Use the user authentications and authorizations configured with the user XML file
-                    endpoint.authenticationManager = PyS2OPC_Server._user_manager.authentication
-                    endpoint.authorizationManager = PyS2OPC_Server._user_manager.authorization
+                    endpoint.authenticationManager = PyS2OPC_Server._xml_user_manager.authentication
+                    endpoint.authorizationManager = PyS2OPC_Server._xml_user_manager.authorization
+                else:
+                    # TODO: For each endpoints create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
+                    # Note: BaseUserHandler implem also to be done to have Python API
+                    assert False 
                 assert endpoint.authenticationManager != NULL and endpoint.authorizationManager != NULL
 
                 # Register endpoint
@@ -726,7 +741,7 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server.load_users(xml_users_config_path)
         PyS2OPC_Server.load_configuration(xml_server_config_path,
                                           address_space_handler=address_space_handler,
-                                          user_handler=None,
+                                          custom_user_handler=None,
                                           method_handler=None,
                                           pki_handler=None)
 

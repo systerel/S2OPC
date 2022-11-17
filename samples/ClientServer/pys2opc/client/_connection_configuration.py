@@ -41,7 +41,10 @@ configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PA
                                      'path_crl': os.path.join(CERT_BASE_PATH, 'revoked', 'cacrl.der'),
                                      'path_cert_srv': os.path.join(CERT_BASE_PATH, 'server_public', 'server_2k_cert.der'),
                                      'path_cert_cli': os.path.join(CERT_BASE_PATH, 'client_public', 'client_2k_cert.der'),
-                                     'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'client_2k_key.pem')}
+                                     'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'client_2k_key.pem'),
+                                     'policy_id': 'username',
+                                     'username': 'user1',
+                                     'password': 'password'}
 
 def join_configs(*args):
     return {k:v for k,v in sum(map(list, map(dict.items, args)), [])}
