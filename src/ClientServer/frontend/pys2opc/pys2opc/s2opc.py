@@ -282,7 +282,10 @@ class PyS2OPC_Client(PyS2OPC):
                                   path_crl = '../../../build/bin/revoked/cacrl.der',
                                   path_cert_srv = '../../../build/bin/server_public/server_2k_cert.der',
                                   path_cert_cli = '../../../build/bin/client_public/client_2k_cert.der',
-                                  path_key_cli = '../../../build/bin/client_private/client_2k_key.pem'):
+                                  path_key_cli = '../../../build/bin/client_private/client_2k_key.pem',
+                                  policy_id = 'anonymous',
+                                  username = None,
+                                  password = None):
         """
         Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
@@ -306,7 +309,22 @@ class PyS2OPC_Client(PyS2OPC):
                            It must be signed by the certificate authority.
             path_cert_cli: The path to the certificate of the client.
             path_key_cli: The path to the private key of the client certificate.
+            policy_id: To know which policy id to use, When username is NULL, the AnonymousIdentityToken
+                       is used and the policy id must correspond to an anonymous UserIdentityPolicy.
+                       Otherwise, the UserNameIdentityToken is used and the policy id must correspond to
+                       an username UserIdentityPolicy.
+            username: None for anonymous access, see policyId the password will be encrypted,
+                      or not, depending on the user token security policy associated to the policyId
+                      or if it is empty depending on the SecureChannel security policy.
+            password: The password is ignored when username is NULL.
         """
+        _username = NULL
+        if username:
+            _username = ffi.new('char[]', username.encode())
+        _password = NULL
+        if password:
+            _password = ffi.new('char[]', password.encode())
+        
         # TODO: factorize code with add_configuration_unsecured
         assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
@@ -321,9 +339,9 @@ class PyS2OPC_Client(PyS2OPC):
                                  'path_cert_srv': ffi.new('char[]', path_cert_srv.encode()),
                                  'path_cert_cli': ffi.new('char[]', path_cert_cli.encode()),
                                  'path_key_cli': ffi.new('char[]', path_key_cli.encode()),
-                                 'policyId': ffi.new('char[]', b"anonymous"),
-                                 'username': NULL,
-                                 'password': NULL,
+                                 'policyId': ffi.new('char[]', policy_id.encode()),
+                                 'username': _username,
+                                 'password': _password,
                                  'publish_period_ms': publish_period,
                                  'n_max_keepalive': n_max_keepalive,
                                  'n_max_lifetime': n_max_lifetime,
