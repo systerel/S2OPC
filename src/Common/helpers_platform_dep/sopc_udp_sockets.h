@@ -68,7 +68,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
                                                   Socket* sock);
 
 /**
- *  \brief Create a new UDP socket and do not bind it
+ *  \brief Create a new UDP socket and bind it
  *
  *  \param destAddress     Destination IP address, used to determine version of the protocol
  *  \param interfaceName   The name of the interface to use, or null if unspecified.
