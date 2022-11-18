@@ -179,7 +179,8 @@ OPERATIONS
                 =>
                 IsDecoded = FALSE
             ) &
-            d_inv_in
+            d_inv_in &
+            d_inv_out
         )
     END
     ;
