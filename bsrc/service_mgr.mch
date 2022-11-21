@@ -155,18 +155,22 @@ OPERATIONS
         /* The input buffer and associated types have been freed */
         a_buffer_in_state := c_buffer_in_state_indet ||
         a_msg_in_type := c_msg_type_indet ||
-        CHOICE
-            a_buffer_out_state := c_buffer_out_state_indet ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            sc, valid_req, async_resp :(sc : t_StatusCode_i & valid_req : BOOL & async_resp : BOOL &
-                            (valid_req = TRUE & async_resp = FALSE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
-        OR
-            a_buffer_out_state := e_buffer_out_msg_written ||
-            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
-            sc := e_sc_ok ||
-            valid_req := TRUE ||
-            async_resp := FALSE
-        END
+        valid_req, async_resp, sc, buffer_out, a_buffer_out_state :(
+            valid_req : BOOL &
+            async_resp : BOOL &
+            sc : t_StatusCode_i &
+            buffer_out : t_byte_buffer_i &
+            a_buffer_out_state : t_buffer_out_state_i &
+            (buffer_out = c_byte_buffer_indet
+             =>
+             a_buffer_out_state = c_buffer_out_state_indet) &
+            (buffer_out /= c_byte_buffer_indet
+             =>
+             buffer_out : t_byte_buffer &
+             a_buffer_out_state = e_buffer_out_msg_written) &
+            (valid_req = TRUE & async_resp = FALSE => sc : t_StatusCode) &
+            (valid_req = TRUE & async_resp = FALSE & buffer_out = c_byte_buffer_indet => sc /= e_sc_ok)
+        )
     END
     ;
 
