@@ -342,7 +342,7 @@ int main(void)
     // Server certificate name
     char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./client_private/client_2k_key.pem";
+    char* keyLocation = "./client_private/encrypted_client_2k_key.pem";
 
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
