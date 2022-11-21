@@ -640,7 +640,7 @@ class PyS2OPC_Server(PyS2OPC):
         assert PyS2OPC._initialized_srv and not PyS2OPC._configured and PyS2OPC_Server._config is None,\
             'Toolkit is either not initialized, initialized as a Client, or already configured.'
 
-        # assert custom_user_handler is None and PyS2OPC_Server._xml_user_manager is not None
+        assert custom_user_handler is None or PyS2OPC_Server._xml_user_manager is None, 'User handler cannot be defined both (XML and custom callbacks)'
         assert custom_user_handler is None, 'Custom User Manager not implemented yet'
         assert method_handler is None, 'Custom Method Manager not implemented yet'
         assert pki_handler is None, 'Custom PKI Manager not implemented yet'
