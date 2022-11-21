@@ -84,16 +84,14 @@ LOCAL_OPERATIONS
         p_maxTargetRef : NAT                      &
         p_nb_target : NAT
     THEN
-        LET l_maxTargetRef BE
-            l_maxTargetRef = {TRUE|-> p_maxTargetRef, FALSE|-> k_n_BrowseTarget_max}(bool(0 /= p_maxTargetRef & k_n_BrowseTarget_max > p_maxTargetRef))
-        IN
-            /* No maximum of targets in results defined by client: keep maximum number of potential targets or default max */
-            IF p_nb_target < l_maxTargetRef THEN
-                p_maxResultRefs := p_nb_target
-            ELSE
-                p_maxResultRefs := l_maxTargetRef
-            END
-        END
+        p_maxResultRefs
+        :(  p_maxResultRefs : NAT &
+
+            p_maxResultRefs <= p_nb_target          &
+            p_maxResultRefs <= k_n_BrowseTarget_max &
+
+            (p_maxTargetRef /= 0 => p_maxResultRefs <= p_maxTargetRef)
+        )
     END
     ;
 
