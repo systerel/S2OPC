@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "constants.h"
 #include "sopc_crypto_profiles.h"
@@ -270,6 +271,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     uint32_t nbEndpointDescription = 0;
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
     OpcUa_EndpointDescription* currentConfig_EndpointDescription = NULL;
+    bool userTokenEncryptionNeeded = false;
 
     SOPC_String_Initialize(&configEndPointURL);
 
@@ -351,8 +353,27 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                         getSecurityLevel(newEndPointDescription->SecurityMode, &currentSecurityPolicy.securityPolicy);
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription->Server);
-                    if (false == isCreateSessionResponse)
+                    if (!isCreateSessionResponse)
                     {
+                        for (uint8_t userTokenIndex = 0;
+                             !userTokenEncryptionNeeded && userTokenIndex < currentSecurityPolicy.nbOfUserTokenPolicies;
+                             userTokenIndex++)
+                        {
+                            if (currentSecurityPolicy.userTokenPolicies[userTokenIndex].SecurityPolicyUri.Length > 0)
+                            {
+                                // If SecurityPolicyURI != None, this token should need encryption
+                                userTokenEncryptionNeeded =
+                                    (0 != strcmp(SOPC_SecurityPolicy_None_URI,
+                                                 SOPC_String_GetRawCString(
+                                                     &currentSecurityPolicy.userTokenPolicies[userTokenIndex]
+                                                          .SecurityPolicyUri)));
+                            }
+                        }
+                        // Set serverCertificate in case it is needed for a user token policy
+                        if (userTokenEncryptionNeeded)
+                        {
+                            SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
+                        }
                         // Set ApplicationDescription
                         SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
                                                              &newEndPointDescription->Server);
@@ -396,7 +417,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     ;
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription->Server);
-                    if (false == isCreateSessionResponse)
+                    if (!isCreateSessionResponse)
                     {
                         // Set serverCertificate
                         SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
@@ -441,7 +462,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                         getSecurityLevel(newEndPointDescription->SecurityMode, &currentSecurityPolicy.securityPolicy);
 
                     OpcUa_ApplicationDescription_Initialize(&newEndPointDescription->Server);
-                    if (false == isCreateSessionResponse)
+                    if (!isCreateSessionResponse)
                     {
                         // Set serverCertificate
                         SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
