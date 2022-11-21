@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 21/11/2022 10:19:21
+ Date                 : 21/11/2022 13:18:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -613,14 +613,6 @@ void service_mgr__local_client_discovery_service_request(
       }
       *service_mgr__buffer_out = service_mgr__l_buffer;
       *service_mgr__req_handle = service_mgr__l_req_handle;
-   }
-}
-
-void service_mgr__dealloc_msg_in_header_if_cond(
-   const t_bool service_mgr__p_cond,
-   const constants__t_msg_header_i service_mgr__p_req_msg_header) {
-   if (service_mgr__p_cond == true) {
-      message_in_bs__dealloc_msg_in_header(service_mgr__p_req_msg_header);
    }
 }
 
