@@ -32,12 +32,58 @@
 #include <stdio.h>
 
 #include "libs2opc_client_cmds.h"
+#include "libs2opc_client_toolkit_config.h"
 #include "libs2opc_common_config.h"
 #include "sopc_macros.h"
 
 static void disconnect_callback(const uint32_t c_id)
 {
     printf("===> connection #%d has been terminated!\n", c_id);
+}
+
+/**
+ * \brief Type of callback to receive user password for decryption of the client private key.
+ *
+ * \param ppPassword      out parameter, the newly allocated password.
+ * \param writtenStatus   out parameter, the status code of the callback process.
+ *
+ * \warning The callback function shall not do anything blocking or long treatment.
+ *          The implementation of the user callback must free the \p ppPassword in case of failure.
+ *          The implementation of the user need to update the \p writtenStatus (error or not)
+ */
+static void Client_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
+{
+    /* Retrieve the user password to decrypt the client private key from environment variable
+     * TEST_CLIENT_PRIVATE_KEY_PWD.
+     */
+
+    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == ppPassword)
+    {
+        return;
+    }
+    const char* password_ref = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+    if (NULL == password_ref)
+    {
+        printf("<Example_wrapper_read: The following environment variables is missing: TEST_CLIENT_PRIVATE_KEY_PWD\n");
+        return;
+    }
+    /* Allocation */
+    *ppPassword = SOPC_String_Create();
+    if (NULL == *ppPassword)
+    {
+        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
+        return;
+    }
+
+    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
+    if (SOPC_STATUS_OK != *writtenStatus)
+    {
+        printf(
+            "<Example_wrapper_read: Failed to copy user password from the environment variable "
+            "TEST_CLIENT_PRIVATE_KEY_PWD\n");
+        SOPC_String_Delete(*ppPassword);
+    }
 }
 
 int main(int argc, char* const argv[])
@@ -72,7 +118,7 @@ int main(int argc, char* const argv[])
         .path_crl = "./revoked/cacrl.der",
         .path_cert_srv = "./server_public/server_2k_cert.der",
         .path_cert_cli = "./client_public/client_2k_cert.der",
-        .path_key_cli = "./client_private/client_2k_key.pem",
+        .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
         .policyId = "anonymous",
         .username = NULL,
         .password = NULL,
@@ -86,11 +132,23 @@ int main(int argc, char* const argv[])
 
     char* node_id = "ns=1;i=1012";
 
-    /* connect to the endpoint */
-    int32_t configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
-    if (configurationId <= 0)
+    /* callback to retrieve the client's private key password */
+    status = SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(&Client_PrivateKey_LoadUserPassword);
+    if (SOPC_STATUS_OK != status)
     {
+        printf("<Example_wrapper_read: Failed to configure the client key user paswword callback\n");
         res = -1;
+    }
+
+    /* connect to the endpoint */
+    int32_t configurationId = 0;
+    if (0 == res)
+    {
+        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+        if (configurationId <= 0)
+        {
+            res = -1;
+        }
     }
 
     int32_t connectionId = 0;
