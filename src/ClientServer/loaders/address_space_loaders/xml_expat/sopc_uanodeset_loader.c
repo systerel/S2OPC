@@ -1564,9 +1564,38 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
 
     if (result && arrayDimUInt32TagCtx->set)
     {
-        argument->NoOfArrayDimensions = (int32_t) SOPC_Array_Size(arrayDimUInt32TagCtx->array_values);
-        argument->ArrayDimensions = SOPC_Array_Into_Raw(arrayDimUInt32TagCtx->array_values);
-        arrayDimUInt32TagCtx->array_values = NULL;
+        size_t arrayLength = SOPC_Array_Size(arrayDimUInt32TagCtx->array_values);
+        argument->ArrayDimensions = SOPC_Calloc(arrayLength, sizeof(uint32_t));
+        if (NULL == argument->ArrayDimensions)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            result = false;
+        }
+        else
+        {
+            argument->NoOfArrayDimensions = (int32_t) arrayLength;
+            for (size_t i = 0; result && i < arrayLength; i++)
+            {
+                char** arrayDim = (char**) SOPC_Array_Get_Ptr(arrayDimUInt32TagCtx->array_values, i);
+                if (NULL == arrayDim)
+                {
+                    LOGF("Unexpected error parsing Argument '%s' ArrayDimensions content",
+                         SOPC_String_GetRawCString(&argument->Name));
+                    result = false;
+                }
+                else
+                {
+                    result = SOPC_strtouint(*arrayDim, (size_t) strlen(*arrayDim), 32, &argument->ArrayDimensions[i]);
+                }
+            }
+
+            if (!result)
+            {
+                LOGF("Unexpected error parsing Argument '%s' ArrayDimensions content to UInt32 values",
+                     SOPC_String_GetRawCString(&argument->Name));
+                result = false;
+            }
+        }
     }
 
     if (result)
@@ -2216,6 +2245,14 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
     return ok;
 }
 
+static void StringPtr_Free(void* ptr)
+{
+    if (NULL != ptr)
+    {
+        SOPC_Free(*(char**) ptr);
+    }
+}
+
 static void end_element_handler(void* user_data, const XML_Char* name)
 {
     struct parse_context_t* ctx = user_data;
@@ -2319,7 +2356,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             {
                 if (NULL == currentTagCtx->array_values)
                 {
-                    currentTagCtx->array_values = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free);
+                    currentTagCtx->array_values = SOPC_Array_Create(sizeof(char*), 1, StringPtr_Free);
                 }
                 char* str_value = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
                 appended = SOPC_Array_Append_Values(currentTagCtx->array_values, &str_value, 1);
