@@ -520,7 +520,7 @@ class PyS2OPC_Server(PyS2OPC):
                 endpoint = serverCfg.endpoints[i]
                 # Free only the first authenticationManager and authorizationManager
                 # Avoid the others by seting to NULL (avoid the double free)
-                if PyS2OPC_Server._xml_user_handler is not None and i > 0:
+                if PyS2OPC_Server._xml_user_manager is not None and i > 0:
                     endpoint.authenticationManager = NULL
                     endpoint.authorizationManager = NULL
             libsub.SOPC_S2OPC_Config_Clear(PyS2OPC_Server._config)
@@ -692,7 +692,7 @@ class PyS2OPC_Server(PyS2OPC):
             # Endpoints have the user management
             for i in range(serverCfg.nbEndpoints):
                 endpoint = serverCfg.endpoints[i]
-                if PyS2OPC_Server._xml_user_manager is None and PyS2OPC_Server.custom_user_handler is None:
+                if PyS2OPC_Server._xml_user_manager is None and custom_user_handler is None:
                     # By default, creates user managers that accept all users and allow all operations
                     endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
                     endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
