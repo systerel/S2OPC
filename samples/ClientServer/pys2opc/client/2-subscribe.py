@@ -30,7 +30,7 @@ This is mostly illustrative, as the nodes do not change in value.
 import time
 
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
-from _connection_configuration import configuration_parameters_subscription
+from _connection_configuration import configuration_parameters_security
 
 
 class PrintSubs(BaseClientConnectionHandler):
@@ -53,7 +53,7 @@ NODES = ['ns=1;s=Int32_007',
 if __name__ == '__main__':
     with PyS2OPC.initialize():
         # Subscription parameters are defined in configuration_parameters_no_subscription
-        config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_subscription)
+        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
         PyS2OPC.mark_configured()
         with PyS2OPC.connect(config, PrintSubs) as connection:
             # Add multiple nodes to the subscription.

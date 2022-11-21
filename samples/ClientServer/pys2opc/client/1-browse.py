@@ -27,14 +27,14 @@ Only displays the following reference types: "Organizes", "HasComponent", and "H
 
 
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, AttributeId
-from _connection_configuration import configuration_parameters_no_subscription
+from _connection_configuration import configuration_parameters_security
 
 
 ROOT_ID = 'i=84'
 
 if __name__ == '__main__':
     with PyS2OPC.initialize():
-        config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
+        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
         PyS2OPC.mark_configured()
         # The tree structure: stores explored nodes
         dNodes = {}  # {parent_node_id: [sub_node_id for each sub_node]}

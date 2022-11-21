@@ -31,7 +31,7 @@ import tempfile
 import random
 
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, DataValue, StatusCode, Variant, VariantType
-from _connection_configuration import configuration_parameters_no_subscription
+from _connection_configuration import configuration_parameters_security
 
 
 # All those nodes are Variable nodes. They are demo nodes which have the name of the type it contains.
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     with PyS2OPC.initialize(logLevel=0, logPath=pathLog):
         # Configure a connection and freeze the S2OPC configurations.
         # See the documentation of this function for all the parameters.
-        config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
+        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
         PyS2OPC.mark_configured()
         # Use the configuration to create a new connection.
         # The connection is automatically closed when reaching out of the with context.
