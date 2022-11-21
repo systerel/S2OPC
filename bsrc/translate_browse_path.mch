@@ -357,7 +357,6 @@ OPERATIONS
                                    e_sc_bad_view_id_unknown} & /* Add other bad view statuses when treated */
           p_nbReferences : NAT &
           p_nbReferences <= k_n_BrowseTarget_max &
-          p_nbReferences = BrowseContext_MaxNbTargets &
           p_continuationPointId : t_ContinuationPointId_i &
           (p_serviceStatusCode /= e_sc_ok => p_continuationPointId = c_ContinuationPointId_indet) &
           isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points)
