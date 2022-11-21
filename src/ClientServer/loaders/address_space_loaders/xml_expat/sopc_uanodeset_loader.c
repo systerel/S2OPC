@@ -2322,7 +2322,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
                     currentTagCtx->array_values = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free);
                 }
                 char* str_value = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
-                appended = SOPC_Array_Append_Values(currentTagCtx->array_values, str_value, 1);
+                appended = SOPC_Array_Append_Values(currentTagCtx->array_values, &str_value, 1);
                 if (!appended)
                 {
                     SOPC_Free(str_value);
