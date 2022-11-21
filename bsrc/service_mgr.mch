@@ -62,7 +62,9 @@ OPERATIONS
         a_msg_in_type = e_msg_service_fault_resp &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
-        a_buffer_in_state = e_buffer_in_msg_type_read
+        a_buffer_in_state = e_buffer_in_msg_type_read &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_in = c_msg_indet
     THEN
         CHOICE
             valid := TRUE ||
@@ -71,7 +73,9 @@ OPERATIONS
               resp_typ : s_service_resps - {e_msg_service_fault_resp})
         OR
             valid := FALSE ||
-            resp_typ := c_msg_type_indet
+            resp_typ := c_msg_type_indet ||
+            /* The input buffer may become invalid */
+            a_buffer_in_state :: {a_buffer_in_state, c_buffer_in_state_indet}
         END
     END
     ;
