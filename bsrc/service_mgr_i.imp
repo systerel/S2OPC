@@ -886,7 +886,8 @@ OPERATIONS
             IF l_resp_msg = c_msg_indet
             THEN
                 /* Allocate error response message if not allocated (degraded case) */
-                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (e_msg_service_fault_resp)
+                l_resp_msg_typ := e_msg_service_fault_resp;
+                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ)
             END;
             IF l_resp_msg /= c_msg_indet
             THEN
