@@ -1796,17 +1796,25 @@ static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
         SOPC_Free(nodeId);
         if (SOPC_STATUS_OK == status)
         {
+            size_t referenceTypeIdLength = 0;
             // Check to avoid segmentation fault error
             if (NULL == browseRequests[i].referenceTypeId)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_INFO, "referenceTypeId is NULL");
-                status = SOPC_STATUS_OK;
             }
             else
             {
-                status = SOPC_NodeId_InitializeFromCString(&nodesToBrowse[i].ReferenceTypeId,
-                                                           browseRequests[i].referenceTypeId,
-                                                           (int) strlen(browseRequests[i].referenceTypeId));
+                referenceTypeIdLength = strlen(browseRequests[i].referenceTypeId);
+                if (0 == referenceTypeIdLength)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "referenceTypeId is a zero-length string");
+                }
+                else
+                {
+                    status = SOPC_NodeId_InitializeFromCString(&nodesToBrowse[i].ReferenceTypeId,
+                                                               browseRequests[i].referenceTypeId,
+                                                               (int) referenceTypeIdLength);
+                }
             }
         }
 
