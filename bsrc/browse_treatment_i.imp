@@ -188,9 +188,10 @@ LOCAL_OPERATIONS
             p_referenceType : t_NodeId)              &
         p_includeSubtypes : BOOL                     &
         p_resultMask      : t_BrowseResultMask_i     &
+
         isBrowseResultAllocated = TRUE               &
         max_nb_references = p_max_nb_results         &
-        isBrowseResultAllocated = TRUE
+        out_BrowseResult_nb_References = 0
     THEN
         p_serviceStatusCode,
         p_toContinue,
