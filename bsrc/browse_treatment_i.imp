@@ -252,6 +252,7 @@ LOCAL_OPERATIONS
 
         nextBrowseResult <= nb_browseResult_max_refs &
         nb_browseResult_max_refs <= max_nb_references &
+        nextBrowseResult = out_BrowseResult_nb_References + 1 &
         isBrowseResultAllocated = TRUE
     THEN
         p_continue, p_alloc_failed,
@@ -279,6 +280,8 @@ LOCAL_OPERATIONS
             out_BrowseResult_isForward       : NAT +-> BOOL               &
 
             (p_alloc_failed = TRUE => p_continue = FALSE) &
+            (p_alloc_failed = FALSE =>
+                nextBrowseResult = out_BrowseResult_nb_References + 1) &
             (p_continue = TRUE =>
                 nextBrowseResult <= nb_browseResult_max_refs) &
             (p_continue = FALSE & p_alloc_failed = FALSE =>
