@@ -421,7 +421,7 @@ def main():
                            help='Path to the address space XML file')
     argparser.add_argument('h_file', metavar='H_FILE',
                            help='Path to the generated HEADER file')
-    argparser.add_argument('--max_nodeId', metavar='MAX_NODEID', default=1000,
+    argparser.add_argument('--max_nodeId', metavar='MAX_NODEID', default=1000, type=int,
                            help='Maximum integer NodeId in NS 0 present in static array')
     args = argparser.parse_args()
 
