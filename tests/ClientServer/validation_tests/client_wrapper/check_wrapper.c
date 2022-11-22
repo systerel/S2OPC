@@ -40,6 +40,7 @@
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_cmds_internal_api.h"
+#include "libs2opc_client_toolkit_config.h"
 #include "libs2opc_common_config.h"
 
 #define SLEEP_TIME 10
@@ -93,11 +94,54 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .username = "username",
     .password = "password"};
 
+static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256_EncryptedKey = {
+    .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
+    .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
+    .path_cert_auth = "./trusted/cacert.der",
+    .path_crl = "./revoked/cacrl.der",
+    .path_cert_srv = "./server_public/server_4k_cert.der",
+    .path_cert_cli = "./client_public/client_4k_cert.der",
+    .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
+    .policyId = "username",
+    .username = "username",
+    .password = "password"};
+
 static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
     SOPC_UNUSED_ARG(c_id);
     SOPC_UNUSED_ARG(node_id);
     SOPC_UNUSED_ARG(value);
+}
+
+static void Client_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
+{
+    /* Retrieve the user password to decrypt the client private key from environment variable
+     * TEST_CLIENT_PRIVATE_KEY_PWD.
+     */
+
+    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == ppPassword)
+    {
+        return;
+    }
+    const char* password_ref = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+    if (NULL == password_ref)
+    {
+        return;
+    }
+    /* Allocation */
+    *ppPassword = SOPC_String_Create();
+    if (NULL == *ppPassword)
+    {
+        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
+        return;
+    }
+
+    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
+    if (SOPC_STATUS_OK != *writtenStatus)
+    {
+        SOPC_String_Delete(*ppPassword);
+    }
 }
 
 static Mutex check_counter_mutex;
@@ -613,9 +657,13 @@ START_TEST(test_wrapper_read)
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, &readResults));
     }
 
+    /* callback to retrieve the client's private key password */
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(&Client_PrivateKey_LoadUserPassword);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
     /* create a connection */
-    int32_t valid_conf_id =
-        SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_signAndEncrypt_b256sha256, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(
+        &valid_endpoint, &valid_security_signAndEncrypt_b256sha256_EncryptedKey, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
