@@ -250,7 +250,8 @@ LOCAL_OPERATIONS
             p_referenceType : t_NodeId)         &
         p_includeSubtypes : BOOL                &
 
-        nextBrowseResult <= nb_browseResult_max_refs  &
+        nextBrowseResult <= nb_browseResult_max_refs &
+        nb_browseResult_max_refs <= max_nb_references &
         isBrowseResultAllocated = TRUE
     THEN
         p_continue, p_alloc_failed,
