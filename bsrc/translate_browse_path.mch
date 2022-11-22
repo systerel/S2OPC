@@ -88,10 +88,10 @@ DEFINITIONS
         /* The target arrays of each Path have same dom
            and max size
         */
-        !(browsePath).(browsePath : dom(BrowsePath_Res_Target_Node)
+        !(browse_path).(browse_path : dom(BrowsePath_Res_Target_Node)
             =>
-            size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
-            size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath)
+            size(BrowsePath_Res_Target_Node(browse_path)) = size(BrowsePath_Res_Target_Index(browse_path)) &
+            size(BrowsePath_Res_Target_Node(browse_path)) <= BrowsePath_Res_NbTargetMax(browse_path)
          )
          ;
 
@@ -211,50 +211,11 @@ OPERATIONS
         browsePath : BrowsePaths
     THEN
         d_variables_out
-        :(
+        :(  d_inv_out &
+
             BrowsePath_Res_StatusCode(browsePath) : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                 e_sc_bad_nothing_to_do, e_sc_bad_node_id_unknown,
-                e_sc_bad_query_too_complex, e_sc_bad_no_match, e_sc_bad_too_many_matches} &
-            (BrowsePath_Res_StatusCode(browsePath) = e_sc_ok =>
-                ! (ind).(ind : dom(BrowsePath_Res_Target_Node(browsePath))
-                    =>
-                    /* Target is local and its browse name is equal to the last target name in the request */
-                    BrowsePath_Res_Target_Node(browsePath)(ind) : dom(conv_ExpandedNodeId_NodeId) &
-                    a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(BrowsePath_Res_Target_Node(browsePath)(ind)))) =
-                    RelativePathElt_TargetName(last(RelativePath_RelativePathElt(BrowsePath_RelativePath(browsePath)))) &
-                    BrowsePath_Res_Target_Index(browsePath)(ind) = k_n_noRemainingPathIndex)
-            ) &
-
-            /* e_sc_uncertain_reference_out_of_server is returned if there is at least one match which is not local.
-               Other matches are locals. */
-            (BrowsePath_Res_StatusCode(browsePath) = e_sc_uncertain_reference_out_of_server =>
-                ! (ind).(ind : dom(BrowsePath_Res_Target_Node(browsePath))
-                    =>
-                    (
-                        /* If target is local, its browse name is equal to the last target name in the request */
-                        BrowsePath_Res_Target_Node(browsePath)(ind) : dom(conv_ExpandedNodeId_NodeId)
-                        =>
-                        a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(BrowsePath_Res_Target_Node(browsePath)(ind)))) =
-                        RelativePathElt_TargetName(last(RelativePath_RelativePathElt(BrowsePath_RelativePath(browsePath)))) &
-                        BrowsePath_Res_Target_Index(browsePath)(ind) = k_n_noRemainingPathIndex
-                    ) &
-                    (
-                        /* If Node is not local */
-                        BrowsePath_Res_Target_Node(browsePath)(ind) /: dom(conv_ExpandedNodeId_NodeId)
-                        =>
-                        BrowsePath_Res_Target_Node(browsePath)(ind) /= c_ExpandedNodeId_indet &
-                        BrowsePath_Res_Target_Index(browsePath)(ind) < k_n_noRemainingPathIndex
-                    )
-                )
-            ) &
-
-
-            (BrowsePath_Res_StatusCode(browsePath) : {e_sc_bad_nothing_to_do, e_sc_bad_node_id_unknown,
-                    e_sc_bad_query_too_complex, e_sc_bad_no_match}
-                =>
-                BrowsePath_Res_Target_Node(browsePath) = {} &
-                BrowsePath_Res_Target_Index(browsePath) = {}
-            )
+                e_sc_bad_query_too_complex, e_sc_bad_no_match, e_sc_bad_too_many_matches}
         )
     END
     ;
