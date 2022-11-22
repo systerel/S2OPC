@@ -499,7 +499,10 @@ OPERATIONS
             ) &
             (l_continue_bri = TRUE =>
                 nextBrowseResult <= nb_browseResult_max_refs) &
-            (l_continue_ref = TRUE => references_to_iterate /= {})
+            (l_continue_ref = TRUE => references_to_iterate /= {}) &
+            (l_alloc_failed = FALSE =>
+                nextBrowseResult = out_BrowseResult_nb_References + 1) &
+            (l_alloc_failed = TRUE => l_continue_bri = FALSE)
         VARIANT
             card(references_to_iterate)
         END;
