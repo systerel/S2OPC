@@ -70,6 +70,14 @@ DEFINITIONS
         isBrowseResultAllocated
         ;
 
+    d_var_browse_source_it ==
+        browsePathSourceIdx_to_iterate,
+        browsePathSourceIdx_iterated,
+        nb_browsePathSourceIdx_max_refs,
+        nextBrowsePathSourceIdx
+        ;
+
+
     d_inv_browse_result_out ==
     (   out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
         out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
@@ -85,6 +93,15 @@ DEFINITIONS
 
         isBrowseResultComputed             : BOOL                       &
         isBrowseResultAllocated            : BOOL
+    );
+
+    d_inv_browse_source_it ==
+    (   nb_browsePathSourceIdx_max_refs : NAT &
+        browsePathSourceIdx_to_iterate <: NAT1 &
+        browsePathSourceIdx_iterated   <: NAT1 &
+        browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
+        nb_browsePathSourceIdx_max_refs = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
+        nextBrowsePathSourceIdx : NAT1
     )
 
 
@@ -348,6 +365,73 @@ LOCAL_OPERATIONS
                 1..size(BrowsePathResult) <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..size(BrowsePathResult) | k_n_noRemainingPathIndex ) &
                 (size(BrowsePathResult) + 1 .. size(BrowsePath_Res_Target_Index(browsePath))) <| BrowsePath_Res_Target_Index(browsePath) = BrowsePathRemainingIndex &
                 size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath))
+            )
+        )
+    END
+    ;
+
+    out_statusCode_operation, statusCode_alloc <-- copy_browsePathResult_to_msg_1(browsePath, in_statusCode_operation, size_result) =
+    PRE
+        browsePath : t_BrowsePath_i &
+        browsePath : BrowsePaths    &
+        in_statusCode_operation : t_StatusCode_i &
+        in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
+        size_result : NAT
+    THEN
+        out_statusCode_operation,
+        statusCode_alloc,
+        d_var_browse_source_it,
+        BrowsePath_Res_Target_Node,
+        BrowsePath_Res_Target_Index
+        :(  out_statusCode_operation : t_StatusCode_i &
+            out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
+            statusCode_alloc : t_StatusCode_i &
+            statusCode_alloc : t_StatusCode   &
+
+            d_inv_browse_source_it &
+
+            BrowsePath_Res_Target_Node  : t_BrowsePath +-> seq(t_ExpandedNodeId) &
+            BrowsePath_Res_Target_Index : t_BrowsePath +-> seq(NAT) &
+            dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Node) &
+            dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Index) &
+
+            (browsePath : dom(BrowsePath_Res_Target_Node)
+                =>
+                size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
+                size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath)
+            )
+        )
+    END
+    ;
+
+    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref, statusCode_alloc) =
+    PRE
+        browsePath : t_BrowsePath_i &
+        browsePath : BrowsePaths    &
+        in_statusCode_operation : t_StatusCode_i &
+        in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
+        nb_max_ref : NAT &
+        statusCode_alloc : t_StatusCode_i &
+        statusCode_alloc : t_StatusCode
+    THEN
+        out_statusCode_operation,
+        d_var_browse_source_it,
+        BrowsePath_Res_Target_Node,
+        BrowsePath_Res_Target_Index
+        :(  out_statusCode_operation : t_StatusCode_i &
+            out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
+
+            d_inv_browse_source_it &
+
+            BrowsePath_Res_Target_Node  : t_BrowsePath +-> seq(t_ExpandedNodeId) &
+            BrowsePath_Res_Target_Index : t_BrowsePath +-> seq(NAT) &
+            dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Node) &
+            dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Index) &
+
+            (browsePath : dom(BrowsePath_Res_Target_Node)
+                =>
+                size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
+                size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath)
             )
         )
     END
@@ -851,7 +935,8 @@ OPERATIONS
         l_size_remaining,
         l_statusCode_alloc,
         l_expandedNodeId,
-        l_remainingIndex
+        l_remainingIndex,
+        l_statusCode_op
     IN
         out_statusCode_operation := in_statusCode_operation;
         l_size_result <-- get_BrowsePathResultSize;
@@ -860,74 +945,111 @@ OPERATIONS
         IF l_size <= k_n_BrowsePathResPerPath_max THEN
             l_statusCode_alloc <-- alloc_BrowsePath_Res_Target(browsePath, l_size);
             IF l_statusCode_alloc = e_sc_ok THEN
+                l_statusCode_op := out_statusCode_operation;
                 /* Move result from BrowsePathResult */
-                l_continue <-- init_iter_browsePathSourceIdx(l_size_result);
-                l_index := 0;
-                WHILE l_continue = TRUE
-                DO
-                    l_continue, l_index <-- continue_iter_browsePathSourceIdx;
-                    l_expandedNodeId <-- get_BrowsePathResult(l_index);
-                    l_statusCode_alloc <-- add_BrowsePath_Res_Target(browsePath, l_expandedNodeId);
-                    IF l_statusCode_alloc /= e_sc_ok THEN
-                        out_statusCode_operation := e_sc_bad_out_of_memory;
-                        l_continue := FALSE
-                    END
-                INVARIANT
+                out_statusCode_operation, l_statusCode_alloc <--
+                    copy_browsePathResult_to_msg_1(browsePath,
+                                                   l_statusCode_op,
+                                                   l_size_result);
 
-                    browsePathSourceIdx_to_iterate <: NAT1 &
-                    browsePathSourceIdx_iterated   <: NAT1 &
-                    browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
-                    l_size_result = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-                    browsePathSourceIdx_iterated = 1 .. l_index &
-                    browsePathSourceIdx_to_iterate = l_index + 1 .. l_size_result &
-                    l_continue = bool(l_statusCode_alloc = e_sc_ok & (l_index + 1 < l_size_result)) &
-                    (l_statusCode_alloc = e_sc_ok
-                        =>
-                        1..l_index <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathResult &
-                        1..l_index <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_index | k_n_noRemainingPathIndex ))
-                VARIANT
-                    l_size_result - l_index
-                END
-                ;
-
-                l_continue <-- init_iter_browsePathSourceIdx(l_size_remaining);
-                l_continue := bool(l_statusCode_alloc = e_sc_ok & l_continue = TRUE);
-                l_index := 0;
-                WHILE l_continue = TRUE
-                DO
-                    l_continue, l_index <-- continue_iter_browsePathSourceIdx;
-                    l_expandedNodeId, l_remainingIndex <-- get_BrowsePathRemaining(l_index);
-                    l_statusCode_alloc <-- add_BrowsePath_Res_Target_withRemainingPath(browsePath, l_expandedNodeId, l_remainingIndex);
-                    IF l_statusCode_alloc /= e_sc_ok THEN
-                        out_statusCode_operation := e_sc_bad_out_of_memory;
-                        l_continue := FALSE
-                    END
-                INVARIANT
-
-                    browsePathSourceIdx_to_iterate <: NAT1 &
-                    browsePathSourceIdx_iterated   <: NAT1 &
-                    browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
-                    l_size_remaining = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-                    browsePathSourceIdx_iterated = 1 .. l_index &
-                    browsePathSourceIdx_to_iterate = l_index + 1 .. l_size_remaining &
-                    l_continue = bool(l_statusCode_alloc = e_sc_ok & (l_index + 1 < l_size_remaining)) &
-                    (l_statusCode_alloc = e_sc_ok
-                        =>
-                        1..l_size_result <| BrowsePath_Res_Target_Node(browsePath) = BrowsePathResult &
-                        1..l_size_result <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_size_result | k_n_noRemainingPathIndex ) &
-                        (l_size_result + 1) .. (l_size_result + l_index) <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathRemainingNodeId &
-                        (l_size_result + 1) .. (l_size_result + l_index) <| BrowsePath_Res_Target_Index(browsePath) = 1..l_index <| BrowsePathRemainingIndex)
-
-                VARIANT
-                    l_size_remaining - l_index
-                END
+                l_statusCode_op := out_statusCode_operation;
+                out_statusCode_operation <--
+                    copy_browsePathResult_to_msg_2(browsePath,
+                                                   l_statusCode_op,
+                                                   l_size_remaining,
+                                                   l_statusCode_alloc)
             ELSE
                 out_statusCode_operation := e_sc_bad_out_of_memory
             END
         ELSE
             out_statusCode_operation := e_sc_bad_too_many_matches
         END
+    END
+    ;
 
+    out_statusCode_operation, statusCode_alloc <-- copy_browsePathResult_to_msg_1(browsePath, in_statusCode_operation, size_result) =
+    VAR
+        l_continue,
+        l_index,
+        l_expandedNodeId,
+        l_remainingIndex,
+        l_statusCode_alloc
+    IN
+        statusCode_alloc := e_sc_ok;
+        out_statusCode_operation := in_statusCode_operation;
+
+        /* Move result from BrowsePathResult */
+        l_continue <-- init_iter_browsePathSourceIdx(size_result);
+        l_index := 0;
+        WHILE l_continue = TRUE
+        DO
+            l_continue, l_index <-- continue_iter_browsePathSourceIdx;
+            l_expandedNodeId <-- get_BrowsePathResult(l_index);
+            statusCode_alloc <-- add_BrowsePath_Res_Target(browsePath, l_expandedNodeId);
+            IF statusCode_alloc /= e_sc_ok THEN
+                out_statusCode_operation := e_sc_bad_out_of_memory;
+                l_continue := FALSE
+            END
+        INVARIANT
+            browsePathSourceIdx_to_iterate <: NAT1 &
+            browsePathSourceIdx_iterated   <: NAT1 &
+            browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
+            size_result = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
+            browsePathSourceIdx_iterated = 1 .. l_index &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. size_result &
+            l_continue = bool(statusCode_alloc = e_sc_ok & (l_index + 1 < size_result)) &
+            (statusCode_alloc = e_sc_ok
+                =>
+                1..l_index <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathResult &
+                1..l_index <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_index | k_n_noRemainingPathIndex ))
+        VARIANT
+            size_result - l_index
+        END
+    END
+    ;
+
+    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref, statusCode_alloc) =
+    VAR
+        l_continue,
+        l_index,
+        l_expandedNodeId,
+        l_remainingIndex,
+        l_statusCode_alloc
+    IN
+        out_statusCode_operation := in_statusCode_operation;
+        l_statusCode_alloc := statusCode_alloc;
+
+        l_continue <-- init_iter_browsePathSourceIdx(nb_max_ref);
+        l_continue := bool(l_statusCode_alloc = e_sc_ok & l_continue = TRUE);
+        l_index := 0;
+        WHILE l_continue = TRUE
+        DO
+            l_continue, l_index <-- continue_iter_browsePathSourceIdx;
+            l_expandedNodeId, l_remainingIndex <-- get_BrowsePathRemaining(l_index);
+            l_statusCode_alloc <-- add_BrowsePath_Res_Target_withRemainingPath(browsePath, l_expandedNodeId, l_remainingIndex);
+            IF l_statusCode_alloc /= e_sc_ok THEN
+                out_statusCode_operation := e_sc_bad_out_of_memory;
+                l_continue := FALSE
+            END
+        INVARIANT
+
+            browsePathSourceIdx_to_iterate <: NAT1 &
+            browsePathSourceIdx_iterated   <: NAT1 &
+            browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
+            nb_max_ref = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
+            browsePathSourceIdx_iterated = 1 .. l_index &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. nb_max_ref &
+            l_continue = bool(l_statusCode_alloc = e_sc_ok & (l_index + 1 < nb_max_ref)) &
+            (l_statusCode_alloc = e_sc_ok
+                =>
+                1..nb_max_ref <| BrowsePath_Res_Target_Node(browsePath) = BrowsePathResult &
+                1..nb_max_ref <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..nb_max_ref | k_n_noRemainingPathIndex ) &
+                (nb_max_ref + 1) .. (nb_max_ref + l_index) <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathRemainingNodeId &
+                (nb_max_ref + 1) .. (nb_max_ref + l_index) <| BrowsePath_Res_Target_Index(browsePath) = 1..l_index <| BrowsePathRemainingIndex)
+
+        VARIANT
+            nb_max_ref - l_index
+        END
     END
     ;
 

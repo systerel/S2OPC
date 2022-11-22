@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 16/11/2022 16:30:18
+ Date                 : 23/11/2022 13:23:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -437,13 +437,10 @@ void translate_browse_path__copy_browsePathResult_to_msg(
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation) {
    {
       t_entier4 translate_browse_path__l_size;
-      t_bool translate_browse_path__l_continue;
-      t_entier4 translate_browse_path__l_index;
       t_entier4 translate_browse_path__l_size_result;
       t_entier4 translate_browse_path__l_size_remaining;
       constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_alloc;
-      constants__t_ExpandedNodeId_i translate_browse_path__l_expandedNodeId;
-      t_entier4 translate_browse_path__l_remainingIndex;
+      constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_op;
       
       *translate_browse_path__out_statusCode_operation = translate_browse_path__in_statusCode_operation;
       translate_browse_path_1__get_BrowsePathResultSize(&translate_browse_path__l_size_result);
@@ -455,42 +452,18 @@ void translate_browse_path__copy_browsePathResult_to_msg(
             translate_browse_path__l_size,
             &translate_browse_path__l_statusCode_alloc);
          if (translate_browse_path__l_statusCode_alloc == constants_statuscodes_bs__e_sc_ok) {
-            translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__l_size_result,
-               &translate_browse_path__l_continue);
-            translate_browse_path__l_index = 0;
-            while (translate_browse_path__l_continue == true) {
-               translate_browse_path_source_it__continue_iter_browsePathSourceIdx(&translate_browse_path__l_continue,
-                  &translate_browse_path__l_index);
-               translate_browse_path_1__get_BrowsePathResult(translate_browse_path__l_index,
-                  &translate_browse_path__l_expandedNodeId);
-               msg_translate_browse_path_bs__add_BrowsePath_Res_Target(translate_browse_path__browsePath,
-                  translate_browse_path__l_expandedNodeId,
-                  &translate_browse_path__l_statusCode_alloc);
-               if (translate_browse_path__l_statusCode_alloc != constants_statuscodes_bs__e_sc_ok) {
-                  *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-                  translate_browse_path__l_continue = false;
-               }
-            }
-            translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__l_size_remaining,
-               &translate_browse_path__l_continue);
-            translate_browse_path__l_continue = ((translate_browse_path__l_statusCode_alloc == constants_statuscodes_bs__e_sc_ok) &&
-               (translate_browse_path__l_continue == true));
-            translate_browse_path__l_index = 0;
-            while (translate_browse_path__l_continue == true) {
-               translate_browse_path_source_it__continue_iter_browsePathSourceIdx(&translate_browse_path__l_continue,
-                  &translate_browse_path__l_index);
-               translate_browse_path_1__get_BrowsePathRemaining(translate_browse_path__l_index,
-                  &translate_browse_path__l_expandedNodeId,
-                  &translate_browse_path__l_remainingIndex);
-               msg_translate_browse_path_bs__add_BrowsePath_Res_Target_withRemainingPath(translate_browse_path__browsePath,
-                  translate_browse_path__l_expandedNodeId,
-                  translate_browse_path__l_remainingIndex,
-                  &translate_browse_path__l_statusCode_alloc);
-               if (translate_browse_path__l_statusCode_alloc != constants_statuscodes_bs__e_sc_ok) {
-                  *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-                  translate_browse_path__l_continue = false;
-               }
-            }
+            translate_browse_path__l_statusCode_op = *translate_browse_path__out_statusCode_operation;
+            translate_browse_path__copy_browsePathResult_to_msg_1(translate_browse_path__browsePath,
+               translate_browse_path__l_statusCode_op,
+               translate_browse_path__l_size_result,
+               translate_browse_path__out_statusCode_operation,
+               &translate_browse_path__l_statusCode_alloc);
+            translate_browse_path__l_statusCode_op = *translate_browse_path__out_statusCode_operation;
+            translate_browse_path__copy_browsePathResult_to_msg_2(translate_browse_path__browsePath,
+               translate_browse_path__l_statusCode_op,
+               translate_browse_path__l_size_remaining,
+               translate_browse_path__l_statusCode_alloc,
+               translate_browse_path__out_statusCode_operation);
          }
          else {
             *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -498,6 +471,76 @@ void translate_browse_path__copy_browsePathResult_to_msg(
       }
       else {
          *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_too_many_matches;
+      }
+   }
+}
+
+void translate_browse_path__copy_browsePathResult_to_msg_1(
+   const constants__t_BrowsePath_i translate_browse_path__browsePath,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   const t_entier4 translate_browse_path__size_result,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_alloc) {
+   {
+      t_bool translate_browse_path__l_continue;
+      t_entier4 translate_browse_path__l_index;
+      constants__t_ExpandedNodeId_i translate_browse_path__l_expandedNodeId;
+      
+      *translate_browse_path__statusCode_alloc = constants_statuscodes_bs__e_sc_ok;
+      *translate_browse_path__out_statusCode_operation = translate_browse_path__in_statusCode_operation;
+      translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__size_result,
+         &translate_browse_path__l_continue);
+      translate_browse_path__l_index = 0;
+      while (translate_browse_path__l_continue == true) {
+         translate_browse_path_source_it__continue_iter_browsePathSourceIdx(&translate_browse_path__l_continue,
+            &translate_browse_path__l_index);
+         translate_browse_path_1__get_BrowsePathResult(translate_browse_path__l_index,
+            &translate_browse_path__l_expandedNodeId);
+         msg_translate_browse_path_bs__add_BrowsePath_Res_Target(translate_browse_path__browsePath,
+            translate_browse_path__l_expandedNodeId,
+            translate_browse_path__statusCode_alloc);
+         if (*translate_browse_path__statusCode_alloc != constants_statuscodes_bs__e_sc_ok) {
+            *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            translate_browse_path__l_continue = false;
+         }
+      }
+   }
+}
+
+void translate_browse_path__copy_browsePathResult_to_msg_2(
+   const constants__t_BrowsePath_i translate_browse_path__browsePath,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   const t_entier4 translate_browse_path__nb_max_ref,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_alloc,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation) {
+   {
+      t_bool translate_browse_path__l_continue;
+      t_entier4 translate_browse_path__l_index;
+      constants__t_ExpandedNodeId_i translate_browse_path__l_expandedNodeId;
+      t_entier4 translate_browse_path__l_remainingIndex;
+      constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_alloc;
+      
+      *translate_browse_path__out_statusCode_operation = translate_browse_path__in_statusCode_operation;
+      translate_browse_path__l_statusCode_alloc = translate_browse_path__statusCode_alloc;
+      translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__nb_max_ref,
+         &translate_browse_path__l_continue);
+      translate_browse_path__l_continue = ((translate_browse_path__l_statusCode_alloc == constants_statuscodes_bs__e_sc_ok) &&
+         (translate_browse_path__l_continue == true));
+      translate_browse_path__l_index = 0;
+      while (translate_browse_path__l_continue == true) {
+         translate_browse_path_source_it__continue_iter_browsePathSourceIdx(&translate_browse_path__l_continue,
+            &translate_browse_path__l_index);
+         translate_browse_path_1__get_BrowsePathRemaining(translate_browse_path__l_index,
+            &translate_browse_path__l_expandedNodeId,
+            &translate_browse_path__l_remainingIndex);
+         msg_translate_browse_path_bs__add_BrowsePath_Res_Target_withRemainingPath(translate_browse_path__browsePath,
+            translate_browse_path__l_expandedNodeId,
+            translate_browse_path__l_remainingIndex,
+            &translate_browse_path__l_statusCode_alloc);
+         if (translate_browse_path__l_statusCode_alloc != constants_statuscodes_bs__e_sc_ok) {
+            *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            translate_browse_path__l_continue = false;
+         }
       }
    }
 }

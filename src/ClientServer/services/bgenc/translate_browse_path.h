@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 16/11/2022 16:30:18
+ Date                 : 23/11/2022 13:23:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -99,6 +99,18 @@ extern void translate_browse_path__compute_browse_result_from_source(
 extern void translate_browse_path__copy_browsePathResult_to_msg(
    const constants__t_BrowsePath_i translate_browse_path__browsePath,
    const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation);
+extern void translate_browse_path__copy_browsePathResult_to_msg_1(
+   const constants__t_BrowsePath_i translate_browse_path__browsePath,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   const t_entier4 translate_browse_path__size_result,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_alloc);
+extern void translate_browse_path__copy_browsePathResult_to_msg_2(
+   const constants__t_BrowsePath_i translate_browse_path__browsePath,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
+   const t_entier4 translate_browse_path__nb_max_ref,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_alloc,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation);
 extern void translate_browse_path__copy_browsePathResult_to_source(
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
