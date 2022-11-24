@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright (c) 2005-2016 The OPC Foundation, Inc. All rights reserved.
+ * Copyright (c) 2005-2021 The OPC Foundation, Inc. All rights reserved.
  *
  * OPC Foundation MIT License 1.00
  *
@@ -143,47 +143,52 @@
 #define OpcUa_BadSecurityChecksFailed 0x80130000
 
 /*============================================================================
- * The Certificate has expired or is not yet valid.
+ * The certificate does not meet the requirements of the security policy.
+ *===========================================================================*/
+#define OpcUa_BadCertificatePolicyCheckFailed 0x81140000
+
+/*============================================================================
+ * The certificate has expired or is not yet valid.
  *===========================================================================*/
 #define OpcUa_BadCertificateTimeInvalid 0x80140000
 
 /*============================================================================
- * An Issuer Certificate has expired or is not yet valid.
+ * An issuer certificate has expired or is not yet valid.
  *===========================================================================*/
 #define OpcUa_BadCertificateIssuerTimeInvalid 0x80150000
 
 /*============================================================================
- * The HostName used to connect to a Server does not match a HostName in the Certificate.
+ * The HostName used to connect to a server does not match a HostName in the certificate.
  *===========================================================================*/
 #define OpcUa_BadCertificateHostNameInvalid 0x80160000
 
 /*============================================================================
- * The URI specified in the ApplicationDescription does not match the URI in the Certificate.
+ * The URI specified in the ApplicationDescription does not match the URI in the certificate.
  *===========================================================================*/
 #define OpcUa_BadCertificateUriInvalid 0x80170000
 
 /*============================================================================
- * The Certificate may not be used for the requested operation.
+ * The certificate may not be used for the requested operation.
  *===========================================================================*/
 #define OpcUa_BadCertificateUseNotAllowed 0x80180000
 
 /*============================================================================
- * The Issuer Certificate may not be used for the requested operation.
+ * The issuer certificate may not be used for the requested operation.
  *===========================================================================*/
 #define OpcUa_BadCertificateIssuerUseNotAllowed 0x80190000
 
 /*============================================================================
- * The Certificate is not trusted.
+ * The certificate is not trusted.
  *===========================================================================*/
 #define OpcUa_BadCertificateUntrusted 0x801A0000
 
 /*============================================================================
- * It was not possible to determine if the Certificate has been revoked.
+ * It was not possible to determine if the certificate has been revoked.
  *===========================================================================*/
 #define OpcUa_BadCertificateRevocationUnknown 0x801B0000
 
 /*============================================================================
- * It was not possible to determine if the Issuer Certificate has been revoked.
+ * It was not possible to determine if the issuer certificate has been revoked.
  *===========================================================================*/
 #define OpcUa_BadCertificateIssuerRevocationUnknown 0x801C0000
 
@@ -273,19 +278,19 @@
 #define OpcUa_BadTooManyArguments 0x80E50000
 
 /*============================================================================
- * The UA Server requires a license to operate in general or to perform a service or operation, but existing license is
+ * The server requires a license to operate in general or to perform a service or operation, but existing license is
  *expired.
  *===========================================================================*/
 #define OpcUa_BadLicenseExpired 0x810E0000
 
 /*============================================================================
- * The UA Server has limits on number of allowed operations / objects, based on installed licenses, and these limits
- *where exceeded.
+ * The server has limits on number of allowed operations / objects, based on installed licenses, and these limits where
+ *exceeded.
  *===========================================================================*/
 #define OpcUa_BadLicenseLimitsExceeded 0x810F0000
 
 /*============================================================================
- * The UA Server does not have a license which is required to operate in general or to perform a service or operation.
+ * The server does not have a license which is required to operate in general or to perform a service or operation.
  *===========================================================================*/
 #define OpcUa_BadLicenseNotAvailable 0x81100000
 
@@ -430,7 +435,7 @@
 #define OpcUa_BadContentFilterInvalid 0x80480000
 
 /*============================================================================
- * An unregognized operator was provided in a filter.
+ * An unrecognized operator was provided in a filter.
  *===========================================================================*/
 #define OpcUa_BadFilterOperatorInvalid 0x80C10000
 
@@ -470,7 +475,7 @@
 #define OpcUa_BadNoContinuationPoints 0x804B0000
 
 /*============================================================================
- * The operation could not be processed because all continuation points have been allocated.
+ * The reference type id does not refer to a valid reference type node.
  *===========================================================================*/
 #define OpcUa_BadReferenceTypeIdInvalid 0x804C0000
 
@@ -483,6 +488,11 @@
  * The node is not part of the view.
  *===========================================================================*/
 #define OpcUa_BadNodeNotInView 0x804E0000
+
+/*============================================================================
+ * The number was not accepted because of a numeric overflow.
+ *===========================================================================*/
+#define OpcUa_BadNumericOverflow 0x81120000
 
 /*============================================================================
  * The ServerUri is not a valid URI.
@@ -510,12 +520,12 @@
 #define OpcUa_BadRequestTypeInvalid 0x80530000
 
 /*============================================================================
- * The security mode does not meet the requirements set by the Server.
+ * The security mode does not meet the requirements set by the server.
  *===========================================================================*/
 #define OpcUa_BadSecurityModeRejected 0x80540000
 
 /*============================================================================
- * The security policy does not meet the requirements set by the Server.
+ * The security policy does not meet the requirements set by the server.
  *===========================================================================*/
 #define OpcUa_BadSecurityPolicyRejected 0x80550000
 
@@ -541,7 +551,7 @@
 #define OpcUa_BadNoValidCertificates 0x80590000
 
 /*============================================================================
- * The Server does not support changing the user identity assigned to the session.
+ * The server does not support changing the user identity assigned to the session.
  *===========================================================================*/
 #define OpcUa_BadIdentityChangeNotSupported 0x80C60000
 
@@ -718,7 +728,7 @@
 #define OpcUa_BadInvalidTimestampArgument 0x80BD0000
 
 /*============================================================================
- * The server not does support writing the combination of value, status and timestamps provided.
+ * The server does not support writing the combination of value, status and timestamps provided.
  *===========================================================================*/
 #define OpcUa_BadWriteNotSupported 0x80730000
 
@@ -738,7 +748,12 @@
 #define OpcUa_BadArgumentsMissing 0x80760000
 
 /*============================================================================
- * The server has reached its  maximum number of subscriptions.
+ * The executable attribute does not allow the execution of the method.
+ *===========================================================================*/
+#define OpcUa_BadNotExecutable 0x81110000
+
+/*============================================================================
+ * The server has reached its maximum number of subscriptions.
  *===========================================================================*/
 #define OpcUa_BadTooManySubscriptions 0x80770000
 
@@ -758,12 +773,17 @@
 #define OpcUa_BadSequenceNumberUnknown 0x807A0000
 
 /*============================================================================
+ * The Server does not support retransmission queue and acknowledgement of sequence numbers is not available.
+ *===========================================================================*/
+#define OpcUa_GoodRetransmissionQueueNotSupported 0x00DF0000
+
+/*============================================================================
  * The requested notification message is no longer available.
  *===========================================================================*/
 #define OpcUa_BadMessageNotAvailable 0x807B0000
 
 /*============================================================================
- * The Client of the current Session does not support one or more Profiles that are necessary for the Subscription.
+ * The client of the current session does not support one or more Profiles that are necessary for the subscription.
  *===========================================================================*/
 #define OpcUa_BadInsufficientClientProfile 0x807C0000
 
@@ -771,6 +791,11 @@
  * The sub-state machine is not currently active.
  *===========================================================================*/
 #define OpcUa_BadStateNotActive 0x80BF0000
+
+/*============================================================================
+ * An equivalent rule already exists.
+ *===========================================================================*/
+#define OpcUa_BadAlreadyExists 0x81150000
 
 /*============================================================================
  * The server cannot process the request because it is too busy.
@@ -788,7 +813,7 @@
 #define OpcUa_BadTcpSecureChannelUnknown 0x807F0000
 
 /*============================================================================
- * The size of the message specified in the header is too large.
+ * The size of the message chunk specified in the header is too large.
  *===========================================================================*/
 #define OpcUa_BadTcpMessageTooLarge 0x80800000
 
@@ -803,7 +828,7 @@
 #define OpcUa_BadTcpInternalError 0x80820000
 
 /*============================================================================
- * The Server does not recognize the QueryString specified.
+ * The server does not recognize the QueryString specified.
  *===========================================================================*/
 #define OpcUa_BadTcpEndpointUrlInvalid 0x80830000
 
@@ -1060,7 +1085,7 @@
 #define OpcUa_BadAggregateConfigurationRejected 0x80DA0000
 
 /*============================================================================
- * The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.
+ * The request specifies fields which are not valid for the EventType or cannot be saved by the historian.
  *===========================================================================*/
 #define OpcUa_GoodDataIgnored 0x00D90000
 
@@ -1068,6 +1093,21 @@
  * The request was rejected by the server because it did not meet the criteria set by the server.
  *===========================================================================*/
 #define OpcUa_BadRequestNotAllowed 0x80E40000
+
+/*============================================================================
+ * The request has not been processed by the server yet.
+ *===========================================================================*/
+#define OpcUa_BadRequestNotComplete 0x81130000
+
+/*============================================================================
+ * The device identity needs a ticket before it can be accepted.
+ *===========================================================================*/
+#define OpcUa_BadTicketRequired 0x811F0000
+
+/*============================================================================
+ * The device identity needs a ticket before it can be accepted.
+ *===========================================================================*/
+#define OpcUa_BadTicketInvalid 0x81200000
 
 /*============================================================================
  * The value does not come from the real source and has been edited by the server.
@@ -1106,6 +1146,57 @@
  *variable is Bad.
  *===========================================================================*/
 #define OpcUa_BadDependentValueChanged 0x80E30000
+
+/*============================================================================
+ * It is delivered with a dominant Variable value when a dependent Variable has changed but the change has not been
+ *applied.
+ *===========================================================================*/
+#define OpcUa_GoodEdited_DependentValueChanged 0x01160000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant Variable has changed but the change has not been
+ *applied.
+ *===========================================================================*/
+#define OpcUa_GoodEdited_DominantValueChanged 0x01170000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant or dependent Variable has changed but change has not
+ *been applied.
+ *===========================================================================*/
+#define OpcUa_GoodEdited_DominantValueChanged_DependentValueChanged 0x01180000
+
+/*============================================================================
+ * It is delivered with a Variable value when Variable has changed but the value is not legal.
+ *===========================================================================*/
+#define OpcUa_BadEdited_OutOfRange 0x81190000
+
+/*============================================================================
+ * It is delivered with a Variable value when a source Variable has changed but the value is not legal.
+ *===========================================================================*/
+#define OpcUa_BadInitialValue_OutOfRange 0x811A0000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant Variable has changed and the value is not legal.
+ *===========================================================================*/
+#define OpcUa_BadOutOfRange_DominantValueChanged 0x811B0000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant Variable has changed, the value is not legal and the
+ *change has not been applied.
+ *===========================================================================*/
+#define OpcUa_BadEdited_OutOfRange_DominantValueChanged 0x811C0000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant or dependent Variable has changed and the value is
+ *not legal.
+ *===========================================================================*/
+#define OpcUa_BadOutOfRange_DominantValueChanged_DependentValueChanged 0x811D0000
+
+/*============================================================================
+ * It is delivered with a dependent Variable value when a dominant or dependent Variable has changed, the value is not
+ *legal and the change has not been applied.
+ *===========================================================================*/
+#define OpcUa_BadEdited_OutOfRange_DominantValueChanged_DependentValueChanged 0x811E0000
 
 /*============================================================================
  * The communication layer has raised an event.
@@ -1191,6 +1282,63 @@
  * The operation could not be finished because all available connections are in use.
  *===========================================================================*/
 #define OpcUa_BadMaxConnectionsReached 0x80B70000
+
+/*============================================================================
+ * The value may not be accurate because the transducer is in manual mode.
+ *===========================================================================*/
+#define OpcUa_UncertainTransducerInManual 0x42080000
+
+/*============================================================================
+ * The value is simulated.
+ *===========================================================================*/
+#define OpcUa_UncertainSimulatedValue 0x42090000
+
+/*============================================================================
+ * The value may not be accurate due to a sensor calibration fault.
+ *===========================================================================*/
+#define OpcUa_UncertainSensorCalibration 0x420A0000
+
+/*============================================================================
+ * The value may not be accurate due to a configuration issue.
+ *===========================================================================*/
+#define OpcUa_UncertainConfigurationError 0x420F0000
+
+/*============================================================================
+ * The value source supports cascade handshaking and the value has been Initialized based on an initialization request
+ *from a cascade secondary.
+ *===========================================================================*/
+#define OpcUa_GoodCascadeInitializationAcknowledged 0x04010000
+
+/*============================================================================
+ * The value source supports cascade handshaking and is requesting initialization of a cascade primary.
+ *===========================================================================*/
+#define OpcUa_GoodCascadeInitializationRequest 0x04020000
+
+/*============================================================================
+ * The value source supports cascade handshaking, however, the source’s current state does not allow for cascade.
+ *===========================================================================*/
+#define OpcUa_GoodCascadeNotInvited 0x04030000
+
+/*============================================================================
+ * The value source supports cascade handshaking, however, the source has not selected the corresponding cascade primary
+ *for use.
+ *===========================================================================*/
+#define OpcUa_GoodCascadeNotSelected 0x04040000
+
+/*============================================================================
+ * There is a fault state condition active in the value source.
+ *===========================================================================*/
+#define OpcUa_GoodFaultStateActive 0x04070000
+
+/*============================================================================
+ * A fault state condition is being requested of the destination.
+ *===========================================================================*/
+#define OpcUa_GoodInitiateFaultState 0x04080000
+
+/*============================================================================
+ * The value is accurate, and the signal source supports cascade handshaking.
+ *===========================================================================*/
+#define OpcUa_GoodCascade 0x04090000
 
 #endif /* OpcUa_StatusCodes_H_ */
 /* This is the last line of an autogenerated file. */

@@ -268,9 +268,6 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                 printf("    IssuedTokenType %s\n", SOPC_String_GetRawCString(&pPol->IssuedTokenType));
                 printf("    IssuerEndpointUrl %s\n", SOPC_String_GetRawCString(&pPol->IssuerEndpointUrl));
                 break;
-            case OpcUa_UserTokenType_Kerberos:
-                printf("    OpcUa_UserTokenType_Kerberos\n");
-                break;
             default:
                 printf("    Invalid/Unrecognized\n");
                 break;
