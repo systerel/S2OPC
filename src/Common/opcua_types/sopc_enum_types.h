@@ -71,6 +71,35 @@ typedef enum _OpcUa_NodeClass
 
 #endif
 
+#ifndef OPCUA_EXCLUDE_PermissionType
+/*============================================================================
+ * The PermissionType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_PermissionType
+{
+    OpcUa_PermissionType_None = 0,
+    OpcUa_PermissionType_Browse = 1,
+    OpcUa_PermissionType_ReadRolePermissions = 2,
+    OpcUa_PermissionType_WriteAttribute = 4,
+    OpcUa_PermissionType_WriteRolePermissions = 8,
+    OpcUa_PermissionType_WriteHistorizing = 16,
+    OpcUa_PermissionType_Read = 32,
+    OpcUa_PermissionType_Write = 64,
+    OpcUa_PermissionType_ReadHistory = 128,
+    OpcUa_PermissionType_InsertHistory = 256,
+    OpcUa_PermissionType_ModifyHistory = 512,
+    OpcUa_PermissionType_DeleteHistory = 1024,
+    OpcUa_PermissionType_ReceiveEvents = 2048,
+    OpcUa_PermissionType_Call = 4096,
+    OpcUa_PermissionType_AddReference = 8192,
+    OpcUa_PermissionType_RemoveReference = 16384,
+    OpcUa_PermissionType_DeleteNode = 32768,
+    OpcUa_PermissionType_AddNode = 65536,
+    OpcUa_PermissionType_SizeOf = INT32_MAX
+} OpcUa_PermissionType;
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_ApplicationType
 /*============================================================================
  * The ApplicationType enumeration.
@@ -111,7 +140,6 @@ typedef enum _OpcUa_UserTokenType
     OpcUa_UserTokenType_UserName = 1,
     OpcUa_UserTokenType_Certificate = 2,
     OpcUa_UserTokenType_IssuedToken = 3,
-    OpcUa_UserTokenType_Kerberos = 4,
     OpcUa_UserTokenType_SizeOf = INT32_MAX
 } OpcUa_UserTokenType;
 
@@ -159,15 +187,18 @@ typedef enum _OpcUa_NodeAttributesMask
     OpcUa_NodeAttributesMask_ValueRank = 524288,
     OpcUa_NodeAttributesMask_WriteMask = 1048576,
     OpcUa_NodeAttributesMask_Value = 2097152,
-    OpcUa_NodeAttributesMask_All = 4194303,
-    OpcUa_NodeAttributesMask_BaseNode = 1335396,
-    OpcUa_NodeAttributesMask_Object = 1335524,
-    OpcUa_NodeAttributesMask_ObjectTypeOrDataType = 1337444,
-    OpcUa_NodeAttributesMask_Variable = 4026999,
-    OpcUa_NodeAttributesMask_VariableType = 3958902,
-    OpcUa_NodeAttributesMask_Method = 1466724,
-    OpcUa_NodeAttributesMask_ReferenceType = 1371236,
-    OpcUa_NodeAttributesMask_View = 1335532,
+    OpcUa_NodeAttributesMask_DataTypeDefinition = 4194304,
+    OpcUa_NodeAttributesMask_RolePermissions = 8388608,
+    OpcUa_NodeAttributesMask_AccessRestrictions = 16777216,
+    OpcUa_NodeAttributesMask_All = 33554431,
+    OpcUa_NodeAttributesMask_BaseNode = 26501220,
+    OpcUa_NodeAttributesMask_Object = 26501348,
+    OpcUa_NodeAttributesMask_ObjectType = 26503268,
+    OpcUa_NodeAttributesMask_Variable = 26571383,
+    OpcUa_NodeAttributesMask_VariableType = 28600438,
+    OpcUa_NodeAttributesMask_Method = 26632548,
+    OpcUa_NodeAttributesMask_ReferenceType = 26537060,
+    OpcUa_NodeAttributesMask_View = 26501356,
     OpcUa_NodeAttributesMask_SizeOf = INT32_MAX
 } OpcUa_NodeAttributesMask;
 
@@ -202,6 +233,10 @@ typedef enum _OpcUa_AttributeWriteMask
     OpcUa_AttributeWriteMask_ValueRank = 524288,
     OpcUa_AttributeWriteMask_WriteMask = 1048576,
     OpcUa_AttributeWriteMask_ValueForVariableType = 2097152,
+    OpcUa_AttributeWriteMask_DataTypeDefinition = 4194304,
+    OpcUa_AttributeWriteMask_RolePermissions = 8388608,
+    OpcUa_AttributeWriteMask_AccessRestrictions = 16777216,
+    OpcUa_AttributeWriteMask_AccessLevelEx = 33554432,
     OpcUa_AttributeWriteMask_SizeOf = INT32_MAX
 } OpcUa_AttributeWriteMask;
 
@@ -216,6 +251,7 @@ typedef enum _OpcUa_BrowseDirection
     OpcUa_BrowseDirection_Forward = 0,
     OpcUa_BrowseDirection_Inverse = 1,
     OpcUa_BrowseDirection_Both = 2,
+    OpcUa_BrowseDirection_Invalid = 3,
     OpcUa_BrowseDirection_SizeOf = INT32_MAX
 } OpcUa_BrowseDirection;
 
@@ -239,21 +275,6 @@ typedef enum _OpcUa_BrowseResultMask
     OpcUa_BrowseResultMask_TargetInfo = 60,
     OpcUa_BrowseResultMask_SizeOf = INT32_MAX
 } OpcUa_BrowseResultMask;
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_ComplianceLevel
-/*============================================================================
- * The ComplianceLevel enumeration.
- *===========================================================================*/
-typedef enum _OpcUa_ComplianceLevel
-{
-    OpcUa_ComplianceLevel_Untested = 0,
-    OpcUa_ComplianceLevel_Partial = 1,
-    OpcUa_ComplianceLevel_SelfTested = 2,
-    OpcUa_ComplianceLevel_Certified = 3,
-    OpcUa_ComplianceLevel_SizeOf = INT32_MAX
-} OpcUa_ComplianceLevel;
 
 #endif
 
@@ -296,6 +317,7 @@ typedef enum _OpcUa_TimestampsToReturn
     OpcUa_TimestampsToReturn_Server = 1,
     OpcUa_TimestampsToReturn_Both = 2,
     OpcUa_TimestampsToReturn_Neither = 3,
+    OpcUa_TimestampsToReturn_Invalid = 4,
     OpcUa_TimestampsToReturn_SizeOf = INT32_MAX
 } OpcUa_TimestampsToReturn;
 
@@ -370,20 +392,6 @@ typedef enum _OpcUa_DeadbandType
     OpcUa_DeadbandType_Percent = 2,
     OpcUa_DeadbandType_SizeOf = INT32_MAX
 } OpcUa_DeadbandType;
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_EnumeratedTestType
-/*============================================================================
- * The EnumeratedTestType enumeration.
- *===========================================================================*/
-typedef enum _OpcUa_EnumeratedTestType
-{
-    OpcUa_EnumeratedTestType_Red = 1,
-    OpcUa_EnumeratedTestType_Yellow = 4,
-    OpcUa_EnumeratedTestType_Green = 5,
-    OpcUa_EnumeratedTestType_SizeOf = INT32_MAX
-} OpcUa_EnumeratedTestType;
 
 #endif
 

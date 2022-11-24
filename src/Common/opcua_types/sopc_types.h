@@ -41,6 +41,28 @@
 // "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
 #include "s2opc_common_export.h"
 
+#ifndef OPCUA_EXCLUDE_RolePermissionType
+/*============================================================================
+ * The RolePermissionType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RolePermissionType_EncodeableType;
+
+typedef struct _OpcUa_RolePermissionType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId RoleId;
+    OpcUa_PermissionType Permissions;
+} OpcUa_RolePermissionType;
+
+void OpcUa_RolePermissionType_Initialize(void* pValue);
+
+void OpcUa_RolePermissionType_Clear(void* pValue);
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_ReferenceNode
 /*============================================================================
  * The ReferenceNode structure.
@@ -83,6 +105,11 @@ typedef struct _OpcUa_Node
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
 } OpcUa_Node;
@@ -112,6 +139,11 @@ typedef struct _OpcUa_InstanceNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
 } OpcUa_InstanceNode;
@@ -141,6 +173,11 @@ typedef struct _OpcUa_TypeNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
 } OpcUa_TypeNode;
@@ -170,6 +207,11 @@ typedef struct _OpcUa_ObjectNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Byte EventNotifier;
@@ -200,6 +242,11 @@ typedef struct _OpcUa_ObjectTypeNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Boolean IsAbstract;
@@ -230,6 +277,11 @@ typedef struct _OpcUa_VariableNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Variant Value;
@@ -241,6 +293,7 @@ typedef struct _OpcUa_VariableNode
     SOPC_Byte UserAccessLevel;
     double MinimumSamplingInterval;
     SOPC_Boolean Historizing;
+    uint32_t AccessLevelEx;
 } OpcUa_VariableNode;
 
 void OpcUa_VariableNode_Initialize(void* pValue);
@@ -268,6 +321,11 @@ typedef struct _OpcUa_VariableTypeNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Variant Value;
@@ -303,6 +361,11 @@ typedef struct _OpcUa_ReferenceTypeNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Boolean IsAbstract;
@@ -335,6 +398,11 @@ typedef struct _OpcUa_MethodNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Boolean Executable;
@@ -366,6 +434,11 @@ typedef struct _OpcUa_ViewNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Boolean ContainsNoLoops;
@@ -397,9 +470,15 @@ typedef struct _OpcUa_DataTypeNode
     SOPC_LocalizedText Description;
     uint32_t WriteMask;
     uint32_t UserWriteMask;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+    int32_t NoOfUserRolePermissions;
+    OpcUa_RolePermissionType* UserRolePermissions;
+    uint16_t AccessRestrictions;
     int32_t NoOfReferences;
     OpcUa_ReferenceNode* References;
     SOPC_Boolean IsAbstract;
+    SOPC_ExtensionObject DataTypeDefinition;
 } OpcUa_DataTypeNode;
 
 void OpcUa_DataTypeNode_Initialize(void* pValue);
@@ -1313,28 +1392,6 @@ typedef struct _OpcUa_X509IdentityToken
 void OpcUa_X509IdentityToken_Initialize(void* pValue);
 
 void OpcUa_X509IdentityToken_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_KerberosIdentityToken
-/*============================================================================
- * The KerberosIdentityToken structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
-
-typedef struct _OpcUa_KerberosIdentityToken
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String PolicyId;
-    SOPC_ByteString TicketData;
-} OpcUa_KerberosIdentityToken;
-
-void OpcUa_KerberosIdentityToken_Initialize(void* pValue);
-
-void OpcUa_KerberosIdentityToken_Clear(void* pValue);
 
 #endif
 
@@ -2554,64 +2611,6 @@ typedef struct _OpcUa_EndpointConfiguration
 void OpcUa_EndpointConfiguration_Initialize(void* pValue);
 
 void OpcUa_EndpointConfiguration_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_SupportedProfile
-/*============================================================================
- * The SupportedProfile structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType;
-
-typedef struct _OpcUa_SupportedProfile
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String OrganizationUri;
-    SOPC_String ProfileId;
-    SOPC_String ComplianceTool;
-    SOPC_DateTime ComplianceDate;
-    OpcUa_ComplianceLevel ComplianceLevel;
-    int32_t NoOfUnsupportedUnitIds;
-    SOPC_String* UnsupportedUnitIds;
-} OpcUa_SupportedProfile;
-
-void OpcUa_SupportedProfile_Initialize(void* pValue);
-
-void OpcUa_SupportedProfile_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_SoftwareCertificate
-/*============================================================================
- * The SoftwareCertificate structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
-
-typedef struct _OpcUa_SoftwareCertificate
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String ProductName;
-    SOPC_String ProductUri;
-    SOPC_String VendorName;
-    SOPC_ByteString VendorProductCertificate;
-    SOPC_String SoftwareVersion;
-    SOPC_String BuildNumber;
-    SOPC_DateTime BuildDate;
-    SOPC_String IssuedBy;
-    SOPC_DateTime IssueDate;
-    int32_t NoOfSupportedProfiles;
-    OpcUa_SupportedProfile* SupportedProfiles;
-} OpcUa_SoftwareCertificate;
-
-void OpcUa_SoftwareCertificate_Initialize(void* pValue);
-
-void OpcUa_SoftwareCertificate_Clear(void* pValue);
 
 #endif
 
@@ -5501,6 +5500,9 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf,
  *===========================================================================*/
 typedef enum SOPC_TypeInternalIndex
 {
+#ifndef OPCUA_EXCLUDE_RolePermissionType
+    SOPC_TypeInternalIndex_RolePermissionType,
+#endif
 #ifndef OPCUA_EXCLUDE_ReferenceNode
     SOPC_TypeInternalIndex_ReferenceNode,
 #endif
@@ -5663,9 +5665,6 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_X509IdentityToken
     SOPC_TypeInternalIndex_X509IdentityToken,
-#endif
-#ifndef OPCUA_EXCLUDE_KerberosIdentityToken
-    SOPC_TypeInternalIndex_KerberosIdentityToken,
 #endif
 #ifndef OPCUA_EXCLUDE_IssuedIdentityToken
     SOPC_TypeInternalIndex_IssuedIdentityToken,
@@ -5837,12 +5836,6 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_EndpointConfiguration
     SOPC_TypeInternalIndex_EndpointConfiguration,
-#endif
-#ifndef OPCUA_EXCLUDE_SupportedProfile
-    SOPC_TypeInternalIndex_SupportedProfile,
-#endif
-#ifndef OPCUA_EXCLUDE_SoftwareCertificate
-    SOPC_TypeInternalIndex_SoftwareCertificate,
 #endif
 #ifndef OPCUA_EXCLUDE_QueryDataDescription
     SOPC_TypeInternalIndex_QueryDataDescription,
