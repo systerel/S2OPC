@@ -211,7 +211,7 @@ bool util_addspace__is_valid_ReferenceTypeId(const SOPC_NodeId* address_space_ty
         const SOPC_AddressSpaceTypeInfo* typeInfo = &SOPC_Embedded_HasSubTypeBackward[nodeId->Data.Numeric];
         result = OpcUa_NodeClass_ReferenceType == typeInfo->nodeClass;
     }
-    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
+    else
     {
         // NodeId not in static array of type nodes info, start research in address space
         bool node_found = false;
