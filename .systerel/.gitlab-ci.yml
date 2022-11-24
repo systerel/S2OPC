@@ -292,7 +292,10 @@ test-check:
   script:
     - ./.check-code.sh
     # Check generated types are up to date
-    - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd && ./.format.sh && git ls-files -m | test 0 -eq `wc -l`'
+    - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd'
+    - './scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h'
+    - './.format.sh'
+    - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
       DOCKER_IMAGE: 'sha256:20d4e72a3c1681a55aeb7b083a28edf4b58d12d113fc9271806d8e70900000ff'
   artifacts:
