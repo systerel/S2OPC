@@ -31,28 +31,12 @@ H_FILE_PATH = 'src/Common/opcua_types/sopc_types.h'
 H_ENUM_FILE_PATH = 'src/Common/opcua_types/sopc_enum_types.h'
 C_FILE_PATH = 'src/Common/opcua_types/sopc_types.c'
 
-
 def main():
     """Main program"""
     ns = parse_args()
     schema = BinarySchema(ns.bsd)
     gen_header_file(schema)
     gen_implem_file(schema)
-
-    untranslated = schema.untranslated_typenames()
-    toignore = (set('ua:' + t for t in PREDEFINED_TYPES) |
-                set('ua:' + t for t in ORPHANED_TYPES))
-    missing = untranslated - toignore
-    unexpected = toignore - untranslated
-    if missing:
-        print("The following types have not been translated:")
-        for name in sorted(missing):
-            print("  " + name)
-    if unexpected:
-        print("The following types should not have been translated:")
-        for name in sorted(unexpected):
-            print("  " + name)
-
 
 def parse_args():
     """
@@ -65,7 +49,6 @@ def parse_args():
                         help='OPC UA type description')
     return parser.parse_args()
 
-
 def gen_header_file(schema):
     """
     Generates the sopc_types.h file from the given schema.
@@ -73,12 +56,11 @@ def gen_header_file(schema):
     with open(H_FILE_PATH, "w") as out, open(H_ENUM_FILE_PATH, "w") as out_enum:
         out.write(H_FILE_START)
         out_enum.write(H_ENUM_FILE_START)
-        gen_header_types(out, out_enum, schema)
+        schema.gen_header_types(out, out_enum)
         out.write(H_FILE_ENUM_FUN_DECLS)
         schema.gen_type_index_decl(out)
         out.write(H_FILE_END)
         out_enum.write(H_ENUM_FILE_END)
-
 
 def gen_implem_file(schema):
     """
@@ -88,192 +70,6 @@ def gen_implem_file(schema):
         out.write(C_FILE_START)
         gen_implem_types(out, schema)
         out.write(C_FILE_END)
-
-
-def gen_header_types(out, out_enum, schema):
-    """
-    Generates the types in the header file.
-    """
-    #
-    # The list of types to generate is currently hard-coded below to match
-    # exactly with the legacy version produced by the C# tool.  We can later
-    # make it shorter by iterating only on the top-level types (generation is
-    # recursive).
-    #
-    schema.gen_header_type(out, out_enum, 'IdType')
-    schema.gen_header_type(out, out_enum, 'Node')
-    schema.gen_header_type(out, out_enum, 'InstanceNode')
-    schema.gen_header_type(out, out_enum, 'TypeNode')
-    schema.gen_header_type(out, out_enum, 'ObjectNode')
-    schema.gen_header_type(out, out_enum, 'ObjectTypeNode')
-    schema.gen_header_type(out, out_enum, 'VariableNode')
-    schema.gen_header_type(out, out_enum, 'VariableTypeNode')
-    schema.gen_header_type(out, out_enum, 'ReferenceTypeNode')
-    schema.gen_header_type(out, out_enum, 'MethodNode')
-    schema.gen_header_type(out, out_enum, 'ViewNode')
-    schema.gen_header_type(out, out_enum, 'DataTypeNode')
-    schema.gen_header_type(out, out_enum, 'Argument')
-    schema.gen_header_type(out, out_enum, 'EnumValueType')
-    schema.gen_header_type(out, out_enum, 'EnumField')
-    schema.gen_header_type(out, out_enum, 'OptionSet')
-    schema.gen_header_type(out, out_enum, 'TimeZoneDataType')
-    schema.gen_header_type(out, out_enum, 'ApplicationDescription')
-    schema.gen_header_type(out, out_enum, 'RequestHeader')
-    schema.gen_header_type(out, out_enum, 'ServiceFault')
-    schema.gen_header_pair(out, out_enum, 'FindServers')
-    schema.gen_header_type(out, out_enum, 'ServerOnNetwork')
-    schema.gen_header_pair(out, out_enum, 'FindServersOnNetwork')
-    schema.gen_header_type(out, out_enum, 'EndpointDescription')
-    schema.gen_header_pair(out, out_enum, 'GetEndpoints')
-    schema.gen_header_type(out, out_enum, 'RegisteredServer')
-    schema.gen_header_pair(out, out_enum, 'RegisterServer')
-    schema.gen_header_type(out, out_enum, 'MdnsDiscoveryConfiguration')
-    schema.gen_header_pair(out, out_enum, 'RegisterServer2')
-    schema.gen_header_type(out, out_enum, 'SecurityTokenRequestType')
-    schema.gen_header_type(out, out_enum, 'ChannelSecurityToken')
-    schema.gen_header_pair(out, out_enum, 'OpenSecureChannel')
-    schema.gen_header_pair(out, out_enum, 'CloseSecureChannel')
-    schema.gen_header_type(out, out_enum, 'SignedSoftwareCertificate')
-    schema.gen_header_type(out, out_enum, 'SignatureData')
-    schema.gen_header_pair(out, out_enum, 'CreateSession')
-    schema.gen_header_type(out, out_enum, 'UserIdentityToken')
-    schema.gen_header_type(out, out_enum, 'AnonymousIdentityToken')
-    schema.gen_header_type(out, out_enum, 'UserNameIdentityToken')
-    schema.gen_header_type(out, out_enum, 'X509IdentityToken')
-    schema.gen_header_type(out, out_enum, 'IssuedIdentityToken')
-    schema.gen_header_pair(out, out_enum, 'ActivateSession')
-    schema.gen_header_pair(out, out_enum, 'CloseSession')
-    schema.gen_header_pair(out, out_enum, 'Cancel')
-    schema.gen_header_type(out, out_enum, 'NodeAttributesMask')
-    schema.gen_header_type(out, out_enum, 'NodeAttributes')
-    schema.gen_header_type(out, out_enum, 'ObjectAttributes')
-    schema.gen_header_type(out, out_enum, 'VariableAttributes')
-    schema.gen_header_type(out, out_enum, 'MethodAttributes')
-    schema.gen_header_type(out, out_enum, 'ObjectTypeAttributes')
-    schema.gen_header_type(out, out_enum, 'VariableTypeAttributes')
-    schema.gen_header_type(out, out_enum, 'ReferenceTypeAttributes')
-    schema.gen_header_type(out, out_enum, 'DataTypeAttributes')
-    schema.gen_header_type(out, out_enum, 'ViewAttributes')
-    schema.gen_header_type(out, out_enum, 'AddNodesItem')
-    schema.gen_header_type(out, out_enum, 'AddNodesResult')
-    schema.gen_header_pair(out, out_enum, 'AddNodes')
-    schema.gen_header_type(out, out_enum, 'AddReferencesItem')
-    schema.gen_header_pair(out, out_enum, 'AddReferences')
-    schema.gen_header_type(out, out_enum, 'DeleteNodesItem')
-    schema.gen_header_pair(out, out_enum, 'DeleteNodes')
-    schema.gen_header_type(out, out_enum, 'DeleteReferencesItem')
-    schema.gen_header_pair(out, out_enum, 'DeleteReferences')
-    schema.gen_header_type(out, out_enum, 'AttributeWriteMask')
-    schema.gen_header_type(out, out_enum, 'BrowseDirection')
-    schema.gen_header_type(out, out_enum, 'ViewDescription')
-    schema.gen_header_type(out, out_enum, 'BrowseDescription')
-    schema.gen_header_type(out, out_enum, 'BrowseResultMask')
-    schema.gen_header_type(out, out_enum, 'BrowseResult')
-    schema.gen_header_pair(out, out_enum, 'Browse')
-    schema.gen_header_pair(out, out_enum, 'BrowseNext')
-    schema.gen_header_type(out, out_enum, 'BrowsePath')
-    schema.gen_header_type(out, out_enum, 'BrowsePathResult')
-    schema.gen_header_pair(out, out_enum, 'TranslateBrowsePathsToNodeIds')
-    schema.gen_header_pair(out, out_enum, 'RegisterNodes')
-    schema.gen_header_pair(out, out_enum, 'UnregisterNodes')
-    schema.gen_header_type(out, out_enum, 'EndpointConfiguration')
-    schema.gen_header_type(out, out_enum, 'NodeTypeDescription')
-    schema.gen_header_type(out, out_enum, 'FilterOperator')
-    schema.gen_header_type(out, out_enum, 'QueryDataSet')
-    schema.gen_header_type(out, out_enum, 'NodeReference')
-    schema.gen_header_type(out, out_enum, 'ContentFilter')
-    schema.gen_header_type(out, out_enum, 'ElementOperand')
-    schema.gen_header_type(out, out_enum, 'LiteralOperand')
-    schema.gen_header_type(out, out_enum, 'AttributeOperand')
-    schema.gen_header_type(out, out_enum, 'SimpleAttributeOperand')
-    schema.gen_header_type(out, out_enum, 'ContentFilterElementResult')
-    schema.gen_header_type(out, out_enum, 'ContentFilterResult')
-    schema.gen_header_type(out, out_enum, 'ParsingResult')
-    schema.gen_header_pair(out, out_enum, 'QueryFirst')
-    schema.gen_header_pair(out, out_enum, 'QueryNext')
-    schema.gen_header_type(out, out_enum, 'TimestampsToReturn')
-    schema.gen_header_type(out, out_enum, 'ReadValueId')
-    schema.gen_header_pair(out, out_enum, 'Read')
-    schema.gen_header_type(out, out_enum, 'HistoryReadValueId')
-    schema.gen_header_type(out, out_enum, 'HistoryReadResult')
-    schema.gen_header_type(out, out_enum, 'ReadEventDetails')
-    schema.gen_header_type(out, out_enum, 'ReadRawModifiedDetails')
-    schema.gen_header_type(out, out_enum, 'ReadProcessedDetails')
-    schema.gen_header_type(out, out_enum, 'ReadAtTimeDetails')
-    schema.gen_header_type(out, out_enum, 'HistoryData')
-    schema.gen_header_type(out, out_enum, 'HistoryModifiedData')
-    schema.gen_header_type(out, out_enum, 'HistoryEvent')
-    schema.gen_header_pair(out, out_enum, 'HistoryRead')
-    schema.gen_header_type(out, out_enum, 'WriteValue')
-    schema.gen_header_pair(out, out_enum, 'Write')
-    schema.gen_header_type(out, out_enum, 'HistoryUpdateDetails')
-    schema.gen_header_type(out, out_enum, 'PerformUpdateType')
-    schema.gen_header_type(out, out_enum, 'UpdateDataDetails')
-    schema.gen_header_type(out, out_enum, 'UpdateStructureDataDetails')
-    schema.gen_header_type(out, out_enum, 'UpdateStructureDataDetails')
-    schema.gen_header_type(out, out_enum, 'UpdateEventDetails')
-    schema.gen_header_type(out, out_enum, 'DeleteRawModifiedDetails')
-    schema.gen_header_type(out, out_enum, 'DeleteAtTimeDetails')
-    schema.gen_header_type(out, out_enum, 'DeleteEventDetails')
-    schema.gen_header_type(out, out_enum, 'HistoryUpdateResult')
-    schema.gen_header_pair(out, out_enum, 'HistoryUpdate')
-    schema.gen_header_type(out, out_enum, 'CallMethodRequest')
-    schema.gen_header_type(out, out_enum, 'CallMethodResult')
-    schema.gen_header_pair(out, out_enum, 'Call')
-    schema.gen_header_type(out, out_enum, 'MonitoringMode')
-    schema.gen_header_type(out, out_enum, 'DataChangeTrigger')
-    schema.gen_header_type(out, out_enum, 'DeadbandType')
-    schema.gen_header_type(out, out_enum, 'DataChangeFilter')
-    schema.gen_header_type(out, out_enum, 'AggregateFilter')
-    schema.gen_header_type(out, out_enum, 'EventFilterResult')
-    schema.gen_header_type(out, out_enum, 'AggregateFilterResult')
-    schema.gen_header_type(out, out_enum, 'MonitoredItemCreateRequest')
-    schema.gen_header_type(out, out_enum, 'MonitoredItemCreateResult')
-    schema.gen_header_pair(out, out_enum, 'CreateMonitoredItems')
-    schema.gen_header_type(out, out_enum, 'MonitoredItemModifyRequest')
-    schema.gen_header_type(out, out_enum, 'MonitoredItemModifyResult')
-    schema.gen_header_pair(out, out_enum, 'ModifyMonitoredItems')
-    schema.gen_header_pair(out, out_enum, 'SetMonitoringMode')
-    schema.gen_header_pair(out, out_enum, 'SetTriggering')
-    schema.gen_header_pair(out, out_enum, 'DeleteMonitoredItems')
-    schema.gen_header_pair(out, out_enum, 'CreateSubscription')
-    schema.gen_header_pair(out, out_enum, 'ModifySubscription')
-    schema.gen_header_pair(out, out_enum, 'SetPublishingMode')
-    schema.gen_header_type(out, out_enum, 'NotificationMessage')
-    schema.gen_header_type(out, out_enum, 'DataChangeNotification')
-    schema.gen_header_type(out, out_enum, 'EventNotificationList')
-    schema.gen_header_type(out, out_enum, 'StatusChangeNotification')
-    schema.gen_header_type(out, out_enum, 'SubscriptionAcknowledgement')
-    schema.gen_header_pair(out, out_enum, 'Publish')
-    schema.gen_header_pair(out, out_enum, 'Republish')
-    schema.gen_header_type(out, out_enum, 'TransferResult')
-    schema.gen_header_pair(out, out_enum, 'TransferSubscriptions')
-    schema.gen_header_pair(out, out_enum, 'DeleteSubscriptions')
-    schema.gen_header_type(out, out_enum, 'BuildInfo')
-    schema.gen_header_type(out, out_enum, 'RedundancySupport')
-    schema.gen_header_type(out, out_enum, 'RedundantServerDataType')
-    schema.gen_header_type(out, out_enum, 'NetworkGroupDataType')
-    schema.gen_header_type(out, out_enum, 'SamplingIntervalDiagnosticsDataType')
-    schema.gen_header_type(out, out_enum, 'ServerDiagnosticsSummaryDataType')
-    schema.gen_header_type(out, out_enum, 'ServerStatusDataType')
-    schema.gen_header_type(out, out_enum, 'SessionDiagnosticsDataType')
-    schema.gen_header_type(out, out_enum, 'SessionSecurityDiagnosticsDataType')
-    schema.gen_header_type(out, out_enum, 'StatusResult')
-    schema.gen_header_type(out, out_enum, 'SubscriptionDiagnosticsDataType')
-    schema.gen_header_type(out, out_enum, 'ModelChangeStructureVerbMask')
-    schema.gen_header_type(out, out_enum, 'ModelChangeStructureDataType')
-    schema.gen_header_type(out, out_enum, 'SemanticChangeStructureDataType')
-    schema.gen_header_type(out, out_enum, 'Range')
-    schema.gen_header_type(out, out_enum, 'EUInformation')
-    schema.gen_header_type(out, out_enum, 'AxisScaleEnumeration')
-    schema.gen_header_type(out, out_enum, 'ComplexNumberType')
-    schema.gen_header_type(out, out_enum, 'DoubleComplexNumberType')
-    schema.gen_header_type(out, out_enum, 'AxisInformation')
-    schema.gen_header_type(out, out_enum, 'XVType')
-    schema.gen_header_type(out, out_enum, 'ProgramDiagnosticDataType')
-    schema.gen_header_type(out, out_enum, 'Annotation')
-    schema.gen_header_type(out, out_enum, 'ExceptionDeviationFormat')
-
 
 def gen_implem_types(out, schema):
     schema.gen_encodeable_type_descs(out)
@@ -376,6 +172,25 @@ class BinarySchema:
         else:
             fatal("Unknown node kind: %s" % node.tag)
         self.bsd2c[typename] = ctype
+
+    def gen_header_types(self, out, out_enum):
+        types = (self.tree.findall('opc:EnumeratedType', self.OPC_NS) +
+                 self.tree.findall('opc:StructuredType', self.OPC_NS))
+        for typ in types:
+            name = typ.get('Name')
+            if name in PREDEFINED_TYPES:
+                continue
+            elif 0 == len(list(typ)):
+                # Type is empty (no fields)
+                continue
+            elif (name.endswith('Request') and
+                  self.tree.findall('./*[@Name="%sResponse"]' % name[:-len('Request')])):
+                self.gen_header_pair(out, out_enum, name[:-len('Request')])
+            elif name.endswith('Response'):
+                # Already treated with Request
+                continue
+            else:
+                self.gen_header_type(out, out_enum, name)
 
     def gen_type_index_decl(self, out):
         """
@@ -890,57 +705,6 @@ PREDEFINED_TYPES = [
 """
 Types that are locally used in module ``sopc_builtintypes`` and do not need to
 be generated in module ``sopc_types``.
-"""
-
-ORPHANED_TYPES = [
-        'NamingRuleType',
-        'OpenFileMode',
-        'TrustListMasks',
-        'TrustListDataType',
-
-        'IdentityMappingRuleType',
-        'IdentityCriteriaType',
-
-        'ApplicationPermissionRuleType',
-
-        'DataSetMetaDataType',
-        'ConfigurationVersionDataType',
-        'DataTypeDescription',
-        'EnumDescription',
-        'EnumDefinition',
-        'StructureDescription',
-        'StructureDefinition',
-        'StructureField',
-        'StructureType',
-        'FieldMetaData',
-        'KeyValuePair',
-        'DataTypeDefinition',
-        'Union',
-
-        'DataConnectionDataType',
-        'OverrideValueHandling',
-
-        'PublishedVariableDataType',
-
-        'SecurityKeyServiceDataType',
-
-        'DataSetContentMask',
-
-
-        'PubSubState',
-
-        # Empty base types of translated types
-        'DiscoveryConfiguration',
-        'FilterOperand',
-        'HistoryReadDetails',
-        'MonitoringFilter',
-        'MonitoringFilterResult',
-        'NotificationData',
-
-]
-"""
-Types that are present in the binary schema but not used by any other type and
-not translated to module ``sopc_types``.
 """
 
 C_FILE_START = """
