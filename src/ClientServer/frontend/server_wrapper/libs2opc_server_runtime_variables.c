@@ -502,15 +502,22 @@ static bool set_server_service_level_value(OpcUa_WriteValue* wv, SOPC_Byte level
 
 static bool set_server_capabilities_max_variables(SOPC_Array* write_values)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 1);
+    OpcUa_WriteValue* values = append_write_values(write_values, 4);
     if (NULL == values)
     {
         return false;
     }
-    // Set only limit for MaxBrowseContinuationPoints, other max variables are optional or for unsupported services
 
     /* MaxBrowseContinuationPoints: only 1 supported per session */
     set_write_value_uint16(&values[0], OpcUaId_Server_ServerCapabilities_MaxBrowseContinuationPoints, 1);
+    /* MaxArrayLength */
+    set_write_value_uint32(&values[1], OpcUaId_Server_ServerCapabilities_MaxArrayLength, SOPC_DEFAULT_MAX_ARRAY_LENGTH);
+    /* MaxStringLength */
+    set_write_value_uint32(&values[2], OpcUaId_Server_ServerCapabilities_MaxStringLength,
+                           SOPC_DEFAULT_MAX_STRING_LENGTH);
+    /* MaxByteStringLength */
+    set_write_value_uint32(&values[3], OpcUaId_Server_ServerCapabilities_MaxByteStringLength,
+                           SOPC_DEFAULT_MAX_STRING_LENGTH);
     return true;
 }
 
