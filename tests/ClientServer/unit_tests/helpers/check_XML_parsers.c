@@ -1122,6 +1122,8 @@ Suite* tests_make_suite_XML_parsers(void)
 
     s = suite_create("XML parsers tests");
     tc_XML_parsers = tcase_create("XML parsers");
+    // Increase default timeout of 4s to 10s (useful when CK_FORK!=NO)
+    tcase_set_timeout(tc_XML_parsers, 10);
     tcase_add_checked_fixture(tc_XML_parsers, setup, NULL);
     tcase_add_test(tc_XML_parsers, test_same_address_space_results);
     tcase_add_test(tc_XML_parsers, test_XML_server_configuration);
