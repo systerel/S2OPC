@@ -71,7 +71,9 @@ DEFINITIONS
         in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
         in_BrowseValue_ResultMask        : t_BrowseResultMask_i  &
         in_ReleasePrevContinuationPoint  : BOOL                  &
-        isBrowseValueContextDefined      : BOOL
+        isBrowseValueContextDefined      : BOOL                  &
+        (isBrowseValueContextDefined = TRUE =>
+            in_maxReferencesPerNode <= k_n_BrowseTarget_max)
     ;
     d_inv_persist ==
         s_ContinuationPoints <: t_ContinuationPoint &
