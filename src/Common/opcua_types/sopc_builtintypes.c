@@ -5332,7 +5332,7 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     size_t pos = 0;
     const SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     const SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparisonResult = 0;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparisonResult == 0; idx++)
@@ -5340,6 +5340,10 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
             pos = idx * sizeOfElt;
             status = compFct(&(byteArrayLeft[pos]), &(byteArrayRight[pos]), comparisonResult);
         }
+    }
+    else if (0 == noOfElts)
+    {
+        *comparisonResult = 0;
     }
     else
     {
@@ -5362,7 +5366,7 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
     size_t pos = 0;
     const SOPC_Byte* byteArrayLeft = eltsArrayLeft;
     const SOPC_Byte* byteArrayRight = eltsArrayRight;
-    if (noOfElts >= 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
+    if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparisonResult = 0;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparisonResult == 0; idx++)
@@ -5371,6 +5375,10 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
             status = compCustomFct(customCompContext, builtInId, &(byteArrayLeft[pos]), &(byteArrayRight[pos]),
                                    comparisonResult);
         }
+    }
+    else if (0 == noOfElts)
+    {
+        *comparisonResult = 0;
     }
     else
     {
