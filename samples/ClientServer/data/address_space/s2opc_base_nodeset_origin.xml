@@ -7438,11 +7438,9 @@
       <Reference ReferenceType="HasProperty">i=2736</Reference>
       <Reference ReferenceType="HasProperty">i=2737</Reference>
       <Reference ReferenceType="HasProperty">i=3704</Reference>
-      <!--
       <Reference ReferenceType="HasProperty">i=11702</Reference>
       <Reference ReferenceType="HasProperty">i=11703</Reference>
       <Reference ReferenceType="HasProperty">i=12911</Reference>
-      -->
       <Reference ReferenceType="HasComponent">i=11704</Reference>
       <Reference ReferenceType="HasComponent">i=2996</Reference>
       <Reference ReferenceType="HasComponent">i=2997</Reference>
@@ -7502,8 +7500,6 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
     </References>
   </UAVariable>
-  <!-- Optional nodes : to be added -->
-  <!--
   <UAVariable NodeId="i=11702" BrowseName="MaxArrayLength" ParentNodeId="i=2268" DataType="UInt32">
     <DisplayName>MaxArrayLength</DisplayName>
     <References>
@@ -7525,7 +7521,6 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
     </References>
   </UAVariable>
-  -->
   <UAObject NodeId="i=11704" BrowseName="OperationLimits" ParentNodeId="i=2268">
     <DisplayName>OperationLimits</DisplayName>
     <References>
