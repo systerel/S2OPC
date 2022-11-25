@@ -824,8 +824,6 @@
     </References>
     <InverseName>OptionalInputArgumentDescriptionOf</InverseName>
   </UAReferenceType>
-  <!-- Optional nodes -->
-  <!--
   <UAObject NodeId="i=15957" BrowseName="0:http://opcfoundation.org/UA/" SymbolicName="OPCUANamespaceMetadata">
     <DisplayName>http://opcfoundation.org/UA/</DisplayName>
     <References>
@@ -836,9 +834,11 @@
       <Reference ReferenceType="HasProperty">i=15962</Reference>
       <Reference ReferenceType="HasProperty">i=15963</Reference>
       <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <!--
       <Reference ReferenceType="HasProperty">i=16134</Reference>
       <Reference ReferenceType="HasProperty">i=16135</Reference>
       <Reference ReferenceType="HasProperty">i=16136</Reference>
+      -->
       <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
     </References>
@@ -880,7 +880,8 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=15957</Reference>
     </References>
     <Value>
-      <Boolean xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">false</Boolean>
+      <!-- Set to true since some optional nodes are not present -->
+      <Boolean xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">true</Boolean>
     </Value>
   </UAVariable>
   <UAVariable NodeId="i=15962" BrowseName="StaticNodeIdTypes" ParentNodeId="i=15957" DataType="i=256" ValueRank="1" ArrayDimensions="0">
@@ -903,6 +904,8 @@
     </References>
     <Value>
       <ListOfString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+      <!-- NumericRange not used in NS 0 -->
+      <!--
         <String>1:2252</String>
         <String>2270</String>
         <String>2273</String>
@@ -936,6 +939,7 @@
         <String>16306:17633</String>
         <String>17635:19090</String>
         <String>19092:2147483647</String>
+      -->
       </ListOfString>
     </Value>
   </UAVariable>
@@ -949,6 +953,8 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd" />
     </Value>
   </UAVariable>
+  <!-- Optional nodes: not supported -->
+  <!--
   <UAVariable NodeId="i=16134" BrowseName="DefaultRolePermissions" ParentNodeId="i=15957" DataType="i=96" ValueRank="1" ArrayDimensions="0">
     <DisplayName>DefaultRolePermissions</DisplayName>
     <References>
@@ -7255,7 +7261,6 @@
       <Reference ReferenceType="HasComponent">i=2256</Reference>
       <Reference ReferenceType="HasProperty">i=2267</Reference>
       <Reference ReferenceType="HasProperty">i=2994</Reference>
-      <!-- Optional nodes -->
       <!--
       <Reference ReferenceType="HasProperty">i=12885</Reference>
       <Reference ReferenceType="HasProperty">i=17634</Reference>
@@ -7264,8 +7269,8 @@
       <Reference ReferenceType="HasComponent">i=2274</Reference>
       <Reference ReferenceType="HasComponent">i=2295</Reference>
       <Reference ReferenceType="HasComponent">i=2296</Reference>
-      <!--
       <Reference ReferenceType="HasComponent">i=11715</Reference>
+      <!--
       <Reference ReferenceType="HasComponent">i=11492</Reference>
       <Reference ReferenceType="HasComponent">i=12873</Reference>
       <Reference ReferenceType="HasComponent">i=12749</Reference>
@@ -7406,6 +7411,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
     </References>
   </UAVariable>
+  <!-- Optional nodes : not supported -->
   <!--
   <UAVariable NodeId="i=12885" BrowseName="EstimatedReturnTime" ParentNodeId="i=2253" DataType="DateTime" MinimumSamplingInterval="1000">
     <DisplayName>EstimatedReturnTime</DisplayName>
@@ -7432,7 +7438,6 @@
       <Reference ReferenceType="HasProperty">i=2736</Reference>
       <Reference ReferenceType="HasProperty">i=2737</Reference>
       <Reference ReferenceType="HasProperty">i=3704</Reference>
-      <!-- Optional nodes -->
       <!--
       <Reference ReferenceType="HasProperty">i=11702</Reference>
       <Reference ReferenceType="HasProperty">i=11703</Reference>
@@ -7441,7 +7446,6 @@
       <Reference ReferenceType="HasComponent">i=11704</Reference>
       <Reference ReferenceType="HasComponent">i=2996</Reference>
       <Reference ReferenceType="HasComponent">i=2997</Reference>
-      <!-- Optional nodes -->
       <!--
       <Reference ReferenceType="HasComponent">i=15606</Reference>
       -->
@@ -7498,7 +7502,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2268</Reference>
     </References>
   </UAVariable>
-  <!-- Optional nodes -->
+  <!-- Optional nodes : to be added -->
   <!--
   <UAVariable NodeId="i=11702" BrowseName="MaxArrayLength" ParentNodeId="i=2268" DataType="UInt32">
     <DisplayName>MaxArrayLength</DisplayName>
@@ -7526,7 +7530,6 @@
     <DisplayName>OperationLimits</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">i=11705</Reference>
-      <!-- Optional nodes -->
       <!--
       <Reference ReferenceType="HasProperty">i=12165</Reference>
       <Reference ReferenceType="HasProperty">i=12166</Reference>
@@ -7553,7 +7556,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=11704</Reference>
     </References>
   </UAVariable>
-  <!-- Optional nodes -->
+  <!-- Optional nodes : not supported -->
   <!--
   <UAVariable NodeId="i=12165" BrowseName="MaxNodesPerHistoryReadData" ParentNodeId="i=11704" DataType="UInt32">
     <DisplayName>MaxNodesPerHistoryReadData</DisplayName>
@@ -7577,7 +7580,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=11704</Reference>
     </References>
   </UAVariable>
-  <!-- Optional nodes -->
+  <!-- Optional nodes : not supported -->
   <!--
   <UAVariable NodeId="i=12167" BrowseName="MaxNodesPerHistoryUpdateData" ParentNodeId="i=11704" DataType="UInt32">
     <DisplayName>MaxNodesPerHistoryUpdateData</DisplayName>
@@ -7654,7 +7657,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
     </References>
   </UAObject>
-  <!-- Optional nodes -->
+  <!-- Optional nodes : not supported -->
   <!--
   <UAObject NodeId="i=15606" BrowseName="RoleSet" ParentNodeId="i=2268">
     <DisplayName>RoleSet</DisplayName>
@@ -7961,8 +7964,6 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2296</Reference>
     </References>
   </UAVariable>
-  <!-- Optional nodes -->
-  <!--
   <UAObject NodeId="i=11715" BrowseName="Namespaces" ParentNodeId="i=2253">
     <DisplayName>Namespaces</DisplayName>
     <References>
@@ -7970,8 +7971,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
     </References>
   </UAObject>
-  -->
-  <!-- Optional nodes -->
+  <!-- Optional nodes: not supported -->
   <!--
   <UAMethod NodeId="i=11492" BrowseName="GetMonitoredItems" ParentNodeId="i=2253" MethodDeclarationId="i=11489">
     <DisplayName>GetMonitoredItems</DisplayName>
@@ -11780,6 +11780,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2127</Reference>
     </References>
   </UAObjectType>
+  <!-- Optional nodes: role permissions not supported -->
   <!--
   <UAObject NodeId="i=15644" BrowseName="Anonymous" SymbolicName="WellKnownRole_Anonymous">
     <DisplayName>Anonymous</DisplayName>
@@ -29377,6 +29378,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=14416</Reference>
     </References>
   </UAVariable>
+  <!-- Optional: PubSub functionalities -->
   <!--
   <UAObject NodeId="i=14443" BrowseName="PublishSubscribe">
     <DisplayName>PublishSubscribe</DisplayName>
