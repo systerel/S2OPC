@@ -89,14 +89,15 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 
 ### Current status
 
-- Security policies available: None, Basic256 and Basic256Sha256
+- Security policies available: None, Basic256, Basic256Sha256, Aes128_Sha256_RsaOaep and Aes256_Sha256_RsaPss
 - Security modes available: None, Sign and SignAndEncrypt
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server discovery services: getEndpoints, findServers
 - Server Nano profile services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath, registerNodes
 - Server extended services (only if compiled with WITH_NANO_EXTENDED set to 1):
-  - subscription (no monitoredItems deletion, no subscription transfer),
-  - method call (no access to node object nor address space during call, any other event blocked during function execution).
+  - subscription (no subscription transfer),
+  - method call (no access to node object nor address space during call, any other event blocked during function execution)
+  - add nodes (only if compiled with SOPC_HAS_NODE_MANAGEMENT_SERVICES set to 1)
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -166,7 +167,6 @@ Note: references point to the standard OPC UA Part 14 (1.04).
 - formal modeling of OPC-UA services using [B method](https://en.wikipedia.org/wiki/B-Method),
 - static analysis using [Frama C](http://frama-c.com/) from CEA and [TIS analyser](https://taas.trust-in-soft.com/) from Trust-In-Soft,
 - static analysis using [Coverity](https://scan.coverity.com/),
-- check for memory leaks using [Valgrind](http://valgrind.org/),
 - use of GCC sanitizers to detect undefined behaviours, race conditions, memory leaks and errors,
 - compilation using several compilers (GCC, CLang, mingGw, MSVC, ...) with conservative compilation flags,
 - all development and testing environment are bundled into [Docker](https://www.docker.com/) images
@@ -196,9 +196,9 @@ At the end of build process, the binary is available here `build/bin/pubsub_serv
 
 ## S2OPC Linux compilation
 
-Tested under Debian 9.
+Tested under Debian 11.
 Prerequisites:
-- Make (tested with GNU Make version 4.2.1)
+- Make (tested with GNU Make version 4.3)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
 - GCC (tested with GCC version 11.2.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.16.12)
