@@ -967,6 +967,7 @@ bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t p
         SOPC_MAX_LENGTH_UINT64_TO_STRING + lengthDot + SOPC_MAX_LENGTH_UINT16_TO_STRING;
 
     char* defaultTopic = SOPC_Calloc(lengthDefaultTopic, sizeof(char));
+    bool result = false;
 
     memset(charPublisherId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
     memset(charWriterGroupId, 0, SOPC_MAX_LENGTH_UINT16_TO_STRING);
@@ -995,9 +996,9 @@ bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t p
         defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
         strncat(defaultTopic, dot, lengthDot);
         strncat(defaultTopic, charWriterGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
+        result = SOPC_WriterGroup_Set_MqttTopic(writer, defaultTopic);
     }
 
-    bool result = SOPC_WriterGroup_Set_MqttTopic(writer, defaultTopic);
     if (result)
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Default value of MqttTopic set to %s", defaultTopic);
