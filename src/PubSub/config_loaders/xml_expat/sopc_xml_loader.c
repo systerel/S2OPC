@@ -92,10 +92,10 @@
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 #define ATTR_MESSAGE_GROUP_ID "groupId"
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
-#define ATTR_MESSAGE_MQTTOPIC "mqttTopic"
+#define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
-#define ATTR_DATASET_MQTTTOPIC "mqttTopic"
+#define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -499,7 +499,7 @@ static bool parse_message_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
         result &= msg->groupVersion > 0;
     }
-    else if (TEXT_EQUALS(ATTR_MESSAGE_MQTTOPIC, attr_name))
+    else if (TEXT_EQUALS(ATTR_MESSAGE_MQTT_TOPIC, attr_name))
     {
         result = copy_any_string_attribute_value(&msg->mqttPublisherTopic, attr_val);
     }
@@ -574,7 +574,7 @@ static bool parse_dataset_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
-    else if (TEXT_EQUALS(ATTR_DATASET_MQTTTOPIC, attr_name))
+    else if (TEXT_EQUALS(ATTR_DATASET_MQTT_TOPIC, attr_name))
     {
         result = copy_any_string_attribute_value(&ds->mqttSubscriberTopic, attr_val);
     }
