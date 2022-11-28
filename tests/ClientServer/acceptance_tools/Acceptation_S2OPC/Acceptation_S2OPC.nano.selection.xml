@@ -2,6 +2,13 @@
  <ProjectInfo ProjectType="ServerProject" Version="1.10.0.402"/>
  <ConformanceGroups>
   <ConformanceGroup name="Address Space Model">
+   <ConformanceUnit name="Address Space Atomicity">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Address Space Base">
     <TestCases>
      <TestCase name="001.js"/>
