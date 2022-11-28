@@ -60,7 +60,7 @@ int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* 
 /* mqtt layer helpers */
 int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic);
 
-int32_t get_unique_id(void);
+int32_t get_unique_client_id(void);
 
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
 {
@@ -130,7 +130,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
     contextClient->pUser = userContext;
     memset(contextClient->clientId, 0, SOPC_MAX_LENGTH_INT32_TO_STRING);
 
-    int32_t clientId = get_unique_id();
+    int32_t clientId = get_unique_client_id();
 
     int result = set_subscriber_options(contextClient, nbSubTopic, subTopic);
     if (0 != result)
@@ -167,6 +167,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
             MQTTAsyncResult = MQTTAsync_connect(contextClient->client, &options);
             if (0 != MQTTAsyncResult)
             {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Client connect request wasn't accepted");
                 status = SOPC_STATUS_NOK;
             }
         }
@@ -243,7 +244,8 @@ int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic
     return 0;
 }
 
-int32_t get_unique_id(void)
+/* Generate a random ID to avoid conflictual client IDs connecting to Mqtt servers */
+int32_t get_unique_client_id(void)
 {
     static int32_t unique_client_id = 1;
     int32_t random = (int32_t) SOPC_TimeReference_GetCurrent();
