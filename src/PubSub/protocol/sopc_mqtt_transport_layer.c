@@ -42,7 +42,7 @@ struct MQTT_CONTEXT_CLIENT
 {
     MQTTAsync client; /* mqtt client */
 
-    char clientId[SOPC_MAX_LENGTH_INT32_TO_STRING]; /* Identifier passed to mqtt server */
+    char clientId[SOPC_MAX_LENGTH_UINT64_TO_STRING]; /* Identifier passed to mqtt server */
 
     bool isSubscriber; /* True if client is subscriber */
     SubscriberContext subContext;
@@ -60,7 +60,7 @@ int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* 
 /* mqtt layer helpers */
 int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic);
 
-int32_t get_unique_client_id(void);
+uint64_t get_unique_client_id(void);
 
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
 {
@@ -128,9 +128,9 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
     contextClient->subContext.cbMessageArrived = cbMessageReceived;
     contextClient->subContext.nbTopic = nbSubTopic;
     contextClient->pUser = userContext;
-    memset(contextClient->clientId, 0, SOPC_MAX_LENGTH_INT32_TO_STRING);
+    memset(contextClient->clientId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
 
-    int32_t clientId = get_unique_client_id();
+    uint64_t clientId = get_unique_client_id();
 
     int result = set_subscriber_options(contextClient, nbSubTopic, subTopic);
     if (0 != result)
@@ -140,7 +140,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 
     if (SOPC_STATUS_OK == status)
     {
-        snprintf(contextClient->clientId, SOPC_MAX_LENGTH_INT32_TO_STRING - 1, "%d", clientId);
+        snprintf(contextClient->clientId, SOPC_MAX_LENGTH_UINT64_TO_STRING - 1, "%" PRIu64, clientId);
         int MQTTAsyncResult =
             MQTTAsync_create(&contextClient->client, uri, contextClient->clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
         if (MQTTAsyncResult != 0)
@@ -245,12 +245,11 @@ int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic
 }
 
 /* Generate a random ID to avoid conflictual client IDs connecting to Mqtt servers */
-int32_t get_unique_client_id(void)
+uint64_t get_unique_client_id(void)
 {
-    static int32_t unique_client_id = 1;
-    int32_t random = (int32_t) SOPC_TimeReference_GetCurrent();
-    unique_client_id += random;
-    return SOPC_Atomic_Int_Add(&unique_client_id, 1);
+    static uint64_t unique_clientId = 1;
+    unique_clientId += SOPC_TimeReference_GetCurrent();
+    return unique_clientId;
 }
 
 #else
