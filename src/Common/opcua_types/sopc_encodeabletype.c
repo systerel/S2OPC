@@ -167,14 +167,33 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
     return SOPC_STATUS_OK;
 }
 
-SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
+SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
 {
     SOPC_EncodeableType_UserTypeValue* pValue = NULL;
+    SOPC_EncodeableType* result = NULL;
+    bool found = false;
+    void* userCoder = NULL;
+    if (g_UserEncodeableTypes != NULL)
+    {
+        // search in user defined encodeable types
+        SOPC_EncodeableType_UserTypeKey key = {.typeId = typeId};
+        userCoder = SOPC_Dict_Get(g_UserEncodeableTypes, (void*) &key, &found);
+        if (found && userCoder != NULL)
+        {
+            pValue = (SOPC_EncodeableType_UserTypeValue*) userCoder;
+            assert(pValue != NULL);
+            result = pValue->encoder;
+            assert(result != NULL);
+        }
+    }
+    return result;
+}
+
+SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
+{
     SOPC_EncodeableType* current = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
-    bool found = false;
-    void* userCoder = NULL;
     current = SOPC_KnownEncodeableTypes[idx];
     while (current != NULL && NULL == result)
     {
@@ -192,18 +211,9 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
             current = NULL;
         }
     }
-    if (result == NULL && g_UserEncodeableTypes != NULL)
+    if (result == NULL)
     {
-        // search in user defined encodeable types
-        SOPC_EncodeableType_UserTypeKey key = {.typeId = typeId};
-        userCoder = SOPC_Dict_Get(g_UserEncodeableTypes, (void*) &key, &found);
-        if (found && userCoder != NULL)
-        {
-            pValue = (SOPC_EncodeableType_UserTypeValue*) userCoder;
-            assert(pValue != NULL);
-            result = pValue->encoder;
-            assert(result != NULL);
-        }
+        result = SOPC_EncodeableType_GetUserType(typeId);
     }
     return result;
 }
@@ -226,13 +236,28 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
     return result;
 }
 
+static SOPC_EncodeableType* getKnownEncodeableType(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    SOPC_EncodeableType* result = NULL;
+    if (desc->typeIndex < SOPC_TypeInternalIndex_SIZE)
+    {
+        result = SOPC_KnownEncodeableTypes[desc->typeIndex];
+    }
+    else
+    {
+        // Invalid typeIndex
+        assert(false && "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
+    }
+    return result;
+}
+
 static size_t getAllocationSize(const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn)
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].size;
     }
-    return SOPC_KnownEncodeableTypes[desc->typeIndex]->AllocationSize;
+    return getKnownEncodeableType(desc)->AllocationSize;
 }
 
 static SOPC_EncodeableObject_PfnInitialize* getPfnInitialize(const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -241,7 +266,7 @@ static SOPC_EncodeableObject_PfnInitialize* getPfnInitialize(const SOPC_Encodeab
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].initialize;
     }
-    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Initialize;
+    return getKnownEncodeableType(desc)->Initialize;
 }
 
 static SOPC_EncodeableObject_PfnClear* getPfnClear(const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -250,7 +275,7 @@ static SOPC_EncodeableObject_PfnClear* getPfnClear(const SOPC_EncodeableType_Fie
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].clear;
     }
-    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Clear;
+    return getKnownEncodeableType(desc)->Clear;
 }
 
 static SOPC_ReturnStatus SOPC_EncodeableType_PfnEncode(const void* value,

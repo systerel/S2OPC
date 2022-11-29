@@ -78,6 +78,10 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
  * The \c isToEncode field indicates whether this field shall be encoded and
  * decoded.  When false, the field is only initialized and cleared.
  *
+ * The \c typeIndex field indicates the index of type in internal types array.
+ * It shall be a valid value of ::SOPC_TypeInternalIndex enum type.
+ * Note: fields could only be of internal defined types for user-defined types.
+ *
  * Finally, the \c offset field gives the offset in bytes of the field in the
  * object structure.
  */
@@ -131,13 +135,24 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* encoder);
 SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encoder);
 
 /**
- *  \brief          Retrieve a defined encodeable object type with the given type Id.
+ *  \brief          Retrieve a user-defined encodeable type with the given type Id.
  *
- *  \param typeId         Type identifier for which corresponding encodeable object type must be returned
+ *  \param typeId         Type identifier for which corresponding encodeable type must be returned
+ *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
+ */
+SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId);
+
+/**
+ *  \brief          Retrieve a defined encodeable type with the given type Id.
+ *
+ *  \param typeId         Type identifier for which corresponding encodeable type must be returned
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
  */
 SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
 
+/**
+ *  \brief          Get the name of the given encodeable type
+ */
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
 
 /**
