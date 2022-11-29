@@ -97,6 +97,11 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
                                                            uint32_t nestedStructLevel);
 
 /**
+ *  \brief Copy function generic signature for an encodeable object
+ */
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
+
+/*
  * \brief Description of an encodeable type field.
  *
  * This structure has been designed to be very compact and fit into 8 bytes.
@@ -260,5 +265,19 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                void* pValue,
                                                SOPC_Buffer* buf,
                                                uint32_t nestedStructLevel);
+
+/**
+ * \brief Copy an encodeable object.
+ *
+ * \param type       The encodeableType of \p destValue and \p srcValue.
+ * \param destValue  The destination encodeable object in which the content copy will be done.
+ *                   It shall have been initialized ::SOPC_EncodeableObject_Initialize and
+ *                   cleared ::SOPC_EncodeableObject_Clear if necessary.
+ *
+ * \param srcValue   The source encodeable object from which the content copy will be done.
+ *
+ * \return           SOPC_STATUS_OK in case of success, reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue);
 
 #endif /* SOPC_ENCODEABLETYPE_H_ */

@@ -4793,7 +4793,7 @@ void SOPC_Initialize_Array(int32_t noOfElts,
 
 SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
                                 void* eltsArrayLeft,
-                                void* eltsArrayRight,
+                                const void* eltsArrayRight,
                                 size_t sizeOfElt,
                                 SOPC_EncodeableObject_PfnCopy* opFct)
 {
@@ -4801,7 +4801,7 @@ SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
     size_t idx = 0;
     size_t pos = 0;
     SOPC_Byte* byteArrayLeft = eltsArrayLeft;
-    SOPC_Byte* byteArrayRight = eltsArrayRight;
+    const SOPC_Byte* byteArrayRight = eltsArrayRight;
     if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status; idx++)

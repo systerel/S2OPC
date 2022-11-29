@@ -95,10 +95,6 @@ typedef enum
     SOPC_AttributeId_UserExecutable = 22,
 } SOPC_AttributeId;
 
-/**
- *  \brief Copy function generic signature
- */
-typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
 
 /**
@@ -1137,7 +1133,7 @@ void SOPC_Initialize_Array(int32_t noOfElts,
                            SOPC_EncodeableObject_PfnInitialize* initFct);
 SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
                                 void* eltsArrayLeft,
-                                void* eltsArrayRight,
+                                const void* eltsArrayRight,
                                 size_t sizeOfElt,
                                 SOPC_EncodeableObject_PfnCopy* opFct);
 SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,

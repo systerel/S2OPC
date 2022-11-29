@@ -309,6 +309,35 @@ static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_F
     }
 }
 
+static SOPC_ReturnStatus SOPC_EncodeableType_PfnCopyArray(void* destValue, const void* srcValue)
+{
+    // When copying array, values in an array were only allocated before this call
+    // We need at least the encodeableType field to be initialized for generic copy function to work
+    SOPC_EncodeableObject_Initialize(*(SOPC_EncodeableType* const*) srcValue, destValue);
+    return SOPC_EncodeableObject_Copy(*(SOPC_EncodeableType* const*) srcValue, destValue, srcValue);
+}
+
+static SOPC_ReturnStatus SOPC_EncodeableType_PfnCopy(void* destValue, const void* srcValue)
+{
+    return SOPC_EncodeableObject_Copy(*(SOPC_EncodeableType* const*) srcValue, destValue, srcValue);
+}
+
+static SOPC_EncodeableObject_PfnCopy* getPfnCopy(const SOPC_EncodeableType_FieldDescriptor* desc, bool isArray)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_HandlingTable[desc->typeIndex].copy;
+    }
+    else if (isArray)
+    {
+        return &SOPC_EncodeableType_PfnCopyArray;
+    }
+    else
+    {
+        return &SOPC_EncodeableType_PfnCopy;
+    }
+}
+
 static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
 {
     /* Avoid "warning: cast increases required alignment of target type [-Wcast-align]"
@@ -484,7 +513,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (NULL == type && NULL == pValue && NULL == buf)
+    if (NULL == type || NULL == pValue || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -543,9 +572,86 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
         }
     }
 
-    if (status != SOPC_STATUS_OK && type != NULL && pValue != NULL)
+    if (status != SOPC_STATUS_OK)
     {
         SOPC_EncodeableObject_Clear(type, pValue);
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    if (NULL == type || NULL == destValue || NULL == srcValue || *((SOPC_EncodeableType* const*) srcValue) != type ||
+        *((SOPC_EncodeableType* const*) destValue) != type)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    status = SOPC_STATUS_OK;
+
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        const void* pSrcField = (const char*) srcValue + desc->offset;
+        void* pDestField = (char*) destValue + desc->offset;
+
+        if (desc->isArrayLength)
+        {
+            const int32_t* pSrcLength = NULL;
+            int32_t* pDestLength = NULL;
+
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            void** pArrayDest = NULL;
+            const void* const* pArraySource = NULL;
+            size_t size = 0;
+            SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pSrcLength = pSrcField;
+            pDestLength = pDestField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            if (*pSrcLength > 0)
+            {
+                arrayDesc = &type->Fields[i];
+                pArrayDest = retrieveArrayAddressPtr(destValue, arrayDesc);
+                pArraySource = retrieveConstArrayAddressPtr(srcValue, arrayDesc);
+                size = getAllocationSize(arrayDesc);
+                copyFunction = getPfnCopy(arrayDesc, true);
+
+                // Allocate array of source length with source elements size
+                // Note: overwrite previous pointer if dest was not cleared
+                *pArrayDest = SOPC_Calloc((size_t) *pSrcLength, size);
+                if (NULL != *pArrayDest)
+                {
+                    status = SOPC_Op_Array(*pSrcLength, *pArrayDest, *pArraySource, size, copyFunction);
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
+            } // else NULL array with 0 length
+            if (SOPC_STATUS_OK == status)
+            {
+                // Set dest length
+                *pDestLength = *pSrcLength;
+            }
+        }
+        else
+        {
+            SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
+            status = copyFunction(pDestField, pSrcField);
+        }
+    }
+
+    if (status != SOPC_STATUS_OK)
+    {
+        SOPC_EncodeableObject_Clear(type, destValue);
     }
 
     return status;
