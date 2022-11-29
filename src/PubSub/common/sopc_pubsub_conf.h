@@ -21,12 +21,7 @@
 #define SOPC_PUBSUB_CONF_H_
 
 #include "sopc_builtintypes.h"
-
-#define SOPC_MAX_LENGTH_UINT64_TO_STRING                                                                              \
-    21 /* 2^64 = 1.8447*10^19 maximum number you could represent that use maximum chars would be 1.8447*10^19 plus \0 \
-          at the end */
-#define SOPC_MAX_LENGTH_UINT16_TO_STRING \
-    6 /* 2^16 = 65536 maximum number you could represent using maximum chars would be 65536 plus \0 at the end */
+#include "sopc_pubsub_constants.h"
 
 typedef struct SOPC_PubSubConfiguration SOPC_PubSubConfiguration;
 typedef struct SOPC_PubSubConnection SOPC_PubSubConnection;

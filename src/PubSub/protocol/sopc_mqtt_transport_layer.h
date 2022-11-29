@@ -28,6 +28,7 @@
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_pubsub_constants.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
@@ -39,10 +40,6 @@
 #define MQTT_LIB_MAX_NB_TOPIC_NAME (256)   /* Maximum subscriber topics that can be handle by client */
 #define MQTT_LIB_CONNECTION_TIMEOUT (4)    /* Connection lib timeout = 4 s*/
 #define MQTT_LIB_KEEPALIVE (4)             /* Connection lost detection set to 4 s*/
-
-#define SOPC_MAX_LENGTH_INT32_TO_STRING                                                                                \
-    12 /* 2^32 = 4294967296 maximum number you could represent using maximum chars would be -4294967296 plus \0 at the \
-          end */
 
 typedef struct MQTT_CONTEXT_CLIENT MqttContextClient; /* Mqtt context client */
 
