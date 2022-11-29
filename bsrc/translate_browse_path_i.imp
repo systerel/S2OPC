@@ -281,7 +281,8 @@ LOCAL_OPERATIONS
 
     statusCode_operation <-- copy_browsePathResult_to_source =
     BEGIN
-        statusCode_operation
+        statusCode_operation,
+        BrowsePathSource
         :(
             statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory} &
             (
@@ -292,7 +293,8 @@ LOCAL_OPERATIONS
                     BrowsePathResult(idx) : dom(conv_ExpandedNodeId_NodeId)
                     | conv_ExpandedNodeId_NodeId(BrowsePathResult(idx)))
             )
-        )
+        ) ||
+        d_var_browse_source_it :(d_inv_browse_source_it)
     END
     ;
 
