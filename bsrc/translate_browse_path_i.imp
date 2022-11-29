@@ -90,6 +90,13 @@ DEFINITIONS
         nextBrowsePathSourceIdx
         ;
 
+    d_var_element_it ==
+        elements_to_iterate,
+        elements_iterated,
+        relativePath,
+        relativePathEls
+        ;
+
     d_inv_browse_value_in ==
     (   in_session                       : t_session_i           &
         in_maxReferencesPerNode          : NAT                   &
@@ -130,6 +137,14 @@ DEFINITIONS
         browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
         nb_browsePathSourceIdx_max_refs = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
         nextBrowsePathSourceIdx : NAT1
+    );
+
+    d_inv_element_it ==
+    (   elements_to_iterate : seq(t_RelativePathElt)  &
+        elements_iterated   : seq(t_RelativePathElt)  &
+        relativePath        : t_RelativePath_i        &
+        relativePathEls     : seq(t_RelativePathElt)  &
+        elements_iterated ^ elements_to_iterate = relativePathEls
     )
 
 
@@ -571,23 +586,24 @@ LOCAL_OPERATIONS
     THEN
         statusCode_operation,
         BrowsePathSource,
-        elements_to_iterate, elements_iterated,
         BrowsePathResult, BrowsePathRemainingNodeId, BrowsePathRemainingIndex
         :(
             statusCode_operation : t_StatusCode_i &
 
             BrowsePathSource : seq(t_NodeId_i) &
 
-            elements_to_iterate : seq(t_RelativePathElt)  &
-            elements_iterated   : seq(t_RelativePathElt)  &
-
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex : seq(NAT1)
         ) ||
 
-        d_var_browse_result_out:(
-            d_inv_browse_result_out
+        d_var_browse_result_out,
+        d_var_browse_source_it,
+        d_var_element_it
+        :(
+            d_inv_browse_result_out &
+            d_inv_browse_source_it  &
+            d_inv_element_it
         )
     END
 
