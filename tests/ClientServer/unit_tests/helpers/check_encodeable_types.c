@@ -81,13 +81,13 @@ static void checkEncodeableType(SOPC_EncodeableType* encType,
     ck_assert_ptr_nonnull(obj);
 
     // Decode
-    ck_assert_ok(encType->Decode(obj, input, 0));
+    ck_assert_ok(SOPC_EncodeableObject_Decode(encType, obj, input, 0));
 
     // Check object content
     encodeableTypeChecker(obj);
 
     // Encode
-    ck_assert_ok(encType->Encode(obj, output, 0));
+    ck_assert_ok(SOPC_EncodeableObject_Encode(encType, obj, output, 0));
 
     // Check buffers
     ck_assert_uint_eq(output->position, frameSize);
@@ -443,8 +443,6 @@ END_TEST
 #define OpcUaId_SPDURequest_Encoding_DefaultBinary 10000002
 #define OpcUaId_SPDURequest_Encoding_DefaultXml 10000003
 
-static SOPC_ReturnStatus SPDURequest_Encode(const void* pValue, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel);
-static SOPC_ReturnStatus SPDURequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel);
 static void SPDURequest_Initialize(void* pValue);
 static void SPDURequest_Clear(void* pValue);
 
@@ -504,9 +502,6 @@ SOPC_EncodeableType SPDURequest_EncodeableType = {
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
-    NULL,
-    SPDURequest_Encode,
-    SPDURequest_Decode,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SPDURequest_Fields};
 
@@ -519,23 +514,8 @@ SOPC_EncodeableType SPDURequest_EncodeableType2 = {
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
-    NULL,
-    SPDURequest_Encode,
-    SPDURequest_Decode,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SPDURequest_Fields};
-
-/*===========================================================================*/
-static SOPC_ReturnStatus SPDURequest_Encode(const void* pValue, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&SPDURequest_EncodeableType, pValue, msgBuffer, nestedStructLevel);
-}
-
-/*===========================================================================*/
-static SOPC_ReturnStatus SPDURequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&SPDURequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
 
 /*===========================================================================*/
 static void SPDURequest_Initialize(void* pValue)

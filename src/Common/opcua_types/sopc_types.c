@@ -42,22 +42,6 @@ void OpcUa_ReferenceNode_Clear(void* pValue)
 }
 
 /*============================================================================
- * OpcUa_ReferenceNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReferenceNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReferenceNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReferenceNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
  * Field descriptors of the ReferenceNode encodeable type.
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
@@ -96,9 +80,6 @@ SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType = {
     sizeof(OpcUa_ReferenceNode),
     OpcUa_ReferenceNode_Initialize,
     OpcUa_ReferenceNode_Clear,
-    NULL,
-    OpcUa_ReferenceNode_Encode,
-    OpcUa_ReferenceNode_Decode,
     sizeof ReferenceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceNode_Fields};
 #endif
@@ -118,22 +99,6 @@ void OpcUa_Node_Initialize(void* pValue)
 void OpcUa_Node_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_Node_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_Node_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Node_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_Node_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_Node_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Node_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_Node_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -216,9 +181,6 @@ SOPC_EncodeableType OpcUa_Node_EncodeableType = {"Node",
                                                  sizeof(OpcUa_Node),
                                                  OpcUa_Node_Initialize,
                                                  OpcUa_Node_Clear,
-                                                 NULL,
-                                                 OpcUa_Node_Encode,
-                                                 OpcUa_Node_Decode,
                                                  sizeof Node_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                  Node_Fields};
 #endif
@@ -238,22 +200,6 @@ void OpcUa_InstanceNode_Initialize(void* pValue)
 void OpcUa_InstanceNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_InstanceNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_InstanceNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_InstanceNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_InstanceNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_InstanceNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_InstanceNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_InstanceNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -337,9 +283,6 @@ SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType = {
     sizeof(OpcUa_InstanceNode),
     OpcUa_InstanceNode_Initialize,
     OpcUa_InstanceNode_Clear,
-    NULL,
-    OpcUa_InstanceNode_Encode,
-    OpcUa_InstanceNode_Decode,
     sizeof InstanceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     InstanceNode_Fields};
 #endif
@@ -359,22 +302,6 @@ void OpcUa_TypeNode_Initialize(void* pValue)
 void OpcUa_TypeNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TypeNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TypeNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TypeNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TypeNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TypeNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TypeNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -458,9 +385,6 @@ SOPC_EncodeableType OpcUa_TypeNode_EncodeableType = {
     sizeof(OpcUa_TypeNode),
     OpcUa_TypeNode_Initialize,
     OpcUa_TypeNode_Clear,
-    NULL,
-    OpcUa_TypeNode_Encode,
-    OpcUa_TypeNode_Decode,
     sizeof TypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TypeNode_Fields};
 #endif
@@ -480,22 +404,6 @@ void OpcUa_ObjectNode_Initialize(void* pValue)
 void OpcUa_ObjectNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ObjectNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ObjectNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ObjectNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ObjectNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ObjectNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -586,9 +494,6 @@ SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType = {
     sizeof(OpcUa_ObjectNode),
     OpcUa_ObjectNode_Initialize,
     OpcUa_ObjectNode_Clear,
-    NULL,
-    OpcUa_ObjectNode_Encode,
-    OpcUa_ObjectNode_Decode,
     sizeof ObjectNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectNode_Fields};
 #endif
@@ -608,22 +513,6 @@ void OpcUa_ObjectTypeNode_Initialize(void* pValue)
 void OpcUa_ObjectTypeNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ObjectTypeNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ObjectTypeNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectTypeNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ObjectTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ObjectTypeNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ObjectTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -714,9 +603,6 @@ SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType = {
     sizeof(OpcUa_ObjectTypeNode),
     OpcUa_ObjectTypeNode_Initialize,
     OpcUa_ObjectTypeNode_Clear,
-    NULL,
-    OpcUa_ObjectTypeNode_Encode,
-    OpcUa_ObjectTypeNode_Decode,
     sizeof ObjectTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectTypeNode_Fields};
 #endif
@@ -736,22 +622,6 @@ void OpcUa_VariableNode_Initialize(void* pValue)
 void OpcUa_VariableNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_VariableNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_VariableNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_VariableNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_VariableNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_VariableNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -898,9 +768,6 @@ SOPC_EncodeableType OpcUa_VariableNode_EncodeableType = {
     sizeof(OpcUa_VariableNode),
     OpcUa_VariableNode_Initialize,
     OpcUa_VariableNode_Clear,
-    NULL,
-    OpcUa_VariableNode_Encode,
-    OpcUa_VariableNode_Decode,
     sizeof VariableNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableNode_Fields};
 #endif
@@ -920,22 +787,6 @@ void OpcUa_VariableTypeNode_Initialize(void* pValue)
 void OpcUa_VariableTypeNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_VariableTypeNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_VariableTypeNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableTypeNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_VariableTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_VariableTypeNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_VariableTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1061,9 +912,6 @@ SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType = {
     sizeof(OpcUa_VariableTypeNode),
     OpcUa_VariableTypeNode_Initialize,
     OpcUa_VariableTypeNode_Clear,
-    NULL,
-    OpcUa_VariableTypeNode_Encode,
-    OpcUa_VariableTypeNode_Decode,
     sizeof VariableTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableTypeNode_Fields};
 #endif
@@ -1083,22 +931,6 @@ void OpcUa_ReferenceTypeNode_Initialize(void* pValue)
 void OpcUa_ReferenceTypeNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReferenceTypeNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReferenceTypeNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReferenceTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReferenceTypeNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReferenceTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1203,9 +1035,6 @@ SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType = {
     sizeof(OpcUa_ReferenceTypeNode),
     OpcUa_ReferenceTypeNode_Initialize,
     OpcUa_ReferenceTypeNode_Clear,
-    NULL,
-    OpcUa_ReferenceTypeNode_Encode,
-    OpcUa_ReferenceTypeNode_Decode,
     sizeof ReferenceTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceTypeNode_Fields};
 #endif
@@ -1225,22 +1054,6 @@ void OpcUa_MethodNode_Initialize(void* pValue)
 void OpcUa_MethodNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MethodNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MethodNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MethodNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MethodNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MethodNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MethodNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MethodNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1338,9 +1151,6 @@ SOPC_EncodeableType OpcUa_MethodNode_EncodeableType = {
     sizeof(OpcUa_MethodNode),
     OpcUa_MethodNode_Initialize,
     OpcUa_MethodNode_Clear,
-    NULL,
-    OpcUa_MethodNode_Encode,
-    OpcUa_MethodNode_Decode,
     sizeof MethodNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MethodNode_Fields};
 #endif
@@ -1360,22 +1170,6 @@ void OpcUa_ViewNode_Initialize(void* pValue)
 void OpcUa_ViewNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ViewNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ViewNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ViewNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ViewNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ViewNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1473,9 +1267,6 @@ SOPC_EncodeableType OpcUa_ViewNode_EncodeableType = {
     sizeof(OpcUa_ViewNode),
     OpcUa_ViewNode_Initialize,
     OpcUa_ViewNode_Clear,
-    NULL,
-    OpcUa_ViewNode_Encode,
-    OpcUa_ViewNode_Decode,
     sizeof ViewNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewNode_Fields};
 #endif
@@ -1495,22 +1286,6 @@ void OpcUa_DataTypeNode_Initialize(void* pValue)
 void OpcUa_DataTypeNode_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DataTypeNode_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DataTypeNode_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataTypeNode_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DataTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DataTypeNode_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataTypeNode_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DataTypeNode_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1601,9 +1376,6 @@ SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType = {
     sizeof(OpcUa_DataTypeNode),
     OpcUa_DataTypeNode_Initialize,
     OpcUa_DataTypeNode_Clear,
-    NULL,
-    OpcUa_DataTypeNode_Encode,
-    OpcUa_DataTypeNode_Decode,
     sizeof DataTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeNode_Fields};
 #endif
@@ -1623,22 +1395,6 @@ void OpcUa_Argument_Initialize(void* pValue)
 void OpcUa_Argument_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_Argument_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_Argument_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Argument_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_Argument_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_Argument_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Argument_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_Argument_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1701,9 +1457,6 @@ SOPC_EncodeableType OpcUa_Argument_EncodeableType = {
     sizeof(OpcUa_Argument),
     OpcUa_Argument_Initialize,
     OpcUa_Argument_Clear,
-    NULL,
-    OpcUa_Argument_Encode,
-    OpcUa_Argument_Decode,
     sizeof Argument_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Argument_Fields};
 #endif
@@ -1723,22 +1476,6 @@ void OpcUa_EnumValueType_Initialize(void* pValue)
 void OpcUa_EnumValueType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EnumValueType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EnumValueType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EnumValueType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EnumValueType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EnumValueType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EnumValueType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EnumValueType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1780,9 +1517,6 @@ SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType = {
     sizeof(OpcUa_EnumValueType),
     OpcUa_EnumValueType_Initialize,
     OpcUa_EnumValueType_Clear,
-    NULL,
-    OpcUa_EnumValueType_Encode,
-    OpcUa_EnumValueType_Decode,
     sizeof EnumValueType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumValueType_Fields};
 #endif
@@ -1802,22 +1536,6 @@ void OpcUa_EnumField_Initialize(void* pValue)
 void OpcUa_EnumField_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EnumField_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EnumField_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EnumField_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EnumField_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EnumField_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EnumField_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EnumField_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1866,9 +1584,6 @@ SOPC_EncodeableType OpcUa_EnumField_EncodeableType = {
     sizeof(OpcUa_EnumField),
     OpcUa_EnumField_Initialize,
     OpcUa_EnumField_Clear,
-    NULL,
-    OpcUa_EnumField_Encode,
-    OpcUa_EnumField_Decode,
     sizeof EnumField_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumField_Fields};
 #endif
@@ -1888,22 +1603,6 @@ void OpcUa_OptionSet_Initialize(void* pValue)
 void OpcUa_OptionSet_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_OptionSet_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_OptionSet_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OptionSet_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_OptionSet_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_OptionSet_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OptionSet_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_OptionSet_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -1938,9 +1637,6 @@ SOPC_EncodeableType OpcUa_OptionSet_EncodeableType = {
     sizeof(OpcUa_OptionSet),
     OpcUa_OptionSet_Initialize,
     OpcUa_OptionSet_Clear,
-    NULL,
-    OpcUa_OptionSet_Encode,
-    OpcUa_OptionSet_Decode,
     sizeof OptionSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OptionSet_Fields};
 #endif
@@ -1960,22 +1656,6 @@ void OpcUa_TimeZoneDataType_Initialize(void* pValue)
 void OpcUa_TimeZoneDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TimeZoneDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TimeZoneDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TimeZoneDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TimeZoneDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TimeZoneDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TimeZoneDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2010,9 +1690,6 @@ SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType = {
     sizeof(OpcUa_TimeZoneDataType),
     OpcUa_TimeZoneDataType_Initialize,
     OpcUa_TimeZoneDataType_Clear,
-    NULL,
-    OpcUa_TimeZoneDataType_Encode,
-    OpcUa_TimeZoneDataType_Decode,
     sizeof TimeZoneDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TimeZoneDataType_Fields};
 #endif
@@ -2032,22 +1709,6 @@ void OpcUa_ApplicationDescription_Initialize(void* pValue)
 void OpcUa_ApplicationDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ApplicationDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ApplicationDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ApplicationDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ApplicationDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ApplicationDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ApplicationDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2124,9 +1785,6 @@ SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType = {
     sizeof(OpcUa_ApplicationDescription),
     OpcUa_ApplicationDescription_Initialize,
     OpcUa_ApplicationDescription_Clear,
-    NULL,
-    OpcUa_ApplicationDescription_Encode,
-    OpcUa_ApplicationDescription_Decode,
     sizeof ApplicationDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ApplicationDescription_Fields};
 #endif
@@ -2146,22 +1804,6 @@ void OpcUa_RequestHeader_Initialize(void* pValue)
 void OpcUa_RequestHeader_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RequestHeader_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RequestHeader_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RequestHeader_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RequestHeader_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RequestHeader_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RequestHeader_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RequestHeader_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2231,9 +1873,6 @@ SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType = {
     sizeof(OpcUa_RequestHeader),
     OpcUa_RequestHeader_Initialize,
     OpcUa_RequestHeader_Clear,
-    NULL,
-    OpcUa_RequestHeader_Encode,
-    OpcUa_RequestHeader_Decode,
     sizeof RequestHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RequestHeader_Fields};
 #endif
@@ -2253,22 +1892,6 @@ void OpcUa_ResponseHeader_Initialize(void* pValue)
 void OpcUa_ResponseHeader_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ResponseHeader_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ResponseHeader_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ResponseHeader_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ResponseHeader_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ResponseHeader_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ResponseHeader_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ResponseHeader_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2338,9 +1961,6 @@ SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType = {
     sizeof(OpcUa_ResponseHeader),
     OpcUa_ResponseHeader_Initialize,
     OpcUa_ResponseHeader_Clear,
-    NULL,
-    OpcUa_ResponseHeader_Encode,
-    OpcUa_ResponseHeader_Decode,
     sizeof ResponseHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ResponseHeader_Fields};
 #endif
@@ -2360,22 +1980,6 @@ void OpcUa_ServiceFault_Initialize(void* pValue)
 void OpcUa_ServiceFault_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ServiceFault_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ServiceFault_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServiceFault_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServiceFault_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ServiceFault_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServiceFault_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServiceFault_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2403,9 +2007,6 @@ SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType = {
     sizeof(OpcUa_ServiceFault),
     OpcUa_ServiceFault_Initialize,
     OpcUa_ServiceFault_Clear,
-    NULL,
-    OpcUa_ServiceFault_Encode,
-    OpcUa_ServiceFault_Decode,
     sizeof ServiceFault_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServiceFault_Fields};
 #endif
@@ -2426,22 +2027,6 @@ void OpcUa_FindServersRequest_Initialize(void* pValue)
 void OpcUa_FindServersRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_FindServersRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_FindServersRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_FindServersRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2497,9 +2082,6 @@ SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType = {
     sizeof(OpcUa_FindServersRequest),
     OpcUa_FindServersRequest_Initialize,
     OpcUa_FindServersRequest_Clear,
-    NULL,
-    OpcUa_FindServersRequest_Encode,
-    OpcUa_FindServersRequest_Decode,
     sizeof FindServersRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersRequest_Fields};
 #endif
@@ -2519,22 +2101,6 @@ void OpcUa_FindServersResponse_Initialize(void* pValue)
 void OpcUa_FindServersResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_FindServersResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_FindServersResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_FindServersResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2576,9 +2142,6 @@ SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType = {
     sizeof(OpcUa_FindServersResponse),
     OpcUa_FindServersResponse_Initialize,
     OpcUa_FindServersResponse_Clear,
-    NULL,
-    OpcUa_FindServersResponse_Encode,
-    OpcUa_FindServersResponse_Decode,
     sizeof FindServersResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersResponse_Fields};
 #endif
@@ -2599,22 +2162,6 @@ void OpcUa_ServerOnNetwork_Initialize(void* pValue)
 void OpcUa_ServerOnNetwork_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ServerOnNetwork_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ServerOnNetwork_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerOnNetwork_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServerOnNetwork_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ServerOnNetwork_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServerOnNetwork_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2670,9 +2217,6 @@ SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType = {
     sizeof(OpcUa_ServerOnNetwork),
     OpcUa_ServerOnNetwork_Initialize,
     OpcUa_ServerOnNetwork_Clear,
-    NULL,
-    OpcUa_ServerOnNetwork_Encode,
-    OpcUa_ServerOnNetwork_Decode,
     sizeof ServerOnNetwork_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerOnNetwork_Fields};
 #endif
@@ -2693,26 +2237,6 @@ void OpcUa_FindServersOnNetworkRequest_Initialize(void* pValue)
 void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2761,9 +2285,6 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType = {
     sizeof(OpcUa_FindServersOnNetworkRequest),
     OpcUa_FindServersOnNetworkRequest_Initialize,
     OpcUa_FindServersOnNetworkRequest_Clear,
-    NULL,
-    OpcUa_FindServersOnNetworkRequest_Encode,
-    OpcUa_FindServersOnNetworkRequest_Decode,
     sizeof FindServersOnNetworkRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersOnNetworkRequest_Fields};
 #endif
@@ -2783,26 +2304,6 @@ void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue)
 void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_FindServersOnNetworkResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_FindServersOnNetworkResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -2851,9 +2352,6 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType = {
     sizeof(OpcUa_FindServersOnNetworkResponse),
     OpcUa_FindServersOnNetworkResponse_Initialize,
     OpcUa_FindServersOnNetworkResponse_Clear,
-    NULL,
-    OpcUa_FindServersOnNetworkResponse_Encode,
-    OpcUa_FindServersOnNetworkResponse_Decode,
     sizeof FindServersOnNetworkResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersOnNetworkResponse_Fields};
 #endif
@@ -2874,22 +2372,6 @@ void OpcUa_UserTokenPolicy_Initialize(void* pValue)
 void OpcUa_UserTokenPolicy_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UserTokenPolicy_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UserTokenPolicy_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserTokenPolicy_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UserTokenPolicy_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UserTokenPolicy_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UserTokenPolicy_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -2945,9 +2427,6 @@ SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType = {
     sizeof(OpcUa_UserTokenPolicy),
     OpcUa_UserTokenPolicy_Initialize,
     OpcUa_UserTokenPolicy_Clear,
-    NULL,
-    OpcUa_UserTokenPolicy_Encode,
-    OpcUa_UserTokenPolicy_Decode,
     sizeof UserTokenPolicy_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserTokenPolicy_Fields};
 #endif
@@ -2967,22 +2446,6 @@ void OpcUa_EndpointDescription_Initialize(void* pValue)
 void OpcUa_EndpointDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EndpointDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EndpointDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EndpointDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EndpointDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EndpointDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3066,9 +2529,6 @@ SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType = {
     sizeof(OpcUa_EndpointDescription),
     OpcUa_EndpointDescription_Initialize,
     OpcUa_EndpointDescription_Clear,
-    NULL,
-    OpcUa_EndpointDescription_Encode,
-    OpcUa_EndpointDescription_Decode,
     sizeof EndpointDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointDescription_Fields};
 #endif
@@ -3089,22 +2549,6 @@ void OpcUa_GetEndpointsRequest_Initialize(void* pValue)
 void OpcUa_GetEndpointsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_GetEndpointsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_GetEndpointsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_GetEndpointsRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_GetEndpointsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_GetEndpointsRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3160,9 +2604,6 @@ SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType = {
     sizeof(OpcUa_GetEndpointsRequest),
     OpcUa_GetEndpointsRequest_Initialize,
     OpcUa_GetEndpointsRequest_Clear,
-    NULL,
-    OpcUa_GetEndpointsRequest_Encode,
-    OpcUa_GetEndpointsRequest_Decode,
     sizeof GetEndpointsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GetEndpointsRequest_Fields};
 #endif
@@ -3182,22 +2623,6 @@ void OpcUa_GetEndpointsResponse_Initialize(void* pValue)
 void OpcUa_GetEndpointsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_GetEndpointsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_GetEndpointsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_GetEndpointsResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_GetEndpointsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_GetEndpointsResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3239,9 +2664,6 @@ SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType = {
     sizeof(OpcUa_GetEndpointsResponse),
     OpcUa_GetEndpointsResponse_Initialize,
     OpcUa_GetEndpointsResponse_Clear,
-    NULL,
-    OpcUa_GetEndpointsResponse_Encode,
-    OpcUa_GetEndpointsResponse_Decode,
     sizeof GetEndpointsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GetEndpointsResponse_Fields};
 #endif
@@ -3262,22 +2684,6 @@ void OpcUa_RegisteredServer_Initialize(void* pValue)
 void OpcUa_RegisteredServer_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisteredServer_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisteredServer_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisteredServer_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisteredServer_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisteredServer_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisteredServer_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisteredServer_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3368,9 +2774,6 @@ SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType = {
     sizeof(OpcUa_RegisteredServer),
     OpcUa_RegisteredServer_Initialize,
     OpcUa_RegisteredServer_Clear,
-    NULL,
-    OpcUa_RegisteredServer_Encode,
-    OpcUa_RegisteredServer_Decode,
     sizeof RegisteredServer_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisteredServer_Fields};
 #endif
@@ -3391,22 +2794,6 @@ void OpcUa_RegisterServerRequest_Initialize(void* pValue)
 void OpcUa_RegisterServerRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterServerRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterServerRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServerRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterServerRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterServerRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterServerRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3434,9 +2821,6 @@ SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType = {
     sizeof(OpcUa_RegisterServerRequest),
     OpcUa_RegisterServerRequest_Initialize,
     OpcUa_RegisterServerRequest_Clear,
-    NULL,
-    OpcUa_RegisterServerRequest_Encode,
-    OpcUa_RegisterServerRequest_Decode,
     sizeof RegisterServerRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServerRequest_Fields};
 #endif
@@ -3456,22 +2840,6 @@ void OpcUa_RegisterServerResponse_Initialize(void* pValue)
 void OpcUa_RegisterServerResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterServerResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterServerResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServerResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterServerResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterServerResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterServerResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3499,9 +2867,6 @@ SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType = {
     sizeof(OpcUa_RegisterServerResponse),
     OpcUa_RegisterServerResponse_Initialize,
     OpcUa_RegisterServerResponse_Clear,
-    NULL,
-    OpcUa_RegisterServerResponse_Encode,
-    OpcUa_RegisterServerResponse_Decode,
     sizeof RegisterServerResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServerResponse_Fields};
 #endif
@@ -3522,26 +2887,6 @@ void OpcUa_MdnsDiscoveryConfiguration_Initialize(void* pValue)
 void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MdnsDiscoveryConfiguration_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MdnsDiscoveryConfiguration_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -3583,9 +2928,6 @@ SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType = {
     sizeof(OpcUa_MdnsDiscoveryConfiguration),
     OpcUa_MdnsDiscoveryConfiguration_Initialize,
     OpcUa_MdnsDiscoveryConfiguration_Clear,
-    NULL,
-    OpcUa_MdnsDiscoveryConfiguration_Encode,
-    OpcUa_MdnsDiscoveryConfiguration_Decode,
     sizeof MdnsDiscoveryConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MdnsDiscoveryConfiguration_Fields};
 #endif
@@ -3606,22 +2948,6 @@ void OpcUa_RegisterServer2Request_Initialize(void* pValue)
 void OpcUa_RegisterServer2Request_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterServer2Request_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterServer2Request_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServer2Request_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterServer2Request_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterServer2Request_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterServer2Request_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3663,9 +2989,6 @@ SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType = {
     sizeof(OpcUa_RegisterServer2Request),
     OpcUa_RegisterServer2Request_Initialize,
     OpcUa_RegisterServer2Request_Clear,
-    NULL,
-    OpcUa_RegisterServer2Request_Encode,
-    OpcUa_RegisterServer2Request_Decode,
     sizeof RegisterServer2Request_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServer2Request_Fields};
 #endif
@@ -3685,22 +3008,6 @@ void OpcUa_RegisterServer2Response_Initialize(void* pValue)
 void OpcUa_RegisterServer2Response_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterServer2Response_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterServer2Response_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServer2Response_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterServer2Response_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterServer2Response_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterServer2Response_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3756,9 +3063,6 @@ SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType = {
     sizeof(OpcUa_RegisterServer2Response),
     OpcUa_RegisterServer2Response_Initialize,
     OpcUa_RegisterServer2Response_Clear,
-    NULL,
-    OpcUa_RegisterServer2Response_Encode,
-    OpcUa_RegisterServer2Response_Decode,
     sizeof RegisterServer2Response_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServer2Response_Fields};
 #endif
@@ -3779,22 +3083,6 @@ void OpcUa_ChannelSecurityToken_Initialize(void* pValue)
 void OpcUa_ChannelSecurityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ChannelSecurityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ChannelSecurityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ChannelSecurityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ChannelSecurityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ChannelSecurityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3843,9 +3131,6 @@ SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType = {
     sizeof(OpcUa_ChannelSecurityToken),
     OpcUa_ChannelSecurityToken_Initialize,
     OpcUa_ChannelSecurityToken_Clear,
-    NULL,
-    OpcUa_ChannelSecurityToken_Encode,
-    OpcUa_ChannelSecurityToken_Decode,
     sizeof ChannelSecurityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ChannelSecurityToken_Fields};
 #endif
@@ -3866,24 +3151,6 @@ void OpcUa_OpenSecureChannelRequest_Initialize(void* pValue)
 void OpcUa_OpenSecureChannelRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_OpenSecureChannelRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_OpenSecureChannelRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_OpenSecureChannelRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_OpenSecureChannelRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_OpenSecureChannelRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -3939,9 +3206,6 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType = {
     sizeof(OpcUa_OpenSecureChannelRequest),
     OpcUa_OpenSecureChannelRequest_Initialize,
     OpcUa_OpenSecureChannelRequest_Clear,
-    NULL,
-    OpcUa_OpenSecureChannelRequest_Encode,
-    OpcUa_OpenSecureChannelRequest_Decode,
     sizeof OpenSecureChannelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OpenSecureChannelRequest_Fields};
 #endif
@@ -3961,26 +3225,6 @@ void OpcUa_OpenSecureChannelResponse_Initialize(void* pValue)
 void OpcUa_OpenSecureChannelResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_OpenSecureChannelResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_OpenSecureChannelResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_OpenSecureChannelResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4029,9 +3273,6 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType = {
     sizeof(OpcUa_OpenSecureChannelResponse),
     OpcUa_OpenSecureChannelResponse_Initialize,
     OpcUa_OpenSecureChannelResponse_Clear,
-    NULL,
-    OpcUa_OpenSecureChannelResponse_Encode,
-    OpcUa_OpenSecureChannelResponse_Decode,
     sizeof OpenSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OpenSecureChannelResponse_Fields};
 #endif
@@ -4056,26 +3297,6 @@ void OpcUa_CloseSecureChannelRequest_Clear(void* pValue)
 }
 
 /*============================================================================
- * OpcUa_CloseSecureChannelRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CloseSecureChannelRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
  * Descriptor of the CloseSecureChannelRequest encodeable type.
  *===========================================================================*/
 SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType = {
@@ -4087,9 +3308,6 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType = {
     sizeof(OpcUa_CloseSecureChannelRequest),
     OpcUa_CloseSecureChannelRequest_Initialize,
     OpcUa_CloseSecureChannelRequest_Clear,
-    NULL,
-    OpcUa_CloseSecureChannelRequest_Encode,
-    OpcUa_CloseSecureChannelRequest_Decode,
     0,
     NULL};
 #endif
@@ -4109,26 +3327,6 @@ void OpcUa_CloseSecureChannelResponse_Initialize(void* pValue)
 void OpcUa_CloseSecureChannelResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CloseSecureChannelResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CloseSecureChannelResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSecureChannelResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4156,9 +3354,6 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType = {
     sizeof(OpcUa_CloseSecureChannelResponse),
     OpcUa_CloseSecureChannelResponse_Initialize,
     OpcUa_CloseSecureChannelResponse_Clear,
-    NULL,
-    OpcUa_CloseSecureChannelResponse_Encode,
-    OpcUa_CloseSecureChannelResponse_Decode,
     sizeof CloseSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSecureChannelResponse_Fields};
 #endif
@@ -4179,26 +3374,6 @@ void OpcUa_SignedSoftwareCertificate_Initialize(void* pValue)
 void OpcUa_SignedSoftwareCertificate_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SignedSoftwareCertificate_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SignedSoftwareCertificate_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SignedSoftwareCertificate_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -4233,9 +3408,6 @@ SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType = {
     sizeof(OpcUa_SignedSoftwareCertificate),
     OpcUa_SignedSoftwareCertificate_Initialize,
     OpcUa_SignedSoftwareCertificate_Clear,
-    NULL,
-    OpcUa_SignedSoftwareCertificate_Encode,
-    OpcUa_SignedSoftwareCertificate_Decode,
     sizeof SignedSoftwareCertificate_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SignedSoftwareCertificate_Fields};
 #endif
@@ -4255,22 +3427,6 @@ void OpcUa_SignatureData_Initialize(void* pValue)
 void OpcUa_SignatureData_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SignatureData_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SignatureData_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SignatureData_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SignatureData_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SignatureData_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SignatureData_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SignatureData_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4305,9 +3461,6 @@ SOPC_EncodeableType OpcUa_SignatureData_EncodeableType = {
     sizeof(OpcUa_SignatureData),
     OpcUa_SignatureData_Initialize,
     OpcUa_SignatureData_Clear,
-    NULL,
-    OpcUa_SignatureData_Encode,
-    OpcUa_SignatureData_Decode,
     sizeof SignatureData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SignatureData_Fields};
 #endif
@@ -4328,22 +3481,6 @@ void OpcUa_CreateSessionRequest_Initialize(void* pValue)
 void OpcUa_CreateSessionRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateSessionRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateSessionRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateSessionRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4420,9 +3557,6 @@ SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType = {
     sizeof(OpcUa_CreateSessionRequest),
     OpcUa_CreateSessionRequest_Initialize,
     OpcUa_CreateSessionRequest_Clear,
-    NULL,
-    OpcUa_CreateSessionRequest_Encode,
-    OpcUa_CreateSessionRequest_Decode,
     sizeof CreateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSessionRequest_Fields};
 #endif
@@ -4442,22 +3576,6 @@ void OpcUa_CreateSessionResponse_Initialize(void* pValue)
 void OpcUa_CreateSessionResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateSessionResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateSessionResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateSessionResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4562,9 +3680,6 @@ SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType = {
     sizeof(OpcUa_CreateSessionResponse),
     OpcUa_CreateSessionResponse_Initialize,
     OpcUa_CreateSessionResponse_Clear,
-    NULL,
-    OpcUa_CreateSessionResponse_Encode,
-    OpcUa_CreateSessionResponse_Decode,
     sizeof CreateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSessionResponse_Fields};
 #endif
@@ -4585,22 +3700,6 @@ void OpcUa_UserIdentityToken_Initialize(void* pValue)
 void OpcUa_UserIdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UserIdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UserIdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UserIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UserIdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UserIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4628,9 +3727,6 @@ SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType = {
     sizeof(OpcUa_UserIdentityToken),
     OpcUa_UserIdentityToken_Initialize,
     OpcUa_UserIdentityToken_Clear,
-    NULL,
-    OpcUa_UserIdentityToken_Encode,
-    OpcUa_UserIdentityToken_Decode,
     sizeof UserIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserIdentityToken_Fields};
 #endif
@@ -4650,22 +3746,6 @@ void OpcUa_AnonymousIdentityToken_Initialize(void* pValue)
 void OpcUa_AnonymousIdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AnonymousIdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AnonymousIdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AnonymousIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AnonymousIdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AnonymousIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4693,9 +3773,6 @@ SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType = {
     sizeof(OpcUa_AnonymousIdentityToken),
     OpcUa_AnonymousIdentityToken_Initialize,
     OpcUa_AnonymousIdentityToken_Clear,
-    NULL,
-    OpcUa_AnonymousIdentityToken_Encode,
-    OpcUa_AnonymousIdentityToken_Decode,
     sizeof AnonymousIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AnonymousIdentityToken_Fields};
 #endif
@@ -4715,22 +3792,6 @@ void OpcUa_UserNameIdentityToken_Initialize(void* pValue)
 void OpcUa_UserNameIdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UserNameIdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UserNameIdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UserNameIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UserNameIdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UserNameIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4779,9 +3840,6 @@ SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType = {
     sizeof(OpcUa_UserNameIdentityToken),
     OpcUa_UserNameIdentityToken_Initialize,
     OpcUa_UserNameIdentityToken_Clear,
-    NULL,
-    OpcUa_UserNameIdentityToken_Encode,
-    OpcUa_UserNameIdentityToken_Decode,
     sizeof UserNameIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserNameIdentityToken_Fields};
 #endif
@@ -4801,22 +3859,6 @@ void OpcUa_X509IdentityToken_Initialize(void* pValue)
 void OpcUa_X509IdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_X509IdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_X509IdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_X509IdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_X509IdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_X509IdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_X509IdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4851,9 +3893,6 @@ SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType = {
     sizeof(OpcUa_X509IdentityToken),
     OpcUa_X509IdentityToken_Initialize,
     OpcUa_X509IdentityToken_Clear,
-    NULL,
-    OpcUa_X509IdentityToken_Encode,
-    OpcUa_X509IdentityToken_Decode,
     sizeof X509IdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     X509IdentityToken_Fields};
 #endif
@@ -4873,22 +3912,6 @@ void OpcUa_KerberosIdentityToken_Initialize(void* pValue)
 void OpcUa_KerberosIdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_KerberosIdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_KerberosIdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_KerberosIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_KerberosIdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_KerberosIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -4923,9 +3946,6 @@ SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType = {
     sizeof(OpcUa_KerberosIdentityToken),
     OpcUa_KerberosIdentityToken_Initialize,
     OpcUa_KerberosIdentityToken_Clear,
-    NULL,
-    OpcUa_KerberosIdentityToken_Encode,
-    OpcUa_KerberosIdentityToken_Decode,
     sizeof KerberosIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     KerberosIdentityToken_Fields};
 #endif
@@ -4945,22 +3965,6 @@ void OpcUa_IssuedIdentityToken_Initialize(void* pValue)
 void OpcUa_IssuedIdentityToken_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_IssuedIdentityToken_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_IssuedIdentityToken_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_IssuedIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_IssuedIdentityToken_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_IssuedIdentityToken_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5002,9 +4006,6 @@ SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType = {
     sizeof(OpcUa_IssuedIdentityToken),
     OpcUa_IssuedIdentityToken_Initialize,
     OpcUa_IssuedIdentityToken_Clear,
-    NULL,
-    OpcUa_IssuedIdentityToken_Encode,
-    OpcUa_IssuedIdentityToken_Decode,
     sizeof IssuedIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     IssuedIdentityToken_Fields};
 #endif
@@ -5025,22 +4026,6 @@ void OpcUa_ActivateSessionRequest_Initialize(void* pValue)
 void OpcUa_ActivateSessionRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ActivateSessionRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ActivateSessionRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ActivateSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ActivateSessionRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ActivateSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5110,9 +4095,6 @@ SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType = {
     sizeof(OpcUa_ActivateSessionRequest),
     OpcUa_ActivateSessionRequest_Initialize,
     OpcUa_ActivateSessionRequest_Clear,
-    NULL,
-    OpcUa_ActivateSessionRequest_Encode,
-    OpcUa_ActivateSessionRequest_Decode,
     sizeof ActivateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ActivateSessionRequest_Fields};
 #endif
@@ -5132,22 +4114,6 @@ void OpcUa_ActivateSessionResponse_Initialize(void* pValue)
 void OpcUa_ActivateSessionResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ActivateSessionResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ActivateSessionResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ActivateSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ActivateSessionResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ActivateSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5210,9 +4176,6 @@ SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType = {
     sizeof(OpcUa_ActivateSessionResponse),
     OpcUa_ActivateSessionResponse_Initialize,
     OpcUa_ActivateSessionResponse_Clear,
-    NULL,
-    OpcUa_ActivateSessionResponse_Encode,
-    OpcUa_ActivateSessionResponse_Decode,
     sizeof ActivateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ActivateSessionResponse_Fields};
 #endif
@@ -5234,22 +4197,6 @@ void OpcUa_CloseSessionRequest_Initialize(void* pValue)
 void OpcUa_CloseSessionRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CloseSessionRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CloseSessionRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSessionRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CloseSessionRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSessionRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5277,9 +4224,6 @@ SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType = {
     sizeof(OpcUa_CloseSessionRequest),
     OpcUa_CloseSessionRequest_Initialize,
     OpcUa_CloseSessionRequest_Clear,
-    NULL,
-    OpcUa_CloseSessionRequest_Encode,
-    OpcUa_CloseSessionRequest_Decode,
     sizeof CloseSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSessionRequest_Fields};
 #endif
@@ -5299,22 +4243,6 @@ void OpcUa_CloseSessionResponse_Initialize(void* pValue)
 void OpcUa_CloseSessionResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CloseSessionResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CloseSessionResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSessionResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CloseSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CloseSessionResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CloseSessionResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5342,9 +4270,6 @@ SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType = {
     sizeof(OpcUa_CloseSessionResponse),
     OpcUa_CloseSessionResponse_Initialize,
     OpcUa_CloseSessionResponse_Clear,
-    NULL,
-    OpcUa_CloseSessionResponse_Encode,
-    OpcUa_CloseSessionResponse_Decode,
     sizeof CloseSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSessionResponse_Fields};
 #endif
@@ -5366,22 +4291,6 @@ void OpcUa_CancelRequest_Initialize(void* pValue)
 void OpcUa_CancelRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CancelRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CancelRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CancelRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CancelRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CancelRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CancelRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CancelRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5409,9 +4318,6 @@ SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType = {
     sizeof(OpcUa_CancelRequest),
     OpcUa_CancelRequest_Initialize,
     OpcUa_CancelRequest_Clear,
-    NULL,
-    OpcUa_CancelRequest_Encode,
-    OpcUa_CancelRequest_Decode,
     sizeof CancelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CancelRequest_Fields};
 #endif
@@ -5431,22 +4337,6 @@ void OpcUa_CancelResponse_Initialize(void* pValue)
 void OpcUa_CancelResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CancelResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CancelResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CancelResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CancelResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CancelResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CancelResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CancelResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5481,9 +4371,6 @@ SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType = {
     sizeof(OpcUa_CancelResponse),
     OpcUa_CancelResponse_Initialize,
     OpcUa_CancelResponse_Clear,
-    NULL,
-    OpcUa_CancelResponse_Encode,
-    OpcUa_CancelResponse_Decode,
     sizeof CancelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CancelResponse_Fields};
 #endif
@@ -5504,22 +4391,6 @@ void OpcUa_NodeAttributes_Initialize(void* pValue)
 void OpcUa_NodeAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_NodeAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_NodeAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_NodeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_NodeAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_NodeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5575,9 +4446,6 @@ SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType = {
     sizeof(OpcUa_NodeAttributes),
     OpcUa_NodeAttributes_Initialize,
     OpcUa_NodeAttributes_Clear,
-    NULL,
-    OpcUa_NodeAttributes_Encode,
-    OpcUa_NodeAttributes_Decode,
     sizeof NodeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeAttributes_Fields};
 #endif
@@ -5597,22 +4465,6 @@ void OpcUa_ObjectAttributes_Initialize(void* pValue)
 void OpcUa_ObjectAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ObjectAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ObjectAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ObjectAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ObjectAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ObjectAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5675,9 +4527,6 @@ SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType = {
     sizeof(OpcUa_ObjectAttributes),
     OpcUa_ObjectAttributes_Initialize,
     OpcUa_ObjectAttributes_Clear,
-    NULL,
-    OpcUa_ObjectAttributes_Encode,
-    OpcUa_ObjectAttributes_Decode,
     sizeof ObjectAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectAttributes_Fields};
 #endif
@@ -5697,22 +4546,6 @@ void OpcUa_VariableAttributes_Initialize(void* pValue)
 void OpcUa_VariableAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_VariableAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_VariableAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_VariableAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_VariableAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_VariableAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5831,9 +4664,6 @@ SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType = {
     sizeof(OpcUa_VariableAttributes),
     OpcUa_VariableAttributes_Initialize,
     OpcUa_VariableAttributes_Clear,
-    NULL,
-    OpcUa_VariableAttributes_Encode,
-    OpcUa_VariableAttributes_Decode,
     sizeof VariableAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableAttributes_Fields};
 #endif
@@ -5853,22 +4683,6 @@ void OpcUa_MethodAttributes_Initialize(void* pValue)
 void OpcUa_MethodAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MethodAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MethodAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MethodAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MethodAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MethodAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MethodAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MethodAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -5938,9 +4752,6 @@ SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType = {
     sizeof(OpcUa_MethodAttributes),
     OpcUa_MethodAttributes_Initialize,
     OpcUa_MethodAttributes_Clear,
-    NULL,
-    OpcUa_MethodAttributes_Encode,
-    OpcUa_MethodAttributes_Decode,
     sizeof MethodAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MethodAttributes_Fields};
 #endif
@@ -5960,22 +4771,6 @@ void OpcUa_ObjectTypeAttributes_Initialize(void* pValue)
 void OpcUa_ObjectTypeAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ObjectTypeAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ObjectTypeAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ObjectTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ObjectTypeAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ObjectTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6038,9 +4833,6 @@ SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType = {
     sizeof(OpcUa_ObjectTypeAttributes),
     OpcUa_ObjectTypeAttributes_Initialize,
     OpcUa_ObjectTypeAttributes_Clear,
-    NULL,
-    OpcUa_ObjectTypeAttributes_Encode,
-    OpcUa_ObjectTypeAttributes_Decode,
     sizeof ObjectTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectTypeAttributes_Fields};
 #endif
@@ -6060,22 +4852,6 @@ void OpcUa_VariableTypeAttributes_Initialize(void* pValue)
 void OpcUa_VariableTypeAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_VariableTypeAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_VariableTypeAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_VariableTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_VariableTypeAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_VariableTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6173,9 +4949,6 @@ SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType = {
     sizeof(OpcUa_VariableTypeAttributes),
     OpcUa_VariableTypeAttributes_Initialize,
     OpcUa_VariableTypeAttributes_Clear,
-    NULL,
-    OpcUa_VariableTypeAttributes_Encode,
-    OpcUa_VariableTypeAttributes_Decode,
     sizeof VariableTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableTypeAttributes_Fields};
 #endif
@@ -6195,22 +4968,6 @@ void OpcUa_ReferenceTypeAttributes_Initialize(void* pValue)
 void OpcUa_ReferenceTypeAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReferenceTypeAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReferenceTypeAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReferenceTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReferenceTypeAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReferenceTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6287,9 +5044,6 @@ SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType = {
     sizeof(OpcUa_ReferenceTypeAttributes),
     OpcUa_ReferenceTypeAttributes_Initialize,
     OpcUa_ReferenceTypeAttributes_Clear,
-    NULL,
-    OpcUa_ReferenceTypeAttributes_Encode,
-    OpcUa_ReferenceTypeAttributes_Decode,
     sizeof ReferenceTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceTypeAttributes_Fields};
 #endif
@@ -6309,22 +5063,6 @@ void OpcUa_DataTypeAttributes_Initialize(void* pValue)
 void OpcUa_DataTypeAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DataTypeAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DataTypeAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataTypeAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DataTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DataTypeAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DataTypeAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6387,9 +5125,6 @@ SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType = {
     sizeof(OpcUa_DataTypeAttributes),
     OpcUa_DataTypeAttributes_Initialize,
     OpcUa_DataTypeAttributes_Clear,
-    NULL,
-    OpcUa_DataTypeAttributes_Encode,
-    OpcUa_DataTypeAttributes_Decode,
     sizeof DataTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeAttributes_Fields};
 #endif
@@ -6409,22 +5144,6 @@ void OpcUa_ViewAttributes_Initialize(void* pValue)
 void OpcUa_ViewAttributes_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ViewAttributes_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ViewAttributes_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewAttributes_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ViewAttributes_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ViewAttributes_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewAttributes_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ViewAttributes_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6494,9 +5213,6 @@ SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType = {
     sizeof(OpcUa_ViewAttributes),
     OpcUa_ViewAttributes_Initialize,
     OpcUa_ViewAttributes_Clear,
-    NULL,
-    OpcUa_ViewAttributes_Encode,
-    OpcUa_ViewAttributes_Decode,
     sizeof ViewAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewAttributes_Fields};
 #endif
@@ -6516,22 +5232,6 @@ void OpcUa_AddNodesItem_Initialize(void* pValue)
 void OpcUa_AddNodesItem_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddNodesItem_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddNodesItem_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesItem_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddNodesItem_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddNodesItem_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesItem_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddNodesItem_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6601,9 +5301,6 @@ SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType = {
     sizeof(OpcUa_AddNodesItem),
     OpcUa_AddNodesItem_Initialize,
     OpcUa_AddNodesItem_Clear,
-    NULL,
-    OpcUa_AddNodesItem_Encode,
-    OpcUa_AddNodesItem_Decode,
     sizeof AddNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesItem_Fields};
 #endif
@@ -6623,22 +5320,6 @@ void OpcUa_AddNodesResult_Initialize(void* pValue)
 void OpcUa_AddNodesResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddNodesResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddNodesResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddNodesResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddNodesResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddNodesResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6673,9 +5354,6 @@ SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType = {
     sizeof(OpcUa_AddNodesResult),
     OpcUa_AddNodesResult_Initialize,
     OpcUa_AddNodesResult_Clear,
-    NULL,
-    OpcUa_AddNodesResult_Encode,
-    OpcUa_AddNodesResult_Decode,
     sizeof AddNodesResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesResult_Fields};
 #endif
@@ -6696,22 +5374,6 @@ void OpcUa_AddNodesRequest_Initialize(void* pValue)
 void OpcUa_AddNodesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddNodesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddNodesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddNodesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6746,9 +5408,6 @@ SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType = {
     sizeof(OpcUa_AddNodesRequest),
     OpcUa_AddNodesRequest_Initialize,
     OpcUa_AddNodesRequest_Clear,
-    NULL,
-    OpcUa_AddNodesRequest_Encode,
-    OpcUa_AddNodesRequest_Decode,
     sizeof AddNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesRequest_Fields};
 #endif
@@ -6768,22 +5427,6 @@ void OpcUa_AddNodesResponse_Initialize(void* pValue)
 void OpcUa_AddNodesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddNodesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddNodesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddNodesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6839,9 +5482,6 @@ SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType = {
     sizeof(OpcUa_AddNodesResponse),
     OpcUa_AddNodesResponse_Initialize,
     OpcUa_AddNodesResponse_Clear,
-    NULL,
-    OpcUa_AddNodesResponse_Encode,
-    OpcUa_AddNodesResponse_Decode,
     sizeof AddNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesResponse_Fields};
 #endif
@@ -6862,22 +5502,6 @@ void OpcUa_AddReferencesItem_Initialize(void* pValue)
 void OpcUa_AddReferencesItem_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddReferencesItem_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesItem_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesItem_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddReferencesItem_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesItem_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddReferencesItem_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -6940,9 +5564,6 @@ SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType = {
     sizeof(OpcUa_AddReferencesItem),
     OpcUa_AddReferencesItem_Initialize,
     OpcUa_AddReferencesItem_Clear,
-    NULL,
-    OpcUa_AddReferencesItem_Encode,
-    OpcUa_AddReferencesItem_Decode,
     sizeof AddReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesItem_Fields};
 #endif
@@ -6963,22 +5584,6 @@ void OpcUa_AddReferencesRequest_Initialize(void* pValue)
 void OpcUa_AddReferencesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddReferencesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddReferencesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddReferencesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7013,9 +5618,6 @@ SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType = {
     sizeof(OpcUa_AddReferencesRequest),
     OpcUa_AddReferencesRequest_Initialize,
     OpcUa_AddReferencesRequest_Clear,
-    NULL,
-    OpcUa_AddReferencesRequest_Encode,
-    OpcUa_AddReferencesRequest_Decode,
     sizeof AddReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesRequest_Fields};
 #endif
@@ -7035,22 +5637,6 @@ void OpcUa_AddReferencesResponse_Initialize(void* pValue)
 void OpcUa_AddReferencesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AddReferencesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AddReferencesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AddReferencesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AddReferencesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7106,9 +5692,6 @@ SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType = {
     sizeof(OpcUa_AddReferencesResponse),
     OpcUa_AddReferencesResponse_Initialize,
     OpcUa_AddReferencesResponse_Clear,
-    NULL,
-    OpcUa_AddReferencesResponse_Encode,
-    OpcUa_AddReferencesResponse_Decode,
     sizeof AddReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesResponse_Fields};
 #endif
@@ -7129,22 +5712,6 @@ void OpcUa_DeleteNodesItem_Initialize(void* pValue)
 void OpcUa_DeleteNodesItem_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteNodesItem_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesItem_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesItem_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteNodesItem_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesItem_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteNodesItem_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7179,9 +5746,6 @@ SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType = {
     sizeof(OpcUa_DeleteNodesItem),
     OpcUa_DeleteNodesItem_Initialize,
     OpcUa_DeleteNodesItem_Clear,
-    NULL,
-    OpcUa_DeleteNodesItem_Encode,
-    OpcUa_DeleteNodesItem_Decode,
     sizeof DeleteNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesItem_Fields};
 #endif
@@ -7202,22 +5766,6 @@ void OpcUa_DeleteNodesRequest_Initialize(void* pValue)
 void OpcUa_DeleteNodesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteNodesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7252,9 +5800,6 @@ SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType = {
     sizeof(OpcUa_DeleteNodesRequest),
     OpcUa_DeleteNodesRequest_Initialize,
     OpcUa_DeleteNodesRequest_Clear,
-    NULL,
-    OpcUa_DeleteNodesRequest_Encode,
-    OpcUa_DeleteNodesRequest_Decode,
     sizeof DeleteNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesRequest_Fields};
 #endif
@@ -7274,22 +5819,6 @@ void OpcUa_DeleteNodesResponse_Initialize(void* pValue)
 void OpcUa_DeleteNodesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteNodesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteNodesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7345,9 +5874,6 @@ SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType = {
     sizeof(OpcUa_DeleteNodesResponse),
     OpcUa_DeleteNodesResponse_Initialize,
     OpcUa_DeleteNodesResponse_Clear,
-    NULL,
-    OpcUa_DeleteNodesResponse_Encode,
-    OpcUa_DeleteNodesResponse_Decode,
     sizeof DeleteNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesResponse_Fields};
 #endif
@@ -7368,22 +5894,6 @@ void OpcUa_DeleteReferencesItem_Initialize(void* pValue)
 void OpcUa_DeleteReferencesItem_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteReferencesItem_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesItem_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteReferencesItem_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesItem_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteReferencesItem_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7439,9 +5949,6 @@ SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesItem),
     OpcUa_DeleteReferencesItem_Initialize,
     OpcUa_DeleteReferencesItem_Clear,
-    NULL,
-    OpcUa_DeleteReferencesItem_Encode,
-    OpcUa_DeleteReferencesItem_Decode,
     sizeof DeleteReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesItem_Fields};
 #endif
@@ -7462,22 +5969,6 @@ void OpcUa_DeleteReferencesRequest_Initialize(void* pValue)
 void OpcUa_DeleteReferencesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteReferencesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteReferencesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteReferencesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7512,9 +6003,6 @@ SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesRequest),
     OpcUa_DeleteReferencesRequest_Initialize,
     OpcUa_DeleteReferencesRequest_Clear,
-    NULL,
-    OpcUa_DeleteReferencesRequest_Encode,
-    OpcUa_DeleteReferencesRequest_Decode,
     sizeof DeleteReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesRequest_Fields};
 #endif
@@ -7534,24 +6022,6 @@ void OpcUa_DeleteReferencesResponse_Initialize(void* pValue)
 void OpcUa_DeleteReferencesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteReferencesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteReferencesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteReferencesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteReferencesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7607,9 +6077,6 @@ SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesResponse),
     OpcUa_DeleteReferencesResponse_Initialize,
     OpcUa_DeleteReferencesResponse_Clear,
-    NULL,
-    OpcUa_DeleteReferencesResponse_Encode,
-    OpcUa_DeleteReferencesResponse_Decode,
     sizeof DeleteReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesResponse_Fields};
 #endif
@@ -7630,22 +6097,6 @@ void OpcUa_ViewDescription_Initialize(void* pValue)
 void OpcUa_ViewDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ViewDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ViewDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ViewDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ViewDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ViewDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ViewDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7687,9 +6138,6 @@ SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType = {
     sizeof(OpcUa_ViewDescription),
     OpcUa_ViewDescription_Initialize,
     OpcUa_ViewDescription_Clear,
-    NULL,
-    OpcUa_ViewDescription_Encode,
-    OpcUa_ViewDescription_Decode,
     sizeof ViewDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewDescription_Fields};
 #endif
@@ -7709,22 +6157,6 @@ void OpcUa_BrowseDescription_Initialize(void* pValue)
 void OpcUa_BrowseDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7787,9 +6219,6 @@ SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType = {
     sizeof(OpcUa_BrowseDescription),
     OpcUa_BrowseDescription_Initialize,
     OpcUa_BrowseDescription_Clear,
-    NULL,
-    OpcUa_BrowseDescription_Encode,
-    OpcUa_BrowseDescription_Decode,
     sizeof BrowseDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseDescription_Fields};
 #endif
@@ -7809,22 +6238,6 @@ void OpcUa_ReferenceDescription_Initialize(void* pValue)
 void OpcUa_ReferenceDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReferenceDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReferenceDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReferenceDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReferenceDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReferenceDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7894,9 +6307,6 @@ SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType = {
     sizeof(OpcUa_ReferenceDescription),
     OpcUa_ReferenceDescription_Initialize,
     OpcUa_ReferenceDescription_Clear,
-    NULL,
-    OpcUa_ReferenceDescription_Encode,
-    OpcUa_ReferenceDescription_Decode,
     sizeof ReferenceDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceDescription_Fields};
 #endif
@@ -7916,22 +6326,6 @@ void OpcUa_BrowseResult_Initialize(void* pValue)
 void OpcUa_BrowseResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -7980,9 +6374,6 @@ SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType = {
     sizeof(OpcUa_BrowseResult),
     OpcUa_BrowseResult_Initialize,
     OpcUa_BrowseResult_Clear,
-    NULL,
-    OpcUa_BrowseResult_Encode,
-    OpcUa_BrowseResult_Decode,
     sizeof BrowseResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseResult_Fields};
 #endif
@@ -8003,22 +6394,6 @@ void OpcUa_BrowseRequest_Initialize(void* pValue)
 void OpcUa_BrowseRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8067,9 +6442,6 @@ SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType = {
     sizeof(OpcUa_BrowseRequest),
     OpcUa_BrowseRequest_Initialize,
     OpcUa_BrowseRequest_Clear,
-    NULL,
-    OpcUa_BrowseRequest_Encode,
-    OpcUa_BrowseRequest_Decode,
     sizeof BrowseRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseRequest_Fields};
 #endif
@@ -8089,22 +6461,6 @@ void OpcUa_BrowseResponse_Initialize(void* pValue)
 void OpcUa_BrowseResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8160,9 +6516,6 @@ SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType = {
     sizeof(OpcUa_BrowseResponse),
     OpcUa_BrowseResponse_Initialize,
     OpcUa_BrowseResponse_Clear,
-    NULL,
-    OpcUa_BrowseResponse_Encode,
-    OpcUa_BrowseResponse_Decode,
     sizeof BrowseResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseResponse_Fields};
 #endif
@@ -8184,22 +6537,6 @@ void OpcUa_BrowseNextRequest_Initialize(void* pValue)
 void OpcUa_BrowseNextRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseNextRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseNextRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseNextRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseNextRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseNextRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseNextRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8241,9 +6578,6 @@ SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType = {
     sizeof(OpcUa_BrowseNextRequest),
     OpcUa_BrowseNextRequest_Initialize,
     OpcUa_BrowseNextRequest_Clear,
-    NULL,
-    OpcUa_BrowseNextRequest_Encode,
-    OpcUa_BrowseNextRequest_Decode,
     sizeof BrowseNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseNextRequest_Fields};
 #endif
@@ -8263,22 +6597,6 @@ void OpcUa_BrowseNextResponse_Initialize(void* pValue)
 void OpcUa_BrowseNextResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowseNextResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowseNextResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseNextResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowseNextResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowseNextResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowseNextResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8334,9 +6652,6 @@ SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType = {
     sizeof(OpcUa_BrowseNextResponse),
     OpcUa_BrowseNextResponse_Initialize,
     OpcUa_BrowseNextResponse_Clear,
-    NULL,
-    OpcUa_BrowseNextResponse_Encode,
-    OpcUa_BrowseNextResponse_Decode,
     sizeof BrowseNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseNextResponse_Fields};
 #endif
@@ -8357,22 +6672,6 @@ void OpcUa_RelativePathElement_Initialize(void* pValue)
 void OpcUa_RelativePathElement_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RelativePathElement_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RelativePathElement_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RelativePathElement_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RelativePathElement_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RelativePathElement_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RelativePathElement_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RelativePathElement_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8421,9 +6720,6 @@ SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType = {
     sizeof(OpcUa_RelativePathElement),
     OpcUa_RelativePathElement_Initialize,
     OpcUa_RelativePathElement_Clear,
-    NULL,
-    OpcUa_RelativePathElement_Encode,
-    OpcUa_RelativePathElement_Decode,
     sizeof RelativePathElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RelativePathElement_Fields};
 #endif
@@ -8443,22 +6739,6 @@ void OpcUa_RelativePath_Initialize(void* pValue)
 void OpcUa_RelativePath_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RelativePath_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RelativePath_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RelativePath_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RelativePath_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RelativePath_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RelativePath_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RelativePath_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8493,9 +6773,6 @@ SOPC_EncodeableType OpcUa_RelativePath_EncodeableType = {
     sizeof(OpcUa_RelativePath),
     OpcUa_RelativePath_Initialize,
     OpcUa_RelativePath_Clear,
-    NULL,
-    OpcUa_RelativePath_Encode,
-    OpcUa_RelativePath_Decode,
     sizeof RelativePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RelativePath_Fields};
 #endif
@@ -8515,22 +6792,6 @@ void OpcUa_BrowsePath_Initialize(void* pValue)
 void OpcUa_BrowsePath_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowsePath_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowsePath_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePath_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowsePath_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowsePath_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePath_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowsePath_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8565,9 +6826,6 @@ SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType = {
     sizeof(OpcUa_BrowsePath),
     OpcUa_BrowsePath_Initialize,
     OpcUa_BrowsePath_Clear,
-    NULL,
-    OpcUa_BrowsePath_Encode,
-    OpcUa_BrowsePath_Decode,
     sizeof BrowsePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePath_Fields};
 #endif
@@ -8587,22 +6845,6 @@ void OpcUa_BrowsePathTarget_Initialize(void* pValue)
 void OpcUa_BrowsePathTarget_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowsePathTarget_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowsePathTarget_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePathTarget_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowsePathTarget_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowsePathTarget_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowsePathTarget_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8637,9 +6879,6 @@ SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType = {
     sizeof(OpcUa_BrowsePathTarget),
     OpcUa_BrowsePathTarget_Initialize,
     OpcUa_BrowsePathTarget_Clear,
-    NULL,
-    OpcUa_BrowsePathTarget_Encode,
-    OpcUa_BrowsePathTarget_Decode,
     sizeof BrowsePathTarget_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePathTarget_Fields};
 #endif
@@ -8659,22 +6898,6 @@ void OpcUa_BrowsePathResult_Initialize(void* pValue)
 void OpcUa_BrowsePathResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BrowsePathResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BrowsePathResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePathResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BrowsePathResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BrowsePathResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BrowsePathResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8716,9 +6939,6 @@ SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType = {
     sizeof(OpcUa_BrowsePathResult),
     OpcUa_BrowsePathResult_Initialize,
     OpcUa_BrowsePathResult_Clear,
-    NULL,
-    OpcUa_BrowsePathResult_Encode,
-    OpcUa_BrowsePathResult_Decode,
     sizeof BrowsePathResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePathResult_Fields};
 #endif
@@ -8739,28 +6959,6 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(void* pValue)
 void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(const void* pValue,
-                                                                    SOPC_Buffer* buf,
-                                                                    uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue,
-                                                                    SOPC_Buffer* buf,
-                                                                    uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -8795,9 +6993,6 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType = 
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsRequest),
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize,
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear,
-    NULL,
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode,
-    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode,
     sizeof TranslateBrowsePathsToNodeIdsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TranslateBrowsePathsToNodeIdsRequest_Fields};
 #endif
@@ -8817,28 +7012,6 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(void* pValue)
 void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(const void* pValue,
-                                                                     SOPC_Buffer* buf,
-                                                                     uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue,
-                                                                     SOPC_Buffer* buf,
-                                                                     uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -8894,9 +7067,6 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType =
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsResponse),
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize,
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear,
-    NULL,
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode,
-    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode,
     sizeof TranslateBrowsePathsToNodeIdsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TranslateBrowsePathsToNodeIdsResponse_Fields};
 #endif
@@ -8918,22 +7088,6 @@ void OpcUa_RegisterNodesRequest_Initialize(void* pValue)
 void OpcUa_RegisterNodesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterNodesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterNodesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterNodesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -8968,9 +7122,6 @@ SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType = {
     sizeof(OpcUa_RegisterNodesRequest),
     OpcUa_RegisterNodesRequest_Initialize,
     OpcUa_RegisterNodesRequest_Clear,
-    NULL,
-    OpcUa_RegisterNodesRequest_Encode,
-    OpcUa_RegisterNodesRequest_Decode,
     sizeof RegisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterNodesRequest_Fields};
 #endif
@@ -8990,22 +7141,6 @@ void OpcUa_RegisterNodesResponse_Initialize(void* pValue)
 void OpcUa_RegisterNodesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RegisterNodesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RegisterNodesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RegisterNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RegisterNodesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RegisterNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9047,9 +7182,6 @@ SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType = {
     sizeof(OpcUa_RegisterNodesResponse),
     OpcUa_RegisterNodesResponse_Initialize,
     OpcUa_RegisterNodesResponse_Clear,
-    NULL,
-    OpcUa_RegisterNodesResponse_Encode,
-    OpcUa_RegisterNodesResponse_Decode,
     sizeof RegisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterNodesResponse_Fields};
 #endif
@@ -9071,22 +7203,6 @@ void OpcUa_UnregisterNodesRequest_Initialize(void* pValue)
 void OpcUa_UnregisterNodesRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UnregisterNodesRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UnregisterNodesRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UnregisterNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UnregisterNodesRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UnregisterNodesRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9121,9 +7237,6 @@ SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType = {
     sizeof(OpcUa_UnregisterNodesRequest),
     OpcUa_UnregisterNodesRequest_Initialize,
     OpcUa_UnregisterNodesRequest_Clear,
-    NULL,
-    OpcUa_UnregisterNodesRequest_Encode,
-    OpcUa_UnregisterNodesRequest_Decode,
     sizeof UnregisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UnregisterNodesRequest_Fields};
 #endif
@@ -9143,22 +7256,6 @@ void OpcUa_UnregisterNodesResponse_Initialize(void* pValue)
 void OpcUa_UnregisterNodesResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UnregisterNodesResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UnregisterNodesResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UnregisterNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UnregisterNodesResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UnregisterNodesResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9186,9 +7283,6 @@ SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType = {
     sizeof(OpcUa_UnregisterNodesResponse),
     OpcUa_UnregisterNodesResponse_Initialize,
     OpcUa_UnregisterNodesResponse_Clear,
-    NULL,
-    OpcUa_UnregisterNodesResponse_Encode,
-    OpcUa_UnregisterNodesResponse_Decode,
     sizeof UnregisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UnregisterNodesResponse_Fields};
 #endif
@@ -9209,22 +7303,6 @@ void OpcUa_EndpointConfiguration_Initialize(void* pValue)
 void OpcUa_EndpointConfiguration_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EndpointConfiguration_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EndpointConfiguration_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointConfiguration_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EndpointConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EndpointConfiguration_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EndpointConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9308,9 +7386,6 @@ SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType = {
     sizeof(OpcUa_EndpointConfiguration),
     OpcUa_EndpointConfiguration_Initialize,
     OpcUa_EndpointConfiguration_Clear,
-    NULL,
-    OpcUa_EndpointConfiguration_Encode,
-    OpcUa_EndpointConfiguration_Decode,
     sizeof EndpointConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointConfiguration_Fields};
 #endif
@@ -9330,22 +7405,6 @@ void OpcUa_SupportedProfile_Initialize(void* pValue)
 void OpcUa_SupportedProfile_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SupportedProfile_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SupportedProfile_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SupportedProfile_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SupportedProfile_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SupportedProfile_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SupportedProfile_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SupportedProfile_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9415,9 +7474,6 @@ SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType = {
     sizeof(OpcUa_SupportedProfile),
     OpcUa_SupportedProfile_Initialize,
     OpcUa_SupportedProfile_Clear,
-    NULL,
-    OpcUa_SupportedProfile_Encode,
-    OpcUa_SupportedProfile_Decode,
     sizeof SupportedProfile_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SupportedProfile_Fields};
 #endif
@@ -9437,22 +7493,6 @@ void OpcUa_SoftwareCertificate_Initialize(void* pValue)
 void OpcUa_SoftwareCertificate_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SoftwareCertificate_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SoftwareCertificate_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SoftwareCertificate_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SoftwareCertificate_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SoftwareCertificate_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SoftwareCertificate_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9550,9 +7590,6 @@ SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType = {
     sizeof(OpcUa_SoftwareCertificate),
     OpcUa_SoftwareCertificate_Initialize,
     OpcUa_SoftwareCertificate_Clear,
-    NULL,
-    OpcUa_SoftwareCertificate_Encode,
-    OpcUa_SoftwareCertificate_Decode,
     sizeof SoftwareCertificate_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SoftwareCertificate_Fields};
 #endif
@@ -9572,22 +7609,6 @@ void OpcUa_QueryDataDescription_Initialize(void* pValue)
 void OpcUa_QueryDataDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryDataDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryDataDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryDataDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryDataDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryDataDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryDataDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9629,9 +7650,6 @@ SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType = {
     sizeof(OpcUa_QueryDataDescription),
     OpcUa_QueryDataDescription_Initialize,
     OpcUa_QueryDataDescription_Clear,
-    NULL,
-    OpcUa_QueryDataDescription_Encode,
-    OpcUa_QueryDataDescription_Decode,
     sizeof QueryDataDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryDataDescription_Fields};
 #endif
@@ -9651,22 +7669,6 @@ void OpcUa_NodeTypeDescription_Initialize(void* pValue)
 void OpcUa_NodeTypeDescription_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_NodeTypeDescription_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_NodeTypeDescription_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeTypeDescription_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_NodeTypeDescription_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_NodeTypeDescription_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_NodeTypeDescription_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9715,9 +7717,6 @@ SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType = {
     sizeof(OpcUa_NodeTypeDescription),
     OpcUa_NodeTypeDescription_Initialize,
     OpcUa_NodeTypeDescription_Clear,
-    NULL,
-    OpcUa_NodeTypeDescription_Encode,
-    OpcUa_NodeTypeDescription_Decode,
     sizeof NodeTypeDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeTypeDescription_Fields};
 #endif
@@ -9737,22 +7736,6 @@ void OpcUa_QueryDataSet_Initialize(void* pValue)
 void OpcUa_QueryDataSet_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryDataSet_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryDataSet_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryDataSet_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryDataSet_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryDataSet_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryDataSet_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryDataSet_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9801,9 +7784,6 @@ SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType = {
     sizeof(OpcUa_QueryDataSet),
     OpcUa_QueryDataSet_Initialize,
     OpcUa_QueryDataSet_Clear,
-    NULL,
-    OpcUa_QueryDataSet_Encode,
-    OpcUa_QueryDataSet_Decode,
     sizeof QueryDataSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryDataSet_Fields};
 #endif
@@ -9823,22 +7803,6 @@ void OpcUa_NodeReference_Initialize(void* pValue)
 void OpcUa_NodeReference_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_NodeReference_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_NodeReference_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeReference_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_NodeReference_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_NodeReference_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NodeReference_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_NodeReference_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9894,9 +7858,6 @@ SOPC_EncodeableType OpcUa_NodeReference_EncodeableType = {
     sizeof(OpcUa_NodeReference),
     OpcUa_NodeReference_Initialize,
     OpcUa_NodeReference_Clear,
-    NULL,
-    OpcUa_NodeReference_Encode,
-    OpcUa_NodeReference_Decode,
     sizeof NodeReference_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeReference_Fields};
 #endif
@@ -9916,22 +7877,6 @@ void OpcUa_ContentFilterElement_Initialize(void* pValue)
 void OpcUa_ContentFilterElement_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ContentFilterElement_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterElement_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterElement_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilterElement_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterElement_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilterElement_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -9973,9 +7918,6 @@ SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType = {
     sizeof(OpcUa_ContentFilterElement),
     OpcUa_ContentFilterElement_Initialize,
     OpcUa_ContentFilterElement_Clear,
-    NULL,
-    OpcUa_ContentFilterElement_Encode,
-    OpcUa_ContentFilterElement_Decode,
     sizeof ContentFilterElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterElement_Fields};
 #endif
@@ -9995,22 +7937,6 @@ void OpcUa_ContentFilter_Initialize(void* pValue)
 void OpcUa_ContentFilter_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ContentFilter_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ContentFilter_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilter_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilter_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ContentFilter_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilter_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilter_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10045,9 +7971,6 @@ SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType = {
     sizeof(OpcUa_ContentFilter),
     OpcUa_ContentFilter_Initialize,
     OpcUa_ContentFilter_Clear,
-    NULL,
-    OpcUa_ContentFilter_Encode,
-    OpcUa_ContentFilter_Decode,
     sizeof ContentFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilter_Fields};
 #endif
@@ -10067,22 +7990,6 @@ void OpcUa_ElementOperand_Initialize(void* pValue)
 void OpcUa_ElementOperand_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ElementOperand_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ElementOperand_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ElementOperand_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ElementOperand_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ElementOperand_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ElementOperand_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ElementOperand_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10110,9 +8017,6 @@ SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType = {
     sizeof(OpcUa_ElementOperand),
     OpcUa_ElementOperand_Initialize,
     OpcUa_ElementOperand_Clear,
-    NULL,
-    OpcUa_ElementOperand_Encode,
-    OpcUa_ElementOperand_Decode,
     sizeof ElementOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ElementOperand_Fields};
 #endif
@@ -10132,22 +8036,6 @@ void OpcUa_LiteralOperand_Initialize(void* pValue)
 void OpcUa_LiteralOperand_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_LiteralOperand_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_LiteralOperand_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_LiteralOperand_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_LiteralOperand_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_LiteralOperand_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_LiteralOperand_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_LiteralOperand_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10175,9 +8063,6 @@ SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType = {
     sizeof(OpcUa_LiteralOperand),
     OpcUa_LiteralOperand_Initialize,
     OpcUa_LiteralOperand_Clear,
-    NULL,
-    OpcUa_LiteralOperand_Encode,
-    OpcUa_LiteralOperand_Decode,
     sizeof LiteralOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     LiteralOperand_Fields};
 #endif
@@ -10197,22 +8082,6 @@ void OpcUa_AttributeOperand_Initialize(void* pValue)
 void OpcUa_AttributeOperand_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AttributeOperand_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AttributeOperand_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AttributeOperand_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AttributeOperand_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AttributeOperand_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AttributeOperand_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AttributeOperand_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10268,9 +8137,6 @@ SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType = {
     sizeof(OpcUa_AttributeOperand),
     OpcUa_AttributeOperand_Initialize,
     OpcUa_AttributeOperand_Clear,
-    NULL,
-    OpcUa_AttributeOperand_Encode,
-    OpcUa_AttributeOperand_Decode,
     sizeof AttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AttributeOperand_Fields};
 #endif
@@ -10290,22 +8156,6 @@ void OpcUa_SimpleAttributeOperand_Initialize(void* pValue)
 void OpcUa_SimpleAttributeOperand_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SimpleAttributeOperand_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SimpleAttributeOperand_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SimpleAttributeOperand_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SimpleAttributeOperand_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SimpleAttributeOperand_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10361,9 +8211,6 @@ SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType = {
     sizeof(OpcUa_SimpleAttributeOperand),
     OpcUa_SimpleAttributeOperand_Initialize,
     OpcUa_SimpleAttributeOperand_Clear,
-    NULL,
-    OpcUa_SimpleAttributeOperand_Encode,
-    OpcUa_SimpleAttributeOperand_Decode,
     sizeof SimpleAttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SimpleAttributeOperand_Fields};
 #endif
@@ -10383,26 +8230,6 @@ void OpcUa_ContentFilterElementResult_Initialize(void* pValue)
 void OpcUa_ContentFilterElementResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ContentFilterElementResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterElementResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterElementResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilterElementResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -10458,9 +8285,6 @@ SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType = {
     sizeof(OpcUa_ContentFilterElementResult),
     OpcUa_ContentFilterElementResult_Initialize,
     OpcUa_ContentFilterElementResult_Clear,
-    NULL,
-    OpcUa_ContentFilterElementResult_Encode,
-    OpcUa_ContentFilterElementResult_Decode,
     sizeof ContentFilterElementResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterElementResult_Fields};
 #endif
@@ -10480,22 +8304,6 @@ void OpcUa_ContentFilterResult_Initialize(void* pValue)
 void OpcUa_ContentFilterResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ContentFilterResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ContentFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ContentFilterResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ContentFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10544,9 +8352,6 @@ SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType = {
     sizeof(OpcUa_ContentFilterResult),
     OpcUa_ContentFilterResult_Initialize,
     OpcUa_ContentFilterResult_Clear,
-    NULL,
-    OpcUa_ContentFilterResult_Encode,
-    OpcUa_ContentFilterResult_Decode,
     sizeof ContentFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterResult_Fields};
 #endif
@@ -10566,22 +8371,6 @@ void OpcUa_ParsingResult_Initialize(void* pValue)
 void OpcUa_ParsingResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ParsingResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ParsingResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ParsingResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ParsingResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ParsingResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ParsingResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ParsingResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10637,9 +8426,6 @@ SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType = {
     sizeof(OpcUa_ParsingResult),
     OpcUa_ParsingResult_Initialize,
     OpcUa_ParsingResult_Clear,
-    NULL,
-    OpcUa_ParsingResult_Encode,
-    OpcUa_ParsingResult_Decode,
     sizeof ParsingResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ParsingResult_Fields};
 #endif
@@ -10660,22 +8446,6 @@ void OpcUa_QueryFirstRequest_Initialize(void* pValue)
 void OpcUa_QueryFirstRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryFirstRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryFirstRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryFirstRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryFirstRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryFirstRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryFirstRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10738,9 +8508,6 @@ SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType = {
     sizeof(OpcUa_QueryFirstRequest),
     OpcUa_QueryFirstRequest_Initialize,
     OpcUa_QueryFirstRequest_Clear,
-    NULL,
-    OpcUa_QueryFirstRequest_Encode,
-    OpcUa_QueryFirstRequest_Decode,
     sizeof QueryFirstRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryFirstRequest_Fields};
 #endif
@@ -10760,22 +8527,6 @@ void OpcUa_QueryFirstResponse_Initialize(void* pValue)
 void OpcUa_QueryFirstResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryFirstResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryFirstResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryFirstResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryFirstResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryFirstResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryFirstResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10859,9 +8610,6 @@ SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType = {
     sizeof(OpcUa_QueryFirstResponse),
     OpcUa_QueryFirstResponse_Initialize,
     OpcUa_QueryFirstResponse_Clear,
-    NULL,
-    OpcUa_QueryFirstResponse_Encode,
-    OpcUa_QueryFirstResponse_Decode,
     sizeof QueryFirstResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryFirstResponse_Fields};
 #endif
@@ -10883,22 +8631,6 @@ void OpcUa_QueryNextRequest_Initialize(void* pValue)
 void OpcUa_QueryNextRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryNextRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryNextRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryNextRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryNextRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryNextRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryNextRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -10933,9 +8665,6 @@ SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType = {
     sizeof(OpcUa_QueryNextRequest),
     OpcUa_QueryNextRequest_Initialize,
     OpcUa_QueryNextRequest_Clear,
-    NULL,
-    OpcUa_QueryNextRequest_Encode,
-    OpcUa_QueryNextRequest_Decode,
     sizeof QueryNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryNextRequest_Fields};
 #endif
@@ -10955,22 +8684,6 @@ void OpcUa_QueryNextResponse_Initialize(void* pValue)
 void OpcUa_QueryNextResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_QueryNextResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_QueryNextResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryNextResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_QueryNextResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_QueryNextResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_QueryNextResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11019,9 +8732,6 @@ SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType = {
     sizeof(OpcUa_QueryNextResponse),
     OpcUa_QueryNextResponse_Initialize,
     OpcUa_QueryNextResponse_Clear,
-    NULL,
-    OpcUa_QueryNextResponse_Encode,
-    OpcUa_QueryNextResponse_Decode,
     sizeof QueryNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryNextResponse_Fields};
 #endif
@@ -11042,22 +8752,6 @@ void OpcUa_ReadValueId_Initialize(void* pValue)
 void OpcUa_ReadValueId_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadValueId_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadValueId_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadValueId_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadValueId_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadValueId_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadValueId_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadValueId_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11106,9 +8800,6 @@ SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType = {
     sizeof(OpcUa_ReadValueId),
     OpcUa_ReadValueId_Initialize,
     OpcUa_ReadValueId_Clear,
-    NULL,
-    OpcUa_ReadValueId_Encode,
-    OpcUa_ReadValueId_Decode,
     sizeof ReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadValueId_Fields};
 #endif
@@ -11129,22 +8820,6 @@ void OpcUa_ReadRequest_Initialize(void* pValue)
 void OpcUa_ReadRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11193,9 +8868,6 @@ SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType = {
     sizeof(OpcUa_ReadRequest),
     OpcUa_ReadRequest_Initialize,
     OpcUa_ReadRequest_Clear,
-    NULL,
-    OpcUa_ReadRequest_Encode,
-    OpcUa_ReadRequest_Decode,
     sizeof ReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadRequest_Fields};
 #endif
@@ -11215,22 +8887,6 @@ void OpcUa_ReadResponse_Initialize(void* pValue)
 void OpcUa_ReadResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11286,9 +8942,6 @@ SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType = {
     sizeof(OpcUa_ReadResponse),
     OpcUa_ReadResponse_Initialize,
     OpcUa_ReadResponse_Clear,
-    NULL,
-    OpcUa_ReadResponse_Encode,
-    OpcUa_ReadResponse_Decode,
     sizeof ReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadResponse_Fields};
 #endif
@@ -11309,22 +8962,6 @@ void OpcUa_HistoryReadValueId_Initialize(void* pValue)
 void OpcUa_HistoryReadValueId_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryReadValueId_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadValueId_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadValueId_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryReadValueId_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadValueId_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryReadValueId_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11373,9 +9010,6 @@ SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType = {
     sizeof(OpcUa_HistoryReadValueId),
     OpcUa_HistoryReadValueId_Initialize,
     OpcUa_HistoryReadValueId_Clear,
-    NULL,
-    OpcUa_HistoryReadValueId_Encode,
-    OpcUa_HistoryReadValueId_Decode,
     sizeof HistoryReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadValueId_Fields};
 #endif
@@ -11395,22 +9029,6 @@ void OpcUa_HistoryReadResult_Initialize(void* pValue)
 void OpcUa_HistoryReadResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryReadResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryReadResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryReadResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11452,9 +9070,6 @@ SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType = {
     sizeof(OpcUa_HistoryReadResult),
     OpcUa_HistoryReadResult_Initialize,
     OpcUa_HistoryReadResult_Clear,
-    NULL,
-    OpcUa_HistoryReadResult_Encode,
-    OpcUa_HistoryReadResult_Decode,
     sizeof HistoryReadResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadResult_Fields};
 #endif
@@ -11474,22 +9089,6 @@ void OpcUa_EventFilter_Initialize(void* pValue)
 void OpcUa_EventFilter_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EventFilter_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EventFilter_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFilter_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EventFilter_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EventFilter_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFilter_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EventFilter_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11531,9 +9130,6 @@ SOPC_EncodeableType OpcUa_EventFilter_EncodeableType = {
     sizeof(OpcUa_EventFilter),
     OpcUa_EventFilter_Initialize,
     OpcUa_EventFilter_Clear,
-    NULL,
-    OpcUa_EventFilter_Encode,
-    OpcUa_EventFilter_Decode,
     sizeof EventFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFilter_Fields};
 #endif
@@ -11553,22 +9149,6 @@ void OpcUa_ReadEventDetails_Initialize(void* pValue)
 void OpcUa_ReadEventDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadEventDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadEventDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadEventDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadEventDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11617,9 +9197,6 @@ SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType = {
     sizeof(OpcUa_ReadEventDetails),
     OpcUa_ReadEventDetails_Initialize,
     OpcUa_ReadEventDetails_Clear,
-    NULL,
-    OpcUa_ReadEventDetails_Encode,
-    OpcUa_ReadEventDetails_Decode,
     sizeof ReadEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadEventDetails_Fields};
 #endif
@@ -11639,22 +9216,6 @@ void OpcUa_ReadRawModifiedDetails_Initialize(void* pValue)
 void OpcUa_ReadRawModifiedDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadRawModifiedDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadRawModifiedDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadRawModifiedDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadRawModifiedDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadRawModifiedDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11710,9 +9271,6 @@ SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType = {
     sizeof(OpcUa_ReadRawModifiedDetails),
     OpcUa_ReadRawModifiedDetails_Initialize,
     OpcUa_ReadRawModifiedDetails_Clear,
-    NULL,
-    OpcUa_ReadRawModifiedDetails_Encode,
-    OpcUa_ReadRawModifiedDetails_Decode,
     sizeof ReadRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadRawModifiedDetails_Fields};
 #endif
@@ -11732,22 +9290,6 @@ void OpcUa_AggregateConfiguration_Initialize(void* pValue)
 void OpcUa_AggregateConfiguration_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AggregateConfiguration_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AggregateConfiguration_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateConfiguration_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AggregateConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AggregateConfiguration_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AggregateConfiguration_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11803,9 +9345,6 @@ SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType = {
     sizeof(OpcUa_AggregateConfiguration),
     OpcUa_AggregateConfiguration_Initialize,
     OpcUa_AggregateConfiguration_Clear,
-    NULL,
-    OpcUa_AggregateConfiguration_Encode,
-    OpcUa_AggregateConfiguration_Decode,
     sizeof AggregateConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateConfiguration_Fields};
 #endif
@@ -11825,22 +9364,6 @@ void OpcUa_ReadProcessedDetails_Initialize(void* pValue)
 void OpcUa_ReadProcessedDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadProcessedDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadProcessedDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadProcessedDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadProcessedDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadProcessedDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11903,9 +9426,6 @@ SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType = {
     sizeof(OpcUa_ReadProcessedDetails),
     OpcUa_ReadProcessedDetails_Initialize,
     OpcUa_ReadProcessedDetails_Clear,
-    NULL,
-    OpcUa_ReadProcessedDetails_Encode,
-    OpcUa_ReadProcessedDetails_Decode,
     sizeof ReadProcessedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadProcessedDetails_Fields};
 #endif
@@ -11925,22 +9445,6 @@ void OpcUa_ReadAtTimeDetails_Initialize(void* pValue)
 void OpcUa_ReadAtTimeDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ReadAtTimeDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ReadAtTimeDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ReadAtTimeDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ReadAtTimeDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ReadAtTimeDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -11982,9 +9486,6 @@ SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType = {
     sizeof(OpcUa_ReadAtTimeDetails),
     OpcUa_ReadAtTimeDetails_Initialize,
     OpcUa_ReadAtTimeDetails_Clear,
-    NULL,
-    OpcUa_ReadAtTimeDetails_Encode,
-    OpcUa_ReadAtTimeDetails_Decode,
     sizeof ReadAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadAtTimeDetails_Fields};
 #endif
@@ -12004,22 +9505,6 @@ void OpcUa_HistoryData_Initialize(void* pValue)
 void OpcUa_HistoryData_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryData_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryData_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryData_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryData_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryData_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryData_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryData_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12054,9 +9539,6 @@ SOPC_EncodeableType OpcUa_HistoryData_EncodeableType = {
     sizeof(OpcUa_HistoryData),
     OpcUa_HistoryData_Initialize,
     OpcUa_HistoryData_Clear,
-    NULL,
-    OpcUa_HistoryData_Encode,
-    OpcUa_HistoryData_Decode,
     sizeof HistoryData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryData_Fields};
 #endif
@@ -12076,22 +9558,6 @@ void OpcUa_ModificationInfo_Initialize(void* pValue)
 void OpcUa_ModificationInfo_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModificationInfo_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModificationInfo_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModificationInfo_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModificationInfo_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModificationInfo_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModificationInfo_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModificationInfo_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12133,9 +9599,6 @@ SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType = {
     sizeof(OpcUa_ModificationInfo),
     OpcUa_ModificationInfo_Initialize,
     OpcUa_ModificationInfo_Clear,
-    NULL,
-    OpcUa_ModificationInfo_Encode,
-    OpcUa_ModificationInfo_Decode,
     sizeof ModificationInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModificationInfo_Fields};
 #endif
@@ -12155,22 +9618,6 @@ void OpcUa_HistoryModifiedData_Initialize(void* pValue)
 void OpcUa_HistoryModifiedData_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryModifiedData_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryModifiedData_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryModifiedData_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryModifiedData_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryModifiedData_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryModifiedData_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12219,9 +9666,6 @@ SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType = {
     sizeof(OpcUa_HistoryModifiedData),
     OpcUa_HistoryModifiedData_Initialize,
     OpcUa_HistoryModifiedData_Clear,
-    NULL,
-    OpcUa_HistoryModifiedData_Encode,
-    OpcUa_HistoryModifiedData_Decode,
     sizeof HistoryModifiedData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryModifiedData_Fields};
 #endif
@@ -12241,22 +9685,6 @@ void OpcUa_HistoryEventFieldList_Initialize(void* pValue)
 void OpcUa_HistoryEventFieldList_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryEventFieldList_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryEventFieldList_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryEventFieldList_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryEventFieldList_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryEventFieldList_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12291,9 +9719,6 @@ SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType = {
     sizeof(OpcUa_HistoryEventFieldList),
     OpcUa_HistoryEventFieldList_Initialize,
     OpcUa_HistoryEventFieldList_Clear,
-    NULL,
-    OpcUa_HistoryEventFieldList_Encode,
-    OpcUa_HistoryEventFieldList_Decode,
     sizeof HistoryEventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryEventFieldList_Fields};
 #endif
@@ -12313,22 +9738,6 @@ void OpcUa_HistoryEvent_Initialize(void* pValue)
 void OpcUa_HistoryEvent_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryEvent_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryEvent_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryEvent_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryEvent_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryEvent_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryEvent_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryEvent_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12363,9 +9772,6 @@ SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType = {
     sizeof(OpcUa_HistoryEvent),
     OpcUa_HistoryEvent_Initialize,
     OpcUa_HistoryEvent_Clear,
-    NULL,
-    OpcUa_HistoryEvent_Encode,
-    OpcUa_HistoryEvent_Decode,
     sizeof HistoryEvent_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryEvent_Fields};
 #endif
@@ -12386,22 +9792,6 @@ void OpcUa_HistoryReadRequest_Initialize(void* pValue)
 void OpcUa_HistoryReadRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryReadRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryReadRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryReadRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12457,9 +9847,6 @@ SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType = {
     sizeof(OpcUa_HistoryReadRequest),
     OpcUa_HistoryReadRequest_Initialize,
     OpcUa_HistoryReadRequest_Clear,
-    NULL,
-    OpcUa_HistoryReadRequest_Encode,
-    OpcUa_HistoryReadRequest_Decode,
     sizeof HistoryReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadRequest_Fields};
 #endif
@@ -12479,22 +9866,6 @@ void OpcUa_HistoryReadResponse_Initialize(void* pValue)
 void OpcUa_HistoryReadResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryReadResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryReadResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryReadResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryReadResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12550,9 +9921,6 @@ SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType = {
     sizeof(OpcUa_HistoryReadResponse),
     OpcUa_HistoryReadResponse_Initialize,
     OpcUa_HistoryReadResponse_Clear,
-    NULL,
-    OpcUa_HistoryReadResponse_Encode,
-    OpcUa_HistoryReadResponse_Decode,
     sizeof HistoryReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadResponse_Fields};
 #endif
@@ -12573,22 +9941,6 @@ void OpcUa_WriteValue_Initialize(void* pValue)
 void OpcUa_WriteValue_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_WriteValue_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_WriteValue_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteValue_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_WriteValue_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_WriteValue_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteValue_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_WriteValue_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12637,9 +9989,6 @@ SOPC_EncodeableType OpcUa_WriteValue_EncodeableType = {
     sizeof(OpcUa_WriteValue),
     OpcUa_WriteValue_Initialize,
     OpcUa_WriteValue_Clear,
-    NULL,
-    OpcUa_WriteValue_Encode,
-    OpcUa_WriteValue_Decode,
     sizeof WriteValue_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteValue_Fields};
 #endif
@@ -12660,22 +10009,6 @@ void OpcUa_WriteRequest_Initialize(void* pValue)
 void OpcUa_WriteRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_WriteRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_WriteRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_WriteRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_WriteRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_WriteRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12710,9 +10043,6 @@ SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType = {
     sizeof(OpcUa_WriteRequest),
     OpcUa_WriteRequest_Initialize,
     OpcUa_WriteRequest_Clear,
-    NULL,
-    OpcUa_WriteRequest_Encode,
-    OpcUa_WriteRequest_Decode,
     sizeof WriteRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteRequest_Fields};
 #endif
@@ -12732,22 +10062,6 @@ void OpcUa_WriteResponse_Initialize(void* pValue)
 void OpcUa_WriteResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_WriteResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_WriteResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_WriteResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_WriteResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_WriteResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_WriteResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12803,9 +10117,6 @@ SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType = {
     sizeof(OpcUa_WriteResponse),
     OpcUa_WriteResponse_Initialize,
     OpcUa_WriteResponse_Clear,
-    NULL,
-    OpcUa_WriteResponse_Encode,
-    OpcUa_WriteResponse_Decode,
     sizeof WriteResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteResponse_Fields};
 #endif
@@ -12826,22 +10137,6 @@ void OpcUa_HistoryUpdateDetails_Initialize(void* pValue)
 void OpcUa_HistoryUpdateDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryUpdateDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryUpdateDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryUpdateDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12869,9 +10164,6 @@ SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateDetails),
     OpcUa_HistoryUpdateDetails_Initialize,
     OpcUa_HistoryUpdateDetails_Clear,
-    NULL,
-    OpcUa_HistoryUpdateDetails_Encode,
-    OpcUa_HistoryUpdateDetails_Decode,
     sizeof HistoryUpdateDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateDetails_Fields};
 #endif
@@ -12891,22 +10183,6 @@ void OpcUa_UpdateDataDetails_Initialize(void* pValue)
 void OpcUa_UpdateDataDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UpdateDataDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UpdateDataDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateDataDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UpdateDataDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UpdateDataDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UpdateDataDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -12955,9 +10231,6 @@ SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType = {
     sizeof(OpcUa_UpdateDataDetails),
     OpcUa_UpdateDataDetails_Initialize,
     OpcUa_UpdateDataDetails_Clear,
-    NULL,
-    OpcUa_UpdateDataDetails_Encode,
-    OpcUa_UpdateDataDetails_Decode,
     sizeof UpdateDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateDataDetails_Fields};
 #endif
@@ -12977,26 +10250,6 @@ void OpcUa_UpdateStructureDataDetails_Initialize(void* pValue)
 void OpcUa_UpdateStructureDataDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UpdateStructureDataDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UpdateStructureDataDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UpdateStructureDataDetails_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -13045,9 +10298,6 @@ SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType = {
     sizeof(OpcUa_UpdateStructureDataDetails),
     OpcUa_UpdateStructureDataDetails_Initialize,
     OpcUa_UpdateStructureDataDetails_Clear,
-    NULL,
-    OpcUa_UpdateStructureDataDetails_Encode,
-    OpcUa_UpdateStructureDataDetails_Decode,
     sizeof UpdateStructureDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateStructureDataDetails_Fields};
 #endif
@@ -13067,22 +10317,6 @@ void OpcUa_UpdateEventDetails_Initialize(void* pValue)
 void OpcUa_UpdateEventDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_UpdateEventDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_UpdateEventDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateEventDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_UpdateEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_UpdateEventDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_UpdateEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13138,9 +10372,6 @@ SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType = {
     sizeof(OpcUa_UpdateEventDetails),
     OpcUa_UpdateEventDetails_Initialize,
     OpcUa_UpdateEventDetails_Clear,
-    NULL,
-    OpcUa_UpdateEventDetails_Encode,
-    OpcUa_UpdateEventDetails_Decode,
     sizeof UpdateEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateEventDetails_Fields};
 #endif
@@ -13160,24 +10391,6 @@ void OpcUa_DeleteRawModifiedDetails_Initialize(void* pValue)
 void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteRawModifiedDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteRawModifiedDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteRawModifiedDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteRawModifiedDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteRawModifiedDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13226,9 +10439,6 @@ SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType = {
     sizeof(OpcUa_DeleteRawModifiedDetails),
     OpcUa_DeleteRawModifiedDetails_Initialize,
     OpcUa_DeleteRawModifiedDetails_Clear,
-    NULL,
-    OpcUa_DeleteRawModifiedDetails_Encode,
-    OpcUa_DeleteRawModifiedDetails_Decode,
     sizeof DeleteRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteRawModifiedDetails_Fields};
 #endif
@@ -13248,22 +10458,6 @@ void OpcUa_DeleteAtTimeDetails_Initialize(void* pValue)
 void OpcUa_DeleteAtTimeDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteAtTimeDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteAtTimeDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteAtTimeDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteAtTimeDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteAtTimeDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13305,9 +10499,6 @@ SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType = {
     sizeof(OpcUa_DeleteAtTimeDetails),
     OpcUa_DeleteAtTimeDetails_Initialize,
     OpcUa_DeleteAtTimeDetails_Clear,
-    NULL,
-    OpcUa_DeleteAtTimeDetails_Encode,
-    OpcUa_DeleteAtTimeDetails_Decode,
     sizeof DeleteAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteAtTimeDetails_Fields};
 #endif
@@ -13327,22 +10518,6 @@ void OpcUa_DeleteEventDetails_Initialize(void* pValue)
 void OpcUa_DeleteEventDetails_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteEventDetails_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteEventDetails_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteEventDetails_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteEventDetails_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteEventDetails_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13384,9 +10559,6 @@ SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType = {
     sizeof(OpcUa_DeleteEventDetails),
     OpcUa_DeleteEventDetails_Initialize,
     OpcUa_DeleteEventDetails_Clear,
-    NULL,
-    OpcUa_DeleteEventDetails_Encode,
-    OpcUa_DeleteEventDetails_Decode,
     sizeof DeleteEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteEventDetails_Fields};
 #endif
@@ -13406,22 +10578,6 @@ void OpcUa_HistoryUpdateResult_Initialize(void* pValue)
 void OpcUa_HistoryUpdateResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryUpdateResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryUpdateResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryUpdateResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13477,9 +10633,6 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateResult),
     OpcUa_HistoryUpdateResult_Initialize,
     OpcUa_HistoryUpdateResult_Clear,
-    NULL,
-    OpcUa_HistoryUpdateResult_Encode,
-    OpcUa_HistoryUpdateResult_Decode,
     sizeof HistoryUpdateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateResult_Fields};
 #endif
@@ -13500,22 +10653,6 @@ void OpcUa_HistoryUpdateRequest_Initialize(void* pValue)
 void OpcUa_HistoryUpdateRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryUpdateRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryUpdateRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryUpdateRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13550,9 +10687,6 @@ SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateRequest),
     OpcUa_HistoryUpdateRequest_Initialize,
     OpcUa_HistoryUpdateRequest_Clear,
-    NULL,
-    OpcUa_HistoryUpdateRequest_Encode,
-    OpcUa_HistoryUpdateRequest_Decode,
     sizeof HistoryUpdateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateRequest_Fields};
 #endif
@@ -13572,22 +10706,6 @@ void OpcUa_HistoryUpdateResponse_Initialize(void* pValue)
 void OpcUa_HistoryUpdateResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_HistoryUpdateResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_HistoryUpdateResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_HistoryUpdateResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_HistoryUpdateResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13643,9 +10761,6 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateResponse),
     OpcUa_HistoryUpdateResponse_Initialize,
     OpcUa_HistoryUpdateResponse_Clear,
-    NULL,
-    OpcUa_HistoryUpdateResponse_Encode,
-    OpcUa_HistoryUpdateResponse_Decode,
     sizeof HistoryUpdateResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateResponse_Fields};
 #endif
@@ -13666,22 +10781,6 @@ void OpcUa_CallMethodRequest_Initialize(void* pValue)
 void OpcUa_CallMethodRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CallMethodRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CallMethodRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallMethodRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CallMethodRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CallMethodRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CallMethodRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13730,9 +10829,6 @@ SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType = {
     sizeof(OpcUa_CallMethodRequest),
     OpcUa_CallMethodRequest_Initialize,
     OpcUa_CallMethodRequest_Clear,
-    NULL,
-    OpcUa_CallMethodRequest_Encode,
-    OpcUa_CallMethodRequest_Decode,
     sizeof CallMethodRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallMethodRequest_Fields};
 #endif
@@ -13752,22 +10848,6 @@ void OpcUa_CallMethodResult_Initialize(void* pValue)
 void OpcUa_CallMethodResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CallMethodResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CallMethodResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallMethodResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CallMethodResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CallMethodResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallMethodResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CallMethodResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13837,9 +10917,6 @@ SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType = {
     sizeof(OpcUa_CallMethodResult),
     OpcUa_CallMethodResult_Initialize,
     OpcUa_CallMethodResult_Clear,
-    NULL,
-    OpcUa_CallMethodResult_Encode,
-    OpcUa_CallMethodResult_Decode,
     sizeof CallMethodResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallMethodResult_Fields};
 #endif
@@ -13860,22 +10937,6 @@ void OpcUa_CallRequest_Initialize(void* pValue)
 void OpcUa_CallRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CallRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CallRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CallRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CallRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CallRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -13910,9 +10971,6 @@ SOPC_EncodeableType OpcUa_CallRequest_EncodeableType = {
     sizeof(OpcUa_CallRequest),
     OpcUa_CallRequest_Initialize,
     OpcUa_CallRequest_Clear,
-    NULL,
-    OpcUa_CallRequest_Encode,
-    OpcUa_CallRequest_Decode,
     sizeof CallRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallRequest_Fields};
 #endif
@@ -13932,22 +10990,6 @@ void OpcUa_CallResponse_Initialize(void* pValue)
 void OpcUa_CallResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CallResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CallResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CallResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CallResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CallResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CallResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14003,9 +11045,6 @@ SOPC_EncodeableType OpcUa_CallResponse_EncodeableType = {
     sizeof(OpcUa_CallResponse),
     OpcUa_CallResponse_Initialize,
     OpcUa_CallResponse_Clear,
-    NULL,
-    OpcUa_CallResponse_Encode,
-    OpcUa_CallResponse_Decode,
     sizeof CallResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallResponse_Fields};
 #endif
@@ -14026,22 +11065,6 @@ void OpcUa_DataChangeFilter_Initialize(void* pValue)
 void OpcUa_DataChangeFilter_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DataChangeFilter_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DataChangeFilter_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataChangeFilter_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DataChangeFilter_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DataChangeFilter_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DataChangeFilter_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14083,9 +11106,6 @@ SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType = {
     sizeof(OpcUa_DataChangeFilter),
     OpcUa_DataChangeFilter_Initialize,
     OpcUa_DataChangeFilter_Clear,
-    NULL,
-    OpcUa_DataChangeFilter_Encode,
-    OpcUa_DataChangeFilter_Decode,
     sizeof DataChangeFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataChangeFilter_Fields};
 #endif
@@ -14105,22 +11125,6 @@ void OpcUa_AggregateFilter_Initialize(void* pValue)
 void OpcUa_AggregateFilter_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AggregateFilter_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AggregateFilter_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateFilter_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AggregateFilter_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AggregateFilter_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateFilter_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AggregateFilter_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14169,9 +11173,6 @@ SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType = {
     sizeof(OpcUa_AggregateFilter),
     OpcUa_AggregateFilter_Initialize,
     OpcUa_AggregateFilter_Clear,
-    NULL,
-    OpcUa_AggregateFilter_Encode,
-    OpcUa_AggregateFilter_Decode,
     sizeof AggregateFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateFilter_Fields};
 #endif
@@ -14191,22 +11192,6 @@ void OpcUa_EventFilterResult_Initialize(void* pValue)
 void OpcUa_EventFilterResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EventFilterResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EventFilterResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFilterResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EventFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EventFilterResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFilterResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EventFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14262,9 +11247,6 @@ SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType = {
     sizeof(OpcUa_EventFilterResult),
     OpcUa_EventFilterResult_Initialize,
     OpcUa_EventFilterResult_Clear,
-    NULL,
-    OpcUa_EventFilterResult_Encode,
-    OpcUa_EventFilterResult_Decode,
     sizeof EventFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFilterResult_Fields};
 #endif
@@ -14284,22 +11266,6 @@ void OpcUa_AggregateFilterResult_Initialize(void* pValue)
 void OpcUa_AggregateFilterResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AggregateFilterResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AggregateFilterResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateFilterResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AggregateFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AggregateFilterResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AggregateFilterResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14341,9 +11307,6 @@ SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType = {
     sizeof(OpcUa_AggregateFilterResult),
     OpcUa_AggregateFilterResult_Initialize,
     OpcUa_AggregateFilterResult_Clear,
-    NULL,
-    OpcUa_AggregateFilterResult_Encode,
-    OpcUa_AggregateFilterResult_Decode,
     sizeof AggregateFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateFilterResult_Fields};
 #endif
@@ -14363,22 +11326,6 @@ void OpcUa_MonitoringParameters_Initialize(void* pValue)
 void OpcUa_MonitoringParameters_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoringParameters_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoringParameters_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoringParameters_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoringParameters_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoringParameters_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoringParameters_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -14434,9 +11381,6 @@ SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType = {
     sizeof(OpcUa_MonitoringParameters),
     OpcUa_MonitoringParameters_Initialize,
     OpcUa_MonitoringParameters_Clear,
-    NULL,
-    OpcUa_MonitoringParameters_Encode,
-    OpcUa_MonitoringParameters_Decode,
     sizeof MonitoringParameters_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoringParameters_Fields};
 #endif
@@ -14456,26 +11400,6 @@ void OpcUa_MonitoredItemCreateRequest_Initialize(void* pValue)
 void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14517,9 +11441,6 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType = {
     sizeof(OpcUa_MonitoredItemCreateRequest),
     OpcUa_MonitoredItemCreateRequest_Initialize,
     OpcUa_MonitoredItemCreateRequest_Clear,
-    NULL,
-    OpcUa_MonitoredItemCreateRequest_Encode,
-    OpcUa_MonitoredItemCreateRequest_Decode,
     sizeof MonitoredItemCreateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemCreateRequest_Fields};
 #endif
@@ -14539,26 +11460,6 @@ void OpcUa_MonitoredItemCreateResult_Initialize(void* pValue)
 void OpcUa_MonitoredItemCreateResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemCreateResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemCreateResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14614,9 +11515,6 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType = {
     sizeof(OpcUa_MonitoredItemCreateResult),
     OpcUa_MonitoredItemCreateResult_Initialize,
     OpcUa_MonitoredItemCreateResult_Clear,
-    NULL,
-    OpcUa_MonitoredItemCreateResult_Encode,
-    OpcUa_MonitoredItemCreateResult_Decode,
     sizeof MonitoredItemCreateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemCreateResult_Fields};
 #endif
@@ -14637,26 +11535,6 @@ void OpcUa_CreateMonitoredItemsRequest_Initialize(void* pValue)
 void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14705,9 +11583,6 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_CreateMonitoredItemsRequest),
     OpcUa_CreateMonitoredItemsRequest_Initialize,
     OpcUa_CreateMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_CreateMonitoredItemsRequest_Encode,
-    OpcUa_CreateMonitoredItemsRequest_Decode,
     sizeof CreateMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateMonitoredItemsRequest_Fields};
 #endif
@@ -14727,26 +11602,6 @@ void OpcUa_CreateMonitoredItemsResponse_Initialize(void* pValue)
 void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateMonitoredItemsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14802,9 +11657,6 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_CreateMonitoredItemsResponse),
     OpcUa_CreateMonitoredItemsResponse_Initialize,
     OpcUa_CreateMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_CreateMonitoredItemsResponse_Encode,
-    OpcUa_CreateMonitoredItemsResponse_Decode,
     sizeof CreateMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateMonitoredItemsResponse_Fields};
 #endif
@@ -14825,26 +11677,6 @@ void OpcUa_MonitoredItemModifyRequest_Initialize(void* pValue)
 void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14879,9 +11711,6 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType = {
     sizeof(OpcUa_MonitoredItemModifyRequest),
     OpcUa_MonitoredItemModifyRequest_Initialize,
     OpcUa_MonitoredItemModifyRequest_Clear,
-    NULL,
-    OpcUa_MonitoredItemModifyRequest_Encode,
-    OpcUa_MonitoredItemModifyRequest_Decode,
     sizeof MonitoredItemModifyRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemModifyRequest_Fields};
 #endif
@@ -14901,26 +11730,6 @@ void OpcUa_MonitoredItemModifyResult_Initialize(void* pValue)
 void OpcUa_MonitoredItemModifyResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemModifyResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemModifyResult_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -14969,9 +11778,6 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType = {
     sizeof(OpcUa_MonitoredItemModifyResult),
     OpcUa_MonitoredItemModifyResult_Initialize,
     OpcUa_MonitoredItemModifyResult_Clear,
-    NULL,
-    OpcUa_MonitoredItemModifyResult_Encode,
-    OpcUa_MonitoredItemModifyResult_Decode,
     sizeof MonitoredItemModifyResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemModifyResult_Fields};
 #endif
@@ -14992,26 +11798,6 @@ void OpcUa_ModifyMonitoredItemsRequest_Initialize(void* pValue)
 void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15060,9 +11846,6 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_ModifyMonitoredItemsRequest),
     OpcUa_ModifyMonitoredItemsRequest_Initialize,
     OpcUa_ModifyMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_ModifyMonitoredItemsRequest_Encode,
-    OpcUa_ModifyMonitoredItemsRequest_Decode,
     sizeof ModifyMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifyMonitoredItemsRequest_Fields};
 #endif
@@ -15082,26 +11865,6 @@ void OpcUa_ModifyMonitoredItemsResponse_Initialize(void* pValue)
 void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModifyMonitoredItemsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifyMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15157,9 +11920,6 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_ModifyMonitoredItemsResponse),
     OpcUa_ModifyMonitoredItemsResponse_Initialize,
     OpcUa_ModifyMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_ModifyMonitoredItemsResponse_Encode,
-    OpcUa_ModifyMonitoredItemsResponse_Decode,
     sizeof ModifyMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifyMonitoredItemsResponse_Fields};
 #endif
@@ -15181,24 +11941,6 @@ void OpcUa_SetMonitoringModeRequest_Initialize(void* pValue)
 void OpcUa_SetMonitoringModeRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetMonitoringModeRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetMonitoringModeRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetMonitoringModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetMonitoringModeRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetMonitoringModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -15247,9 +11989,6 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType = {
     sizeof(OpcUa_SetMonitoringModeRequest),
     OpcUa_SetMonitoringModeRequest_Initialize,
     OpcUa_SetMonitoringModeRequest_Clear,
-    NULL,
-    OpcUa_SetMonitoringModeRequest_Encode,
-    OpcUa_SetMonitoringModeRequest_Decode,
     sizeof SetMonitoringModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetMonitoringModeRequest_Fields};
 #endif
@@ -15269,26 +12008,6 @@ void OpcUa_SetMonitoringModeResponse_Initialize(void* pValue)
 void OpcUa_SetMonitoringModeResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetMonitoringModeResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetMonitoringModeResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetMonitoringModeResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15344,9 +12063,6 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType = {
     sizeof(OpcUa_SetMonitoringModeResponse),
     OpcUa_SetMonitoringModeResponse_Initialize,
     OpcUa_SetMonitoringModeResponse_Clear,
-    NULL,
-    OpcUa_SetMonitoringModeResponse_Encode,
-    OpcUa_SetMonitoringModeResponse_Decode,
     sizeof SetMonitoringModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetMonitoringModeResponse_Fields};
 #endif
@@ -15368,22 +12084,6 @@ void OpcUa_SetTriggeringRequest_Initialize(void* pValue)
 void OpcUa_SetTriggeringRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetTriggeringRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetTriggeringRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetTriggeringRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetTriggeringRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetTriggeringRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -15446,9 +12146,6 @@ SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType = {
     sizeof(OpcUa_SetTriggeringRequest),
     OpcUa_SetTriggeringRequest_Initialize,
     OpcUa_SetTriggeringRequest_Clear,
-    NULL,
-    OpcUa_SetTriggeringRequest_Encode,
-    OpcUa_SetTriggeringRequest_Decode,
     sizeof SetTriggeringRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetTriggeringRequest_Fields};
 #endif
@@ -15468,22 +12165,6 @@ void OpcUa_SetTriggeringResponse_Initialize(void* pValue)
 void OpcUa_SetTriggeringResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetTriggeringResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetTriggeringResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetTriggeringResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetTriggeringResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetTriggeringResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -15567,9 +12248,6 @@ SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType = {
     sizeof(OpcUa_SetTriggeringResponse),
     OpcUa_SetTriggeringResponse_Initialize,
     OpcUa_SetTriggeringResponse_Clear,
-    NULL,
-    OpcUa_SetTriggeringResponse_Encode,
-    OpcUa_SetTriggeringResponse_Decode,
     sizeof SetTriggeringResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetTriggeringResponse_Fields};
 #endif
@@ -15591,26 +12269,6 @@ void OpcUa_DeleteMonitoredItemsRequest_Initialize(void* pValue)
 void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15652,9 +12310,6 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_DeleteMonitoredItemsRequest),
     OpcUa_DeleteMonitoredItemsRequest_Initialize,
     OpcUa_DeleteMonitoredItemsRequest_Clear,
-    NULL,
-    OpcUa_DeleteMonitoredItemsRequest_Encode,
-    OpcUa_DeleteMonitoredItemsRequest_Decode,
     sizeof DeleteMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteMonitoredItemsRequest_Fields};
 #endif
@@ -15674,26 +12329,6 @@ void OpcUa_DeleteMonitoredItemsResponse_Initialize(void* pValue)
 void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteMonitoredItemsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15749,9 +12384,6 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_DeleteMonitoredItemsResponse),
     OpcUa_DeleteMonitoredItemsResponse_Initialize,
     OpcUa_DeleteMonitoredItemsResponse_Clear,
-    NULL,
-    OpcUa_DeleteMonitoredItemsResponse_Encode,
-    OpcUa_DeleteMonitoredItemsResponse_Decode,
     sizeof DeleteMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteMonitoredItemsResponse_Fields};
 #endif
@@ -15773,26 +12405,6 @@ void OpcUa_CreateSubscriptionRequest_Initialize(void* pValue)
 void OpcUa_CreateSubscriptionRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateSubscriptionRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateSubscriptionRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15855,9 +12467,6 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType = {
     sizeof(OpcUa_CreateSubscriptionRequest),
     OpcUa_CreateSubscriptionRequest_Initialize,
     OpcUa_CreateSubscriptionRequest_Clear,
-    NULL,
-    OpcUa_CreateSubscriptionRequest_Encode,
-    OpcUa_CreateSubscriptionRequest_Decode,
     sizeof CreateSubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSubscriptionRequest_Fields};
 #endif
@@ -15877,26 +12486,6 @@ void OpcUa_CreateSubscriptionResponse_Initialize(void* pValue)
 void OpcUa_CreateSubscriptionResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_CreateSubscriptionResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_CreateSubscriptionResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_CreateSubscriptionResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -15952,9 +12541,6 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType = {
     sizeof(OpcUa_CreateSubscriptionResponse),
     OpcUa_CreateSubscriptionResponse_Initialize,
     OpcUa_CreateSubscriptionResponse_Clear,
-    NULL,
-    OpcUa_CreateSubscriptionResponse_Encode,
-    OpcUa_CreateSubscriptionResponse_Decode,
     sizeof CreateSubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSubscriptionResponse_Fields};
 #endif
@@ -15976,26 +12562,6 @@ void OpcUa_ModifySubscriptionRequest_Initialize(void* pValue)
 void OpcUa_ModifySubscriptionRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModifySubscriptionRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModifySubscriptionRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16058,9 +12624,6 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType = {
     sizeof(OpcUa_ModifySubscriptionRequest),
     OpcUa_ModifySubscriptionRequest_Initialize,
     OpcUa_ModifySubscriptionRequest_Clear,
-    NULL,
-    OpcUa_ModifySubscriptionRequest_Encode,
-    OpcUa_ModifySubscriptionRequest_Decode,
     sizeof ModifySubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifySubscriptionRequest_Fields};
 #endif
@@ -16080,26 +12643,6 @@ void OpcUa_ModifySubscriptionResponse_Initialize(void* pValue)
 void OpcUa_ModifySubscriptionResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModifySubscriptionResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModifySubscriptionResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModifySubscriptionResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16148,9 +12691,6 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType = {
     sizeof(OpcUa_ModifySubscriptionResponse),
     OpcUa_ModifySubscriptionResponse_Initialize,
     OpcUa_ModifySubscriptionResponse_Clear,
-    NULL,
-    OpcUa_ModifySubscriptionResponse_Encode,
-    OpcUa_ModifySubscriptionResponse_Decode,
     sizeof ModifySubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifySubscriptionResponse_Fields};
 #endif
@@ -16172,24 +12712,6 @@ void OpcUa_SetPublishingModeRequest_Initialize(void* pValue)
 void OpcUa_SetPublishingModeRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetPublishingModeRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetPublishingModeRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetPublishingModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetPublishingModeRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetPublishingModeRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16231,9 +12753,6 @@ SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType = {
     sizeof(OpcUa_SetPublishingModeRequest),
     OpcUa_SetPublishingModeRequest_Initialize,
     OpcUa_SetPublishingModeRequest_Clear,
-    NULL,
-    OpcUa_SetPublishingModeRequest_Encode,
-    OpcUa_SetPublishingModeRequest_Decode,
     sizeof SetPublishingModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetPublishingModeRequest_Fields};
 #endif
@@ -16253,26 +12772,6 @@ void OpcUa_SetPublishingModeResponse_Initialize(void* pValue)
 void OpcUa_SetPublishingModeResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SetPublishingModeResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SetPublishingModeResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SetPublishingModeResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16328,9 +12827,6 @@ SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType = {
     sizeof(OpcUa_SetPublishingModeResponse),
     OpcUa_SetPublishingModeResponse_Initialize,
     OpcUa_SetPublishingModeResponse_Clear,
-    NULL,
-    OpcUa_SetPublishingModeResponse_Encode,
-    OpcUa_SetPublishingModeResponse_Decode,
     sizeof SetPublishingModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetPublishingModeResponse_Fields};
 #endif
@@ -16351,22 +12847,6 @@ void OpcUa_NotificationMessage_Initialize(void* pValue)
 void OpcUa_NotificationMessage_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_NotificationMessage_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_NotificationMessage_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NotificationMessage_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_NotificationMessage_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_NotificationMessage_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NotificationMessage_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_NotificationMessage_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16415,9 +12895,6 @@ SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType = {
     sizeof(OpcUa_NotificationMessage),
     OpcUa_NotificationMessage_Initialize,
     OpcUa_NotificationMessage_Clear,
-    NULL,
-    OpcUa_NotificationMessage_Encode,
-    OpcUa_NotificationMessage_Decode,
     sizeof NotificationMessage_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NotificationMessage_Fields};
 #endif
@@ -16437,26 +12914,6 @@ void OpcUa_MonitoredItemNotification_Initialize(void* pValue)
 void OpcUa_MonitoredItemNotification_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_MonitoredItemNotification_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemNotification_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_MonitoredItemNotification_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_MonitoredItemNotification_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16491,9 +12948,6 @@ SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType = {
     sizeof(OpcUa_MonitoredItemNotification),
     OpcUa_MonitoredItemNotification_Initialize,
     OpcUa_MonitoredItemNotification_Clear,
-    NULL,
-    OpcUa_MonitoredItemNotification_Encode,
-    OpcUa_MonitoredItemNotification_Decode,
     sizeof MonitoredItemNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemNotification_Fields};
 #endif
@@ -16513,22 +12967,6 @@ void OpcUa_DataChangeNotification_Initialize(void* pValue)
 void OpcUa_DataChangeNotification_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DataChangeNotification_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DataChangeNotification_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataChangeNotification_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DataChangeNotification_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DataChangeNotification_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DataChangeNotification_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16577,9 +13015,6 @@ SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType = {
     sizeof(OpcUa_DataChangeNotification),
     OpcUa_DataChangeNotification_Initialize,
     OpcUa_DataChangeNotification_Clear,
-    NULL,
-    OpcUa_DataChangeNotification_Encode,
-    OpcUa_DataChangeNotification_Decode,
     sizeof DataChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataChangeNotification_Fields};
 #endif
@@ -16599,22 +13034,6 @@ void OpcUa_EventFieldList_Initialize(void* pValue)
 void OpcUa_EventFieldList_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EventFieldList_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EventFieldList_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFieldList_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EventFieldList_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EventFieldList_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventFieldList_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EventFieldList_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16656,9 +13075,6 @@ SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType = {
     sizeof(OpcUa_EventFieldList),
     OpcUa_EventFieldList_Initialize,
     OpcUa_EventFieldList_Clear,
-    NULL,
-    OpcUa_EventFieldList_Encode,
-    OpcUa_EventFieldList_Decode,
     sizeof EventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFieldList_Fields};
 #endif
@@ -16678,22 +13094,6 @@ void OpcUa_EventNotificationList_Initialize(void* pValue)
 void OpcUa_EventNotificationList_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EventNotificationList_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EventNotificationList_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventNotificationList_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EventNotificationList_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EventNotificationList_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EventNotificationList_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EventNotificationList_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16728,9 +13128,6 @@ SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType = {
     sizeof(OpcUa_EventNotificationList),
     OpcUa_EventNotificationList_Initialize,
     OpcUa_EventNotificationList_Clear,
-    NULL,
-    OpcUa_EventNotificationList_Encode,
-    OpcUa_EventNotificationList_Decode,
     sizeof EventNotificationList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventNotificationList_Fields};
 #endif
@@ -16750,24 +13147,6 @@ void OpcUa_StatusChangeNotification_Initialize(void* pValue)
 void OpcUa_StatusChangeNotification_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_StatusChangeNotification_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_StatusChangeNotification_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_StatusChangeNotification_Encode(const void* pValue,
-                                                        SOPC_Buffer* buf,
-                                                        uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_StatusChangeNotification_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_StatusChangeNotification_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_StatusChangeNotification_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16802,9 +13181,6 @@ SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType = {
     sizeof(OpcUa_StatusChangeNotification),
     OpcUa_StatusChangeNotification_Initialize,
     OpcUa_StatusChangeNotification_Clear,
-    NULL,
-    OpcUa_StatusChangeNotification_Encode,
-    OpcUa_StatusChangeNotification_Decode,
     sizeof StatusChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StatusChangeNotification_Fields};
 #endif
@@ -16824,26 +13200,6 @@ void OpcUa_SubscriptionAcknowledgement_Initialize(void* pValue)
 void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SubscriptionAcknowledgement_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SubscriptionAcknowledgement_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionAcknowledgement_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -16878,9 +13234,6 @@ SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType = {
     sizeof(OpcUa_SubscriptionAcknowledgement),
     OpcUa_SubscriptionAcknowledgement_Initialize,
     OpcUa_SubscriptionAcknowledgement_Clear,
-    NULL,
-    OpcUa_SubscriptionAcknowledgement_Encode,
-    OpcUa_SubscriptionAcknowledgement_Decode,
     sizeof SubscriptionAcknowledgement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SubscriptionAcknowledgement_Fields};
 #endif
@@ -16901,22 +13254,6 @@ void OpcUa_PublishRequest_Initialize(void* pValue)
 void OpcUa_PublishRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_PublishRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_PublishRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_PublishRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_PublishRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_PublishRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_PublishRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_PublishRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -16951,9 +13288,6 @@ SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType = {
     sizeof(OpcUa_PublishRequest),
     OpcUa_PublishRequest_Initialize,
     OpcUa_PublishRequest_Clear,
-    NULL,
-    OpcUa_PublishRequest_Encode,
-    OpcUa_PublishRequest_Decode,
     sizeof PublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishRequest_Fields};
 #endif
@@ -16973,22 +13307,6 @@ void OpcUa_PublishResponse_Initialize(void* pValue)
 void OpcUa_PublishResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_PublishResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_PublishResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_PublishResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_PublishResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_PublishResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_PublishResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_PublishResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17079,9 +13397,6 @@ SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType = {
     sizeof(OpcUa_PublishResponse),
     OpcUa_PublishResponse_Initialize,
     OpcUa_PublishResponse_Clear,
-    NULL,
-    OpcUa_PublishResponse_Encode,
-    OpcUa_PublishResponse_Decode,
     sizeof PublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishResponse_Fields};
 #endif
@@ -17103,22 +13418,6 @@ void OpcUa_RepublishRequest_Initialize(void* pValue)
 void OpcUa_RepublishRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RepublishRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RepublishRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RepublishRequest_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RepublishRequest_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RepublishRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RepublishRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RepublishRequest_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17153,9 +13452,6 @@ SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType = {
     sizeof(OpcUa_RepublishRequest),
     OpcUa_RepublishRequest_Initialize,
     OpcUa_RepublishRequest_Clear,
-    NULL,
-    OpcUa_RepublishRequest_Encode,
-    OpcUa_RepublishRequest_Decode,
     sizeof RepublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RepublishRequest_Fields};
 #endif
@@ -17175,22 +13471,6 @@ void OpcUa_RepublishResponse_Initialize(void* pValue)
 void OpcUa_RepublishResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RepublishResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RepublishResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RepublishResponse_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RepublishResponse_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RepublishResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RepublishResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RepublishResponse_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17225,9 +13505,6 @@ SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType = {
     sizeof(OpcUa_RepublishResponse),
     OpcUa_RepublishResponse_Initialize,
     OpcUa_RepublishResponse_Clear,
-    NULL,
-    OpcUa_RepublishResponse_Encode,
-    OpcUa_RepublishResponse_Decode,
     sizeof RepublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RepublishResponse_Fields};
 #endif
@@ -17248,22 +13525,6 @@ void OpcUa_TransferResult_Initialize(void* pValue)
 void OpcUa_TransferResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TransferResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TransferResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TransferResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TransferResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TransferResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17305,9 +13566,6 @@ SOPC_EncodeableType OpcUa_TransferResult_EncodeableType = {
     sizeof(OpcUa_TransferResult),
     OpcUa_TransferResult_Initialize,
     OpcUa_TransferResult_Clear,
-    NULL,
-    OpcUa_TransferResult_Encode,
-    OpcUa_TransferResult_Decode,
     sizeof TransferResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferResult_Fields};
 #endif
@@ -17328,26 +13586,6 @@ void OpcUa_TransferSubscriptionsRequest_Initialize(void* pValue)
 void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17389,9 +13627,6 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType = {
     sizeof(OpcUa_TransferSubscriptionsRequest),
     OpcUa_TransferSubscriptionsRequest_Initialize,
     OpcUa_TransferSubscriptionsRequest_Clear,
-    NULL,
-    OpcUa_TransferSubscriptionsRequest_Encode,
-    OpcUa_TransferSubscriptionsRequest_Decode,
     sizeof TransferSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferSubscriptionsRequest_Fields};
 #endif
@@ -17411,26 +13646,6 @@ void OpcUa_TransferSubscriptionsResponse_Initialize(void* pValue)
 void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Encode(const void* pValue,
-                                                             SOPC_Buffer* buf,
-                                                             uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_TransferSubscriptionsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_TransferSubscriptionsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17486,9 +13701,6 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType = {
     sizeof(OpcUa_TransferSubscriptionsResponse),
     OpcUa_TransferSubscriptionsResponse_Initialize,
     OpcUa_TransferSubscriptionsResponse_Clear,
-    NULL,
-    OpcUa_TransferSubscriptionsResponse_Encode,
-    OpcUa_TransferSubscriptionsResponse_Decode,
     sizeof TransferSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferSubscriptionsResponse_Fields};
 #endif
@@ -17510,26 +13722,6 @@ void OpcUa_DeleteSubscriptionsRequest_Initialize(void* pValue)
 void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsRequest_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsRequest_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17564,9 +13756,6 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType = {
     sizeof(OpcUa_DeleteSubscriptionsRequest),
     OpcUa_DeleteSubscriptionsRequest_Initialize,
     OpcUa_DeleteSubscriptionsRequest_Clear,
-    NULL,
-    OpcUa_DeleteSubscriptionsRequest_Encode,
-    OpcUa_DeleteSubscriptionsRequest_Decode,
     sizeof DeleteSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteSubscriptionsRequest_Fields};
 #endif
@@ -17586,26 +13775,6 @@ void OpcUa_DeleteSubscriptionsResponse_Initialize(void* pValue)
 void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsResponse_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Encode(const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DeleteSubscriptionsResponse_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -17661,9 +13830,6 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType = {
     sizeof(OpcUa_DeleteSubscriptionsResponse),
     OpcUa_DeleteSubscriptionsResponse_Initialize,
     OpcUa_DeleteSubscriptionsResponse_Clear,
-    NULL,
-    OpcUa_DeleteSubscriptionsResponse_Encode,
-    OpcUa_DeleteSubscriptionsResponse_Decode,
     sizeof DeleteSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteSubscriptionsResponse_Fields};
 #endif
@@ -17684,22 +13850,6 @@ void OpcUa_BuildInfo_Initialize(void* pValue)
 void OpcUa_BuildInfo_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_BuildInfo_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_BuildInfo_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BuildInfo_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_BuildInfo_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_BuildInfo_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_BuildInfo_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_BuildInfo_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17762,9 +13912,6 @@ SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType = {
     sizeof(OpcUa_BuildInfo),
     OpcUa_BuildInfo_Initialize,
     OpcUa_BuildInfo_Clear,
-    NULL,
-    OpcUa_BuildInfo_Encode,
-    OpcUa_BuildInfo_Decode,
     sizeof BuildInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BuildInfo_Fields};
 #endif
@@ -17784,22 +13931,6 @@ void OpcUa_RedundantServerDataType_Initialize(void* pValue)
 void OpcUa_RedundantServerDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_RedundantServerDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_RedundantServerDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RedundantServerDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_RedundantServerDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_RedundantServerDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_RedundantServerDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17841,9 +13972,6 @@ SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType = {
     sizeof(OpcUa_RedundantServerDataType),
     OpcUa_RedundantServerDataType_Initialize,
     OpcUa_RedundantServerDataType_Clear,
-    NULL,
-    OpcUa_RedundantServerDataType_Encode,
-    OpcUa_RedundantServerDataType_Decode,
     sizeof RedundantServerDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RedundantServerDataType_Fields};
 #endif
@@ -17863,22 +13991,6 @@ void OpcUa_EndpointUrlListDataType_Initialize(void* pValue)
 void OpcUa_EndpointUrlListDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EndpointUrlListDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EndpointUrlListDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EndpointUrlListDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EndpointUrlListDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EndpointUrlListDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17913,9 +14025,6 @@ SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType = {
     sizeof(OpcUa_EndpointUrlListDataType),
     OpcUa_EndpointUrlListDataType_Initialize,
     OpcUa_EndpointUrlListDataType_Clear,
-    NULL,
-    OpcUa_EndpointUrlListDataType_Encode,
-    OpcUa_EndpointUrlListDataType_Decode,
     sizeof EndpointUrlListDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointUrlListDataType_Fields};
 #endif
@@ -17935,22 +14044,6 @@ void OpcUa_NetworkGroupDataType_Initialize(void* pValue)
 void OpcUa_NetworkGroupDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_NetworkGroupDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_NetworkGroupDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_NetworkGroupDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_NetworkGroupDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_NetworkGroupDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -17992,9 +14085,6 @@ SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType = {
     sizeof(OpcUa_NetworkGroupDataType),
     OpcUa_NetworkGroupDataType_Initialize,
     OpcUa_NetworkGroupDataType_Clear,
-    NULL,
-    OpcUa_NetworkGroupDataType_Encode,
-    OpcUa_NetworkGroupDataType_Decode,
     sizeof NetworkGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NetworkGroupDataType_Fields};
 #endif
@@ -18014,28 +14104,6 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(void* pValue)
 void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SamplingIntervalDiagnosticsDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Encode(const void* pValue,
-                                                                   SOPC_Buffer* buf,
-                                                                   uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SamplingIntervalDiagnosticsDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue,
-                                                                   SOPC_Buffer* buf,
-                                                                   uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18084,9 +14152,6 @@ SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SamplingIntervalDiagnosticsDataType),
     OpcUa_SamplingIntervalDiagnosticsDataType_Initialize,
     OpcUa_SamplingIntervalDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SamplingIntervalDiagnosticsDataType_Encode,
-    OpcUa_SamplingIntervalDiagnosticsDataType_Decode,
     sizeof SamplingIntervalDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SamplingIntervalDiagnosticsDataType_Fields};
 #endif
@@ -18106,28 +14171,6 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(void* pValue)
 void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ServerDiagnosticsSummaryDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Encode(const void* pValue,
-                                                                SOPC_Buffer* buf,
-                                                                uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ServerDiagnosticsSummaryDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue,
-                                                                SOPC_Buffer* buf,
-                                                                uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18232,9 +14275,6 @@ SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType = {
     sizeof(OpcUa_ServerDiagnosticsSummaryDataType),
     OpcUa_ServerDiagnosticsSummaryDataType_Initialize,
     OpcUa_ServerDiagnosticsSummaryDataType_Clear,
-    NULL,
-    OpcUa_ServerDiagnosticsSummaryDataType_Encode,
-    OpcUa_ServerDiagnosticsSummaryDataType_Decode,
     sizeof ServerDiagnosticsSummaryDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerDiagnosticsSummaryDataType_Fields};
 #endif
@@ -18254,22 +14294,6 @@ void OpcUa_ServerStatusDataType_Initialize(void* pValue)
 void OpcUa_ServerStatusDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ServerStatusDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ServerStatusDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerStatusDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServerStatusDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ServerStatusDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServerStatusDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -18332,9 +14356,6 @@ SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType = {
     sizeof(OpcUa_ServerStatusDataType),
     OpcUa_ServerStatusDataType_Initialize,
     OpcUa_ServerStatusDataType_Clear,
-    NULL,
-    OpcUa_ServerStatusDataType_Encode,
-    OpcUa_ServerStatusDataType_Decode,
     sizeof ServerStatusDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerStatusDataType_Fields};
 #endif
@@ -18354,22 +14375,6 @@ void OpcUa_ServiceCounterDataType_Initialize(void* pValue)
 void OpcUa_ServiceCounterDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ServiceCounterDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ServiceCounterDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ServiceCounterDataType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ServiceCounterDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ServiceCounterDataType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -18404,9 +14409,6 @@ SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType = {
     sizeof(OpcUa_ServiceCounterDataType),
     OpcUa_ServiceCounterDataType_Initialize,
     OpcUa_ServiceCounterDataType_Clear,
-    NULL,
-    OpcUa_ServiceCounterDataType_Encode,
-    OpcUa_ServiceCounterDataType_Decode,
     sizeof ServiceCounterDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServiceCounterDataType_Fields};
 #endif
@@ -18426,26 +14428,6 @@ void OpcUa_SessionDiagnosticsDataType_Initialize(void* pValue)
 void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SessionDiagnosticsDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Encode(const void* pValue,
-                                                          SOPC_Buffer* buf,
-                                                          uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SessionDiagnosticsDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SessionDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18774,9 +14756,6 @@ SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SessionDiagnosticsDataType),
     OpcUa_SessionDiagnosticsDataType_Initialize,
     OpcUa_SessionDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SessionDiagnosticsDataType_Encode,
-    OpcUa_SessionDiagnosticsDataType_Decode,
     sizeof SessionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionDiagnosticsDataType_Fields};
 #endif
@@ -18796,28 +14775,6 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(void* pValue)
 void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SessionSecurityDiagnosticsDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Encode(const void* pValue,
-                                                                  SOPC_Buffer* buf,
-                                                                  uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SessionSecurityDiagnosticsDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue,
-                                                                  SOPC_Buffer* buf,
-                                                                  uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -18908,9 +14865,6 @@ SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SessionSecurityDiagnosticsDataType),
     OpcUa_SessionSecurityDiagnosticsDataType_Initialize,
     OpcUa_SessionSecurityDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SessionSecurityDiagnosticsDataType_Encode,
-    OpcUa_SessionSecurityDiagnosticsDataType_Decode,
     sizeof SessionSecurityDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionSecurityDiagnosticsDataType_Fields};
 #endif
@@ -18930,22 +14884,6 @@ void OpcUa_StatusResult_Initialize(void* pValue)
 void OpcUa_StatusResult_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_StatusResult_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_StatusResult_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_StatusResult_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_StatusResult_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_StatusResult_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_StatusResult_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_StatusResult_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -18980,9 +14918,6 @@ SOPC_EncodeableType OpcUa_StatusResult_EncodeableType = {
     sizeof(OpcUa_StatusResult),
     OpcUa_StatusResult_Initialize,
     OpcUa_StatusResult_Clear,
-    NULL,
-    OpcUa_StatusResult_Encode,
-    OpcUa_StatusResult_Decode,
     sizeof StatusResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StatusResult_Fields};
 #endif
@@ -19002,28 +14937,6 @@ void OpcUa_SubscriptionDiagnosticsDataType_Initialize(void* pValue)
 void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SubscriptionDiagnosticsDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Encode(const void* pValue,
-                                                               SOPC_Buffer* buf,
-                                                               uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SubscriptionDiagnosticsDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue,
-                                                               SOPC_Buffer* buf,
-                                                               uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SubscriptionDiagnosticsDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19261,9 +15174,6 @@ SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SubscriptionDiagnosticsDataType),
     OpcUa_SubscriptionDiagnosticsDataType_Initialize,
     OpcUa_SubscriptionDiagnosticsDataType_Clear,
-    NULL,
-    OpcUa_SubscriptionDiagnosticsDataType_Encode,
-    OpcUa_SubscriptionDiagnosticsDataType_Decode,
     sizeof SubscriptionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SubscriptionDiagnosticsDataType_Fields};
 #endif
@@ -19283,26 +15193,6 @@ void OpcUa_ModelChangeStructureDataType_Initialize(void* pValue)
 void OpcUa_ModelChangeStructureDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ModelChangeStructureDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Encode(const void* pValue,
-                                                            SOPC_Buffer* buf,
-                                                            uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ModelChangeStructureDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ModelChangeStructureDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19344,9 +15234,6 @@ SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType = {
     sizeof(OpcUa_ModelChangeStructureDataType),
     OpcUa_ModelChangeStructureDataType_Initialize,
     OpcUa_ModelChangeStructureDataType_Clear,
-    NULL,
-    OpcUa_ModelChangeStructureDataType_Encode,
-    OpcUa_ModelChangeStructureDataType_Decode,
     sizeof ModelChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModelChangeStructureDataType_Fields};
 #endif
@@ -19366,28 +15253,6 @@ void OpcUa_SemanticChangeStructureDataType_Initialize(void* pValue)
 void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_SemanticChangeStructureDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Encode(const void* pValue,
-                                                               SOPC_Buffer* buf,
-                                                               uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_SemanticChangeStructureDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_SemanticChangeStructureDataType_Decode(void* pValue,
-                                                               SOPC_Buffer* buf,
-                                                               uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_SemanticChangeStructureDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -19422,9 +15287,6 @@ SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType = {
     sizeof(OpcUa_SemanticChangeStructureDataType),
     OpcUa_SemanticChangeStructureDataType_Initialize,
     OpcUa_SemanticChangeStructureDataType_Clear,
-    NULL,
-    OpcUa_SemanticChangeStructureDataType_Encode,
-    OpcUa_SemanticChangeStructureDataType_Decode,
     sizeof SemanticChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SemanticChangeStructureDataType_Fields};
 #endif
@@ -19444,22 +15306,6 @@ void OpcUa_Range_Initialize(void* pValue)
 void OpcUa_Range_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_Range_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_Range_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Range_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_Range_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_Range_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Range_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_Range_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19493,9 +15339,6 @@ SOPC_EncodeableType OpcUa_Range_EncodeableType = {"Range",
                                                   sizeof(OpcUa_Range),
                                                   OpcUa_Range_Initialize,
                                                   OpcUa_Range_Clear,
-                                                  NULL,
-                                                  OpcUa_Range_Encode,
-                                                  OpcUa_Range_Decode,
                                                   sizeof Range_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                   Range_Fields};
 #endif
@@ -19515,22 +15358,6 @@ void OpcUa_EUInformation_Initialize(void* pValue)
 void OpcUa_EUInformation_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_EUInformation_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_EUInformation_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EUInformation_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_EUInformation_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_EUInformation_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_EUInformation_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_EUInformation_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19579,9 +15406,6 @@ SOPC_EncodeableType OpcUa_EUInformation_EncodeableType = {
     sizeof(OpcUa_EUInformation),
     OpcUa_EUInformation_Initialize,
     OpcUa_EUInformation_Clear,
-    NULL,
-    OpcUa_EUInformation_Encode,
-    OpcUa_EUInformation_Decode,
     sizeof EUInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EUInformation_Fields};
 #endif
@@ -19601,22 +15425,6 @@ void OpcUa_ComplexNumberType_Initialize(void* pValue)
 void OpcUa_ComplexNumberType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ComplexNumberType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ComplexNumberType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ComplexNumberType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ComplexNumberType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ComplexNumberType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ComplexNumberType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19651,9 +15459,6 @@ SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType = {
     sizeof(OpcUa_ComplexNumberType),
     OpcUa_ComplexNumberType_Initialize,
     OpcUa_ComplexNumberType_Clear,
-    NULL,
-    OpcUa_ComplexNumberType_Encode,
-    OpcUa_ComplexNumberType_Decode,
     sizeof ComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ComplexNumberType_Fields};
 #endif
@@ -19673,22 +15478,6 @@ void OpcUa_DoubleComplexNumberType_Initialize(void* pValue)
 void OpcUa_DoubleComplexNumberType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_DoubleComplexNumberType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_DoubleComplexNumberType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_DoubleComplexNumberType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_DoubleComplexNumberType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_DoubleComplexNumberType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19723,9 +15512,6 @@ SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType = {
     sizeof(OpcUa_DoubleComplexNumberType),
     OpcUa_DoubleComplexNumberType_Initialize,
     OpcUa_DoubleComplexNumberType_Clear,
-    NULL,
-    OpcUa_DoubleComplexNumberType_Encode,
-    OpcUa_DoubleComplexNumberType_Decode,
     sizeof DoubleComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DoubleComplexNumberType_Fields};
 #endif
@@ -19745,22 +15531,6 @@ void OpcUa_AxisInformation_Initialize(void* pValue)
 void OpcUa_AxisInformation_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_AxisInformation_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_AxisInformation_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AxisInformation_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_AxisInformation_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_AxisInformation_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_AxisInformation_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_AxisInformation_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19823,9 +15593,6 @@ SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType = {
     sizeof(OpcUa_AxisInformation),
     OpcUa_AxisInformation_Initialize,
     OpcUa_AxisInformation_Clear,
-    NULL,
-    OpcUa_AxisInformation_Encode,
-    OpcUa_AxisInformation_Decode,
     sizeof AxisInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AxisInformation_Fields};
 #endif
@@ -19845,22 +15612,6 @@ void OpcUa_XVType_Initialize(void* pValue)
 void OpcUa_XVType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_XVType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_XVType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_XVType_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_XVType_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_XVType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_XVType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_XVType_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -19894,9 +15645,6 @@ SOPC_EncodeableType OpcUa_XVType_EncodeableType = {"XVType",
                                                    sizeof(OpcUa_XVType),
                                                    OpcUa_XVType_Initialize,
                                                    OpcUa_XVType_Clear,
-                                                   NULL,
-                                                   OpcUa_XVType_Encode,
-                                                   OpcUa_XVType_Decode,
                                                    sizeof XVType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                    XVType_Fields};
 #endif
@@ -19916,26 +15664,6 @@ void OpcUa_ProgramDiagnosticDataType_Initialize(void* pValue)
 void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_ProgramDiagnosticDataType_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Encode(const void* pValue,
-                                                         SOPC_Buffer* buf,
-                                                         uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_ProgramDiagnosticDataType_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_ProgramDiagnosticDataType_EncodeableType, pValue, buf,
-                                        nestedStructLevel);
 }
 
 /*============================================================================
@@ -20040,9 +15768,6 @@ SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType = {
     sizeof(OpcUa_ProgramDiagnosticDataType),
     OpcUa_ProgramDiagnosticDataType_Initialize,
     OpcUa_ProgramDiagnosticDataType_Clear,
-    NULL,
-    OpcUa_ProgramDiagnosticDataType_Encode,
-    OpcUa_ProgramDiagnosticDataType_Decode,
     sizeof ProgramDiagnosticDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ProgramDiagnosticDataType_Fields};
 #endif
@@ -20062,22 +15787,6 @@ void OpcUa_Annotation_Initialize(void* pValue)
 void OpcUa_Annotation_Clear(void* pValue)
 {
     SOPC_EncodeableObject_Clear(&OpcUa_Annotation_EncodeableType, pValue);
-}
-
-/*============================================================================
- * OpcUa_Annotation_Encode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Annotation_Encode(const void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Encode(&OpcUa_Annotation_EncodeableType, pValue, buf, nestedStructLevel);
-}
-
-/*============================================================================
- * OpcUa_Annotation_Decode
- *===========================================================================*/
-SOPC_ReturnStatus OpcUa_Annotation_Decode(void* pValue, SOPC_Buffer* buf, uint32_t nestedStructLevel)
-{
-    return SOPC_EncodeableObject_Decode(&OpcUa_Annotation_EncodeableType, pValue, buf, nestedStructLevel);
 }
 
 /*============================================================================
@@ -20119,9 +15828,6 @@ SOPC_EncodeableType OpcUa_Annotation_EncodeableType = {
     sizeof(OpcUa_Annotation),
     OpcUa_Annotation_Initialize,
     OpcUa_Annotation_Clear,
-    NULL,
-    OpcUa_Annotation_Encode,
-    OpcUa_Annotation_Decode,
     sizeof Annotation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Annotation_Fields};
 #endif

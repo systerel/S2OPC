@@ -1944,7 +1944,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
             status = SOPC_Int32_Write(&tmpLength, buf, nestedStructLevel);
             if (SOPC_STATUS_OK == status)
             {
-                status = extObj->Body.Object.ObjType->Encode(extObj->Body.Object.Value, buf, nestedStructLevel);
+                status = SOPC_EncodeableObject_Encode(extObj->Body.Object.ObjType, extObj->Body.Object.Value, buf,
+                                                      nestedStructLevel);
             }
             if (SOPC_STATUS_OK == status)
             {
@@ -2041,7 +2042,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
                 if (NULL != extObj->Body.Object.Value)
                 {
                     extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
-                    status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, buf, nestedStructLevel);
+                    status = SOPC_EncodeableObject_Decode(extObj->Body.Object.ObjType, extObj->Body.Object.Value, buf,
+                                                          nestedStructLevel);
                     if (SOPC_STATUS_OK != status)
                     {
                         SOPC_Free(extObj->Body.Object.Value);
@@ -3435,11 +3437,11 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = headerType->Encode(msgHeader, buf, 0);
+        status = SOPC_EncodeableObject_Encode(headerType, msgHeader, buf, 0);
     }
     if (SOPC_STATUS_OK == status && encType->TypeId != OpcUaId_ServiceFault)
     {
-        status = encType->Encode(msgBody, buf, 0);
+        status = SOPC_EncodeableObject_Encode(encType, msgBody, buf, 0);
     }
     return status;
 }
@@ -3483,7 +3485,7 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
         *encodeableObj = SOPC_Malloc(msgEncType->AllocationSize);
         if (NULL != *encodeableObj)
         {
-            status = msgEncType->Decode(*encodeableObj, buffer, 0);
+            status = SOPC_EncodeableObject_Decode(msgEncType, *encodeableObj, buffer, 0);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Free(*encodeableObj);

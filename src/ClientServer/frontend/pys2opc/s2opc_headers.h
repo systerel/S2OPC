@@ -89,9 +89,6 @@ typedef struct SOPC_EncodeableType_Struct
     size_t AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
     SOPC_EncodeableObject_PfnClear* Clear;
-    SOPC_EncodeableObject_PfnGetSize* GetSize;
-    SOPC_EncodeableObject_PfnEncode* Encode;
-    SOPC_EncodeableObject_PfnDecode* Decode;
 } SOPC_EncodeableType;
 
 /* sopc_singly_linked_list.h */

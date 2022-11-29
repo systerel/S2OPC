@@ -253,13 +253,28 @@ static SOPC_EncodeableObject_PfnClear* getPfnClear(const SOPC_EncodeableType_Fie
     return SOPC_KnownEncodeableTypes[desc->typeIndex]->Clear;
 }
 
+static SOPC_ReturnStatus SOPC_EncodeableType_PfnEncode(const void* value,
+                                                       SOPC_Buffer* msgBuffer,
+                                                       uint32_t nestedStructLevel)
+{
+    return SOPC_EncodeableObject_Encode(*(SOPC_EncodeableType* const*) value, value, msgBuffer, nestedStructLevel);
+}
+
 static SOPC_EncodeableObject_PfnEncode* getPfnEncode(const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn)
     {
         return SOPC_BuiltInType_EncodingTable[desc->typeIndex].encode;
     }
-    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Encode;
+    else
+    {
+        return SOPC_EncodeableType_PfnEncode;
+    }
+}
+
+static SOPC_ReturnStatus SOPC_EncodeableType_PfnDecode(void* value, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel)
+{
+    return SOPC_EncodeableObject_Decode(*(SOPC_EncodeableType**) value, value, msgBuffer, nestedStructLevel);
 }
 
 static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -268,7 +283,10 @@ static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_F
     {
         return SOPC_BuiltInType_EncodingTable[desc->typeIndex].decode;
     }
-    return SOPC_KnownEncodeableTypes[desc->typeIndex]->Decode;
+    else
+    {
+        return SOPC_EncodeableType_PfnDecode;
+    }
 }
 
 static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
