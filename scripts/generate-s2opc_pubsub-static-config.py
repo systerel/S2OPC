@@ -27,6 +27,9 @@ TAG_PUBSUB = "PubSub"
 TAG_CONNECTION = "connection"
 ATTRIBUTE_CONNECTION_ADDRESS = "address"
 ATTRIBUTE_CONNECTION_MODE = "mode"
+ATTRIBUTE_CONNECTION_MQTT_TOPIC = "mqttTopic"
+ATTRIBUTE_CONNECTION_MQTT_USERNAME = "mqttUsername"
+ATTRIBUTE_CONNECTION_MQTT_PASSWORD = "mqttPassword"
 VALUE_CONNECTION_MODE_PUBLISHER = "publisher"
 VALUE_CONNECTION_MODE_SUBSCRIBER = "subscriber"
 
@@ -101,6 +104,9 @@ class CnxContext:
     def __init__(self, connection):
         self.publisherId = None
         self.address = connection.get(ATTRIBUTE_CONNECTION_ADDRESS)
+        self.mqttTopic = connection.get(ATTRIBUTE_CONNECTION_MQTT_TOPIC)
+        self.mqttUsername = connection.get(ATTRIBUTE_CONNECTION_MQTT_USERNAME)
+        self.mqttPassword = connection.get(ATTRIBUTE_CONNECTION_MQTT_PASSWORD)
         self.messages = connection.findall("./%s" % TAG_MESSAGE)
 
 
@@ -246,7 +252,25 @@ def handlePubConnection(publisherId, connection, index, result):
     }
 
     """ % (len(cnxContext.messages), len(cnxContext.messages)))
-
+        if(cnxContext.mqttTopic):
+            result.add("""
+    if (alloc)
+    {
+        // Set MQTT topic
+        alloc = SOPC_PubSubConnection_Set_MqttTopic(connection, "%s");
+    }
+    """ %cnxContext.mqttTopic
+            )
+        if(cnxContext.mqttUsername and cnxContext.mqttPassword):
+            result.add("""
+    if (alloc)
+    {
+        // Set MQTT Username and Password
+        alloc = SOPC_PubSubConnection_Set_MqttUsername(connection, "%s");
+        alloc = SOPC_PubSubConnection_Set_MqttPassword(connection, "%s");
+    }
+    """ %(cnxContext.mqttUsername,cnxContext.mqttPassword)
+            )
         msgIndex = 0
         for message in cnxContext.messages:
             handlePubMessage(cnxContext, message, msgIndex, result)
@@ -428,6 +452,26 @@ def handleSubConnection(connection, index, result):
     }
 
         """ % (index, cnxContext.address, nbMsg, nbMsg))
+        if(cnxContext.mqttTopic):
+            result.add("""
+    if (alloc)
+    {
+        // Set MQTT topic
+        alloc = SOPC_PubSubConnection_Set_MqttTopic(connection, "%s");
+    }
+    """ %cnxContext.mqttTopic
+            )
+        if(cnxContext.mqttUsername and cnxContext.mqttPassword):
+            result.add("""
+    if (alloc)
+    {
+        // Set MQTT Username and Password
+        alloc = SOPC_PubSubConnection_Set_MqttUsername(connection, "%s");
+        alloc = SOPC_PubSubConnection_Set_MqttPassword(connection, "%s");
+    }
+    """ %(cnxContext.mqttUsername,cnxContext.mqttPassword)
+            )
+
         msgIndex = 0
         for message in cnxContext.messages:
             
