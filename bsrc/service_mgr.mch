@@ -269,7 +269,10 @@ OPERATIONS
         /* The input message must have been blessed */
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_reqs \/ s_discovery_service_reqs &
-        c_msg_in_header = c_msg_header_indet
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         ret              :: {e_sc_ok,
                              e_sc_bad_out_of_memory}
