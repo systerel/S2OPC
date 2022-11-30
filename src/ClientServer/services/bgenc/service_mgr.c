@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 21/11/2022 13:18:32
+ Date                 : 30/11/2022 18:36:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -762,7 +762,6 @@ void service_mgr__client_receive_session_treatment_resp(
                   service_mgr__l_resp_msg_header,
                   service_mgr__l_resp_msg,
                   &service_mgr__l_session);
-               request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
                message_in_bs__dealloc_msg_in(service_mgr__l_resp_msg);
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);

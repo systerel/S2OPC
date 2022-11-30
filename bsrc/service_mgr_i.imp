@@ -780,7 +780,6 @@ OPERATIONS
                 IF l_valid_resp = TRUE
                 THEN
                     l_session <-- client_receive_session_resp (channel, l_request_handle, resp_typ, l_resp_msg_header, l_resp_msg);
-                    client_remove_req_handle (l_request_handle);
                     /* resp message not used anymore => deallocate */
                     dealloc_msg_in (l_resp_msg)
                 END; /* DECODE RESP CHECK */
