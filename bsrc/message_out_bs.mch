@@ -246,9 +246,9 @@ OPERATIONS
     copy_msg_resp_header_into_msg_out (msg_header, msg) =
     PRE
         msg_header : t_msg_header_i &
-        msg_header = c_msg_in_header &
+        msg_header = c_msg_out_header &
         msg : t_msg_i &
-        msg = c_msg_in &
+        msg = c_msg_out &
         c_msg_out : t_msg &
         c_msg_out_header : t_msg_header &
         a_msg_out_type : s_service_resps
