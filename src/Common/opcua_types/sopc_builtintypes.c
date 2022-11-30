@@ -18,6 +18,7 @@
  */
 
 #include "sopc_builtintypes.h"
+#include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 
 #include <assert.h>
@@ -3269,9 +3270,6 @@ void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj)
 SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    SOPC_Buffer* encodedObject = NULL;
-    SOPC_ExtObjectBodyEncoding encoding = SOPC_ExtObjBodyEncoding_None;
-    const SOPC_Common_EncodingConstants* encCfg;
 
     if (NULL == dest || NULL == src)
     {
@@ -3285,35 +3283,28 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
         break;
     case SOPC_ExtObjBodyEncoding_ByteString:
         status = SOPC_ByteString_Copy(&dest->Body.Bstring, &src->Body.Bstring);
-        encoding = SOPC_ExtObjBodyEncoding_ByteString;
         break;
     case SOPC_ExtObjBodyEncoding_XMLElement:
         status = SOPC_XmlElement_Copy(&dest->Body.Xml, &src->Body.Xml);
-        encoding = SOPC_ExtObjBodyEncoding_XMLElement;
         break;
     case SOPC_ExtObjBodyEncoding_Object:
         if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
         {
-            encCfg = SOPC_Internal_Common_GetEncodingConstants();
-            /* We do not have the copy method for the object but we can encode it */
-            encodedObject = SOPC_Buffer_CreateResizable(encCfg->buffer_size, encCfg->send_max_msg_size);
-            status = NULL == encodedObject ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-
+            status = SOPC_Encodeable_Create(src->Body.Object.ObjType, &dest->Body.Object.Value);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_ExtensionObject_Write(src, encodedObject, 0);
+                status = SOPC_EncodeableObject_Copy(src->Body.Object.ObjType, dest->Body.Object.Value,
+                                                    src->Body.Object.Value);
+                if (SOPC_STATUS_OK == status)
+                {
+                    dest->Body.Object.ObjType = src->Body.Object.ObjType;
+                }
+                else
+                {
+                    SOPC_Free(dest->Body.Object.Value);
+                    dest->Body.Object.Value = NULL;
+                }
             }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_Buffer_SetPosition(encodedObject, 0);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_ExtensionObject_Read(dest, encodedObject, 0);
-            }
-            encoding = SOPC_ExtObjBodyEncoding_Object;
-            SOPC_Buffer_Delete(encodedObject);
-            encodedObject = NULL;
         }
         break;
     default:
@@ -3325,7 +3316,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     }
     if (SOPC_STATUS_OK == status)
     {
-        dest->Encoding = encoding;
+        dest->Encoding = src->Encoding;
         dest->Length = src->Length;
     }
     else
