@@ -98,8 +98,8 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        c_msg_in_header   :: t_msg_header_i ||
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
@@ -130,8 +130,8 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        c_msg_in_header   :: t_msg_header_i ||
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 
@@ -194,8 +194,8 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        c_msg_in_header   :: t_msg_header_i ||
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 
@@ -217,8 +217,8 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        c_msg_in_header   :: t_msg_header_i ||
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
@@ -249,8 +249,8 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        c_msg_in_header   :: t_msg_header_i ||
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 
