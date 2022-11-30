@@ -310,14 +310,9 @@ void msg_session_bs__write_create_session_resp_signature(const constants__t_msg_
     if (result)
     {
         /* TODO: should borrow a reference instead of copy */
-        /* Copy Signature, which is not a built-in, so copy its fields */
         if (SOPC_STATUS_OK == status && constants__c_SignatureData_indet != pSig)
         {
-            status = SOPC_String_Copy(&pResp->ServerSignature.Algorithm, &pSig->Algorithm);
-        }
-        if (SOPC_STATUS_OK == status && constants__c_SignatureData_indet != pSig)
-        {
-            status = SOPC_ByteString_Copy(&pResp->ServerSignature.Signature, &pSig->Signature);
+            status = SOPC_EncodeableObject_Copy(&OpcUa_SignatureData_EncodeableType, &pResp->ServerSignature, pSig);
         }
 
         if (status != SOPC_STATUS_OK)
@@ -403,12 +398,7 @@ void msg_session_bs__write_activate_session_req_msg_crypto(const constants__t_ms
 
     /* Copy Signature, which is not a built-in, so copy its fields */
     /* TODO: should borrow a reference instead of copy */
-    status = SOPC_String_Copy(&pReq->ClientSignature.Algorithm, &pSig->Algorithm);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ByteString_Copy(&pReq->ClientSignature.Signature, &pSig->Signature);
-    }
+    status = SOPC_EncodeableObject_Copy(&OpcUa_SignatureData_EncodeableType, &pReq->ClientSignature, pSig);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -507,24 +497,32 @@ void msg_session_bs__write_create_session_req_msg_clientDescription(
 
     const SOPC_Client_Config* clientAppCfg = pSCCfg->clientConfigPtr;
 
-    if (clientAppCfg->clientDescription.ApplicationType < OpcUa_ApplicationType_Client ||
-        clientAppCfg->clientDescription.ApplicationType > OpcUa_ApplicationType_ClientAndServer)
+    status = SOPC_EncodeableObject_Copy(&OpcUa_ApplicationDescription_EncodeableType, &pReq->ClientDescription,
+                                        &clientAppCfg->clientDescription);
+    if (SOPC_STATUS_OK != status)
     {
         pReq->ClientDescription.ApplicationType = OpcUa_ApplicationType_Client;
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "Client description configuration copy into CreateSession failed for channel config=%" PRIu32,
+            msg_session_bs__p_channel_config_idx);
+        return;
+    }
+
+    if (pReq->ClientDescription.ApplicationType < OpcUa_ApplicationType_Client ||
+        pReq->ClientDescription.ApplicationType > OpcUa_ApplicationType_ClientAndServer)
+    {
         // Trace a warning since client description does not seem to be properly initialized
         SOPC_Logger_TraceWarning(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "Client description does not seem to be correctly initialized on channel config=%" PRIu32
             " (unexpected application type %d)",
-            msg_session_bs__p_channel_config_idx, clientAppCfg->clientDescription.ApplicationType);
-    }
-    else
-    {
-        pReq->ClientDescription.ApplicationType = clientAppCfg->clientDescription.ApplicationType;
+            msg_session_bs__p_channel_config_idx, pReq->ClientDescription.ApplicationType);
+
+        pReq->ClientDescription.ApplicationType = OpcUa_ApplicationType_Client;
     }
 
-    status = SOPC_String_Copy(&pReq->ClientDescription.ApplicationUri, &clientAppCfg->clientDescription.ApplicationUri);
-    if (SOPC_STATUS_OK != status || pReq->ClientDescription.ApplicationUri.Length <= 0)
+    if (pReq->ClientDescription.ApplicationUri.Length <= 0)
     {
         // Trace a warning since the applicationUri is usually checked by server
         SOPC_Logger_TraceWarning(
@@ -533,17 +531,14 @@ void msg_session_bs__write_create_session_req_msg_clientDescription(
             msg_session_bs__p_channel_config_idx);
     }
 
-    status = SOPC_String_Copy(&pReq->ClientDescription.ProductUri, &clientAppCfg->clientDescription.ProductUri);
-    if (SOPC_STATUS_OK != status || pReq->ClientDescription.ProductUri.Length <= 0)
+    if (pReq->ClientDescription.ProductUri.Length <= 0)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
                               "No client product URI set in the create session request on channel config=%" PRIu32,
                               msg_session_bs__p_channel_config_idx);
     }
 
-    status = SOPC_LocalizedText_Copy(&pReq->ClientDescription.ApplicationName,
-                                     &clientAppCfg->clientDescription.ApplicationName);
-    if (SOPC_STATUS_OK != status || pReq->ClientDescription.ApplicationName.defaultText.Length <= 0)
+    if (pReq->ClientDescription.ApplicationName.defaultText.Length <= 0)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
                               "No client application name set in the create session request on channel config=%" PRIu32,

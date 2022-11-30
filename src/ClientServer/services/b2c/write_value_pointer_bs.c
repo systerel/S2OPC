@@ -51,19 +51,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
 
     if (NULL != writeValueCopy)
     {
-        retStatus = SOPC_NodeId_Copy(&writeValueCopy->NodeId, &wv->NodeId);
-
-        writeValueCopy->AttributeId = wv->AttributeId;
-
-        if (SOPC_STATUS_OK == retStatus)
-        {
-            retStatus = SOPC_String_Copy(&writeValueCopy->IndexRange, &wv->IndexRange);
-        }
-
-        if (SOPC_STATUS_OK == retStatus)
-        {
-            retStatus = SOPC_DataValue_Copy(&writeValueCopy->Value, &wv->Value);
-        }
+        retStatus = SOPC_EncodeableObject_Copy(&OpcUa_WriteValue_EncodeableType, writeValueCopy, wv);
 
         if (SOPC_STATUS_OK == retStatus)
         {

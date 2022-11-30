@@ -43,118 +43,6 @@ void service_register_server2_set_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-static bool internal_registered_server_copy(OpcUa_RegisteredServer* dst, OpcUa_RegisteredServer* src)
-{
-    assert(NULL != dst);
-    assert(NULL != src);
-
-    SOPC_ReturnStatus status = SOPC_String_Copy(&dst->ServerUri, &src->ServerUri);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-    status = SOPC_String_Copy(&dst->ProductUri, &src->ProductUri);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-
-    if (src->NoOfServerNames > 0)
-    {
-        dst->ServerNames = SOPC_Calloc((size_t) src->NoOfServerNames, sizeof(SOPC_LocalizedText));
-        if (NULL != dst->ServerNames)
-        {
-            dst->NoOfServerNames = src->NoOfServerNames;
-            bool res = true;
-            for (int32_t i = 0; i < dst->NoOfServerNames; i++)
-            {
-                SOPC_LocalizedText_Initialize(&dst->ServerNames[i]);
-                status = SOPC_LocalizedText_Copy(&dst->ServerNames[i], &src->ServerNames[i]);
-                res = res && SOPC_STATUS_OK == status;
-            }
-
-            if (!res)
-            {
-                return false;
-            }
-        }
-    }
-
-    dst->ServerType = src->ServerType;
-
-    status = SOPC_String_Copy(&dst->GatewayServerUri, &src->GatewayServerUri);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-
-    if (src->NoOfDiscoveryUrls > 0)
-    {
-        dst->DiscoveryUrls = SOPC_Calloc((size_t) src->NoOfDiscoveryUrls, sizeof(SOPC_String));
-        if (NULL != dst->DiscoveryUrls)
-        {
-            dst->NoOfDiscoveryUrls = src->NoOfDiscoveryUrls;
-            bool res = true;
-            for (int32_t i = 0; i < dst->NoOfDiscoveryUrls; i++)
-            {
-                SOPC_String_Initialize(&dst->DiscoveryUrls[i]);
-                status = SOPC_String_Copy(&dst->DiscoveryUrls[i], &src->DiscoveryUrls[i]);
-                res = res && SOPC_STATUS_OK == status;
-            }
-
-            if (!res)
-            {
-                return false;
-            }
-        }
-    }
-
-    status = SOPC_String_Copy(&dst->SemaphoreFilePath, &src->SemaphoreFilePath);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-
-    dst->IsOnline = src->IsOnline;
-
-    return true;
-}
-
-static bool internal_mdns_config_copy(OpcUa_MdnsDiscoveryConfiguration* dst, OpcUa_MdnsDiscoveryConfiguration* src)
-{
-    assert(NULL != dst);
-    assert(NULL != src);
-
-    SOPC_ReturnStatus status = SOPC_String_Copy(&dst->MdnsServerName, &src->MdnsServerName);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-
-    if (src->NoOfServerCapabilities > 0)
-    {
-        dst->ServerCapabilities = SOPC_Calloc((size_t) src->NoOfServerCapabilities, sizeof(SOPC_String));
-        if (NULL != dst->ServerCapabilities)
-        {
-            dst->NoOfServerCapabilities = src->NoOfServerCapabilities;
-            bool res = true;
-            for (int32_t i = 0; i < dst->NoOfServerCapabilities; i++)
-            {
-                SOPC_String_Initialize(&dst->ServerCapabilities[i]);
-                status = SOPC_String_Copy(&dst->ServerCapabilities[i], &src->ServerCapabilities[i]);
-                res = res && SOPC_STATUS_OK == status;
-            }
-
-            if (!res)
-            {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
 void service_register_server2_set_bs__add_to_registered_server2_set(
     const constants__t_RegisteredServer_i service_register_server2_set_bs__p_registered_server,
     const constants__t_MdnsDiscoveryConfig_i service_register_server2_set_bs__p_mdns_config,
@@ -174,14 +62,17 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
     {
         // Move RegisteredServer
         OpcUa_RegisteredServer_Initialize(&newRecord->registeredServer);
-        bool copiedRegSrv = internal_registered_server_copy(&newRecord->registeredServer,
-                                                            service_register_server2_set_bs__p_registered_server);
+        SOPC_ReturnStatus status =
+            SOPC_EncodeableObject_Copy(&OpcUa_RegisteredServer_EncodeableType, &newRecord->registeredServer,
+                                       service_register_server2_set_bs__p_registered_server);
+        if (SOPC_STATUS_OK == status)
+        {
+            OpcUa_MdnsDiscoveryConfiguration_Initialize(&newRecord->mDNSconfig);
+            status = SOPC_EncodeableObject_Copy(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType,
+                                                &newRecord->mDNSconfig, service_register_server2_set_bs__p_mdns_config);
+        }
 
-        OpcUa_MdnsDiscoveryConfiguration_Initialize(&newRecord->mDNSconfig);
-        bool copiedMdns =
-            internal_mdns_config_copy(&newRecord->mDNSconfig, service_register_server2_set_bs__p_mdns_config);
-
-        if (copiedRegSrv && copiedMdns)
+        if (SOPC_STATUS_OK == status)
         {
             // Move mDNSconfig
             newRecord->recordId = service_register_server2_set_bs__p_recordId;

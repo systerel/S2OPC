@@ -274,18 +274,8 @@ static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildIn
         SOPC_Encodeable_CreateExtension(extObject, &OpcUa_BuildInfo_EncodeableType, (void**) &build_info_in_extObject);
     assert(SOPC_STATUS_OK == status);
 
-    /* copy values */
-    status = SOPC_String_Copy(&build_info_in_extObject->ProductUri, &build_info->ProductUri);
+    status = SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, build_info_in_extObject, build_info);
     assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&build_info_in_extObject->ManufacturerName, &build_info->ManufacturerName);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&build_info_in_extObject->ProductName, &build_info->ProductName);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&build_info_in_extObject->SoftwareVersion, &build_info->SoftwareVersion);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&build_info_in_extObject->BuildNumber, &build_info->BuildNumber);
-    assert(SOPC_STATUS_OK == status);
-    build_info_in_extObject->BuildDate = build_info->BuildDate;
 
     /* Prepare write of this extension object */
     set_write_value_id(wv, OpcUaId_Server_ServerStatus_BuildInfo);
@@ -337,18 +327,9 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, SOPC_Server_Runt
                                              (void**) &server_status_in_extObject);
     assert(SOPC_STATUS_OK == status);
 
-    /* copy values */
-    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ProductUri, &build_info->ProductUri);
+    status =
+        SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, &server_status_in_extObject->BuildInfo, build_info);
     assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ManufacturerName, &build_info->ManufacturerName);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.ProductName, &build_info->ProductName);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.SoftwareVersion, &build_info->SoftwareVersion);
-    assert(SOPC_STATUS_OK == status);
-    status = SOPC_String_Copy(&server_status_in_extObject->BuildInfo.BuildNumber, &build_info->BuildNumber);
-    assert(SOPC_STATUS_OK == status);
-    server_status_in_extObject->BuildInfo.BuildDate = build_info->BuildDate;
 
     server_status_in_extObject->CurrentTime = SOPC_Time_GetCurrentTimeUTC();
     server_status_in_extObject->SecondsTillShutdown = vars->secondsTillShutdown;

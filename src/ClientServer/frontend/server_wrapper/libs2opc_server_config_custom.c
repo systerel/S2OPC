@@ -437,30 +437,12 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
 
     OpcUa_UserTokenPolicy* utp = &destSecuConfig->userTokenPolicies[destSecuConfig->nbOfUserTokenPolicies];
     OpcUa_UserTokenPolicy_Initialize(utp);
-    SOPC_ReturnStatus status = SOPC_String_Copy(&utp->IssuedTokenType, &userTokenPolicy->IssuedTokenType);
-    if (SOPC_STATUS_OK != status)
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Copy(&OpcUa_UserTokenPolicy_EncodeableType, utp, userTokenPolicy);
+    if (SOPC_STATUS_OK == status)
     {
-        return status;
+        destSecuConfig->nbOfUserTokenPolicies++;
     }
-    status = SOPC_String_Copy(&utp->IssuerEndpointUrl, &userTokenPolicy->IssuerEndpointUrl);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
-    status = SOPC_String_Copy(&utp->PolicyId, &userTokenPolicy->PolicyId);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
-    status = SOPC_String_Copy(&utp->SecurityPolicyUri, &userTokenPolicy->SecurityPolicyUri);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
-    utp->TokenType = userTokenPolicy->TokenType;
-
-    destSecuConfig->nbOfUserTokenPolicies++;
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
@@ -574,30 +556,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ProductUri, &buildInfo->ProductUri);
+        status =
+            SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, sopc_server_helper_config.buildInfo, buildInfo);
     }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ManufacturerName, &buildInfo->ManufacturerName);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->ProductName, &buildInfo->ProductName);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->SoftwareVersion, &buildInfo->SoftwareVersion);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_String_Copy(&sopc_server_helper_config.buildInfo->BuildNumber, &buildInfo->BuildNumber);
-    }
-
-    sopc_server_helper_config.buildInfo->BuildDate = buildInfo->BuildDate;
 
     if (SOPC_STATUS_OK != status)
     {
