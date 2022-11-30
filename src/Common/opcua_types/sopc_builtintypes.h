@@ -1131,11 +1131,11 @@ void SOPC_Initialize_Array(int32_t noOfElts,
                            void* eltsArray,
                            size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct);
-SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
-                                void* eltsArrayLeft,
-                                const void* eltsArrayRight,
-                                size_t sizeOfElt,
-                                SOPC_EncodeableObject_PfnCopy* opFct);
+SOPC_ReturnStatus SOPC_Copy_Array(int32_t noOfElts,
+                                  void* eltsArrayDest,
+                                  const void* eltsArraySrc,
+                                  size_t sizeOfElt,
+                                  SOPC_EncodeableObject_PfnCopy* opFct);
 SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
                                   const void* eltsArrayLeft,
                                   const void* eltsArrayRight,

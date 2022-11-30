@@ -3725,11 +3725,11 @@ static SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId buil
     return status;
 }
 
-static SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                                          SOPC_VariantArrayValue* arrayLeft,
-                                                          const SOPC_VariantArrayValue* arrayRight,
-                                                          int32_t length,
-                                                          SOPC_EncodeableObject_PfnCopy* opAuxFunction)
+static SOPC_ReturnStatus ApplyCopyToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                                            SOPC_VariantArrayValue* arrayLeft,
+                                                            const SOPC_VariantArrayValue* arrayRight,
+                                                            int32_t length,
+                                                            SOPC_EncodeableObject_PfnCopy* opAuxFunction)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     switch (builtInTypeId)
@@ -3764,8 +3764,8 @@ static SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtIn
     case SOPC_DiagnosticInfo_Id:
         // Note union fields content are aligned: provide pointer to data
         // (i.e. content of the first field)
-        return SOPC_Op_Array(length, (void*) arrayLeft->BooleanArr, (void*) arrayRight->BooleanArr,
-                             SOPC_BuiltInType_HandlingTable[builtInTypeId].size, opAuxFunction);
+        return SOPC_Copy_Array(length, (void*) arrayLeft->BooleanArr, (void*) arrayRight->BooleanArr,
+                               SOPC_BuiltInType_HandlingTable[builtInTypeId].size, opAuxFunction);
     default:
         break;
     }
@@ -4120,9 +4120,9 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                 if (SOPC_STATUS_OK == status)
                 {
                     dest->Value.Array.Length = src->Value.Array.Length;
-                    status = ApplyOpToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Array.Content,
-                                                              &src->Value.Array.Content, src->Value.Array.Length,
-                                                              copyFunction);
+                    status = ApplyCopyToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Array.Content,
+                                                                &src->Value.Array.Content, src->Value.Array.Length,
+                                                                copyFunction);
                 }
                 if (SOPC_STATUS_OK != status)
                 {
@@ -4173,9 +4173,9 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
                                                               (int32_t) matrixLength);
                         if (SOPC_STATUS_OK == status)
                         {
-                            status = ApplyOpToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Matrix.Content,
-                                                                      &src->Value.Matrix.Content,
-                                                                      (int32_t) matrixLength, copyFunction);
+                            status = ApplyCopyToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Matrix.Content,
+                                                                        &src->Value.Matrix.Content,
+                                                                        (int32_t) matrixLength, copyFunction);
                             if (SOPC_STATUS_OK != status)
                             {
                                 ClearToVariantArrayBuiltInType(src->BuiltInTypeId, &dest->Value.Matrix.Content,
@@ -4791,17 +4791,17 @@ void SOPC_Initialize_Array(int32_t noOfElts,
     }
 }
 
-SOPC_ReturnStatus SOPC_Op_Array(int32_t noOfElts,
-                                void* eltsArrayLeft,
-                                const void* eltsArrayRight,
-                                size_t sizeOfElt,
-                                SOPC_EncodeableObject_PfnCopy* opFct)
+SOPC_ReturnStatus SOPC_Copy_Array(int32_t noOfElts,
+                                  void* eltsArrayDest,
+                                  const void* eltsArraySrc,
+                                  size_t sizeOfElt,
+                                  SOPC_EncodeableObject_PfnCopy* opFct)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     size_t idx = 0;
     size_t pos = 0;
-    SOPC_Byte* byteArrayLeft = eltsArrayLeft;
-    const SOPC_Byte* byteArrayRight = eltsArrayRight;
+    SOPC_Byte* byteArrayLeft = eltsArrayDest;
+    const SOPC_Byte* byteArrayRight = eltsArraySrc;
     if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status; idx++)

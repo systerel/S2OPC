@@ -629,7 +629,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
                 *pArrayDest = SOPC_Calloc((size_t) *pSrcLength, size);
                 if (NULL != *pArrayDest)
                 {
-                    status = SOPC_Op_Array(*pSrcLength, *pArrayDest, *pArraySource, size, copyFunction);
+                    status = SOPC_Copy_Array(*pSrcLength, *pArrayDest, *pArraySource, size, copyFunction);
                 }
                 else
                 {
