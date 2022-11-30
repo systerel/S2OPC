@@ -295,7 +295,7 @@ OPERATIONS
     THEN
         CHOICE
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_client_request_handle_indet
+            req_handle :: t_client_request_handle_i
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
@@ -329,7 +329,7 @@ OPERATIONS
                 e_sc_bad_encoding_error} ||
             channel :(channel : t_channel_i & channel = c_channel_indet) ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            req_handle := c_client_request_handle_indet
+            req_handle :: t_client_request_handle_i
         OR
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
@@ -355,7 +355,7 @@ OPERATIONS
     THEN
         CHOICE
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_client_request_handle_indet
+            req_handle :: t_client_request_handle_i
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
@@ -384,7 +384,7 @@ OPERATIONS
                 e_sc_bad_connection_closed} ||
             channel    := c_channel_indet ||
             buffer_out := c_byte_buffer_indet ||
-            req_handle := c_client_request_handle_indet
+            req_handle :: t_client_request_handle_i
         OR
             ret        := e_sc_ok ||
             channel    :(channel : t_channel_i & channel : s_channel_connected) ||
