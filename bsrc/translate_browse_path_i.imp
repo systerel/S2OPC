@@ -97,6 +97,13 @@ DEFINITIONS
         relativePathEls
         ;
 
+    d_var_browse_path ==
+        BrowsePathSource,
+        BrowsePathResult,
+        BrowsePathRemainingNodeId,
+        BrowsePathRemainingIndex
+        ;
+
     d_inv_browse_value_in ==
     (   in_session                       : t_session_i           &
         in_maxReferencesPerNode          : NAT                   &
@@ -606,7 +613,35 @@ LOCAL_OPERATIONS
             d_inv_element_it
         )
     END
+    ;
 
+    statusCode_operation, p_continue <-- treat_one_translate_browse_path_1_1(rel_path_elt, index, continue) =
+    PRE
+        rel_path_elt : t_RelativePathElt_i &
+        rel_path_elt : t_RelativePathElt   &
+        index : NAT1 &
+        continue : BOOL
+    THEN
+        statusCode_operation,
+        p_continue,
+        d_var_browse_path
+        :(  statusCode_operation : t_StatusCode_i &
+            p_continue : BOOL &
+
+            BrowsePathSource : seq(t_NodeId_i) &
+            BrowsePathResult : seq(t_ExpandedNodeId_i) &
+            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
+            BrowsePathRemainingIndex  : seq(NAT1)
+        ) ||
+
+        d_var_browse_source_it,
+        d_var_browse_value_in,
+        d_var_browse_result_out
+        :(  d_inv_browse_source_it &
+            d_inv_browse_value_in &
+            d_inv_browse_result_out
+        )
+    END
 
 OPERATIONS
 
@@ -1205,6 +1240,7 @@ OPERATIONS
     statusCode_operation <-- treat_one_translate_browse_path_1(statusCode_init, source) =
     VAR
         l_continue,
+        l_continue_1,
         l_source_copy,
         l_index,
         l_relativePathElt
@@ -1229,17 +1265,11 @@ OPERATIONS
         DO
             free_BrowsePathResult;
             l_continue, l_relativePathElt, l_index <-- continue_iter_relativePath;
-            statusCode_operation <-- treat_one_relative_path_element(l_relativePathElt, l_index);
 
-            free_BrowsePathSource;
-            l_continue := bool(l_continue = TRUE &
-                               (statusCode_operation = e_sc_ok or
-                                statusCode_operation = e_sc_uncertain_reference_out_of_server));
-            IF l_continue = TRUE
-            THEN
-                statusCode_operation <-- copy_browsePathResult_to_source
-            END
-
+            l_continue_1 := l_continue;
+            statusCode_operation, l_continue <--
+                treat_one_translate_browse_path_1_1(l_relativePathElt,
+                                                    l_index, l_continue_1)
         INVARIANT
             elements_to_iterate : seq(t_RelativePathElt)  &
             elements_iterated   : seq(t_RelativePathElt)  &
@@ -1253,6 +1283,22 @@ OPERATIONS
 
         VARIANT
             card(elements_to_iterate)
+        END
+    END
+    ;
+
+    statusCode_operation, p_continue <-- treat_one_translate_browse_path_1_1(rel_path_elt, index, continue) =
+    BEGIN
+        statusCode_operation <--
+            treat_one_relative_path_element(rel_path_elt, index);
+
+        free_BrowsePathSource;
+        p_continue := bool(continue = TRUE &
+                           (statusCode_operation = e_sc_ok or
+                            statusCode_operation = e_sc_uncertain_reference_out_of_server));
+        IF p_continue = TRUE
+        THEN
+            statusCode_operation <-- copy_browsePathResult_to_source
         END
     END
 

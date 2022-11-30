@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 23/11/2022 13:23:59
+ Date                 : 30/11/2022 05:00:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -651,6 +651,7 @@ void translate_browse_path__treat_one_translate_browse_path_1(
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
    {
       t_bool translate_browse_path__l_continue;
+      t_bool translate_browse_path__l_continue_1;
       constants__t_NodeId_i translate_browse_path__l_source_copy;
       t_entier4 translate_browse_path__l_index;
       constants__t_RelativePathElt_i translate_browse_path__l_relativePathElt;
@@ -671,17 +672,31 @@ void translate_browse_path__treat_one_translate_browse_path_1(
          translate_browse_path_element_it__continue_iter_relativePath(&translate_browse_path__l_continue,
             &translate_browse_path__l_relativePathElt,
             &translate_browse_path__l_index);
-         translate_browse_path__treat_one_relative_path_element(translate_browse_path__l_relativePathElt,
+         translate_browse_path__l_continue_1 = translate_browse_path__l_continue;
+         translate_browse_path__treat_one_translate_browse_path_1_1(translate_browse_path__l_relativePathElt,
             translate_browse_path__l_index,
-            translate_browse_path__statusCode_operation);
-         translate_browse_path__free_BrowsePathSource();
-         translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
-            ((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
-            (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
-         if (translate_browse_path__l_continue == true) {
-            translate_browse_path__copy_browsePathResult_to_source(translate_browse_path__statusCode_operation);
-         }
+            translate_browse_path__l_continue_1,
+            translate_browse_path__statusCode_operation,
+            &translate_browse_path__l_continue);
       }
+   }
+}
+
+void translate_browse_path__treat_one_translate_browse_path_1_1(
+   const constants__t_RelativePathElt_i translate_browse_path__rel_path_elt,
+   const t_entier4 translate_browse_path__index,
+   const t_bool translate_browse_path__continue,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation,
+   t_bool * const translate_browse_path__p_continue) {
+   translate_browse_path__treat_one_relative_path_element(translate_browse_path__rel_path_elt,
+      translate_browse_path__index,
+      translate_browse_path__statusCode_operation);
+   translate_browse_path__free_BrowsePathSource();
+   *translate_browse_path__p_continue = ((translate_browse_path__continue == true) &&
+      ((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
+      (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
+   if (*translate_browse_path__p_continue == true) {
+      translate_browse_path__copy_browsePathResult_to_source(translate_browse_path__statusCode_operation);
    }
 }
 
