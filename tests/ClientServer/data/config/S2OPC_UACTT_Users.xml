@@ -3,7 +3,7 @@
   <Anonymous>
     <UserAuthorization write="true" read="true" execute="true" addnode="true" />
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="10000">
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- user="user1" pwd="password" -->
     <UserPassword user="user1" hash="rHOX8eI0E4KQCofDzC2B5ZKdzerB6uGUD+UiiJm46D0=" salt="cy7PLE59LTnr1vV00OnyVA==" base64="true">
       <UserAuthorization write="true" read="true" execute="true" addnode="true" />

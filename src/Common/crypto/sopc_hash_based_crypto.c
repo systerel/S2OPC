@@ -29,8 +29,6 @@
 #include "hash_based_crypto_lib.h"
 #include "sopc_hash_based_crypto.h"
 
-#define SHA256_DIGEST_SIZE_BYTES 32u
-
 /**
  * \brief   cryptographic structure to configure the algorithm used.
  */
@@ -99,8 +97,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_PBKDF2(SOPC_HashBasedCrypto_Config
                                                      size_t iteration_count,
                                                      size_t lenOutput)
 {
-    if (NULL == config || NULL == pSalt || 0 == iteration_count || 0 == lenOutput ||
-        0 != (lenOutput % SHA256_DIGEST_SIZE_BYTES))
+    if (NULL == config || NULL == pSalt || 0 == iteration_count || 0 == lenOutput)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

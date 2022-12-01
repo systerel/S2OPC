@@ -3,7 +3,7 @@
   <Anonymous>
     <UserAuthorization/>
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="10000">
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- user="noaccess" pwd="secret" -->
     <UserPassword user="noaccess" hash="nB2iURQGOgMGXcfUY1f8psiE5DmXXAvhl1eMhDJFA5Y=" salt="anv9SGojovLlHSO15B2mJQ==" base64="true">
       <UserAuthorization/>

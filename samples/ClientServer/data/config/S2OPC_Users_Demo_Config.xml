@@ -4,7 +4,7 @@
     <!-- Anonymous is read only -->
     <UserAuthorization write="false" read="true" execute="false" />
   </Anonymous>
-  <UserPasswordConfiguration hash_iteration_count="10000">
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- "user1" pwd=password cannot call methods of address space -->
     <UserPassword user="user1" hash="q9UVP2qKV+xvxWlXbHjl//OLy+gBFf5yipvO9uOybIM=" salt="M59HxepygLeEw5sqFJ+Zgw==" base64="true">
       <UserAuthorization write="true" read="true" execute="false" />

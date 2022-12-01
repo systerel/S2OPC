@@ -37,11 +37,10 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
-/* Default user password configuration for rejected token with wrong username (to avoid timing attack) */
+/* Default name for rejected token with wrong username (to avoid timing attack) */
 #define REJECTED_USER "rejectedUser"
-#define REJECTED_HASH "2/uIDCHytBMdVkCsWgcjyLRksoWZZIFGpxcRd+b0ISE="
-#define REJECTED_SALT "lnpfeUrWa41tYNvDuyXh4A=="
-#define REJECTED_ITER_COUNT 10000u
+/* the value used to fill the memory for the salt and hash */
+#define BYTE_REJECTED_USER 0xA5
 
 typedef enum
 {
@@ -75,6 +74,7 @@ typedef struct _SOPC_UsersConfig
 {
     SOPC_Dict* users;
     user_rights anonRights;
+    user_password* rejectedUser;
 } SOPC_UsersConfig;
 
 struct parse_context_t
@@ -88,13 +88,22 @@ struct parse_context_t
     user_rights anonymousRights;
 
     user_password* currentUserPassword;
+    user_password* rejectedUser;
     size_t hashIterationCount;
+    size_t hashLength;
+    size_t saltLength;
 
     parse_state_t state;
 };
 
 #define NS_SEPARATOR "|"
 #define NS(ns, tag) ns NS_SEPARATOR tag
+
+SOPC_ReturnStatus generate_fixed_hash_or_salt(SOPC_ByteString* toGen, size_t length);
+static SOPC_ReturnStatus set_default_password_hash(user_password** up,
+                                                   size_t hashLength,
+                                                   size_t saltLength,
+                                                   size_t iterationCount);
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
@@ -204,33 +213,48 @@ static bool end_userpassword(struct parse_context_t* ctx)
     return true;
 }
 
-static bool get_decode_buffer(const char* buffer, bool base64, SOPC_ByteString* out, XML_Parser parser)
+static bool get_decode_buffer(const char* buffer,
+                              bool base64,
+                              size_t expected_length,
+                              SOPC_ByteString* out,
+                              XML_Parser parser)
 {
     SOPC_ASSERT(NULL != buffer);
     size_t outLen = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    // Get the output size from the encoding input format
+    // Get and check the output length from the encoding input format
     if (!base64)
     {
-        if (0 != strlen(buffer) % 2)
+        outLen = strlen(buffer);
+        if (0 != outLen % 2)
         {
             LOG_XML_ERROR(parser, "Hash hex format must be a multiple of 2 bytes");
             return false;
         }
-        outLen = (strlen(buffer) / 2);
+        outLen = outLen / 2;
     }
     else
     {
-        if (0 != strlen(buffer) % 4)
+        outLen = strlen(buffer);
+        if (0 != outLen % 4)
         {
             LOG_XML_ERROR(parser, "Hash base64 format must be a multiple of 4 bytes");
             return false;
         }
         size_t paddingLength = 0;
         status = SOPC_HelperDecode_Base64_GetPaddingLength(buffer, &paddingLength);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
-        outLen = (3 * (strlen(buffer) / 4)) - paddingLength;
+        if (SOPC_STATUS_OK != status)
+        {
+            LOG_XML_ERROR(parser, "Invalid padding for base64 encoding");
+            return false;
+        }
+        outLen = (3 * (outLen / 4)) - paddingLength;
+    }
+    if (expected_length != outLen)
+    {
+        LOG_XML_ERROR(parser, "Hash length is not the same as the global configuration");
+        return false;
     }
     // Decode
     SOPC_ByteString_Initialize(out);
@@ -267,7 +291,8 @@ static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool b
         return false;
     }
 
-    bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
+    bool res =
+        get_decode_buffer(attr_val, base64, ctx->hashLength, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
     return res;
 }
 
@@ -280,7 +305,8 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
         return false;
     }
 
-    bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
+    bool res =
+        get_decode_buffer(attr_val, base64, ctx->saltLength, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
     return res;
 }
 
@@ -300,7 +326,44 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    return true;
+    if (ctx->hashIterationCount == 0)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is equal to zero");
+        return false;
+    }
+
+    attr_val = get_attr(ctx, "hash_length", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no hash length defined");
+        return false;
+    }
+
+    status = SOPC_strtouint32_t(attr_val, (uint32_t*) &ctx->hashLength, 10, '\0');
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "hash length is not an integer");
+        return false;
+    }
+
+    attr_val = get_attr(ctx, "salt_length", attrs);
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no salt length defined");
+        return false;
+    }
+
+    status = SOPC_strtouint32_t(attr_val, (uint32_t*) &ctx->saltLength, 10, '\0');
+    if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "salt length is not an integer");
+        return false;
+    }
+
+    /* Lengths are checked during the parsing of salt and hash (get_decode_buffer) */
+    status = set_default_password_hash(&ctx->rejectedUser, ctx->hashLength, ctx->saltLength, ctx->hashIterationCount);
+
+    return status == SOPC_STATUS_OK;
 }
 
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
@@ -570,53 +633,47 @@ static bool secure_hash_compare(const user_password* sRef, const SOPC_ByteString
     return result && (lRef == lCmp);
 }
 
-static SOPC_ReturnStatus set_default_password_hash(user_password** up)
+SOPC_ReturnStatus generate_fixed_hash_or_salt(SOPC_ByteString* toGen, size_t length)
 {
-    size_t outLen = 0;
-    size_t paddingLength = 0;
-    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    if (toGen == NULL || length == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
+    SOPC_ReturnStatus status = SOPC_ByteString_InitializeFixedSize(toGen, (uint32_t) length);
+    if (SOPC_STATUS_OK == status)
+    {
+        memset(toGen->Data, BYTE_REJECTED_USER, length);
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus set_default_password_hash(user_password** up,
+                                                   size_t hashLength,
+                                                   size_t saltLength,
+                                                   size_t iterationCount)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    if (NULL == up)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     // Allocate the user password structure
     user_password* pwd = SOPC_Malloc(sizeof(user_password) * 1);
     if (NULL == pwd)
     {
         return status;
     }
-
     // Allocate the default hash
-    status = SOPC_HelperDecode_Base64_GetPaddingLength(REJECTED_HASH, &paddingLength);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_ByteString_Initialize(&pwd->hash);
-    if (SOPC_STATUS_OK == status)
-    {
-        outLen = (3 * (strlen(REJECTED_HASH) / 4)) - paddingLength;
-        pwd->hash.Length = (int32_t) outLen;
-        pwd->hash.Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
-        if (NULL == pwd->hash.Data)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        status = SOPC_HelperDecode_Base64(REJECTED_HASH, pwd->hash.Data, &outLen);
-    }
-
+    status = generate_fixed_hash_or_salt(&pwd->hash, hashLength);
     // Allocate the default salt
-    status = SOPC_HelperDecode_Base64_GetPaddingLength(REJECTED_SALT, &paddingLength);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_ByteString_Initialize(&pwd->salt);
     if (SOPC_STATUS_OK == status)
     {
-        outLen = (3 * (strlen(REJECTED_SALT) / 4)) - paddingLength;
-        pwd->salt.Length = (int32_t) outLen;
-        pwd->salt.Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
-        if (NULL == pwd->salt.Data)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        status = SOPC_HelperDecode_Base64(REJECTED_SALT, pwd->salt.Data, &outLen);
+        status = generate_fixed_hash_or_salt(&pwd->salt, saltLength);
     }
-
     // Set the default iteration count
-    pwd->iteration_count = REJECTED_ITER_COUNT;
+    pwd->iteration_count = iterationCount;
     // Allocate the default user
     SOPC_String_Initialize(&pwd->user);
     status = SOPC_String_CopyFromCString((SOPC_String*) &pwd->user, REJECTED_USER);
@@ -638,7 +695,6 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UsersConfig* config = authn->pData;
-    bool wrongUsername = false;
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
     assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
@@ -647,17 +703,11 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
         user_password* up = SOPC_Dict_Get(config->users, username, NULL);
-        // if rejected Token with wrong username: set default password hash configuration to avoid timing attack (to
+        // if rejected Token with wrong username: use default password hash configuration to avoid timing attack (to
         // have a constant time during authentication process)
         if (NULL == up)
         {
-            wrongUsername = true;
-            status = set_default_password_hash(&up);
-            if (SOPC_STATUS_OK != status)
-            {
-                //  Even if the default hash setting failed, then the token is rejected
-                return SOPC_STATUS_OK;
-            }
+            up = config->rejectedUser;
         }
 
         SOPC_HashBasedCrypto_Config* configHash = NULL;
@@ -708,12 +758,6 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         status = status_crypto;
         SOPC_ByteString_Delete(UserPasswordHash);
         SOPC_HashBasedCrypto_Config_Free(configHash);
-
-        // Free the default user password hash in case of wrong username
-        if (wrongUsername)
-        {
-            userpassword_free(up);
-        }
     }
 
     return status;
@@ -793,6 +837,7 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
     if (NULL != authentication && NULL != authentication->pData)
     {
         SOPC_Dict_Delete(((SOPC_UsersConfig*) authentication->pData)->users);
+        userpassword_free(((SOPC_UsersConfig*) authentication->pData)->rejectedUser);
         SOPC_Free(authentication->pData);
     }
     SOPC_Free(authentication);
@@ -864,6 +909,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         else
         {
             config->users = users;
+            config->rejectedUser = ctx.rejectedUser;
             config->anonRights = ctx.anonymousRights;
             (*authentication)->pData = config;
             (*authentication)->pFunctions = &authentication_functions;
