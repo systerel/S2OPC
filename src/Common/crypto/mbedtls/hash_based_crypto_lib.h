@@ -40,8 +40,8 @@
  *                          You should free it.
  * \param lenOutput         Length of \p ppOutput desired.
  *
- * \note            \p lenSecret must not exceed 64 bytes because if the HMAC key is longer than the blocks in the hash
- * function then the \p pSecret is hashed beforehand, which can reduce the entropy of the derived \p ppOutput .
+ * \note            \p lenSecret should not exceed 32 bytes because a secret longer than digest size
+ *                  does not protect more, because, HMAC-SHA256 is considered to have 256 bits maximum input entropy.
  *
  * \note            You doesn't have to free the content of \p ppOutput when there is an error.
  *

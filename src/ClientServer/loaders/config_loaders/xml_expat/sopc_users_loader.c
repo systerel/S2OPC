@@ -268,10 +268,6 @@ static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool b
     }
 
     bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
-    if (!res)
-    {
-        SOPC_Free(&ctx->currentUserPassword->hash);
-    }
     return res;
 }
 
@@ -285,10 +281,6 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
     }
 
     bool res = get_decode_buffer(attr_val, base64, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
-    if (!res)
-    {
-        SOPC_Free(&ctx->currentUserPassword->salt);
-    }
     return res;
 }
 
@@ -668,17 +660,18 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
             }
         }
 
-        SOPC_HashBasedCrypto_Config configHash;
-        SOPC_ReturnStatus status_crypto = SOPC_STATUS_OK;
+        SOPC_HashBasedCrypto_Config* configHash = NULL;
+        SOPC_ReturnStatus status_crypto = SOPC_HashBasedCrypto_Config_Create(&configHash);
         SOPC_ByteString* UserPasswordHash = NULL;
 
+        SOPC_ASSERT(0 < up->hash.Length);
         // Configure the salt and the counter from the XML
         status_crypto =
-            SOPC_HashBasedCrypto_Config_PBKDF2(&configHash, &up->salt, up->iteration_count, (size_t) up->hash.Length);
+            SOPC_HashBasedCrypto_Config_PBKDF2(configHash, &up->salt, up->iteration_count, (size_t) up->hash.Length);
         if (SOPC_STATUS_OK == status_crypto)
         {
             // Hash the password issued form the userToken
-            status_crypto = SOPC_HashBasedCrypto_Run(&configHash, &userToken->Password, &UserPasswordHash);
+            status_crypto = SOPC_HashBasedCrypto_Run(configHash, &userToken->Password, &UserPasswordHash);
         }
 
         // Compare the result
@@ -714,6 +707,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
         status = status_crypto;
         SOPC_ByteString_Delete(UserPasswordHash);
+        SOPC_HashBasedCrypto_Config_Free(configHash);
 
         // Free the default user password hash in case of wrong username
         if (wrongUsername)

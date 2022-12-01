@@ -42,12 +42,16 @@ START_TEST(test_pbkdf2_hmac_sha256)
     SOPC_ByteString salt;
     SOPC_ByteString hashHex;
     SOPC_ByteString* hash = NULL;
-    SOPC_HashBasedCrypto_Config config;
+    SOPC_HashBasedCrypto_Config* config = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     SOPC_ByteString_Initialize(&password);
     SOPC_ByteString_Initialize(&salt);
     SOPC_ByteString_Initialize(&hashHex);
+
+    /* Create the configuration structure */
+    status = SOPC_HashBasedCrypto_Config_Create(&config);
+    ck_assert_ptr_nonnull(config);
 
     /*
     Part 11 of [RFC7914] https://www.rfc-editor.org/rfc/rfc7914.txt
@@ -89,11 +93,11 @@ START_TEST(test_pbkdf2_hmac_sha256)
     size_t iteration_count = 1;
 
     // Set the salt and the counter
-    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
     SOPC_DateTime t0 = SOPC_Time_GetCurrentTimeUTC();
-    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
+    status = SOPC_HashBasedCrypto_Run(config, &password, &hash);
     SOPC_DateTime t1 = SOPC_Time_GetCurrentTimeUTC();
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
@@ -121,10 +125,10 @@ START_TEST(test_pbkdf2_hmac_sha256)
 
     iteration_count = 80000;
 
-    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
-    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
+    status = SOPC_HashBasedCrypto_Run(config, &password, &hash);
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
@@ -152,11 +156,11 @@ START_TEST(test_pbkdf2_hmac_sha256)
     lenHash = 32;
     iteration_count = 10000;
 
-    status = SOPC_HashBasedCrypto_Config_PBKDF2(&config, &salt, iteration_count, lenHash);
+    status = SOPC_HashBasedCrypto_Config_PBKDF2(config, &salt, iteration_count, lenHash);
     ck_assert(SOPC_STATUS_OK == status);
     // Hash the password
     t0 = SOPC_Time_GetCurrentTimeUTC();
-    status = SOPC_HashBasedCrypto_Run(&config, &password, &hash);
+    status = SOPC_HashBasedCrypto_Run(config, &password, &hash);
     t1 = SOPC_Time_GetCurrentTimeUTC();
     // Check result
     ck_assert(SOPC_STATUS_OK == status);
@@ -170,6 +174,9 @@ START_TEST(test_pbkdf2_hmac_sha256)
     SOPC_ByteString_Clear(&hashHex);
     SOPC_ByteString_Clear(&salt);
     SOPC_ByteString_Delete(hash);
+
+    /* Free the configuration structure */
+    SOPC_HashBasedCrypto_Config_Free(config);
 }
 END_TEST
 

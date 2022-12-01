@@ -19,7 +19,12 @@
 
 /** \file sopc_hash_based_crypto.h
  *
- * \brief   Defines a cryptographic API to performing hash mechanisms
+ * \brief   Defines a cryptographic API to performing hash mechanisms.
+ *          This module is not required by the OPC UA protocol.
+ *          It hashes a secret and may be used to authenticate users.
+ *
+ *          Supported algorithms:
+ *              - PBKDF2 with HMAC-SHA-256 [RFC2898]
  */
 
 #ifndef SOPC_HASH_BASED_CRYPTO_H_
@@ -41,13 +46,26 @@ typedef enum SOPC_HashBasedCrypto_Algo
 /**
  * \brief   cryptographic structure to configure the algorithm used.
  */
-typedef struct SOPC_HashBasedCrypto_Config
-{
-    SOPC_HashBasedCrypto_Algo algo; /*!< The algorithm used */
-    const SOPC_ByteString* pSalt;   /*!< The salt used */
-    size_t iteration_count;         /*!< The number of iteration */
-    size_t lenOutput;               /*!< The hash length in bytes */
-} SOPC_HashBasedCrypto_Config;
+typedef struct SOPC_HashBasedCrypto_Config SOPC_HashBasedCrypto_Config;
+
+/**
+ * \brief           Create the internal configuration structure
+ *
+ * \param cfg       A valid pointer to the newly created structure.
+ *                  You should free it with SOPC_HashBasedCrypto_Config_Free()
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when \p cfg is NULL
+ *                  ond SOPC_STATUS_OUT_OF_MEMORY when memory allocation failed.
+ */
+
+SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_Create(SOPC_HashBasedCrypto_Config** cfg);
+
+/**
+ * \brief      Free the internal configuration.
+ *
+ * \param cfg  A valid pointer to the configuration to freed.
+ */
+void SOPC_HashBasedCrypto_Config_Free(SOPC_HashBasedCrypto_Config* cfg);
 
 /**
  * \brief           Fills the configuration structure for SOPC_HashBasedCrypto_PBKDF2_HMAC_SHA256 algorithm.
@@ -75,10 +93,12 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_PBKDF2(SOPC_HashBasedCrypto_Config
  *                          You should free it.
  *
  * \note            When \p config is configured with SOPC_HashBasedCrypto_PBKDF2_HMAC_SHA256 then length of \p pSecret
- * should not exceed 64 bytes because if the HMAC key is longer than the blocks in the hash function then the \p pSecret
- * is hashed beforehand, which can reduce the entropy of the derived \p ppOutput .
+ *                  should not exceed 32 bytes because a secret longer than digest size does not protect more, because,
+ *                  HMAC-SHA256 is considered to have 256 bits maximum input entropy.
  *
  * \note            Content of the \p ppOutput is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \note            \p config is checked beforehand by this function.
  *
  * \return          SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_NOK or
  * SOPC_STATUS_OUT_OF_MEMORY.
