@@ -324,7 +324,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
     if (SOPC_STATUS_OK == status)
     {
         assert(NULL != addNodesResp);
-        if (addNodesResp->NoOfResults != 1 || addNodesResp->Results[0].StatusCode ||
+        if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult) || addNodesResp->NoOfResults != 1 || addNodesResp->Results[0].StatusCode ||
             !SOPC_NodeId_Equal(&reqNodeId.NodeId, &addNodesResp->Results[0].AddedNodeId))
         {
             status = SOPC_STATUS_NOK;
