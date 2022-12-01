@@ -4549,6 +4549,10 @@ SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src)
             {
                 status =
                     ApplyOpToVariantNonArrayBuiltInType(src->BuiltInTypeId, &dest->Value, &src->Value, copyFunction);
+                if (SOPC_STATUS_OK != status)
+                {
+                    FreeVariantNonArrayBuiltInType(src->BuiltInTypeId, &dest->Value);
+                }
             }
             break;
         case SOPC_VariantArrayType_Array:
