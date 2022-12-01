@@ -479,11 +479,15 @@ static bool set_server_capabilities_locale_ids_array_value(OpcUa_WriteValue* wv,
 
     assert(n_locale_ids <= INT32_MAX);
 
-    SOPC_String* localeIds = SOPC_Calloc(n_locale_ids, sizeof(SOPC_String));
+    SOPC_String* localeIds = NULL;
 
-    if (localeIds == NULL)
+    if (n_locale_ids > 0)
     {
-        return false;
+        localeIds = SOPC_Calloc(n_locale_ids, sizeof(SOPC_String));
+        if (localeIds == NULL)
+        {
+            return false;
+        }
     }
 
     for (size_t i = 0; i < n_locale_ids; i++)

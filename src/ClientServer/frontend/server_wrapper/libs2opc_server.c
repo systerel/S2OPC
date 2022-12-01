@@ -122,9 +122,9 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
 
     assert(&OpcUa_WriteResponse_EncodeableType == encType);
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
-    bool ok = (writeResp->ResponseHeader.ServiceResult == SOPC_GoodGenericStatus);
+    bool ok = (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult));
 
-    for (int32_t i = 0; i < writeResp->NoOfResults; ++i)
+    for (int32_t i = 0; ok && i < writeResp->NoOfResults; ++i)
     {
         ok &= (writeResp->Results[i] == SOPC_GoodGenericStatus);
     }
