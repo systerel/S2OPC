@@ -1049,18 +1049,20 @@ CSTS_USER_TOKEN_POLICIES = """
  *===========================================================================*/
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_Anonymous = {
-    .TokenType = OpcUa_UserTokenType_Anonymous,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_Anonymous_ID) - 1, true,
                 (SOPC_Byte*) SOPC_UserTokenPolicy_Anonymous_ID},
+    .TokenType = OpcUa_UserTokenType_Anonymous,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {0, true, NULL},
 };
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
-    .TokenType = OpcUa_UserTokenType_UserName,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_UserNameNone_ID) - 1, true,
                 (SOPC_Byte*) SOPC_UserTokenPolicy_UserNameNone_ID},
+    .TokenType = OpcUa_UserTokenType_UserName,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_None_URI) - 1, true, (SOPC_Byte*) SOPC_SecurityPolicy_None_URI},
@@ -1069,9 +1071,10 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_NoneSecurityPolicy = {
 };
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy = {
-    .TokenType = OpcUa_UserTokenType_UserName,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_UserName_ID) - 1, true,
                 (SOPC_Byte*) SOPC_UserTokenPolicy_UserName_ID},
+    .TokenType = OpcUa_UserTokenType_UserName,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {0, true, NULL},
@@ -1080,9 +1083,10 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy 
 };
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy = {
-    .TokenType = OpcUa_UserTokenType_UserName,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID) - 1, true,
                  (SOPC_Byte*) SOPC_UserTokenPolicy_UserNameBasic256Sha256_ID},
+    .TokenType = OpcUa_UserTokenType_UserName,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_Basic256Sha256_URI) - 1, true,
