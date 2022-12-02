@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 30/11/2022 05:00:51
+ Date                 : 02/12/2022 08:55:40
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -458,12 +458,13 @@ void translate_browse_path__copy_browsePathResult_to_msg(
                translate_browse_path__l_size_result,
                translate_browse_path__out_statusCode_operation,
                &translate_browse_path__l_statusCode_alloc);
-            translate_browse_path__l_statusCode_op = *translate_browse_path__out_statusCode_operation;
-            translate_browse_path__copy_browsePathResult_to_msg_2(translate_browse_path__browsePath,
-               translate_browse_path__l_statusCode_op,
-               translate_browse_path__l_size_remaining,
-               translate_browse_path__l_statusCode_alloc,
-               translate_browse_path__out_statusCode_operation);
+            if (translate_browse_path__l_statusCode_alloc == constants_statuscodes_bs__e_sc_ok) {
+               translate_browse_path__l_statusCode_op = *translate_browse_path__out_statusCode_operation;
+               translate_browse_path__copy_browsePathResult_to_msg_2(translate_browse_path__browsePath,
+                  translate_browse_path__l_statusCode_op,
+                  translate_browse_path__l_size_remaining,
+                  translate_browse_path__out_statusCode_operation);
+            }
          }
          else {
             *translate_browse_path__out_statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -511,7 +512,6 @@ void translate_browse_path__copy_browsePathResult_to_msg_2(
    const constants__t_BrowsePath_i translate_browse_path__browsePath,
    const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode_operation,
    const t_entier4 translate_browse_path__nb_max_ref,
-   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_alloc,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__out_statusCode_operation) {
    {
       t_bool translate_browse_path__l_continue;
@@ -521,7 +521,7 @@ void translate_browse_path__copy_browsePathResult_to_msg_2(
       constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_alloc;
       
       *translate_browse_path__out_statusCode_operation = translate_browse_path__in_statusCode_operation;
-      translate_browse_path__l_statusCode_alloc = translate_browse_path__statusCode_alloc;
+      translate_browse_path__l_statusCode_alloc = constants_statuscodes_bs__e_sc_ok;
       translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__nb_max_ref,
          &translate_browse_path__l_continue);
       translate_browse_path__l_continue = ((translate_browse_path__l_statusCode_alloc == constants_statuscodes_bs__e_sc_ok) &&

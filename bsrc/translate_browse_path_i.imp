@@ -468,7 +468,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref, statusCode_alloc) =
+    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref) =
     PRE
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
@@ -476,9 +476,7 @@ LOCAL_OPERATIONS
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                                    e_sc_bad_out_of_memory} &
-        nb_max_ref : NAT &
-        statusCode_alloc : t_StatusCode_i &
-        statusCode_alloc : t_StatusCode
+        nb_max_ref : NAT
     THEN
         out_statusCode_operation,
         d_var_browse_source_it,
@@ -1055,12 +1053,13 @@ OPERATIONS
                                                    l_statusCode_op,
                                                    l_size_result);
 
-                l_statusCode_op := out_statusCode_operation;
-                out_statusCode_operation <--
-                    copy_browsePathResult_to_msg_2(browsePath,
-                                                   l_statusCode_op,
-                                                   l_size_remaining,
-                                                   l_statusCode_alloc)
+                IF l_statusCode_alloc = e_sc_ok THEN
+                    l_statusCode_op := out_statusCode_operation;
+                    out_statusCode_operation <--
+                        copy_browsePathResult_to_msg_2(browsePath,
+                                                       l_statusCode_op,
+                                                       l_size_remaining)
+                END
             ELSE
                 out_statusCode_operation := e_sc_bad_out_of_memory
             END
@@ -1111,7 +1110,7 @@ OPERATIONS
     END
     ;
 
-    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref, statusCode_alloc) =
+    out_statusCode_operation <-- copy_browsePathResult_to_msg_2(browsePath, in_statusCode_operation, nb_max_ref) =
     VAR
         l_continue,
         l_index,
@@ -1120,7 +1119,7 @@ OPERATIONS
         l_statusCode_alloc
     IN
         out_statusCode_operation := in_statusCode_operation;
-        l_statusCode_alloc := statusCode_alloc;
+        l_statusCode_alloc := e_sc_ok;
 
         l_continue <-- init_iter_browsePathSourceIdx(nb_max_ref);
         l_continue := bool(l_statusCode_alloc = e_sc_ok & l_continue = TRUE);
