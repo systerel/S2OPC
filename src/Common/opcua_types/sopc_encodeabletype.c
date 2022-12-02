@@ -338,6 +338,23 @@ static SOPC_EncodeableObject_PfnCopy* getPfnCopy(const SOPC_EncodeableType_Field
     }
 }
 
+static SOPC_ReturnStatus SOPC_EncodeableType_PfnCompare(const void* leftValue, const void* rightValue, int32_t* comp)
+{
+    return SOPC_EncodeableObject_Compare(*(SOPC_EncodeableType* const*) leftValue, leftValue, rightValue, comp);
+}
+
+static SOPC_EncodeableObject_PfnComp* getPfnCompare(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn)
+    {
+        return SOPC_BuiltInType_HandlingTable[desc->typeIndex].compare;
+    }
+    else
+    {
+        return SOPC_EncodeableType_PfnCompare;
+    }
+}
+
 static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
 {
     /* Avoid "warning: cast increases required alignment of target type [-Wcast-align]"
@@ -652,6 +669,81 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
     if (status != SOPC_STATUS_OK)
     {
         SOPC_EncodeableObject_Clear(type, destValue);
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
+                                                const void* leftValue,
+                                                const void* rightValue,
+                                                int32_t* comp)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int32_t resultComp = 0;
+
+    if (NULL == type || NULL == leftValue || NULL == rightValue ||
+        *((SOPC_EncodeableType* const*) rightValue) != type || *((SOPC_EncodeableType* const*) leftValue) != type ||
+        NULL == comp)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    status = SOPC_STATUS_OK;
+
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        const void* pRightField = (const char*) rightValue + desc->offset;
+        const void* pLeftField = (const char*) leftValue + desc->offset;
+
+        if (desc->isArrayLength)
+        {
+            const int32_t* pLeftLength = NULL;
+            const int32_t* pRightLength = NULL;
+
+            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+            const void* const* pArrayLeft = NULL;
+            const void* const* pArrayRight = NULL;
+            size_t size = 0;
+            SOPC_EncodeableObject_PfnComp* compFunction = NULL;
+
+            assert(desc->isBuiltIn);
+            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            pLeftLength = pLeftField;
+            pRightLength = pRightField;
+
+            ++i;
+            assert(i < type->NoOfFields);
+            if (pLeftLength < pRightLength)
+            {
+                resultComp = -1;
+            }
+            else if (pLeftLength > pRightLength)
+            {
+                resultComp = 1;
+            }
+            else if (*pLeftLength > 0)
+            {
+                arrayDesc = &type->Fields[i];
+                pArrayLeft = retrieveConstArrayAddressPtr(leftValue, arrayDesc);
+                pArrayRight = retrieveConstArrayAddressPtr(rightValue, arrayDesc);
+                size = getAllocationSize(arrayDesc);
+                compFunction = getPfnCompare(arrayDesc);
+
+                status = SOPC_Comp_Array(*pLeftLength, *pArrayLeft, *pArrayRight, size, compFunction, &resultComp);
+            } // else both have length == 0
+        }
+        else
+        {
+            SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
+            status = compFunction(pLeftField, pRightField, &resultComp);
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *comp = resultComp;
     }
 
     return status;

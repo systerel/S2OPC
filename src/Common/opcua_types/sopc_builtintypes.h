@@ -95,8 +95,6 @@ typedef enum
     SOPC_AttributeId_UserExecutable = 22,
 } SOPC_AttributeId;
 
-typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
-
 /**
  * \brief Restricts and converts the status code to the only status code authorized for TCP error code
  */

@@ -101,6 +101,11 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
 
+/**
+ *  \brief Compare function generic signature for an encodeable object
+ */
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
+
 /*
  * \brief Description of an encodeable type field.
  *
@@ -279,5 +284,24 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
  * \return           SOPC_STATUS_OK in case of success, reason of failure otherwise.
  */
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue);
+
+/**
+ * \brief Compare 2 encodeable objects.
+ *
+ * \param type         The encodeableType of \p leftValue and \p rightValue.
+ * \param leftValue    The left encodeable object operand to compare
+ * \param rightValue   The right encodeable object operand to compare
+ * \param[out] comp    Pointer to an integer that will store the comparison result when returned status is
+ *                     SOPC_STATUS_OK. In this latter case:
+ *                     - \p comp &lt; 0 if \p leftValue  &lt;  \p rightValue,
+ *                     - \p comp &gt; 0 if \p leftValue &gt; \p rightValue and
+ *                     - \p comp == 0 if \p leftValue == \p rightValue.
+ *
+ * \return             SOPC_STATUS_OK in case of success, reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
+                                                const void* leftValue,
+                                                const void* rightValue,
+                                                int32_t* comp);
 
 #endif /* SOPC_ENCODEABLETYPE_H_ */
