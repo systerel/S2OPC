@@ -411,9 +411,12 @@ LOCAL_OPERATIONS
     THEN
         out_statusCode_operation,
         d_var_browse_source_it,
+        BrowsePath_Res_NbTargetMax,
         BrowsePath_Res_Target_Node,
         BrowsePath_Res_Target_Index
         :(  d_inv_browse_source_it &
+
+            BrowsePath_Res_NbTargetMax : t_BrowsePath +-> NAT &
 
             out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex,
                 e_sc_bad_out_of_memory, e_sc_bad_too_many_matches} &
