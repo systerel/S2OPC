@@ -3368,9 +3368,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
                                                int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Buffer* encodedLeftObject = NULL;
-    SOPC_Buffer* encodedRightObject = NULL;
-    const SOPC_Common_EncodingConstants* encCfg;
 
     if (NULL == left || NULL == right || NULL == comparison)
     {
@@ -3407,46 +3404,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
                 {
                     if (left->Body.Object.ObjType == right->Body.Object.ObjType)
                     {
-                        /* We do not have a compare method for the object but we can encode it */
-                        encCfg = SOPC_Internal_Common_GetEncodingConstants();
-
-                        encodedLeftObject = SOPC_Buffer_CreateResizable(encCfg->buffer_size, encCfg->send_max_msg_size);
-                        status = NULL == encodedLeftObject ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            encodedRightObject =
-                                SOPC_Buffer_CreateResizable(encCfg->buffer_size, encCfg->send_max_msg_size);
-                            status = NULL == encodedRightObject ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-                        }
-
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            status = SOPC_ExtensionObject_Write(left, encodedLeftObject, 0);
-                        }
-
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            status = SOPC_ExtensionObject_Write(right, encodedRightObject, 0);
-                        }
-
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            if (encodedLeftObject->length == encodedRightObject->length)
-                            {
-                                *comparison = memcmp(encodedLeftObject->data, encodedRightObject->data,
-                                                     (size_t) encodedLeftObject->length);
-                            }
-                            else
-                            {
-                                *comparison = encodedLeftObject->length > encodedRightObject->length ? +1 : -1;
-                            }
-                        }
-
-                        SOPC_Buffer_Delete(encodedLeftObject);
-                        encodedLeftObject = NULL;
-                        SOPC_Buffer_Delete(encodedRightObject);
-                        encodedRightObject = NULL;
+                        status = SOPC_EncodeableObject_Compare(left->Body.Object.ObjType, left->Body.Object.Value,
+                                                               right->Body.Object.Value, comparison);
                     }
                     else
                     {
