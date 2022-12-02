@@ -406,6 +406,7 @@ LOCAL_OPERATIONS
     PRE
         browsePath : t_BrowsePath_i  &
         browsePath : BrowsePaths     &
+        browsePath : dom(BrowsePath_Res_NbTargetMax) &
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
     THEN
@@ -435,6 +436,7 @@ LOCAL_OPERATIONS
     PRE
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
+        browsePath : dom(BrowsePath_Res_NbTargetMax) &
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
         size_result : NAT
@@ -470,6 +472,7 @@ LOCAL_OPERATIONS
     PRE
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
+        browsePath : dom(BrowsePath_Res_NbTargetMax) &
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                                    e_sc_bad_out_of_memory} &

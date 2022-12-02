@@ -306,9 +306,9 @@ OPERATIONS
     PRE
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
+        browsePath : dom(BrowsePath_Res_StatusCode) &
         statusCode : t_StatusCode_i &
-        statusCode : t_StatusCode   &
-        dom(BrowsePath_Res_StatusCode) = BrowsePaths
+        statusCode : t_StatusCode
     THEN
         BrowsePath_Res_StatusCode(browsePath) := statusCode
     END
@@ -318,9 +318,9 @@ OPERATIONS
     PRE
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths    &
+        browsePath : dom(BrowsePath_Res_NbTargetMax) &
         nbTargetMax : NAT1 &
-        IsDecoded = TRUE   &
-        dom(BrowsePath_Res_NbTargetMax) = BrowsePaths
+        IsDecoded = TRUE
     THEN
         BrowsePath_Res_NbTargetMax,
         BrowsePath_Res_Target_Node,
@@ -331,7 +331,7 @@ OPERATIONS
             statusCode : t_StatusCode   &
             (statusCode  = e_sc_ok => BrowsePath_Res_NbTargetMax = BrowsePath_Res_NbTargetMax$0 <+ {browsePath |-> nbTargetMax} ) &
             (statusCode /= e_sc_ok => BrowsePath_Res_NbTargetMax = BrowsePath_Res_NbTargetMax$0 <+ {browsePath |-> 0} ) &
-                BrowsePath_Res_Target_Node  = BrowsePath_Res_Target_Node$0 <+ {browsePath |-> {}} &
+            BrowsePath_Res_Target_Node  = BrowsePath_Res_Target_Node$0 <+ {browsePath |-> {}} &
             BrowsePath_Res_Target_Index = BrowsePath_Res_Target_Index$0 <+ {browsePath |-> {}}
         )
     END
