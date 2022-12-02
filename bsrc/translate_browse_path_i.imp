@@ -439,7 +439,8 @@ LOCAL_OPERATIONS
         browsePath : dom(BrowsePath_Res_NbTargetMax) &
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
-        size_result : NAT
+        size_result : NAT &
+        size_result = size(BrowsePathResult)
     THEN
         out_statusCode_operation,
         statusCode_alloc,
@@ -459,10 +460,14 @@ LOCAL_OPERATIONS
             dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Node) &
             dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Index) &
 
-            (browsePath : dom(BrowsePath_Res_Target_Node)
-                =>
-                size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
-                size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath)
+            size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
+            size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath) &
+
+            /* Success of copy of all browse paths */
+            (statusCode_alloc = e_sc_ok =>
+                BrowsePath_Res_Target_Node(browsePath) = BrowsePathResult &
+                BrowsePath_Res_Target_Index(browsePath) =
+                    (1..size(BrowsePathResult)) * {k_n_noRemainingPathIndex}
             )
         )
     END
