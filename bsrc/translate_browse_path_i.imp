@@ -481,7 +481,9 @@ LOCAL_OPERATIONS
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                                    e_sc_bad_out_of_memory} &
-        nb_max_ref : NAT
+        nb_max_ref : NAT &
+        nb_max_ref = size(BrowsePathRemainingNodeId) &
+        size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePathResult)
     THEN
         out_statusCode_operation,
         d_var_browse_source_it,
@@ -498,10 +500,20 @@ LOCAL_OPERATIONS
             dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Node) &
             dom(BrowsePath_Res_NbTargetMax) = dom(BrowsePath_Res_Target_Index) &
 
-            (browsePath : dom(BrowsePath_Res_Target_Node)
-                =>
-                size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
-                size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath)
+            size(BrowsePath_Res_Target_Node(browsePath)) = size(BrowsePath_Res_Target_Index(browsePath)) &
+            size(BrowsePath_Res_Target_Node(browsePath)) <= BrowsePath_Res_NbTargetMax(browsePath) &
+
+            /* Previous copy of BrowsePathResult remains unchanged */
+            1..size(BrowsePathResult) <| BrowsePath_Res_Target_Node(browsePath) =
+                1..size(BrowsePathResult) <| BrowsePath_Res_Target_Node$0(browsePath) &
+            1..size(BrowsePathResult) <| BrowsePath_Res_Target_Index(browsePath) =
+                1..size(BrowsePathResult) <| BrowsePath_Res_Target_Index$0(browsePath) &
+            /* Success of copy of all remaining browse paths */
+            (out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} =>
+                1..size(BrowsePathResult) <<| BrowsePath_Res_Target_Node(browsePath) =
+                    BrowsePathRemainingNodeId &
+                1..size(BrowsePathResult) <<| BrowsePath_Res_Target_Index(browsePath) =
+                    BrowsePathRemainingIndex
             )
         )
     END
