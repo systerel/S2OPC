@@ -73,7 +73,7 @@ OPERATIONS
         browsePathSourceIdx_to_iterate := nextBrowsePathSourceIdx + 1 .. nb_browsePathSourceIdx_max_refs ||
         p_browsePathSourceIdx          := nextBrowsePathSourceIdx ||
         nextBrowsePathSourceIdx        := nextBrowsePathSourceIdx + 1 ||
-        p_continue                     := bool(nextBrowsePathSourceIdx /= nb_browsePathSourceIdx_max_refs)
+        p_continue                     := bool(nextBrowsePathSourceIdx < nb_browsePathSourceIdx_max_refs)
     END
 
 END
