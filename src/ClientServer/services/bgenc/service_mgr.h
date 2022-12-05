@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 21/11/2022 13:18:32
+ Date                 : 05/12/2022 17:10:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -103,6 +103,19 @@ extern void service_mgr__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void service_mgr__decode_and_treat_session_service_req(
+   const constants__t_channel_i service_mgr__p_channel,
+   const constants__t_msg_type_i service_mgr__p_req_typ,
+   const constants__t_request_context_i service_mgr__p_req_context,
+   const constants__t_byte_buffer_i service_mgr__p_msg_buffer,
+   const constants__t_msg_header_i service_mgr__p_req_header,
+   const constants__t_server_request_handle_i service_mgr__p_req_handle,
+   constants_statuscodes_bs__t_StatusCode_i * const service_mgr__p_sc,
+   t_bool * const service_mgr__p_valid_req,
+   t_bool * const service_mgr__p_async,
+   constants__t_msg_type_i * const service_mgr__p_resp_typ,
+   constants__t_msg_header_i * const service_mgr__p_resp_header,
+   constants__t_msg_i * const service_mgr__p_resp_msg);
 extern void service_mgr__encode_session_service_resp(
    const constants__t_server_request_handle_i service_mgr__p_request_handle,
    const constants__t_channel_i service_mgr__p_channel,

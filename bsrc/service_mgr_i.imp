@@ -194,6 +194,61 @@ LOCAL_OPERATIONS
     END
     ;
 
+    p_sc, p_valid_req, p_async, p_resp_typ, p_resp_header, p_resp_msg
+        <-- decode_and_treat_session_service_req (p_channel, p_req_typ, p_req_context,
+                                                  p_msg_buffer, p_req_header, p_req_handle) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected &
+        p_channel : dom(a_endpoint) &
+        p_req_typ : t_msg_type_i &
+        p_req_typ = a_msg_in_type &
+        a_msg_in_type : s_service_on_session_reqs &
+        p_req_context : t_request_context_i &
+        p_req_context : t_request_context &
+        p_msg_buffer : t_byte_buffer_i &
+        p_msg_buffer : t_byte_buffer  &
+        a_buffer_in_state = e_buffer_in_msg_header_read &
+        p_req_header : t_msg_header_i &
+        p_req_header = c_msg_in_header &
+        p_req_handle : t_server_request_handle_i &
+        /* only the header of the input message has been decoded */
+        c_msg_in = c_msg_indet &
+        c_msg_in_header : t_msg_header &
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
+    THEN
+        a_buffer_in_state :: {a_buffer_in_state, e_buffer_in_msg_read, c_buffer_in_state_indet} ||
+        c_msg_in := c_msg_indet ||
+        a_msg_in_type :: {a_msg_in_type, c_msg_type_indet} ||
+        d_adsp_nodes_variables :( d_adsp_nodes_invariant ) ||
+        p_sc, p_valid_req, p_async, p_resp_typ, p_resp_header, p_resp_msg,
+        a_msg_out_type, c_msg_out_header, c_msg_out :(
+            p_sc : t_StatusCode_i &
+            p_sc : t_StatusCode &
+            p_valid_req : BOOL &
+            p_async : BOOL &
+            p_resp_typ : t_msg_type_i &
+            p_resp_header : t_msg_header_i &
+            p_resp_msg : t_msg_i &
+            c_msg_out = p_resp_msg &
+            c_msg_out_header = p_resp_header &
+            a_msg_out_type: t_msg_type_i &
+            (p_resp_msg  = c_msg_indet =>
+             c_msg_out_header = c_msg_header_indet &
+             a_msg_out_type = c_msg_type_indet) &
+            (p_resp_msg /= c_msg_indet =>
+             p_resp_msg : t_msg &
+             p_resp_header : t_msg_header &
+             p_resp_typ : t_msg_type &
+             p_resp_typ : s_service_resps &
+             a_msg_out_type = p_resp_typ)
+        )
+    END
+    ;
+
     StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ,
                                                                       req_handle, req_ctx, req_header, req_msg, resp_msg) =
     PRE
@@ -556,6 +611,59 @@ OPERATIONS
     END
     ;
 
+    p_sc, p_valid_req, p_async, p_resp_typ, p_resp_header, p_resp_msg
+        <-- decode_and_treat_session_service_req (p_channel, p_req_typ, p_req_context,
+                                                  p_msg_buffer, p_req_header, p_req_handle) =
+    VAR
+        l_session_token,
+        l_is_valid_req_on_session,
+        l_session,
+        l_endpoint_config_idx,
+        l_is_valid_ep_config_idx,
+        l_req_msg
+    IN
+        p_resp_typ := c_msg_type_indet;
+        p_resp_header := c_msg_header_indet;
+        p_resp_msg := c_msg_indet;
+        p_async := FALSE;
+        /* Check valid session token used */
+        l_session_token <-- read_msg_req_header_session_token (p_req_header);
+        l_is_valid_req_on_session, l_session, p_sc <-- server_validate_session_service_req (p_channel, l_session_token);
+        l_endpoint_config_idx <-- server_get_endpoint_config (p_channel);
+        l_is_valid_ep_config_idx <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
+        IF l_is_valid_req_on_session = TRUE & l_is_valid_ep_config_idx = TRUE
+        THEN
+            /* Decode message */
+            p_valid_req, l_req_msg <-- decode_msg (p_req_typ, p_msg_buffer);
+            IF p_valid_req = TRUE
+            THEN
+                /* Allocate response message */
+                p_resp_typ <-- get_response_type (p_req_typ);
+                p_resp_header, p_resp_msg <-- alloc_resp_msg (p_resp_typ);
+                IF p_resp_msg /= c_msg_indet
+                THEN
+                    // Call local operation to dispatch the service request on right service
+                    p_sc, p_async <-- treat_session_service_req (l_endpoint_config_idx,
+                                                                 l_session,
+                                                                 p_req_typ,
+                                                                 p_req_handle,
+                                                                 p_req_context,
+                                                                 p_req_header,
+                                                                 l_req_msg,
+                                                                 p_resp_msg)
+                END;
+                /* request message not necessary anymore */
+                dealloc_msg_in (l_req_msg)
+            ELSE
+                p_sc := e_sc_bad_decoding_error
+            END /* DECODE REQ CHECK */
+        ELSE // l_is_valid_req_on_session = FALSE:
+            // Note: consider message valid if we do not evaluate it due to session invalid token but we will send a service fault anyway
+            p_valid_req := TRUE
+        END /* VALID SESSION REQ CHECK */
+    END
+    ;
+
     StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, req_handle,
                                                                       req_ctx, req_header, req_msg, resp_msg) =
     BEGIN
@@ -799,21 +907,14 @@ OPERATIONS
         l_req_msg_header,
         l_valid_req_header,
         l_request_handle,
-        l_session_token,
-        l_is_valid_req_on_session,
-        l_session,
-        l_req_msg,
         l_valid_req,
         l_resp_msg_typ,
         l_resp_msg,
         l_resp_msg_header,
         l_ret,
-        l_buffer_out,
-        l_endpoint_config_idx,
-        l_is_valid_ep_config_idx
+        l_buffer_out
     IN
         sc := c_StatusCode_indet;
-        l_is_valid_req_on_session := FALSE;
         l_valid_req := FALSE;
         l_resp_msg_typ := c_msg_type_indet;
         l_resp_msg_header := c_msg_header_indet;
@@ -825,42 +926,9 @@ OPERATIONS
         THEN
             /* Check request handle */
             l_request_handle <-- server_read_msg_header_req_handle (l_req_msg_header);
-            /* Check valid session token used */
-            l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-            l_is_valid_req_on_session, l_session, l_ret <-- server_validate_session_service_req (channel, l_session_token);
-            l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-            l_is_valid_ep_config_idx <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
-            IF l_is_valid_req_on_session = TRUE & l_is_valid_ep_config_idx = TRUE
-            THEN
-                /* Decode message */
-                l_valid_req, l_req_msg <-- decode_msg (req_typ, msg_buffer);
-                IF l_valid_req = TRUE
-                THEN
-                    /* Allocate response message */
-                    l_resp_msg_typ <-- get_response_type (req_typ);
-                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
-                    IF l_resp_msg /= c_msg_indet
-                    THEN
-                        // Call local operation to dispatch the service request on right service
-                        l_ret, async_resp
-                              <-- treat_session_service_req (l_endpoint_config_idx,
-                                                             l_session,
-                                                             req_typ,
-                                                             l_request_handle,
-                                                             req_context,
-                                                             l_req_msg_header,
-                                                             l_req_msg,
-                                                             l_resp_msg)
-                    END;
-                    /* request message not necessary anymore */
-                    dealloc_msg_in (l_req_msg)
-                ELSE
-                    l_ret := e_sc_bad_decoding_error
-                END /* DECODE REQ CHECK */
-            ELSE // l_is_valid_req_on_session = FALSE:
-                // Note: consider message valid if we do not evaluate it due to session invalid token but we will send a service fault anyway
-                l_valid_req := TRUE
-            END; /* VALID SESSION REQ CHECK */
+            l_ret, l_valid_req, async_resp, l_resp_msg_typ, l_resp_msg_header, l_resp_msg
+                <-- decode_and_treat_session_service_req (channel, req_typ, req_context, msg_buffer,
+                                                          l_req_msg_header, l_request_handle);
             IF l_resp_msg = c_msg_indet
             THEN
                 /* Allocate error response message if not allocated (degraded case) */
