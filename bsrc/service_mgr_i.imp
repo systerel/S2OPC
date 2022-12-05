@@ -318,9 +318,7 @@ LOCAL_OPERATIONS
             a_client_request_context   : s_client_request_handle --> t_application_context_i
         ) ||
         CHOICE
-            ret :: {e_sc_bad_out_of_memory,
-                e_sc_bad_invalid_argument, /* message has not expected type */
-                e_sc_bad_encoding_error} ||
+            ret :: {e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory} ||
             buffer_out := c_byte_buffer_indet ||
             req_handle := c_client_request_handle_indet
         OR
