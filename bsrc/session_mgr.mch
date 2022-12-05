@@ -118,7 +118,6 @@ OPERATIONS
         channel : s_channel_connected &
         req_handle : t_client_request_handle_i &
         req_handle : s_client_request_handle &
-        c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_resps
     THEN
         CHOICE
