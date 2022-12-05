@@ -85,7 +85,7 @@ OPERATIONS
             e_msg_session_activate_resp,
             e_msg_session_close_resp}
     THEN
-        service_ret :: t_StatusCode_i ||
+        service_ret :( service_ret : t_StatusCode_i & service_ret : t_StatusCode ) ||
         session :: t_session_i
     END
     ;
