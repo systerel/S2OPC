@@ -278,8 +278,10 @@ LOCAL_OPERATIONS
         a_msg_in_type : s_discovery_service_reqs &
         req_msg : t_msg_i &
         req_msg = c_msg_in &
+        c_msg_in : t_msg &
         resp_msg : t_msg_i &
-        resp_msg = c_msg_out
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg
     THEN
         StatusCode_service
         :(  StatusCode_service : t_StatusCode_i &
