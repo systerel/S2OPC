@@ -302,21 +302,20 @@ LOCAL_OPERATIONS
         c_msg_out        : t_msg &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type   = req_typ &
-        a_msg_out_type   : s_discovery_service_reqs
+        a_msg_out_type   : s_discovery_service_reqs &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         s_client_request_handle,
         a_client_request_type,
         a_client_request_resp_type,
         a_client_request_channel,
-        a_client_request_context,
-        a_buffer_out_state
+        a_client_request_context
         :(
             s_client_request_handle    <: t_client_request_handle                             &
             a_client_request_type      : s_client_request_handle --> s_service_reqs          &
             a_client_request_resp_type : s_client_request_handle --> s_service_resps         &
             a_client_request_channel   : s_client_request_handle --> t_channel               &
-            a_client_request_context   : s_client_request_handle --> t_application_context_i &
-            a_buffer_out_state         : t_buffer_out_state_i
+            a_client_request_context   : s_client_request_handle --> t_application_context_i
         ) ||
         CHOICE
             ret :: {e_sc_bad_out_of_memory,
@@ -326,6 +325,7 @@ LOCAL_OPERATIONS
             req_handle := c_client_request_handle_indet
         OR
             ret := e_sc_ok ||
+            a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
