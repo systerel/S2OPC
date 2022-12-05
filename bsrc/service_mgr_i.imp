@@ -89,15 +89,20 @@ PROMOTES
 
 DEFINITIONS
 
+    /* The following file defines the actual state of the address space,
+       together with all read operations.  It has been created so that we can
+       repeat this information in several machines, until the final address
+       space module which contains the actual implementation. */
+    "address_space.def"
+    ;
+
     d_treat_session_service_req ==
-        a_Value,
-        StatusCode_service
+        StatusCode_service,
+        d_adsp_nodes_variables
         :(
-            a_Value                  : s_Node +-> t_Variant          &
             StatusCode_service       : t_StatusCode_i                &
             StatusCode_service       : t_StatusCode                  &
-            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value)       &
-            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType})
+            d_adsp_nodes_invariant
         )
 
 ASSERTIONS
