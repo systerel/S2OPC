@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/12/2022 17:30:31
+ Date                 : 05/12/2022 17:49:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -857,20 +857,18 @@ void service_mgr__server_receive_session_service_req(
       constants__t_msg_header_i service_mgr__l_req_msg_header;
       t_bool service_mgr__l_valid_req_header;
       constants__t_server_request_handle_i service_mgr__l_request_handle;
-      t_bool service_mgr__l_valid_req;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
-      constants__t_byte_buffer_i service_mgr__l_buffer_out;
       
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
-      service_mgr__l_valid_req = false;
+      *service_mgr__valid_req = false;
       service_mgr__l_resp_msg_typ = constants__c_msg_type_indet;
       service_mgr__l_resp_msg_header = constants__c_msg_header_indet;
       service_mgr__l_resp_msg = constants__c_msg_indet;
       *service_mgr__async_resp = false;
-      service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
+      *service_mgr__buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
          &service_mgr__l_valid_req_header,
@@ -885,7 +883,7 @@ void service_mgr__server_receive_session_service_req(
             service_mgr__l_req_msg_header,
             service_mgr__l_request_handle,
             &service_mgr__l_ret,
-            &service_mgr__l_valid_req,
+            service_mgr__valid_req,
             service_mgr__async_resp,
             &service_mgr__l_resp_msg_typ,
             &service_mgr__l_resp_msg_header,
@@ -905,7 +903,7 @@ void service_mgr__server_receive_session_service_req(
                service_mgr__l_resp_msg,
                *service_mgr__async_resp,
                service_mgr__sc,
-               &service_mgr__l_buffer_out);
+               service_mgr__buffer_out);
          }
          else {
             *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -913,8 +911,6 @@ void service_mgr__server_receive_session_service_req(
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
-      *service_mgr__buffer_out = service_mgr__l_buffer_out;
-      *service_mgr__valid_req = service_mgr__l_valid_req;
    }
 }
 
