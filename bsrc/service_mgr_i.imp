@@ -141,11 +141,7 @@ LOCAL_OPERATIONS
         resp_msg = c_msg_out &
         c_msg_out : t_msg
     THEN
-        StatusCode_service
-        :(  StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
-        )
-
+        d_treat_session_service_req
     END
     ;
 
