@@ -84,6 +84,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_session_treatment_reqs &
@@ -117,6 +118,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel /: dom(a_endpoint) &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_session_treatment_resps \/ {e_msg_service_fault_resp} &
@@ -139,6 +141,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_service_on_session_reqs &
@@ -181,6 +184,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel /: dom(a_endpoint) &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_service_on_session_resps \/ {e_msg_service_fault_resp} &
@@ -203,6 +207,7 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
         a_msg_in_type : s_discovery_service_reqs &
@@ -236,6 +241,7 @@ OPERATIONS
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
+        channel /: dom(a_endpoint) &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : s_discovery_service_resps \/ {e_msg_service_fault_resp} &
