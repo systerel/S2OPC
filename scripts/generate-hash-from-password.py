@@ -69,15 +69,15 @@ def main():
 
     # Check it the user algorithm is supported by the tool
     if args.algo not in SUPPORTED_ALGO:
-        print("\ngenerate-password: Unrecognized algo '{}'".format(args.algo))
-        print("generate-password: Use --help for summary\n")
+        print("\ngenerate-hash-from-password: Unrecognized algo '{}'".format(args.algo))
+        print("generate-hash-from-password: Use --help for summary\n")
         return
 
     # Get the right algorithm
     if args.algo == PBKDF2:
         # Check hashLen argument
         if args.hashlen < SHA256_DIGEST_SIZE_BYTES:
-            print("\ngenerate-password: WARNING: using a hashlen smaller than the digest size ({} bytes) reduces the strength of the hash.\n".format(SHA256_DIGEST_SIZE_BYTES))
+            print("\ngenerate-hash-from-password: WARNING: using a hashlen smaller than the digest size ({} bytes) reduces the strength of the hash.\n".format(SHA256_DIGEST_SIZE_BYTES))
 
         # Retrieve the password/salt and encode them as byte objects.
         try:
@@ -85,15 +85,15 @@ def main():
             pwd_tmp = getpass.getpass()
             pwd = getpass.getpass(prompt='Confirm your password:')
         except Exception:
-            print('\ngenerate-password: an interactive terminal is required for password input (see README.md to run this command in an S2OPC docker)\n')
+            print('\ngenerate-hash-from-password: an interactive terminal is required for password input (see README.md to run this command in an S2OPC docker)\n')
             return
         if pwd_tmp != pwd:
-            print('\ngenerate-password: ERROR: not the same password\n')
+            print('\ngenerate-hash-from-password: ERROR: not the same password\n')
             return
         # from ascii string to byte object
         pwd = str.encode(pwd)
         if len(pwd) > SHA256_BLOCK_SIZE_BYTES:
-            print("\ngenerate-password: password should not exceed 64 bytes because if the HMAC key is longer \
+            print("\ngenerate-hash-from-password: password should not exceed 64 bytes because if the HMAC key is longer \
                     than the blocks in the hash function (SH256 => 512 bits blocks size) then the password \
                     is hashed beforehand, which can reduce the entropy of the derived output.\n")
 
@@ -107,7 +107,7 @@ def main():
                     # from ascii base64 string to byte object
                     salt = b64decode(args.salt, validate=True)
                 except FormatError:
-                    print('\ngenerate-password: Non-base64 digit found for the salt\n')
+                    print('\ngenerate-hash-from-password: Non-base64 digit found for the salt\n')
                     return
             else:
                 # User salt in hexadecimal format
@@ -115,7 +115,7 @@ def main():
                     # from ascii hex to byte object
                     salt = unhexlify(args.salt)
                 except FormatError:
-                    print('\ngenerate-password: Non-hexadecimal digit found for the salt\n')
+                    print('\ngenerate-hash-from-password: Non-hexadecimal digit found for the salt\n')
                     return
 
         # Run PBKDF2
