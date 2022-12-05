@@ -209,13 +209,27 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64_GetPaddingLength(const char* input, s
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    for (size_t i = 0; i < strlen(input); i++)
+    bool first_occ = false;
+    int i = (int) (strlen(input)) - 1;
+    while ((0 <= i) && !first_occ)
     {
         if ('=' == input[i])
         {
             padding_length++;
         }
+        else
+        {
+            first_occ = true;
+        }
+        i--;
     }
-    *outLen = padding_length;
-    return SOPC_STATUS_OK;
+    if (0 != padding_length && 1 != padding_length && 2 != padding_length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        *outLen = padding_length;
+        return SOPC_STATUS_OK;
+    }
 }

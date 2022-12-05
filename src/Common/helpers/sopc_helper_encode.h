@@ -24,13 +24,15 @@
 #include "sopc_enums.h"
 
 /**
- * \brief  Get the number of padding characters for base64 ('=')
+ * \brief  Get the number of padding characters for base64 ('=').
+ *         Starting from the end until the first base64 characters.
  *
  * \param input     A valid pointer to the input.
  *
- * \param outLen    the number of padding characters.
+ * \param outLen    the number of padding characters (0, 1 or 2)
  *
- * \return   SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS.
+ * \return   SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS if
+ *           \p input is NULL or has not a number of padding characters equal to 0, 1 or 2.
  */
 SOPC_ReturnStatus SOPC_HelperDecode_Base64_GetPaddingLength(const char* input, size_t* outLen);
 
