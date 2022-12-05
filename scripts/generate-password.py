@@ -23,7 +23,8 @@ import os
 import getpass
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from binascii import hexlify, unhexlify, b2a_base64, a2b_base64
+from binascii import hexlify, unhexlify, b2a_base64, Error as FormatError
+from base64 import b64decode
 
 SHA256_DIGEST_SIZE_BYTES = 32
 SHA256_BLOCK_SIZE_BYTES = 64
@@ -51,7 +52,7 @@ def pbkdf2_print_result(pwd, salt, iter, result, base64_format=False):
 
 def main():
 
-    argparser = argparse.ArgumentParser(description='This tool Generate a hash from a password, the output hash is useful to prepare the XML user \
+    argparser = argparse.ArgumentParser(description='This tool generates a hash from a password. Password is asked. The output hash is useful to prepare the XML user \
                                                     configuration file for server. Password is asking interactively.')
     argparser.add_argument('--salt', type=str, help='Desired user salt (hexadecimal encoding, default 128 bits random value)')
     argparser.add_argument('--iter', type=int, default=1000000, help='Desired iteration count (default 1000000)')
@@ -71,20 +72,20 @@ def main():
         print("\ngenerate-password: Unrecognized algo '{}'".format(args.algo))
         print("generate-password: Use --help for summary\n")
         return
-    
+
     # Get the right algorithm
     if args.algo == PBKDF2:
         # Check hashLen argument
-        if (args.hashlen % SHA256_DIGEST_SIZE_BYTES) != 0:
-            print("\ngenerate-password: hashlen must be a multiple of the digest size ({} bytes).\n".format(SHA256_DIGEST_SIZE_BYTES))
-            return
+        if args.hashlen < SHA256_DIGEST_SIZE_BYTES:
+            print("\ngenerate-password: WARNING: using a hashlen smaller than the digest size ({} bytes) reduces the strength of the hash.\n".format(SHA256_DIGEST_SIZE_BYTES))
+
         # Retrieve the password/salt and encode them as byte objects.
         try:
             # get password form interactive console
             pwd_tmp = getpass.getpass()
             pwd = getpass.getpass(prompt='Confirm your password:')
-        except:
-            print('\ngenerate-password: RUN_INTERACTIVELY environement variable is missing\n')
+        except Exception:
+            print('\ngenerate-password: an interactive terminal is required for password input (see README.md to run this command in an S2OPC docker)\n')
             return
         if pwd_tmp != pwd:
             print('\ngenerate-password: ERROR: not the same password\n')
@@ -104,8 +105,8 @@ def main():
                 # User salt in base64 format
                 try:
                     # from ascii base64 string to byte object
-                    salt = a2b_base64(args.salt)
-                except:
+                    salt = b64decode(args.salt, validate=True)
+                except FormatError:
                     print('\ngenerate-password: Non-base64 digit found for the salt\n')
                     return
             else:
@@ -113,14 +114,14 @@ def main():
                 try:
                     # from ascii hex to byte object
                     salt = unhexlify(args.salt)
-                except:
+                except FormatError:
                     print('\ngenerate-password: Non-hexadecimal digit found for the salt\n')
                     return
 
         # Run PBKDF2
         kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=args.hashlen, salt=salt, iterations=args.iter)
         result = kdf.derive(pwd)
-        # Print result 
+        # Print result
         pbkdf2_print_result(pwd, salt, args.iter, result, args.base64)
 
 if __name__ == '__main__':
