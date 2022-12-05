@@ -29,6 +29,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
@@ -1237,7 +1238,7 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
     unsigned char* str = SOPC_Calloc(1, length);
 
     status = SOPC_HelperDecode_Base64(bstring_str, str, &length);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
     SOPC_Free(str);
