@@ -267,6 +267,7 @@ static bool get_decode_buffer(const char* buffer,
     }
     if (base64)
     {
+        // TODO: Update SOPC_HelperDecode_Base64. This feature is disable for now (see ticket #1057)
         status = SOPC_HelperDecode_Base64(buffer, out->Data, &outLen);
     }
     else
@@ -290,9 +291,10 @@ static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool b
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no password defined");
         return false;
     }
-
+    // TODO: Add base64 encoding feature for hash (see ticket #1057)
+    (void) base64;
     bool res =
-        get_decode_buffer(attr_val, base64, ctx->hashLength, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
+        get_decode_buffer(attr_val, false, ctx->hashLength, &ctx->currentUserPassword->hash, ctx->helper_ctx.parser);
     return res;
 }
 
@@ -304,9 +306,10 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no salt defined");
         return false;
     }
-
+    // TODO: Add base64 encoding feature for salt (see ticket #1057)
+    (void) base64;
     bool res =
-        get_decode_buffer(attr_val, base64, ctx->saltLength, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
+        get_decode_buffer(attr_val, false, ctx->saltLength, &ctx->currentUserPassword->salt, ctx->helper_ctx.parser);
     return res;
 }
 
