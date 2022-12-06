@@ -198,16 +198,16 @@ static void log_UserCallback(const char* context, const char* text)
         // In scope a real-time application this is not a relevant implementation because the mutex
         // will be locked for an unknown long time.
         // See example in 'zephyr_ptp' for a non-blocking thread-safe console printing
-        printk("%.80s\n", text);
+        PRINT("%.80s\n", text);
         if (strlen(text) > 80)
         {
             text += 80;
             while (strlen(text) > 78)
             {
-                printk("  %.78s\n", text);
+                PRINT("  %.78s\n", text);
                 text += 78;
             }
-            printk("  %s\n", text);
+            PRINT("  %s\n", text);
         }
         k_mutex_unlock(&log_mutex);
     }
@@ -375,7 +375,7 @@ static SOPC_DataValue* Server_LocalReadSingleNode(const SOPC_NodeId* pNid)
     SOPC_DataValue* result = NULL;
     if (response != NULL && response->NoOfResults == 1)
     {
-        //
+        // Allocate the result only if the response contains exactly the expected content
         result = SOPC_Malloc(sizeof(*result));
         SOPC_ASSERT(NULL != result);
         SOPC_DataValue_Copy(result, &response->Results[0]);
@@ -719,7 +719,7 @@ static int cmd_demo_pub(const struct shell* shell, size_t argc, char** argv)
 /***************************************************/
 static void cb_SetSubStatus(SOPC_PubSubState state)
 {
-    printk("New Sub state: %d\n", (int) state);
+    PRINT("New Sub state: %d\n", (int) state);
     gSubOperational = (SOPC_PubSubState_Operational == state);
 }
 
@@ -736,7 +736,7 @@ static int cmd_demo_sub(const struct shell* shell, size_t argc, char** argv)
             SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
         if (!bResult)
         {
-            printk("\r\nFailed to start Subscriber!\r\n");
+            PRINT("\r\nFailed to start Subscriber!\r\n");
             return 1;
         }
         else
