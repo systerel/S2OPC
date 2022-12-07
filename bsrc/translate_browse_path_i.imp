@@ -440,7 +440,9 @@ LOCAL_OPERATIONS
         in_statusCode_operation : t_StatusCode_i &
         in_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server} &
         size_result : NAT &
-        size_result = size(BrowsePathResult)
+        size_result = size(BrowsePathResult) &
+        BrowsePath_Res_Target_Node(browsePath) = {} &
+        BrowsePath_Res_Target_Index(browsePath) = {}
     THEN
         out_statusCode_operation,
         statusCode_alloc,
