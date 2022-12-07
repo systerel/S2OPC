@@ -24,7 +24,7 @@
  *          It hashes a secret and may be used to authenticate users.
  *
  *          Supported algorithms:
- *              - PBKDF2 with HMAC-SHA-256 [RFC2898]
+ *              - PBKDF2 with HMAC-SHA-256 [RFC8018]
  */
 
 #ifndef SOPC_HASH_BASED_CRYPTO_H_

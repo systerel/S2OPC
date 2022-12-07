@@ -42,7 +42,7 @@ struct SOPC_HashBasedCrypto_Config
 
 SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_Create(SOPC_HashBasedCrypto_Config** cfg)
 {
-    if (cfg == NULL)
+    if (NULL == cfg)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -59,10 +59,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_Create(SOPC_HashBasedCrypto_Config
 
 void SOPC_HashBasedCrypto_Config_Free(SOPC_HashBasedCrypto_Config* cfg)
 {
-    if (cfg != NULL)
-    {
-        SOPC_Free(cfg);
-    }
+    SOPC_Free(cfg);
 }
 
 static bool hash_based_crypto_is_valid_config(const SOPC_HashBasedCrypto_Config* config)

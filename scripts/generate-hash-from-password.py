@@ -52,8 +52,8 @@ def pbkdf2_print_result(pwd, salt, iter, result, base64_format=False):
 
 def main():
 
-    argparser = argparse.ArgumentParser(description='This tool generates a hash from a password. Password is asked. The output hash is useful to prepare the XML user \
-                                                    configuration file for server. Password is asking interactively.')
+    argparser = argparse.ArgumentParser(description='This tool generates a hash from a password. The output hash is useful to prepare the XML user \
+                                                    configuration file for server. Password is asked interactively.')
     argparser.add_argument('--salt', type=str, help='Desired user salt (hexadecimal encoding, default 128 bits random value)')
     argparser.add_argument('--iter', type=int, default=1000000, help='Desired iteration count (default 1000000)')
     argparser.add_argument('--hashlen', type=int, default=SHA256_DIGEST_SIZE_BYTES, help='Desired output len  (default 32 bytes)')

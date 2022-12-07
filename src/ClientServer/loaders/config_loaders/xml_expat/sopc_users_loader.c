@@ -88,7 +88,7 @@ struct parse_context_t
     user_rights anonymousRights;
 
     user_password* currentUserPassword;
-    user_password* rejectedUser;
+    bool usrPwdCfgSet;
     size_t hashIterationCount;
     size_t hashLength;
     size_t saltLength;
@@ -329,7 +329,7 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    if (ctx->hashIterationCount == 0)
+    if (0 == ctx->hashIterationCount)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "iteration count is equal to zero");
         return false;
@@ -363,10 +363,7 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    /* Lengths are checked during the parsing of salt and hash (get_decode_buffer) */
-    status = set_default_password_hash(&ctx->rejectedUser, ctx->hashLength, ctx->saltLength, ctx->hashIterationCount);
-
-    return status == SOPC_STATUS_OK;
+    return true;
 }
 
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
@@ -458,8 +455,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         ctx->state = PARSE_S2OPC_USERS;
         break;
     case PARSE_S2OPC_USERS:
-        if (0 == strcmp(name, "UserPasswordConfiguration"))
+        if (0 == strcmp(name, "UserPasswordConfiguration") && !ctx->usrPwdCfgSet)
         {
+            ctx->usrPwdCfgSet = true;
             if (!start_user_password_configuration(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
@@ -638,7 +636,7 @@ static bool secure_hash_compare(const user_password* sRef, const SOPC_ByteString
 
 SOPC_ReturnStatus generate_fixed_hash_or_salt(SOPC_ByteString* toGen, size_t length)
 {
-    if (toGen == NULL || length == 0)
+    if (NULL == toGen || 0 == length)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -888,6 +886,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     ctx.hasAnonymous = false;
     ctx.anonymousRights = (user_rights){false, false, false, false};
     ctx.currentUserPassword = NULL;
+    ctx.usrPwdCfgSet = false;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
 
@@ -899,7 +898,9 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         *authentication = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
         *authorization = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));
         SOPC_UsersConfig* config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig));
-        if (NULL == *authentication || NULL == *authorization || NULL == config)
+        user_password* rejectedUser = NULL;
+        res = set_default_password_hash(&rejectedUser, ctx.hashLength, ctx.saltLength, ctx.hashIterationCount);
+        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != res)
         {
             SOPC_Free(*authentication);
             *authentication = NULL;
@@ -907,12 +908,13 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
             *authorization = NULL;
             SOPC_Free(config);
             config = NULL;
+            userpassword_free(rejectedUser);
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
             config->users = users;
-            config->rejectedUser = ctx.rejectedUser;
+            config->rejectedUser = rejectedUser;
             config->anonRights = ctx.anonymousRights;
             (*authentication)->pData = config;
             (*authentication)->pFunctions = &authentication_functions;
