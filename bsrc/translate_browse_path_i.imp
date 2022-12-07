@@ -1112,15 +1112,35 @@ OPERATIONS
         INVARIANT
             browsePathSourceIdx_to_iterate <: NAT1 &
             browsePathSourceIdx_iterated   <: NAT1 &
-            browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
-            size_result = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
+            nextBrowsePathSourceIdx : NAT1 &
             browsePathSourceIdx_iterated = 1 .. l_index &
             browsePathSourceIdx_to_iterate = l_index + 1 .. size_result &
-            l_continue = bool(statusCode_alloc = e_sc_ok & (l_index + 1 < size_result)) &
-            (statusCode_alloc = e_sc_ok
-                =>
-                1..l_index <| BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathResult &
-                1..l_index <| BrowsePath_Res_Target_Index(browsePath) = %(xx).(xx : 1..l_index | k_n_noRemainingPathIndex ))
+
+            l_continue = bool(statusCode_alloc = e_sc_ok & (l_index < size_result)) &
+            nextBrowsePathSourceIdx = l_index + 1 &
+
+            statusCode_alloc : t_StatusCode_i &
+            statusCode_alloc : t_StatusCode   &
+            out_statusCode_operation : {e_sc_ok,e_sc_uncertain_reference_out_of_server,
+                                        e_sc_bad_out_of_memory} &
+
+            card(BrowsePath_Res_Target_Node(browsePath)) = l_index &
+
+            {browsePath} <<| BrowsePath_Res_Target_Node =
+                {browsePath} <<| BrowsePath_Res_Target_Node$0 &
+            {browsePath} <<| BrowsePath_Res_Target_Index =
+                {browsePath} <<| BrowsePath_Res_Target_Index$0 &
+
+            (statusCode_alloc = e_sc_ok =>
+                BrowsePath_Res_Target_Node(browsePath) = 1..l_index <| BrowsePathResult &
+                BrowsePath_Res_Target_Index(browsePath) =
+                    (1..l_index) * {k_n_noRemainingPathIndex}
+            ) &
+            (statusCode_alloc /= e_sc_ok =>
+                BrowsePath_Res_Target_Node(browsePath) = 1..l_index - 1 <| BrowsePathResult &
+                BrowsePath_Res_Target_Index(browsePath) =
+                    (1..l_index - 1) * {k_n_noRemainingPathIndex}
+            )
         VARIANT
             size_result - l_index
         END
