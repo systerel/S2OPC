@@ -150,7 +150,7 @@ typedef struct SOPC_String
 {
     int32_t Length;
     bool DoNotClear; // flag indicating if bytes must be freed
-    SOPC_Byte* Data;
+    SOPC_Byte* Data; // Consider as <em>const SOPC_Byte*</em> if DoNotClear is set
 } SOPC_String;
 
 typedef SOPC_String SOPC_XmlElement;
@@ -395,6 +395,7 @@ S2OPC_COMMON_EXPORT extern const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNode
 #define SECURITY_POLICY_BASIC256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
+/**** BOOLEAN ****/
 /**
  * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Initialize() will get the
  *  same description.
@@ -470,6 +471,8 @@ void SOPC_Boolean_Clear(SOPC_Boolean* b);
  */
 void SOPC_Boolean_ClearAux(void* value);
 
+/**** SByte ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte);
 void SOPC_SByte_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_SByte_CopyAux(void* dest, const void* src);
@@ -477,6 +480,8 @@ SOPC_ReturnStatus SOPC_SByte_CompareAux(const void* left, const void* right, int
 void SOPC_SByte_Clear(SOPC_SByte* sbyte);
 void SOPC_SByte_ClearAux(void* value);
 
+/**** Byte ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Byte_Initialize(SOPC_Byte* byte);
 void SOPC_Byte_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Byte_CopyAux(void* dest, const void* src);
@@ -484,6 +489,8 @@ SOPC_ReturnStatus SOPC_Byte_CompareAux(const void* left, const void* right, int3
 void SOPC_Byte_Clear(SOPC_Byte* byte);
 void SOPC_Byte_ClearAux(void* value);
 
+/**** Int16 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Int16_Initialize(int16_t* intv);
 void SOPC_Int16_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Int16_CopyAux(void* dest, const void* src);
@@ -491,6 +498,8 @@ SOPC_ReturnStatus SOPC_Int16_CompareAux(const void* left, const void* right, int
 void SOPC_Int16_Clear(int16_t* intv);
 void SOPC_Int16_ClearAux(void* value);
 
+/**** UInt16 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_UInt16_Initialize(uint16_t* uint);
 void SOPC_UInt16_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_UInt16_CopyAux(void* dest, const void* src);
@@ -498,6 +507,8 @@ SOPC_ReturnStatus SOPC_UInt16_CompareAux(const void* left, const void* right, in
 void SOPC_UInt16_Clear(uint16_t* uint);
 void SOPC_UInt16_ClearAux(void* value);
 
+/**** Int32 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Int32_Initialize(int32_t* intv);
 void SOPC_Int32_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Int32_CopyAux(void* dest, const void* src);
@@ -505,6 +516,8 @@ SOPC_ReturnStatus SOPC_Int32_CompareAux(const void* left, const void* right, int
 void SOPC_Int32_Clear(int32_t* intv);
 void SOPC_Int32_ClearAux(void* value);
 
+/**** UInt32 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_UInt32_Initialize(uint32_t* uint);
 void SOPC_UInt32_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_UInt32_CopyAux(void* dest, const void* src);
@@ -512,6 +525,8 @@ SOPC_ReturnStatus SOPC_UInt32_CompareAux(const void* left, const void* right, in
 void SOPC_UInt32_Clear(uint32_t* uint);
 void SOPC_UInt32_ClearAux(void* value);
 
+/**** Int64 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Int64_Initialize(int64_t* intv);
 void SOPC_Int64_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Int64_CopyAux(void* dest, const void* src);
@@ -519,6 +534,8 @@ SOPC_ReturnStatus SOPC_Int64_CompareAux(const void* left, const void* right, int
 void SOPC_Int64_Clear(int64_t* intv);
 void SOPC_Int64_ClearAux(void* value);
 
+/**** UInt64 ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_UInt64_Initialize(uint64_t* uint);
 void SOPC_UInt64_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_UInt64_CopyAux(void* dest, const void* src);
@@ -526,6 +543,8 @@ SOPC_ReturnStatus SOPC_UInt64_CompareAux(const void* left, const void* right, in
 void SOPC_UInt64_Clear(uint64_t* uint);
 void SOPC_UInt64_ClearAux(void* value);
 
+/**** Float ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Float_Initialize(float* f);
 void SOPC_Float_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Float_CopyAux(void* dest, const void* src);
@@ -533,6 +552,8 @@ SOPC_ReturnStatus SOPC_Float_CompareAux(const void* left, const void* right, int
 void SOPC_Float_Clear(float* f);
 void SOPC_Float_ClearAux(void* value);
 
+/**** Double ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Double_Initialize(double* d);
 void SOPC_Double_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Double_CopyAux(void* dest, const void* src);
@@ -540,6 +561,8 @@ SOPC_ReturnStatus SOPC_Double_CompareAux(const void* left, const void* right, in
 void SOPC_Double_Clear(double* d);
 void SOPC_Double_ClearAux(void* value);
 
+/**** ByteString ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring);
 void SOPC_ByteString_InitializeAux(void* value);
 
@@ -570,10 +593,23 @@ SOPC_ByteString* SOPC_ByteString_Create(void);
  * \return A valid pointer otherwise it returns NULL pointer if allocation failed.
  */
 SOPC_ReturnStatus SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
+
+/**
+ * \brief Return a deep copy of a Byte array.
+ * \param[out] dest Must be a non-NULL pointer to an uninitialized ByteString. Do not use an already allocated string
+ *      or this will lead to a memory leak.
+ * \param bytes A pointer to at least \a length bytes. (Can contain zeros)
+ * \param length The number of bytes to copy.
+ */
 SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOPC_Byte* bytes, int32_t length);
+
+/** \brief Return a deep copy of another ByteString. See SOPC_ByteString_CopyFromBytes */
 SOPC_ReturnStatus SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
+/** \see SOPC_ByteString_Copy */
 SOPC_ReturnStatus SOPC_ByteString_CopyAux(void* dest, const void* src);
+/** \see SOPC_Boolean_Clear */
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
+/** \see SOPC_Boolean_ClearAux */
 void SOPC_ByteString_ClearAux(void* value);
 
 /**
@@ -582,41 +618,40 @@ void SOPC_ByteString_ClearAux(void* value);
  *
  * \warning This kind of function frees the memory used, so each \p SOPC_BUILTINTYPE_Create() function
  * need to call \p SOPC_BUILTINTYPE_Delete() function to avoid <em>leak memory or segmentation fault error</em>.
- *
  * \brief Free a specific builtintype pointer thus it will transform it into an invalid pointer.
- *
  * \param bstring The specific builtintype pointer that will be freed.
  *
  */
 void SOPC_ByteString_Delete(SOPC_ByteString* bstring);
 
+/** \see description in similar function SOPC_Boolean_CompareAux */
 SOPC_ReturnStatus SOPC_ByteString_Compare(const SOPC_ByteString* left,
                                           const SOPC_ByteString* right,
                                           int32_t* comparison);
+/** \see description in similar function SOPC_Boolean_CompareAux */
 SOPC_ReturnStatus SOPC_ByteString_CompareAux(const void* left, const void* right, int32_t* comparison);
 
 /**
  * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_Equal() will get the
  *  same description.
  * \brief Compare the content of two specific builtintype pointer and return true or false according to the result
- *
  * \param left The content of a specific builtintype pointer to be compare with another pointer of the same type.
- *
  * \param right The content of a specific builtintype pointer to be compare with another pointer of the same type.
  *
  * \return true if the two contents are equal otherwise false.
  */
 bool SOPC_ByteString_Equal(const SOPC_ByteString* left, const SOPC_ByteString* right);
 
+/** \see description in similar function SOPC_Boolean_Initialize */
 void SOPC_String_Initialize(SOPC_String* string);
+/** \see description in similar function SOPC_Boolean_InitializeAux */
 void SOPC_String_InitializeAux(void* value);
+/** Allocates and return a new String (initialized as empty). */
 SOPC_String* SOPC_String_Create(void);
 
 /**
  * \brief Copy a C-String to the Data field of the SOPC_String object
- *
  * \param string The pointer to the SOPC_String object
- *
  * \param cString  The C-String that would be copied in the Data field
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
@@ -628,23 +663,18 @@ SOPC_ReturnStatus SOPC_String_CopyAux(void* dest, const void* src);
  * \note The functions which have prototype as : \p SOPC_BUILTINTYPE_InitializeFromCString() will get the
  *  same description.
  * \brief Initialize the content of a specific builtintype pointer with a C-String.
- *
- * \param string The specific builtintype pointer
- *
+ * \param string Must be a non-NULL pointer to an uninitialized 'BUILTINTYPE'. Do not use an already allocated object
+ *      or this will lead to a memory leak.
  * \param cString The C-String.
- *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if there are bad input
  *  parameters or SOPC_STATUS_NOK if an error occurs.
  */
 SOPC_ReturnStatus SOPC_String_InitializeFromCString(SOPC_String* string, const char* cString);
 
 /**
- * \warning This function do x-bytes of allocation memory, so the return value must be freed after this call function.
- *
- * \brief Retreive the C-String of a SOPC_String pointer.
- *
+ * \warning This function allocates new memory, so the return value must be freed after this call function.
+ * \brief Retrieve the C-String of a SOPC_String pointer.
  * \param string The SOPC_String pointer whose content will be extracted.
- *
  * \return A valid C-String otherwise it returns NULL pointer if allocation failed or there were bad input parameters.
  */
 char* SOPC_String_GetCString(const SOPC_String* string);
@@ -654,32 +684,24 @@ char* SOPC_String_GetCString(const SOPC_String* string);
  *  - The returned value can only be used while the input object is defined.
  *  - The returned value shall not be freed.
  *
- * \brief Retreive the raw C-String of a SOPC_String pointer.
- *
+ * \brief Retrieve the raw C-String of a SOPC_String pointer.
  * \param string The SOPC_String pointer whose content will be extracted.
- *
  * \return A valid C-String otherwise it returns NULL pointer if allocation failed.
  */
 const char* SOPC_String_GetRawCString(const SOPC_String* string);
 
 /**
  * \brief Create a shallow copy of \a src into \a dest. The \a src string must not be cleared before \a dest is cleared
- *
  * \param dest  The pointer to the destination SOPC_String object.
- *
  * \param src  The pointer to the source SOPC_String object.
- *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  */
 SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src);
 
 /**
  * \brief Create a shallow copy of \a src (C-String) into \a dest.
- *
  * \param dest  The pointer to the destination SOPC_String object
- *
  * \param src  The C-String data that will be copied to the destination SOPC_String object
- *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  */
 SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src);
@@ -689,17 +711,18 @@ SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src);
  *  Furthermore, it is a copy, so be sure to clear bytes on clear.
  *
  * \brief Create a copy of \a src into \a dest.
- *
  * \param dest  The pointer to the destination SOPC_String object.
- *
  * \param src  The pointer to the source SOPC_String object.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if there are bad inputs
  * parameters or SOPC_STATUS_OUT_OF_MEMORY if no space memory available.
  */
 SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src);
+/** \see SOPC_Boolean_Clear */
 void SOPC_String_Clear(SOPC_String* bstring);
+/** \see SOPC_Boolean_ClearAux */
 void SOPC_String_ClearAux(void* value);
+/** \see SOPC_Boolean_Delete */
 void SOPC_String_Delete(SOPC_String* bstring);
 
 /**
@@ -709,11 +732,8 @@ void SOPC_String_Delete(SOPC_String* bstring);
  * \brief Compare the content of a String pointer to another one and set the result in the comparison parameter.
  *
  * \param left a generic pointer that will be casted in <em>specific builtintype pointer</em>
- *
  * \param right a generic pointer that will be casted in <em>specific builtintype pointer</em>
- *
  * \param ignoreCase false if ignore sensitive case otherwise it is true.
- *
  * \param comparison these possible values are:
  *                      * 1 : left pointer < right pointer
  *                      * 0 : left pointer == right pointer
@@ -757,6 +777,8 @@ const char** SOPC_String_GetRawCStringArray(int32_t nbOfStrings, SOPC_String* st
  */
 char** SOPC_String_GetCStringArray(int32_t nbOfStrings, SOPC_String* stringArray);
 
+/**** XmlElement ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_XmlElement_Copy(SOPC_XmlElement* dest, const SOPC_XmlElement* src);
@@ -768,6 +790,8 @@ SOPC_ReturnStatus SOPC_XmlElement_CompareAux(const void* left, const void* right
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_ClearAux(void* value);
 
+/**** DateTime ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime);
 void SOPC_DateTime_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_DateTime_CopyAux(void* dest, const void* src);
@@ -776,6 +800,8 @@ SOPC_ReturnStatus SOPC_DateTime_CompareAux(const void* left, const void* right, 
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime);
 void SOPC_DateTime_ClearAux(void* value);
 
+/**** Guid ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
 void SOPC_Guid_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Guid_FromCString(SOPC_Guid* guid, const char* str, size_t len);
@@ -787,6 +813,8 @@ SOPC_ReturnStatus SOPC_Guid_Compare(const SOPC_Guid* left, const SOPC_Guid* righ
 void SOPC_Guid_Clear(SOPC_Guid* guid);
 void SOPC_Guid_ClearAux(void* value);
 
+/**** NodeId ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_NodeId_Initialize(SOPC_NodeId* nodeId);
 void SOPC_NodeId_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src);
@@ -801,12 +829,21 @@ bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId);
 
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
+/** \brief Allocates a C string containing the normalized representation of a NodeId. Must be freed by caller after use
+ */
 char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId);
+/** \brief Initializes a NodeId from a normalized C string. See SOPC_String_InitializeFromCString */
 SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len);
+/** \brief Alloacates and initializes a NodeId from a normalized C string. See SOPC_String_InitializeFromCString */
 SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
-
+/** \brief Creates a dictionary which keys are \a NodeId.
+ * \param free_keys True if the dictionary is responsible for deleting keys on element removal
+ * \param value_free The Free function for deleted elements. (Can be null if no deletion is required)
+ */
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
 
+/**** ExpandedNodeId ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_ExpandedNodeId_Copy(SOPC_ExpandedNodeId* dest, const SOPC_ExpandedNodeId* src);
@@ -818,6 +855,8 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_CompareAux(const void* left, const void* r
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_ClearAux(void* value);
 
+/**** StatusCode ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_StatusCode_Initialize(SOPC_StatusCode* status);
 void SOPC_StatusCode_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_StatusCode_CopyAux(void* dest, const void* src);
@@ -825,6 +864,8 @@ SOPC_ReturnStatus SOPC_StatusCode_CompareAux(const void* left, const void* right
 void SOPC_StatusCode_Clear(SOPC_StatusCode* status);
 void SOPC_StatusCode_ClearAux(void* value);
 
+/**** DiagnosticInfo ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo);
 void SOPC_DiagnosticInfo_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, const SOPC_DiagnosticInfo* src);
@@ -836,6 +877,8 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_CompareAux(const void* left, const void* r
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo);
 void SOPC_DiagnosticInfo_ClearAux(void* value);
 
+/**** QualifiedName ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_QualifiedName_Initialize(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_Copy(SOPC_QualifiedName* dest, const SOPC_QualifiedName* src);
@@ -848,6 +891,8 @@ void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
 
+/**** LocalizedText ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_LocalizedText* src);
@@ -933,6 +978,8 @@ SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText*
                                                              int32_t nbLocalizedText,
                                                              const SOPC_LocalizedText* srcArray);
 
+/**** ExtensionObject ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_InitializeAux(void* value);
 
@@ -956,9 +1003,13 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CompareAux(const void* left, const void* 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
+/**** Variant ****/
+/** \brief allocates and return a SOPC_Variant*/
 SOPC_Variant* SOPC_Variant_Create(void);
+/** \brief Initialize a Variant. Do not initialize existing variants without clearing them first.*/
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
-// Allocation of the requested array to given length
+/** \brief Initialize a Variant as an array of given length. Do not initialize existing variants without clearing them
+ * first.*/
 bool SOPC_Variant_Initialize_Array(SOPC_Variant* var, SOPC_BuiltinId builtInId, int32_t length);
 void SOPC_Null_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_t* comparison);
@@ -1005,6 +1056,8 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
 
+/**** DataValue ****/
+/** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
 void SOPC_DataValue_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_DataValue_Copy(SOPC_DataValue* dest, const SOPC_DataValue* src);

@@ -75,7 +75,10 @@ struct SOPC_Log_Instance
 
 void SOPC_Log_Initialize(void)
 {
-    SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
+    if (!uniquePrefixSet)
+    {
+        SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
+    }
     uniquePrefixSet = true;
 }
 

@@ -81,9 +81,7 @@ typedef enum SOPC_Log_System
 } SOPC_Log_System;
 
 /**
- * \brief This union provides possible logging configurations
- * \param fileSystemLogConfig An accurate log configuration for file system
- * \param userSystemLogConfig A structure to configure a callback for the user system log
+ * \brief Provides possible logging configurations
  */
 typedef union SOPC_Log_SystemConfiguration {
     SOPC_LogSystem_File_Configuration fileSystemLogConfig; /**< log file system configuration */
@@ -91,24 +89,24 @@ typedef union SOPC_Log_SystemConfiguration {
 } SOPC_Log_SystemConfiguration;
 
 /**
- * \brief logs configuration
- *
- * the user can choose between multiple log system using the logSystem enumerate
- * and give the proper configuration in the logSysConfig union.
+ * \brief Defines logging configuration
  */
 typedef struct SOPC_Log_Configuration
 {
     SOPC_Log_Level logLevel;   /**< default log level */
     SOPC_Log_System logSystem; /**< discriminant of the log system configuration used in \a logSysConfig */
-    SOPC_Log_SystemConfiguration logSysConfig; /**< log system configuration */
+    SOPC_Log_SystemConfiguration logSysConfig; /**< The specific parameters of logging (depending on \a logSystem) */
 } SOPC_Log_Configuration;
 
-/*
- * \brief Initializes the logger manager: generate unique file name prefix for execution
- * */
+/**
+ * \brief Initializes the logger manager: generate unique file name prefix for execution.
+ * This prefix is only relevant when the logging feature is set to default file logging.
+ * Only the first call is taken into account. Further call will be ignored until next call to
+ * :: SOPC_Log_Clear
+ */
 void SOPC_Log_Initialize(void);
 
-/*
+/**
  * \brief Creates a new log file and log instance and prints the starting timestamp
  *
  * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
