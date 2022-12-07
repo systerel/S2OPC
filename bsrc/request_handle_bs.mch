@@ -160,10 +160,10 @@ OPERATIONS
         channel : t_channel &
         req_handle : t_client_request_handle_i &
         resp_typ : t_msg_type_i &
-        resp_typ : s_service_resps
+        resp_typ : s_service_resps \/ {e_msg_service_fault_resp}
     THEN
         ret := bool(req_handle : s_client_request_handle &
-            a_client_request_resp_type (req_handle) = resp_typ &
+            resp_typ : {a_client_request_resp_type (req_handle), e_msg_service_fault_resp} &
             a_client_request_channel (req_handle) = channel)
     END
     ;
