@@ -45,7 +45,7 @@ typedef void SOPC_ClientKeyUsrPwd_Fct(SOPC_String** ppPassword, SOPC_StatusCode*
  *
  * \param clientKeyUsrPwdCb  The user callback to retrieve the password
  *
- * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p serverKeyUsrPwdCb is
+ * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p clientKeyUsrPwdCb is
  * invalid.
  *
  * \note    This function must be called before the configuration the secure Channel.

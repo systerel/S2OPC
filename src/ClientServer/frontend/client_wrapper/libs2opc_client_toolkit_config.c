@@ -28,7 +28,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(SOPC_Client
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "The following user callback is already configure: SOPC_ClientKeyUsrPwd_Fct");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_INVALID_STATE;
     }
     if (NULL == clientKeyUsrPwdCb)
     {
@@ -45,7 +45,7 @@ void SOPC_HelperConfigClient_ClientKeyUsrPwdCb(SOPC_String** ppPassword, SOPC_St
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "The following user callback isn't configure: SOPC_ClientKeyUsrPwd_Fct");
-        *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
+        *writtenStatus = SOPC_STATUS_INVALID_STATE;
         return;
     }
     FctclientKeyUsrPwdCb(ppPassword, writtenStatus);
