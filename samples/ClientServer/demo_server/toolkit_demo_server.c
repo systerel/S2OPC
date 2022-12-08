@@ -27,6 +27,7 @@
 #include "libs2opc_server_config.h"
 
 #include "sopc_array.h"
+#include "sopc_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -76,120 +77,6 @@ static char* Server_ConfigLogPath(const char* logDirName)
 /*---------------------------------------------------------------------------
  *                             Server configuration
  *---------------------------------------------------------------------------*/
-
-static void LoadUserPassword_FromEnv(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus, const char* password_ref)
-{
-    /* Allocation */
-    *ppPassword = SOPC_String_Create();
-    if (NULL == *ppPassword)
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
-    if (SOPC_STATUS_OK != *writtenStatus)
-    {
-        printf("Failed to copy user password from environment variable TEST_SERVER_PRIVATE_KEY_PWD\n");
-        SOPC_String_Delete(*ppPassword);
-    }
-}
-
-static void LoadUserPassword_FromStdin(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    SOPC_Array* password = SOPC_Array_Create(sizeof(char), 1, NULL);
-    if (NULL == password)
-    {
-        printf("LoadUserPassword_FromStdio> unexpected error: memory allocation failure while creating an array\n");
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-    printf("Server private key password: ");
-    char c;
-    bool success = false;
-    do
-    {
-        c = (char) getchar();
-        if ('\n' != c)
-        {
-            success = SOPC_Array_Append(password, c);
-            if (!success)
-            {
-                break;
-            }
-        }
-    } while (c != '\n');
-    if (success)
-    {
-        c = '\0';
-        success = SOPC_Array_Append(password, c);
-    }
-    if (!success)
-    {
-        printf(
-            "LoadUserPassword_FromStdio> unexpected error: memory allocation failure while appending value in array\n");
-    }
-    if (success)
-    {
-        /* Allocation */
-        *ppPassword = SOPC_String_Create();
-        if (NULL == *ppPassword)
-        {
-            printf("LoadUserPassword_FromStdio> unexpected error: memory allocation failure while creating a string\n");
-            success = false;
-        }
-    }
-    if (success)
-    {
-        *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, (char*) SOPC_Array_Get_Ptr(password, 0));
-        if (SOPC_STATUS_OK != *writtenStatus)
-        {
-            SOPC_String_Delete(*ppPassword);
-        }
-    }
-    else
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    SOPC_Array_Delete(password);
-}
-
-/**
- * \brief Type of callback to receive user password for decryption of the server private key.
- *
- * \param ppPassword      out parameter, the newly allocated password.
- * \param writtenStatus   out parameter, the status code of the callback process.
- *
- * \warning The callback function shall not do anything blocking or long treatment.
- *          The implementation of the user callback must free the \p ppPassword in case of failure.
- *          The implementation of the user need to update the \p writtenStatus (error or not)
- */
-static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the server private key from environment variable
-     * TEST_SERVER_PRIVATE_KEY_PWD. If TEST_SERVER_PRIVATE_KEY_PWD is missing then the demo ask user to enter a password
-     * from stdin console.
-     */
-
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    const char* password_ref = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
-
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    if (NULL == password_ref)
-    {
-        // From stdin
-        LoadUserPassword_FromStdin(ppPassword, writtenStatus);
-    }
-    else
-    {
-        // from environment variable
-        LoadUserPassword_FromEnv(ppPassword, writtenStatus, password_ref);
-    }
-}
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
 {
@@ -389,7 +276,7 @@ int main(int argc, char* argv[])
     {
         /* This function must be called after the initialization functions of the server library and
            before starting the server and its configuration. */
-        status = SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(&Server_PrivateKey_LoadUserPassword);
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
     }
 
     /* Configuration of:
