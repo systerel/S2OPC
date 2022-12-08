@@ -88,33 +88,33 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
                                                            SOPC_ConfigServerXML_Custom* customConfig);
 
 /**
- * \brief Type of callback to receive user password for decryption of the server private key.
+ * \brief Type of callback to retrieve password for decryption of the server private key.
  *
- * \param ppPassword      out parameter, the newly allocated password.
- * \param writtenStatus   out parameter, the status code of the callback process.
+ * \param[out] outPassword   out parameter, the newly allocated password.
  *
- * \warning The callback function shall not do anything blocking or long treatment.
- *          The implementation of the user callback must free the \p ppPassword in case of failure.
+ * \return true in case of success, otherwise false.
+ *
+ * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
+ * failure.
  */
-typedef void SOPC_ServerKeyUsrPwd_Fct(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus);
+typedef bool SOPC_GetServerKeyPassword_Fct(char** outPassword);
 
 /**
- * \brief Define the server private key password callback to be used.
+ * \brief Define the callback to retrieve password for decryption of the server private key.
  *
  * This is optional but if used it shall be defined before starting server and loading its configuration.
  *
- * \param serverKeyUsrPwdCb  The user callback to retrieve the password
+ * \param getServerKeyPassword  The callback to retrieve the password
  *
- * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p serverKeyUsrPwdCb is
+ * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p getServerKeyPassword is
  * invalid or SOPC_STATUS_INVALID_STATE if the configuration is not possible (toolkit not initialized, server already
  * started).
  *
  * \note   This function must be called after the initialization functions of the server library.
- *         When the callback is configured, it is called before the instantiation of the serialized serverKey.
- *
- * \warning The callback function shall not do anything blocking or long treatment.
+ *         When the callback is configured, it is called during call to ::SOPC_HelperConfigServer_SetKeyCertPairFromPath
+ *         or ::SOPC_HelperConfigServer_ConfigureFromXML.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(SOPC_ServerKeyUsrPwd_Fct* serverKeyUsrPwdCb);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword);
 
 /**
  * \brief Method Call service configuration.
