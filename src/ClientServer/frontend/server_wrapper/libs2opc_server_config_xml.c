@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
@@ -84,31 +85,27 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
         res = false;
     }
 
+    char* password = NULL;
+    size_t lenPassword = 0;
+
     if (serverConfig->serverkeyEncrypted)
     {
-        SOPC_String* password = NULL;
-        SOPC_ServerInternal_ServerKeyUsrPwdCb(&password, &status);
+        res = SOPC_ServerInternal_GetKeyPassword(&password);
+    }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_DecryptPrivateKeyFromPath(serverConfig->serverKeyPath, password,
-                                                               &serverConfig->serverKey);
-        }
-
-        if (SOPC_STATUS_OK != status)
+    if (res && NULL != password)
+    {
+        lenPassword = strlen(password);
+        if (UINT32_MAX < lenPassword)
         {
             res = false;
         }
-
-        if (NULL != password)
-        {
-            SOPC_String_Delete(password);
-        }
     }
-    else
+
+    if (res)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverConfig->serverKeyPath,
-                                                                        &serverConfig->serverKey);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+            serverConfig->serverKeyPath, &serverConfig->serverKey, password, (uint32_t) lenPassword);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(
@@ -117,6 +114,11 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
                 serverConfig->serverKeyPath);
             res = false;
         }
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
     }
 
     return res;

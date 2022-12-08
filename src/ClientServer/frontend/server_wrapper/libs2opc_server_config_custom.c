@@ -198,7 +198,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath, const char* serverKeyPath)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+                                                                 const char* serverKeyPath,
+                                                                 bool encrypted)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     assert(NULL != pConfig);
@@ -217,29 +219,37 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCertPath, &serverCert);
     if (SOPC_STATUS_OK == status)
     {
-        if (pConfig->serverConfig.serverkeyEncrypted)
+        char* password = NULL;
+        size_t lenPassword = 0;
+
+        if (encrypted)
         {
-            SOPC_String* password = NULL;
-            SOPC_ServerInternal_ServerKeyUsrPwdCb(&password, &status);
+            bool res = SOPC_ServerInternal_GetKeyPassword(&password);
+            status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
 
-            if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && NULL != password)
+        {
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
             {
-                status = SOPC_KeyManager_DecryptPrivateKeyFromPath(serverKeyPath, password, &serverKey);
-            }
-
-            if (NULL != password)
-            {
-                SOPC_String_Delete(password);
+                status = SOPC_STATUS_NOK;
             }
         }
-        else
+
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverKeyPath, &serverKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverKeyPath, &serverKey, password,
+                                                                                    (uint32_t) lenPassword);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server key from path %s\n",
                                        serverKeyPath);
             }
+        }
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
     }
     else

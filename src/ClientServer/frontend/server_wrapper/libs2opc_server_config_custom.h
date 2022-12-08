@@ -133,13 +133,16 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
  *
  * \param serverCertPath  Path to server certificate file at DER format
  * \param serverKeyPath   Path to server key file at DER or PEM format
+ * \param encrypted       Whether if the key is encrypted or not
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p serverCertPath or \p serverKeyPath are invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, key/cert pair already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath, const char* serverKeyPath);
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+                                                                 const char* serverKeyPath,
+                                                                 bool encrypted);
 
 /**
  * \brief Set asymmetrical certificate and key of server from byte arrays.
