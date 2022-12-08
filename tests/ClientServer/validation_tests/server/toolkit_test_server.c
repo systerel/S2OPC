@@ -24,7 +24,9 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_askpass.h"
 #include "sopc_common_constants.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -101,6 +103,8 @@ static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 static const bool secuActive = true;
+
+#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -283,7 +287,7 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
         SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Load client/server certificates and server key from files */
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert);
+        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert, false);
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
@@ -715,41 +719,6 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
  *                             Server configuration
  *---------------------------------------------------------------------------*/
 
-static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the server private key from TEST_SERVER_PRIVATE_KEY_PWD environement
-     * variable*/
-
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    const char* password = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
-    if (NULL == password)
-    {
-        printf(
-            "<Server_PrivateKey_LoadUserPassword > The following environment variable is missing: "
-            "TEST_SERVER_PRIVATE_KEY_PWD\n");
-        return;
-    }
-
-    /* Allocation */
-    *ppPassword = SOPC_String_Create();
-    if (NULL == *ppPassword)
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password);
-    if (SOPC_STATUS_OK != *writtenStatus)
-    {
-        printf("Server_PrivateKey_LoadUserPassword > Failed to copy user password\n");
-        SOPC_String_Delete(*ppPassword);
-    }
-}
-
 static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
@@ -823,9 +792,10 @@ int main(int argc, char* argv[])
 
 #ifdef WITH_EXPAT
 
+    SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(&Server_PrivateKey_LoadUserPassword);
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
     }
 
 #endif
