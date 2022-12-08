@@ -51,8 +51,8 @@ START_TEST(test_username_password)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_QuitAfterConnect) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    char* password = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
-    ck_assert(NULL != password && "missing TEST_CLIENT_PRIVATE_KEY_PWD environement variable");
+    char* password = getenv("TEST_PASSWORD_PRIVATE_KEY");
+    ck_assert(NULL != password && "missing TEST_PASSWORD_PRIVATE_KEY environement variable");
     Config_SetTest_ClientKeyPassword("password");
     ck_assert(StateMachine_ConfigureMachine(g_pSM, true, false) == SOPC_STATUS_OK);
 

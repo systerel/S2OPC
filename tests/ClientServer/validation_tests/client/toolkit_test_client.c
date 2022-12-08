@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
@@ -388,46 +389,35 @@ int main(void)
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        // Private key: Retrieve the password from TEST_SERVER_PRIVATE_KEY_PWD environement variable
-        const char* password = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
+        // Private key: Retrieve the password from TEST_PASSWORD_PRIVATE_KEY environement variable
+        char* password = getenv("TEST_PASSWORD_PRIVATE_KEY");
+        size_t lenPassword = 0;
         if (NULL == password)
         {
-            printf(">>Stub_Client: The following environment variable is missing: TEST_CLIENT_PRIVATE_KEY_PWD\n");
+            printf(">>Stub_Client: The following environment variable is missing: TEST_PASSWORD_PRIVATE_KEY\n");
             status = SOPC_STATUS_NOK;
         }
-        SOPC_String* key_password = NULL;
-        // Private key: Decrypt and Load
-        if (SOPC_STATUS_OK == status)
+
+        if (SOPC_STATUS_OK == status && NULL != password)
         {
-            key_password = SOPC_String_Create();
-            if (NULL == key_password)
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
             {
-                printf(">>Stub_Client: Failed to create string\n");
-                status = SOPC_STATUS_OUT_OF_MEMORY;
+                status = SOPC_STATUS_NOK;
             }
         }
+
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_String_CopyFromCString(key_password, password);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf(">>Stub_Client: Failed to copy password from Cstring\n");
-            }
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_DecryptPrivateKeyFromPath(keyLocation, key_password, &priv_cli);
+            // Private key: Decrypt and Load
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
+                                                                                    (uint32_t) lenPassword);
             if (SOPC_STATUS_OK != status)
             {
                 printf(
                     ">>Stub_Client: Failed to decrypt client private key, please check the password or key format "
                     "(PEM)\n");
             }
-        }
-
-        if (NULL != key_password)
-        {
-            SOPC_String_Delete(key_password);
         }
 
         if (SOPC_STATUS_OK == status)

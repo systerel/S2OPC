@@ -24,16 +24,18 @@
 
 // Server wrapper
 #include "libs2opc_client_cmds.h"
-#include "libs2opc_client_toolkit_config.h"
+#include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
+#include "sopc_askpass.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -77,6 +79,8 @@ static const uint32_t sleepTimeout = 500;
 
 static SOPC_AddressSpace* addressSpace = NULL;
 
+#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
+
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
@@ -94,87 +98,6 @@ static void disconnect_callback(const uint32_t c_id)
 {
     SOPC_UNUSED_ARG(c_id);
     SOPC_Atomic_Int_Set(&connectionClosed, true);
-}
-
-static void PrivateKey_LoadUserPassword_FromEnv(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus, bool client)
-{
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    const char* password_ref = NULL;
-    if (client)
-    {
-        password_ref = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
-    }
-    else
-    {
-        password_ref = getenv("TEST_SERVER_PRIVATE_KEY_PWD");
-    }
-
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    if (NULL == password_ref)
-    {
-        printf(
-            "<Test_Server_Client: The following environment variables may be missing: TEST_CLIENT_PRIVATE_KEY_PWD or "
-            "TEST_SERVER_PRIVATE_KEY_PWD\n");
-        return;
-    }
-
-    /* Allocation */
-    *ppPassword = SOPC_String_Create();
-    if (NULL == *ppPassword)
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
-    if (SOPC_STATUS_OK != *writtenStatus)
-    {
-        printf(
-            "<Test_Server_Client: Failed to copy user password from environment variables TEST_CLIENT_PRIVATE_KEY_PWD "
-            "or TEST_SERVER_PRIVATE_KEY_PWD\n");
-        SOPC_String_Delete(*ppPassword);
-    }
-}
-
-/**
- * \brief Type of callback to receive user password for decryption of the client private key.
- *
- * \param ppPassword      out parameter, the newly allocated password.
- * \param writtenStatus   out parameter, the status code of the callback process.
- *
- * \warning The callback function shall not do anything blocking or long treatment.
- *          The implementation of the user callback must free the \p ppPassword in case of failure.
- *          The implementation of the user need to update the \p writtenStatus (error or not)
- */
-static void Client_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the client private key from environment variable
-     * TEST_CLIENT_PRIVATE_KEY_PWD.
-     */
-
-    PrivateKey_LoadUserPassword_FromEnv(ppPassword, writtenStatus, true);
-}
-
-/**
- * \brief Type of callback to receive user password for decryption of the server private key.
- *
- * \param ppPassword      out parameter, the newly allocated password.
- * \param writtenStatus   out parameter, the status code of the callback process.
- *
- * \warning The callback function shall not do anything blocking or long treatment.
- *          The implementation of the user callback must free the \p ppPassword in case of failure.
- *          The implementation of the user need to update the \p writtenStatus (error or not)
- */
-static void Server_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the server private key from environment variable
-     * TEST_SERVER_PRIVATE_KEY_PWD.
-     */
-
-    PrivateKey_LoadUserPassword_FromEnv(ppPassword, writtenStatus, false);
 }
 
 /*---------------------------------------------------------------------------
@@ -238,7 +161,8 @@ static int32_t client_create_configuration(void)
         .reverseConnectionConfigId = 0,
     };
 
-    status = SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(&Client_PrivateKey_LoadUserPassword);
+    SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
+    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the client key user paswword callback\n");
@@ -486,7 +410,8 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     {
         SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
         pConfig->serverConfig.serverkeyEncrypted = true;
-        status = SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(&Server_PrivateKey_LoadUserPassword);
+        SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Client: Failed to configure the server key user paswword callback\n");
@@ -495,7 +420,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
-                                                                "./server_private/encrypted_server_2k_key.pem");
+                                                                "./server_private/encrypted_server_2k_key.pem", true);
     }
 
     // Set PKI configuration
