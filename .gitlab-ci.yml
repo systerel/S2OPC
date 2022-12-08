@@ -268,7 +268,7 @@ build-rpi:
 build-linux64-coverity:
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:d4d0960bce81fc665efff13d04b3246920111a9c63f30b5fa267482a2096c807 # digest of coverity:1.7
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:be2f9a46e261d7e028dbf00df0d4d0d8d46d8863e098e754efa394280ea4514b # digest of coverity:1.8
   script: |-
     mkdir build
     cd build
