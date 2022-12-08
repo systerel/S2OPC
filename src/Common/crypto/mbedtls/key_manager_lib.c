@@ -208,9 +208,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricKey* pKey,
-                                                          bool is_public,
-                                                          SOPC_SerializedAsymmetricKey** out)
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SOPC_AsymmetricKey* pKey,
+                                                                        bool is_public,
+                                                                        SOPC_SerializedAsymmetricKey** out)
 {
     if (NULL == pKey || NULL == out)
     {

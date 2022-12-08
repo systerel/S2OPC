@@ -182,23 +182,42 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const u
  * \param path  path to the file
  * \param key   out parameter, the created serialized key
  *
+ * \deprecated  Use ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd instead
+ *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
                                                                          SOPC_SerializedAsymmetricKey** key);
 
 /**
- * \brief Creates a serialized asymmetric key from an SOPC_AsymmetricKey structure.
+ * \brief               Creates a serialized asymmetric key from a file in DER or PEM format
+ *                      with an optional \p password for the encrypted private key (PEM format).
  *
- * \param pKey      A valid pointer to the asymmetric key (public/private) to serialize.
- * \param is_public Whether the key is public or private.
- * \param out       out parameter, the newly allocated serialized key
+ * \param keyPath       The path to the DER/PEM file.
+ * \param key           the newly allocated serialized.
+ * \param password      An optional password (!= NULL). The password must be a zero-terminated string with
+ *                      at most \p lenPassword non null chars, and at least \p lenPassword + 1 allocated chars.
+ * \param lenPassword   The length of the password.
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricKey* pKey,
-                                                          bool is_public,
-                                                          SOPC_SerializedAsymmetricKey** out);
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(const char* keyPath,
+                                                                                 SOPC_SerializedAsymmetricKey** key,
+                                                                                 char* password,
+                                                                                 uint32_t lenPassword);
+
+/**
+ * \brief Creates a serialized asymmetric key from an ::SOPC_AsymmetricKey structure.
+ *
+ * \param pKey      A valid pointer to the asymmetric key (public/private) to serialize.
+ * \param is_public Whether the key is public or private.
+ * \param out       the newly allocated serialized key
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SOPC_AsymmetricKey* pKey,
+                                                                        bool is_public,
+                                                                        SOPC_SerializedAsymmetricKey** out);
 
 /**
  * \brief Deserializes a serialized key.
@@ -212,19 +231,6 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey(const SOPC_AsymmetricK
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC_SerializedAsymmetricKey* key,
                                                                       bool is_public,
                                                                       SOPC_AsymmetricKey** res);
-
-/**
- * \brief Decrypt private key from path (PEM format)
- *
- * \param keyPath    Path to the file
- * \param password   Password to decrypt the key
- * \param out        out parameter, the newly allocated serialized and decrypted key
- *
- * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
- */
-SOPC_ReturnStatus SOPC_KeyManager_DecryptPrivateKeyFromPath(const char* keyPath,
-                                                            SOPC_String* password,
-                                                            SOPC_SerializedAsymmetricKey** out);
 
 /**
  * \brief Releases all resources associated to a serialized asymmetric key.
