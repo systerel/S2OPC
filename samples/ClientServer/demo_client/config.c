@@ -313,45 +313,24 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
                 }
             }
 
+            size_t lenPassword = 0;
+            if (SOPC_STATUS_OK == status && NULL != PRIVATE_KEY_PWD)
+            {
+                lenPassword = strlen(PRIVATE_KEY_PWD);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
             if (SOPC_STATUS_OK == status)
             {
-                if (NULL != PRIVATE_KEY_PWD)
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    PATH_CLIENT_PRIV, &pKeyCli, PRIVATE_KEY_PWD, (uint32_t) lenPassword);
+                if (SOPC_STATUS_OK != status)
                 {
-                    SOPC_String* password = SOPC_String_Create();
-                    if (NULL == password)
-                    {
-                        printf("# Error: Failed to create string\n");
-                        status = SOPC_STATUS_OUT_OF_MEMORY;
-                    }
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        status = SOPC_String_CopyFromCString(password, PRIVATE_KEY_PWD);
-                        if (SOPC_STATUS_OK != status)
-                        {
-                            printf("# Error: Failed to copy password from Cstring\n");
-                        }
-                    }
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        status = SOPC_KeyManager_DecryptPrivateKeyFromPath(PATH_CLIENT_PRIV, password, &pKeyCli);
-                        if (SOPC_STATUS_OK != status)
-                        {
-                            printf("# Error: Failed to decrypt client private key, please check the password\n");
-                        }
-                    }
-
-                    if (NULL != password)
-                    {
-                        SOPC_String_Delete(password);
-                    }
-                }
-                else
-                {
-                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(PATH_CLIENT_PRIV, &pKeyCli);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        printf("# Error: Failed to load client private key\n");
-                    }
+                    printf(
+                        "# Error: Failed to load client private key (please check the key format or the password)\n");
                 }
             }
         } // else configuration with client/server certificates already created and shared
