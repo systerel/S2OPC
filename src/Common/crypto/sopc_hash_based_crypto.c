@@ -116,7 +116,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Run(const SOPC_HashBasedCrypto_Config* co
                                            const SOPC_ByteString* pSecret,
                                            SOPC_ByteString** ppOutput)
 {
-    if (NULL == config || NULL == pSecret || NULL == ppOutput)
+    if (NULL == config || NULL == config->pSalt || NULL == pSecret || NULL == ppOutput)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
