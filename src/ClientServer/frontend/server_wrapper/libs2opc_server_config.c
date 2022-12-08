@@ -25,7 +25,6 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
 
-#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -60,7 +59,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .nbEndpoints = 0,
     .endpointIndexes = NULL,
     .endpointClosed = NULL,
-    .serverKeyUsrPwdCb = NULL,
+    .getServerKeyPassword = NULL,
 };
 
 SOPC_ServerHelper_Config sopc_server_helper_config;
@@ -516,17 +515,17 @@ void SOPC_HelperConfigServer_Clear(void)
     Mutex_Clear(&sopc_server_helper_config.stateMutex);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetServerKeyUsrPwdCallback(SOPC_ServerKeyUsrPwd_Fct* serverKeyUsrPwdCb)
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == serverKeyUsrPwdCb)
+    if (NULL == getServerKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    sopc_server_helper_config.serverKeyUsrPwdCb = serverKeyUsrPwdCb;
+    sopc_server_helper_config.getServerKeyPassword = getServerKeyPassword;
     return SOPC_STATUS_OK;
 }
 
