@@ -168,7 +168,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_KeyManager_DecryptPrivateKeyFromPath(szPathKeyClient, password, &pKeyCli);
+                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                        szPathKeyClient, &pKeyCli, (char*) password->Data, (uint32_t) password->Length);
                 }
 
                 if (NULL != password)
