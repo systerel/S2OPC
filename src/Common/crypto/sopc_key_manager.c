@@ -94,22 +94,35 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(const SOPC
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_DecryptPrivateKeyFromPath(const char* keyPath,
-                                                            SOPC_String* password,
-                                                            SOPC_SerializedAsymmetricKey** out)
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(const char* keyPath,
+                                                                                 SOPC_SerializedAsymmetricKey** key,
+                                                                                 char* password,
+                                                                                 uint32_t lenPassword)
 {
-    if (NULL == keyPath || NULL == password || NULL == out)
+    if (NULL == keyPath || NULL == key)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (0 > password->Length || NULL == password->Data)
+    if (NULL == password && 0 != lenPassword)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == password)
+    {
+        // The key is not encrypt
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyPath, key);
+        return status;
+    }
+
     SOPC_AsymmetricKey* pKey = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, (char*) password->Data,
-                                                                            (uint32_t) password->Length);
+    status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, password, lenPassword);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -120,7 +133,7 @@ SOPC_ReturnStatus SOPC_KeyManager_DecryptPrivateKeyFromPath(const char* keyPath,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey(pKey, false, out);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pKey, false, key);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to serialize private key from file %s",
