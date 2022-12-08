@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
-                                                                "./server_private/server_2k_key.pem");
+                                                                "./server_private/server_2k_key.pem", false);
     }
 
     // Set PKI configuration
