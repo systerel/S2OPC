@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libs2opc_client_toolkit_config.h"
+#include "libs2opc_client_config.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
@@ -155,35 +155,42 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 
         if (SOPC_STATUS_OK == status)
         {
+            char* password = NULL;
+            size_t lenPassword = 0;
             bool clientKeyEncrypted = SOPC_HelperConfigClient_IsEncryptedClientKey();
             if (clientKeyEncrypted)
             {
-                SOPC_String* password = NULL;
-                SOPC_HelperConfigClient_ClientKeyUsrPwdCb(&password, &status);
-                if (SOPC_STATUS_OK != status)
+                bool res = SOPC_HelperConfigClient_ClientKeyUsrPwdCb(&password);
+                if (!res)
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_ERROR,
                                 "Failed to retrieve the password of the client's private key from callback.");
-                }
-
-                if (SOPC_STATUS_OK == status)
-                {
-                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                        szPathKeyClient, &pKeyCli, (char*) password->Data, (uint32_t) password->Length);
-                }
-
-                if (NULL != password)
-                {
-                    SOPC_String_Delete(password);
+                    status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                 }
             }
-            else
+
+            if (SOPC_STATUS_OK == status && NULL != password)
             {
-                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(szPathKeyClient, &pKeyCli);
+                lenPassword = strlen(password);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    szPathKeyClient, &pKeyCli, password, (uint32_t) lenPassword);
                 if (SOPC_STATUS_OK != status)
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
                 }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
             }
         }
     }
