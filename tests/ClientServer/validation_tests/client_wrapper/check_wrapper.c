@@ -30,6 +30,7 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "assert.h"
+#include "sopc_askpass.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
@@ -40,7 +41,7 @@
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_cmds_internal_api.h"
-#include "libs2opc_client_toolkit_config.h"
+#include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
 
 #define SLEEP_TIME 10
@@ -111,37 +112,6 @@ static void datachange_callback_none(const int32_t c_id, const char* node_id, co
     SOPC_UNUSED_ARG(c_id);
     SOPC_UNUSED_ARG(node_id);
     SOPC_UNUSED_ARG(value);
-}
-
-static void Client_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the client private key from environment variable
-     * TEST_CLIENT_PRIVATE_KEY_PWD.
-     */
-
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    const char* password_ref = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
-    if (NULL == password_ref)
-    {
-        return;
-    }
-    /* Allocation */
-    *ppPassword = SOPC_String_Create();
-    if (NULL == *ppPassword)
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
-    if (SOPC_STATUS_OK != *writtenStatus)
-    {
-        SOPC_String_Delete(*ppPassword);
-    }
 }
 
 static Mutex check_counter_mutex;
@@ -657,8 +627,9 @@ START_TEST(test_wrapper_read)
         ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, &readResults));
     }
 
+    SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(&Client_PrivateKey_LoadUserPassword);
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */

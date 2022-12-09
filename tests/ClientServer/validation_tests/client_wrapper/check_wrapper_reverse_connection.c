@@ -32,8 +32,9 @@
 #include "string.h"
 
 #include "libs2opc_client_cmds.h"
-#include "libs2opc_client_toolkit_config.h"
+#include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
+#include "sopc_askpass.h"
 
 #define SLEEP_TIME 10
 #define CONNECTION_TIMEOUT 10000
@@ -54,37 +55,6 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .policyId = "anonymous",
     .username = NULL,
     .password = NULL};
-
-static void Client_PrivateKey_LoadUserPassword(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
-{
-    /* Retrieve the user password to decrypt the client private key from environment variable
-     * TEST_CLIENT_PRIVATE_KEY_PWD.
-     */
-
-    *writtenStatus = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL == ppPassword)
-    {
-        return;
-    }
-    const char* password_ref = getenv("TEST_CLIENT_PRIVATE_KEY_PWD");
-    if (NULL == password_ref)
-    {
-        return;
-    }
-    /* Allocation */
-    *ppPassword = SOPC_String_Create();
-    if (NULL == *ppPassword)
-    {
-        *writtenStatus = SOPC_STATUS_OUT_OF_MEMORY;
-        return;
-    }
-
-    *writtenStatus = SOPC_String_CopyFromCString(*ppPassword, password_ref);
-    if (SOPC_STATUS_OK != *writtenStatus)
-    {
-        SOPC_String_Delete(*ppPassword);
-    }
-}
 
 START_TEST(test_wrapper_reverse_connections)
 {
@@ -127,8 +97,9 @@ START_TEST(test_wrapper_reverse_connections)
         SOPC_ClientHelper_GetEndpointsResult_Free(&result);
     }
 
+    SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(&Client_PrivateKey_LoadUserPassword);
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */
