@@ -34,7 +34,8 @@
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "sopc_askpass.h"
+#include "sopc_assert.h"
+#include "sopc_helper_string.h"
 
 #define SLEEP_TIME 10
 #define CONNECTION_TIMEOUT 10000
@@ -55,6 +56,20 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .policyId = "anonymous",
     .username = NULL,
     .password = NULL};
+
+#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
+
+static bool get_password_callback(char** outPassword)
+{
+    SOPC_ASSERT(NULL != outPassword);
+    /*
+        We have to make a copy here because in any case, we will free the password and not distinguish if it come
+        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
+    */
+    char* _outPassword = getenv(PASSWORD_ENV_NAME);
+    *outPassword = SOPC_strdup(_outPassword); // Do a copy
+    return NULL != *outPassword;
+}
 
 START_TEST(test_wrapper_reverse_connections)
 {
@@ -97,9 +112,8 @@ START_TEST(test_wrapper_reverse_connections)
         SOPC_ClientHelper_GetEndpointsResult_Free(&result);
     }
 
-    SOPC_AskPass_SetEnv("TEST_PASSWORD_PRIVATE_KEY");
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromEnv);
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&get_password_callback);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */

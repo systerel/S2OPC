@@ -47,31 +47,4 @@
  */
 bool SOPC_AskPass_FromTerminal(char** outPassword);
 
-/**
- * \brief               Configure the name of the environement variable to use with ::SOPC_AskPass_FromEnv.
- *
- * \param envVarName    The name of the environement variable
- *
- * \note                This function should be call before call to ::SOPC_AskPass_FromEnv
- *
- */
-void SOPC_AskPass_SetEnv(char* envVarName);
-
-/**
- * \brief               Retrieve the password from environement variable.
- *
- * \param outPassword   The newly allocated password, you should free it.
- *
- * \return              true in case of success, otherwise false.
- *
- * \note                The environement variable name should be defines with ::SOPC_AskPass_SetEnv.
- *
- * \note                This function is useful to configure the client/server callback to retrieve
- *                      the password of the private key. It can be passed directly as input argument to
- *                      ::SOPC_HelperConfigClient_SetKeyPasswordCallback or
- *                      ::SOPC_HelperConfigServer_SetKeyPasswordCallback
- *
- */
-bool SOPC_AskPass_FromEnv(char** outPassword);
-
 #endif /* SOPC_ASKPASS_H_ */
