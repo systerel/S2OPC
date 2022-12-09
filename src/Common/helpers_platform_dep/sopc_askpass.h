@@ -27,17 +27,20 @@
 
 #include <stdbool.h>
 
-/* TODO: The SOPC_AskPass_FromTerminal function is not implemented as described and uses an environment variable instead
- */
+// Maximum password length
+#ifndef SOPC_PASSWORD_MAX_LENGTH
+#define SOPC_PASSWORD_MAX_LENGTH 128
+#endif
 
 /**
  * \brief               Ask for a password in an interactive and secure way from a console.
+ *                      The prompt is "Password:\n".
  *
  * \param outPassword   The newly allocated password, you should free it.
  *
  * \return              true in case of success, otherwise false.
  *
- * \note                stdin is not use.
+ * \note                stdin is not used (linux)
  *
  * \note                This function is useful to configure the client/server callback to retrieve
  *                      the password of the private key. It can be passed directly as input argument to
@@ -46,5 +49,17 @@
  *
  */
 bool SOPC_AskPass_FromTerminal(char** outPassword);
+
+/**
+ * \brief               Ask for a password in an interactive and secure way from a console.
+ *                      Same as ::SOPC_AskPass_FromTerminal with a custom prompt.
+ *
+ * \param prompt        The custom prompt to display waiting for password input
+ * \param outPassword   The newly allocated password, you should free it.
+ *
+ * \return              true in case of success, otherwise false.
+ *
+ */
+bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword);
 
 #endif /* SOPC_ASKPASS_H_ */

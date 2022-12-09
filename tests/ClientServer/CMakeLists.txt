@@ -94,8 +94,8 @@ if(ENABLE_TESTING)
 
   # Helpers tests
 
-  file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/*.c")
-  add_executable(check_helpers ${INTERNAL_TESTS_SRCS} ${TEST_SERVER_ADDRESS_SPACE_C})
+  file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/check_*.c")
+  add_executable(check_helpers ${INTERNAL_TESTS_SRCS} unit_tests/helpers/hexlify.c ${TEST_SERVER_ADDRESS_SPACE_C})
   add_dependencies(check_helpers make-server-address-space)
   target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
   target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2opc_clientserver-loader-embedded)
@@ -124,6 +124,13 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_SERVER_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_USERS_UACTT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND ${CMAKE_COMMAND} -E copy ${TEST_ADDRESS_SPACE_XML_ORIGIN} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_ADDRESS_SPACE_XML_FILE})
+
+  # Ask password binary for test
+  add_executable(ask_password unit_tests/helpers/ask_password.c)
+  target_include_directories(ask_password PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+  target_link_libraries(ask_password PRIVATE s2opc_common)
+  target_compile_options(ask_password PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
 
   # Sockets layer tests
 

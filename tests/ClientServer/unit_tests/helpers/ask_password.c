@@ -17,16 +17,29 @@
  * under the License.
  */
 
-/** \file sopc_askpass.c
- *
- * \brief A platform independent API to ask for passwords.
- */
-
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
+#include "sopc_mem_alloc.h"
 
-bool SOPC_AskPass_FromTerminal(char** outPassword)
+int main(int argc, char* argv[])
 {
-    return SOPC_AskPass_CustomPromptFromTerminal("Password:\n", outPassword);
+    SOPC_ASSERT(argc == 2 && "expects 1 and only 1 argument: the expected password");
+    char* pwd = NULL;
+    bool bres = SOPC_AskPass_FromTerminal(&pwd);
+    if (bres)
+    {
+        int res = strcmp(argv[1], pwd);
+        printf("found pwd: '%s' && res == %d\n", pwd, res);
+        SOPC_Free(pwd);
+        return res;
+    }
+    else
+    {
+        printf("no password entered !");
+    }
+    return -100;
 }
