@@ -51,7 +51,7 @@ typedef struct SOPC_HashBasedCrypto_Config SOPC_HashBasedCrypto_Config;
 /**
  * \brief           Create the internal configuration structure
  *
- * \param cfg       A valid pointer to the newly created structure.
+ * \param[out] cfg  A valid pointer to the newly created structure.
  *                  You should free it with SOPC_HashBasedCrypto_Config_Free()
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when \p cfg is NULL
@@ -89,7 +89,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Config_PBKDF2(SOPC_HashBasedCrypto_Config
  *
  * \param config            A valid pointer to the configuration structure.
  * \param pSecret           A valid pointer to a ByteString which contains the data to hash.
- * \param ppOutput          A valid pointer to the newly created ByteString which will contain the generated hash.
+ * \param[out] ppOutput     A valid pointer to the newly created ByteString which will contain the generated hash.
  *                          You should free it.
  *
  * \note            When \p config is configured with SOPC_HashBasedCrypto_PBKDF2_HMAC_SHA256 then length of \p pSecret
