@@ -673,18 +673,25 @@ static SOPC_ReturnStatus set_default_password_hash(user_password** up,
     {
         status = generate_fixed_hash_or_salt(&pwd->salt, saltLength);
     }
-    // Set the default iteration count
-    pwd->iteration_count = iterationCount;
-    // Allocate the default user
-    SOPC_String_Initialize(&pwd->user);
-    status = SOPC_String_CopyFromCString((SOPC_String*) &pwd->user, REJECTED_USER);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Allocate the default user
+        SOPC_String_Initialize(&pwd->user);
+        status = SOPC_String_CopyFromCString((SOPC_String*) &pwd->user, REJECTED_USER);
+    }
+
     // Clear the structure in case of error
     if (SOPC_STATUS_OK != status)
     {
         userpassword_free(pwd);
     }
-
-    *up = pwd;
+    else
+    {
+        // Set the default iteration count
+        pwd->iteration_count = iterationCount;
+        *up = pwd;
+    }
     return status;
 }
 

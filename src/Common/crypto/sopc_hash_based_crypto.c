@@ -76,7 +76,7 @@ static bool hash_based_crypto_is_valid_config(const SOPC_HashBasedCrypto_Config*
             res = false;
         }
         //  config->pSalt->Length > 0 to check the cast beforehand SOPC_HashBasedCrypto_Run
-        if (NULL == config->pSalt->Data || 0 >= config->pSalt->Length)
+        else if (NULL == config->pSalt->Data || 0 >= config->pSalt->Length)
         {
             res = false;
         }
@@ -143,7 +143,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Run(const SOPC_HashBasedCrypto_Config* co
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        if (SOPC_STATUS_OK == status)
+        else
         {
             status = HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(
                 pSecret->Data, (uint32_t) pSecret->Length, config->pSalt->Data, (uint32_t) config->pSalt->Length,
@@ -157,6 +157,7 @@ SOPC_ReturnStatus SOPC_HashBasedCrypto_Run(const SOPC_HashBasedCrypto_Config* co
         else
         {
             SOPC_ByteString_Clear(pOutput);
+            SOPC_Free(pOutput);
         }
         break;
     default:
