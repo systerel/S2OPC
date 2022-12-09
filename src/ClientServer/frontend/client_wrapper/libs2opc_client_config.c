@@ -17,41 +17,41 @@
  * under the License.
  */
 
-#include "libs2opc_client_toolkit_config.h"
+#include "libs2opc_client_config.h"
 #include "sopc_logger.h"
 
-SOPC_ClientKeyUsrPwd_Fct* FctclientKeyUsrPwdCb = NULL;
+SOPC_GetClientKeyPassword_Fct* FctGetClientKeyPassword = NULL;
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyUsrPwdCallback(SOPC_ClientKeyUsrPwd_Fct* clientKeyUsrPwdCb)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyPasswordCallback(SOPC_GetClientKeyPassword_Fct* getClientKeyPassword)
 {
-    if (NULL != FctclientKeyUsrPwdCb)
+    if (NULL != FctGetClientKeyPassword)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "The following user callback is already configure: SOPC_ClientKeyUsrPwd_Fct");
+                               "The following user callback is already configure: SOPC_GetClientKeyPassword_Fct");
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == clientKeyUsrPwdCb)
+    if (NULL == getClientKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    FctclientKeyUsrPwdCb = clientKeyUsrPwdCb;
+    FctGetClientKeyPassword = getClientKeyPassword;
     return SOPC_STATUS_OK;
 }
 
-// Get user password to decrypt client private key from internal callback
-void SOPC_HelperConfigClient_ClientKeyUsrPwdCb(SOPC_String** ppPassword, SOPC_StatusCode* writtenStatus)
+// Get password to decrypt client private key from internal callback
+bool SOPC_HelperConfigClient_ClientKeyUsrPwdCb(char** outPassword)
 {
-    if (NULL == FctclientKeyUsrPwdCb)
+    if (NULL == FctGetClientKeyPassword)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "The following user callback isn't configure: SOPC_ClientKeyUsrPwd_Fct");
-        *writtenStatus = SOPC_STATUS_INVALID_STATE;
-        return;
+                               "The following user callback isn't configure: SOPC_GetClientKeyPassword_Fct");
+        return false;
     }
-    FctclientKeyUsrPwdCb(ppPassword, writtenStatus);
+    bool res = FctGetClientKeyPassword(outPassword);
+    return res;
 }
 
 bool SOPC_HelperConfigClient_IsEncryptedClientKey(void)
 {
-    return NULL != FctclientKeyUsrPwdCb;
+    return NULL != FctGetClientKeyPassword;
 }
