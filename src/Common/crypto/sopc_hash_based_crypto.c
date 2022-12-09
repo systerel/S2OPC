@@ -70,13 +70,13 @@ static bool hash_based_crypto_is_valid_config(const SOPC_HashBasedCrypto_Config*
     case SOPC_HashBasedCrypto_PBKDF2_HMAC_SHA256:
         // INT32_MAX < config->lenOutput to check the cast beforehand SOPC_HashBasedCrypto_Run
         // same for UINT32_MAX < config->iteration_count
-        if (NULL == config->pSalt || 0 == config->iteration_count || 0 == config->lenOutput ||
+        if (NULL == config->pSalt || 0 == config->iteration_count || 0 >= config->lenOutput ||
             INT32_MAX < config->lenOutput || UINT32_MAX < config->iteration_count)
         {
             res = false;
         }
-        //  config->pSalt->Length > INT32_MAX to check the cast beforehand SOPC_HashBasedCrypto_Run
-        if (NULL == config->pSalt->Data || 0 >= config->pSalt->Length || config->pSalt->Length > INT32_MAX)
+        //  config->pSalt->Length > 0 to check the cast beforehand SOPC_HashBasedCrypto_Run
+        if (NULL == config->pSalt->Data || 0 >= config->pSalt->Length)
         {
             res = false;
         }
