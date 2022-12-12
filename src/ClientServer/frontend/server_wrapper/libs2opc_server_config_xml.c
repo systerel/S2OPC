@@ -108,10 +108,10 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
             serverConfig->serverKeyPath, &serverConfig->serverKey, password, (uint32_t) lenPassword);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "Failed to load server private key file %s. Please check it is a private key at DER or PEM format.",
-                serverConfig->serverKeyPath);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Failed to load server private key file %s. Please check the password if the key is "
+                                   "encrypted and check the key format (PEM)",
+                                   serverConfig->serverKeyPath);
             res = false;
         }
     }

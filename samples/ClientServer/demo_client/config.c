@@ -335,7 +335,8 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
                 if (SOPC_STATUS_OK != status)
                 {
                     printf(
-                        "# Error: Failed to load client private key (please check the key format or the password)\n");
+                        "# Error: Failed to load client private key. Please check the password if the key is "
+                        "encrypted and check the key format (PEM)\n");
                 }
             }
 

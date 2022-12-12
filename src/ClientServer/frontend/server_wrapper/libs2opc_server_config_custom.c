@@ -243,7 +243,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
                                                                                     (uint32_t) lenPassword);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server key from path %s\n",
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Failed to load server key from path %s. Please check the password if the key "
+                                       "is encrypted and check the key format (PEM)\n",
                                        serverKeyPath);
             }
         }

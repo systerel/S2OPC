@@ -184,7 +184,9 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                     szPathKeyClient, &pKeyCli, password, (uint32_t) lenPassword);
                 if (SOPC_STATUS_OK != status)
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client private key.");
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                "Failed to load client private key. Please check the password if the key is encrypted "
+                                "and check the key format (PEM)");
                 }
             }
 
