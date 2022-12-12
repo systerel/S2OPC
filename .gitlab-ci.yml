@@ -362,7 +362,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:996e2bd7a493117e07fd967d18f20872abc86508acff7b94347108e4a13b7114 # digest of test:2.13
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -463,7 +463,7 @@ windows-appveyor:
 coverage-analysis:
   <<: *docker_job
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:996e2bd7a493117e07fd967d18f20872abc86508acff7b94347108e4a13b7114  # digest of test:2.13
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31  # digest of test:2.14
   script:
     - ./.gen_coverage.sh
   artifacts:
