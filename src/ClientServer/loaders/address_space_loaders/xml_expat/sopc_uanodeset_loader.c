@@ -189,7 +189,7 @@ static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
         NULL, false, NULL, false, NULL, NULL, NULL \
     }
 
-// Note use #define to could use it as distinct context storage during same complex value parsing (here several NodeIds)
+// Note use #define to use it as distinct context storage during same complex value parsing (here several NodeIds)
 #define COMPLEX_VALUE_NODE_ID_TAGS                                                  \
     {                                                                               \
         {"Identifier", false, NULL, false, NULL, NULL, NULL}, END_COMPLEX_VALUE_TAG \
@@ -211,6 +211,14 @@ static parse_complex_value_tag_t complex_value_guid_tags[] = COMPLEX_VALUE_GUID_
     }
 
 static parse_complex_value_tag_t complex_value_localized_text_tags[] = COMPLEX_VALUE_LOCALIZED_TEXT_TAGS;
+
+#define COMPLEX_VALUE_QUALIFIED_NAME_TAGS                                                                         \
+    {                                                                                                             \
+        {"NamespaceIndex", false, NULL, false, NULL, NULL, NULL}, {"Name", false, NULL, false, NULL, NULL, NULL}, \
+            END_COMPLEX_VALUE_TAG                                                                                 \
+    }
+
+static parse_complex_value_tag_t complex_value_qualified_name_tags[] = COMPLEX_VALUE_QUALIFIED_NAME_TAGS;
 
 static parse_complex_value_tag_t complex_value_empty_ext_obj_tags[] = {
     {"TypeId", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
@@ -337,7 +345,7 @@ static bool type_id_from_name(const char* name,
         {"NodeId", SOPC_NodeId_Id, false, complex_value_node_id_tags},
         {"ExpandedNodeId", SOPC_ExpandedNodeId_Id, false, NULL},
         {"StatusCode", SOPC_StatusCode_Id, true, NULL},
-        {"QualifiedName", SOPC_QualifiedName_Id, false, NULL},
+        {"QualifiedName", SOPC_QualifiedName_Id, false, complex_value_qualified_name_tags},
         {"LocalizedText", SOPC_LocalizedText_Id, false, complex_value_localized_text_tags},
         {"ExtensionObject", SOPC_ExtensionObject_Id, false, complex_value_empty_ext_obj_tags},
         {"Structure", SOPC_ExtensionObject_Id, false, complex_value_empty_ext_obj_tags},
@@ -1751,6 +1759,53 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     return result;
 }
 
+static bool set_variant_value_qualified_name(SOPC_QualifiedName** pqname, parse_complex_value_tag_array_t tagsContext)
+{
+    assert(NULL != pqname);
+    parse_complex_value_tag_t* currentTagCtx = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    bool ns_index_ok = complex_value_tag_from_tag_name_no_namespace("NamespaceIndex", tagsContext, &currentTagCtx);
+    assert(ns_index_ok && "QualifiedName without namespace index.");
+
+    uint16_t namespaceindex = 0;
+    status = SOPC_strtouint16_t(currentTagCtx->single_value, &namespaceindex, 10, '\0');
+    assert(SOPC_STATUS_OK == status && "Unable to convert QualifiedName index to uint16.");
+
+    bool name_ok = complex_value_tag_from_tag_name_no_namespace("Name", tagsContext, &currentTagCtx);
+    assert(name_ok && "QualifiedName without name.");
+
+    const char* name = currentTagCtx->single_value;
+    if (!currentTagCtx->set)
+    {
+        // Empty name
+        name = "";
+    }
+
+    SOPC_QualifiedName* qn = SOPC_Calloc(1, sizeof(SOPC_QualifiedName));
+
+    if (qn == NULL)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        SOPC_Free(qn);
+        return false;
+    }
+
+    SOPC_QualifiedName_Initialize(qn);
+
+    qn->NamespaceIndex = namespaceindex;
+    if (SOPC_String_CopyFromCString(&qn->Name, name) != SOPC_STATUS_OK)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        SOPC_QualifiedName_Clear(qn);
+        SOPC_Free(qn);
+        return false;
+    }
+
+    *pqname = qn;
+    return true;
+}
+
 static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, const char* val)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1832,7 +1887,7 @@ static bool set_variant_value_complex(SOPC_Variant* var,
         assert(false && "Unexpected simple type");
         break;
     case SOPC_QualifiedName_Id:
-        assert(false && "QualifiedName not managed yet");
+        ok = set_variant_value_qualified_name(&var->Value.Qname, tagsContext);
         break;
     case SOPC_Guid_Id:
         ok = set_variant_value_guid(&var->Value.Guid, tagsContext);
