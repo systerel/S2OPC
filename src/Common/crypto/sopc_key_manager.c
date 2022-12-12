@@ -32,7 +32,6 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
-#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -123,22 +122,10 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
 
     SOPC_AsymmetricKey* pKey = NULL;
     status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, password, lenPassword);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Failed to load encrypted private key file %s. Please check the password or it is a "
-                               "private key at DER or PEM format",
-                               keyPath);
-    }
 
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pKey, false, key);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to serialize private key from file %s",
-                                   keyPath);
-        }
     }
 
     SOPC_KeyManager_AsymmetricKey_Free(pKey);
