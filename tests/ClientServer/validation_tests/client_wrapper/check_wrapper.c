@@ -756,7 +756,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -774,7 +774,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -795,7 +795,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -817,7 +817,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -835,7 +835,7 @@ START_TEST(test_wrapper_write)
             {.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value[0]},
             {.nodeId = "ns=0;i=1009", .indexRange = NULL, .value = &value[1]},
         };
-        SOPC_StatusCode writeResults[2] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[2] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -861,7 +861,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;
@@ -879,7 +879,7 @@ START_TEST(test_wrapper_write)
     {
         SOPC_DataValue value;
         SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
-        SOPC_StatusCode writeResults[1] = {SOPC_STATUS_NOK};
+        SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
         writeValues[0].value->Value.DoNotClear = false;

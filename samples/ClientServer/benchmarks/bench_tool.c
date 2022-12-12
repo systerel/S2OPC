@@ -119,7 +119,7 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
         SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
         assert(id != NULL);
 
-        SOPC_StatusCode status = SOPC_NodeId_Copy(&r->NodeId, id);
+        SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);
         assert(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
@@ -155,7 +155,7 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
         SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
         assert(id != NULL);
 
-        SOPC_StatusCode status = SOPC_NodeId_Copy(&r->NodeId, id);
+        SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);
         assert(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
@@ -631,7 +631,7 @@ int main(int argc, char** argv)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./bench_tool_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_StatusCode status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
     assert(SOPC_STATUS_OK == status);
 
     status = SOPC_Toolkit_Initialize(event_handler);

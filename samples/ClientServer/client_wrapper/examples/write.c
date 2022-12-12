@@ -123,7 +123,7 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        SOPC_StatusCode writeResult = SOPC_STATUS_NOK;
+        SOPC_StatusCode writeResult = SOPC_UncertainStatusMask;
         SOPC_ClientHelper_WriteValue writeValue;
 
         /* initialize write value parameters */

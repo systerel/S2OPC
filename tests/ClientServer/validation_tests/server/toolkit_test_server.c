@@ -642,7 +642,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
     SOPC_MethodCallFunc_Ptr* methodFunc;
     /* Create and define the method call manager the server will use*/
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
-    SOPC_StatusCode status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_SetMethodCallManager(mcm);
