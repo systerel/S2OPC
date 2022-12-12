@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libs2opc_client_config.h"
+#include "libs2opc_client_internal.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
@@ -157,10 +157,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         {
             char* password = NULL;
             size_t lenPassword = 0;
-            bool clientKeyEncrypted = SOPC_HelperConfigClient_IsEncryptedClientKey();
+            bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedKey();
             if (clientKeyEncrypted)
             {
-                bool res = SOPC_HelperConfigClient_ClientKeyUsrPwdCb(&password);
+                bool res = SOPC_ClientInternal_GetKeyPassword(&password);
                 if (!res)
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_ERROR,

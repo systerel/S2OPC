@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Interface to configure the client toolkit
+ * \brief High level interface to configure an OPC UA client
  *
  */
 
@@ -54,21 +54,5 @@ typedef bool SOPC_GetClientKeyPassword_Fct(char** outPassword);
  * \note    This function must be called before the configuration the secure Channel.
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyPasswordCallback(SOPC_GetClientKeyPassword_Fct* getClientKeyPassword);
-
-/**
- * \brief Function to call the callback to retrieve password for decryption of the Client private key.
- *
- * \param[out] outPassword   the newly allocated password.
- *
- * \return                   true in case of success, otherwise false.
- *
- */
-bool SOPC_HelperConfigClient_ClientKeyUsrPwdCb(char** outPassword);
-
-/**
- * \brief Function to know if the client's key is encrypted (if the callback has been defined).
- *
- */
-bool SOPC_HelperConfigClient_IsEncryptedClientKey(void);
 
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */
