@@ -55,7 +55,8 @@ LOCAL_OPERATIONS
 
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
-        p_nb_browse_value : NAT
+        p_nb_browse_value : NAT &
+        p_nb_browse_value = RequestBrowse_nb_BrowseValue
     THEN
         StatusCode_service,
         ResponseBrowse_BrowseStatus,
