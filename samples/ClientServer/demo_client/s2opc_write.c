@@ -96,25 +96,24 @@ int main(int argc, char* argv[])
     struct argparse argparse;
 
     argparse_init(&argparse, options, usage, 0);
-    argparse_describe(
-        &argparse, "\nS2OPC write demo: write a node Value attribute with numerical type",
-        "\nExpects at least 2 arguments:"
-        "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
-        "\n -t: the BuiltInType id: "
-        "\n       SOPC_Boolean_Id | 1"
-        "\n       SOPC_SByte_Id   | 2"
-        "\n       SOPC_Byte_Id    | 3"
-        "\n       SOPC_Int16_Id   | 4"
-        "\n       SOPC_UInt16_Id  | 5"
-        "\n       SOPC_Int32_Id   | 6"
-        "\n       SOPC_UInt32_Id  | 7"
-        "\n       SOPC_Int64_Id   | 8"
-        "\n       SOPC_UInt64_Id  | 9"
-        "\n       SOPC_Float_Id   | 10"
-        "\n       SOPC_Double_Id  | 11"
-        "\n       SOPC_String_Id  | 12"
+    argparse_describe(&argparse, "\nS2OPC write demo: write a node Value attribute with numerical type",
+                      "\nExpects at least 2 arguments:"
+                      "\n -n: the Node id XML formatted [ns=<digits>;]<i, s, g or b>=<nodeid>,"
+                      "\n -t: the BuiltInType id: "
+                      "\n       SOPC_Boolean_Id | 1"
+                      "\n       SOPC_SByte_Id   | 2"
+                      "\n       SOPC_Byte_Id    | 3"
+                      "\n       SOPC_Int16_Id   | 4"
+                      "\n       SOPC_UInt16_Id  | 5"
+                      "\n       SOPC_Int32_Id   | 6"
+                      "\n       SOPC_UInt32_Id  | 7"
+                      "\n       SOPC_Int64_Id   | 8"
+                      "\n       SOPC_UInt64_Id  | 9"
+                      "\n       SOPC_Float_Id   | 10"
+                      "\n       SOPC_Double_Id  | 11"
+                      "\n       SOPC_String_Id  | 12"
 
-        "\n E.g.: ./s2opc_write -u user1 -p password -n \"ns=1;s=Byte_001\" --private_key_password password -t 3 42");
+                      "\n E.g.: ./s2opc_write -u user1 -p password -n \"ns=1;s=Byte_001\" -t 3 42");
     int restArgc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC write demo\n");

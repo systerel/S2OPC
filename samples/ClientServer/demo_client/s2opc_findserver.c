@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
     argparse_init(&argparse, options, usage, 0);
     argparse_describe(&argparse, "\nS2OPC find server: send a find server request to server",
-                      "\n Example: ./s2opc_findserver --private_key_password password");
+                      "\n Example: ./s2opc_findserver");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC find server demo.\n");
