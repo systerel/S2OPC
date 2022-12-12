@@ -25,36 +25,21 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
-#include "sopc_helper_string.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 
 #include "config.h"
+#include "sopc_helper_askpass.h"
 #include "state_machine.h"
 #include "test_suite_client.h"
 #include "wait_machines.h"
-
-#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 
 static StateMachine_Machine* g_pSM = NULL;
 static int32_t atomicValidatingResult = 0;
 
 static void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
-
-static bool get_password_callback(char** outPassword)
-{
-    SOPC_ASSERT(NULL != outPassword);
-    /*
-        We have to make a copy here because in any case, we will free the password and not distinguish if it come
-        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
-    */
-    char* _outPassword = getenv(PASSWORD_ENV_NAME);
-    *outPassword = SOPC_strdup(_outPassword); // Do a copy
-    return NULL != *outPassword;
-}
 
 START_TEST(test_username_password)
 {
@@ -67,7 +52,7 @@ START_TEST(test_username_password)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_QuitAfterConnect) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    Config_Client_SetKeyPassword_Fct(&get_password_callback);
+    Config_Client_SetKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, true, false) == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "username", "user", "password") == SOPC_STATUS_OK);

@@ -24,10 +24,8 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
-#include "sopc_askpass.h"
-#include "sopc_assert.h"
 #include "sopc_common_constants.h"
-#include "sopc_helper_string.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -39,10 +37,6 @@
 #include "libs2opc_server_config_custom.h"
 
 #include "embedded/sopc_addspace_loader.h"
-
-#ifdef WITH_EXPAT
-#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
-#endif
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "static_security_data.h"
@@ -167,21 +161,6 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
                            writeSuccess, sNodeId, SOPC_User_ToCString(user));
     SOPC_Free(sNodeId);
 }
-
-#ifdef WITH_EXPAT
-
-static bool get_password_callback(char** outPassword)
-{
-    SOPC_ASSERT(NULL != outPassword);
-    /*
-        We have to make a copy here because in any case, we will free the password and not distinguish if it come
-        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
-    */
-    char* _outPassword = getenv(PASSWORD_ENV_NAME);
-    *outPassword = SOPC_strdup(_outPassword); // Do a copy
-    return NULL != *outPassword;
-}
-#endif
 
 /*---------------------------------------------------------------------------
  *                          Server initialization
@@ -812,7 +791,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&get_password_callback);
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     }
 
 #endif

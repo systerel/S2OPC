@@ -30,11 +30,9 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "assert.h"
-#include "sopc_askpass.h"
-#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
-#include "sopc_helper_string.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -55,8 +53,6 @@
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
-
-#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 
 static SOPC_ClientHelper_EndpointConnection valid_endpoint = {
     .endpointUrl = VALID_URL,
@@ -116,18 +112,6 @@ static void datachange_callback_none(const int32_t c_id, const char* node_id, co
     SOPC_UNUSED_ARG(c_id);
     SOPC_UNUSED_ARG(node_id);
     SOPC_UNUSED_ARG(value);
-}
-
-static bool get_password_callback(char** outPassword)
-{
-    SOPC_ASSERT(NULL != outPassword);
-    /*
-        We have to make a copy here because in any case, we will free the password and not distinguish if it come
-        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
-    */
-    char* _outPassword = getenv(PASSWORD_ENV_NAME);
-    *outPassword = SOPC_strdup(_outPassword); // Do a copy
-    return NULL != *outPassword;
 }
 
 static Mutex check_counter_mutex;
@@ -644,7 +628,7 @@ START_TEST(test_wrapper_read)
     }
 
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&get_password_callback);
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */
