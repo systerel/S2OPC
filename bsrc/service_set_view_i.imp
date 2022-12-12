@@ -149,6 +149,7 @@ LOCAL_OPERATIONS
     PRE
         isBrowseValueContextDefined = FALSE &
         isBrowseResultComputed      = FALSE &
+        isBrowseNextResponseAllocated = TRUE &
 
         RequestBrowseNext_ReleaseContinuationPoints = FALSE &
         RequestBrowse_nb_BrowseValue > 0 &
@@ -193,6 +194,7 @@ LOCAL_OPERATIONS
 
     treat_browse_next_request_ReleaseContinuationPoint_1(p_session, p_req_msg, p_resp_msg, p_cpi) =
     PRE
+        isBrowseNextResponseAllocated = TRUE &
         RequestBrowseNext_ReleaseContinuationPoints = TRUE &
 
         p_session : t_session_i &
@@ -460,7 +462,8 @@ OPERATIONS
                     ) &
 
                     isBrowseValueContextDefined = FALSE &
-                    isBrowseResultComputed      = FALSE
+                    isBrowseResultComputed      = FALSE &
+                    isBrowseNextResponseAllocated = TRUE
                 VARIANT
                     card(breqs_to_iterate)
                 END
