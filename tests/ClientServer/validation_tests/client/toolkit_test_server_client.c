@@ -31,12 +31,10 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
-#include "sopc_askpass.h"
-#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeable.h"
-#include "sopc_helper_string.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -80,8 +78,6 @@ static const uint32_t sleepTimeout = 500;
 
 static SOPC_AddressSpace* addressSpace = NULL;
 
-#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
-
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
@@ -99,18 +95,6 @@ static void disconnect_callback(const uint32_t c_id)
 {
     SOPC_UNUSED_ARG(c_id);
     SOPC_Atomic_Int_Set(&connectionClosed, true);
-}
-
-static bool get_password_callback(char** outPassword)
-{
-    SOPC_ASSERT(NULL != outPassword);
-    /*
-        We have to make a copy here because in any case, we will free the password and not distinguish if it come
-        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
-    */
-    char* _outPassword = getenv(PASSWORD_ENV_NAME);
-    *outPassword = SOPC_strdup(_outPassword); // Do a copy
-    return NULL != *outPassword;
 }
 
 /*---------------------------------------------------------------------------
@@ -174,7 +158,7 @@ static int32_t client_create_configuration(void)
         .reverseConnectionConfigId = 0,
     };
 
-    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&get_password_callback);
+    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the client key user paswword callback\n");
@@ -422,7 +406,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     {
         SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
         pConfig->serverConfig.serverkeyEncrypted = true;
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&get_password_callback);
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Client: Failed to configure the server key user paswword callback\n");
