@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
     argparse_init(&argparse, options, usage, 0);
     argparse_describe(&argparse, "\nS2OPC discovery demo: get endpoints from a server",
-                      "\n Example: ./s2opc_discovery --private_key_password password");
+                      "\n Example: ./s2opc_discovery");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC discovery demo.\n");

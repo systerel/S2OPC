@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
 
     argparse_init(&argparse, options, usage, 0);
     argparse_describe(&argparse, "S2OPC register demo: send a register server request to server",
-                      "\n Example: ./s2opc_register --private_key_password password");
+                      "\n Example: ./s2opc_register");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC register server demo.\n");

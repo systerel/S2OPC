@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
                       "\n                Historizing | 20"
                       "\n                 Executable | 21"
                       "\n             UserExecutable | 22"
-                      "\n E.g.: ./s2opc_read -n i=2259 -a 13 --private_key_password password");
+                      "\n E.g.: ./s2opc_read -n i=2259 -a 13");
     argc = argparse_parse(&argparse, argc, argv);
 
     printf("S2OPC read demo.\n");

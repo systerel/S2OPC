@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -42,10 +43,12 @@ char* PATH_CACERT_PUBL = "./trusted/cacert.der";
 char* PATH_CACRL = "./revoked/cacrl.der";
 char* PATH_ISSUED = NULL;
 
+int NO_KEY_ENCRYPTION = false;
+Config_GetClientKeyPassword_Fct* getClientKeyPassword_Fct = &SOPC_AskPass_FromTerminal;
+
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 char* USER_PWD = NULL;
-char* PRIVATE_KEY_PWD = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
 
@@ -151,13 +154,13 @@ struct argparse_option CONN_OPTIONS[16] = {
                NULL,
                0,
                0),
-    OPT_STRING('K',
-               "private_key_password",
-               &PRIVATE_KEY_PWD,
-               "(if private key is encrypted) the password of the user used to decrypt the private key",
-               NULL,
-               0,
-               0)};
+    OPT_BOOLEAN(0,
+                "no_key_encryption",
+                &NO_KEY_ENCRYPTION,
+                "(default: false) if the client application private key is not encrypted",
+                NULL,
+                0,
+                0)};
 
 /* Only supports one set of certificates at a time. They are all shared by the configs. */
 int nCfgWithSecuCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
@@ -284,12 +287,6 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     }
 }
 
-/* Only for validation testing */
-void Config_SetTest_ClientKeyPassword(char* password)
-{
-    PRIVATE_KEY_PWD = password;
-}
-
 SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityMode)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -313,10 +310,18 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
                 }
             }
 
+            char* password = NULL;
             size_t lenPassword = 0;
-            if (SOPC_STATUS_OK == status && NULL != PRIVATE_KEY_PWD)
+            bool res = false;
+
+            if (false == NO_KEY_ENCRYPTION)
             {
-                lenPassword = strlen(PRIVATE_KEY_PWD);
+                res = getClientKeyPassword_Fct(&password);
+            }
+
+            if (true == res && false == NO_KEY_ENCRYPTION)
+            {
+                lenPassword = strlen(password);
                 if (UINT32_MAX < lenPassword)
                 {
                     status = SOPC_STATUS_NOK;
@@ -326,12 +331,17 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                    PATH_CLIENT_PRIV, &pKeyCli, PRIVATE_KEY_PWD, (uint32_t) lenPassword);
+                    PATH_CLIENT_PRIV, &pKeyCli, password, (uint32_t) lenPassword);
                 if (SOPC_STATUS_OK != status)
                 {
                     printf(
                         "# Error: Failed to load client private key (please check the key format or the password)\n");
                 }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
             }
         } // else configuration with client/server certificates already created and shared
 
@@ -359,4 +369,9 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
     nCfgCreated += 1; /* If it failed once, do not try again */
 
     return status;
+}
+
+void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword)
+{
+    getClientKeyPassword_Fct = getClientKeyPassword;
 }
