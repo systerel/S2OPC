@@ -40,6 +40,9 @@ LOCAL_OPERATIONS
 
     StatusCode_service <-- treat_browse_request_BrowseValues(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_nb_browse_value) =
     PRE
+        isBrowseValueContextDefined = FALSE &
+        isBrowseResultComputed      = FALSE &
+
         p_session : t_session_i &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -91,6 +94,9 @@ LOCAL_OPERATIONS
 
     treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi, p_autoReleaseCP) =
     PRE
+        isBrowseValueContextDefined = FALSE &
+        isBrowseResultComputed      = FALSE &
+
         RequestBrowse_nb_BrowseValue > 0 &
         RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
 
@@ -347,7 +353,11 @@ OPERATIONS
                                      p_index : dom(ResponseBrowse_ResultReferences) &
                                     (ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points =>
                                       ResponseBrowse_ContinuationPoint(p_index) = c_ContinuationPointId_indet)
-                         )
+                         ) &
+
+                         /* Browse context and browse result are reset */
+                         isBrowseValueContextDefined = FALSE &
+                         isBrowseResultComputed      = FALSE
                     VARIANT
                         card(breqs_to_iterate)
                     END
