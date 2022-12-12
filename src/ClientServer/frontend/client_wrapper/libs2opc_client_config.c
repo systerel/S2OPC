@@ -18,6 +18,7 @@
  */
 
 #include "libs2opc_client_config.h"
+#include "libs2opc_client_internal.h"
 #include "sopc_logger.h"
 
 SOPC_GetClientKeyPassword_Fct* FctGetClientKeyPassword = NULL;
@@ -39,7 +40,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyPasswordCallback(SOPC_GetClientK
 }
 
 // Get password to decrypt client private key from internal callback
-bool SOPC_HelperConfigClient_ClientKeyUsrPwdCb(char** outPassword)
+bool SOPC_ClientInternal_GetKeyPassword(char** outPassword)
 {
     if (NULL == FctGetClientKeyPassword)
     {
@@ -51,7 +52,7 @@ bool SOPC_HelperConfigClient_ClientKeyUsrPwdCb(char** outPassword)
     return res;
 }
 
-bool SOPC_HelperConfigClient_IsEncryptedClientKey(void)
+bool SOPC_ClientInternal_IsEncryptedKey(void)
 {
     return NULL != FctGetClientKeyPassword;
 }
