@@ -34,6 +34,7 @@ PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
 
 CLIENTSERVER_TAP_FILES='check_helpers.tap
+ask_password.tap
 check_libsub.tap
 check_security_policy_config.tap
 check_sc_rcv_buffer.tap

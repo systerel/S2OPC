@@ -131,6 +131,13 @@ if(ENABLE_TESTING)
   target_link_libraries(ask_password PRIVATE s2opc_common)
   target_compile_options(ask_password PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
+  add_test(NAME "unit:ask_password"
+           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+           COMMAND
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+           "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/ask_password_tests.py"
+           )
+  set_tests_properties("unit:ask_password" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ask_password.tap")
 
   # Sockets layer tests
 
