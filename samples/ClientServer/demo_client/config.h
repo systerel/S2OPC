@@ -33,6 +33,18 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+/**
+ * \brief Type of callback to retrieve password for decryption of the client private key.
+ *
+ * \param[out] outPassword   out parameter, the newly allocated password.
+ *
+ * \return true in case of success, otherwise false.
+ *
+ * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
+ * failure.
+ */
+typedef bool Config_GetClientKeyPassword_Fct(char** outPassword);
+
 /* Connection configuration variables with default values */
 
 /* Secure Channel configuration */
@@ -85,14 +97,6 @@ extern struct argparse_option CONN_OPTIONS[16];
 SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcUa_MessageSecurityMode msgSecurityMode);
 
 /**
- * \brief   Function to set the password of the client private key during the validation test
- *
- * \param password  The password
- *
- */
-void Config_SetTest_ClientKeyPassword(char* password);
-
-/**
  * \brief   Frees the secure channel configuration, and the underlying certificates/PKI, if any.
  *
  * This function acts as a garbage collector: once the last configuration using certificates and PKI
@@ -102,5 +106,14 @@ void Config_SetTest_ClientKeyPassword(char* password);
  * \param ppscConfig  The SecureChannel configuration to free.
  */
 void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig);
+
+/**
+ * \brief Change the default callback which retrieve password for decryption of the client private key.
+ *
+ * \param getClientKeyPassword  The callback to retrieve the password
+ *
+ * \note   This function is useful for validation tests
+ */
+void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword);
 
 #endif /* CONFIG_H_ */
