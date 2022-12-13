@@ -32,6 +32,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libs2opc_client_config.h"
+#include "sopc_askpass.h"
+#include "sopc_log_manager.h"
+#include "sopc_user_app_itf.h"
+#define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
 /* Secure Channel configuration */
@@ -63,7 +68,7 @@
 /* Path to the client certificate */
 #define PATH_CLIENT_PUBL "./client_public/client_2k_cert.der"
 /* Path to the client private key */
-#define PATH_CLIENT_PRIV "./client_private/client_2k_key.pem"
+#define PATH_CLIENT_PRIV "./client_private/encrypted_client_2k_key.pem"
 
 /* Default policy Id */
 #define POLICY_ID "anonymous"
@@ -170,10 +175,20 @@ int main(int argc, char* const argv[])
         return 2;
     }
 
-    status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
-    if (SOPC_STATUS_OK != status)
+    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+    if (SOPC_STATUS_OK == status)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                    "Could not define the callback to retrieve password for decryption of the client private key.");
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_LibSub_ConfigureConnection(&cfg_con, &cfg_id);
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
+        }
     }
 
     if (SOPC_STATUS_OK == status)

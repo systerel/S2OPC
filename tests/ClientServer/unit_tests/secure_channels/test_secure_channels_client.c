@@ -28,6 +28,7 @@
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
@@ -122,7 +123,7 @@ int main(int argc, char* argv[])
     // Server certificate name
     char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./client_private/client_2k_key.pem";
+    char* keyLocation = "./client_private/encrypted_client_2k_key.pem";
 
     // Manage key length used for the client (and default for server) 2048 or 4096
     if (argc >= 4)
@@ -131,13 +132,13 @@ int main(int argc, char* argv[])
         {
             certificateLocation = "./client_public/client_2k_cert.der";
             certificateSrvLocation = "./server_public/server_2k_cert.der";
-            keyLocation = "./client_private/client_2k_key.pem";
+            keyLocation = "./client_private/encrypted_client_2k_key.pem";
         }
         else if (strlen(argv[3]) == strlen("4096") && 0 == memcmp(argv[3], "4096", strlen("4096")))
         {
             certificateLocation = "./client_public/client_4k_cert.der";
             certificateSrvLocation = "./server_public/server_4k_cert.der";
-            keyLocation = "./client_private/client_4k_key.pem";
+            keyLocation = "./client_private/encrypted_client_4k_key.pem";
         }
         else
         {
@@ -196,8 +197,24 @@ int main(int argc, char* argv[])
 
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
+        char* password = NULL;
+        size_t lenPassword = 0;
+
+        bool res_cb = SOPC_TestHelper_AskPass_FromEnv(&password);
+        status = res_cb ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
         // Private key: load
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
+                                                                                (uint32_t) lenPassword);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load private key\n");
@@ -205,6 +222,11 @@ int main(int argc, char* argv[])
         else
         {
             printf(">>Stub_Client: Client private key loaded\n");
+        }
+
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
     }
 

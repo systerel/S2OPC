@@ -38,6 +38,7 @@
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -127,7 +128,7 @@ static void establishSC(void)
     // Server certificate name
     char* certificateSrvLocation = "./check_sc_rcv_encrypted_buffer_data/check_sc_server_2k_cert.der";
     // Client private key
-    char* keyLocation = "./check_sc_rcv_encrypted_buffer_data/check_sc_client_2k_key.pem";
+    char* keyLocation = "./check_sc_rcv_encrypted_buffer_data/encrypted_check_sc_client_2k_key.pem";
 
     if (SOPC_STATUS_OK == status)
     {
@@ -161,15 +162,39 @@ static void establishSC(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        // Private key: load
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
-        if (SOPC_STATUS_OK != status)
+        char* password = NULL;
+        size_t lenPassword = 0;
+
+        bool res_cb = SOPC_TestHelper_AskPass_FromEnv(&password);
+        status = res_cb ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
         {
-            printf("SC_Rcv_Buffer Init: Failed to load private key\n");
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
-        else
+
+        if (SOPC_STATUS_OK == status)
         {
-            printf("SC_Rcv_Buffer Init: Client private key loaded\n");
+            // Private key: load
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
+                                                                                    (uint32_t) lenPassword);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("SC_Rcv_Buffer Init: Failed to load private key\n");
+            }
+            else
+            {
+                printf("SC_Rcv_Buffer Init: Client private key loaded\n");
+            }
+        }
+
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
     }
 

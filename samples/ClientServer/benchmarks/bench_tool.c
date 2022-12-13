@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sopc_askpass.h>
 #include <sopc_common.h>
 #include <sopc_crypto_profiles.h>
 #include <sopc_mem_alloc.h>
@@ -393,7 +394,7 @@ static struct
     {"Basic256Sha256", SOPC_SecurityPolicy_Basic256Sha256_URI, OpcUa_MessageSecurityMode_SignAndEncrypt},
     {NULL, 0, OpcUa_MessageSecurityMode_Invalid}};
 
-static const char* DEFAULT_KEY_PATH = "client_private/client_2k_key.pem";
+static const char* DEFAULT_KEY_PATH = "client_private/encrypted_client_2k_key.pem";
 static const char* DEFAULT_CERT_PATH = "client_public/client_2k_cert.der";
 static const char* DEFAULT_SERVER_CERT_PATH = "server_public/server_2k_cert.der";
 static const char* DEFAULT_CA_PATH = "trusted/cacert.der";
@@ -495,7 +496,27 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         fprintf(stderr, "Error while loading client certificate from %s\n", cert_path);
     }
 
-    if (SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(key_path, key) != SOPC_STATUS_OK)
+    char* password = NULL;
+    size_t lenPassword = 0;
+
+    bool res = SOPC_AskPass_FromTerminal(&password);
+
+    if (true == res)
+    {
+        lenPassword = strlen(password);
+        if (UINT32_MAX < lenPassword)
+        {
+            res = false;
+        }
+    }
+
+    if (false == res)
+    {
+        fprintf(stderr, "Error while retrieve password for private key\n");
+    }
+
+    if (SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(key_path, key, password,
+                                                                       (uint32_t) lenPassword) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading private key from %s\n", key_path);
     }
@@ -513,6 +534,11 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
     if (SOPC_KeyManager_CRL_CreateOrAddFromFile(crl_path, cacrl) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading CA CRL from %s\n", crl_path);
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
     }
 
     if (*cert == NULL || *key == NULL || *server_cert == NULL || *ca == NULL)
