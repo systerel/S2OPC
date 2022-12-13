@@ -44,7 +44,7 @@
 // Default certificate paths
 
 static char* default_server_cert = "server_public/server_2k_cert.der";
-static char* default_key_cert = "server_private/server_2k_key.pem";
+static char* default_key_cert = "server_private/encrypted_server_2k_key.pem";
 
 static char* default_trusted_root_issuers[] = {
     "trusted/cacert.der",    /* Demo CA */
@@ -283,8 +283,10 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
         }
         SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 #else // WITH_STATIC_SECURITY_DATA == false
+        /* Configure the callback */
+        SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         /* Load client/server certificates and server key from files */
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert, false);
+        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert, true);
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
