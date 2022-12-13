@@ -223,8 +223,10 @@ if(ENABLE_TESTING)
   # Secure channels (+ Sockets) layer tests: SERVER executable
   add_executable(test_secure_channels_server ${SOCKETS_SRC}
                                              ${SECURE_CHANNELS_SRC}
-                                             ${SECURE_CHANNELS_SERVER_TEST})
+                                             ${SECURE_CHANNELS_SERVER_TEST}
+                                             ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
   target_link_libraries(test_secure_channels_server PRIVATE s2opc_common)
+  target_include_directories(test_secure_channels_server PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
@@ -260,9 +262,10 @@ if(ENABLE_TESTING)
                                                    "validation_tests/client/testlib_write.c"
                                                    "validation_tests/client/test_results.c"
                                                    "validation_tests/client/testlib_read_response.c"
-                                                   ${TEST_LIGHT_ADDRESS_SPACE_C})
+                                                   ${TEST_LIGHT_ADDRESS_SPACE_C}
+                                                   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
   add_dependencies(toolkit_test_server_local_service make-light-address-space)
-  target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client")
+  target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client" ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
   target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
@@ -352,14 +355,12 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add 4096 client / server keys
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
-    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add UaCTT CAs / CRLs
