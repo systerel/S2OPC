@@ -31,8 +31,8 @@ CA_CERT=cacert.pem
 DURATION=730
 
 # CA generation: generate key, generate self signed certificate# (does not work with 4096 key length)
-# /!\ only for test as no pass phrase is embedeed"
-openssl genrsa -out $CA_KEY 4096
+# /!\ CA key encrypted with AES-256-CBC, these commands require the password.
+openssl genrsa -out $CA_KEY -aes-256-cbc 4096
 openssl req -config $CONF_FILE -new -x509 -key $CA_KEY -out $CA_CERT -days $DURATION
 
 # Generate an empty Certificate Revocation List, convert it to DER format for UA stack
@@ -67,6 +67,9 @@ openssl rsa -in server_4k_key.pem -aes-256-cbc -out encrypted_server_4k_key.pem
 echo "****** Client private keys encryption ******"
 openssl rsa -in client_2k_key.pem -aes-256-cbc -out encrypted_client_2k_key.pem
 openssl rsa -in client_4k_key.pem -aes-256-cbc -out encrypted_client_4k_key.pem
+
+# Remove the unencrypted keys
+rm client*_key.pem && rm server*_key.pem
 
 # Output hexlified certificate to include in check_crypto_certificates.c
 echo "Server signed public key:"
