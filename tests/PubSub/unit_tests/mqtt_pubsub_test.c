@@ -35,7 +35,8 @@
 static const char* URI_MQTT_BROKER = "127.0.0.1:1883";
 static const char* MQTT_LIB_TOPIC_NAME[MQTT_LIB_MAX_NB_TOPIC_NAME] = {"test1", "test2", "test3"};
 static const uint16_t NB_TOPIC = 3;
-
+static const char* USERNAME = "user1";
+static const char* PASSWORD = "password";
 /* Arbitrary network message */
 #define ENCODED_DATA_SIZE 35
 uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
@@ -125,6 +126,22 @@ START_TEST(test_callback_subscription)
 }
 END_TEST
 
+START_TEST(test_connexion_authentification)
+{
+    MqttContextClient* contextClient;
+    SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, USERNAME, PASSWORD, NULL, 0, NULL, NULL);
+    SOPC_Sleep(100); // Let time to mqtt Client to connect
+    for (int i = 0; i < NB_TOPIC; i++)
+    {
+        status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+    }
+    SOPC_MQTT_Release_Client(contextClient);
+}
+END_TEST
+
 int main(void)
 {
     int number_failed;
@@ -140,6 +157,7 @@ int main(void)
     TCase* tc_publisher_client = tcase_create("Mqtt publisher");
     suite_add_tcase(suite, tc_publisher_client);
     tcase_add_test(tc_publisher_client, test_publisher_send);
+    tcase_add_test(tc_publisher_client, test_connexion_authentification);
 
     TCase* tc_subscriber_client = tcase_create("Mqtt subscriber");
     suite_add_tcase(suite, tc_subscriber_client);
