@@ -90,18 +90,6 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .path_crl = "./revoked/cacrl.der",
     .path_cert_srv = "./server_public/server_4k_cert.der",
     .path_cert_cli = "./client_public/client_4k_cert.der",
-    .path_key_cli = "./client_private/client_4k_key.pem",
-    .policyId = "username",
-    .username = "username",
-    .password = "password"};
-
-static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256_EncryptedKey = {
-    .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
-    .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
-    .path_cert_auth = "./trusted/cacert.der",
-    .path_crl = "./revoked/cacrl.der",
-    .path_cert_srv = "./server_public/server_4k_cert.der",
-    .path_cert_cli = "./client_public/client_4k_cert.der",
     .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
     .policyId = "username",
     .username = "username",
@@ -267,6 +255,9 @@ START_TEST(test_wrapper_config_invalid_arguments)
         ck_assert_int_eq(-12, invalid_conf_id);
     }
     {
+        /* callback to retrieve the client's private key password */
+        SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_srv = NULL;
         invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
@@ -630,10 +621,9 @@ START_TEST(test_wrapper_read)
     /* callback to retrieve the client's private key password */
     SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(
-        &valid_endpoint, &valid_security_signAndEncrypt_b256sha256_EncryptedKey, NULL);
+    int32_t valid_conf_id =
+        SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_signAndEncrypt_b256sha256, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);

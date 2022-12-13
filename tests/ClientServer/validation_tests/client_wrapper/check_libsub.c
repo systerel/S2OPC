@@ -29,10 +29,12 @@
 #include <stdint.h>
 #include <stdlib.h> /* EXIT_* */
 
+#include "libs2opc_client_config.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_log_manager.h"
 #include "sopc_macros.h"
 #include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
@@ -258,7 +260,7 @@ START_TEST(test_half_broken_subscriptions)
          .path_crl = "./revoked/cacrl.der",
          .path_cert_srv = "./server_public/server_4k_cert.der",
          .path_cert_cli = "./client_public/client_4k_cert.der",
-         .path_key_cli = "./client_private/client_4k_key.pem",
+         .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
          .policyId = "username",
          .username = "user",
          .password = "",
@@ -279,7 +281,7 @@ START_TEST(test_half_broken_subscriptions)
          .path_crl = "./revoked/cacrl.der",
          .path_cert_srv = "./server_public/server_4k_cert.der",
          .path_cert_cli = "./client_public/client_4k_cert.der",
-         .path_key_cli = "./client_private/client_4k_key.pem",
+         .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
          .policyId = "username",
          .username = "user",
          .password = "",
@@ -300,7 +302,7 @@ START_TEST(test_half_broken_subscriptions)
          .path_crl = "./revoked/cacrl.der",
          .path_cert_srv = "./server_public/server_4k_cert.der",
          .path_cert_cli = "./client_public/client_4k_cert.der",
-         .path_key_cli = "./client_private/client_4k_key.pem",
+         .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
          .policyId = "username",
          .username = "user",
          .password = "",
@@ -315,6 +317,7 @@ START_TEST(test_half_broken_subscriptions)
          .expected_endpoints = NULL}};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
+    ck_assert(SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv) == SOPC_STATUS_OK);
     for (int i = 0; i < N_CONNECTIONS; ++i)
     {
         ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con[i], &cfg_ids[i]) == SOPC_STATUS_OK);

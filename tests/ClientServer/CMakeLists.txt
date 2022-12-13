@@ -176,18 +176,20 @@ if(ENABLE_TESTING)
        "unit_tests/secure_channels/stubs/*.c")
 
   add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
-                                               ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST})
+                                               ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST}
+                                               ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
   target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE Check::check s2opc_common)
   target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_DEFINITIONS})
   target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "unit_tests/secure_channels/stubs"
                                                                    "unit_tests/secure_channels"
                                                                    "unit_tests/helpers"
-                                                                   ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+                                                                   ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
+                                                                   ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   add_custom_command(
     TARGET check_sc_rcv_encrypted_buffer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/check_sc_test/check_sc_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/check_sc_test/encrypted_check_sc_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/check_sc_test/check_sc_client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/check_sc_test/check_sc_server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/check_sc_rcv_encrypted_buffer_data/)
   s2opc_unit_test(check_sc_rcv_encrypted_buffer)
@@ -212,10 +214,12 @@ if(ENABLE_TESTING)
   # Secure channels (+ Sockets) layer tests: CLIENT executable
   add_executable(test_secure_channels_client ${SOCKETS_SRC}
                                              ${SECURE_CHANNELS_SRC}
-                                             ${SECURE_CHANNELS_CLIENT_TEST})
+                                             ${SECURE_CHANNELS_CLIENT_TEST}
+                                             ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 
   target_include_directories(test_secure_channels_client PRIVATE "unit_tests/secure_channels/stubs"
-                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+                                                                 ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
+                                                                 ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_secure_channels_client PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(test_secure_channels_client PRIVATE s2opc_common)
@@ -352,13 +356,11 @@ if(ENABLE_TESTING)
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
-    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_client_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
     # Add 4096 client / server keys
-    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_client_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/client_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_public/
     COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
@@ -508,7 +510,8 @@ if(ENABLE_TESTING)
 ## S2OPC wrapper client library validation tests ##
 
   # Helpers unit tests
-  add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c")
+  add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  target_include_directories(check_libsub PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
   target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper Check::check)
