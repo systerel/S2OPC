@@ -59,10 +59,11 @@ IFS=$ifs_save
 
 #### Check absence of functions / includes ####
 echo "Checking specific functions or headers not used in code" | tee -a $LOGPATH
+EXLUDE_CERT_VERIFIED_MANUALLY="*\/linux\/p_askpass.c"
 CHECK_CERT_RULE_ABSENCE_FAILED=false
 
 CHECK_CERT_RULE_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit)"
-for FILE in $(find $CSRC -name "*.c" -or -name "*.h") ; 
+for FILE in $(find $CSRC -not -path $EXLUDE_CERT_VERIFIED_MANUALLY -name "*.c" -or -name "*.h") ; 
 do
 	# We choose to remove:
 	# - (L1) comments inside /* .. */ 
