@@ -140,9 +140,8 @@ fi
 
 if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
    adduser --system mosquitto
-   touch ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt
-   mosquitto_passwd -b ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt user1 password # fill file with username and password
-   echo "password_file  ${BUILD_DIR}/bin/mqttBroker_passwordfile.txt" > ${BUILD_DIR}/bin/mosquitto.conf # load file to allow authentification with username and password
+   echo "per_listener_settings true" > ${BUILD_DIR}/bin/mosquitto.conf
+   echo "password_file ${BUILD_DIR}/bin/mqttBroker_passwordFile.txt" >> ${BUILD_DIR}/bin/mosquitto.conf # load file to allow authentification with username and password
    echo "allow_anonymous true" >> ${BUILD_DIR}/bin/mosquitto.conf
    mosquitto -c ${BUILD_DIR}/bin/mosquitto.conf &
 
