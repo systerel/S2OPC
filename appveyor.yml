@@ -12,7 +12,8 @@ install:
     - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
     # Check that we have the expected version and architecture for Python
     - "pip --version"
-    - "pip install cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
+    - "python.exe -m pip install -U pip setuptools"
+    - "pip install wexpect==4.0.0 cryptography==2.0.3 pycparser==2.18 six==1.11.0 asn1crypto==0.23.0 cffi==1.11.2 python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml==4.0.0"
     - "pip install --upgrade wheel==0.34.2 setuptools==47.3.1"
     - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
     - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
