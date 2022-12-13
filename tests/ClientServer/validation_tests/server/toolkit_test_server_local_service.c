@@ -27,6 +27,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -180,11 +181,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Configure the callback
+    SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+
     // Server certificates configuration
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
-                                                                "./server_private/server_2k_key.pem", false);
+                                                                "./server_private/encrypted_server_2k_key.pem", true);
     }
 
     // Set PKI configuration

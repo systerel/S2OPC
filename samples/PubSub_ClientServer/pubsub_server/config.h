@@ -22,13 +22,16 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <stdbool.h>
+
 #define xstr(s) str(s)
 #define str(s) #s
 
 /* Server Configuration */
 
 #define SERVER_CERT_PATH "./server_public/server_2k_cert.der"
-#define SERVER_KEY_PATH "./server_private/server_2k_key.pem"
+#define SERVER_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
+#define ENCRYPTED_SERVER_KEY true /* set to false otherwise */
 #define CA_CERT_PATH "./trusted/cacert.der"
 #define CA_CRL_PATH "./revoked/cacrl.der"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"

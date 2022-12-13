@@ -30,6 +30,19 @@ import sys
 
 from opcua import ua, Server
 from common import sUri, variantInfoList
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+PRIVATE_KEY_PASSWORD = b'password'
+
+def load_private_key(key_path, pwd):
+    _, ext = os.path.splitext(key_path)
+    with open(key_path, "rb") as f:
+        data = f.read()
+        if ext == ".pem":
+            return serialization.load_pem_private_key(data, password=pwd, backend=default_backend())
+        else:
+            return serialization.load_der_private_key(data, password=None, backend=default_backend())
 
 stopFlag = False
 
@@ -59,7 +72,7 @@ if __name__=='__main__':
 
     cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'samples', 'ClientServer', 'data', 'cert')
     server.load_certificate(os.path.join(cert_dir, 'server_4k_cert.der'))
-    server.load_private_key(os.path.join(cert_dir, 'server_4k_key.pem'))
+    server.private_key = load_private_key(os.path.join(cert_dir, 'encrypted_server_4k_key.pem'), PRIVATE_KEY_PASSWORD)
 
     # Nodes are created under the Objects node
     objects = server.get_objects_node()

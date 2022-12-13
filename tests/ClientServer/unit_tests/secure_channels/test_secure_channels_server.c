@@ -31,6 +31,7 @@
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -76,19 +77,19 @@ int main(int argc, char* argv[])
     // Server certificate name
     char* certificateSrvLocation = "./server_public/server_2k_cert.der";
     // Server private key
-    char* keyLocation = "./server_private/server_2k_key.pem";
+    char* keyLocation = "./server_private/encrypted_server_2k_key.pem";
 
     if (argc >= 2)
     {
         if (strlen(argv[1]) == strlen("2048") && 0 == memcmp(argv[1], "2048", strlen("2048")))
         {
             certificateSrvLocation = "./server_public/server_2k_cert.der";
-            keyLocation = "./server_private/server_2k_key.pem";
+            keyLocation = "./server_private/encrypted_server_2k_key.pem";
         }
         else if (strlen(argv[1]) == strlen("4096") && 0 == memcmp(argv[1], "4096", strlen("4096")))
         {
             certificateSrvLocation = "./server_public/server_4k_cert.der";
-            keyLocation = "./server_private/server_4k_key.pem";
+            keyLocation = "./server_private/encrypted_server_4k_key.pem";
         }
         else
         {
@@ -116,7 +117,27 @@ int main(int argc, char* argv[])
     // Private key: load
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyLocation, &priv_srv);
+        // Retrive the password
+        char* password = NULL;
+        size_t lenPassword = 0;
+        bool res = SOPC_TestHelper_AskPass_FromEnv(&password);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_srv, password,
+                                                                                    (uint32_t) lenPassword);
+        }
+
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to load private key\n");
@@ -124,6 +145,11 @@ int main(int argc, char* argv[])
         else
         {
             printf("<Stub_Server: Server private key loaded\n");
+        }
+
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
     }
 

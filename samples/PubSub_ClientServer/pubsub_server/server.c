@@ -25,6 +25,7 @@
 
 #include "embedded/sopc_addspace_loader.h"
 #include "sopc_address_space.h"
+#include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
@@ -166,10 +167,36 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
     status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(output_s2opcConfig->serverConfig.serverCertPath,
                                                                   &output_s2opcConfig->serverConfig.serverCertificate);
 
+    // Retrive the password
+    char* password = NULL;
+    size_t lenPassword = 0;
+    bool res = false;
+
+    if (SOPC_STATUS_OK == status && true == ENCRYPTED_SERVER_KEY)
+    {
+        res = SOPC_AskPass_FromTerminal(&password);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(output_s2opcConfig->serverConfig.serverKeyPath,
-                                                                        &output_s2opcConfig->serverConfig.serverKey);
+        lenPassword = strlen(password);
+        if (UINT32_MAX < lenPassword)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+            output_s2opcConfig->serverConfig.serverKeyPath, &output_s2opcConfig->serverConfig.serverKey, password,
+            (uint32_t) lenPassword);
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
     }
 
     if (SOPC_STATUS_OK == status)
