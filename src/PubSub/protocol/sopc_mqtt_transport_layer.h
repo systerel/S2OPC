@@ -99,4 +99,13 @@ SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient);
  */
 void SOPC_MQTT_Release_Client(MqttContextClient* contextClient);
 
+/**
+ * @brief Return if client is connected or not
+ *
+ * @param contextClient A valid mqtt client context from a successful ::SOPC_MQTT_Create_Client
+ * @return true if client is connected
+ * @return false if client is not connected or if parameters are invalid
+ */
+bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient);
+
 #endif

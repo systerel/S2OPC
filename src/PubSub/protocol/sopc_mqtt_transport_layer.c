@@ -195,6 +195,18 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
     SOPC_Free(contextClient);
 }
 
+bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
+{
+    if (NULL == contextClient)
+    {
+        return false;
+    }
+    if (MQTTAsync_isConnected(contextClient->client))
+    {
+        return true;
+    }
+    return false;
+}
 /* Callback called on Succeed connection, if client is subscriber then subscribe to topics */
 void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response)
 {
