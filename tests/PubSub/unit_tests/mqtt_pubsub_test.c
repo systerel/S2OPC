@@ -39,6 +39,8 @@ static const char* USERNAME = "user1";
 static const char* PASSWORD = "password";
 /* Arbitrary network message */
 #define ENCODED_DATA_SIZE 35
+#define WAIT_CONNECTION 100
+#define TRY_IF_CONNECTED 5
 uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
                                                        // Payload header/Message Count & DSM WriterIds
                                                        0x01, 0xFF, 0x00,
@@ -61,6 +63,13 @@ static void cbMessageArrivedTest(uint8_t* data, uint16_t size, void* user)
     }
 }
 
+static void verifyClientConnected(MqttContextClient* contextClient)
+{
+    for (int i = 0; i < TRY_IF_CONNECTED && !SOPC_MQTT_Client_Is_Connected(contextClient); i++)
+    {
+        SOPC_Sleep(WAIT_CONNECTION);
+    }
+}
 START_TEST(test_create_client)
 {
     MqttContextClient* contextClient;
@@ -101,7 +110,7 @@ START_TEST(test_publisher_send)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_Sleep(100); // Let time to mqtt Client to connect
+    verifyClientConnected(contextClient);
     for (int i = 0; i < NB_TOPIC; i++)
     {
         status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
@@ -119,7 +128,7 @@ START_TEST(test_callback_subscription)
     status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME, NB_TOPIC,
                                          cbMessageArrivedTest, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_Sleep(100); // Let time to mqtt Client to connect
+    verifyClientConnected(contextClient);
     status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[0], encoded_network_msg);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_MQTT_Release_Client(contextClient);
@@ -132,7 +141,7 @@ START_TEST(test_connexion_authentification)
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, USERNAME, PASSWORD, NULL, 0, NULL, NULL);
-    SOPC_Sleep(100); // Let time to mqtt Client to connect
+    verifyClientConnected(contextClient);
     for (int i = 0; i < NB_TOPIC; i++)
     {
         status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
