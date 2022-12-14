@@ -44,6 +44,7 @@ test_script:
     - set VS_VERSION="Visual Studio 15 2017 Win64"
     - set WITH_NANO_EXTENDED=on
     - set ENABLE_SAMPLES=on
+    - set TEST_PASSWORD_PRIVATE_KEY=password
 
     # download and extract libcheck
     - cd %ROOT_DIR%
