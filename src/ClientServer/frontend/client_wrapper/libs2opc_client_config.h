@@ -49,7 +49,7 @@ typedef bool SOPC_GetClientKeyPassword_Fct(char** outPassword);
  * \param getClientKeyPassword  The callback to retrieve the password
  *
  * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p getClientKeyPassword is
- *          invalid or SOPC_STATUS_INVALID_STATE if the callback is already configure.
+ *          invalid.
  *
  * \note    This function must be called before the configuration the secure Channel.
  */

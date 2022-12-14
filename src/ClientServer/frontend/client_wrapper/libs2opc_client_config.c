@@ -25,12 +25,6 @@ SOPC_GetClientKeyPassword_Fct* FctGetClientKeyPassword = NULL;
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyPasswordCallback(SOPC_GetClientKeyPassword_Fct* getClientKeyPassword)
 {
-    if (NULL != FctGetClientKeyPassword)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "The following user callback is already configure: SOPC_GetClientKeyPassword_Fct");
-        return SOPC_STATUS_INVALID_STATE;
-    }
     if (NULL == getClientKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
