@@ -212,9 +212,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        // Private key: load
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
-                                                                                (uint32_t) lenPassword);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Private key: load
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
+                                                                                    (uint32_t) lenPassword);
+        }
+
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load private key\n");

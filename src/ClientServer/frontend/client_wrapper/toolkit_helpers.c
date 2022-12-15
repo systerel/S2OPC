@@ -165,7 +165,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_ERROR,
                                 "Failed to retrieve the password of the client's private key from callback.");
-                    status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                    status = SOPC_STATUS_NOK;
                 }
             }
 
