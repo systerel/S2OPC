@@ -22,7 +22,6 @@ import argparse
 import shlex
 import subprocess
 import sys
-import sys
 
 import wait_server
 
