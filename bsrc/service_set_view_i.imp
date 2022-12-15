@@ -349,6 +349,8 @@ OPERATIONS
                     INVARIANT
                         breqs_to_iterate /\ breqs_iterated = {} &
                         breqs_nb_reqs = card(breqs_to_iterate \/ breqs_iterated) &
+                        l_continue = bool(breqs_to_iterate /= {}) &
+                        l_first_iteration : BOOL &
 
                         ResponseBrowse_BrowseStatus : breqs_iterated --> t_StatusCode &
                         /* Continuation points and result references are defined when status is OK or there is no available continuation points:
