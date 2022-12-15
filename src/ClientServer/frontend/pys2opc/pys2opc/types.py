@@ -1338,4 +1338,4 @@ if __name__ == '__main__':
     assert ntp_to_python(18285654237264005879) == 2048471845.694287  # Hopefully with this one there is no float-rounding errors.
 
     print(Reference("i=1000", True, "i=10001000", [0, "bla"], None, 1, "i=2"))
-    
+

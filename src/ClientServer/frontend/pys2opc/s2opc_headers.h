@@ -171,8 +171,10 @@ extern const char* SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI;
 /* sopc_key_manager.h */
 typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
 typedef SOPC_Buffer SOPC_SerializedCertificate;
-SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
-                                                                         SOPC_SerializedAsymmetricKey** key);
+SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(const char* keyPath,
+                                                                                 SOPC_SerializedAsymmetricKey** key,
+                                                                                 char* password,
+                                                                                 uint32_t lenPassword);
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
                                                                        SOPC_SerializedCertificate** cert);
 
@@ -194,6 +196,7 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space);
 
 #include "sopc_user_app_itf_cffi.h"
 
+#include "libs2opc_client_config_cffi.h"
 #include "sopc_toolkit_config_cffi.h"
 
 /* Defines converted to constants */

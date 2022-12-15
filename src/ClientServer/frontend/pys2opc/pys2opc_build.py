@@ -34,6 +34,7 @@ ffibuilder.cdef(header + r'''
         void _callback_disconnected(SOPC_LibSub_ConnectionId c_id);
         void _callback_datachanged(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_DataId d_id, SOPC_LibSub_Value* value);
         void _callback_client_event(SOPC_LibSub_ConnectionId c_id, SOPC_LibSub_ApplicativeEvent event, SOPC_StatusCode status, const void* response, uintptr_t responseContext);
+        bool _callback_get_client_key_password(char** password);
         void _callback_toolkit_event(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
         void _callback_address_space_event(const SOPC_CallContext* callCtxPtr, SOPC_App_AddSpace_Event event, void* opParam, SOPC_StatusCode opStatus);
         SOPC_ReturnStatus _callback_validate_user_identity(SOPC_UserAuthentication_Manager* authenticationManager,
