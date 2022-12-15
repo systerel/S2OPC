@@ -50,6 +50,8 @@ static const char* const usage[] = {
     NULL,
 };
 
+static int exitStatus = -1;
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -133,6 +135,7 @@ static void EventDispatcher_Register(SOPC_App_Com_Event event, uint32_t arg, voi
         switch (event)
         {
         case SE_RCV_DISCOVERY_RESPONSE:
+            exitStatus = 2;
             PrintRegisterResponse((OpcUa_RegisterServerResponse*) pParam);
             break;
         default:
@@ -153,5 +156,10 @@ static void PrintRegisterResponse(OpcUa_RegisterServerResponse* pResp)
     if ((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0)
     {
         SOPC_Atomic_Int_Set(&validResult, 1);
+        exitStatus = 3;
+    }
+    else
+    {
+        exitStatus = 0;
     }
 }

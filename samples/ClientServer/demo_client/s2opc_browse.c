@@ -52,6 +52,8 @@ static const char* const usage[] = {
     NULL,
 };
 
+static int exitStatus = -1;
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -157,7 +159,7 @@ int main(int argc, char* argv[])
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 
-    return (status == SOPC_STATUS_OK) ? 0 : 1;
+    return exitStatus;
 }
 
 static void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
@@ -169,10 +171,12 @@ static void EventDispatcher_Browse(SOPC_App_Com_Event event, uint32_t arg, void*
         switch (event)
         {
         case SE_ACTIVATED_SESSION:
+            exitStatus = 1;
             /* Send message */
             SendBrowseRequest(g_pSM);
             break;
         case SE_RCV_SESSION_RESPONSE:
+            exitStatus = 2;
             /* Prints */
             /* It can be long, as the thread is joined by Toolkit_Clear(), it should not be interrupted. */
             PrintBrowseResponse((OpcUa_BrowseResponse*) pParam);
@@ -268,10 +272,12 @@ static void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
     if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
     {
         printf("# Error: Browse failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
+        exitStatus = 3;
     }
     else
     {
         printf("Browsed nodes:\n");
+        exitStatus = 0;
     }
 
     for (i = 0; i < pResp->NoOfResults; ++i)

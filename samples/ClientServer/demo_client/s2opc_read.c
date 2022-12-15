@@ -57,6 +57,8 @@ static const char* const usage[] = {
     NULL,
 };
 
+static int exitStatus = -1;
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -224,10 +226,12 @@ static void EventDispatcher_Read(SOPC_App_Com_Event event, uint32_t arg, void* p
         switch (event)
         {
         case SE_ACTIVATED_SESSION:
+            exitStatus = 1;
             /* Send message */
             SendReadRequest(g_pSM);
             break;
         case SE_RCV_SESSION_RESPONSE:
+            exitStatus = 2;
             /* Prints */
             /* It can be long, as the thread is joined by Toolkit_Clear(), it should not be interrupted. */
             PrintReadResponse((OpcUa_ReadResponse*) pParam);
@@ -316,6 +320,11 @@ static void PrintReadResponse(OpcUa_ReadResponse* pResp)
     if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
     {
         printf("# Error: Read failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
+        exitStatus = 3;
+    }
+    else
+    {
+        exitStatus = 0;
     }
 
     /* There should always be 1 result here... */

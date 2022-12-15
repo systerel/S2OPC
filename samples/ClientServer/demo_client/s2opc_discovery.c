@@ -51,6 +51,8 @@ static const char* const usage[] = {
     NULL,
 };
 
+static int exitStatus = -1;
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -110,7 +112,7 @@ int main(int argc, char* argv[])
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 
-    return (status == SOPC_STATUS_OK) ? 0 : 1;
+    return exitStatus;
 }
 
 static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
@@ -122,6 +124,7 @@ static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, vo
         switch (event)
         {
         case SE_RCV_DISCOVERY_RESPONSE:
+            exitStatus = 2;
             PrintEndpoints((OpcUa_GetEndpointsResponse*) pParam);
             break;
         default:
@@ -152,10 +155,12 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
     if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
     {
         printf("# Error: GetEndpoints failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
+        exitStatus = 3;
     }
     else
     {
         printf("%" PRIi32 " endpoints:\n", pResp->NoOfEndpoints);
+        exitStatus = 0;
     }
 
     for (i = 0; i < pResp->NoOfEndpoints; ++i)

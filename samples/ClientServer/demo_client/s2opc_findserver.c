@@ -49,6 +49,8 @@ static const char* const usage[] = {
     NULL,
 };
 
+static int exitStatus = -1;
+
 int main(int argc, char* argv[])
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -119,6 +121,7 @@ static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, vo
         switch (event)
         {
         case SE_RCV_DISCOVERY_RESPONSE:
+            exitStatus = 2;
             PrintServers((OpcUa_FindServersResponse*) pParam);
             break;
         default:
@@ -141,10 +144,12 @@ static void PrintServers(OpcUa_FindServersResponse* pResp)
     if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
     {
         printf("# Error: FindServers failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
+        exitStatus = 3;
     }
     else
     {
         printf("%" PRIi32 " servers through endpoint %s:\n", pResp->NoOfServers, ENDPOINT_URL);
+        exitStatus = 0;
     }
 
     for (i = 0; i < pResp->NoOfServers; ++i)
