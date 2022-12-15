@@ -1134,7 +1134,7 @@ def generate_value_variant(val):
                                 generate_localized_text if val.is_array else generate_localized_text_pointer)
     elif val.ty == VALUE_TYPE_QUALIFIED_NAME:
         return generate_variant('SOPC_QualifiedName_Id', 'SOPC_QualifiedName' , 'Qname',
-                                val.val, val.is_array, generate_qname_pointer)
+                                val.val, val.is_array, generate_qname if val.is_array else generate_qname_pointer)
     elif val.ty == VALUE_TYPE_GUID:
         return generate_variant('SOPC_Guid_Id', 'SOPC_Guid', 'Guid',
                                 val.val, val.is_array,
