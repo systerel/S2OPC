@@ -53,6 +53,8 @@ LOCAL_OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
 
+        RequestBrowse  = p_req_msg &
+
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
         p_nb_browse_value : NAT &
@@ -112,6 +114,7 @@ LOCAL_OPERATIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
 
+        RequestBrowse  = p_req_msg &
         ResponseBrowse = p_resp_msg &
 
         p_nid_view : t_NodeId_i &
