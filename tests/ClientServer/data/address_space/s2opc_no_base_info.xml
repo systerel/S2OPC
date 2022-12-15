@@ -2653,6 +2653,8 @@
          <Reference ReferenceType="HasComponent">ns=1;i=1031</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1032</Reference>
          <Reference ReferenceType="HasComponent">ns=1;i=1033</Reference>
+         <Reference ReferenceType="HasComponent">ns=1;i=1034</Reference>
+         <Reference ReferenceType="HasComponent">ns=1;i=1035</Reference>
       </References>
   </UAObject>
   <UAVariable AccessLevel="99" BrowseName="1:Int64" DataType="Int64" NodeId="ns=1;i=1001"
@@ -3181,6 +3183,57 @@
          </LocalizedText>
       </Value>
   </UAVariable>
+ <UAVariable AccessLevel="99" NodeId="ns=1;i=1034" BrowseName="1:QualifiedName" 
+		DataType="QualifiedName"
+                ValueRank="-1">
+    <DisplayName>QualifiedName</DisplayName>
+    <Description>QualifiedName description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:QualifiedName>
+        <uax:NamespaceIndex>23</uax:NamespaceIndex>
+        <uax:Name>testName</uax:Name>
+      </uax:QualifiedName>
+    </Value>
+  </UAVariable>
+ <UAVariable AccessLevel="99" NodeId="ns=1;i=1035" BrowseName="1:QualifiedNameList" 
+		DataType="QualifiedName"
+                ValueRank="1">
+    <DisplayName>QualifiedName list DN</DisplayName>
+    <Description>QualifiedName list description</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      			<uax:ListOfQualifiedName>
+			      	<uax:QualifiedName>
+		        		<uax:NamespaceIndex>41</uax:NamespaceIndex>
+			        	<uax:Name>testName1</uax:Name>
+			        </uax:QualifiedName>
+			      	<uax:QualifiedName>
+		        		<uax:NamespaceIndex>42</uax:NamespaceIndex>
+			        	<uax:Name>testName2</uax:Name>
+			        </uax:QualifiedName>
+			      	<uax:QualifiedName>
+		        		<uax:NamespaceIndex>43</uax:NamespaceIndex>
+			        	<uax:Name>testName3</uax:Name>
+			        </uax:QualifiedName>
+			      	<uax:QualifiedName>
+		        		<uax:NamespaceIndex>44</uax:NamespaceIndex>
+			        	<uax:Name>testName4</uax:Name>
+			        </uax:QualifiedName>
+			      	<uax:QualifiedName>
+		        		<uax:NamespaceIndex>45</uax:NamespaceIndex>
+			        	<uax:Name>testName5</uax:Name>
+			        </uax:QualifiedName>
+		      </uax:ListOfQualifiedName>
+    </Value>
+  </UAVariable>
+
   <!-- Nodes for UACTT tests on references and paths -->
   <UAObject BrowseName="1:TestReferencesFolder" NodeId="ns=1;s=TestReferencesFolder"
              ParentNodeId="i=85">
