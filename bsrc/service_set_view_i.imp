@@ -97,6 +97,7 @@ LOCAL_OPERATIONS
     PRE
         isBrowseValueContextDefined = FALSE &
         isBrowseResultComputed      = FALSE &
+        isBrowseResponseAllocated   = TRUE &
 
         RequestBrowse_nb_BrowseValue > 0 &
         RequestBrowse_nb_BrowseValue <= k_n_BrowseResponse_max &
@@ -110,6 +111,8 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_resp &
+
+        ResponseBrowse = p_resp_msg &
 
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
@@ -368,7 +371,11 @@ OPERATIONS
 
                          /* Browse context and browse result are reset */
                          isBrowseValueContextDefined = FALSE &
-                         isBrowseResultComputed      = FALSE
+                         isBrowseResultComputed      = FALSE &
+                         /* Browse reponse is allocated */
+                         isBrowseResponseAllocated   = TRUE &
+
+                         ResponseBrowse = p_resp_msg
                     VARIANT
                         card(breqs_to_iterate)
                     END
