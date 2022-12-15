@@ -25,6 +25,8 @@ import os
 import sys
 import json
 import signal
+import getpass
+
 from collections import namedtuple
 
 from _pys2opc import ffi, lib as libsub
@@ -34,10 +36,12 @@ from .responses import Response
 from .server_callbacks import BaseAddressSpaceHandler
 from .request import LocalAsyncRequestHandler, Request
 
-
 VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
 
 NULL = ffi.NULL
+
+allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
+TEST_PASSWORD_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
 
 # Note: this level only concerns the following function _callback_log
 # TODO: make this configurable for the end user
@@ -86,6 +90,9 @@ def _callback_validate_user_identity(authenticationManager, pUser, pUserAuthenti
 def _callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
     return PyS2OPC_Server._callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized);
 
+@ffi.def_extern()
+def _callback_get_client_key_password(password):
+    return PyS2OPC_Client._callback_get_client_key_password(password)
 
 
 class PyS2OPC:
@@ -282,7 +289,8 @@ class PyS2OPC_Client(PyS2OPC):
                                   path_crl = '../../../build/bin/revoked/cacrl.der',
                                   path_cert_srv = '../../../build/bin/server_public/server_2k_cert.der',
                                   path_cert_cli = '../../../build/bin/client_public/client_2k_cert.der',
-                                  path_key_cli = '../../../build/bin/client_private/client_2k_key.pem',
+                                  path_key_cli = '../../../build/bin/client_private/encrypted_client_2k_key.pem',
+                                  client_key_encrypted = True,
                                   policy_id = 'anonymous',
                                   username = None,
                                   password = None):
@@ -309,6 +317,7 @@ class PyS2OPC_Client(PyS2OPC):
                            It must be signed by the certificate authority.
             path_cert_cli: The path to the certificate of the client.
             path_key_cli: The path to the private key of the client certificate.
+            client_key_encrypted: Whether the client private key is encrypted or not. Password is asked interactively.
             policy_id: To know which policy id to use, When username is NULL, the AnonymousIdentityToken
                        is used and the policy id must correspond to an anonymous UserIdentityPolicy.
                        Otherwise, the UserNameIdentityToken is used and the policy id must correspond to
@@ -324,7 +333,7 @@ class PyS2OPC_Client(PyS2OPC):
         _password = NULL
         if password:
             _password = ffi.new('char[]', password.encode())
-        
+
         # TODO: factorize code with add_configuration_unsecured
         assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
             'Toolkit is not initialized or already configured, cannot add new configurations.'
@@ -350,6 +359,10 @@ class PyS2OPC_Client(PyS2OPC):
                                  'sc_lifetime': sc_lifetime,
                                  'token_target': token_target,
                                  'generic_response_callback': libsub._callback_client_event}
+
+        if client_key_encrypted:
+            status = libsub.SOPC_HelperConfigClient_SetKeyPasswordCallback(libsub._callback_get_client_key_password)
+            assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the client private key.'
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
 
@@ -430,6 +443,19 @@ class PyS2OPC_Client(PyS2OPC):
         connection = PyS2OPC_Client._dConnections[connectionId]
         # It is not possible to store the payload, as it is freed by the caller of the callback.
         connection._on_response(event, status, responsePayload, responseContext, timestamp)
+
+    @staticmethod
+    def _callback_get_client_key_password(password):
+        try:
+            pwd = os.getenv(TEST_PASSWORD_ENV_NAME)
+            if pwd is None:
+                pwd = getpass.getpass(prompt='Client private key password:').encode() + b'\0' # Add protection to avoid buffer overrun with C code
+            else:
+                pwd = pwd.encode() + b'\0'
+            password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
+        except Exception:
+            return False
+        return True
 
 
 class PyS2OPC_Server(PyS2OPC):
@@ -550,7 +576,7 @@ class PyS2OPC_Server(PyS2OPC):
 
     @staticmethod
     def _callback_validate_user_identity(authenticationManager, pUser, pUserAuthenticated):
-        return PyS2OPC_Server._custom_user_handler._on_user_authentication(authenticationManager, pUser, pUserAuthenticated) 
+        return PyS2OPC_Server._custom_user_handler._on_user_authentication(authenticationManager, pUser, pUserAuthenticated)
 
     @staticmethod
     def _callback_authorize_operation(authorizationManager, operationType, nodeId, attributeId, pUser, pbOperationAuthorized):
@@ -589,7 +615,7 @@ class PyS2OPC_Server(PyS2OPC):
         Args:
             xml_path: Path to XML file compliant with s2opc_clientserver_users_config.xsd schema.
         """
-       
+
         assert PyS2OPC._initialized_srv and not PyS2OPC._configured,\
             'Toolkit is either not initialized, initialized as a Client, or already marked_configured.'
         assert PyS2OPC_Server._config is None, 'Server is already configure'
@@ -604,7 +630,7 @@ class PyS2OPC_Server(PyS2OPC):
             assert res, 'Cannot load user configuration from file {}'.format(xml_path)
         pAuthenticationManager = ppAuthenticationManager[0]
         pAuthorizationManager = ppAuthorizationManager[0]
-        PyS2OPC_Server._xml_user_manager = PyS2OPC_Server.XMLUserManager(pAuthenticationManager, pAuthorizationManager) 
+        PyS2OPC_Server._xml_user_manager = PyS2OPC_Server.XMLUserManager(pAuthenticationManager, pAuthorizationManager)
 
     @staticmethod
     def load_configuration(xml_path, address_space_handler=None, custom_user_handler=None, method_handler=None, pki_handler=None):
@@ -614,6 +640,7 @@ class PyS2OPC_Server(PyS2OPC):
         There should be only one created configuration.
 
         The XML configuration format is specific to S2OPC and follows the s2opc_config.xsd scheme.
+        If the server private key is encrypted then the password is asked interactively.
 
         Optionally configure the callbacks of the server.
         If handlers are left None, the following default behaviors are used:
@@ -671,7 +698,17 @@ class PyS2OPC_Server(PyS2OPC):
                     .format(ffi.string(serverCfg.serverCertPath), ReturnStatus.get_both_from_id(status))
 
                 ppKey = ffi.addressof(serverCfg, 'serverKey')
-                status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(serverCfg.serverKeyPath, ppKey)
+
+                password = NULL
+                lenPassword = 0
+                # Retrieve the password if the key is encrypted
+                if serverCfg.serverKeyEncrypted:
+                    password = os.getenv(TEST_PASSWORD_ENV_NAME)
+                    if password is None:
+                        password = getpass.getpass(prompt='server private key password:')
+                    password = ffi.new('char[]', password.encode())
+                    lenPassword = len(password)
+                status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverCfg.serverKeyPath, ppKey, password, lenPassword)
                 assert status == ReturnStatus.OK,\
                     'Cannot load secret key file {} with status {}. Is path correct?'\
                     .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
@@ -703,7 +740,7 @@ class PyS2OPC_Server(PyS2OPC):
                 else:
                     # TODO: For each endpoints create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
                     # Note: BaseUserHandler implem also to be done to have Python API
-                    assert False 
+                    assert False
                 assert endpoint.authenticationManager != NULL and endpoint.authorizationManager != NULL
 
                 # Register endpoint
