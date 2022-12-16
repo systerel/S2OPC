@@ -44,7 +44,13 @@ char* PATH_CACRL = "./revoked/cacrl.der";
 char* PATH_ISSUED = NULL;
 
 int NO_KEY_ENCRYPTION = false;
-Config_GetClientKeyPassword_Fct* getClientKeyPassword_Fct = &SOPC_AskPass_FromTerminal;
+
+static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+}
+
+Config_GetClientKeyPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskPass_FromTerminal;
 
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;

@@ -167,14 +167,14 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
     status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(output_s2opcConfig->serverConfig.serverCertPath,
                                                                   &output_s2opcConfig->serverConfig.serverCertificate);
 
-    // Retrive the password
+    // Retrieve the password
     char* password = NULL;
     size_t lenPassword = 0;
     bool res = false;
 
     if (SOPC_STATUS_OK == status && ENCRYPTED_SERVER_KEY)
     {
-        res = SOPC_AskPass_FromTerminal(&password);
+        res = SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", &password);
         status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 

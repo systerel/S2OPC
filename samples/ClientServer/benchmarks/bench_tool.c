@@ -499,7 +499,7 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
     char* password = NULL;
     size_t lenPassword = 0;
 
-    bool res = SOPC_AskPass_FromTerminal(&password);
+    bool res = SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", &password);
 
     if (res)
     {

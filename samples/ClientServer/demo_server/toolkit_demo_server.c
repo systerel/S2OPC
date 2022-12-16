@@ -50,6 +50,14 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
     SOPC_Free(sNodeId);
 }
 
+/*
+ * Server callback definition to ask for private key password during configuration phase
+ */
+static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+}
+
 /*-----------------------
  * Logger configuration :
  *-----------------------*/
@@ -275,7 +283,7 @@ int main(int argc, char* argv[])
     {
         /* This function must be called after the initialization functions of the server library and
            before starting the server and its configuration. */
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
     }
 
     /* Configuration of:
