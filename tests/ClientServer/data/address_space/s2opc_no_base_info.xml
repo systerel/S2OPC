@@ -3083,11 +3083,11 @@
       </References>
       <Value>
          <uax:ListOfByteString>
-				        <uax:ByteString>VGhlIHF1aWNr</uax:ByteString>
-				        <uax:ByteString>YnJvd24gZm94</uax:ByteString>
-				        <uax:ByteString>anVtcHMgb3Zlcg==</uax:ByteString>
-				        <uax:ByteString>dGhlIGxhenk=</uax:ByteString>
-				        <uax:ByteString>ZG9n</uax:ByteString>
+                    <uax:ByteString>VGhlIHF1aWNr</uax:ByteString>
+                    <uax:ByteString>YnJvd24gZm94</uax:ByteString>
+                    <uax:ByteString>anVtcHMgb3Zlcg==</uax:ByteString>
+                    <uax:ByteString>dGhlIGxhenk=</uax:ByteString>
+                    <uax:ByteString>ZG9n</uax:ByteString>
          </uax:ListOfByteString>
       </Value>
   </UAVariable>
@@ -3103,11 +3103,11 @@
       </References>
       <Value>
          <uax:ListOfXmlElement>
-				        <uax:XmlElement>&lt;The_quick/&gt;</uax:XmlElement>
-				        <uax:XmlElement>&lt;brown_fox/&gt;</uax:XmlElement>
-				        <uax:XmlElement>&lt;jumps_over/&gt;</uax:XmlElement>
-				        <uax:XmlElement>&lt;the_lazy/&gt;</uax:XmlElement>
-				        <uax:XmlElement>&lt;dog/&gt;</uax:XmlElement>
+                    <uax:XmlElement>&lt;The_quick/&gt;</uax:XmlElement>
+                    <uax:XmlElement>&lt;brown_fox/&gt;</uax:XmlElement>
+                    <uax:XmlElement>&lt;jumps_over/&gt;</uax:XmlElement>
+                    <uax:XmlElement>&lt;the_lazy/&gt;</uax:XmlElement>
+                    <uax:XmlElement>&lt;dog/&gt;</uax:XmlElement>
          </uax:ListOfXmlElement>
       </Value>
   </UAVariable>
@@ -3184,7 +3184,7 @@
       </Value>
   </UAVariable>
  <UAVariable AccessLevel="99" NodeId="ns=1;i=1034" BrowseName="1:QualifiedName"
-		DataType="QualifiedName"
+      DataType="QualifiedName"
                 ValueRank="-1">
     <DisplayName>QualifiedName</DisplayName>
     <Description>QualifiedName description</Description>
@@ -3200,7 +3200,7 @@
     </Value>
   </UAVariable>
  <UAVariable AccessLevel="99" NodeId="ns=1;i=1035" BrowseName="1:QualifiedNameList"
-		DataType="QualifiedName"
+      DataType="QualifiedName"
                 ValueRank="1">
     <DisplayName>QualifiedName list DN</DisplayName>
     <Description>QualifiedName list description</Description>
@@ -3209,28 +3209,28 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      			<uax:ListOfQualifiedName>
-			      	<uax:QualifiedName>
-		        		<uax:NamespaceIndex>41</uax:NamespaceIndex>
-			        	<uax:Name>testName1</uax:Name>
-			        </uax:QualifiedName>
-			      	<uax:QualifiedName>
-		        		<uax:NamespaceIndex>42</uax:NamespaceIndex>
-			        	<uax:Name>testName2</uax:Name>
-			        </uax:QualifiedName>
-			      	<uax:QualifiedName>
-		        		<uax:NamespaceIndex>43</uax:NamespaceIndex>
-			        	<uax:Name>testName3</uax:Name>
-			        </uax:QualifiedName>
-			      	<uax:QualifiedName>
-		        		<uax:NamespaceIndex>44</uax:NamespaceIndex>
-			        	<uax:Name>testName4</uax:Name>
-			        </uax:QualifiedName>
-			      	<uax:QualifiedName>
-		        		<uax:NamespaceIndex>45</uax:NamespaceIndex>
-			        	<uax:Name>testName5</uax:Name>
-			        </uax:QualifiedName>
-		      </uax:ListOfQualifiedName>
+               <uax:ListOfQualifiedName>
+                  <uax:QualifiedName>
+                    <uax:NamespaceIndex>41</uax:NamespaceIndex>
+                    <uax:Name>testName1</uax:Name>
+                 </uax:QualifiedName>
+                  <uax:QualifiedName>
+                    <uax:NamespaceIndex>42</uax:NamespaceIndex>
+                    <uax:Name>testName2</uax:Name>
+                 </uax:QualifiedName>
+                  <uax:QualifiedName>
+                    <uax:NamespaceIndex>43</uax:NamespaceIndex>
+                    <uax:Name>testName3</uax:Name>
+                 </uax:QualifiedName>
+                  <uax:QualifiedName>
+                    <uax:NamespaceIndex>44</uax:NamespaceIndex>
+                    <uax:Name>testName4</uax:Name>
+                 </uax:QualifiedName>
+                  <uax:QualifiedName>
+                    <uax:NamespaceIndex>45</uax:NamespaceIndex>
+                    <uax:Name>testName5</uax:Name>
+                 </uax:QualifiedName>
+            </uax:ListOfQualifiedName>
     </Value>
   </UAVariable>
 
