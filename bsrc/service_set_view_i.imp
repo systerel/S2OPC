@@ -58,7 +58,13 @@ LOCAL_OPERATIONS
         p_nid_view : t_NodeId_i &
         p_nb_target_max : NAT &
         p_nb_browse_value : NAT &
-        p_nb_browse_value = RequestBrowse_nb_BrowseValue
+        p_nb_browse_value = RequestBrowse_nb_BrowseValue &
+
+        dom(RequestBrowse_BrowseValue_NodeId) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_BrowseDirection) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_ReferenceTypeId) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_NodeClassMask) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_ResultMask) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue]
     THEN
         StatusCode_service,
         ResponseBrowse_BrowseStatus,
@@ -123,6 +129,11 @@ LOCAL_OPERATIONS
         p_bvi           : t_BrowseValue_i &
         p_bvi           : t_BrowseValue &
         p_bvi           : cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_NodeId) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_BrowseDirection) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_ReferenceTypeId) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_NodeClassMask) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
+        dom(RequestBrowse_BrowseValue_ResultMask) = cast_t_BrowseValue[1..RequestBrowse_nb_BrowseValue] &
 
         p_autoReleaseCP : BOOL
     THEN
