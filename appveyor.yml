@@ -86,6 +86,8 @@ test_script:
         .\build_s2opc.bat
     - cd %ROOT_DIR%\build\tests\ClientServer
     - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc*"
+    - cd %ROOT_DIR%\build\samples\ClientServer
+    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
 
     # Build pys2opc for Py35+
     - |-
