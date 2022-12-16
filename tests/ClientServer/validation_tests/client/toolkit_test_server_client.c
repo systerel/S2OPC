@@ -161,7 +161,7 @@ static int32_t client_create_configuration(void)
     status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Client: Failed to configure the client key user paswword callback\n");
+        printf("<Test_Server_Client: Failed to configure the client key user password callback\n");
     }
 
     /* connect to the endpoint */
@@ -409,7 +409,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
         status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_Server_Client: Failed to configure the server key user paswword callback\n");
+            printf("<Test_Server_Client: Failed to configure the server key user password callback\n");
         }
     }
     if (SOPC_STATUS_OK == status)

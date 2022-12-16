@@ -93,7 +93,7 @@ int main(int argc, char* const argv[])
     status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Example_wrapper_browse: Failed to configure the client key user paswword callback\n");
+        printf("<Example_wrapper_browse: Failed to configure the client key user password callback\n");
         res = -1;
     }
 
