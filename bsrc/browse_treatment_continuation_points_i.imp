@@ -172,8 +172,9 @@ OPERATIONS
             l_continue = bool(sessions_to_iterate /= {}) &
             sessions_to_iterate /\ sessions_iterated = {} &
             sessions_to_iterate \/ sessions_iterated = t_session &
-            session_hasContinuationPoint_i[sessions_iterated] = {FALSE} &
-            session_ContinuationPoint_i[sessions_iterated] = {c_ContinuationPoint_indet} &
+            session_hasContinuationPoint_i[sessions_iterated] <: {FALSE} &
+            session_ContinuationPoint_i[sessions_iterated] <: {c_ContinuationPoint_indet} &
+
             s_ContinuationPoints = session_ContinuationPoint_i[sessions_to_iterate] - {c_ContinuationPoint_indet} &
             dom(id_ContinuationPoint) = session_ContinuationPoint_i[sessions_to_iterate] - {c_ContinuationPoint_indet}
         VARIANT
