@@ -382,9 +382,8 @@ test-check:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
   <<: *test_unit
-  script:
-    - './.set-bin-root.sh'
-    - './test-all.sh'
+  variables:
+    TEST_PASSWORD_PRIVATE_KEY : password
   rules:
     - if: "$ALL_TESTS != null"
       when: on_success
@@ -419,6 +418,8 @@ test-unit:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
+  variables:
+    TEST_PASSWORD_PRIVATE_KEY : password
   rules:
     - if: "$ALL_TESTS != null && \
            $S2OPC_PUBSUB_ONLY == null && \
