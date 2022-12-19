@@ -88,7 +88,7 @@ static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
     char* password = NULL;
     size_t lenPassword = 0;
 
-    if (serverConfig->serverkeyEncrypted)
+    if (serverConfig->serverKeyEncrypted)
     {
         res = SOPC_ServerInternal_GetKeyPassword(&password);
     }

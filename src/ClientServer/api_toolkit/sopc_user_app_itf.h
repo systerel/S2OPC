@@ -248,7 +248,7 @@ struct SOPC_Server_Config
     /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
     SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
-    bool serverkeyEncrypted;                       /**< Boolean to indicate if the private key is encrypted */
+    bool serverKeyEncrypted;                       /**< Boolean to indicate if the private key is encrypted */
     SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
                               or ::SOPC_PKIProviderStack_Create. */
     SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
