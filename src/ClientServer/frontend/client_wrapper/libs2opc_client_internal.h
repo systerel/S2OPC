@@ -42,7 +42,8 @@
 bool SOPC_ClientInternal_GetKeyPassword(char** outPassword);
 
 /**
- * \brief Function to know if the client's key is encrypted (if the callback has been defined).
+ * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetKeyPasswordCallback (i.e. the
+ *        client's key is encrypted).
  *
  */
 bool SOPC_ClientInternal_IsEncryptedKey(void);
