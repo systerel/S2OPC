@@ -86,7 +86,6 @@ int main(int argc, char* argv[])
                                         CONN_OPTIONS[12],
                                         CONN_OPTIONS[13],
                                         CONN_OPTIONS[14],
-                                        CONN_OPTIONS[15],
                                         OPT_END()};
 
     struct argparse argparse;
@@ -180,16 +179,17 @@ int main(int argc, char* argv[])
     /* Secure Channel and Session creation */
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != USER_NAME || NULL != USER_PWD)
+        if (NULL != USER_NAME)
         {
-            if (NULL == USER_NAME || NULL == USER_PWD)
+            char* password = Config_Client_GetUserPassword();
+            if (NULL != password)
             {
-                printf("# Error: username AND password must be either both or none set\n");
-                status = SOPC_STATUS_NOK;
+                status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, password);
+                SOPC_Free(password);
             }
             else
             {
-                status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, USER_PWD);
+                status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
         else

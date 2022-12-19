@@ -54,11 +54,10 @@ Config_GetClientKeyPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskP
 
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
-char* USER_PWD = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
 
-struct argparse_option CONN_OPTIONS[16] = {
+struct argparse_option CONN_OPTIONS[15] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -142,14 +141,8 @@ struct argparse_option CONN_OPTIONS[16] = {
     OPT_STRING('u',
                "username",
                &USER_NAME,
-               "(if anonymous mode is not active) the username of the user used to establish session",
-               NULL,
-               0,
-               0),
-    OPT_STRING('p',
-               "password",
-               &USER_PWD,
-               "(if anonymous mode is not active) the password of the user used to establish session",
+               "(if anonymous mode is not active) the username of the user used to establish session."
+               " If set the user password will be requested in terminal.",
                NULL,
                0,
                0),
@@ -381,4 +374,18 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword)
 {
     getClientKeyPassword_Fct = getClientKeyPassword;
+}
+
+char* Config_Client_GetUserPassword(void)
+{
+    char* password = NULL;
+    if (NULL != USER_NAME)
+    {
+        bool res = SOPC_AskPass_CustomPromptFromTerminal("Session user password:\n", &password);
+        if (!res)
+        {
+            printf("# Error: Failed to retrieve user password\n");
+        }
+    }
+    return password;
 }

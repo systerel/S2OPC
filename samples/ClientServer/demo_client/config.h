@@ -68,12 +68,11 @@ extern char* PATH_ISSUED;
 
 extern char* USER_POLICY_ID;
 extern char* USER_NAME;
-extern char* USER_PWD;
 
 extern char* SESSION_NAME;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[16];
+extern struct argparse_option CONN_OPTIONS[15];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200
@@ -116,5 +115,15 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig);
  * \note   This function is useful for validation tests
  */
 void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword);
+
+/**
+ * \brief Function to retrieve the user password when username token type is for establishing connection session.
+ *        The user password is requested through the terminal.
+ *
+ * \return session user password as a zero-terminated string or NULL if no username defined or terminal input failed.
+ *
+ * \note   The returned C string must be freed by user.
+ */
+char* Config_Client_GetUserPassword(void);
 
 #endif /* CONFIG_H_ */
