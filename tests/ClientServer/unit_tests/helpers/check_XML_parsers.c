@@ -339,7 +339,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
     /* Check whether the server's key private is encryted or not. */
-    ck_assert_int_eq(true, sConfig->serverkeyEncrypted);
+    ck_assert_int_eq(true, sConfig->serverKeyEncrypted);
 
     /* Check trusted CAs */
     int caCounter = 0;

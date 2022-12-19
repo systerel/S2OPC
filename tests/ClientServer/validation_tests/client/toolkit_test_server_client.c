@@ -405,7 +405,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-        pConfig->serverConfig.serverkeyEncrypted = true;
+        pConfig->serverConfig.serverKeyEncrypted = true;
         status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
