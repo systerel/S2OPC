@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "embedded/sopc_addspace_loader.h"
@@ -30,6 +31,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -97,6 +99,23 @@ SOPC_ReturnStatus Server_Initialize(void)
 }
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
+
+static bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
+{
+    SOPC_ASSERT(NULL != outPassword);
+    /*
+        We have to make a copy here because in any case, we will free the password and not distinguish if it come
+        from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
+    */
+    char* _outPassword = getenv(PASSWORD_ENV_NAME);
+    *outPassword = SOPC_strdup(_outPassword); // Do a copy
+    if (NULL == *outPassword)
+    {
+        printf("INFO: %s environment variable not set or empty, use terminal interactive input:\n", PASSWORD_ENV_NAME);
+        return SOPC_AskPass_CustomPromptFromTerminal("Server private key password:\n", outPassword);
+    }
+    return true;
+}
 
 SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfig)
 {
@@ -174,7 +193,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
 
     if (SOPC_STATUS_OK == status && ENCRYPTED_SERVER_KEY)
     {
-        res = SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", &password);
+        res = SOPC_TestHelper_AskPass_FromEnv(&password);
         status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 

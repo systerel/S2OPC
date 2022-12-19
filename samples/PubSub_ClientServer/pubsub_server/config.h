@@ -32,6 +32,7 @@
 #define SERVER_CERT_PATH "./server_public/server_2k_cert.der"
 #define SERVER_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 #define ENCRYPTED_SERVER_KEY true /* set to false otherwise */
+#define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 #define CA_CERT_PATH "./trusted/cacert.der"
 #define CA_CRL_PATH "./revoked/cacrl.der"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
