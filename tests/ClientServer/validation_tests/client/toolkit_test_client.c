@@ -33,6 +33,8 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_askpass.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -389,16 +391,14 @@ int main(void)
 
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        // Private key: Retrieve the password from TEST_PASSWORD_PRIVATE_KEY environement variable
-        char* password = getenv("TEST_PASSWORD_PRIVATE_KEY");
+        // Private key: Retrieve the password
+        char* password = NULL;
         size_t lenPassword = 0;
-        if (NULL == password)
-        {
-            printf(">>Stub_Client: The following environment variable is missing: TEST_PASSWORD_PRIVATE_KEY\n");
-            status = SOPC_STATUS_NOK;
-        }
 
-        if (SOPC_STATUS_OK == status && NULL != password)
+        bool res = SOPC_TestHelper_AskPass_FromEnv(&password);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
         {
             lenPassword = strlen(password);
             if (UINT32_MAX < lenPassword)
@@ -418,6 +418,11 @@ int main(void)
                     ">>Stub_Client: Failed to decrypt client private key, please check the password or key format "
                     "(PEM)\n");
             }
+        }
+
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
 
         if (SOPC_STATUS_OK == status)
