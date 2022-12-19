@@ -28,37 +28,20 @@ from cryptography.hazmat.backends import default_backend
 PRIVATE_KEY_PASSWORD = b'password'
 
 def _load_private_key(key_path, pwd):
-    _, ext = os.path.splitext(key_path)
     with open(key_path, "rb") as f:
         data = f.read()
-        if ext == ".pem":
-            return serialization.load_pem_private_key(data, password=pwd, backend=default_backend())
-        else:
-            return serialization.load_der_private_key(data, password=None, backend=default_backend())
-
-def _set_security(client, policy, certificate_path, private_key_path, server_certificate_path=None, mode=ua.MessageSecurityMode.SignAndEncrypt):
-    if server_certificate_path is None:
-        # load certificate from server's list of endpoints
-        endpoints = client.connect_and_get_server_endpoints()
-        endpoint = client.find_endpoint(endpoints, mode, policy.URI)
-        server_cert = uacrypto.x509_from_der(endpoint.ServerCertificate)
-    else:
-        server_cert = uacrypto.load_certificate(server_certificate_path)
-    cert = uacrypto.load_certificate(certificate_path)
-    pk = _load_private_key(private_key_path, PRIVATE_KEY_PASSWORD)
-    client.security_policy = policy(server_cert, cert, pk, mode)
-    client.uaclient.set_security(client.security_policy)
+        return serialization.load_pem_private_key(data, password=pwd, backend=default_backend())
 
 def secure_channels_connect(client, security_policy):
     cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', 'samples', 'ClientServer', 'data', 'cert')
 
     if (security_policy == security_policies.SecurityPolicyBasic256):
-        _set_security(client,
-        security_policy,
-        os.path.join(cert_dir, 'client_2k_cert.der'),
-        os.path.join(cert_dir, 'encrypted_client_2k_key.pem'),
-        server_certificate_path=os.path.join(cert_dir, 'server_2k_cert.der'),
-        mode=ua.MessageSecurityMode.Sign)
+        client_cert = uacrypto.load_certificate(os.path.join(cert_dir, 'client_2k_cert.der'))
+        cient_key = _load_private_key(os.path.join(cert_dir, 'encrypted_client_2k_key.pem'), PRIVATE_KEY_PASSWORD)
+        server_cert = uacrypto.load_certificate(os.path.join(cert_dir, 'server_2k_cert.der'))
+
+        client.security_policy = security_policy(server_cert, client_cert, cient_key, ua.MessageSecurityMode.Sign)
+        client.uaclient.set_security(client.security_policy)
 
     client.connect()
     print('Connected')
