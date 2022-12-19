@@ -43,7 +43,7 @@ def test_ask_password(expected, actual, success):
     return True
 
 def get_random_pwd_of_length(pwd_length):
-    return ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation.replace('"', ''), k=pwd_length))
+    return ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation.replace('"', '').replace('\\', ''), k=pwd_length))
 
 if __name__ == '__main__':
     res = test_ask_password("toto", "toto", True)
