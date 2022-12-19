@@ -281,9 +281,11 @@ if(ENABLE_TESTING)
                                      "validation_tests/client/testlib_write.c"
                                      "validation_tests/client/test_results.c"
                                      "validation_tests/client/testlib_read_response.c"
-                                     ${TEST_LIGHT_ADDRESS_SPACE_C})
+                                     ${TEST_LIGHT_ADDRESS_SPACE_C}
+                                     ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
   add_dependencies(toolkit_test_server_local_service make-light-address-space)
   target_link_libraries(toolkit_test_client PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+  target_include_directories(toolkit_test_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
 

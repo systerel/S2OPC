@@ -22,6 +22,7 @@
  * \brief An API to ask for passwords.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "sopc_assert.h"
@@ -36,6 +37,12 @@ bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
         from environement or terminal after calling ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
     */
     char* _outPassword = getenv(PASSWORD_ENV_NAME);
+    if (NULL == _outPassword)
+    {
+        printf("<SOPC_TestHelper_AskPass_FromEnv: The following environment variable is missing: %s\n",
+               PASSWORD_ENV_NAME);
+        return false;
+    }
     *outPassword = SOPC_strdup(_outPassword); // Do a copy
     return NULL != *outPassword;
 }
