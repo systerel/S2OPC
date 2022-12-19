@@ -157,7 +157,7 @@ struct argparse_option CONN_OPTIONS[16] = {
     OPT_BOOLEAN(0,
                 "no_key_encryption",
                 &NO_KEY_ENCRYPTION,
-                "(default: false) if the client application private key is not encrypted",
+                "(default: false) set if the client application private key is not encrypted",
                 NULL,
                 0,
                 0)};
@@ -314,12 +314,12 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
             size_t lenPassword = 0;
             bool res = false;
 
-            if (false == NO_KEY_ENCRYPTION)
+            if (!NO_KEY_ENCRYPTION)
             {
                 res = getClientKeyPassword_Fct(&password);
             }
 
-            if (true == res && false == NO_KEY_ENCRYPTION)
+            if (res && !NO_KEY_ENCRYPTION)
             {
                 lenPassword = strlen(password);
                 if (UINT32_MAX < lenPassword)

@@ -172,7 +172,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfi
     size_t lenPassword = 0;
     bool res = false;
 
-    if (SOPC_STATUS_OK == status && true == ENCRYPTED_SERVER_KEY)
+    if (SOPC_STATUS_OK == status && ENCRYPTED_SERVER_KEY)
     {
         res = SOPC_AskPass_FromTerminal(&password);
         status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
