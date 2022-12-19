@@ -36,7 +36,8 @@
 /**
  * \brief Type of callback to retrieve password for decryption of the client private key.
  *
- * \param[out] outPassword   out parameter, the newly allocated password.
+ * \param[out] outPassword   out parameter, the newly allocated password which shall be a zero-terminated string in case
+ *                           of success.
  *
  * \return true in case of success, otherwise false.
  *
