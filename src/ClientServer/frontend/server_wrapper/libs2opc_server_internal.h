@@ -79,7 +79,7 @@ typedef struct SOPC_ServerHelper_Config
     SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb;
     // Application asynchronous local service response callback record
     SOPC_LocalServiceAsyncResp_Fct* asyncRespCb;
-    // Application server private key user password callbask record
+    // Application server private key password callback
     SOPC_GetServerKeyPassword_Fct*
         getServerKeyPassword; /* If it is defined and if the serverKey is encrypted,
                                  then the callback is called during call to

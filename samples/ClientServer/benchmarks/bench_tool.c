@@ -501,7 +501,7 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
 
     bool res = SOPC_AskPass_FromTerminal(&password);
 
-    if (true == res)
+    if (res)
     {
         lenPassword = strlen(password);
         if (UINT32_MAX < lenPassword)
@@ -510,7 +510,7 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         }
     }
 
-    if (false == res)
+    if (!res)
     {
         fprintf(stderr, "Error while retrieve password for private key\n");
     }

@@ -39,7 +39,7 @@ bool SOPC_ClientInternal_GetKeyPassword(char** outPassword)
     if (NULL == FctGetClientKeyPassword)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "The following user callback isn't configure: SOPC_GetClientKeyPassword_Fct");
+                               "The following user callback isn't configured: SOPC_GetClientKeyPassword_Fct");
         return false;
     }
     bool res = FctGetClientKeyPassword(outPassword);
