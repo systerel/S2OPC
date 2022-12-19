@@ -196,11 +196,11 @@ if(ENABLE_SAMPLES)
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_write>" -u user1 -p password -n "ns=1;s=Byte_001" -t 3 42)
+  "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;s=Byte_001" -t 3 42)
   set_tests_properties("validation::s2opc_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
