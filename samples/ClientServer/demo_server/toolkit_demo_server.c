@@ -26,7 +26,6 @@
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 
-#include "sopc_array.h"
 #include "sopc_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"

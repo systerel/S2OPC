@@ -19,7 +19,6 @@
 
 #include <check.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 #include "sopc_atomic.h"
 #include "sopc_common.h"
