@@ -36,13 +36,10 @@ from cryptography.hazmat.backends import default_backend
 PRIVATE_KEY_PASSWORD = b'password'
 
 def load_private_key(key_path, pwd):
-    _, ext = os.path.splitext(key_path)
     with open(key_path, "rb") as f:
         data = f.read()
-        if ext == ".pem":
-            return serialization.load_pem_private_key(data, password=pwd, backend=default_backend())
-        else:
-            return serialization.load_der_private_key(data, password=None, backend=default_backend())
+        return serialization.load_pem_private_key(data, password=pwd, backend=default_backend())
+
 
 stopFlag = False
 
