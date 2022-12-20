@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <termios.h>
+#include <unistd.h>
 
 #include "sopc_askpass.h"
 #include "sopc_helper_string.h"
@@ -28,14 +29,9 @@
 
 bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
 {
-    if (NULL == prompt || NULL == outPassword)
-    {
-        return false;
-    }
+    char* result = NULL;
 
-    // Allocated password: 4 additional characters to guarantee max length: ends with "\n\0\0"
-    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + 3);
-    if (NULL == pwd)
+    if (NULL == prompt || NULL == outPassword)
     {
         return false;
     }
@@ -50,35 +46,46 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
     FILE* file_tty = fdopen(fd_tty, "w+");
     if (NULL == file_tty)
     {
+        close(fd_tty);
+        return false;
+    }
+
+    // Allocated password: 4 additional characters to guarantee max length: ends with "\n\0\0"
+    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + 3);
+    if (NULL == pwd)
+    {
+        // note: also closes the underlying file descriptor
+        fclose(file_tty);
         return false;
     }
 
     // Set no echo
     int res = tcgetattr(fd_tty, &old);
-    if (0 != res)
+
+    if (0 == res)
     {
-        return false;
+        new = old;
+        new.c_lflag &= (tcflag_t) ~(ECHO | ECHOE | ECHOK | ECHONL);
+        // TCSAFLUSH: the change occurs after all output transmitted and all input not read yet are discarded
+        res = tcsetattr(fd_tty, TCSAFLUSH, &new);
     }
-    new = old;
-    new.c_lflag &= (tcflag_t) ~(ECHO | ECHOE | ECHOK | ECHONL);
-    // TCSAFLUSH: the change occurs after all output transmitted and all input not read yet are discarded
-    res = tcsetattr(fd_tty, TCSAFLUSH, &new);
-    if (0 != res)
+
+    if (0 == res)
     {
-        return false;
+        // Prompt for the user for password
+        fputs(prompt, file_tty);
+        fflush(file_tty);
+
+        // Retrieve the password (locking file_tty)
+        result = fgets(pwd, SOPC_PASSWORD_MAX_LENGTH + 3, file_tty);
+
+        // Restore echo
+        tcsetattr(fd_tty, TCSAFLUSH, &old);
+        fflush(file_tty);
+        fputs("\n", file_tty);
     }
-    // Prompt for the user for password
-    fputs(prompt, file_tty);
-    fflush(file_tty);
 
-    // Retrieve the password (locking file_tty)
-    char* result = fgets(pwd, SOPC_PASSWORD_MAX_LENGTH + 3, file_tty);
-
-    // Restore echo
-    tcsetattr(fd_tty, TCSAFLUSH, &old);
-    fflush(file_tty);
-    fputs("\n", file_tty);
-
+    // note: also closes the underlying file descriptor
     fclose(file_tty);
 
     if (NULL != result)
@@ -100,6 +107,7 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
             result = NULL;
         }
     }
+
     if (NULL == result)
     {
         // Comply with CERT rule FIO40-C: reset strings on fgets() failure
