@@ -82,8 +82,8 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
             logPath = "";
         }
 
-        secuAudit = SOPC_Log_CreateFileInstance(pFileConfig->logDirPath, "Trace", SOPC_Log_SecuAuditCategory,
-                                                pFileConfig->logMaxBytes, pFileConfig->logMaxFiles);
+        secuAudit = SOPC_Log_CreateFileInstance(logPath, "Trace", SOPC_Log_SecuAuditCategory, pFileConfig->logMaxBytes,
+                                                pFileConfig->logMaxFiles);
         result = SOPC_Logger_AuditInitialize();
 #else /* SOPC_HAS_FILESYSTEM */
         /* Status stays OK given that we don't have other alternatives for now */
