@@ -168,7 +168,7 @@ typedef struct
     NodeId of the Node that contains the attribute to read. zero-terminated string
   @var SOPC_ClientHelper_ReadValue::attributeId
     AttributeId of the Node that contains the value to read. 0 is not valid.
-    All possible OPC UA attribute ids can be found in the header file sopc_builtintypes.h
+    All possible OPC UA attribute ids can be found in the header file sopc_builtintypes.h ::SOPC_AttributeId
     Ids of attributes are defined in Part 6.
   @var SOPC_ClientHelper_ReadValue::indexRange
     Used only if the attribute 'Value' is an array. Otherwise, it should be NULL.
