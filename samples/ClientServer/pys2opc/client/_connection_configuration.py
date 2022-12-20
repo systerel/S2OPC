@@ -44,8 +44,7 @@ configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PA
                                      'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'encrypted_client_2k_key.pem'),
                                      'client_key_encrypted': True,
                                      'policy_id': 'username',
-                                     'username': 'user1',
-                                     'password': 'password'}
+                                     'username': 'user1'}
 
 
 def join_configs(*args):

@@ -73,7 +73,6 @@ config_security = {'security_mode': SecurityMode.Sign,
                    'client_key_encrypted': True,
                    'policy_id': 'username',
                    'username': 'user1',
-                   'password': 'password',
                    'add_configuration_function': PyS2OPC.add_configuration_secured}
 
 

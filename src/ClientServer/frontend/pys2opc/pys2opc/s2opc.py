@@ -158,6 +158,18 @@ class PyS2OPC:
         else:
             assert event not in PyS2OPC._events_client, 'Only server events are supported yet'
 
+    @staticmethod
+    def _get_password(prompt):
+        """
+        Return a zero-terminated byte string which contain the password.
+        """
+        pwd = os.getenv(TEST_PASSWORD_ENV_NAME)
+        if pwd is None:
+            pwd = getpass.getpass(prompt='{}'.format(prompt))
+        pwd = pwd.encode() + b'\0' # Add protection to avoid buffer overrun with C code
+        return pwd
+
+
 
 class PyS2OPC_Client(PyS2OPC):
     """
@@ -292,8 +304,7 @@ class PyS2OPC_Client(PyS2OPC):
                                   path_key_cli = '../../../build/bin/client_private/encrypted_client_2k_key.pem',
                                   client_key_encrypted = True,
                                   policy_id = 'anonymous',
-                                  username = None,
-                                  password = None):
+                                  username = None):
         """
         Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
@@ -322,17 +333,17 @@ class PyS2OPC_Client(PyS2OPC):
                        is used and the policy id must correspond to an anonymous UserIdentityPolicy.
                        Otherwise, the UserNameIdentityToken is used and the policy id must correspond to
                        an username UserIdentityPolicy.
-            username: None for anonymous access, see policyId the password will be encrypted,
+            username: The password of the token is asked interactively.
+                      None for anonymous access, see policyId the password will be encrypted,
                       or not, depending on the user token security policy associated to the policyId
                       or if it is empty depending on the SecureChannel security policy.
-            password: The password is ignored when username is NULL.
         """
         _username = NULL
+        _password = NULL
         if username:
             _username = ffi.new('char[]', username.encode())
-        _password = NULL
-        if password:
-            _password = ffi.new('char[]', password.encode())
+            _password = PyS2OPC._get_password("({}) username password:".format(username))
+            _password = ffi.new('char[]', _password)
 
         # TODO: factorize code with add_configuration_unsecured
         assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
@@ -447,11 +458,7 @@ class PyS2OPC_Client(PyS2OPC):
     @staticmethod
     def _callback_get_client_key_password(password):
         try:
-            pwd = os.getenv(TEST_PASSWORD_ENV_NAME)
-            if pwd is None:
-                pwd = getpass.getpass(prompt='Client private key password:').encode() + b'\0' # Add protection to avoid buffer overrun with C code
-            else:
-                pwd = pwd.encode() + b'\0'
+            pwd = PyS2OPC._get_password("Client private key password:")
             password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
         except Exception:
             return False
@@ -703,10 +710,8 @@ class PyS2OPC_Server(PyS2OPC):
                 lenPassword = 0
                 # Retrieve the password if the key is encrypted
                 if serverCfg.serverKeyEncrypted:
-                    password = os.getenv(TEST_PASSWORD_ENV_NAME)
-                    if password is None:
-                        password = getpass.getpass(prompt='server private key password:')
-                    password = ffi.new('char[]', password.encode())
+                    password = PyS2OPC._get_password("Server private key password:")
+                    password = ffi.new('char[]', password)
                     lenPassword = len(password)
                 status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverCfg.serverKeyPath, ppKey, password, lenPassword)
                 assert status == ReturnStatus.OK,\
