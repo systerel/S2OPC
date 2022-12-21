@@ -18,12 +18,13 @@
  */
 
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 
 bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
 {
     SOPC_UNUSED_ARG(prompt);
     SOPC_UNUSED_ARG(outPassword);
-    // NOT IMPLEMENTED
+    SOPC_ASSERT(false && "NOT IMPLEMENTED");
     return false;
 }

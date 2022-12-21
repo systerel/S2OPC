@@ -18,10 +18,12 @@
  */
 
 #include <conio.h>
-#include <stdio.h>
 
 #include "sopc_askpass.h"
 #include "sopc_mem_alloc.h"
+
+// additional character to catch end character '\n' or '\r'
+#define PWD_BUFFER_ADDITIONAL_CHARACTERS 1
 
 bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
 {
@@ -30,7 +32,7 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
         return false;
     }
 
-    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + 1);
+    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + PWD_BUFFER_ADDITIONAL_CHARACTERS);
     if (NULL == pwd)
     {
         return false;
@@ -42,7 +44,7 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
     bool end = false;
     bool stop = false;
     int index = 0;
-    while (!end && !stop && index < SOPC_PASSWORD_MAX_LENGTH + 1)
+    while (!end && !stop && index < SOPC_PASSWORD_MAX_LENGTH + PWD_BUFFER_ADDITIONAL_CHARACTERS)
     {
         pwd[index] = _getch();
         if (pwd[index] == '\003')

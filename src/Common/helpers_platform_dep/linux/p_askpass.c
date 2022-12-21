@@ -24,8 +24,10 @@
 #include <unistd.h>
 
 #include "sopc_askpass.h"
-#include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
+
+// 3 additional characters to guarantee retrieved value ends with "\n\0\0"
+#define PWD_BUFFER_ADDITIONAL_CHARACTERS 3
 
 bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
 {
@@ -36,7 +38,8 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
         return false;
     }
 
-    struct termios old, new;
+    struct termios old = {0};
+    struct termios new = {0};
     // Open TTY
     int fd_tty = open("/dev/tty", O_RDWR | O_NOCTTY);
     if (fd_tty < 0)
@@ -50,8 +53,8 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
         return false;
     }
 
-    // Allocated password: 4 additional characters to guarantee max length: ends with "\n\0\0"
-    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + 3);
+    // Allocated password: 3 additional characters to guarantee max length: ends with "\n\0\0"
+    char* pwd = SOPC_Calloc(sizeof(char), SOPC_PASSWORD_MAX_LENGTH + PWD_BUFFER_ADDITIONAL_CHARACTERS);
     if (NULL == pwd)
     {
         // note: also closes the underlying file descriptor
@@ -77,7 +80,7 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
         fflush(file_tty);
 
         // Retrieve the password (locking file_tty)
-        result = fgets(pwd, SOPC_PASSWORD_MAX_LENGTH + 3, file_tty);
+        result = fgets(pwd, SOPC_PASSWORD_MAX_LENGTH + PWD_BUFFER_ADDITIONAL_CHARACTERS, file_tty);
 
         // Restore echo
         tcsetattr(fd_tty, TCSAFLUSH, &old);

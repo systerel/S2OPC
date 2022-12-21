@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     SOPC_Toolkit_Clear();
     StateMachine_Delete(&g_pSM);
 
-    return (status == SOPC_STATUS_OK) ? 0 : 1;
+    return exitStatus;
 }
 
 static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)

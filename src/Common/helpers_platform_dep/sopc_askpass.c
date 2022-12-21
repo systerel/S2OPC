@@ -22,8 +22,6 @@
  * \brief A platform independent API to ask for passwords.
  */
 
-#include <stdlib.h>
-
 #include "sopc_askpass.h"
 
 bool SOPC_AskPass_FromTerminal(char** outPassword)

@@ -20,6 +20,8 @@
 /** \file sopc_askpass.h
  *
  * \brief A platform independent API to ask for passwords.
+ *
+ * \note only implemented for Linux and Windows platforms
  */
 
 #ifndef SOPC_ASKPASS_H_
