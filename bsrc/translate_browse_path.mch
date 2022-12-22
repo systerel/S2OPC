@@ -358,8 +358,7 @@ OPERATIONS
         p_nb_references
         :(  isBrowseResultComputed = FALSE &
             p_nb_references : NAT &
-            p_nb_references <= k_n_BrowseTarget_max &
-            p_nb_references = BrowseContext_MaxNbTargets) ||
+            p_nb_references <= k_n_BrowseTarget_max) ||
         p_browseResult :: t_BrowseResultReferences_i
     END
 
