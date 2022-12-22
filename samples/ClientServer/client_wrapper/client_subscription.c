@@ -117,9 +117,14 @@ static char* client_get_user_password(void)
     bool res = SOPC_AskPass_CustomPromptFromTerminal("Session user password:\n", &password);
     if (!res)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "# Error: Failed to retrieve user password");
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not retrieve user password.");
     }
     return password;
+}
+
+static bool client_get_private_key_password(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
 }
 
 /* Main subscribing client */
@@ -192,7 +197,7 @@ int main(int argc, char* const argv[])
 
     if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
     {
-        status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+        status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&client_get_private_key_password);
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR,
@@ -207,6 +212,11 @@ int main(int argc, char* const argv[])
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Could not configure connection.");
         }
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -230,11 +240,6 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
-    }
-
-    if (NULL != password)
-    {
-        SOPC_Free(password);
     }
 
     if (SOPC_STATUS_OK == status)
