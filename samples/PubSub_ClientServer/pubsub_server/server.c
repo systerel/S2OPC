@@ -100,6 +100,7 @@ SOPC_ReturnStatus Server_Initialize(void)
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
 
+#ifndef WITH_STATIC_SECURITY_DATA
 static bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
 {
     SOPC_ASSERT(NULL != outPassword);
@@ -116,6 +117,7 @@ static bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
     }
     return true;
 }
+#endif
 
 SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfig)
 {
