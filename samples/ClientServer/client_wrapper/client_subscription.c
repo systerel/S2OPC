@@ -35,6 +35,7 @@
 #include "libs2opc_client_config.h"
 #include "sopc_askpass.h"
 #include "sopc_log_manager.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_user_app_itf.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
@@ -80,7 +81,6 @@ enum
     OPT_ENDPOINT,
     OPT_POLICYID,
     OPT_USERNAME,
-    OPT_PASSWORD,
     OPT_PUBLISH_PERIOD,
     OPT_TOKEN_TARGET,
     OPT_DISABLE_SECU,
@@ -91,7 +91,6 @@ typedef struct
     char* endpoint_url;
     char* policyId;
     char* username;
-    char* password;
     char* publish_period_str;
     int64_t publish_period;
     char* token_target_str;
@@ -112,6 +111,17 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
                                 const SOPC_LibSub_DataId d_id,
                                 const SOPC_LibSub_Value* value);
 
+static char* client_get_user_password(void)
+{
+    char* password = NULL;
+    bool res = SOPC_AskPass_CustomPromptFromTerminal("Session user password:\n", &password);
+    if (!res)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "# Error: Failed to retrieve user password");
+    }
+    return password;
+}
+
 /* Main subscribing client */
 int main(int argc, char* const argv[])
 {
@@ -129,6 +139,11 @@ int main(int argc, char* const argv[])
                                                         .log_path = "./client_subscription_logs/",
                                                         .maxBytes = 1048576,
                                                         .maxFiles = 50}};
+    char* password = NULL;
+    if (NULL != options.username)
+    {
+        password = client_get_user_password();
+    }
     SOPC_LibSub_ConnectionCfg cfg_con = {.server_url = options.endpoint_url,
                                          .security_policy = SECURITY_POLICY,
                                          .security_mode = SECURITY_MODE,
@@ -140,7 +155,7 @@ int main(int argc, char* const argv[])
                                          .path_crl = NULL,
                                          .policyId = options.policyId,
                                          .username = options.username,
-                                         .password = options.password,
+                                         .password = password,
                                          .publish_period_ms = options.publish_period,
                                          .n_max_keepalive = options.n_max_keepalive,
                                          .n_max_lifetime = MAX_LIFETIME_COUNT,
@@ -175,11 +190,14 @@ int main(int argc, char* const argv[])
         return 2;
     }
 
-    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
-    if (SOPC_STATUS_OK == status)
+    if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                    "Could not define the callback to retrieve password for decryption of the client private key.");
+        status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                        "Could not define the callback to retrieve password for decryption of the client private key.");
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -212,6 +230,11 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -301,10 +324,9 @@ static void datachange_callback(const SOPC_LibSub_ConnectionId c_id,
     x("endpoint", false, required_argument, OPT_ENDPOINT, endpoint_url)                                           \
         x("policy-id", false, required_argument, OPT_POLICYID, policyId)                                          \
             x("username", false, required_argument, OPT_USERNAME, username)                                       \
-                x("password", false, required_argument, OPT_PASSWORD, password)                                   \
-                    x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)         \
-                        x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)           \
-                            x("max-keepalive-count", false, required_argument, OPT_KEEPALIVE, n_max_keepalive_str)
+                x("publish-period", false, required_argument, OPT_PUBLISH_PERIOD, publish_period_str)             \
+                    x("token-target", false, required_argument, OPT_TOKEN_TARGET, token_target_str)               \
+                        x("max-keepalive-count", false, required_argument, OPT_KEEPALIVE, n_max_keepalive_str)
 
 static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
 {
@@ -440,8 +462,7 @@ static void print_usage(const char* exe)
     printf("Options:\n");
     printf("  --endpoint URL        URL of the endpoint to connect to\n");
     printf("  --policy-id POLICYID  Name of the selected UserIdentityToken policy id\n");
-    printf("  --username UNAME      Username of the session user\n");
-    printf("  --password PWD        Password of the session user\n");
+    printf("  --username UNAME      Username of the session user, password asked in terminal.\n");
     printf("  --publish-period MILLISEC  Subscription publish cycle, in ms\n");
     printf("  --token-target N      Number of PublishRequests available to the server\n");
     printf("  --disable-certificate-validation  For development only\n");
