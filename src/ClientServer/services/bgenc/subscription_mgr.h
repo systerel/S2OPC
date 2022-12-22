@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 08/09/2022 17:20:17
+ Date                 : 22/12/2022 10:07:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -78,8 +78,7 @@ extern void subscription_mgr__create_notification_on_monitored_items_if_data_cha
    const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
 extern void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
-   const t_bool subscription_mgr__p_added,
-   const constants__t_NodeId_i subscription_mgr__p_nid);
+   const t_bool subscription_mgr__p_added);
 extern void subscription_mgr__fill_delete_subscriptions_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -137,8 +136,7 @@ extern void subscription_mgr__local_create_delete_notification_on_set_monit_mode
 extern void subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const t_bool subscription_mgr__p_added_or_monitMode,
-   const t_bool subscription_mgr__p_monitMode_enabling,
-   const constants__t_NodeId_i subscription_mgr__p_nid);
+   const t_bool subscription_mgr__p_monitMode_enabling);
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
