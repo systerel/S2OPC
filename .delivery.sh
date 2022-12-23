@@ -25,6 +25,8 @@
 echo "Check master branch name is valid"
 BRANCH_COMMIT=master
 VERSION_HEADER=./src/Common/helpers/sopc_version.h
+PYS2OPC_VERSION_JSON=./src/ClientServer/frontend/pys2opc/pys2opc/version.json
+PYS2OPC_VERSION_WHEEL_FILES="./src/ClientServer/frontend/pys2opc/CMakeLists.txt appveyor.yml"
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
@@ -81,8 +83,6 @@ fi
 
 echo "Checking out $BRANCH_COMMIT"
 git checkout $BRANCH_COMMIT &> /dev/null || exit 1
-echo "Creation of $DELIVERY_NAME branch"
-git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
 
 echo "Checking out $2-update-tagged-version"
 git checkout -b $2-update-tagged-version &> /dev/null || exit 1
@@ -91,6 +91,13 @@ sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJ
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
 sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
 
+echo "Update to $1 version in $PYS2OPC_VERSION_JSON in $2-update-tagged-version"
+sed -i 's/{"version":"[^"]\+"}/{"version":'"$1"'}/' $PYS2OPC_VERSION_JSON || exit 1
+
+for WHEEL_FILE in $PYS2OPC_VERSION_WHEEL_FILES; do
+    sed -i 's/pys2opc-[0-9]\+\.[0-9]\+\.[0-9]\+-/pys2opc-'"$1"'-/' $WHEEL_FILE || exit 1
+done
+
 echo "Update to $1 version in src/CMakeLists.txt file"
 sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt || exit 1
 
@@ -98,29 +105,21 @@ echo "Update to $1 version in README.md file"
 sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
 
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
-git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Ticket #$2: Update current version of Toolkit to $1" &> /dev/null || exit 1
+git commit src/CMakeLists.txt README.md $VERSION_HEADER $PYS2OPC_VERSION_JSON $PYS2OPC_VERSION_WHEEL_FILES -S -m "Ticket #$2: Update current version of Toolkit to $1" &> /dev/null || exit 1
 
-echo "Checking out $DELIVERY_NAME"
-git checkout $DELIVERY_NAME || exit 1
+echo "Creation of $DELIVERY_NAME branch"
+git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
 
 echo "Update to $1 version in $VERSION_HEADER in $DELIVERY_NAME"
-sed -i 's/#define SOPC_TOOLKIT_VERSION_MAJOR .*/#define SOPC_TOOLKIT_VERSION_MAJOR '"$major"'/' $VERSION_HEADER || exit 1
-sed -i 's/#define SOPC_TOOLKIT_VERSION_MEDIUM .*/#define SOPC_TOOLKIT_VERSION_MEDIUM '"$medium"'/' $VERSION_HEADER || exit 1
-sed -i 's/#define SOPC_TOOLKIT_VERSION_MINOR .*/#define SOPC_TOOLKIT_VERSION_MINOR '"$minor"'/' $VERSION_HEADER || exit 1
-sed -i 's/ "\*"//' $VERSION_HEADER
+sed -i 's/ "\*"//' $VERSION_HEADER || exit 1
 
-echo "Update to $1 version in src/CMakeLists.txt file"
-sed -i 's/VERSION [0-9]\+\.[0-9]\+\.[0-9]\+/VERSION '"$1"'/' src/CMakeLists.txt || exit 1
-
-echo "Update to $1 version in README.md file"
-sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.md || exit 1
-
-git commit src/CMakeLists.txt README.md $VERSION_HEADER -S -m "Update tagged $1 S2OPC version" &> /dev/null || exit 1
+git commit $VERSION_HEADER -S -m "Update tagged $1 S2OPC version" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
 echo "$1" > VERSION
 git add VERSION &> /dev/null || exit 1
 git commit -S -m "Add VERSION file" &> /dev/null || exit 1
+
 echo "Generate C source files"
 ./clean.sh all || exit 1
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
