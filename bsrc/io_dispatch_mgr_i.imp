@@ -861,7 +861,6 @@ OPERATIONS
     bres <-- internal_server_send_publish_response_prio_event (p_session, p_req_handle, p_req_context, p_publish_resp_msg, p_statusCode) =
     VAR
         l_valid_session,
-        l_valid_msg,
         l_msg_typ,
         l_valid_req_context,
         l_buffer_out,

@@ -473,7 +473,6 @@ OPERATIONS
         l_new_index,
         l_monitoredItemId,
         l_subscription,
-        l_continue,
         l_nid,
         l_aid,
         l_indexRange,
@@ -1167,7 +1166,6 @@ OPERATIONS
         l_aid,
         l_indexRange,
         l_timestampToReturn,
-        l_prevMonitoringMode,
         l_clientHandle
     IN
         p_mi_pointer := c_monitoredItemPointer_indet;
