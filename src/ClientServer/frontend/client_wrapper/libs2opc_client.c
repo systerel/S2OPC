@@ -45,7 +45,7 @@
 
 SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void)
 {
-    return "S2OPC Toolkit subscribe library v" SOPC_TOOLKIT_VERSION;
+    return "S2OPC Toolkit library v" SOPC_TOOLKIT_VERSION;
 }
 
 SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg)
