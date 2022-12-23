@@ -746,7 +746,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
             {
                 SOPC_ASSERT(NULL != up);
                 // Check user access
-                if (up->rights.read || up->rights.write || up->rights.exec)
+                if (up->rights.read || up->rights.write || up->rights.exec || up->rights.addnode)
                 {
                     // At least 1 type of access authorized
                     *authenticated = SOPC_USER_AUTHENTICATION_OK;
