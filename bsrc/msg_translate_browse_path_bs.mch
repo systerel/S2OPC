@@ -184,6 +184,7 @@ OPERATIONS
 
     nodeId <-- read_BrowsePath_StartingNode(browsePath) =
     PRE
+        IsDecoded = TRUE &
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths
     THEN
@@ -195,6 +196,7 @@ OPERATIONS
 
     relativePath <-- read_BrowsePath_RelativePath(browsePath) =
     PRE
+        IsDecoded = TRUE &
         browsePath : t_BrowsePath_i     &
         browsePath : BrowsePaths
     THEN
@@ -206,6 +208,7 @@ OPERATIONS
 
     nb_relativePathElt <-- read_RelativePath_Nb_RelativePathElt(relativePath) =
     PRE
+        IsDecoded = TRUE &
         relativePath : t_RelativePath_i &
         relativePath : t_RelativePath   &
         relativePath : dom(RelativePath_RelativePathElt)
@@ -216,6 +219,7 @@ OPERATIONS
 
     relativePathElt <-- read_RelativePath_RelativePathElt(relativePath, index) =
     PRE
+        IsDecoded = TRUE &
         relativePath : t_RelativePath_i &
         relativePath : t_RelativePath   &
         relativePath : dom(RelativePath_RelativePathElt) &
@@ -230,6 +234,7 @@ OPERATIONS
 
     referenceTypeId <-- read_RelativePathElt_ReferenceTypeId(relativePathElt) =
     PRE
+        IsDecoded = TRUE &
         relativePathElt : t_RelativePathElt_i &
         relativePathElt : t_RelativePathElt   &
         relativePathElt : dom(RelativePathElt_ReferenceTypeId)
@@ -244,6 +249,7 @@ OPERATIONS
 
     isInverse <-- read_RelativePathElt_IsInverse(relativePathElt) =
     PRE
+        IsDecoded = TRUE &
         relativePathElt: t_RelativePathElt_i &
         relativePathElt: t_RelativePathElt   &
         relativePathElt : dom(RelativePathElt_IsInverse)
@@ -257,6 +263,7 @@ OPERATIONS
 
     includedSubtypes <-- read_RelativePathElt_IncludedSubtypes(relativePathElt) =
     PRE
+        IsDecoded = TRUE &
         relativePathElt: t_RelativePathElt_i &
         relativePathElt: t_RelativePathElt   &
         relativePathElt : dom(RelativePathElt_IncludedSubtypes)
@@ -270,6 +277,7 @@ OPERATIONS
 
     targetName <-- read_RelativePathElt_TargetName(relativePathElt) =
     PRE
+        IsDecoded = TRUE &
         relativePathElt: t_RelativePathElt_i &
         relativePathElt: t_RelativePathElt   &
         relativePathElt : dom(RelativePathElt_TargetName)
