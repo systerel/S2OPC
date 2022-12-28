@@ -34,6 +34,7 @@ DEFINITIONS
         BrowsePath_StartingNode,
         BrowsePath_RelativePath,
 
+        s_RelativePathElt,
         RelativePath_RelativePathElt,
 
         RelativePathElt_ReferenceTypeId,
@@ -66,13 +67,14 @@ DEFINITIONS
         dom(BrowsePath_RelativePath)   = BrowsePaths &
 
         /* RelativePath */
-        RelativePath_RelativePathElt   :  t_RelativePath +-> seq(t_RelativePathElt) &
+        s_RelativePathElt              <: t_RelativePathElt &
+        RelativePath_RelativePathElt   :  t_RelativePath +-> seq(s_RelativePathElt) &
 
         /* RelativePathElt */
-        RelativePathElt_ReferenceTypeId   : t_RelativePathElt +-> t_NodeId &
-        RelativePathElt_IsInverse         : t_RelativePathElt +-> BOOL     &
-        RelativePathElt_IncludedSubtypes  : t_RelativePathElt +-> BOOL     &
-        RelativePathElt_TargetName        : t_RelativePathElt +-> t_QualifiedName
+        RelativePathElt_ReferenceTypeId   : s_RelativePathElt --> t_NodeId &
+        RelativePathElt_IsInverse         : s_RelativePathElt --> BOOL     &
+        RelativePathElt_IncludedSubtypes  : s_RelativePathElt --> BOOL     &
+        RelativePathElt_TargetName        : s_RelativePathElt --> t_QualifiedName
     ;
 
     d_inv_out ==
@@ -111,6 +113,7 @@ DEFINITIONS
             BrowsePath_RelativePath       = {} &
 
             /* RelativePath */
+            s_RelativePathElt                = {} &
             RelativePath_RelativePathElt     = {} &
 
             /* RelativePathElt */
