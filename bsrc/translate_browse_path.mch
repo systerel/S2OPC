@@ -71,7 +71,7 @@ DEFINITIONS
         RelativePath_RelativePathElt   :  t_RelativePath +-> seq(s_RelativePathElt) &
 
         /* RelativePathElt */
-        RelativePathElt_ReferenceTypeId   : s_RelativePathElt --> t_NodeId &
+        RelativePathElt_ReferenceTypeId   : s_RelativePathElt --> t_NodeId_i &
         RelativePathElt_IsInverse         : s_RelativePathElt --> BOOL     &
         RelativePathElt_IncludedSubtypes  : s_RelativePathElt --> BOOL     &
         RelativePathElt_TargetName        : s_RelativePathElt --> t_QualifiedName
