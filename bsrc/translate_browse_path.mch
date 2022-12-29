@@ -242,6 +242,7 @@ OPERATIONS
     /* Promoted from msg_translate_browse_path_bs */
     p_nb_BrowsePaths <-- read_nb_BrowsePaths =
     PRE
+        IsDecoded = TRUE &
         p_nb_BrowsePaths : NAT
     THEN
         p_nb_BrowsePaths := card(BrowsePaths)
