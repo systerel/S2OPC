@@ -259,6 +259,7 @@ OPERATIONS
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
         p_maxTargetRef : NAT                        &
+        p_maxTargetRef <= k_n_BrowseTarget_max      &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
         p_nodeId : t_NodeId                         &
