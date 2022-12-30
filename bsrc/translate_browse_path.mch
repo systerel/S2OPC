@@ -221,6 +221,12 @@ OPERATIONS
             BrowsePath_Res_StatusCode(browsePath) : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                 e_sc_bad_nothing_to_do, e_sc_bad_node_id_unknown,
                 e_sc_bad_query_too_complex, e_sc_bad_no_match, e_sc_bad_too_many_matches}
+        ) ||
+
+        isBrowseValueContextDefined,
+        isBrowseResultComputed
+        :(  isBrowseValueContextDefined : BOOL &
+            isBrowseResultComputed : BOOL
         )
     END
     ;
