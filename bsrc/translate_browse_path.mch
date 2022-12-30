@@ -212,7 +212,8 @@ OPERATIONS
     PRE
         IsDecoded = TRUE &
         browsePath : t_BrowsePath_i &
-        browsePath : BrowsePaths
+        browsePath : BrowsePaths &
+        dom(BrowsePath_Res_NbTargetMax) = BrowsePaths
     THEN
         d_variables_out
         :(  d_inv_out &
