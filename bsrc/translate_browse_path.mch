@@ -210,6 +210,7 @@ OPERATIONS
 
     treat_one_translate_browse_path(browsePath) =
     PRE
+        IsDecoded = TRUE &
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths
     THEN

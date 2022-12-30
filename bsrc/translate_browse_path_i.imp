@@ -194,6 +194,7 @@ LOCAL_OPERATIONS
     */
     statusCode_operation <-- treat_one_relative_path_element(relativePathElt, index) =
     PRE
+        IsDecoded = TRUE &
         relativePathElt : t_RelativePathElt_i &
         relativePathElt : t_RelativePathElt   &
         index : NAT1
@@ -609,6 +610,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation <-- treat_one_translate_browse_path_1(statusCode_init, source) =
     PRE
+        IsDecoded = TRUE &
         statusCode_init : t_StatusCode_i &
         statusCode_init : t_StatusCode   &
         source : t_NodeId_i &
@@ -641,6 +643,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation, p_continue <-- treat_one_translate_browse_path_1_1(rel_path_elt, index, continue) =
     PRE
+        IsDecoded = TRUE &
         rel_path_elt : t_RelativePathElt_i &
         rel_path_elt : t_RelativePathElt   &
         index : NAT1 &
