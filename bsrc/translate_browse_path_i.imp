@@ -621,6 +621,7 @@ LOCAL_OPERATIONS
         BrowsePathResult, BrowsePathRemainingNodeId, BrowsePathRemainingIndex
         :(
             statusCode_operation : t_StatusCode_i &
+            statusCode_operation : t_StatusCode   &
 
             BrowsePathSource : seq(t_NodeId_i) &
 
@@ -653,6 +654,7 @@ LOCAL_OPERATIONS
         p_continue,
         d_var_browse_path
         :(  statusCode_operation : t_StatusCode_i &
+            statusCode_operation : t_StatusCode   &
             p_continue : BOOL &
 
             BrowsePathSource : seq(t_NodeId_i) &
