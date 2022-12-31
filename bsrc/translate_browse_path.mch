@@ -178,10 +178,6 @@ OPERATIONS
                 IsDecoded = TRUE &
                 card(BrowsePaths) = 0
             ) &
-            ( StatusCode_service = e_sc_bad_too_many_ops
-                =>
-                IsDecoded = FALSE
-            ) &
             d_inv_in &
             d_inv_out
         )
