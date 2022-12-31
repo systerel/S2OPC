@@ -53,7 +53,7 @@ DEFINITIONS
            /* BrowsePath */
         BrowsePaths                    <: t_BrowsePath                        &
         BrowsePaths                    = cast_t_BrowsePath[1..card(BrowsePaths)] &
-        BrowsePath_StartingNode        : BrowsePaths --> t_NodeId            &
+        BrowsePath_StartingNode        : BrowsePaths --> t_NodeId_i          &
         BrowsePath_RelativePath        : BrowsePaths --> t_RelativePath      &
 
         /* RelativePath */
