@@ -420,6 +420,8 @@ LOCAL_OPERATIONS
 
             BrowsePath_Res_NbTargetMax : t_BrowsePath +-> NAT &
 
+            out_statusCode_operation : t_StatusCode_i &
+            out_statusCode_operation : t_StatusCode   &
             out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server, e_sc_bad_query_too_complex,
                 e_sc_bad_out_of_memory, e_sc_bad_too_many_matches} &
             (out_statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
@@ -451,6 +453,7 @@ LOCAL_OPERATIONS
         BrowsePath_Res_Target_Node,
         BrowsePath_Res_Target_Index
         :(  out_statusCode_operation : t_StatusCode_i &
+            out_statusCode_operation : t_StatusCode   &
             out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                                         e_sc_bad_out_of_memory} &
             statusCode_alloc : t_StatusCode_i &
@@ -493,6 +496,7 @@ LOCAL_OPERATIONS
         BrowsePath_Res_Target_Node,
         BrowsePath_Res_Target_Index
         :(  out_statusCode_operation : t_StatusCode_i &
+            out_statusCode_operation : t_StatusCode   &
             out_statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
                                         e_sc_bad_out_of_memory} &
 
