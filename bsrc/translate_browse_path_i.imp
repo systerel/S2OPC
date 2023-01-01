@@ -287,8 +287,7 @@ LOCAL_OPERATIONS
 
     StatusCode <-- check_startingNode(nodeid)=
     PRE
-        nodeid : t_NodeId_i &
-        nodeid : t_NodeId
+        nodeid : t_NodeId_i
     THEN
         IF nodeid = c_NodeId_indet
         THEN
