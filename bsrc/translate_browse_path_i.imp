@@ -306,9 +306,10 @@ LOCAL_OPERATIONS
         statusCode_operation,
         BrowsePathSource
         :(
-            statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory} &
-            (
-                statusCode_operation = e_sc_ok
+            statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory,
+                e_sc_bad_unexpected_error} &
+
+            (   statusCode_operation = e_sc_ok
                 =>
                 BrowsePathSource =
                 %(idx).(idx : 1..size(BrowsePathResult) &
@@ -625,6 +626,9 @@ LOCAL_OPERATIONS
         :(
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : t_StatusCode   &
+            statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
+                e_sc_bad_node_id_unknown, e_sc_bad_query_too_complex, e_sc_bad_no_match,
+                e_sc_bad_out_of_memory, e_sc_bad_unexpected_error} &
 
             BrowsePathSource : seq(t_NodeId_i) &
 
@@ -658,6 +662,9 @@ LOCAL_OPERATIONS
         d_var_browse_path
         :(  statusCode_operation : t_StatusCode_i &
             statusCode_operation : t_StatusCode   &
+            statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server,
+                e_sc_bad_node_id_unknown, e_sc_bad_query_too_complex, e_sc_bad_no_match,
+                e_sc_bad_out_of_memory, e_sc_bad_unexpected_error} &
             p_continue : BOOL &
 
             BrowsePathSource : seq(t_NodeId_i) &
