@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -110,19 +111,19 @@ SOPC_KeyBunch_Keys* SOPC_LocalSKS_GetSecurityKeys(uint32_t groupid, uint32_t tok
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 
-        SOPC_CONSOLE_PRINTF("# Load security signing key from static buffers... slen = %u\n",
+        SOPC_CONSOLE_PRINTF("# Load security signing key from static buffers... slen = %" PRIu32 "\n",
                             pubsub_key_bunch.uwSigningKeySize);
 
         keys->signingKey = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sSigningKey,
                                                                   pubsub_key_bunch.uwSigningKeySize);
 
-        SOPC_CONSOLE_PRINTF("# Load security encrypt key from static buffers... slen = %u\n",
+        SOPC_CONSOLE_PRINTF("# Load security encrypt key from static buffers... slen = %" PRIu32 "\n",
                             pubsub_key_bunch.uwEncryptKeySize);
 
         keys->encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sEncryptKey,
                                                                   pubsub_key_bunch.uwEncryptKeySize);
 
-        SOPC_CONSOLE_PRINTF("# Load security nonce key from static buffers... slen = %u\n",
+        SOPC_CONSOLE_PRINTF("# Load security nonce key from static buffers... slen = %" PRIu32 "\n",
                             pubsub_key_bunch.uwKeyNonceSize);
 
         keys->keyNonce = SOPC_SecretBuffer_NewFromExposedBuffer((SOPC_ExposedBuffer*) pubsub_key_bunch.sKeyNonce,

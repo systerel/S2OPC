@@ -33,6 +33,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_missing_c99.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_constants.h"
@@ -194,7 +195,8 @@ static void SOPC_PubScheduler_Context_Clear(void)
             if (pubSchedulerCtx.transport[i].pFctClear != NULL)
             {
                 pubSchedulerCtx.transport[i].pFctClear(&pubSchedulerCtx.transport[i]);
-                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Transport context freed for connection #%u (publisher).",
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
+                                      "Transport context freed for connection #%" PRIu32 "(publisher).",
                                       pubSchedulerCtx.nbConnection);
             }
         }
@@ -234,7 +236,7 @@ static void MessageCtx_Array_Clear(void)
         /* Destroy message */
         for (uint32_t i = 0; i < pubSchedulerCtx.messages.current; i++)
         {
-            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Network message #%u freed", i);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Network message #%" PRIu32 " freed", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].message);
             arr[i].message = NULL;
             SOPC_PubSub_Security_Clear(arr[i].security);
@@ -335,7 +337,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
     }
     else
     {
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Publisher: message created #%d",
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Publisher: message created #%" PRId32,
                                (int32_t) pubSchedulerCtx.messages.current);
         pubSchedulerCtx.messages.current++;
     }
