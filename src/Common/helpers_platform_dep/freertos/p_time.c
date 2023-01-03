@@ -25,16 +25,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* s2opc includes */
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
-#include "sopc_enums.h" /* s2opc includes */
+#include "sopc_enums.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
-#include "FreeRTOS.h"       /* freeRtos includes */
-#include "FreeRTOSConfig.h" /* freeRtos includes */
+/* freertos includes */
+#include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "task.h"
 
 /* Private time api */
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
+#define US_TO_MS 1000
 
 /* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
  * There are configTICK_RATE_HZ per second.
@@ -228,6 +235,94 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
 SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 {
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}
+
+SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
+{
+    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
+    if (NULL != copy && NULL != ret)
+    {
+        *ret = *copy;
+    }
+    else if (NULL != ret)
+    {
+        ret->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+    }
+    return ret;
+}
+
+void SOPC_RealTime_Delete(SOPC_RealTime** t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
+}
+
+bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+{
+    if (NULL == t)
+    {
+        return false;
+    }
+    t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+    return true;
+}
+
+void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+{
+    SOPC_UNUSED_ARG(offset_us);
+    SOPC_ASSERT(NULL != t);
+
+    t->ticksMs += (uint64_t)(duration_us / (uint64_t) US_TO_MS);
+}
+
+bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+{
+    SOPC_ASSERT(NULL != t);
+    SOPC_RealTime t1;
+
+    if (NULL == now)
+    {
+        t1.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+    }
+    else
+    {
+        t1 = *now;
+    }
+
+    /* t <= t1*/
+    return t->ticksMs <= t1.ticksMs;
+}
+
+bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+{
+    if (NULL == date)
+    {
+        return false;
+    }
+    SOPC_RealTime now;
+
+    now.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+
+    if (now.ticksMs >= date->ticksMs)
+    {
+        taskYIELD();
+    }
+    else
+    {
+        TickType_t timeToWait = (TickType_t)((date->ticksMs - now.ticksMs) * configTICK_RATE_HZ / 1000);
+
+        /** vTaskDelayUntil works with FreeRTOS absolute Ticks. In order to use this API the absolute
+         * time must be calculate other FreeRTOS tick.
+         */
+        TickType_t nowInternalTick = xTaskGetTickCount();
+
+        vTaskDelayUntil(&nowInternalTick, timeToWait);
+    }
+    return false;
 }
 
 /* TODO: assert that mktime works correctly on the targeted platform
