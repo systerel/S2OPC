@@ -56,13 +56,9 @@
 
 #include "EthernetConfig.h"
 
-// ************Private API**************
+    // ************Private API**************
 
-typedef enum E_ETHERNET_IF_RESULT
-{
-    ETHERNET_IF_RESULT_OK,
-    ETHERNET_IF_RESULT_NOK
-} eEthernetIfResult;
+    typedef enum E_ETHERNET_IF_RESULT { ETHERNET_IF_RESULT_OK, ETHERNET_IF_RESULT_NOK } eEthernetIfResult;
 
 eEthernetIfResult P_ETHERNET_IF_Initialize(void);
 eEthernetIfResult P_ETHERNET_IF_IsReady(uint32_t timeoutMS);
