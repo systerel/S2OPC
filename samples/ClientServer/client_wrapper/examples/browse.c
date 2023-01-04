@@ -36,6 +36,9 @@
 #include "sopc_askpass.h"
 #include "sopc_macros.h"
 
+/* Define USE_REVERSE_HELLO to 1 to use a ReverseConnection */
+#define USE_REVERSE_HELLO 0
+
 static void disconnect_callback(const uint32_t c_id)
 {
     printf("===> connection #%d has been terminated!\n", c_id);
@@ -70,6 +73,26 @@ int main(int argc, char* const argv[])
         }
     }
 
+    uint32_t rev_ep = 0;
+#if USE_REVERSE_HELLO
+    /* create a reverse endpoint*/
+    if (0 == res)
+    {
+        static const char* REVERSE_EP_URL = "opc.tcp://localhost:4844";
+        int32_t tmp_ep = SOPC_ClientHelper_CreateReverseEndpoint(REVERSE_EP_URL);
+        if (tmp_ep <= 0)
+        {
+            printf("<Example_wrapper_browse: Failed to create reverse endpoint\n");
+            res = -1;
+        }
+        else
+        {
+            printf("<Example_wrapper_browse: Using reverse endpoint: %s\n", REVERSE_EP_URL);
+            rev_ep = (uint32_t) tmp_ep;
+        }
+    }
+#endif
+
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_Sign,
@@ -86,7 +109,7 @@ int main(int argc, char* const argv[])
     SOPC_ClientHelper_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
+        .reverseConnectionConfigId = rev_ep,
     };
 
     /* callback to retrieve the client's private key password */
@@ -104,6 +127,7 @@ int main(int argc, char* const argv[])
         configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
         if (configurationId <= 0)
         {
+            printf("<Example_wrapper_browse: Failed to create configuration\n");
             res = -1;
         }
     }
@@ -116,6 +140,7 @@ int main(int argc, char* const argv[])
         if (connectionId <= 0)
         {
             /* connectionId is invalid */
+            printf("<Example_wrapper_browse: Failed to create connection (code=%d)\n", connectionId);
             res = -1;
         }
     }
