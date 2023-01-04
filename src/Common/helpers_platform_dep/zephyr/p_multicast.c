@@ -22,10 +22,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "kernel.h"
-#include "net/ethernet.h"
-#include "net/net_if.h"
-#include "net/socket.h"
+#include <zephyr/kernel.h>
+#include <zephyr/net/ethernet.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/socket.h>
 
 #include "sopc_assert.h"
 #include "sopc_dict.h"

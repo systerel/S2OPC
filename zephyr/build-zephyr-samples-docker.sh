@@ -22,13 +22,13 @@
 # This script is intended to be run from within the docker.
 # It does not require elevation
 
-
-echo "PWD=$(pwd) P='$0'"
-cd $(dirname $0) || exit 1
+P0=$0
+echo "PWD=$(pwd) P0='$P0'"
+cd $(dirname $P0) || exit 1
 cd ..
 HOSTDIR=$(pwd)
 CURDIR=$(pwd)/zephyr/samples
-S2OPCDIR=/workdir/modules/lib/s2opc
+S2OPCDIR=/zephyrproject/modules/lib/s2opc
 ZEPHYRDIR=${S2OPCDIR}/zephyr/samples
 OUTDIR=${HOSTDIR}/build_zephyr
 
@@ -41,7 +41,8 @@ cd ${CURDIR}
 [ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
 
 # Replace S2OPC content by host
-cd ${S2OPCDIR}/..
+! [ -d ${S2OPCDIR} ] && echo "S2OPC not found in ${S2OPCDIR}" && exit 2
+cd ${S2OPCDIR}/..|| exit 2
 rm -rf s2opc
 ln -s ${HOSTDIR} s2opc || exit 3
 
@@ -50,23 +51,24 @@ cd s2opc || exit 3
 
 cd ${CURDIR}
 build_app() {
-	BOARD=$1
-	APP=$2
-	rm -f build/zephyr/zephyr.bin
-	cd ${ZEPHYRDIR}/${APP}
-	rm -rf build && west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
-	if ! [ -f build/zephyr/zephyr.bin ] ; then
-		echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-		exit 1
-	fi
-	cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-	echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  BOARD=$1
+  APP=$2
+  echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  rm -f build/zephyr/zephyr.bin 2> /dev/null
+  cd ${ZEPHYRDIR}/${APP} || return 1
+  rm -rf build && west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+  if ! [ -f build/zephyr/zephyr.bin ] ; then
+    echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+    return 1
+  fi
+  cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 }
 
-# Build SERVER demo on stm32h735g_disco
+# Build PUBSUB+SERVER demo on stm32h735g_disco
 build_app stm32h735g_disco zephyr_pubsub_server || exit 10
 
-# Build SERVER demo on mimxrt1064_evk
+# Build PUBSUB+SERVER demo on mimxrt1064_evk
 build_app mimxrt1064_evk zephyr_pubsub_server || exit 11
 
 # Build CLIENTdemo on stm32h735g_disco

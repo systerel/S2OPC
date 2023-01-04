@@ -26,14 +26,15 @@
 
 #include <inttypes.h>
 
-#include "kernel.h"
+#include <zephyr/kernel.h>
 
 #if CONFIG_NET_GPTP
-#include <net/gptp.h>
-#include <net/net_core.h>
-#include "ethernet/gptp/gptp_messages.h"
+#include <zephyr/net/gptp.h>
+#include <zephyr/net/net_core.h>
 // Include MUST follow this order
-#include "ethernet/gptp/gptp_data_set.h"
+#include <zephyr/ethernet/gptp/gptp_messages.h>
+// Include MUST follow this order
+#include <zephyr/ethernet/gptp/gptp_data_set.h>
 #endif
 
 #ifndef __INT32_MAX__

@@ -36,7 +36,7 @@
 
 #include <inttypes.h>
 
-#include "kernel.h"
+#include <zephyr/kernel.h>
 
 #include "sopc_assert.h"
 

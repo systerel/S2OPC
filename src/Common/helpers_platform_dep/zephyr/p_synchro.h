@@ -21,8 +21,9 @@
 #define SOPC_SYNCHRO_H
 
 #include <inttypes.h>
-#include <kernel.h>
 #include <stdint.h>
+
+#include <zephyr/kernel.h>
 
 /*****Public synchro api*****/
 

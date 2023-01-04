@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <sys/util.h> // ensure __SIZEOF_POINTER__ is defined
+#include <zephyr/sys/util.h> // ensure __SIZEOF_POINTER__ is defined
 
 #include "sopc_atomic.h"
 

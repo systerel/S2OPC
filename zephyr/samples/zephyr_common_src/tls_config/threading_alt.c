@@ -19,8 +19,8 @@
 
 #include "threading_alt.h"
 
-#include <kernel.h>
 #include <mbedtls/threading.h>
+#include <zephyr/kernel.h>
 
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {

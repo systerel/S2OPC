@@ -27,7 +27,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "net/socket.h"
+#include <zephyr/net/socket.h>
 
 #include "sopc_enums.h"
 

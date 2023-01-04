@@ -20,7 +20,7 @@
 #include "cache_sync.h"
 
 // System includes
-#include <kernel.h>
+#include <zephyr/kernel.h>
 
 // S2OPC includes
 #include "libs2opc_request_builder.h"

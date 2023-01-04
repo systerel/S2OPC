@@ -523,8 +523,14 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
                 "Variant",        "DiagnosticInfo"};
 
             const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
-            SOPC_ASSERT(typeId <= SOPC_DiagnosticInfo_Id);
-            printf(" ; Type=%.12s ; Val = ", typeName[typeId]);
+            if (typeId <= sizeof(typeName) / sizeof(*typeName))
+            {
+                printf(" ; Type=%.12s ; Val = ", typeName[typeId]);
+            }
+            else
+            {
+                printf(" ; Type=%.12s ; Val = ", "<Invalid>");
+            }
 
             switch (typeId)
             {

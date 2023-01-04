@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <kernel.h>
 #include <limits.h>
-#include <shell/shell.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <zephyr/kernel.h>
+#include <zephyr/shell/shell.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -40,7 +40,6 @@
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_common_config.h"
 
-#include "cache.h"
 #include "network_init.h"
 #include "static_security_data.h"
 #include "threading_alt.h"

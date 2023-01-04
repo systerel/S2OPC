@@ -24,7 +24,7 @@
 
 /* Zephyr includes */
 
-#include "kernel.h"
+#include <zephyr/kernel.h>
 
 #ifndef __INT32_MAX__
 #include "toolchain/xcc_missing_defs.h"

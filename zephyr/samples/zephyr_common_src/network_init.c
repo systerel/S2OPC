@@ -21,8 +21,8 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <kernel.h>
 #include <limits.h>
+#include <zephyr/kernel.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -30,11 +30,11 @@
 #include <stdlib.h>
 
 #include <fcntl.h>
-#include <kernel.h>
-#include <net/net_ip.h>
-#include <net/socket.h>
-#include "net/ethernet.h"
-#include "net/net_if.h"
+#include <zephyr/kernel.h>
+#include <zephyr/net/ethernet.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/net/net_ip.h>
+#include <zephyr/net/socket.h>
 
 #include "sopc_assert.h"
 #include "sopc_mutexes.h"
@@ -105,7 +105,7 @@ static bool configure_interface(const NetItf* itf, const char* ipAddr, const cha
             SOPC_ASSERT(NULL != ptrNetIf->if_dev->dev->name);
             printk("Using interface (%s)\n", ptrNetIf->if_dev->dev->name);
         }
-        if (NULL == ptrNetIf)
+        else
         {
             printk("Could not find matching network interface!\n");
             return false;

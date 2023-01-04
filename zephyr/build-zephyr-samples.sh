@@ -34,7 +34,7 @@ wait $!
 
 echo "Result = $?"
 # Check results
-EXPECTED_FILES="zephyr_client_stm32h735g_disco.bin  zephyr_pubsub_stm32h735g_disco.bin  zephyr_server_stm32h735g_disco.bin  zephyr_server_mimxrt1064_evk.bin"
+EXPECTED_FILES="zephyr_client_stm32h735g_disco.bin  zephyr_pubsub_server_mimxrt1064_evk.bin  zephyr_pubsub_server_stm32h735g_disco.bin"
 RESULT=true
 for f in ${EXPECTED_FILES} ; do
 	[ ! -f build_zephyr/${f} ] && echo "File not build : ${f}" && RESULT=false

@@ -19,12 +19,13 @@
 
 // System includes
 #include <assert.h>
-#include <kernel.h>
-#include <shell/shell.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/reboot.h>
+#include <zephyr/kernel.h>
+#include <zephyr/net/net_if.h>
+#include <zephyr/shell/shell.h>
+#include <zephyr/sys/reboot.h>
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
@@ -595,7 +596,7 @@ int main(int argc, char* argv[])
 
     // Setup network
     bool netInit = Network_Initialize(NULL);
-    assert(netInit == true);
+    SOPC_ASSERT(netInit == true);
 
     /* Initialize MbedTLS */
     tls_threading_initialize();
@@ -653,6 +654,11 @@ static int cmd_demo_info(const struct shell* shell, size_t argc, char** argv)
     if (gSubOperational)
     {
         PRINT("Subscriber last rcpt  : %d ms\n", cacheSync_LastReceptionDateMs());
+    }
+
+    STRUCT_SECTION_FOREACH(net_if, iface)
+    {
+        PRINT("NET INTERFACE         : %s\n", (iface->if_dev->dev->name ? iface->if_dev->dev->name : "NULL"));
     }
 
     return 0;

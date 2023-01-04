@@ -238,7 +238,7 @@ build-rpi:
 
 build-zephyr:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/zephyr_build@sha256:9808bec78b1f86bf747734b9f6893643a4090dcb92a005680884ee836c94f4ff # digest of zephyr_build :v1
+  image: docker.aix.systerel.fr/c838/zephyr_build:v3.2.0@sha256:cd3c4dfe62f866b06917ca16aba7e3ba8856e6e2ae6bfd8dbece625b26e28d8f # digest of zephyr_build :v3.2.0
   script:
     - 'zephyr/build-zephyr-samples-docker.sh || exit $?'
   variables:
