@@ -125,7 +125,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
     SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
     Thread handleWks = NULL;
 
-    if (NULL == ptrWks || NULL == fct)
+    if (NULL == ptrWks || NULL == pFct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -170,9 +170,9 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
 
     memset(handleWks, 0, sizeof(tThreadWks));
 
-    handleWks->args.pCbExternalCallback = &fct;
-    handleWks->pCbReadyToSignal = &fctReadyToSignal;
-    handleWks->pCbWaitingForJoin = &fctWaitingForJoin;
+    handleWks->args.pCbExternalCallback = pFct;
+    handleWks->pCbReadyToSignal = fctReadyToSignal;
+    handleWks->pCbWaitingForJoin = fctWaitingForJoin;
     handleWks->args.ptrStartArgs = args;
     handleWks->handleTask = NULL;
 
@@ -605,7 +605,7 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 // Create and initialize a thread
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, 0, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, 0, taskName, NULL, NULL);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
@@ -619,7 +619,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct) startFct, startArgs, priority, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, priority, taskName, NULL, NULL);
 }
 
 // Join then destroy a thread
