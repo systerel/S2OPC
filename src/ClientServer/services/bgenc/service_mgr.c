@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/12/2022 17:49:46
+ Date                 : 05/01/2023 14:00:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -484,6 +484,9 @@ void service_mgr__decode_and_treat_session_service_req(
                   *service_mgr__p_resp_msg,
                   service_mgr__p_sc,
                   service_mgr__p_async);
+            }
+            else {
+               *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             }
             message_in_bs__dealloc_msg_in(service_mgr__l_req_msg);
          }

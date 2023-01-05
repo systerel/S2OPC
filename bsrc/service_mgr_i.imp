@@ -238,7 +238,8 @@ LOCAL_OPERATIONS
             a_msg_out_type: t_msg_type_i &
             (p_resp_msg  = c_msg_indet =>
              c_msg_out_header = c_msg_header_indet &
-             a_msg_out_type = c_msg_type_indet) &
+             a_msg_out_type = c_msg_type_indet &
+             p_sc /= e_sc_ok) &
             (p_resp_msg /= c_msg_indet =>
              p_resp_msg : t_msg &
              p_resp_header : t_msg_header &
@@ -651,6 +652,8 @@ OPERATIONS
                                                                  p_req_header,
                                                                  l_req_msg,
                                                                  p_resp_msg)
+                ELSE
+                    p_sc := e_sc_bad_out_of_memory
                 END;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
