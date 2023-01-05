@@ -72,8 +72,10 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
 
         if (SOPC_STATUS_OK == status && NULL != interfaceName)
         {
-            setOptStatus =
-                setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, interfaceName, (socklen_t) strlen(interfaceName));
+            struct ifreq ifr;
+            memset(&ifr, 0, sizeof(struct ifreq));
+            strncpy(ifr.ifr_name, interfaceName, sizeof(ifr.ifr_name));
+            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
             if (setOptStatus < 0)
             {
                 status = SOPC_STATUS_NOK;

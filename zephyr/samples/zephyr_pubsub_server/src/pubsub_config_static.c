@@ -23,6 +23,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <zephyr/net/net_if.h>
+
 #ifndef CONFIG_SOPC_PUBLISHER_PERIOD_US
 #error "CONFIG_SOPC_PUBLISHER_PERIOD_US is not defined!"
 #endif
@@ -176,6 +178,22 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, PUBLISHER_ID);
         alloc = SOPC_PubSubConnection_Set_Address(connection, CONFIG_SOPC_PUBLISHER_ADDRESS);
+    }
+
+    if (alloc)
+    {
+        const char* itf_name = CONFIG_SOPC_PUBLISHER_ITF_NAME;
+        if (CONFIG_SOPC_PUBLISHER_ITF_NAME[0] == '\0')
+        {
+            // Force default interface if not specified
+            struct net_if* iface = net_if_get_default();
+            if (NULL != iface && NULL != iface->if_dev && NULL != iface->if_dev->dev &&
+                NULL != iface->if_dev->dev->name)
+            {
+                itf_name = iface->if_dev->dev->name;
+            }
+        }
+        alloc = SOPC_PubSubConnection_Set_InterfaceName(connection, itf_name);
     }
 
     if (alloc)

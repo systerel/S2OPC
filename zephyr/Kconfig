@@ -43,6 +43,12 @@ config SOPC_ETH_NETMASK
 	help
 	  This value is used by Server sample
 
+config SOPC_PUBLISHER_ITF_NAME
+	string "Publisher network interface name"
+	default ""
+	depends on S2OPC
+	help
+	  This value is used by Publisher. If empty, the default interface is used.
 config SOPC_PUBLISHER_ADDRESS
 	string "Publisher address"
 	default "opc.udp://232.1.2.100:4840"
