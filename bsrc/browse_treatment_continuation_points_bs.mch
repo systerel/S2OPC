@@ -43,7 +43,6 @@ OPERATIONS
         p_nextIndex    : NAT                        &
         p_nextIndex    : t_RefIndex                 &
         p_maxTargetRef : NAT                        &
-        p_maxTargetRef <= k_n_BrowseTarget_max      &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
         p_nodeId : t_NodeId                         &
@@ -87,7 +86,6 @@ OPERATIONS
             p_nextIndex    : NAT                        &
             p_nextIndex    : t_RefIndex                 &
             p_maxTargetRef : NAT                        &
-            p_maxTargetRef <= k_n_BrowseTarget_max      &
             p_browseView : t_NodeId_i                   &
             p_nodeId : t_NodeId_i                       &
             p_browseDirection : t_BrowseDirection_i     &

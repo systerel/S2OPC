@@ -265,7 +265,6 @@ OPERATIONS
         isBrowseValueContextDefined = FALSE         &
         p_session : t_session_i                     &
         p_maxTargetRef : NAT                        &
-        p_maxTargetRef <= k_n_BrowseTarget_max      &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
         p_nodeId : t_NodeId                         &
@@ -302,7 +301,7 @@ OPERATIONS
         BrowseContext_MaxNbTargets,
         isBrowseValueContextDefined
         :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_continuation_point_invalid} &
-            BrowseContext_MaxNbTargets : NAT & BrowseContext_MaxNbTargets <= k_n_BrowseTarget_max &
+            BrowseContext_MaxNbTargets : NAT &
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok)
         )
     END
