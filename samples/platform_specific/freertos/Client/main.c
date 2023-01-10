@@ -17,46 +17,26 @@
  * under the License.
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "lwip/opt.h"
-#include "lwip/tcpip.h"
-
+/* specific boards inclusion */
 #include "board.h"
-#include "clock_config.h"
-#include "ethernetif.h"
-#include "netif/ethernet.h"
 #include "peripherals.h"
 #include "pin_mux.h"
 
-#include "FreeRTOS.h"
-#include "MIMXRT1064.h"
-#include "queue.h"
-#include "task.h"
-#include "timers.h"
-
-#include "fsl_debug_console.h"
-#include "fsl_device_registers.h"
-#include "fsl_gpio.h"
-#include "fsl_iomuxc.h"
-#include "fsl_qtmr.h"
-
-#include "sopc_mutexes.h"
+/* S2OPC helpers  */
+#include "p_time.h"
 #include "sopc_threads.h"
 
+/* boards portage Mbedtls and LwIP helpers */
 #include "ksdk_mbedtls_config.h"
 #include "p_ethernet_if.h"
-#include "p_time.h"
 
 #include "client.h"
 
 Condition* handleCondition;
 tUtilsList list;
 
-int FREE_RTOS_S2OPC_CLIENT(void* ptr);
+/* Create a S2OPC client thread */
+static int FREE_RTOS_S2OPC_CLIENT(void);
 
 int main(void)
 {
@@ -75,7 +55,7 @@ int main(void)
     mbedtls_threading_initialize();
 
     // Create S2OPC client Thread
-    FREE_RTOS_S2OPC_CLIENT(NULL);
+    FREE_RTOS_S2OPC_CLIENT();
 
     vTaskStartScheduler();
 
@@ -83,11 +63,10 @@ int main(void)
         ;
 }
 
-int FREE_RTOS_S2OPC_CLIENT(void* ptr)
+int FREE_RTOS_S2OPC_CLIENT(void)
 {
     SOPC_ReturnStatus status;
-    Condition* pv = (Condition*) ptr;
     Thread pX = NULL;
-    status = SOPC_Thread_Create(&pX, (void*) cbToolkit_test_client, pv, NULL);
+    status = SOPC_Thread_Create(&pX, (void*) cbToolkit_test_client, NULL, NULL);
     return status;
 }

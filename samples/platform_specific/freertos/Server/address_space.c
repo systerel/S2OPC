@@ -226,8 +226,8 @@ SOPC_AddressSpace_Node
                       .DisplayName = {{0, 0, NULL}, {sizeof("Int16") - 1, 1, (SOPC_Byte*) "Int16"}},
                       .Description =
                           {{0, 0, NULL},
-                           {sizeof("Describes a value that is an integer between ?32,768 and 32,767.") - 1, 1,
-                            (SOPC_Byte*) "Describes a value that is an integer between ?32,768 and 32,767."}},
+                           {sizeof("Describes a value that is an integer between −32,768 and 32,767.") - 1, 1,
+                            (SOPC_Byte*) "Describes a value that is an integer between −32,768 and 32,767."}},
                       .NoOfReferences = 1,
                       .References =
                           (OpcUa_ReferenceNode[]){
@@ -273,10 +273,10 @@ SOPC_AddressSpace_Node
                       .DisplayName = {{0, 0, NULL}, {sizeof("Int32") - 1, 1, (SOPC_Byte*) "Int32"}},
                       .Description =
                           {{0, 0, NULL},
-                           {sizeof("Describes a value that is an integer between ?2,147,483,648  and 2,147,483,647.") -
+                           {sizeof("Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.") -
                                 1,
                             1,
-                            (SOPC_Byte*) "Describes a value that is an integer between ?2,147,483,648  and "
+                            (SOPC_Byte*) "Describes a value that is an integer between −2,147,483,648  and "
                                          "2,147,483,647."}},
                       .NoOfReferences = 1,
                       .References =
@@ -323,12 +323,12 @@ SOPC_AddressSpace_Node
                       .BrowseName = {0, {sizeof("Int64") - 1, 1, (SOPC_Byte*) "Int64"}},
                       .DisplayName = {{0, 0, NULL}, {sizeof("Int64") - 1, 1, (SOPC_Byte*) "Int64"}},
                       .Description = {{0, 0, NULL},
-                                      {sizeof("Describes a value that is an integer between ?9,223,372,036,854,775,808 "
+                                      {sizeof("Describes a value that is an integer between −9,223,372,036,854,775,808 "
                                               "and 9,223,372,036,854,775,807.") -
                                            1,
                                        1,
                                        (SOPC_Byte*) "Describes a value that is an integer between "
-                                                    "?9,223,372,036,854,775,808 and 9,223,372,036,854,775,807."}},
+                                                    "−9,223,372,036,854,775,808 and 9,223,372,036,854,775,807."}},
                       .NoOfReferences = 1,
                       .References =
                           (OpcUa_ReferenceNode[]){
@@ -3470,7 +3470,7 @@ SOPC_AddressSpace_Node
                                   false,
                                   {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 63}, {0, 0, NULL}, 0},
                               }},
-                      .Value = {true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16 = -1}},
+                      .Value = {true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64 = -1L}},
                       .DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 8},
                       .ValueRank = (-1),
                       .AccessLevel = 3,

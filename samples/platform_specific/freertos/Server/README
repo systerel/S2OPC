@@ -1,0 +1,10 @@
+The file S2OPC_address_space.xml describe the address space embedded by the server
+Address space C file is generated from XML file to C file with following scripts:
+- generate-s2opc-address-space.py
+located in folder scripts
+
+usage:
+
+```bash
+./generate-s2opc-address-space.py S2OPC_address_space.xml address_space.c
+```

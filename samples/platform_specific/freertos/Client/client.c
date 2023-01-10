@@ -26,6 +26,7 @@
 #include "libs2opc_common_config.h"
 
 #include "p_threads.h"
+#include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -37,28 +38,36 @@
 #define ENDPOINT_URL "opc.tcp://192.168.5.22:4841"
 #define SERVER_URI "urn:S2OPC:localhost"
 
-void cbDisconnect(const uint32_t connectionId);
-SOPC_ReturnStatus clientInitialize(void);
+static void cbDisconnect(const uint32_t connectionId);
+static SOPC_ReturnStatus clientInitialize(void);
 /* return ConfigurationId used by connection API
  ConfigurationId should be 0< otherwise configuration failed */
-int32_t clientConfigure(void);
+static int32_t clientConfigure(void);
 /* Do a browse request to nodeId and populate result of the request in parameter browseResult
     If nodeId is NULL then browse node "ns=0;i=85" which is root node Id
 */
-SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_ClientHelper_BrowseResult* browseResult);
+static SOPC_ReturnStatus clientBrowse(int32_t connectionId,
+                                      const char* nodeId,
+                                      SOPC_ClientHelper_BrowseResult* browseResult);
 /* Do a write request to nodeId "ns=1;s=Int32_001" which store a counter incrementing each time the function is called
  */
-SOPC_ReturnStatus clientWrite(int32_t connectionId);
+static SOPC_ReturnStatus clientWrite(int32_t connectionId);
 /* Do a read request of nodeId "ns=1;s=Int32_001" */
-SOPC_ReturnStatus clientRead(int32_t connectionId);
+static SOPC_ReturnStatus clientRead(int32_t connectionId);
 
 static void log_UserCallback(const char* context, const char* text)
 {
     SOPC_UNUSED_ARG(context);
     if (NULL != text)
     {
-        PRINTF("%s\n", text);
+        PRINTF("%s\r\n", text);
     }
+}
+static void assert_userCallback(const char* context)
+{
+    PRINTF("ASSERT FAILED : <%p>\r\n", (void*) context);
+    PRINTF("Context: <%s>", context);
+    configASSERT(0);
 }
 
 void cbToolkit_test_client(void)
@@ -104,7 +113,15 @@ void cbToolkit_test_client(void)
         status = clientBrowse(connectionId, NULL, browseResult);
         if (SOPC_STATUS_OK != status)
         {
-            printf("Failed to Browse specified node\n");
+            PRINTF("Failed to Browse specified node\r\n");
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = clientRead(connectionId);
+        if (SOPC_STATUS_OK != status)
+        {
+            PRINTF("Failed to read specified node \n\r");
         }
     }
 
@@ -131,10 +148,13 @@ SOPC_ReturnStatus clientInitialize(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t res = 0;
 
+    // Set user assert
+    SOPC_Assert_Set_UserCallback(&assert_userCallback);
+
     // Initialize toolkit and configure logs
-    const SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_WARNING,
-                                              .logSystem = SOPC_LOG_SYSTEM_USER,
-                                              .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
+    SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_WARNING,
+                                        .logSystem = SOPC_LOG_SYSTEM_USER,
+                                        .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
     status = SOPC_CommonHelper_Initialize(&logConfig);
 
@@ -198,9 +218,9 @@ SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_Cl
         for (int32_t i = 0; i < browseResult->nbOfReferences; i++)
         {
             const SOPC_ClientHelper_BrowseResultReference* ref = &browseResult->references[i];
-            printf("Item #%" PRIi32 "\n", i);
-            printf("- nodeId: %s\n", ref->nodeId);
-            printf("- displayName: %s\n", ref->displayName);
+            PRINTF("Item #%i \r\n", i);
+            PRINTF("- nodeId: %s\r\n", ref->nodeId);
+            PRINTF("- displayName: %s\r\n", ref->displayName);
 
             SOPC_Free(ref->nodeId);
             SOPC_Free(ref->displayName);
@@ -248,7 +268,6 @@ SOPC_ReturnStatus clientWrite(int32_t connectionId)
     {
         status = SOPC_STATUS_NOK;
     }
-
     // Clear
     SOPC_Free(dv);
     SOPC_Free(writeValue);
@@ -267,6 +286,9 @@ SOPC_ReturnStatus clientRead(int32_t connectionId)
     readValue->indexRange = NULL;
 
     status = SOPC_ClientHelper_Read(connectionId, readValue, 1, dv);
+
+    PRINTF("Read node %s \r\n", readValue->nodeId);
+    PRINTF("- Value %u \r\n", dv->Value.Value.Uint32);
 
     SOPC_Free(dv);
     SOPC_Free(readValue);

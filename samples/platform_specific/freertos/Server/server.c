@@ -46,7 +46,7 @@
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
-/* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
+/* Define application namespaces: ns=1 and ns=2 */
 static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
@@ -61,7 +61,7 @@ static void log_UserCallback(const char* context, const char* text)
     SOPC_UNUSED_ARG(context);
     if (NULL != text)
     {
-        PRINTF("%s\n", text);
+        PRINTF("%s\r\n", text);
     }
 }
 
@@ -79,11 +79,13 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* cal
 {
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(inputArgs);
     SOPC_UNUSED_ARG(param);
     *nbOutputArgs = 0;
     *outputArgs = NULL;
+    PRINTF("[INFO] SOPC_Method_Func_Test_Generic: Number of input argument %" PRIu32
+           " number of output argument %" PRIu32 "\r\n",
+           nbInputArgs, *nbOutputArgs);
     return SOPC_STATUS_OK;
 }
 
@@ -217,7 +219,6 @@ static SOPC_ReturnStatus Server_Initialize(void)
 /*-------------------------
  * Method call management :
  *-------------------------*/
-
 static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 {
     char* sNodeId;
@@ -655,16 +656,6 @@ void cbToolkit_test_server(void)
 
     status = Server_Initialize();
 
-    /* Configuration of:
-     * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
-         - Enpoint URL,
-         - Security endpoint properties,
-         - Cryptographic parameters,
-         - Application description
-       - Server address space initial content from XML configuration file (comply with UANodeSet.xsd)
-       - User authentication and authorization management from XML configuration file
-         (comply with s2opc_clientserver_users_config.xsd)
-    */
     if (SOPC_STATUS_OK == status)
     {
         status = Server_LoadServerConfiguration();
