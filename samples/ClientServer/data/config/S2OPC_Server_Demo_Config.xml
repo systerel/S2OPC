@@ -28,7 +28,6 @@
     <Endpoints>
       <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
       <Endpoint url="opc.tcp://localhost:4841">
-          <!-- Only None/Basic256/Basic256Sha256 available -->
         <SecurityPolicies>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
             <SecurityModes>
