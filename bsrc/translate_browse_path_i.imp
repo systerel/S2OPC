@@ -213,7 +213,8 @@ LOCAL_OPERATIONS
 
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : {e_sc_ok, e_sc_bad_node_id_unknown,
-                e_sc_bad_query_too_complex, e_sc_bad_no_match} &
+                e_sc_bad_query_too_complex, e_sc_bad_no_match,
+                e_sc_bad_browse_name_invalid} &
             BrowsePathResult: seq(t_ExpandedNodeId_i) &
             ( statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
                 =>
@@ -270,7 +271,8 @@ LOCAL_OPERATIONS
         translate_statusCode
         :(
             translate_statusCode : t_StatusCode_i &
-            translate_statusCode :  {e_sc_ok, e_sc_bad_node_id_unknown, e_sc_bad_query_too_complex, c_StatusCode_indet} &
+            translate_statusCode :  {e_sc_ok, e_sc_bad_node_id_unknown, e_sc_bad_query_too_complex,
+                                     e_sc_bad_no_match, c_StatusCode_indet} &
             (translate_statusCode = e_sc_ok => browse_statusCode = e_sc_ok ) &
             (translate_statusCode = e_sc_bad_node_id_unknown  => browse_statusCode : { e_sc_bad_node_id_unknown }) &
             (translate_statusCode = e_sc_bad_no_match  => browse_statusCode : { e_sc_bad_reference_type_id_invalid }) &
