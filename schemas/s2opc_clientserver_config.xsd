@@ -179,19 +179,20 @@
         <xs:attribute type="xs:string" name="policyId"  use="required"/>
         <xs:attribute type="TokenType" name="tokenType"  use="required">
           <xs:annotation>
-            <xs:documentation>Available token types are only anonymous and username. Security URI available is only None</xs:documentation>
+            <xs:documentation>Available token types are only anonymous and username.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute type="SecurityURI" name="securityUri" use="optional"/>
+        <xs:attribute type="SecurityURI" name="securityUri" use="optional">
+          <xs:annotation>
+            <xs:documentation>It is mandatory when token type is not anonymous. When it is empty the endpoint security policy URI is used (it cannot be None).</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
   <xs:complexType name="UserPoliciesType">
     <xs:sequence>
       <xs:element type="UserPolicyType" name="UserPolicy" maxOccurs="5" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>Available token types are only anonymous and username. Security URI available is only None</xs:documentation>
-        </xs:annotation>
       </xs:element>
     </xs:sequence>
   </xs:complexType>
