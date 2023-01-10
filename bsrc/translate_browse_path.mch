@@ -300,7 +300,8 @@ OPERATIONS
         p_service_StatusCode,
         BrowseContext_MaxNbTargets,
         isBrowseValueContextDefined
-        :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_continuation_point_invalid} &
+        :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_continuation_point_invalid,
+                                    e_sc_bad_out_of_memory} &
             BrowseContext_MaxNbTargets : NAT &
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok)
         )
