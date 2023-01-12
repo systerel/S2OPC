@@ -50,13 +50,29 @@ typedef void(SOPC_EncodeableObject_PfnGetSize)(void);
 
 /**
  *  \brief Encoding function generic signature for an encodeable object
+ *  *
+ *  \param value             The encodeable object instance to encode into \p buffer.
+ *                           it might be either of encodeable type object with ::SOPC_EncodeableType* as first field
+ *                           or a built-in type object.
+ *  \param buffer            The buffer in which the encodeable object will be encoded
+ *  \param nestedStructLevel The number of structure levels encoded until then
+ *
+ *  \return                  ::SOPC_STATUS_OK in case of success, the appropriate error status otherwise.
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
-                                                           SOPC_Buffer* msgBuffer,
+                                                           SOPC_Buffer* buffer,
                                                            uint32_t nestedStructLevel);
 
 /**
  *  \brief Decoding function generic signature for an encodeable object
+ *
+ *  \param value             The encodeable object instance in which \p buffer will be decoded,
+ *                           it might be either of encodeable type object with ::SOPC_EncodeableType* as first field
+ *                           or a built-in type object.
+ *  \param buffer            The buffer to decode to fill the encodeable object content
+ *  \param nestedStructLevel The number of structure levels decoded until then
+ *
+ *  \return                  ::SOPC_STATUS_OK in case of success, the appropriate error status otherwise.
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
                                                            SOPC_Buffer* msgBuffer,
@@ -80,7 +96,7 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
  *
  * The \c typeIndex field indicates the index of type in internal types array.
  * It shall be a valid value of ::SOPC_TypeInternalIndex enum type.
- * Note: fields could only be of internal defined types for user-defined types.
+ * Note: fields can only be of internal defined types for user-defined types.
  *
  * Finally, the \c offset field gives the offset in bytes of the field in the
  * object structure.
@@ -144,6 +160,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId);
 
 /**
  *  \brief          Retrieve a defined encodeable type with the given type Id.
+ *                  It can be a internal defined type or user-defined type.
  *
  *  \param typeId         Type identifier for which corresponding encodeable type must be returned
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
@@ -152,6 +169,9 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
 
 /**
  *  \brief          Get the name of the given encodeable type
+ *
+ *  \param encType  The encodeable type for which name is requested
+ *  \return         The name of the encodeable type as a C string
  */
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
 

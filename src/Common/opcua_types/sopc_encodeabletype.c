@@ -238,17 +238,10 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
 
 static SOPC_EncodeableType* getKnownEncodeableType(const SOPC_EncodeableType_FieldDescriptor* desc)
 {
-    SOPC_EncodeableType* result = NULL;
-    if (desc->typeIndex < SOPC_TypeInternalIndex_SIZE)
-    {
-        result = SOPC_KnownEncodeableTypes[desc->typeIndex];
-    }
-    else
-    {
-        // Invalid typeIndex
-        assert(false && "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
-    }
-    return result;
+    const uint32_t typeIndex = desc->typeIndex;
+    assert(typeIndex < SOPC_TypeInternalIndex_SIZE &&
+           "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
+    return SOPC_KnownEncodeableTypes[typeIndex];
 }
 
 static size_t getAllocationSize(const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -282,6 +275,7 @@ static SOPC_ReturnStatus SOPC_EncodeableType_PfnEncode(const void* value,
                                                        SOPC_Buffer* msgBuffer,
                                                        uint32_t nestedStructLevel)
 {
+    // note: the first field of an object instance for an encodeable type is always a reference to its encodeable type
     return SOPC_EncodeableObject_Encode(*(SOPC_EncodeableType* const*) value, value, msgBuffer, nestedStructLevel);
 }
 
@@ -293,12 +287,13 @@ static SOPC_EncodeableObject_PfnEncode* getPfnEncode(const SOPC_EncodeableType_F
     }
     else
     {
-        return SOPC_EncodeableType_PfnEncode;
+        return &SOPC_EncodeableType_PfnEncode;
     }
 }
 
 static SOPC_ReturnStatus SOPC_EncodeableType_PfnDecode(void* value, SOPC_Buffer* msgBuffer, uint32_t nestedStructLevel)
 {
+    // note: the first field of an object instance for an encodeable type is always a reference to its encodeable type
     return SOPC_EncodeableObject_Decode(*(SOPC_EncodeableType**) value, value, msgBuffer, nestedStructLevel);
 }
 
@@ -310,7 +305,7 @@ static SOPC_EncodeableObject_PfnDecode* getPfnDecode(const SOPC_EncodeableType_F
     }
     else
     {
-        return SOPC_EncodeableType_PfnDecode;
+        return &SOPC_EncodeableType_PfnDecode;
     }
 }
 
