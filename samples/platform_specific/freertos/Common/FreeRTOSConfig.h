@@ -94,13 +94,8 @@
 #define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE_TIMER * 2)
 
 /* Define to trap errors during development. */
-#define configASSERT(x)           \
-    if ((x) == 0)                 \
-    {                             \
-        taskDISABLE_INTERRUPTS(); \
-        for (;;)                  \
-            ;                     \
-    }
+#include "sopc_assert.h"
+#define configASSERT(x) SOPC_ASSERT(x)
 
 /* Optional functions - most linkers will remove unused functions anyway. */
 #define INCLUDE_vTaskPrioritySet 1

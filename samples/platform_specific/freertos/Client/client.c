@@ -22,6 +22,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+/* FreeRTOS include */
+#include "FreeRTOS.h"
+#include "task.h" // Used for disable task entering in user assert
+
+/* S2OPC includes */
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_common_config.h"
 
@@ -32,6 +37,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_udp_sockets.h"
 
+/* MIMXRT1064 includes */
 #include "fsl_debug_console.h"
 #include "p_ethernet_if.h"
 
@@ -63,11 +69,14 @@ static void log_UserCallback(const char* context, const char* text)
         PRINTF("%s\r\n", text);
     }
 }
+
 static void assert_userCallback(const char* context)
 {
     PRINTF("ASSERT FAILED : <%p>\r\n", (void*) context);
     PRINTF("Context: <%s>", context);
-    configASSERT(0);
+    taskDISABLE_INTERRUPTS();
+    for (;;)
+        ;
 }
 
 void cbToolkit_test_client(void)

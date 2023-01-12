@@ -22,8 +22,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* MIMXRT1064 includes */
 #include "fsl_debug_console.h"
 
+/* FreeRTOS include */
+#include "FreeRTOS.h"
+#include "task.h" // Used for disable task entering in user assert
+
+/* S2OPC includes */
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_common_constants.h"
@@ -63,6 +69,19 @@ static void log_UserCallback(const char* context, const char* text)
     {
         PRINTF("%s\r\n", text);
     }
+}
+
+/*---------------------------------------------------------------------------
+ *                          Assert Callback definition
+ *---------------------------------------------------------------------------*/
+
+static void assert_userCallback(const char* context)
+{
+    PRINTF("ASSERT FAILED : <%p>\r\n", (void*) context);
+    PRINTF("Context: <%s>", context);
+    taskDISABLE_INTERRUPTS();
+    for (;;)
+        ;
 }
 
 /*---------------------------------------------------------------------------
@@ -194,6 +213,9 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
 
 static SOPC_ReturnStatus Server_Initialize(void)
 {
+    // Set user assert
+    SOPC_Assert_Set_UserCallback(&assert_userCallback);
+
     // Initialize toolkit and configure logs
     SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_WARNING,
                                                .logSystem = SOPC_LOG_SYSTEM_USER,
