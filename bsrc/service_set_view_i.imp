@@ -77,6 +77,8 @@ LOCAL_OPERATIONS
             ResponseBrowse_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
             isBrowseResponseAllocated : BOOL &
 
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode   &
             StatusCode_service : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_view_id_unknown} &
 
             (StatusCode_service = e_sc_ok =>
@@ -266,6 +268,8 @@ LOCAL_OPERATIONS
             ResponseBrowseNext_ResultReferences    : t_BrowseValue +-> t_BrowseResultReferences &
             isBrowseNextResponseAllocated : BOOL &
 
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode   &
             StatusCode_service : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} &
 
             (StatusCode_service = e_sc_ok =>

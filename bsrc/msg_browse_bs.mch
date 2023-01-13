@@ -163,13 +163,15 @@ OPERATIONS
         p_inc_subtype,
         p_class_mask,
         p_result_mask
-        :(  p_NodeId      = RequestBrowse_BrowseValue_NodeId(p_bvi) &
+        :(  p_NodeId : t_NodeId_i &
+            p_dir    : t_BrowseDirection_i &
+
+            p_NodeId      = RequestBrowse_BrowseValue_NodeId(p_bvi) &
             p_dir         = RequestBrowse_BrowseValue_BrowseDirection(p_bvi) &
             p_reftype     = RequestBrowse_BrowseValue_ReferenceTypeId(p_bvi) &
-            p_reftype = RequestBrowse_BrowseValue_ReferenceTypeId(p_bvi) &
             p_inc_subtype = bool(p_bvi : RequestBrowse_BrowseValue_IncludedSubtypes) &
             p_class_mask  = RequestBrowse_BrowseValue_NodeClassMask(p_bvi) &
-            p_result_mask  = RequestBrowse_BrowseValue_ResultMask(p_bvi)
+            p_result_mask = RequestBrowse_BrowseValue_ResultMask(p_bvi)
         )
     END
     ;

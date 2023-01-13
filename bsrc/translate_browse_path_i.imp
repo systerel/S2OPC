@@ -305,7 +305,8 @@ LOCAL_OPERATIONS
     BEGIN
         statusCode_operation,
         BrowsePathSource
-        :(
+        :(  statusCode_operation : t_StatusCode_i &
+            statusCode_operation : t_StatusCode   &
             statusCode_operation: {e_sc_ok, e_sc_bad_out_of_memory,
                 e_sc_bad_unexpected_error} &
 
