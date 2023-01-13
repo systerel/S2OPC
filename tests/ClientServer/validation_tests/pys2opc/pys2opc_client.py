@@ -88,7 +88,7 @@ config_security = {'security_mode': SecurityMode.Sign,
                    'path_cert_cli': BINARY_DIR + '/client_public/client_2k_cert.der',
                    'path_key_cli': BINARY_DIR + '/client_private/encrypted_client_2k_key.pem',
                    'client_key_encrypted': True,
-                   'policy_id': 'username',
+                   'policy_id': 'username_Basic256Sha256',
                    'username': 'user1',
                    'password': PyS2OPC_Client_Test.get_user_password('user1'),
                    'add_configuration_function': PyS2OPC.add_configuration_secured}
