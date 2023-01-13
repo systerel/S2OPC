@@ -30,9 +30,9 @@ import time
 import tempfile
 import random
 
+import utils
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, DataValue, StatusCode, Variant, VariantType
 from _connection_configuration import configuration_parameters_security
-
 
 # All those nodes are Variable nodes. They are demo nodes which have the name of the type it contains.
 NODES_TO_READ = ['ns=1;s=Int32_007',

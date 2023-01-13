@@ -41,7 +41,6 @@ VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)
 NULL = ffi.NULL
 
 allocator_no_gc = ffi.new_allocator(alloc=libsub.SOPC_Malloc, free=None, should_clear_after_alloc=True)
-TEST_PASSWORD_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
 
 # Note: this level only concerns the following function _callback_log
 # TODO: make this configurable for the end user
@@ -92,8 +91,13 @@ def _callback_authorize_operation(authorizationManager, operationType, nodeId, a
 
 @ffi.def_extern()
 def _callback_get_client_key_password(password):
-    return PyS2OPC_Client._callback_get_client_key_password(password)
-
+    try:
+        pwd = PyS2OPC_Client.get_client_key_password()
+        pwd = pwd.encode() + b'\0' # Add protection to avoid buffer overrun with C code
+        password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
+    except Exception:
+        return False
+    return True
 
 class PyS2OPC:
     """
@@ -163,13 +167,8 @@ class PyS2OPC:
         """
         Return a zero-terminated byte string which contain the password.
         """
-        pwd = os.getenv(TEST_PASSWORD_ENV_NAME)
-        if pwd is None:
-            pwd = getpass.getpass(prompt='{}'.format(prompt))
-        pwd = pwd.encode() + b'\0' # Add protection to avoid buffer overrun with C code
+        pwd = getpass.getpass(prompt='{}'.format(prompt))
         return pwd
-
-
 
 class PyS2OPC_Client(PyS2OPC):
     """
@@ -304,7 +303,8 @@ class PyS2OPC_Client(PyS2OPC):
                                   path_key_cli = '../../../build/bin/client_private/encrypted_client_2k_key.pem',
                                   client_key_encrypted = True,
                                   policy_id = 'anonymous',
-                                  username = None):
+                                  username = None,
+                                  password = None):
         """
         Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
@@ -333,17 +333,17 @@ class PyS2OPC_Client(PyS2OPC):
                        is used and the policy id must correspond to an anonymous UserIdentityPolicy.
                        Otherwise, the UserNameIdentityToken is used and the policy id must correspond to
                        an username UserIdentityPolicy.
-            username: The password of the token is asked interactively.
-                      None for anonymous access, see policyId the password will be encrypted,
+            username: None for anonymous access, see policyId the password will be encrypted,
                       or not, depending on the user token security policy associated to the policyId
                       or if it is empty depending on the SecureChannel security policy.
+            password: The password is ignored when username is NULL.
         """
         _username = NULL
-        _password = NULL
         if username:
             _username = ffi.new('char[]', username.encode())
-            _password = PyS2OPC._get_password("({}) username password:".format(username))
-            _password = ffi.new('char[]', _password)
+        _password = NULL
+        if password:
+            _password = ffi.new('char[]', password.encode())
 
         # TODO: factorize code with add_configuration_unsecured
         assert PyS2OPC._initialized_cli and not PyS2OPC._configured,\
@@ -456,14 +456,13 @@ class PyS2OPC_Client(PyS2OPC):
         connection._on_response(event, status, responsePayload, responseContext, timestamp)
 
     @staticmethod
-    def _callback_get_client_key_password(password):
-        try:
-            pwd = PyS2OPC._get_password("Client private key password:")
-            password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
-        except Exception:
-            return False
-        return True
-
+    def get_client_key_password():
+        """
+        Default method that is called during configuration phase if an encrypted private key is used, 
+        it shall return the password to decrypt the client private key.
+        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        """
+        return PyS2OPC._get_password("Client private key password:")
 
 class PyS2OPC_Server(PyS2OPC):
     """
@@ -710,7 +709,8 @@ class PyS2OPC_Server(PyS2OPC):
                 lenPassword = 0
                 # Retrieve the password if the key is encrypted
                 if serverCfg.serverKeyEncrypted:
-                    password = PyS2OPC._get_password("Server private key password:")
+                    password = PyS2OPC_Server.get_server_key_password()
+                    password = password.encode() + b'\0' # Add protection to avoid buffer overrun with C code
                     password = ffi.new('char[]', password)
                     lenPassword = len(password)
                 status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverCfg.serverKeyPath, ppKey, password, lenPassword)
@@ -855,6 +855,15 @@ class PyS2OPC_Server(PyS2OPC):
             except KeyboardInterrupt:
                 pass
 
+    @staticmethod
+    def get_server_key_password():
+        """
+        Default method that is called during configuration phase if an encrypted private key is used, 
+        it shall return the password to decrypt the server private key.
+        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        """
+        return PyS2OPC._get_password("Server private key password:")
+            
     # -----------------------------
     # Local services implementation
 

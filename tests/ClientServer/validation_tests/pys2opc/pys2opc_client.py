@@ -43,6 +43,7 @@ VALIDATION_DIR= S2OPC_ROOT + 'validation'
 from itertools import product
 import time
 import threading
+import os
 
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, SecurityMode, SecurityPolicy, AttributeId, VariantType, Variant, NodeClass, DataValue, StatusCode
 
@@ -51,8 +52,24 @@ from tap_logger import TapLogger
 # WARNING, the following import makes a dependency on freeopcua
 from common import sUri as serverUrl, variantInfoList, ua, browseSubTree
 
+TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
+TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
 
 TIMEOUT_RESPONSE = 5.
+
+class PyS2OPC_Client_Test():
+    @staticmethod
+    def get_client_key_password():
+        pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
+        return pwd
+
+    @staticmethod
+    def get_user_password(username):
+        pwd = os.getenv(TEST_PASSWORD_USER_ENV_NAME)
+        return pwd
+
+# overload the default method to get key password
+PyS2OPC.get_client_key_password = PyS2OPC_Client_Test.get_client_key_password
 
 # Modular configuration parameters
 config_base = {'server_url': serverUrl}
@@ -73,8 +90,8 @@ config_security = {'security_mode': SecurityMode.Sign,
                    'client_key_encrypted': True,
                    'policy_id': 'username',
                    'username': 'user1',
+                   'password': PyS2OPC_Client_Test.get_user_password('user1'),
                    'add_configuration_function': PyS2OPC.add_configuration_secured}
-
 
 # Transform freeopcua types to pys2opc types
 PYS2OPC_TYPES = {ua.VariantType.Int64: VariantType.Int64,

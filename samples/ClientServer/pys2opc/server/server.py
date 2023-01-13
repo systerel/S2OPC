@@ -26,15 +26,28 @@ Example script: this script initializes the toolkit as a server.
 
 import time
 import argparse
+import os
+import getpass
 
 from pys2opc import PyS2OPC_Server as PyS2OPC, BaseAddressSpaceHandler, DataValue, StatusCode, AttributeId#, Variant, VariantType
 #from _connection_configuration import configuration_parameters_no_subscription
 
+TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
 
 class AddressSpaceHandler(BaseAddressSpaceHandler):
     def on_datachanged(self, nodeId, attrId, dataValue, indexRange, status):
         print(nodeId, AttributeId.get_name_from_id(attrId), dataValue, indexRange, StatusCode.get_name_from_id(status))
 
+class PyS2OPC_Server_Test():
+    @staticmethod
+    def get_server_key_password():
+        pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
+        if pwd is None:
+            pwd = getpass.getpass(prompt='Server private key password:')
+        return pwd
+
+# overload the default password method for tests
+PyS2OPC.get_server_key_password = PyS2OPC_Server_Test.get_server_key_password
 
 if __name__ == '__main__':
     print(PyS2OPC.get_version())

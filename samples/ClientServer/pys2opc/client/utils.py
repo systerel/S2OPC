@@ -18,9 +18,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import os
+import getpass
 
-from pys2opc import PyS2OPC_Client as PyS2OPC
+from pys2opc import PyS2OPC_Client
 
+TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
+TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
 
 class ReconnectingContext:
     """
@@ -44,5 +48,23 @@ class ReconnectingContext:
         """
         if self.connection is None or not self.connection.connected:
             print('+', end='', flush=True)
-            self.connection = PyS2OPC.connect(self.confId, self.connCls)
+            self.connection = PyS2OPC_Client.connect(self.confId, self.connCls)
         return self.connection
+
+class PyS2OPC_Client_Test():
+    @staticmethod
+    def get_client_key_password():
+        pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
+        if pwd is None:
+            pwd = getpass.getpass(prompt='Client private key password:')
+        return pwd
+
+    @staticmethod
+    def get_user_password(username):
+        pwd = os.getenv(TEST_PASSWORD_USER_ENV_NAME)
+        if pwd is None:
+            pwd = getpass.getpass(prompt='({}) username password:'.format(username))
+        return pwd
+
+# overload the default method to get key password
+PyS2OPC_Client.get_client_key_password = PyS2OPC_Client_Test.get_client_key_password

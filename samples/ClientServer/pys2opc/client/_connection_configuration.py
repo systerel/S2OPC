@@ -25,6 +25,7 @@ Defines the configurations used by the examples.
 
 
 import os
+from utils import PyS2OPC_Client_Test
 
 SERVER_URL = 'opc.tcp://localhost:4841'
 CERT_BASE_PATH = './'
@@ -44,7 +45,8 @@ configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PA
                                      'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'encrypted_client_2k_key.pem'),
                                      'client_key_encrypted': True,
                                      'policy_id': 'username',
-                                     'username': 'user1'}
+                                     'username': 'user1',
+                                     'password': PyS2OPC_Client_Test.get_user_password('user1')}
 
 
 def join_configs(*args):
