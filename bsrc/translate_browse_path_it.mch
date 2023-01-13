@@ -49,7 +49,9 @@ INITIALISATION
 OPERATIONS
 
     p_continue <-- init_iter_browsePaths =
-    BEGIN
+    PRE
+        IsDecoded = TRUE
+    THEN
         browsePaths_iterated   := {}        ||
         browsePaths_to_iterate := BrowsePaths ||
         p_continue             := bool(browsePaths_to_iterate /= {})

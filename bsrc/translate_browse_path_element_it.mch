@@ -54,7 +54,8 @@ OPERATIONS
 
     p_continue <-- init_iter_relativePath(p_relativePath) =
     PRE
-        p_relativePath : t_RelativePath_i
+        p_relativePath : t_RelativePath_i &
+        IsDecoded = TRUE
     THEN
         elements_iterated   := {}        ||
         elements_to_iterate := RelativePath_RelativePathElt(p_relativePath) ||
@@ -68,7 +69,8 @@ OPERATIONS
     PRE
         elements_to_iterate /= {} &
         size(elements_to_iterate) > 0 &
-        relativePathEls = RelativePath_RelativePathElt(relativePath)
+        relativePathEls = RelativePath_RelativePathElt(relativePath) &
+        IsDecoded = TRUE
     THEN
         ANY l_relativePathElt WHERE
             l_relativePathElt : t_RelativePathElt_i &
