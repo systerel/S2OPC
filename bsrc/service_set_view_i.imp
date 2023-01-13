@@ -81,20 +81,15 @@ LOCAL_OPERATIONS
 
             (StatusCode_service = e_sc_ok =>
                 isBrowseResponseAllocated = TRUE &
-                ResponseBrowse_BrowseStatus : cast_t_BrowseValue[1..p_nb_browse_value] --> t_StatusCode &
-                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] &
-                          (ResponseBrowse_BrowseStatus(p_index) = e_sc_ok or
-                           ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points) =>
-                            p_index : dom(ResponseBrowse_ContinuationPoint) &
-                            p_index : dom(ResponseBrowse_ResultReferences) &
-                          (ResponseBrowse_BrowseStatus(p_index) = e_sc_bad_no_continuation_points =>
-                            ResponseBrowse_ContinuationPoint(p_index) = c_ContinuationPointId_indet)
-                ) &
-                !p_index.(p_index : cast_t_BrowseValue[1..p_nb_browse_value] & ResponseBrowse_BrowseStatus(p_index) /= e_sc_ok =>
-                    p_index /: dom(ResponseBrowse_ContinuationPoint) &
-                    p_index /: dom(ResponseBrowse_ResultReferences)
-                )
 
+                dom(ResponseBrowse_BrowseStatus) = cast_t_BrowseValue[1..p_nb_browse_value] &
+                dom(ResponseBrowse_BrowseStatus |> {e_sc_ok, e_sc_bad_no_continuation_points}) =
+                    dom(ResponseBrowse_ContinuationPoint) &
+                dom(ResponseBrowse_BrowseStatus |> {e_sc_ok, e_sc_bad_no_continuation_points}) =
+                    dom(ResponseBrowse_ResultReferences) &
+
+                dom(ResponseBrowse_BrowseStatus |> {e_sc_bad_no_continuation_points}) =
+                    dom(ResponseBrowse_ContinuationPoint |> {c_ContinuationPointId_indet})
             ) &
             (StatusCode_service /= e_sc_ok => isBrowseResponseAllocated = FALSE)
         )
