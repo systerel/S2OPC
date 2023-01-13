@@ -53,7 +53,7 @@ from tap_logger import TapLogger
 from common import sUri as serverUrl, variantInfoList, ua, browseSubTree
 
 TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
-TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
+TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_USER"
 
 TIMEOUT_RESPONSE = 5.
 

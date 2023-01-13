@@ -46,6 +46,7 @@ test_script:
     - set WITH_NANO_EXTENDED=on
     - set ENABLE_SAMPLES=on
     - set TEST_PASSWORD_PRIVATE_KEY=password
+    - set TEST_PASSWORD_USER=password
 
     # download and extract libcheck
     - cd %ROOT_DIR%

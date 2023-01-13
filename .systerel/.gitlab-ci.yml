@@ -49,6 +49,7 @@
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
   TEST_PASSWORD_PRIVATE_KEY : password
+  TEST_PASSWORD_USER : password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
@@ -336,6 +337,7 @@ test-unit-all-tests:
   <<: *test_unit
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
+    TEST_PASSWORD_USER : password
   rules:
     - if: "$ALL_TESTS != null"
       when: on_success
