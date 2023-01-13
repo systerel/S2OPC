@@ -33,8 +33,7 @@ OPERATIONS
     */
     p_isvalid, p_nb_ref, p_src_node <-- getall_SourceNode_NbRef(p_src_nodeid) =
     PRE
-        p_src_nodeid : t_NodeId_i &
-        p_src_nodeid : t_NodeId
+        p_src_nodeid : t_NodeId_i
     THEN
         IF  p_src_nodeid : dom(a_NodeId~) THEN
             p_isvalid := TRUE ||

@@ -530,7 +530,6 @@ LOCAL_OPERATIONS
     statusCode_operation, nbReferences <-- compute_browse_result_from_source(source, browseDirection, referenceTypeId, includedSubtypes) =
     PRE
         source : t_NodeId_i &
-        source : t_NodeId &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &

@@ -57,8 +57,7 @@ DEFINITIONS
         in_ReleasePrevContinuationPoint  : BOOL & /* Automatic release of previous continuation flag */
         isBrowseValueContextDefined      : BOOL &
         (isBrowseValueContextDefined = TRUE =>
-            in_BrowseValue_BrowseDirection : t_BrowseDirection &
-            in_BrowseValue_NodeId : t_NodeId)
+            in_BrowseValue_BrowseDirection : t_BrowseDirection)
     ;
     d_init_in ==
         d_variables_in
@@ -101,7 +100,6 @@ OPERATIONS
         p_maxTargetRef : NAT                        &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
-        p_nodeId : t_NodeId                         &
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &

@@ -163,7 +163,6 @@ OPERATIONS
         p_maxTargetRef : NAT                        &
         p_browseView : t_NodeId_i                   &
         p_nodeId : t_NodeId_i                       &
-        p_nodeId : t_NodeId                         &
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
