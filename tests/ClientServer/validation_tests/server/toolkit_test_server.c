@@ -97,6 +97,8 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der",          "revoked/c
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 
+#define DEFAULT_CLIENT_REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
+
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
 static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
@@ -503,7 +505,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         status = Server_SetDefaultCryptographicConfig();
     }
 
-    if (!SOPC_EndpointConfig_AddClientToConnect(ep, NULL, "opc.tcp://localhost:4844"))
+    if (!SOPC_EndpointConfig_AddClientToConnect(ep, NULL, DEFAULT_CLIENT_REVERSE_ENDPOINT_URL))
     {
         status = SOPC_STATUS_NOK;
     }
