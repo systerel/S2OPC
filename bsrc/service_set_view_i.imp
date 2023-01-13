@@ -147,10 +147,11 @@ LOCAL_OPERATIONS
               ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
                 p_bvi : dom(ResponseBrowse_ResultReferences) & // Result is defined
                 p_bvi : dom(ResponseBrowse_ContinuationPoint) & // Continuation is either indet or defined
-              (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points =>
-                 ResponseBrowse_ContinuationPoint(p_bvi) = c_ContinuationPointId_indet) &
-              not (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
-                   ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
+                (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points =>
+                    ResponseBrowse_ContinuationPoint(p_bvi) = c_ContinuationPointId_indet)
+            ) &
+            (not (ResponseBrowse_BrowseStatus(p_bvi) = e_sc_ok or
+                  ResponseBrowse_BrowseStatus(p_bvi) = e_sc_bad_no_continuation_points) =>
                 p_bvi /: dom(ResponseBrowse_ResultReferences) &
                 p_bvi /: dom(ResponseBrowse_ContinuationPoint)
             )
