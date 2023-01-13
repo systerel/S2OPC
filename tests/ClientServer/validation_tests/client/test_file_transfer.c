@@ -185,16 +185,16 @@ static int32_t client_create_configuration(void)
     }
 
     SOPC_ClientHelper_Security security = {
-        .security_policy = SOPC_SecurityPolicy_None_URI, // None, Basic256
-        .security_mode = OpcUa_MessageSecurityMode_None, // Sign and Encrypt, None or Sign only
-        .path_cert_auth = "./data/trusted/cacert.der",
-        .path_crl = "./data/revoked/cacrl.der",
-        .path_cert_srv = "./data/server_public/server_2k_cert.der",
-        .path_cert_cli = "./data/client_public/client_2k_cert.der",
-        .path_key_cli = "./data/client_private/client_2k_key.pem",
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
+        .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
+        .security_mode = OpcUa_MessageSecurityMode_Sign,
+        .path_cert_auth = "./trusted/cacert.der",
+        .path_crl = "./revoked/cacrl.der",
+        .path_cert_srv = "./server_public/server_4k_cert.der",
+        .path_cert_cli = "./client_public/client_4k_cert.der",
+        .path_key_cli = "./client_private/client_4k_key.pem",
+        .policyId = "user",
+        .username = "me",
+        .password = "1234",
     };
 
     SOPC_ClientHelper_EndpointConnection endpoint = {
@@ -210,11 +210,11 @@ static int32_t client_create_configuration(void)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "./data/server_config.xml";
+    const char* xml_server_cfg_path = "./S2OPC_Server_Demo_Config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "./data/address_space.xml";
+    const char* xml_address_space_path = "./ft_data/address_space.xml";
     // User credentials and authorizations
-    const char* xml_users_cfg_path = "./data/users_config.xml";
+    const char* xml_users_cfg_path = "./S2OPC_Users_Demo_Config.xml";
 
     return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
@@ -331,7 +331,7 @@ START_TEST(test_file_transfer_method)
     callRequestsItem2.objectNodeId = item2PreloadFile.fileType_nodeId;
 
     // Fonctional test: PHASE 1: declaration variables (TC_033 and TC_034):
-    const char* bin_file_path = "./data/bin_file_TC_33_34.a";
+    const char* bin_file_path = "./ft_data/bin_file_TC_33_34.a";
     FILE* bin_file_fp = NULL;
     int filedes = -1;
     int ret = -1;
@@ -718,22 +718,23 @@ START_TEST(test_file_transfer_method)
     SOPC_TEST_FileTransfer_SetTestCaseNumber(33);
 
     bin_file_fp = fopen(bin_file_path, "rb+");
-    ck_assert("TC_SOPC_FileTransfer_033: the fopen function has failed (./data/bin_file_TC_33_34.a may missing)" &&
+    ck_assert("TC_SOPC_FileTransfer_033: the fopen function has failed (./ft_data/bin_file_TC_33_34.a may missing)" &&
               NULL != bin_file_fp);
     filedes = fileno(bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fileno function has failed (./data/bin_file_TC_33_34.a)" && -1 != filedes);
+    ck_assert("TC_SOPC_FileTransfer_033: the fileno function has failed (./ft_data/bin_file_TC_33_34.a)" &&
+              -1 != filedes);
     struct stat sb;
     ret = fstat(filedes, &sb);
-    ck_assert("TC_SOPC_FileTransfer_033: the fstat function has failed (./data/bin_file_TC_33_34.a)" && -1 != ret);
+    ck_assert("TC_SOPC_FileTransfer_033: the fstat function has failed (./ft_data/bin_file_TC_33_34.a)" && -1 != ret);
     bin_buffer_write.Length = (int32_t) sb.st_size;
     bin_buffer_write.Data = SOPC_Malloc((size_t) bin_buffer_write.Length);
     read_count = fread(bin_buffer_write.Data, 1, (size_t) bin_buffer_write.Length, bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fread function has failed (./data/bin_file_TC_33_34.a)" &&
+    ck_assert("TC_SOPC_FileTransfer_033: the fread function has failed (./ft_data/bin_file_TC_33_34.a)" &&
               read_count == (size_t) bin_buffer_write.Length);
     // bin_buffer_write is clear by the after the callRequests
     SOPC_ByteString_Copy(&bin_buffer_write_tmp, &bin_buffer_write);
     ret = fclose(bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fclose function has failed (./data/bin_file_TC_33_34.a)" && 0 == ret);
+    ck_assert("TC_SOPC_FileTransfer_033: the fclose function has failed (./ft_data/bin_file_TC_33_34.a)" && 0 == ret);
     mode = 3;
     fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
                                                         item1PreloadFile.met_openId, mode);
