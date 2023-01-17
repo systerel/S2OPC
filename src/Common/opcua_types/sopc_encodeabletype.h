@@ -20,7 +20,25 @@
 /**
  *  \file sopc_encodeabletype.h
  *
- *  \brief Encodeable type and services
+ *  \brief EncodeableType and services on encodeable object
+ *
+ *  An ::SOPC_EncodeableType is the description uniquely identified OPC UA type which is composed of an ordered list
+ * of type fields which can be either ::SOPC_EncodeableType or OPC UA built-in types (see sopc_builtintypes.h).
+ *
+ * An instance of an ::SOPC_EncodeableType type is a C structure which contains as first field a pointer to its
+ * ::SOPC_EncodeableType and then the fields of expected types described by its ::SOPC_EncodeableType
+ * (see sopc_types.h, e.g. ::OpcUa_ReadRequest is the C structure instance of encodeable type
+ * ::OpcUa_ReadRequest_EncodeableType).
+ *
+ * An encodeable object is either an instance of an OPC UA built-in type or an instance of an ::SOPC_EncodeableType.
+ * Each encodeable object has several services functions:
+ * - Initialize the encodeable object (C structure or simple C type)
+ * - Encode the encodeable object into a byte buffer
+ * - Decode a byte buffer into the encodeable object
+ * - Clear the encodeable object
+ *
+ * Encodeable object types are defined in sopc_builtintypes.h for built-in types and  sopc_types.h for
+ * internally defined ::SOPC_EncodeableType types.
  */
 
 #ifndef SOPC_ENCODEABLETYPE_H_
