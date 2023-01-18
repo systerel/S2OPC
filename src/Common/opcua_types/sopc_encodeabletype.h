@@ -96,7 +96,7 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
                                                            SOPC_Buffer* msgBuffer,
                                                            uint32_t nestedStructLevel);
 
-/*
+/**
  * \brief Description of an encodeable type field.
  *
  * This structure has been designed to be very compact and fit into 8 bytes.
@@ -200,7 +200,9 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
  * \param pValue An object instance of the appropriate encodeable type.
  *               It shall at least have allocation size described in the encodeable type
  *               and is expected to be the C structure corresponding to an instance of the encodeable type
- *               (first field is a reference to its encodeable type and next fields haves type described in it)
+ *               (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                which value will be set to \p type.
+ *                The following fields shall have types described by \p type)
  */
 void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue);
 
@@ -211,7 +213,9 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue);
  * \param pValue An object instance of the appropriate encodeable type.
  *               It shall at least have allocation size described in the encodeable type
  *               and is expected to be the C structure corresponding to an instance of the encodeable type
- *               (first field is a reference to its encodeable type and next fields have types described in it)
+ *               (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                which value shall be \p type.
+ *                The following fields shall have types described by \p type)
  */
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
 
@@ -221,9 +225,9 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
  * \param type               The encodeable type of the object instance to encode.
  * \param pValue             The object instance of the appropriate encodeable type to encode.
  *                           It shall at least have allocation size described in the encodeable type
- *                           and shall to be the C structure corresponding to an instance of the encodeable type
- *                           (first field is a reference to its encodeable type
- *                            and next fields have types described by its encodeable type)
+ *                           and shall be the C structure corresponding to an instance of the encodeable type
+ *                           (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                            which value shall be \p type. The following fields shall have types described by \p type)
  *
  * \param buf               The buffer in which the encodeable object will be encoded
  * \param nestedStructLevel The number of structure levels encoded until then.
@@ -242,9 +246,9 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
  * \param type               The encodeable type of the object instance to decode.
  * \param pValue             An initialized object instance of the appropriate encodeable type to decode.
  *                           It shall at least have allocation size described in the encodeable type
- *                           and shall to be the C structure corresponding to an instance of the encodeable type
- *                           (first field is a reference to its encodeable type
- *                            and next fields have types described by its encodeable type)
+ *                           and shall be the C structure corresponding to an instance of the encodeable type
+ *                           (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                            which value shall be \p type. The following fields shall have types described by \p type)
  *
  * \param buf               The buffer to decode to fill the encodeable object content
  * \param nestedStructLevel The number of structure levels decoded until then
