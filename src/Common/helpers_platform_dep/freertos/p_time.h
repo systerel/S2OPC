@@ -17,13 +17,18 @@
  * under the License.
  */
 
+/** \file
+ *
+ * FreeRTOS specific implementation of "sopc_platform_time.h"
+ */
+
 #ifndef SOPC_P_TIME_H_
 #define SOPC_P_TIME_H_
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/** Definition of SOPC_RealTime for SOPC_TIME.H */
+/** Definition of SOPC_RealTime */
 typedef struct
 {
     /* Internal unit is ticks which is user configurable by setting configTICK_RATE_HZ. Note that
@@ -31,61 +36,6 @@ typedef struct
      ticksMs represent time from launch in ms */
     uint64_t ticksMs;
 } SOPC_RealTime;
-
-/**
- * \brief Create a new time reference.
- * \param copy A possibly NULL time reference.
- *
- * \return A new time reference containing the current time if \a copy is NULL,
- *          or a copy of \a copy otherwise
- * \note Every object initialized by \a SOPC_RealTime_Create must be cleared by \a SOPC_RealTime_Delete
- */
-SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy);
-
-/**
- * \brief Deletes a time reference.
- * \param t A reference returned by \a SOPC_RealTime_Create
- */
-void SOPC_RealTime_Delete(SOPC_RealTime** t);
-
-/**
- * \brief Store the current time in t.
- *
- * \param t A Non-null time reference
- * \return false if failed.
- */
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t);
-
-/**
- * \brief Adds duration_us to \a t
- *
- * \note PTP is not yet supported other FreeRTOS so this function only add duration_us to \a t
- *
- * \param t A Non-null time reference
- * \param duration_us microsecond add to \a t, in this implementation resolution of time cannot be finer than 1ms
- *                      thus, only the millisecond part is taken into account".
- * \param offset_us This parameter is ignored
- **/
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us);
-
-/**
- * \brief Checks is a date is in the future (relatively to another date)
- * \param t A non-NULL date
- * \param now if non-NULL, this date will be compared to t. If NULL, the current date will be
- *  used instead.
- *
- * \returns true if \a t < \a now. Typically, \code SOPC_RealTime_IsExpired(&t, NULL) \endcode returns true if
- *      \a t is in the past (event reached), and false if \a t is in the future.
- *  */
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now);
-
-/** \brief Precise sleep until specified date.
- * \param date The date at which the function shall return
- * \return true if the function failed
- * \note If date is in the past, the function yields but does not wait.
- * \note The calling thread must have appropriate scheduling policy and priority for precise timing.
- */
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date);
 
 void P_TIME_SetInitialDateToBuildTime(void);
 

@@ -415,39 +415,9 @@ void SOPC_Sleep(unsigned int milliseconds)
 }
 
 /***************************************************/
-SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
-{
-    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
-    if (NULL != copy && NULL != ret)
-    {
-        *ret = *copy;
-    }
-    else if (NULL != ret)
-    {
-        *ret = P_TIME_TimeReference_GetInternal100ns();
-    }
-
-    return ret;
-}
-
-/***************************************************/
-void SOPC_RealTime_Delete(SOPC_RealTime** t)
-{
-    if (NULL == t)
-    {
-        return;
-    }
-    SOPC_Free(*t);
-    *t = NULL;
-}
-
-/***************************************************/
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    if (NULL == t)
-    {
-        return false;
-    }
+    assert(NULL != t);
 
     *t = P_TIME_TimeReference_GetInternal100ns();
     return true;

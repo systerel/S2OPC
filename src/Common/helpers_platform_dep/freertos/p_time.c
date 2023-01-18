@@ -237,36 +237,9 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
-{
-    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
-    if (NULL != copy && NULL != ret)
-    {
-        *ret = *copy;
-    }
-    else if (NULL != ret)
-    {
-        ret->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
-    }
-    return ret;
-}
-
-void SOPC_RealTime_Delete(SOPC_RealTime** t)
-{
-    if (NULL == t)
-    {
-        return;
-    }
-    SOPC_Free(*t);
-    *t = NULL;
-}
-
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    if (NULL == t)
-    {
-        return false;
-    }
+    assert(NULL != t);
     t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
     return true;
 }

@@ -17,19 +17,42 @@
  * under the License.
  */
 
-/** \file
+/** \file sopc_askpass.c
  *
- * LINUX specific implementation of "sopc_platform_time.h"
+ * \brief A platform independent API to ask for passwords.
  */
 
-#ifndef SOPC_P_TIME_H_
-#define SOPC_P_TIME_H_
+#include "sopc_platform_time.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <time.h>
+#include "sopc_mem_alloc.h"
 
-/** Type used to measure milliseconds and sub-millisecond times */
-typedef struct timespec SOPC_RealTime;
+/***************************************************/
+SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
+{
+    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
+    if (NULL != copy && NULL != ret)
+    {
+        *ret = *copy;
+    }
+    else if (NULL != ret)
+    {
+        bool ok = SOPC_RealTime_GetTime(ret);
+        if (!ok)
+        {
+            SOPC_RealTime_Delete(&ret);
+        }
+    }
 
-#endif /* SOPC_P_TIME_H_ */
+    return ret;
+}
+
+/***************************************************/
+void SOPC_RealTime_Delete(SOPC_RealTime** t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
+}

@@ -19,7 +19,8 @@
 
 /** \file
  *
- * LINUX specific implementation of "sopc_platform_time.h"
+ * Windows specific implementation of "sopc_platform_time.h".
+ * Currently, this is not supported on windows.
  */
 
 #ifndef SOPC_P_TIME_H_
@@ -27,9 +28,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 
-/** Type used to measure milliseconds and sub-millisecond times */
-typedef struct timespec SOPC_RealTime;
+/** Definition of SOPC_RealTime */
+typedef struct
+{
+    uint64_t ticksMs;
+} SOPC_RealTime;
 
 #endif /* SOPC_P_TIME_H_ */

@@ -20,9 +20,15 @@
 #include <stdint.h>
 #include <windows.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_macros.h"
+#include "sopc_platform_time.h"
 #include "sopc_time.h"
 
+#define US_TO_MS 1000
+
+/***************************************************/
 int64_t SOPC_Time_GetCurrentTimeUTC(void)
 {
     int64_t result = 0;
@@ -45,6 +51,7 @@ int64_t SOPC_Time_GetCurrentTimeUTC(void)
     return result;
 }
 
+/***************************************************/
 SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 {
     /* Extract of GetTickCount64 function documentation:
@@ -59,12 +66,37 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
     return GetTickCount64();
 }
 
+/***************************************************/
 SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
 {
     return (localtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
+/***************************************************/
 SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 {
     return (gmtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
+
+/***************************************************/
+bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+{
+    assert(NULL != t);
+    return false; // not implemented in Windows
+}
+
+/***************************************************/
+void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+{
+    SOPC_UNUSED_ARG(offset_us);
+    SOPC_ASSERT(NULL != t);
+
+    t->ticksMs += (uint64_t)(duration_us / (uint64_t) US_TO_MS);
+}
+
+/***************************************************/
+bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+{
+    SOPC_UNUSED_ARG(date);
+    return true; // not implemented in Windows
 }

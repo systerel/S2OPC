@@ -137,25 +137,6 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
-{
-    SOPC_RealTime* ret = SOPC_Calloc(1, sizeof(SOPC_RealTime));
-    if (NULL != copy && NULL != ret)
-    {
-        *ret = *copy;
-    }
-    else if (NULL != ret)
-    {
-        bool ok = SOPC_RealTime_GetTime(ret);
-        if (!ok)
-        {
-            SOPC_RealTime_Delete(&ret);
-        }
-    }
-
-    return ret;
-}
-
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
     assert(NULL != t);
@@ -169,16 +150,6 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
     }
 
     return true;
-}
-
-void SOPC_RealTime_Delete(SOPC_RealTime** t)
-{
-    if (NULL == t)
-    {
-        return;
-    }
-    SOPC_Free(*t);
-    *t = NULL;
 }
 
 static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
@@ -254,13 +225,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 
     if (NULL == now)
     {
-        int res = clock_gettime(CLOCK_MONOTONIC, &t1);
-        if (-1 == res)
-        {
-            /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
-            ok = false;
-        }
+        ok = SOPC_RealTime_GetTime(&t1);
     }
     else
     {

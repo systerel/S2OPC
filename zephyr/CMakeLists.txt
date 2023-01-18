@@ -77,7 +77,8 @@ file(GLOB_RECURSE SOPC_COMMON_SRC ${S2OPC_SRC}/Common/*.c)
 list(FILTER SOPC_COMMON_SRC EXCLUDE REGEX "${S2OPC_SRC}/Common/helpers_platform_dep/.*" )
 
 # Include specific "helpers_platform_dep" files
-file(GLOB_RECURSE SOPC_ZEPHYR_SRC ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr/*.c)
+file(GLOB SOPC_ZEPHYR_SRC ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr/*.c
+     ${S2OPC_SRC}/Common/helpers_platform_dep/*.c)
 
 # Include other files
 file(GLOB_RECURSE SOPC_CLIENT_SERVER_SRC ${S2OPC_SRC}/ClientServer/*.c)

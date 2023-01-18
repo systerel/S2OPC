@@ -20,12 +20,13 @@
 #ifndef SOPC_TIME_H_
 #define SOPC_TIME_H_
 
-#include "sopc_enums.h"
 #include "sopc_platform_time.h"
 
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#include "sopc_enums.h"
 
 /**
  * \brief returns a C string representation of the given time in DateTime format
