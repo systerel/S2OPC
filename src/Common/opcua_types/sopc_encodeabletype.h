@@ -194,26 +194,42 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
 
 /**
- * \brief Initialize an encodeable object.
+ * \brief Initialize an encodeable object of the given encodeable type.
  *
- * The \c pValue parameter shall correspond to an object of the appropriate
- * type.
+ * \param type   The encodeable type of the object instance to initialize.
+ * \param pValue An object instance of the appropriate encodeable type.
+ *               It shall at least have allocation size described in the encodeable type
+ *               and is expected to be the C structure corresponding to an instance of the encodeable type
+ *               (first field is a reference to its encodeable type and next fields haves type described in it)
  */
 void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue);
 
 /**
- * \brief Clear an encodeable object.
+ * \brief Clear an encodeable object of the given encodeable type.
  *
- * The \c pValue parameter shall correspond to an object of the appropriate
- * type.
+ * \param type   The encodeable type of the object instance to clear.
+ * \param pValue An object instance of the appropriate encodeable type.
+ *               It shall at least have allocation size described in the encodeable type
+ *               and is expected to be the C structure corresponding to an instance of the encodeable type
+ *               (first field is a reference to its encodeable type and next fields have types described in it)
  */
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
 
 /**
- * \brief Encode an encodeable object.
+ * \brief Encode an encodeable object of the given encodeable type into a bytes buffer.
  *
- * The \c pValue parameter shall correspond to an object of the appropriate
- * type.
+ * \param type               The encodeable type of the object instance to encode.
+ * \param pValue             The object instance of the appropriate encodeable type to encode.
+ *                           It shall at least have allocation size described in the encodeable type
+ *                           and shall to be the C structure corresponding to an instance of the encodeable type
+ *                           (first field is a reference to its encodeable type
+ *                            and next fields have types described by its encodeable type)
+ *
+ * \param buf               The buffer in which the encodeable object will be encoded
+ * \param nestedStructLevel The number of structure levels encoded until then.
+ *                          Value 0 shall be used for first call.
+ *
+ *  \return                 A status code indicating the result of operation
  */
 SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
                                                const void* pValue,
@@ -221,10 +237,20 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
                                                uint32_t nestedStructLevel);
 
 /**
- * \brief Decode an encodeable object.
+ * \brief Decode an encodeable object of the given encodeable type from a bytes buffer.
  *
- * The \c pValue parameter shall correspond to an object of the appropriate
- * type.
+ * \param type               The encodeable type of the object instance to decode.
+ * \param pValue             An initialized object instance of the appropriate encodeable type to decode.
+ *                           It shall at least have allocation size described in the encodeable type
+ *                           and shall to be the C structure corresponding to an instance of the encodeable type
+ *                           (first field is a reference to its encodeable type
+ *                            and next fields have types described by its encodeable type)
+ *
+ * \param buf               The buffer to decode to fill the encodeable object content
+ * \param nestedStructLevel The number of structure levels decoded until then
+ *                          Value 0 shall be used for first call.
+ *
+ *  \return                 A status code indicating the result of operation
  */
 SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                void* pValue,
