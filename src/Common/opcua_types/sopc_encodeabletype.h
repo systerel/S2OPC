@@ -98,11 +98,32 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
 
 /**
  *  \brief Copy function generic signature for an encodeable object
+ *
+ *  \param dest  The encodeable object instance in which copy will be done
+ *               It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
+ *               or a built-in type object.
+ *  \param src   The encodeable object instance copied into \p dest.
+ *               It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
+ *               or a built-in type object.
+ *  \return      ::SOPC_STATUS_OK in case of success, the appropriate error status otherwise.
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
 
 /**
  *  \brief Compare function generic signature for an encodeable object
+ *
+ *  \param left      The encodeable object instance in which copy will be done
+ *                   It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
+ *                   or a built-in type object.
+ *  \param right     The encodeable object instance copied into \p dest.
+ *                   It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
+ *                   or a built-in type object.
+ * \param[out] comp  Pointer to an integer that will store the comparison result when returned status is
+ *                   SOPC_STATUS_OK. In this latter case:
+ *                   - \p comp &lt; 0 if \p left  &lt;  \p right,
+ *                   - \p comp &gt; 0 if \p left &gt; \p right and
+ *                   - \p comp == 0 if \p left == \p right.
+ *  \return          ::SOPC_STATUS_OK in case of success, the appropriate error status otherwise.
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
 
@@ -272,25 +293,39 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                uint32_t nestedStructLevel);
 
 /**
- * \brief Copy an encodeable object.
+ * \brief Copy an encodeable object of the given encodeable type.
  *
  * \param type       The encodeableType of \p destValue and \p srcValue.
- * \param destValue  The destination encodeable object in which the content copy will be done.
+ * \param destValue  The destination encodeable object instance of the given encodeable type
+ *                   in which the content copy will be done.
  *                   It shall have been initialized ::SOPC_EncodeableObject_Initialize and
- *                   cleared ::SOPC_EncodeableObject_Clear if necessary.
+ *                   cleared ::SOPC_EncodeableObject_Clear if necessary with \p type as encodeable type.
  *
- * \param srcValue   The source encodeable object from which the content copy will be done.
+ * \param srcValue   The source encodeable object instance of the given encodeable type
+ *                   from which the content copy will be done.
+ *                   It shall at least have allocation size described in the encodeable type
+ *                   and shall be the C structure corresponding to an instance of the encodeable type
+ *                   (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                    which value shall be \p type. The following fields shall have types described by \p type)
  *
  * \return           SOPC_STATUS_OK in case of success, reason of failure otherwise.
  */
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue);
 
 /**
- * \brief Compare 2 encodeable objects.
+ * \brief Compare 2 encodeable objects of the given encodeable type.
  *
  * \param type         The encodeableType of \p leftValue and \p rightValue.
- * \param leftValue    The left encodeable object operand to compare
- * \param rightValue   The right encodeable object operand to compare
+ * \param leftValue    The left encodeable object of the given encodeable type operand to compare.
+ *                     It shall at least have allocation size described in the encodeable type
+ *                     and shall be the C structure corresponding to an instance of the encodeable type
+ *                     (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                     which value shall be \p type. The following fields shall have types described by \p type)
+ * \param rightValue   The right encodeable object of the given encodeable type operand to compare.
+ *                     It shall at least have allocation size described in the encodeable type
+ *                     and shall be the C structure corresponding to an instance of the encodeable type
+ *                     (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                     which value shall be \p type. The following fields shall have types described by \p type)
  * \param[out] comp    Pointer to an integer that will store the comparison result when returned status is
  *                     SOPC_STATUS_OK. In this latter case:
  *                     - \p comp &lt; 0 if \p leftValue  &lt;  \p rightValue,
