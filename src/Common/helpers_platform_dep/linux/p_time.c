@@ -240,10 +240,10 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
     assert(NULL != date);
     static bool warned = false;
-    int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
+    const int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
 
     /* TODO: handle the EINTR case more accurately */
-    if (-1 == res && !warned)
+    if (0 != res && !warned)
     {
         /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_nanosleep failed (warn once): %d (%s)", errno,
@@ -251,5 +251,5 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
         warned = true;
     }
 
-    return -1 == res;
+    return 0 == res;
 }

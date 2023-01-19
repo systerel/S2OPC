@@ -150,7 +150,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now);
 
 /** \brief Precise sleep until specified date.
  * \param date The date at which the function shall return
- * \return true if the function failed
+ * \return true in case of success
  * \note If date is in the past, the function yields but does not wait.
  * \note The calling thread must have appropriate scheduling policy and priority for precise timing.
  */

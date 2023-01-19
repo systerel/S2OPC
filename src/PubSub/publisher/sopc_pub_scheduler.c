@@ -533,7 +533,7 @@ static void* thread_start_publish(void* arg)
         /* Otherwise sleep until there is a message to send */
         else
         {
-            ok = SOPC_RealTime_SleepUntil(context->next_timeout) == 0;
+            ok = SOPC_RealTime_SleepUntil(context->next_timeout);
             assert(ok && "Failed NanoSleep");
         }
     }

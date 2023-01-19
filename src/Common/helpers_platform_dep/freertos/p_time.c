@@ -272,10 +272,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
-    if (NULL == date)
-    {
-        return false;
-    }
+    assert(NULL != date);
     SOPC_RealTime now;
 
     now.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
@@ -295,7 +292,7 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 
         vTaskDelayUntil(&nowInternalTick, timeToWait);
     }
-    return false;
+    return true;
 }
 
 /* TODO: assert that mktime works correctly on the targeted platform

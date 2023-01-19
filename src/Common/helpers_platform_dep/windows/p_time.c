@@ -98,5 +98,5 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
     SOPC_UNUSED_ARG(date);
-    return true; // not implemented in Windows
+    return false; // not implemented in Windows
 }

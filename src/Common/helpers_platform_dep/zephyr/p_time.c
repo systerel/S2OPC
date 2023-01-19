@@ -497,10 +497,7 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 #if (CONFIG_SYS_CLOCK_TICKS_PER_SEC < 1000)
 #warning CONFIG_SYS_CLOCK_TICKS_PER_SEC is insufficient to handle durations under 1 ms
 #endif
-    if (NULL == date)
-    {
-        return false;
-    }
+    assert(NULL != date);
 
     SOPC_RealTime now = P_TIME_TimeReference_GetInternal100ns();
 
@@ -518,7 +515,7 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
     {
         toWait_us = k_usleep(toWait_us);
     }
-    return false;
+    return true;
 }
 
 #if CONFIG_NET_GPTP
