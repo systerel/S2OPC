@@ -17,9 +17,9 @@
  * under the License.
  */
 
-/** \file sopc_askpass.c
+/** \file sopc_platform_time.c
  *
- * \brief A platform independent API to ask for passwords.
+ * \brief The platform-independant implementations of "sopc_platform_time.h"
  */
 
 #include "sopc_platform_time.h"

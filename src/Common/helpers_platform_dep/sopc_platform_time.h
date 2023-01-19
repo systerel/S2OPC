@@ -18,7 +18,7 @@
  */
 
 /**
- *  \file sopc_time.h
+ *  \file sopc_platform_time.h
  *
  *  \brief A platform independent API to handle time management
  */
@@ -45,8 +45,8 @@
  * The platform-specific implementation of "p_time.h" shall provide the actual definition of
  * - \ref SOPC_RealTime to hold a RealTime information (date with no specific origin). It is
  *      only used to compute time differences. However, in case the system has an external
- *      PtP synchronization source, it is mandatory that this date is aligned to this source
- *      clock modulo 1 second. The implementation also must use a monotonic clock in all platform
+ *      PtP synchronization source, it is mandatory that this date is aligned to that PtP source
+ *      clock modulo 1 second. The implementation must also use a monotonic clock in all platform
  *      implementation even if the system time gets back or forth (e.g. because of ntp).
  * - all functions defined in this header except ::SOPC_RealTime_Create and ::SOPC_RealTime_Delete.
  */
