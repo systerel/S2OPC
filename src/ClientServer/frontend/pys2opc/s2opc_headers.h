@@ -72,7 +72,6 @@ void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size);
 /* sopc_encodeabletype.h */
 typedef void(SOPC_EncodeableObject_PfnInitialize)(void* value);
 typedef void(SOPC_EncodeableObject_PfnClear)(void* value);
-typedef void(SOPC_EncodeableObject_PfnGetSize)(void);
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
                                                            SOPC_Buffer* msgBuffer,
                                                            uint32_t nestedStructLevel);
