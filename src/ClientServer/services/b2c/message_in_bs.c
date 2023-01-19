@@ -239,7 +239,7 @@ void message_in_bs__read_activate_req_msg_identity_token(
     constants__t_SignatureData_i* const message_in_bs__user_token_signature)
 {
     *message_in_bs__p_valid_user_token = false;
-    *message_in_bs__user_token_signature = constants_bs__c_user_token_indet;
+    *message_in_bs__user_token_signature = constants__c_SignatureData_indet;
     OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
 
     if (activateSessionReq->UserIdentityToken.Length > 0)

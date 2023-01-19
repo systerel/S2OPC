@@ -594,7 +594,7 @@ void session_core_bs__server_create_session_req_do_crypto(
             return;
         }
 
-        /* Allocated the signature */
+        /* Allocate the signature */
         pSign = SOPC_Malloc(sizeof(OpcUa_SignatureData));
         if (NULL == pSign)
         {
@@ -742,14 +742,14 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
                                                      const char* pSecuPolicyUri,
                                                      const SOPC_SerializedAsymmetricKey* pKeyPriv,
                                                      SOPC_ByteString* pServerNonce,
-                                                     const SOPC_Buffer* pServerCert)
+                                                     const SOPC_Buffer* pServerCert,
+                                                     const char** errorReason)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
     SOPC_AsymmetricKey* pKey = NULL;
     SOPC_CryptoProvider* pProvider = NULL;
-    const char* errorReason = "";
 
     SOPC_ASSERT(NULL != pSign || NULL != pSecuPolicyUri || NULL != pKeyPriv || NULL != pServerNonce ||
                 NULL != pServerCert);
@@ -794,9 +794,7 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
     {
         if (0 < pSign->Signature.Length && SIZE_MAX >= (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte))
         {
-            pSign->Signature.Data =
-                SOPC_Malloc(sizeof(SOPC_Byte) *
-                            (size_t) pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+            pSign->Signature.Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) pSign->Signature.Length);
         }
         else
         {
@@ -804,17 +802,16 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
         }
         if (NULL == pSign->Signature.Data || 0 >= pSign->Signature.Length)
         {
-            status = SOPC_STATUS_OK;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pKey, pSign->Signature.Data,
-                                                    (uint32_t) pSign->Signature.Length, &errorReason);
+                                                    (uint32_t) pSign->Signature.Length, errorReason);
     }
 
-    /* Prepare the OpcUa_SignatureData */
     if (SOPC_STATUS_OK == status)
     {
         SOPC_String_Clear(&pSign->Algorithm);
@@ -823,21 +820,12 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
     }
 
     /* Clean */
-    if (NULL != pKey)
-    {
-        SOPC_KeyManager_AsymmetricKey_Free(pKey);
-        pKey = NULL;
-    }
-    if (NULL != pToSign)
-    {
-        SOPC_Free(pToSign);
-        pToSign = NULL;
-    }
-    if (NULL != pProvider)
-    {
-        SOPC_CryptoProvider_Free(pProvider);
-        pProvider = NULL;
-    }
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
+    pKey = NULL;
+    SOPC_Free(pToSign);
+    pToSign = NULL;
+    SOPC_CryptoProvider_Free(pProvider);
+    pProvider = NULL;
 
     return status;
 }
@@ -856,6 +844,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     const SOPC_Buffer* serverCert = NULL;
     OpcUa_SignatureData* pSign = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const char* errorReason = "";
 
     *session_core_bs__valid = false;
     *session_core_bs__signature = constants__c_SignatureData_indet;
@@ -895,10 +884,16 @@ void session_core_bs__client_activate_session_req_do_crypto(
         OpcUa_SignatureData_Initialize(pSign);
 
         /* Use the client private key to sign the server certificate + server nonce */
-        status =
-            session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->key_priv_cli, serverNonce, serverCert);
-
-        if (SOPC_STATUS_OK == status)
+        status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->key_priv_cli, serverNonce,
+                                             serverCert, &errorReason);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRIu32
+                                   " client signature (server certificate + server nonce) failed: %s",
+                                   session_core_bs__session, errorReason);
+        }
+        else
         {
             *session_core_bs__signature = pSign;
         }
@@ -914,15 +909,14 @@ void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_c
                                       const constants__t_Nonce_i session_core_bs__p_server_nonce,
                                       const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
                                       const constants__t_session_application_context_i session_core_bs__app_context,
-                                      constants__t_SignatureData_i* const session_core_bs__p_user_token_signature,
-                                      t_bool* const session_core_bs__p_bret)
+                                      constants__t_SignatureData_i* const session_core_bs__p_user_token_signature)
 {
     OpcUa_SignatureData* pSignUserToken = NULL;
     SOPC_ByteString* serverNonce = NULL;
     const SOPC_Buffer* serverCert = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const char* errorReason = "";
 
-    *session_core_bs__p_bret = false;
     *session_core_bs__p_user_token_signature = constants__c_SignatureData_indet;
 
     /* Check parameters */
@@ -954,19 +948,21 @@ void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_c
         /* Initialise the signature */
         OpcUa_SignatureData_Initialize(pSignUserToken);
         /* Use the user private key to sign the server certificate + server nonce */
-        status =
-            session_core_asymetric_sign(pSignUserToken, userSecurityPolicy,
-                                        (const SOPC_SerializedAsymmetricKey*) pKeyUserToken, serverNonce, serverCert);
+        status = session_core_asymetric_sign(pSignUserToken, userSecurityPolicy,
+                                             (const SOPC_SerializedAsymmetricKey*) pKeyUserToken, serverNonce,
+                                             serverCert, &errorReason);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Services: session x509 identity token signature (server certificate + server nonce) failed: %s",
+                errorReason);
+        }
 
         if (SOPC_STATUS_OK == status)
         {
             *session_core_bs__p_user_token_signature = pSignUserToken;
         }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        *session_core_bs__p_bret = true;
     }
 }
 

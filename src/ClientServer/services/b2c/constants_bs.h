@@ -176,7 +176,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_Server_Nano_Extended true
 #endif
 
-#define constants_bs__c_SignatureData_indet 0
+#define constants_bs__c_SignatureData_indet NULL
 #define constants_bs__c_Timestamp_null \
     (SOPC_Value_Timestamp) { 0, 0 }
 #define constants_bs__c_Variant_indet 0
@@ -213,7 +213,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_timer_id_indet 0
 #define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
-#define constants_bs__c_user_token_indet 0
+#define constants_bs__c_user_token_indet NULL
 #define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 #define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
