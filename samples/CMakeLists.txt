@@ -15,3 +15,5 @@ if(NOT S2OPC_CLIENTSERVER_ONLY)
   # Note: only PubSub_Server samples available for now
   add_subdirectory(PubSub)
 endif()
+
+add_subdirectory(embedded)

@@ -416,6 +416,7 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback,
             pCfg->stackSize = CONFIG_SOPC_USER_STACK_SIZE * KILOBYTE;
             pCfg->nameFilter = "";
             pCfg->pWks = &gGlbThreadWks[i + NB_SOPC_THREADS];
+            pCfg->pWks->userCallback = NULL;
         }
 
         // Fill-in user threads configuration
