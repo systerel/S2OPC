@@ -224,7 +224,7 @@ OPERATIONS
         msg = c_msg_out &
         c_msg_out : t_msg &
         p_user_token_signature : t_SignatureData_i &
-        p_user_token_signature : t_SignatureData &
+        p_user_token_signature /= c_SignatureData_indet &
         a_msg_out_type = e_msg_session_activate_req
     THEN
         l_bret :: BOOL

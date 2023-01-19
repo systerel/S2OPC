@@ -276,8 +276,7 @@ OPERATIONS
         :(p_valid_user_token : BOOL &
           user_token_signature : t_SignatureData_i &
           p_user_token : t_user_token_i &
-          (p_valid_user_token = TRUE => p_user_token : t_user_token & user_token_signature : t_SignatureData) &
-          (p_valid_user_token = FALSE => user_token_signature = c_SignatureData_indet)
+          (p_valid_user_token = TRUE => p_user_token : t_user_token)
         )
     END
     ;

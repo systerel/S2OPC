@@ -22,8 +22,7 @@ MACHINE
 
 SEES
     constants,
-    constants_statuscodes_bs,
-    message_in_bs
+    constants_statuscodes_bs
 
 OPERATIONS
 
@@ -48,7 +47,6 @@ OPERATIONS
     END
     ;
 
-    /* TODO: add user token signature for X509 */
     p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, p_server_nonce, p_channel_config_idx, p_endpoint_config_idx, p_user_token_signature) =
     PRE
         p_user_token : t_user_token_i &
@@ -59,8 +57,7 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx &
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
-        p_user_token_signature : t_SignatureData_i &
-        p_user_token_signature : t_SignatureData
+        p_user_token_signature : t_SignatureData_i
     THEN
         p_sc_valid_user,
         p_user
@@ -102,7 +99,7 @@ OPERATIONS
     END
     ;
 
-    p_user_token_type <-- get_user_token (p_user_token) =
+    p_user_token_type <-- get_user_token_type_from_token (p_user_token) =
     PRE
         p_user_token : t_user_token_i &
         p_user_token : t_user_token

@@ -321,8 +321,7 @@ OPERATIONS
                               e_session_scOrphaned} &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
-        p_user_token_signature : t_SignatureData_i &
-        p_user_token_signature : t_SignatureData
+        p_user_token_signature : t_SignatureData_i
     THEN
         p_sc_valid_user,
         p_user
