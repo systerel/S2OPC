@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 16/08/2022 09:25:24
+ Date                 : 19/01/2023 10:52:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,7 +40,6 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
-#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -91,7 +90,7 @@ extern void user_authentication_bs__is_user_token_supported(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    t_bool * const user_authentication_bs__p_supported_user_token_type,
    constants__t_SecurityPolicy * const user_authentication_bs__p_user_security_policy);
-extern void user_authentication_bs__is_valid_user_authentication(
+extern void user_authentication_bs__is_valid_user_x509_authentication(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
@@ -99,6 +98,11 @@ extern void user_authentication_bs__is_valid_user_authentication(
    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
+extern void user_authentication_bs__is_valid_username_pwd_authentication(
+   const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+   const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+   const constants__t_user_token_i user_authentication_bs__p_user_token,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
 extern void user_authentication_bs__shallow_copy_user_token(
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,

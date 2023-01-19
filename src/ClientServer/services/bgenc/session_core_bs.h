@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 26/08/2022 14:03:46
+ Date                 : 19/01/2023 10:52:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -215,7 +215,6 @@ extern void session_core_bs__sign_user_token(
    const constants__t_Nonce_i session_core_bs__p_server_nonce,
    const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
    const constants__t_session_application_context_i session_core_bs__app_context,
-   constants__t_SignatureData_i * const session_core_bs__p_user_token_signature,
-   t_bool * const session_core_bs__p_bret);
+   constants__t_SignatureData_i * const session_core_bs__p_user_token_signature);
 
 #endif

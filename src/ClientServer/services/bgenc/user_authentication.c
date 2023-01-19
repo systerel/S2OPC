@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 25/08/2022 15:31:50
+ Date                 : 19/01/2023 10:52:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -121,7 +121,7 @@ void user_authentication__allocate_valid_and_authenticated_user(
       constants_statuscodes_bs__t_StatusCode_i user_authentication__l_sc_user_authentication;
       constants__t_SecurityPolicy user_authentication__l_used_security_policy;
       t_bool user_authentication__l_is_valid_user_token;
-      constants__t_user_token_i user_authentication__l_may_decrypted_user_token;
+      constants__t_user_token_i user_authentication__l_decrypted_user_token;
       
       user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
          &user_authentication__l_user_token_type);
@@ -132,30 +132,39 @@ void user_authentication__allocate_valid_and_authenticated_user(
          &user_authentication__l_is_supported_user_token_type,
          &user_authentication__l_used_security_policy);
       if (user_authentication__l_is_supported_user_token_type == true) {
-         if (user_authentication__l_user_token_type != constants__e_userTokenType_anonymous) {
+         if (user_authentication__l_user_token_type == constants__e_userTokenType_userName) {
             user_authentication_bs__decrypt_user_token(user_authentication__p_endpoint_config_idx,
                user_authentication__p_server_nonce,
                user_authentication__l_used_security_policy,
                user_authentication__l_user_token_type,
                user_authentication__p_user_token,
                &user_authentication__l_is_valid_user_token,
-               &user_authentication__l_may_decrypted_user_token);
+               &user_authentication__l_decrypted_user_token);
             if (user_authentication__l_is_valid_user_token == true) {
-               user_authentication_bs__is_valid_user_authentication(user_authentication__p_endpoint_config_idx,
+               user_authentication_bs__is_valid_username_pwd_authentication(user_authentication__p_endpoint_config_idx,
                   user_authentication__l_user_token_type,
-                  user_authentication__l_may_decrypted_user_token,
-                  user_authentication__p_user_token_signature,
-                  user_authentication__p_server_nonce,
-                  user_authentication__l_used_security_policy,
-                  user_authentication__p_channel_config_idx,
+                  user_authentication__l_decrypted_user_token,
                   &user_authentication__l_sc_user_authentication);
             }
             else {
                user_authentication__l_sc_user_authentication = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
             }
          }
-         else {
+         else if (user_authentication__l_user_token_type == constants__e_userTokenType_x509) {
+            user_authentication_bs__is_valid_user_x509_authentication(user_authentication__p_endpoint_config_idx,
+               user_authentication__l_user_token_type,
+               user_authentication__p_user_token,
+               user_authentication__p_user_token_signature,
+               user_authentication__p_server_nonce,
+               user_authentication__l_used_security_policy,
+               user_authentication__p_channel_config_idx,
+               &user_authentication__l_sc_user_authentication);
+         }
+         else if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) {
             user_authentication__l_sc_user_authentication = constants_statuscodes_bs__e_sc_ok;
+         }
+         else {
+            user_authentication__l_sc_user_authentication = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
          }
          user_authentication__allocate_user_if_authenticated(user_authentication__p_endpoint_config_idx,
             user_authentication__p_user_token,
@@ -167,18 +176,6 @@ void user_authentication__allocate_valid_and_authenticated_user(
          *user_authentication__p_user = constants__c_user_indet;
          *user_authentication__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
       }
-   }
-}
-
-void user_authentication__get_user_token(
-   const constants__t_user_token_i user_authentication__p_user_token,
-   constants__t_user_token_type_i * const user_authentication__p_user_token_type) {
-   {
-      constants__t_user_token_type_i user_authentication__l_user_token_type;
-      
-      user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
-         &user_authentication__l_user_token_type);
-      *user_authentication__p_user_token_type = user_authentication__l_user_token_type;
    }
 }
 
