@@ -76,7 +76,7 @@ typedef struct
 /**
  * Update address space for the given NodeId*(key)
  */
-static void subscriber_pushToWriteRequest(const void* key, const void* value, void* user_data)
+static void subscriber_pushToWriteRequest(const void* key, void* value, void* user_data)
 {
     (void) value;
     SOPC_ASSERT(NULL != user_data);

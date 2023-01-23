@@ -582,13 +582,13 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
     SOPC_Free(nidStr);
 }
 
-static void forEach_DoExec(const void* key, const void* value, void* user_data)
+static void forEach_DoExec(const void* key, void* value, void* user_data)
 {
     Cache_ForEach_Exec* exec = (Cache_ForEach_Exec*) user_data;
     exec((const SOPC_NodeId*) key, (SOPC_DataValue*) value);
 }
 
-static void Cache_ForEach_Dump(const void* key, const void* value, void* user_data)
+static void Cache_ForEach_Dump(const void* key, void* value, void* user_data)
 {
     (void) user_data;
     Cache_Dump_VarValue(key, value);

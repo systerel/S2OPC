@@ -429,6 +429,8 @@ size_t SOPC_Dict_Capacity(const SOPC_Dict* d)
 
 void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, void* user_data)
 {
+    assert(NULL != func && NULL != d);
+
     for (size_t i = 0; i < d->size; ++i)
     {
         if (d->buckets[i].key != d->empty_key)

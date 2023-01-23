@@ -305,7 +305,7 @@ START_TEST(test_dict_compact)
 }
 END_TEST
 
-static void dict_callback_increment_u32(const void* key, const void* value, void* user_data)
+static void dict_callback_increment_u32(const void* key, void* value, void* user_data)
 {
     SOPC_UNUSED_ARG(key);
     SOPC_UNUSED_ARG(value);
@@ -333,7 +333,7 @@ typedef struct
     bool* values_iterated;
 } foreach_data_t;
 
-static void dict_callback_mark(const void* key, const void* value, void* user_data)
+static void dict_callback_mark(const void* key, void* value, void* user_data)
 {
     foreach_data_t* cb_data = user_data;
     size_t _key = (size_t) key;

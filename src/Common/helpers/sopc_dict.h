@@ -50,10 +50,10 @@ typedef bool SOPC_Dict_KeyEqual_Fct(const void* a, const void* b);
 
 /**
  * \brief Type of callback functions for \ref SOPC_Dict_ForEach. Both the key and
- * value belong to the dictionary and shall not be modified. The value of
- * \p user_data is set when calling \ref SOPC_Dict_ForEach.
+ * value belong to the dictionary. The parameter \p value can be modified but not reallocated nor deleted.
+ * The value of \p user_data is set when calling \ref SOPC_Dict_ForEach.
  */
-typedef void SOPC_Dict_ForEach_Fct(const void* key, const void* value, void* user_data);
+typedef void SOPC_Dict_ForEach_Fct(const void* key, void* value, void* user_data);
 
 /**
  * \brief Creates a new, empty dictionary.

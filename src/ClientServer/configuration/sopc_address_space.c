@@ -499,13 +499,34 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, con
     }
 }
 
+typedef struct
+{
+    SOPC_AddressSpace_ForEach_Fct* pFunc;
+    void* user_data;
+} AddressSpace_Dict_Context;
+
+/* \brief
+ *      This function is used to convert Dict_ForEach calls which have void* value to
+ *      AddressSpace_ForEach calls which have const void* value.
+ * \param key The dictionary key
+ * \param key The dictionary value
+ * \param key The AddressSpace_Dict_Context context needed to apply on this \p key / \p value pair.
+ */
+static void addressSpace_ForEach_Convert(const void* key, void* value, void* user_data)
+{
+    AddressSpace_Dict_Context* context = (AddressSpace_Dict_Context*) user_data;
+    assert(NULL != user_data && NULL != context->pFunc);
+    context->pFunc(key, value, context->user_data);
+}
+
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data)
 {
-    assert(space != NULL);
+    assert(NULL != space && NULL != pFunc);
 
     if (!space->readOnlyNodes)
     {
-        SOPC_Dict_ForEach(space->dict_nodes, pFunc, user_data);
+        AddressSpace_Dict_Context context = {.pFunc = pFunc, .user_data = user_data};
+        SOPC_Dict_ForEach(space->dict_nodes, addressSpace_ForEach_Convert, &context);
     }
     else
     {
