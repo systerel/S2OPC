@@ -107,8 +107,8 @@ sed -i 's/S2OPC_Toolkit_[0-9]\+\.[0-9]\+\.[0-9]\+/S2OPC_Toolkit_'"$1"'/' README.
 echo "Commit updated current version in $2-update-tagged-version: it shall be pushed as MR on gitlab ASAP"
 git commit src/CMakeLists.txt README.md $VERSION_HEADER $PYS2OPC_VERSION_JSON $PYS2OPC_VERSION_WHEEL_FILES -S -m "Ticket #$2: Update current version of Toolkit to $1" &> /dev/null || exit 1
 
-echo "Creation of $DELIVERY_NAME branch"
-git checkout -b $DELIVERY_NAME &> /dev/null || exit 1
+echo "Creation of ${DELIVERY_NAME}_branch branch"
+git checkout -b "${DELIVERY_NAME}_branch" &> /dev/null || exit 1
 
 echo "Update to $1 version in $VERSION_HEADER in $DELIVERY_NAME"
 sed -i 's/ "\*"//' $VERSION_HEADER || exit 1
@@ -222,7 +222,7 @@ if [ $? -eq 0 ]; then
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
     echo "PLEASE USE ARCHIVE ONLY FOR TESTING PURPOSE: retrieve the final archive from gitlab directly to avoid md5sum possible issue (--prefix choice)"
     echo "Please push the $2-update-tagged-version branch as MR on gitlab closing issue #$2"
-    echo "Please tag the $DELIVERY_NAME branch on bare repository WITH SIGNATURE: $DELIVERY_NAME"
+    echo "Please tag the ${DELIVERY_NAME}_branch branch on bare repository WITH SIGNATURE: $DELIVERY_NAME"
 else
     echo "==========================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' FAILED"
