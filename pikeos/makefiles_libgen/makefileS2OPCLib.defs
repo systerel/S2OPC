@@ -1,0 +1,91 @@
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+ifeq ($(S2OPC_PRJ_DIR),)
+$(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
+else
+ifeq ($(MBEDTLS_PRJ_DIR),)
+$(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
+else
+$(info S2OPC_PRJ_DIR set to $(S2OPC_PRJ_DIR))
+$(info MBEDTLS_PRJ_DIR set to $(MBEDTLS_PRJ_DIR))
+
+S2OPC_SRCS_DIR = $(S2OPC_PRJ_DIR)/src
+S2OPC_PIKEOS_MAKEFILE_DIR = $(S2OPC_PRJ_DIR)/pikeos/makefiles_libgen
+
+CPPFLAGS += -I$(PIKEOS_INSTALL_DIRECTORY)/include/
+CPPFLAGS += -I$(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+CFLAGS += -DMBEDTLS_USER_CONFIG_FILE='"mbedtls_pikeos_config.h"'
+
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtlsUserConfig
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileCommon.defs
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileClientServer.defs
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileAddspaceLoader.defs
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefilePubSub.defs
+
+ifeq ($(S2OPC_SAMPLES_ENABLE),false)
+$(info S2OPC samples build disabled)
+else
+$(info S2OPC samples build enabled)
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileSamples.defs
+APPLIST += $(APPLIST_PUBSUB_SERVER) $(APPLIST_CLIENT)
+endif
+
+ifeq ($(S2OPC_TEST_ENABLE),false)
+$(info S2OPC tests disabled)
+else
+$(info S2OPC tests enabled)
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileTests.defs
+APPLIST += $(APPLIST_S2OPC_TEST)
+endif
+
+all :
+
+APPLIST += libs2opc_common.a libs2opc_clientserver.a libs2opc_addresspaceloader.a libs2opc_pubsub.a
+
+libs2opc_common.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTCOMMON)))
+
+libs2opc_clientserver.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTCLIENTSERVER)))
+
+libs2opc_addresspaceloader.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTADDSPACE)))
+
+libs2opc_pubsub.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTPUBSUB)))
+
+.PHONY: install_header install uninstall uninstall_header uninstall_build_info_files get_build_info
+
+install: install_header
+
+install_header:
+	rm -rf $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/*
+	mkdir -p $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/Pikeos_dep $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/Common $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/ClientServer $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/PubSub
+	find $(S2OPC_SRCS_DIR)/Common -name "*.h" ! -path "$(S2OPC_SRCS_DIR)/Common/helpers_platform_dep/*" -exec cp -a '{}' $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/Common \;
+	find $(S2OPC_SRCS_DIR)/ClientServer -name "*.h" ! -path "$(S2OPC_SRCS_DIR)/ClientServer/frontend/pys2opc/*" -exec cp -a '{}' $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/ClientServer \;
+	find $(S2OPC_SRCS_DIR)/PubSub -name "*.h" -exec cp -a '{}' $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/PubSub \;
+	find $(S2OPC_SRCS_DIR)/Common/helpers_platform_dep -maxdepth 1 -name "*.h" -exec cp -a '{}' $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/Pikeos_dep \;
+	find $(S2OPC_SRCS_DIR)/Common/helpers_platform_dep/pikeos -name "*.h" -exec cp -a '{}' $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/Pikeos_dep \;
+
+clean: uninstall
+
+uninstall: uninstall_header uninstall_build_info_files
+
+uninstall_header:
+	rm -rf $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/*
+
+uninstall_build_info_files: remove_build_info_clientserver remove_build_info_pubsub remove_build_info_common
+
+endif
+endif

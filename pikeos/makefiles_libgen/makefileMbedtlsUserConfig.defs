@@ -1,0 +1,31 @@
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# Add your mbedtls configuration file and path here
+CPPFLAGS += -I$(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+CFLAGS += -DMBEDTLS_USER_CONFIG_FILE='"mbedtls_pikeos_config.h"'
+
+
+# Add implementation of posix function time() and gmtime_r()
+USER_TIME_IMPLEMENTATION_DIR = $(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+USER_TIME_IMPLEMENTATION_SRC = $(USER_TIME_IMPLEMENTATION_DIR)/p_time_mbedtls
+
+# Add implementation of function mbedtls_hardware_poll() needed to furnish source of randomness
+USER_CUSTOM_ENTROPY_SOURCE_DIR = $(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+USER_CUSTOM_ENTROPY_SOURCE_SRC = $(USER_CUSTOM_ENTROPY_SOURCE_DIR)/p_entropy_source
+
+MBEDTLS_MODLIST_USERCUSTOM_IMP = $(USER_CUSTOM_ENTROPY_SOURCE_SRC) $(USER_TIME_IMPLEMENTATION_SRC)

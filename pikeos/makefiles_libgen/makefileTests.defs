@@ -1,0 +1,51 @@
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtls.defs
+-include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtlsUserConfig.defs
+
+S2OPC_UNIT_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/unit_test
+S2OPC_CHECK_UNIT_TEST_DIR = $(S2OPC_UNIT_TEST_DIR)/check_tests
+S2OPC_VALIDATION_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/validation_test
+MBEDTLS_CONFIG_USER_DIR = ${S2OPC_PRJ_DIR}/pikeos/common/mbedtls
+
+CPPFLAGS += -I${S2OPC_PRJ_DIR}/pikeos/common -I$(MBEDTLS_CONFIG_USER_DIR)
+
+S2OPC_UNIT_TEST_OBJ = $(patsubst %.c,%,$(wildcard ${S2OPC_UNIT_TEST_DIR}/*.c))
+S2OPC_CHECK_UNIT_TEST_OBJ = $(patsubst %.c,%,$(wildcard ${S2OPC_CHECK_UNIT_TEST_DIR}/*.c))
+S2OPC_VALIDATION_TEST_OBJ = $(patsubst %.c,%,$(wildcard ${S2OPC_VALIDATION_TEST_DIR}/*.c))
+
+MODLIST_S2OPC_TESTS = $(MBEDTLS_MODLIST) $(MBEDTLS_MODLIST_USERCUSTOM_IMP) $(S2OPC_MODLISTPUBSUB) $(S2OPC_MODLISTCLIENTSERVER) $(S2OPC_MODLISTCOMMON) $(S2OPC_MODLISTADDSPACE) $(S2OPC_MODLISTTIME) \
+			$(S2OPC_UNIT_TEST_OBJ) \
+            $(S2OPC_CHECK_UNIT_TEST_OBJ) \
+            $(S2OPC_VALIDATION_TEST_OBJ)
+
+APPLIST_S2OPC_TEST = unit_test.elf
+
+# Discard Warning on generated files
+$(ODIR)/${S2OPC_VALIDATION_TEST_DIR}/address_space.o: ${S2OPC_VALIDATION_TEST_DIR}/address_space.c $(MAKEFILE_LIST)
+	@test -d "$(@D)" || mkdir -p "$(@D)"
+ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
+	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
+endif
+ifneq ($(ARTIFACT_FLAGS_C),)
+	$(CC) $(ARTIFACT_FLAGS_C) -Wno-cast-qual -Wno-missing-field-initializers -o $@ $<
+else
+	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-cast-qual -Wno-missing-field-initializers  $(DEP_FLAGS) -o $@ -c $<)
+endif
+
+$(APPLIST_S2OPC_TEST): $(addprefix $(ODIR)/, $(addsuffix .o, $(MODLIST_S2OPC_TESTS)))

@@ -55,7 +55,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "p_time.h"
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 

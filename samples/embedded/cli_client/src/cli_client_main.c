@@ -57,7 +57,6 @@ static char* epURL = NULL;
 #define LOG_INFO(...) SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
 #define LOG_WARNING(...) SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
 #define LOG_ERROR(...) SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
-#define PRINT printf
 #define YES_NO(x) ((x) ? "YES" : "NO")
 
 /***************************************************/

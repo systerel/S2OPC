@@ -1,0 +1,123 @@
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+ifeq ($(S2OPC_PRJ_DIR),)
+$(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
+else
+ifeq ($(MBEDTLS_PRJ_DIR),)
+$(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
+else
+
+# S2OPC common paths
+S2OPC_SRC_DIR = ${S2OPC_PRJ_DIR}/src
+S2OPC_COMMON_DIR = ${S2OPC_SRC_DIR}/Common
+S2OPC_COMMON_CONFIGURATION_DIR= ${S2OPC_COMMON_DIR}/configuration
+S2OPC_COMMON_CRYPTO_DIR = ${S2OPC_COMMON_DIR}/crypto
+S2OPC_CRYPTO_LIBDEP_DIR = ${S2OPC_COMMON_CRYPTO_DIR}/lib_dep
+S2OPC_LIBDEP_MBEDTLS_DIR = ${S2OPC_CRYPTO_LIBDEP_DIR}/mbedtls
+S2OPC_CRYPTO_LIBITF_DIR = ${S2OPC_COMMON_CRYPTO_DIR}/lib_itf
+S2OPC_COMMON_HELPERS_DIR = ${S2OPC_COMMON_DIR}/helpers
+S2OPC_COMMON_PLATFORMDEP_DIR = $(S2OPC_COMMON_DIR)/helpers_platform_dep
+S2OPC_PLATFORMDEP_PIKEOS_DIR = $(S2OPC_COMMON_PLATFORMDEP_DIR)/pikeos
+S2OPC_PIKEOS_TIME_DIR = ${S2OPC_PLATFORMDEP_PIKEOS_DIR}/time
+S2OPC_PIKEOS_SIGNAL_DIR = ${S2OPC_PLATFORMDEP_PIKEOS_DIR}/signal
+S2OPC_COMMON_OPCUATYPES_DIR = ${S2OPC_COMMON_DIR}/opcua_types
+S2OPC_COMMON_SKS_DIR = ${S2OPC_COMMON_DIR}/sks
+
+$(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c: $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c_
+	cp $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c_ $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c
+
+remove_build_info_common:
+	rm -f $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c
+
+# Add common S2OPC inclusion path
+CPPFLAGS += -I${S2OPC_SRC_DIR} -I${S2OPC_COMMON_CONFIGURATION_DIR} \
+			-I${S2OPC_COMMON_CRYPTO_DIR} -I${S2OPC_LIBDEP_MBEDTLS_DIR} \
+			-I${S2OPC_CRYPTO_LIBITF_DIR} \
+			-I${S2OPC_COMMON_HELPERS_DIR} -I${S2OPC_COMMON_PLATFORMDEP_DIR} \
+ 			-I${S2OPC_PLATFORMDEP_PIKEOS_DIR} -I${S2OPC_PIKEOS_SIGNAL_DIR} \
+			-I${S2OPC_PIKEOS_TIME_DIR} -I${S2OPC_COMMON_OPCUATYPES_DIR} \
+			-I${S2OPC_COMMON_SKS_DIR}
+
+# Add path to cryptographic library headers
+CPPFLAGS += -I$(MBEDTLS_PRJ_DIR)/include
+
+# S2OPC Specific flags
+CFLAGS += -DSOPC_TIME_T_SIZE=8 -DSOPC_PTR_SIZE=8 -DSOPC_MAX_MONITORED_ITEM=10000 -DWITH_NANO_EXTENDED=0 -Wno-aggregate-return
+
+# Common C source files necessary
+
+S2OPC_COMMON_CONFIGURATION_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_CONFIGURATION_DIR}/*.c)) $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info
+
+S2OPC_COMMON_CRYPTO_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_CRYPTO_DIR}/*.c))
+
+S2OPC_LIBDEP_MBEDTLS_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_LIBDEP_MBEDTLS_DIR}/*.c))
+
+S2OPC_COMMON_HELPERS_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_HELPERS_DIR}/*.c))
+
+S2OPC_COMMON_PLATFORMDEP_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_PLATFORMDEP_DIR}/*.c))
+
+S2OPC_PLATFORMDEP_PIKEOS_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_PLATFORMDEP_PIKEOS_DIR}/*.c))
+
+S2OPC_PIKEOS_SIGNAL_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_PIKEOS_SIGNAL_DIR}/*.c))
+
+S2OPC_PIKEOS_TIME_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_PIKEOS_TIME_DIR}/*.c))
+
+S2OPC_COMMON_OPCUATYPES_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_OPCUATYPES_DIR}/*.c))
+
+S2OPC_COMMON_SKS_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_SKS_DIR}/*.c))
+
+S2OPC_MODLISTTIME += ${S2OPC_PIKEOS_TIME_OBJ}
+
+S2OPC_MODLISTCOMMON += ${S2OPC_COMMON_CONFIGURATION_OBJ} \
+		${S2OPC_COMMON_CRYPTO_OBJ} \
+		${S2OPC_LIBDEP_MBEDTLS_OBJ} \
+		${S2OPC_LIBDEP_NOCRYPTO_OBJ} \
+		${S2OPC_COMMON_HELPERS_OBJ} \
+		${S2OPC_COMMON_PLATFORMDEP_OBJ} \
+		${S2OPC_PLATFORMDEP_PIKEOS_OBJ} \
+		${S2OPC_PIKEOS_SIGNAL_OBJ} \
+		${S2OPC_COMMON_OPCUATYPES_OBJ} \
+		${S2OPC_COMMON_SKS_OBJ}
+
+# Discard Warning on generated files
+$(ODIR)/${S2OPC_COMMON_OPCUATYPES_DIR}/sopc_types.o: ${S2OPC_COMMON_OPCUATYPES_DIR}/sopc_types.c $(MAKEFILE_LIST)
+	@test -d "$(@D)" || mkdir -p "$(@D)"
+ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
+	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
+endif
+ifneq ($(ARTIFACT_FLAGS_C),)
+	$(CC) $(ARTIFACT_FLAGS_C)  -Wno-discarded-qualifiers -Wno-cast-qual -o $@ $<
+else
+	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS)  -Wno-discarded-qualifiers -Wno-cast-qual  $(DEP_FLAGS) -o $@ -c $<)
+endif
+
+
+# Discard Warning "might be a candidate for 'gnu_printf'"
+$(ODIR)/${S2OPC_COMMON_HELPERS_DIR}/sopc_log_manager.o: ${S2OPC_COMMON_HELPERS_DIR}/sopc_log_manager.c $(MAKEFILE_LIST)
+	@test -d "$(@D)" || mkdir -p "$(@D)"
+ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
+	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
+endif
+ifneq ($(ARTIFACT_FLAGS_C),)
+	$(CC) $(ARTIFACT_FLAGS_C)  -Wno-suggest-attribute=format -o $@ $<
+else
+	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS)  -Wno-suggest-attribute=format  $(DEP_FLAGS) -o $@ -c $<)
+endif
+
+endif
+endif
