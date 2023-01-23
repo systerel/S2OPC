@@ -76,49 +76,28 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_
                                                          SOPC_Server_Config* server_config);
 
 /**
- * \brief Sets the values for runtime variables in the address space.
+ * \brief Build a write request to write the values for runtime variables in the address space.
  *
- * \param endpoint_config_idx  Config index of the endpoint where to send the
- *                             write request.
  * \param vars                 Values of the runtime variables.
  *
- * \param asyncRespContext     Context to use when sending asynchronous local service request
- *                             to set the runtime variables.
- *
- * \return \c TRUE on success, \c FALSE in case of failure.
+ * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
  *
  * This function gathers all the runtime values passed as parameters into a
- * single write request sent to the given endpoint. This write request may fail,
- * the application should watch the \c SE_LOCAL_SERVICE_RESPONSE event to be
- * informed of success or failure.
- *
- * This function returns as soon as the write request is sent, which means there
- * might be a delay between when this function returns, and when the values are
- * observable in the address space.
+ * single write request that should be used with ::SOPC_ToolkitServer_AsyncLocalServiceRequest
+ * to update the runtime variables of the server.
  */
-bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
-                               SOPC_Server_RuntimeVariables* vars,
-                               uintptr_t asyncRespContext);
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars);
 
 /**
- * \brief Update the server status values runtime variables in the address space.
+ * \brief Build a write request to update the server status values runtime variables in the address space.
  *
- * \param endpoint_config_idx  Config index of the endpoint where to send the
- *                             write request.
  * \param vars                 Values of the runtime variables.
- * \return \c TRUE on success, \c FALSE in case of failure.
+ * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
  *
  * This function gathers all the server status values passed as parameters into a
- * single write request sent to the given endpoint. This write request may fail,
- * the application should watch the \c SE_LOCAL_SERVICE_RESPONSE event to be
- * informed of success or failure.
- *
- * This function returns as soon as the write request is sent, which means there
- * might be a delay between when this function returns, and when the values are
- * observable in the address space.
+ * single write request that should be used with ::SOPC_ToolkitServer_AsyncLocalServiceRequest
+ * to update the runtime variables of the server.
  */
-bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
-                                              SOPC_Server_RuntimeVariables* vars,
-                                              uintptr_t asyncRespContext);
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SOPC_Server_RuntimeVariables* vars);
 
 #endif

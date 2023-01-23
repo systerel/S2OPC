@@ -604,9 +604,7 @@ static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVa
            set_server_capabilities_operation_limits_variables(write_values, vars);
 }
 
-bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
-                               SOPC_Server_RuntimeVariables* vars,
-                               uintptr_t asyncRespContext)
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
@@ -617,7 +615,7 @@ bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
     {
         SOPC_Array_Delete(write_values);
         SOPC_Free(request);
-        return false;
+        return NULL;
     }
 
     size_t n_values = SOPC_Array_Size(write_values);
@@ -626,14 +624,11 @@ bool SOPC_RuntimeVariables_Set(uint32_t endpoint_config_idx,
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
     request->NoOfNodesToWrite = (int32_t) n_values;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, asyncRespContext);
 
-    return true;
+    return request;
 }
 
-bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
-                                              SOPC_Server_RuntimeVariables* vars,
-                                              uintptr_t asyncRespContext)
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
@@ -644,7 +639,7 @@ bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
     {
         SOPC_Array_Delete(write_values);
         SOPC_Free(request);
-        return false;
+        return NULL;
     }
 
     size_t n_values = SOPC_Array_Size(write_values);
@@ -653,7 +648,6 @@ bool SOPC_RuntimeVariables_UpdateServerStatus(uint32_t endpoint_config_idx,
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
     request->NoOfNodesToWrite = (int32_t) n_values;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(endpoint_config_idx, request, asyncRespContext);
 
-    return true;
+    return request;
 }

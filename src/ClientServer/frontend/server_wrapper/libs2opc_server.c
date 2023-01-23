@@ -122,17 +122,35 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
 
     assert(&OpcUa_WriteResponse_EncodeableType == encType);
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
+    OpcUa_WriteRequest* writeReqCtx = (OpcUa_WriteRequest*) helperCtx->userContext;
     bool ok = (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult));
 
     for (int32_t i = 0; ok && i < writeResp->NoOfResults; ++i)
     {
-        ok &= (writeResp->Results[i] == SOPC_GoodGenericStatus);
+        ok &= SOPC_IsGoodStatus(writeResp->Results[i]);
     }
 
     if (!ok)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s\n",
-                               helperCtx->eventCtx.localService.internalErrorMsg);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s\n",
+                                 helperCtx->eventCtx.localService.internalErrorMsg);
+        for (int32_t i = 0; NULL != writeReqCtx && i < writeResp->NoOfResults && i < writeReqCtx->NoOfNodesToWrite; ++i)
+        {
+            if (!SOPC_IsGoodStatus(writeResp->Results[i]))
+            {
+                char* nodeIdStr = SOPC_NodeId_ToCString(&writeReqCtx->NodesToWrite[i].NodeId);
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "- Writing runtime variable %s failed with status 0x%X\n", nodeIdStr,
+                                         writeResp->Results[i]);
+                SOPC_Free(nodeIdStr);
+            }
+        }
+    }
+
+    if (NULL != writeReqCtx)
+    {
+        OpcUa_WriteRequest_Clear((void*) writeReqCtx);
+        SOPC_Free(writeReqCtx);
     }
 }
 
@@ -261,9 +279,39 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
         ctx->eventCtx.localService.internalErrorMsg =
             "Setting runtime variables of server build information nodes failed."
             " Please check address space content includes necessary base information nodes.";
-        bool res = SOPC_RuntimeVariables_Set(sopc_server_helper_config.endpointIndexes[0],
-                                             &sopc_server_helper_config.runtimeVariables, (uintptr_t) ctx);
-        status = (res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+        OpcUa_WriteRequest* writeRequest =
+            SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
+        if (NULL != writeRequest)
+        {
+            OpcUa_WriteRequest* writeRequestCopyCtx = SOPC_Malloc(sizeof(*writeRequestCopyCtx));
+            if (NULL != writeRequestCopyCtx)
+            {
+                SOPC_EncodeableObject_Initialize(&OpcUa_WriteRequest_EncodeableType, writeRequestCopyCtx);
+                status =
+                    SOPC_EncodeableObject_Copy(&OpcUa_WriteRequest_EncodeableType, writeRequestCopyCtx, writeRequest);
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+                OpcUa_WriteRequest_Clear(writeRequest);
+                SOPC_Free(writeRequest);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                ctx->userContext = (uintptr_t) writeRequestCopyCtx;
+                SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], writeRequest,
+                                                            (uintptr_t) ctx);
+            }
+            else
+            {
+                OpcUa_WriteRequest_Clear(writeRequest);
+                SOPC_Free(writeRequest);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
     else
     {
@@ -321,8 +369,36 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
             ctx->eventCtx.localService.isHelperInternal = true;
             ctx->eventCtx.localService.internalErrorMsg =
                 "Updating runtime variables of server build information nodes failed";
-            if (!SOPC_RuntimeVariables_UpdateServerStatus(sopc_server_helper_config.endpointIndexes[0], runtime_vars,
-                                                          (uintptr_t) ctx))
+            OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(runtime_vars);
+
+            if (NULL != writeRequest)
+            {
+                OpcUa_WriteRequest* writeRequestCopyCtx = SOPC_Malloc(sizeof(*writeRequestCopyCtx));
+                if (NULL != writeRequestCopyCtx)
+                {
+                    SOPC_EncodeableObject_Initialize(&OpcUa_WriteRequest_EncodeableType, writeRequestCopyCtx);
+                    status = SOPC_EncodeableObject_Copy(&OpcUa_WriteRequest_EncodeableType, writeRequestCopyCtx,
+                                                        writeRequest);
+                }
+                else
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                    OpcUa_WriteRequest_Clear(writeRequest);
+                    SOPC_Free(writeRequest);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    ctx->userContext = (uintptr_t) writeRequestCopyCtx;
+                    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0],
+                                                                writeRequest, (uintptr_t) ctx);
+                }
+                else
+                {
+                    OpcUa_WriteRequest_Clear(writeRequest);
+                    SOPC_Free(writeRequest);
+                }
+            }
+            else
             {
                 status = SOPC_STATUS_NOK;
             }
