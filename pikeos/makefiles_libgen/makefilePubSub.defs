@@ -1,0 +1,69 @@
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+ifeq ($(S2OPC_PRJ_DIR),)
+$(error S2OPC_PRJ_DIR and should be set to S2OPC project path)
+else
+
+# S2OPC paths
+S2OPC_SRC_DIR = ${S2OPC_PRJ_DIR}/src
+S2OPC_PUBSUB_DIR = ${S2OPC_SRC_DIR}/PubSub
+SOPC_PUBSUB_COMMON_DIR = ${S2OPC_PUBSUB_DIR}/common
+SOPC_PUBSUB_DATASET_DIR = ${S2OPC_PUBSUB_DIR}/dataset
+SOPC_PUBSUB_NETWORK_DIR = ${S2OPC_PUBSUB_DIR}/network
+SOPC_PUBSUB_PROTOCOL_DIR = ${S2OPC_PUBSUB_DIR}/protocol
+SOPC_PUBSUB_PUBLISHER_DIR = ${S2OPC_PUBSUB_DIR}/publisher
+SOPC_PUBSUB_SECURITY_DIR = ${S2OPC_PUBSUB_DIR}/security
+SOPC_PUBSUB_SUBSCRIBER_DIR = ${S2OPC_PUBSUB_DIR}/subscriber
+
+$(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c: $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c_
+	cp $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c_ $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c
+
+remove_build_info_pubsub:
+	rm -f $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c
+
+# Add S2OPC inclusion path
+CPPFLAGS += -I${SOPC_PUBSUB_COMMON_DIR} -I${SOPC_PUBSUB_DATASET_DIR} \
+			-I${SOPC_PUBSUB_NETWORK_DIR} -I${SOPC_PUBSUB_PROTOCOL_DIR} \
+			-I${SOPC_PUBSUB_PUBLISHER_DIR} -I${SOPC_PUBSUB_SECURITY_DIR} \
+			-I${SOPC_PUBSUB_SUBSCRIBER_DIR}
+
+# PubSub C source files
+
+SOPC_PUBSUB_COMMON_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_COMMON_DIR}/*.c)) $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info
+
+SOPC_PUBSUB_DATASET_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_DATASET_DIR}/*.c))
+
+SOPC_PUBSUB_NETWORK_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_NETWORK_DIR}/*.c))
+
+SOPC_PUBSUB_PROTOCOL_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_PROTOCOL_DIR}/*.c))
+
+SOPC_PUBSUB_PUBLISHER_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_PUBLISHER_DIR}/*.c))
+
+SOPC_PUBSUB_SECURITY_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_SECURITY_DIR}/*.c))
+
+SOPC_PUBSUB_SUBSCRIBER_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_SUBSCRIBER_DIR}/*.c))
+
+S2OPC_MODLISTPUBSUB += ${SOPC_PUBSUB_COMMON_OBJ} \
+		${SOPC_PUBSUB_DATASET_OBJ} \
+		${SOPC_PUBSUB_NETWORK_OBJ} \
+		${SOPC_PUBSUB_PROTOCOL_OBJ} \
+		${SOPC_PUBSUB_PUBLISHER_OBJ} \
+		${SOPC_PUBSUB_SECURITY_OBJ} \
+		${SOPC_PUBSUB_SUBSCRIBER_OBJ}
+
+endif

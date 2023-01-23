@@ -63,10 +63,10 @@ EXLUDE_CERT_VERIFIED_MANUALLY="*\/linux\/p_sopc_askpass.c"
 CHECK_CERT_RULE_ABSENCE_FAILED=false
 
 CHECK_CERT_RULE_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit)"
-for FILE in $(find $CSRC -not -path $EXLUDE_CERT_VERIFIED_MANUALLY -name "*.c" -or -name "*.h") ; 
+for FILE in $(find $CSRC -not -path $EXLUDE_CERT_VERIFIED_MANUALLY -not -path "*/pikeos/time/*" -name "*.c" -or -not -path "*/pikeos/time/*" -not -path "*/pikeos/p_time_c99.h" -name "*.h") ;
 do
 	# We choose to remove:
-	# - (L1) comments inside /* .. */ 
+	# - (L1) comments inside /* .. */
 	# - (L2) comments after //
 	# - (L3) : - remove sequence \" to avoid interpreting that as a string ending
 	#          - replace all string content by "..." to avoid false detection in strings
@@ -83,10 +83,10 @@ $CHECK_CERT_RULE_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence o
 
 CHECK_DIRECT_ABSENCE_FAILED=false
 CHECK_DIRECT_ABSENCE="(printf)"
-for FILE in $(find $CSRC -name "*.c" -or -name "*.h") ; 
+for FILE in $(find $CSRC -name "*.c" -or -name "*.h") ;
 do
 	# We choose to remove:
-	# - (L1) comments inside /* .. */ 
+	# - (L1) comments inside /* .. */
 	# - (L2) comments after //
 	# - (L3) : - remove sequence \" to avoid interpreting that as a string ending
 	#          - replace all string content by "..." to avoid false detection in strings
@@ -159,7 +159,7 @@ fi
 
 CERT_RULES=cert-flp30-c,cert-fio38-c,cert-env33-c,cert-err34-c,cert-msc30-c
 # Define include directories
-SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -type d`)
+SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*pikeos*" -type d`)
 SRC_INCL=${SRC_DIRS[@]/#/-I}
 # includes the generated export file
 SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
@@ -167,7 +167,7 @@ SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
 SRC_INCL="$SRC_INCL -I/usr/local/include/cyclone_crypto"
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
-find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE -D__error_t_defined \; &> $CLANG_TIDY_LOG
+find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -not -path "*pikeos*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE -D__error_t_defined \; &> $CLANG_TIDY_LOG
 # Check if resulting log contains error or warnings
 grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
 if [[ $? != 0 ]]; then
