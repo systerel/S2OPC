@@ -27,6 +27,7 @@
 #ifndef SOPC_SERVICE_CALL_CONTEXT_H_
 #define SOPC_SERVICE_CALL_CONTEXT_H_
 
+#include "sopc_address_space_access.h"
 #include "sopc_enum_types.h"
 #include "sopc_user.h"
 
@@ -47,5 +48,11 @@ const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callConte
 
 /** \brief Returns the server endpoint of the connection used to call the service */
 uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr);
+
+/** \brief Get direct access to the address space.
+ *         AddressSpace is only available during a method call and shall not be kept
+ *         nor used after method call ends. Otherwise behavior is undefined.
+ */
+SOPC_AddressSpaceAccess* SOPC_CallContext_GetAddressSpaceAccess(const SOPC_CallContext* callContextPtr);
 
 #endif // SOPC_SERVICE_CALL_CONTEXT_H_

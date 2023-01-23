@@ -29,9 +29,6 @@
         x(ReferenceType, reference_type, extra) x(Variable, variable, extra) x(VariableType, variable_type, extra)    \
             x(View, view, extra)
 
-#define ELEMENT_ATTRIBUTE_GETTER_DECL(ret_type, lowercase_name, camel_case_name) \
-    ret_type* current_element_##lowercase_name(SOPC_AddressSpace_Node* node);
-
 typedef struct SOPC_Value_Timestamp
 {
     SOPC_DateTime timestamp;

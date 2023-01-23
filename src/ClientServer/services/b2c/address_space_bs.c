@@ -34,6 +34,8 @@
 
 #include "address_space_impl.h"
 #include "opcua_identifiers.h"
+#include "sopc_address_space_access_internal.h"
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
@@ -70,6 +72,35 @@ void address_space_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+static void generate_changes_notifs_after_method_call(SOPC_SLinkedList* operations)
+{
+    SOPC_ASSERT(NULL != operations);
+    SOPC_AddressSpaceAccessOperation* operation =
+        (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations);
+    // Note: operations were pushed (prepended) and we pop (head) them which leads to a FILO behavior.
+    //       Since we push them as next events in the services event queue, it finally leads to a FIFO behavior.
+    while (NULL != operation)
+    {
+        switch (operation->operation)
+        {
+        case SOPC_ADDSPACE_WRITE:
+            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
+                                         (uintptr_t) operation->param1, (uintptr_t) operation->param2);
+            break;
+        case SOPC_ADDSPACE_CHANGE_NODE:
+            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0,
+                                         (uintptr_t) operation->param1, (uintptr_t) operation->param2);
+            break;
+        default:
+            SOPC_ASSERT(false);
+            break;
+        }
+        SOPC_Free(operation);
+        operation = (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations);
+    }
+    SOPC_SLinkedList_Delete(operations);
+}
 
 void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i address_space_bs__p_endpoint_config_idx,
                                        const constants__t_CallMethodPointer_i address_space_bs__p_call_method_pointer,
@@ -113,8 +144,17 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
     uint32_t noOfOutput = 0;
     SOPC_Variant* outputArgs = NULL;
     SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
+    cc->addressSpaceForMethodCall = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
+    if (NULL == cc->addressSpaceForMethodCall)
+    {
+        SOPC_CallContext_Free(cc);
+        *address_space_bs__p_rawStatusCode = OpcUa_BadOutOfMemory;
+        return;
+    }
     *address_space_bs__p_rawStatusCode =
         method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
+    generate_changes_notifs_after_method_call(SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
+    SOPC_AddressSpaceAccess_Delete(&cc->addressSpaceForMethodCall);
     SOPC_CallContext_Free(cc);
     if (0 != noOfOutput && NULL == outputArgs)
     {

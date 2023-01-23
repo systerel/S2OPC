@@ -34,6 +34,8 @@ struct SOPC_CallContext
     const char* secuPolicyUri;
     const SOPC_User* user;
 
+    SOPC_AddressSpaceAccess* addressSpaceForMethodCall;
+
     uintptr_t auxParam; // Used to store initial auxParam in application events (it will be replaced by call context)
 };
 

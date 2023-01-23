@@ -190,3 +190,8 @@ uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callConte
 {
     return callContextPtr->endpointConfigIdx;
 }
+
+SOPC_AddressSpaceAccess* SOPC_CallContext_GetAddressSpaceAccess(const SOPC_CallContext* callContextPtr)
+{
+    return callContextPtr->addressSpaceForMethodCall;
+}
