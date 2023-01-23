@@ -88,7 +88,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     if (ls->syncId != sopc_server_helper_config.syncLocalServiceId)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "Received unexpected synchronous local service response: %s\n",
+                                 "Received unexpected synchronous local service response: %s",
                                  SOPC_EncodeableType_GetName(encType));
     }
     else
@@ -102,7 +102,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Issue %d treating synchronous local service response: %s\n", (int) status,
+                                   "Issue %d treating synchronous local service response: %s", (int) status,
                                    SOPC_EncodeableType_GetName(encType));
         }
         else
@@ -132,7 +132,7 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
 
     if (!ok)
     {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s\n",
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s",
                                  helperCtx->eventCtx.localService.internalErrorMsg);
         for (int32_t i = 0; NULL != writeReqCtx && i < writeResp->NoOfResults && i < writeReqCtx->NoOfNodesToWrite; ++i)
         {
@@ -140,7 +140,7 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
             {
                 char* nodeIdStr = SOPC_NodeId_ToCString(&writeReqCtx->NodesToWrite[i].NodeId);
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                         "- Writing runtime variable %s failed with status 0x%X\n", nodeIdStr,
+                                         "- Writing runtime variable %s failed with status 0x%X", nodeIdStr,
                                          writeResp->Results[i]);
                 SOPC_Free(nodeIdStr);
             }
@@ -173,7 +173,7 @@ void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "Received an asynchronous local service response without configured handler for response type %s."
-            " Please check you configured an asynchronous local service response callback if you sent request.\n",
+            " Please check you configured an asynchronous local service response callback if you sent request.",
             SOPC_EncodeableType_GetName(encType));
     }
 }
@@ -226,7 +226,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Error configuring endpoint %" PRIu8
                                    ": %s."
-                                   " Please check associated configuration data is coherent and complete.\n",
+                                   " Please check associated configuration data is coherent and complete.",
                                    i, sopc_server_helper_config.endpoints[i]->endpointURL);
             status = SOPC_STATUS_NOK;
         }
