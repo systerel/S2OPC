@@ -252,6 +252,22 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
     t->ticksMs += (uint64_t)(duration_us / (uint64_t) US_TO_MS);
 }
 
+int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+{
+    SOPC_ASSERT(NULL != tRef);
+    SOPC_RealTime t1;
+    if (NULL == t)
+    {
+        t1.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+    }
+    else
+    {
+        t1 = *now;
+    }
+
+    return (((int64_t) t1.ticksMs) - ((int64_t) tRef.ticksMs)) * US_TO_MS;
+}
+
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 {
     SOPC_ASSERT(NULL != t);

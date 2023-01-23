@@ -492,6 +492,24 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 }
 
 /***************************************************/
+int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+{
+    assert(NULL != tRef);
+    SOPC_RealTime t1;
+
+    if (NULL == t)
+    {
+        t1 = P_TIME_TimeReference_GetInternal100ns();
+    }
+    else
+    {
+        t1 = *t;
+    }
+
+    return (((int64_t) t1.tick100ns) - ((int64_t) tRef->tick100ns)) / US_TO_100NS;
+}
+
+/***************************************************/
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
 #if (CONFIG_SYS_CLOCK_TICKS_PER_SEC < 1000)

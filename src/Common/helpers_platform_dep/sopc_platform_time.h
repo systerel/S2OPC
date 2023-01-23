@@ -120,6 +120,15 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t);
 
 /**
+ * \brief Convert compare two \p SOPC_RealTime elements into microseconds.
+ * \param tRef The reference time. Shall be non-NULL
+ * \param t A SOPC_RealTime value (current time is used if NULL).
+ * \return the number of microseconds between the reference \p tRef and \p t. Positive if \p t
+ *  is after \p tRef
+ */
+int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t);
+
+/**
  * \brief Adds an offset to a \a SOPC_RealTime object, ensuring a specific time offset towards a
  *        synchronized clock within a periodic time window.
  *        The offset is measured regarding the dateTime Clock, thus implying that it

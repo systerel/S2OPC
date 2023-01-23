@@ -236,6 +236,25 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
     return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
 }
 
+int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+{
+    struct timespec t1 = {0};
+
+    if (NULL == t)
+    {
+        const bool ok = SOPC_RealTime_GetTime(&t1);
+        assert(ok);
+    }
+    else
+    {
+        t1 = *t;
+    }
+    int64_t delta_sec = (int64_t) t1.tv_sec - (int64_t) tRef->tv_sec;
+    int64_t delta_nsec = (int64_t) t1.tv_nsec - (int64_t) tRef->tv_nsec;
+
+    return delta_sec * SOPC_MICROSECOND_TO_SECONDS + delta_nsec / SOPC_MICROSECOND_TO_NANOSECONDS;
+}
+
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
     assert(NULL != date);

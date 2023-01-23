@@ -217,6 +217,30 @@ static void check_network_msg_content_multi_dsm(SOPC_Dataset_LL_NetworkMessage* 
     }
 }
 
+START_TEST(test_tc_tools_test)
+{
+    SOPC_RealTime* t1 = SOPC_RealTime_Create(NULL);
+    SOPC_RealTime* t2 = SOPC_RealTime_Create(t1);
+    int64_t delta_us;
+
+    ck_assert_ptr_nonnull(t1);
+    ck_assert_ptr_nonnull(t2);
+    SOPC_RealTime_AddSynchedDuration(t2, 2500, -1);
+
+    // Check that t2 is close to t1 + 2500 us
+    delta_us = SOPC_RealTime_DeltaUs(t1, t2);
+    ck_assert_int_lt(delta_us - 2500, 10);
+
+    SOPC_RealTime_SleepUntil(t2);
+
+    // Check that the minimum amount of time has elapsed
+    delta_us = SOPC_RealTime_DeltaUs(t1, NULL);
+    ck_assert_int_gt(delta_us, 2499);
+
+    SOPC_RealTime_Delete(&t1);
+    SOPC_RealTime_Delete(&t2);
+}
+
 START_TEST(test_hl_network_msg_encode)
 {
     // Initialize endianess for encoders
@@ -1208,6 +1232,10 @@ int main(void)
     SRunner* sr;
 
     Suite* suite = suite_create("PubSub modules test suite");
+
+    TCase* tc_tools_test = tcase_create("Utility-level tools checks");
+    suite_add_tcase(suite, tc_tools_test);
+    tcase_add_test(tc_tools_test, test_tc_tools_test);
 
     TCase* tc_hl_network_msg = tcase_create("Network message layer");
     suite_add_tcase(suite, tc_hl_network_msg);

@@ -86,6 +86,22 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 }
 
 /***************************************************/
+int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+{
+    assert(NULL != tRef);
+    SOPC_UNUSED_ARG(t);
+    return 0; // not implemented in Windows
+}
+
+/***************************************************/
+bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+{
+    assert(NULL != t);
+    SOPC_UNUSED_ARG(now);
+    return false; // not implemented in Windows
+}
+
+/***************************************************/
 void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
 {
     SOPC_UNUSED_ARG(offset_us);
