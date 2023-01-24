@@ -106,6 +106,57 @@ static SOPC_ReturnStatus is_valid_user_token_signature(const SOPC_ExtensionObjec
     return status;
 }
 
+static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_ExtensionObject* pUser,
+                                                             const char* pUsedSecuPolicy)
+{
+    SOPC_ASSERT(&OpcUa_X509IdentityToken_EncodeableType == pUser->Body.Object.ObjType &&
+                "only suport x509 certificate");
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
+    SOPC_CryptoProvider* pProvider = NULL;
+    SOPC_SerializedCertificate* psCrtUser = NULL;
+    SOPC_CertificateList* pCrtUser = NULL;
+    OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
+    const SOPC_CryptoProfile* pProfile = NULL;
+
+    pProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+    if (NULL == pProvider)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(
+        x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &psCrtUser);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_Deserialize(psCrtUser, &pCrtUser);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+        if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Let the lib-specific code handle the verification for the current security policy
+        status = pProfile->pFnCertVerify(pProvider, pCrtUser);
+    }
+
+    /* Clear */
+    SOPC_KeyManager_SerializedCertificate_Delete(psCrtUser);
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+    SOPC_CryptoProvider_Free(pProvider);
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
@@ -135,8 +186,17 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
     status = is_valid_user_token_signature(pUser, pUserTokenSignature, pServerNonce, pServerCert, pUsedSecuPolicy);
     if (SOPC_STATUS_OK == status)
     {
-        status = (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
-                                                                                pUserAuthenticated, pUsedSecuPolicy);
+        status = is_cert_comply_with_security_policy(pUser, pUsedSecuPolicy);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
+                                                                                    pUserAuthenticated);
+        }
+        else
+        {
+            *pUserAuthenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+            status = SOPC_STATUS_OK;
+        }
     }
     else
     {
@@ -169,7 +229,7 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
     }
 
     return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
-                                                                          pUserAuthenticated, NULL);
+                                                                          pUserAuthenticated);
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
@@ -223,12 +283,10 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
 /** \brief A helper implementation of the validate UserIdentity callback, which always returns OK. */
 static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* authenticationManager,
                                               const SOPC_ExtensionObject* pUserIdentity,
-                                              SOPC_UserAuthentication_Status* pUserAuthenticated,
-                                              const char* pUsedSecuPolicy)
+                                              SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
     SOPC_UNUSED_ARG(authenticationManager);
     SOPC_UNUSED_ARG(pUserIdentity);
-    SOPC_UNUSED_ARG(pUsedSecuPolicy);
     assert(NULL != pUserAuthenticated);
 
     *pUserAuthenticated = SOPC_USER_AUTHENTICATION_OK;

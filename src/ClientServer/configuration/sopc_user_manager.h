@@ -37,6 +37,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_user.h"
 
@@ -78,8 +79,7 @@ typedef void SOPC_UserAuthentication_Free_Func(SOPC_UserAuthentication_Manager* 
 typedef SOPC_ReturnStatus SOPC_UserAuthentication_ValidateUserIdentity_Func(
     SOPC_UserAuthentication_Manager* authenticationManager,
     const SOPC_ExtensionObject* pUser,
-    SOPC_UserAuthentication_Status* pUserAuthenticated,
-    const char* pUsedSecuPolicy);
+    SOPC_UserAuthentication_Status* pUserAuthenticated);
 
 typedef void SOPC_UserAuthorization_Free_Func(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus SOPC_UserAuthorization_AuthorizeOperation_Func(
@@ -113,7 +113,6 @@ typedef struct SOPC_UserAuthentication_Functions
      *    - \p SOPC_USER_AUTHENTICATION_INVALID_TOKEN: the callback could not read the user identity token,
      *    - \p SOPC_USER_AUTHENTICATION_REJECTED_TOKEN: the proposed identity could not be authenticated,
      *    - \p SOPC_USER_AUTHENTICATION_OK: the identity token correctly authenticates a user.
-     * \param pUsedSecuPolicy The used security policy.
      * \return SOPC_STATUS_OK when \p pbUserAuthenticated was set.
      */
     SOPC_UserAuthentication_ValidateUserIdentity_Func* pFuncValidateUserIdentity;

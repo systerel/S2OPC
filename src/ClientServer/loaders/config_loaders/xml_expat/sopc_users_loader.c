@@ -1257,10 +1257,8 @@ static SOPC_ReturnStatus set_default_password_hash(user_password** up,
 
 static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* authn,
                                             const SOPC_ExtensionObject* token,
-                                            SOPC_UserAuthentication_Status* authenticated,
-                                            const char* pUsedSecuPolicy)
+                                            SOPC_UserAuthentication_Status* authenticated)
 {
-    SOPC_UNUSED_ARG(pUsedSecuPolicy);
     SOPC_ASSERT(NULL != authn && NULL != authn->pData && NULL != token && NULL != authenticated);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1334,30 +1332,17 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
-        SOPC_ASSERT(NULL != pUsedSecuPolicy);
-
         const SOPC_PKIProvider* pkiProvider = config->pX509_UserIdentity_PKI;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;
         SOPC_CertificateList* pUserCert = NULL;
         SOPC_StatusCode errorStatus;
-        SOPC_CryptoProvider* cryptoProvider = NULL;
 
-        cryptoProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
-        if (NULL == cryptoProvider)
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
 
         if (SOPC_STATUS_OK == status)
         {
-            status =
-                SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_CryptoProvider_Certificate_Validate(cryptoProvider, pkiProvider, pUserCert, &errorStatus);
+            status = pkiProvider->pFnValidateCertificate(pkiProvider, pUserCert, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -1387,7 +1372,6 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
         }
 
         /* Clear */
-        SOPC_CryptoProvider_Free(cryptoProvider);
         SOPC_KeyManager_Certificate_Free(pUserCert);
     }
     return status;
