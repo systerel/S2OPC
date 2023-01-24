@@ -48,6 +48,8 @@ static SOPC_ReturnStatus is_valid_user_token_signature(const SOPC_ExtensionObjec
     SOPC_AsymmetricKey* pKeyCrtUser = NULL;
     OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
 
+    const char* errorReason = "";
+
     if (NULL == pUserTokenSignature || NULL == pUserTokenSignature->Algorithm.Data ||
         NULL == pUserTokenSignature->Signature.Data)
     {
@@ -93,8 +95,11 @@ static SOPC_ReturnStatus is_valid_user_token_signature(const SOPC_ExtensionObjec
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_CryptoProvider_Check_Signature(provider, &pUserTokenSignature->Algorithm, pKeyCrtUser,
-                                                     pServerCert, pServerNonce, &pUserTokenSignature->Signature);
+        status = SOPC_CryptoProvider_Check_Signature(
+            provider, (const char*) pUserTokenSignature->Algorithm.Data,
+            (uint32_t) pUserTokenSignature->Algorithm.Length, pKeyCrtUser, pServerCert->data, pServerCert->length,
+            pServerNonce->Data, (uint32_t) pServerNonce->Length, pUserTokenSignature->Signature.Data,
+            (uint32_t) pUserTokenSignature->Signature.Length, &errorReason);
     }
 
     /* Clear */

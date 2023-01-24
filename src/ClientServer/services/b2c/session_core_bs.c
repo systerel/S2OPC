@@ -1187,17 +1187,32 @@ static SOPC_ReturnStatus check_signature(const char* channelSecurityPolicy,
                                          const SOPC_AsymmetricKey* publicKey,
                                          const SOPC_Buffer* payload,
                                          const SOPC_ByteString* nonce,
-                                         const SOPC_String* signature)
+                                         const SOPC_String* signature,
+                                         const char** errorReason)
 {
-    SOPC_CryptoProvider* provider = SOPC_CryptoProvider_Create(channelSecurityPolicy);
-
-    if (provider == NULL)
+    if (NULL == requestedSecurityPolicy || NULL == payload || NULL == nonce || NULL == signature || NULL == publicKey ||
+        NULL == errorReason)
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status =
-        SOPC_CryptoProvider_Check_Signature(provider, requestedSecurityPolicy, publicKey, payload, nonce, signature);
+    // cast protection int32_t to uint32_t
+    if (0 > requestedSecurityPolicy->Length || 0 > nonce->Length || 0 > signature->Length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CryptoProvider* provider = SOPC_CryptoProvider_Create(channelSecurityPolicy);
+
+    if (NULL == provider)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_Check_Signature(
+        provider, (const char*) requestedSecurityPolicy->Data, (uint32_t) requestedSecurityPolicy->Length, publicKey,
+        payload->data, payload->length, nonce->Data, (uint32_t) nonce->Length, signature->Data,
+        (uint32_t) signature->Length, errorReason);
     SOPC_CryptoProvider_Free(provider);
     return status;
 }
@@ -1253,12 +1268,28 @@ void session_core_bs__client_create_session_check_crypto(
         return;
     }
 
-    if (SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_srv, &pCrtSrv) == SOPC_STATUS_OK &&
-        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv) == SOPC_STATUS_OK &&
-        check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, pSCCfg->crt_cli,
-                        &pSession->nonceClient, &pSignCandid->Signature) == SOPC_STATUS_OK)
+    const char* errorReason = "";
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_srv, &pCrtSrv);
+
+    if (SOPC_STATUS_OK == status)
     {
-        *session_core_bs__valid = true;
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, pSCCfg->crt_cli,
+                                 &pSession->nonceClient, &pSignCandid->Signature, &errorReason);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRIu32 " signature of server certificate is invalid:  %s",
+                                   session_core_bs__p_session, errorReason);
+        }
+        else
+        {
+            *session_core_bs__valid = true;
+        }
     }
 
     SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtSrv);
@@ -1274,7 +1305,6 @@ void session_core_bs__server_activate_session_check_crypto(
 {
     SOPC_UNUSED_ARG(session_core_bs__channel);
     const SOPC_SecureChannel_Config* pSCCfg = NULL;
-    SOPC_CryptoProvider* provider = NULL;
     ServerSessionData* pSession = NULL;
     SOPC_ByteString* pNonce = NULL;
     const OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) session_core_bs__activate_req_msg;
@@ -1319,21 +1349,33 @@ void session_core_bs__server_activate_session_check_crypto(
         return;
     }
 
-    provider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+    const char* errorReason = "";
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_cli, &pCrtCli);
 
-    if (provider != NULL &&
-        SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_cli, &pCrtCli) == SOPC_STATUS_OK &&
-        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli) == SOPC_STATUS_OK &&
-        SOPC_CryptoProvider_Check_Signature(provider, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
-                                            &pSignCandid->Signature) == SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == status)
     {
-        *session_core_bs__valid = true;
+        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
     }
 
-    /* Clear */
-    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
-    SOPC_KeyManager_Certificate_Free(pCrtCli);
-    SOPC_CryptoProvider_Free(provider);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
+                                 &pSignCandid->Signature, &errorReason);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Services: session=%" PRIu32 " signature of client certificate is invalid:  %s",
+                                   session_core_bs__session, errorReason);
+        }
+        else
+        {
+            *session_core_bs__valid = true;
+        }
+
+        /* Clear */
+        SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
+        SOPC_KeyManager_Certificate_Free(pCrtCli);
+    }
 }
 
 void session_core_bs__client_activate_session_resp_check(

@@ -1115,13 +1115,18 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
  *   bytes.
  *
  * \param provider An initialized cryptographic context.
- * \param AsymmetricSignatureAlgorithm the URI of the asymmetric algorithm used.
+ * \param AsymmetricSignatureAlgorithm The URI of the asymmetric algorithm used.
+ * \param lenAsymmetricSignatureAlgorithm Length of the asymmetric algorithm used \p AsymmetricSignatureAlgorithm.
  * \param publicKey A valid pointer to the public key.
  * \param payload   The payload.
+ * \param lenPayload Length of the the payload \p payload.
  * \param nonce     The nonce secret to append to the payload \p payload .
+ * \param lenNonce  Length of the nonce secret \p nonce .
  * \param signature The signature to check.
+ * \param lenSignature Length of the signature \p signature .
+ * \param errorReason Pointer to a C string used to point on error reason string when returned status != SOPC_STATUS_OK.
  *
- * \note The nonce \p nonce size must be equal to the nonce size of the secure channel of the provider's security
+ * \note The nonce size \p lenNonce must be equal to the nonce size of the secure channel of the provider's security
  * policy.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
@@ -1130,10 +1135,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
  * error.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Check_Signature(SOPC_CryptoProvider* provider,
-                                                      const SOPC_String* AsymmetricSignatureAlgorithm,
+                                                      const char* AsymmetricSignatureAlgorithm,
+                                                      const uint32_t lenAsymmetricSignatureAlgorithm,
                                                       const SOPC_AsymmetricKey* publicKey,
-                                                      const SOPC_Buffer* payload,
-                                                      const SOPC_ByteString* nonce,
-                                                      const SOPC_String* signature);
+                                                      const uint8_t* payload,
+                                                      const uint32_t lenPayload,
+                                                      const uint8_t* nonce,
+                                                      const uint32_t lenNonce,
+                                                      const uint8_t* signature,
+                                                      const uint32_t lenSignature,
+                                                      const char** errorReason);
 
 #endif /* SOPC_CRYPTO_PROVIDER_H_ */

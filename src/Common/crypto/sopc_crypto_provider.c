@@ -1907,24 +1907,25 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_Check_Signature(SOPC_CryptoProvider* provider,
-                                                      const SOPC_String* AsymmetricSignatureAlgorithm,
+                                                      const char* AsymmetricSignatureAlgorithm,
+                                                      const uint32_t LenAsymmetricSignatureAlgorithm,
                                                       const SOPC_AsymmetricKey* publicKey,
-                                                      const SOPC_Buffer* payload,
-                                                      const SOPC_ByteString* nonce,
-                                                      const SOPC_String* signature)
+                                                      const uint8_t* payload,
+                                                      const uint32_t lenPayload,
+                                                      const uint8_t* nonce,
+                                                      const uint32_t lenNonce,
+                                                      const uint8_t* signature,
+                                                      const uint32_t lenSignature,
+                                                      const char** errorReason)
 {
     SOPC_ASSERT(NULL != provider);
     SOPC_ASSERT(NULL != AsymmetricSignatureAlgorithm);
-    SOPC_ASSERT(NULL != AsymmetricSignatureAlgorithm->Data);
-    SOPC_ASSERT(0 < AsymmetricSignatureAlgorithm->Length);
+    SOPC_ASSERT(0 < LenAsymmetricSignatureAlgorithm);
     SOPC_ASSERT(NULL != payload);
     SOPC_ASSERT(NULL != nonce);
-    SOPC_ASSERT(NULL != nonce->Data);
-    SOPC_ASSERT(0 < nonce->Length);
+    SOPC_ASSERT(0 < lenNonce);
     SOPC_ASSERT(NULL != signature);
-    SOPC_ASSERT(NULL != signature->Data);
-    SOPC_ASSERT(0 < signature->Length);
-    const char* errorReason = "";
+    SOPC_ASSERT(0 < lenSignature);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -1939,24 +1940,22 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Check_Signature(SOPC_CryptoProvider* provi
     /* Verify signature algorithm URI */
     const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
 
-    int res = strncmp(algorithm, (const char*) AsymmetricSignatureAlgorithm->Data,
-                      (size_t) AsymmetricSignatureAlgorithm->Length);
-    if (NULL == algorithm || 0 != res || (UINT32_MAX - length_nonce) < payload->length ||
-        (int32_t) length_nonce != nonce->Length)
+    int res = strncmp(algorithm, AsymmetricSignatureAlgorithm, LenAsymmetricSignatureAlgorithm);
+    if (NULL == algorithm || 0 != res || (UINT32_MAX - length_nonce) < lenPayload || length_nonce != lenNonce)
     {
         return SOPC_STATUS_NOK;
     }
 
-    uint32_t verify_len = payload->length + length_nonce;
+    uint32_t verify_len = lenPayload + length_nonce;
     uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
 
     if (NULL != verify_payload)
     {
-        memcpy(verify_payload, payload->data, payload->length);
-        memcpy(verify_payload + payload->length, nonce->Data, length_nonce);
+        memcpy(verify_payload, payload, lenPayload);
+        memcpy(verify_payload + lenPayload, nonce, lenNonce);
 
-        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
-                                                      (uint32_t) signature->Length, &errorReason);
+        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature,
+                                                      lenSignature, errorReason);
         SOPC_Free(verify_payload);
     }
     else
