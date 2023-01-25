@@ -60,7 +60,12 @@ SETS
                        e_aid_MinimumSamplingInterval,
                        e_aid_Historizing,
                        e_aid_Executable,
-                       e_aid_UserExecutable};
+                       e_aid_UserExecutable,
+                       e_aid_DataTypeDefinition,
+                       e_aid_RolePermissions,
+                       e_aid_UserRolePermissions,
+                       e_aid_AccessRestrictions,
+                       e_aid_AccessLevelEx};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,

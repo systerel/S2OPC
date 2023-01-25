@@ -1550,6 +1550,11 @@ constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid)
     case constants__e_aid_Historizing:
     case constants__e_aid_Executable:
     case constants__e_aid_UserExecutable:
+    case constants__e_aid_DataTypeDefinition:
+    case constants__e_aid_RolePermissions:
+    case constants__e_aid_UserRolePermissions:
+    case constants__e_aid_AccessRestrictions:
+    case constants__e_aid_AccessLevelEx:
         return (constants__t_AttributeId_i) caid;
     default:
         return constants__c_AttributeId_indet;

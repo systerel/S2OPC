@@ -93,6 +93,11 @@ typedef enum
     SOPC_AttributeId_Historizing = 20,
     SOPC_AttributeId_Executable = 21,
     SOPC_AttributeId_UserExecutable = 22,
+    SOPC_AttributeId_DataTypeDefinition = 23,
+    SOPC_AttributeId_RolePermissions = 24,
+    SOPC_AttributeId_UserRolePermissions = 25,
+    SOPC_AttributeId_AccessRestrictions = 26,
+    SOPC_AttributeId_AccessLevelEx = 27,
 } SOPC_AttributeId;
 
 /**

@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 03/11/2022 10:22:12
+ Date                 : 25/01/2023 15:42:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -144,7 +144,12 @@ typedef enum {
    constants__e_aid_MinimumSamplingInterval,
    constants__e_aid_Historizing,
    constants__e_aid_Executable,
-   constants__e_aid_UserExecutable
+   constants__e_aid_UserExecutable,
+   constants__e_aid_DataTypeDefinition,
+   constants__e_aid_RolePermissions,
+   constants__e_aid_UserRolePermissions,
+   constants__e_aid_AccessRestrictions,
+   constants__e_aid_AccessLevelEx
 } constants__t_AttributeId_i;
 typedef enum {
    constants__e_bd_indet,
