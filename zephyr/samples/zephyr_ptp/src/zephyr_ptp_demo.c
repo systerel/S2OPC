@@ -545,14 +545,14 @@ void main(void)
     static struct gptp_phase_dis_cb phase_dis;
     gptp_register_phase_dis_cb(&phase_dis, gptp_phase_dis_cb);
 
-    Thread thread = P_THREAD_Create(&test_thread, NULL, "demo", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
+    Thread thread = P_THREAD_Create(&test_thread, NULL, "demo", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY);
     SOPC_ASSERT(thread != NULL);
 
 #if USE_ASYNCH_PRINTF
     SOPC_ReturnStatus result = SOPC_AsyncQueue_Init(&printQueue, "PRINT");
     SOPC_ASSERT(SOPC_STATUS_OK == result);
 
-    Thread threadPrint = P_THREAD_Create(&print_thread, NULL, "print", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
+    Thread threadPrint = P_THREAD_Create(&print_thread, NULL, "print", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY);
     SOPC_ASSERT(threadPrint != NULL);
 #endif
 }

@@ -705,8 +705,8 @@ int main(int argc, char* arvg[])
     initializeCacheFromAddrSpace();
 
     /* Create thread for Command Line Input management*/
-    CLI_thread = P_THREAD_Create(&CLI_thread_exec, NULL, "CLI", CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, false);
-    SOPC_ASSERT(NULL != CLI_thread && "SOPC_Thread_Create failed");
+    status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
 
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
     {

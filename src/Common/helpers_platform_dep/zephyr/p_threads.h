@@ -38,13 +38,11 @@ typedef void* ptrFct(void* pCtx);           // Thread callback
  *  @param pCtx Any user-defined context parameter. This will be passed to "callback" call.
  *  @param taskName A task name. Caller should ensure uniqueness of names. Possibly can be NULL.
  *  @param priority The ZEPHYR priority of the new thread.
- *  @param isSOPCThread True for SOPC internal thread. User-defined thread shall use "false" value
  */
-tThreadHandle* P_THREAD_Create(ptrFct* callback,         // Callback
-                               void* pCtx,               // Context
-                               const char* taskName,     // Thread name
-                               const int priority,       // Priority
-                               const bool isSOPCThread); // True for S2OPC thread. False for applicative thread
+tThreadHandle* P_THREAD_Create(ptrFct* callback,     // Callback
+                               void* pCtx,           // Context
+                               const char* taskName, // Thread name
+                               const int priority);  // Priority
 
 /** @brief
  *  Join and destroy a thread

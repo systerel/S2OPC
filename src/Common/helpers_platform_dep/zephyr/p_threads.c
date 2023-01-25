@@ -262,12 +262,11 @@ static void DEBUG_CREATE_THREAD(const char* pName, const sopcThreadConfig* pCfg)
  * @param taskName The task name.
  * @return The stack configuration to use.
  */
-static const sopcThreadConfig* P_THREAD_GetStackCfg(const char* taskName, const bool isSOPCThread)
+static const sopcThreadConfig* P_THREAD_GetStackCfg(const char* taskName)
 {
     const sopcThreadConfig* result = NULL;
-    if (isSOPCThread)
+    if (NULL != taskName)
     {
-        SOPC_ASSERT(NULL != taskName);
         // Search in S2OPC predefined tasks
         for (size_t i = 0; i < NB_SOPC_THREADS && (NULL == result); i++)
         {
@@ -280,7 +279,7 @@ static const sopcThreadConfig* P_THREAD_GetStackCfg(const char* taskName, const 
             }
         }
     }
-    else
+    if (result == NULL)
     {
         // Consider it as an applicative task
         // try to create an applicative task
@@ -389,11 +388,7 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
 }
 
 // Thread creation
-tThreadHandle* P_THREAD_Create(ptrFct* callback,
-                               void* pCtx,
-                               const char* taskName,
-                               const int priority,
-                               const bool isSOPCThread)
+tThreadHandle* P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskName, const int priority)
 {
     tThreadHandle* pHandle = NULL;
 
@@ -442,7 +437,7 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback,
 
     if (NULL != pHandle)
     {
-        const sopcThreadConfig* stack_cfg = P_THREAD_GetStackCfg(taskName, isSOPCThread);
+        const sopcThreadConfig* stack_cfg = P_THREAD_GetStackCfg(taskName);
         const bool result = P_THREAD_Init(pHandle, callback, pCtx, taskName, stack_cfg, priority);
         if (!result)
         {
@@ -517,7 +512,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    *thread = P_THREAD_Create(startFct, startArgs, taskName, CONFIG_SOPC_THREAD_DEFAULT_PRIORITY, true);
+    *thread = P_THREAD_Create(startFct, startArgs, taskName, CONFIG_SOPC_THREAD_DEFAULT_PRIORITY);
 
     if (NULL == *thread)
     {
@@ -545,7 +540,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    *thread = P_THREAD_Create(startFct, startArgs, taskName, priority, true);
+    *thread = P_THREAD_Create(startFct, startArgs, taskName, priority);
 
     if (NULL == *thread)
     {
