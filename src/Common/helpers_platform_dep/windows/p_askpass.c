@@ -46,7 +46,7 @@ bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
     int index = 0;
     while (!end && !stop && index < SOPC_PASSWORD_MAX_LENGTH + PWD_BUFFER_ADDITIONAL_CHARACTERS)
     {
-        pwd[index] = _getch();
+        pwd[index] = (char) _getch();
         if (pwd[index] == '\003')
         { // EOF
             stop = true;
