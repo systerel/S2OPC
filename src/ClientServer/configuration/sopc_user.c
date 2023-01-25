@@ -19,6 +19,7 @@
 
 #include <assert.h>
 
+#include "sopc_key_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_user.h"
@@ -37,7 +38,7 @@ struct SOPC_User
     union {
         /** The \p username is only valid for the \p USER_USERNAME type. */
         SOPC_String username;
-        SOPC_ByteString certificate;
+        SOPC_String certificate_thumbprint;
     } data;
 };
 
@@ -85,23 +86,41 @@ SOPC_User* SOPC_User_CreateUsername(SOPC_String* username)
     return user;
 }
 
-SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* CertificateData)
+SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* certificateData)
 {
+    SOPC_CertificateList* pCert = NULL;
+    char* thumbprint = NULL;
     SOPC_User* user = SOPC_Calloc(1, sizeof(SOPC_User));
     if (NULL == user)
     {
         return NULL;
     }
 
-    user->type = USER_CERTIFICATE;
-    SOPC_ByteString_Initialize(&user->data.certificate);
-    SOPC_ReturnStatus status = SOPC_ByteString_Copy(&user->data.certificate, CertificateData);
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+        certificateData->Data, (uint32_t) certificateData->Length, &pCert);
+    if (SOPC_STATUS_OK == status)
+    {
+        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCert);
+        if (NULL == thumbprint)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        user->type = USER_CERTIFICATE;
+        status = SOPC_String_InitializeFromCString(&user->data.certificate_thumbprint, thumbprint);
+    }
+
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_ByteString_Clear(&user->data.certificate);
         SOPC_Free(user);
         user = NULL;
     }
+
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_Free(thumbprint);
     return user;
 }
 
@@ -117,11 +136,10 @@ bool SOPC_User_IsUsername(const SOPC_User* user)
     return USER_USERNAME == user->type;
 }
 
-const SOPC_String* SOPC_User_GetCertificate(const SOPC_User* user)
+const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user)
 {
     assert(SOPC_User_IsCertificate(user));
-    const SOPC_ByteString* ret = &user->data.certificate;
-    return (const SOPC_String*) ret;
+    return &user->data.certificate_thumbprint;
 }
 
 bool SOPC_User_IsCertificate(const SOPC_User* user)
@@ -145,7 +163,7 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
         case USER_USERNAME:
             return SOPC_String_Equal(&left->data.username, &right->data.username);
         case USER_CERTIFICATE:
-            return SOPC_ByteString_Equal(&left->data.certificate, &right->data.certificate);
+            return SOPC_String_Equal(&left->data.certificate_thumbprint, &right->data.certificate_thumbprint);
         default:
             assert(false && "Unknown Type");
             break;
@@ -173,7 +191,7 @@ void SOPC_User_Free(SOPC_User** ppUser)
         }
         if (is_certificate)
         {
-            SOPC_ByteString_Clear(&user->data.certificate);
+            SOPC_String_Clear(&user->data.certificate_thumbprint);
         }
         SOPC_Free(user);
     }
@@ -220,7 +238,7 @@ SOPC_User* SOPC_User_Copy(const SOPC_User* user)
         if (NULL != userCopy)
         {
             userCopy->type = user->type;
-            status = SOPC_ByteString_Copy(&userCopy->data.certificate, &user->data.certificate);
+            status = SOPC_String_Copy(&userCopy->data.certificate_thumbprint, &user->data.certificate_thumbprint);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -247,7 +265,7 @@ const char* SOPC_User_ToCString(const SOPC_User* user)
     case USER_USERNAME:
         return SOPC_String_GetRawCString(SOPC_User_GetUsername(user));
     case USER_CERTIFICATE:
-        return SOPC_String_GetCString(SOPC_User_GetCertificate(user));
+        return SOPC_String_GetRawCString(SOPC_User_GetCertificate_Thumbprint(user));
     default:
         assert(false && "Unknown user type");
     }

@@ -61,11 +61,11 @@ SOPC_User* SOPC_User_CreateUsername(SOPC_String* username);
 /**
  * \brief Creates a \p SOPC_User which has a X509 certificate.
  *
- * \param CertificateData A valid pointer to the certificate of the user to create.
+ * \param certificateData A valid pointer to the certificate of the user to create.
  *
  * \return An instance of \p SOPC_User if successful, otherwise NULL.
  */
-SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* CertificateData);
+SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* certificateData);
 
 /**
  * \brief Returns a reference to the internal storage of the username.
@@ -80,7 +80,7 @@ bool SOPC_User_IsUsername(const SOPC_User* user);
  * \brief Returns a reference to the internal storage of the certificate.
  *        The user must be a user with a certificate.
  */
-const SOPC_String* SOPC_User_GetCertificate(const SOPC_User* user);
+const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user);
 
 /** \brief Returns true if the type of the user is certificate */
 bool SOPC_User_IsCertificate(const SOPC_User* user);
