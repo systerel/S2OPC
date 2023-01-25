@@ -176,11 +176,6 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_Seriali
     return cert;
 }
 
-char* SOPC_KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert)
-{
-    return KeyManager_Certificate_GetCstring_SHA1(pCert);
-}
-
 void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* cert)
 {
     SOPC_Buffer_Delete(cert);

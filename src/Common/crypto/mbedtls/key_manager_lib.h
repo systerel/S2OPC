@@ -103,17 +103,4 @@ struct SOPC_CRLList
  */
 SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey);
 
-/**
- * \brief           Return the SHA-1 thumbprint of a certificate.
- *
- * \param pCert     A pointer to a single Certificate to find in the list.
- *
- * \warning         \p pCert must contain a single certificate. The SHA_1.
- *
- * \note            The returned SHA-1 Cstring must be freed by the caller.
- *
- * \return          NULL if error otherwise the SHA-1 thumbprint of \p pCert .
- */
-char* KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert);
-
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */
