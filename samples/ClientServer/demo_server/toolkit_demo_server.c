@@ -26,10 +26,13 @@
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 
+#include "sopc_address_space_access.h"
 #include "sopc_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+
+#include "toolkit_demo_server_methods.h"
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -123,49 +126,6 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
  * Method call management :
  *-------------------------*/
 
-static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* callContextPtr,
-                                                     const SOPC_NodeId* objectId,
-                                                     uint32_t nbInputArgs,
-                                                     const SOPC_Variant* inputArgs,
-                                                     uint32_t* nbOutputArgs,
-                                                     SOPC_Variant** outputArgs,
-                                                     void* param)
-{
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-    // Note: pointers given by the toolkit are always valid
-    *nbOutputArgs = 0;
-    *outputArgs = NULL;
-    return SOPC_STATUS_OK;
-}
-
-static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_CallContext* callContextPtr,
-                                                                  const SOPC_NodeId* objectId,
-                                                                  uint32_t nbInputArgs,
-                                                                  const SOPC_Variant* inputArgs,
-                                                                  uint32_t* nbOutputArgs,
-                                                                  SOPC_Variant** outputArgs,
-                                                                  void* param)
-{
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-    // Note: pointers given by the toolkit are always valid
-    *nbOutputArgs = 1;
-    *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
-    assert(NULL != *outputArgs);
-    SOPC_Variant_Initialize(&((*outputArgs)[0]));
-    (*outputArgs)[0].BuiltInTypeId = SOPC_UInt32_Id;
-    (*outputArgs)[0].Value.Uint32 = 42;
-
-    return SOPC_STATUS_OK;
-}
-
 static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 {
     char* sNodeId;
@@ -189,7 +149,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_IncCounter;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
         }
         else
@@ -204,7 +164,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_AddToCounter;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Only input, no output", NULL);
         }
         else
@@ -220,7 +180,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_GetCounterValue;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, only output", NULL);
         }
         else
@@ -236,7 +196,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_CreateSigningRequest;
+            methodFunc = &SOPC_Method_Func_UpdateAndGetPreviousHello;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Input, output", NULL);
         }
         else

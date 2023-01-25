@@ -342,10 +342,13 @@ endif()
 add_executable(${TOOLKIT_TEST_SERVER}
   "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server.c"
   ${TEST_SERVER_ADDRESS_SPACE_C}
-  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server_methods.c")
 add_dependencies(${TOOLKIT_TEST_SERVER} make-server-address-space)
 target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
-target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
 target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 if (expat_FOUND)

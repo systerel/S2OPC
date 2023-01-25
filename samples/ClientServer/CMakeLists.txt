@@ -44,7 +44,9 @@ endif()
 
 if (expat_FOUND)
   add_executable(${TOOLKIT_DEMO_SERVER}
+    "demo_server/toolkit_demo_server_methods.c"
     "demo_server/toolkit_demo_server.c")
+  target_include_directories(${TOOLKIT_DEMO_SERVER} PRIVATE demo_server)
   target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_serverwrapper)
   target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
