@@ -31,6 +31,7 @@ SETS
     t_Byte;
     t_RawStatusCode;
     t_access_level;
+    t_access_level_ex;
 
     t_WriteValuePointer_i;
     t_BrowseResultReferences_i;

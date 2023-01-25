@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 25/01/2023 15:42:53
+ Date                 : 25/01/2023 14:36:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -80,6 +80,7 @@
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_WriteValuePointer_i constants_bs__t_WriteValuePointer_i
 #define constants__t_access_level constants_bs__t_access_level
+#define constants__t_access_level_ex constants_bs__t_access_level_ex
 #define constants__t_application_context_i constants_bs__t_application_context_i
 #define constants__t_byte_buffer_i constants_bs__t_byte_buffer_i
 #define constants__t_channel_config_idx_i constants_bs__t_channel_config_idx_i
@@ -361,6 +362,7 @@ typedef enum {
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_WriteValuePointer_i_max constants_bs__t_WriteValuePointer_i_max
 #define constants__t_access_level_max constants_bs__t_access_level_max
+#define constants__t_access_level_ex_max constants_bs__t_access_level_ex_max
 #define constants__t_application_context_i_max constants_bs__t_application_context_i_max
 #define constants__t_byte_buffer_i_max constants_bs__t_byte_buffer_i_max
 #define constants__t_channel_config_idx_i_max constants_bs__t_channel_config_idx_i_max

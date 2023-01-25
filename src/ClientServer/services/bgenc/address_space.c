@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 05/08/2022 09:28:31
+ Date                 : 25/01/2023 15:42:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,7 +52,8 @@ void address_space__local_is_mandatory_attribute(
    if (*address_space__bres == false) {
       switch (address_space__p_ncl) {
       case constants__e_ncl_Variable:
-         *address_space__bres = (((((((address_space__p_aid == constants__e_aid_AccessLevel) ||
+         *address_space__bres = ((((((((address_space__p_aid == constants__e_aid_AccessLevel) ||
+            (address_space__p_aid == constants__e_aid_AccessLevelEx)) ||
             (address_space__p_aid == constants__e_aid_DataType)) ||
             (address_space__p_aid == constants__e_aid_Historizing)) ||
             (address_space__p_aid == constants__e_aid_UserAccessLevel)) ||
@@ -477,6 +478,11 @@ void address_space__read_AddressSpace_Attribute_value(
          switch (address_space__p_aid) {
          case constants__e_aid_AccessLevel:
             address_space_bs__read_AddressSpace_AccessLevel_value(address_space__p_node,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_AccessLevelEx:
+            address_space_bs__read_AddressSpace_AccessLevelEx_value(address_space__p_node,
                address_space__sc,
                address_space__val);
             break;

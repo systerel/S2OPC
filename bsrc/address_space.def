@@ -25,7 +25,8 @@ DEFINITIONS
         dvAid = e_aid_NodeClass or dvAid = e_aid_NodeId) or
 
     (dvNcl = e_ncl_Variable & /* VARIABLE */
-        (dvAid = e_aid_AccessLevel or dvAid = e_aid_DataType or
+        (dvAid = e_aid_AccessLevel or dvAid = e_aid_AccessLevelEx or /* optional in spec but mandatory in profiles */
+            dvAid = e_aid_DataType or
             dvAid = e_aid_Historizing or dvAid = e_aid_UserAccessLevel or
             dvAid = e_aid_Value or dvAid = e_aid_ValueRank or
             dvAid = e_aid_ArrayDimensions)
@@ -71,6 +72,7 @@ DEFINITIONS
         a_ValueRank,
         a_ArrayDimensions,
         a_AccessLevel,
+        a_AccessLevelEx,
         a_UserAccessLevel,
         a_Historizing,
         a_Executable,
@@ -153,6 +155,8 @@ DEFINITIONS
         a_ArrayDimensions : a_NodeClass~[{e_ncl_Variable, e_ncl_VariableType}] --> t_ArrayDimensions &
 
         a_AccessLevel : a_NodeClass~[{e_ncl_Variable}] --> t_access_level &
+
+        a_AccessLevelEx : a_NodeClass~[{e_ncl_Variable}] --> t_access_level_ex &
 
         a_UserAccessLevel : a_NodeClass~[{e_ncl_Variable}] --> t_access_level &
 

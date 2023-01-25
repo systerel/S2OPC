@@ -45,6 +45,7 @@ DEFINITIONS
         a_ValueRank,
         a_ArrayDimensions,
         a_AccessLevel,
+        a_AccessLevelEx,
         a_UserAccessLevel,
         a_Historizing,
         a_Executable,
@@ -116,6 +117,9 @@ DEFINITIONS
 
         a_AccessLevel : s_Node +-> t_access_level &
         dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        a_AccessLevelEx : s_Node +-> t_access_level_ex &
+        dom(a_AccessLevelEx) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
         a_UserAccessLevel : s_Node +-> t_access_level &
         dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
@@ -221,6 +225,26 @@ OPERATIONS
               sc = e_sc_bad_out_of_memory)
         OR
             variant :(variant : t_Variant_i & variant = conv_AccessLevel_Variant(a_AccessLevel(p_node))) ||
+            sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_AccessLevelEx_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : s_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(a_AccessLevelEx)
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc
+            :(sc : t_StatusCode_i &
+              sc = e_sc_bad_out_of_memory)
+        OR
+            variant :(variant : t_Variant_i & variant = conv_AccessLevelEx_Variant(a_AccessLevelEx(p_node))) ||
             sc := e_sc_ok
         END
     END

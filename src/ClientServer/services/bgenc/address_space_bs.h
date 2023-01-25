@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 05/08/2022 09:29:04
+ Date                 : 25/01/2023 14:36:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -136,6 +136,10 @@ extern void address_space_bs__is_NodeId_equal(
    const constants__t_NodeId_i address_space_bs__nid1,
    const constants__t_NodeId_i address_space_bs__nid2,
    t_bool * const address_space_bs__bres);
+extern void address_space_bs__read_AddressSpace_AccessLevelEx_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_AccessLevel_value(
    const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,

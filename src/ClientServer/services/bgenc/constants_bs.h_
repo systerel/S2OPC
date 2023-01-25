@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 03/11/2022 10:22:39
+ Date                 : 25/01/2023 14:36:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -75,6 +75,7 @@
 #define constants_bs__t_Variant_i t_entier4
 #define constants_bs__t_WriteValuePointer_i t_entier4
 #define constants_bs__t_access_level t_entier4
+#define constants_bs__t_access_level_ex t_entier4
 #define constants_bs__t_application_context_i t_entier4
 #define constants_bs__t_byte_buffer_i t_entier4
 #define constants_bs__t_channel_config_idx_i t_entier4
@@ -150,6 +151,7 @@
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_WriteValuePointer_i_max (-1)
 #define constants_bs__t_access_level_max (-1)
+#define constants_bs__t_access_level_ex_max (-1)
 #define constants_bs__t_application_context_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (-1)

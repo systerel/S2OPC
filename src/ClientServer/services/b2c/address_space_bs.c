@@ -301,6 +301,22 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
+void address_space_bs__read_AddressSpace_AccessLevelEx_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    // Note: always returns 0 since we always support atomic read/write operations + write with index range
+    *address_space_bs__variant = util_variant__new_Variant_from_uint32(0);
+    if (NULL == *address_space_bs__variant)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    }
+}
+
 void address_space_bs__read_AddressSpace_AccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,

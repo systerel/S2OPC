@@ -104,6 +104,7 @@ SETS
     t_RawStatusCode; /* uint32_t */
 
     t_access_level; /* SOPC_Byte */
+    t_access_level_ex; /* uint32_t */
 
     t_session_i;
     t_BrowsePath_i;
@@ -429,6 +430,7 @@ CONCRETE_CONSTANTS
 
 ABSTRACT_CONSTANTS
     conv_AccessLevel_Variant,
+    conv_AccessLevelEx_Variant,
     conv_QualifiedName_Variant,
     conv_LocalizedText_Variant,
     conv_Boolean_Variant,
@@ -1027,6 +1029,7 @@ PROPERTIES
                                  e_bd_both    |-> TRUE  |-> TRUE} &
 
     conv_AccessLevel_Variant : t_access_level --> t_Variant &
+    conv_AccessLevelEx_Variant : t_access_level_ex --> t_Variant &
     conv_QualifiedName_Variant : t_QualifiedName_i +-> t_Variant &
     dom(conv_QualifiedName_Variant) = t_QualifiedName &
     conv_LocalizedText_Variant : t_LocalizedText_i +-> t_Variant &

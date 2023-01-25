@@ -256,6 +256,7 @@ LOCAL_OPERATIONS
         /* We serve only these attributes */
         p_aid : {
             e_aid_AccessLevel,
+            e_aid_AccessLevelEx,
             e_aid_BrowseName,
             e_aid_ContainsNoLoops,
             e_aid_DataType,
@@ -275,6 +276,7 @@ LOCAL_OPERATIONS
         } &
 
         (p_aid = e_aid_AccessLevel     => p_node : dom(a_AccessLevel))     &
+        (p_aid = e_aid_AccessLevelEx   => p_node : dom(a_AccessLevelEx))   &
         (p_aid = e_aid_BrowseName      => p_node : dom(a_BrowseName))      &
         (p_aid = e_aid_ContainsNoLoops => p_node : dom(a_ContainsNoLoops)) &
         (p_aid = e_aid_DataType        => p_node : dom(a_DataType))        &
@@ -346,6 +348,7 @@ LOCAL_OPERATIONS
           (sc = e_sc_ok =>
             /* Set Variant value */
             (p_aid = e_aid_AccessLevel     => val = conv_AccessLevel_Variant(a_AccessLevel(p_node)))         &
+            (p_aid = e_aid_AccessLevelEx   => val = conv_AccessLevelEx_Variant(a_AccessLevelEx(p_node)))       &
             (p_aid = e_aid_BrowseName      => val = conv_QualifiedName_Variant(a_BrowseName(p_node)))        &
             (p_aid = e_aid_ContainsNoLoops => val = conv_Boolean_Variant(a_ContainsNoLoops(p_node)))         &
             (p_aid = e_aid_DataType        => val = conv_NodeId_Variant(a_DataType(p_node)))                 &
@@ -394,7 +397,8 @@ OPERATIONS
         IF bres = FALSE THEN
             CASE p_ncl OF
                 EITHER e_ncl_Variable THEN /* VARIABLE */
-                    bres := bool(p_aid = e_aid_AccessLevel or p_aid = e_aid_DataType or
+                    bres := bool(p_aid = e_aid_AccessLevel or p_aid = e_aid_AccessLevelEx or
+                        p_aid = e_aid_DataType or
                         p_aid = e_aid_Historizing or p_aid = e_aid_UserAccessLevel or
                         p_aid = e_aid_Value or p_aid = e_aid_ValueRank or
                         p_aid = e_aid_ArrayDimensions)
@@ -671,6 +675,8 @@ OPERATIONS
             CASE p_aid OF
                 EITHER e_aid_AccessLevel THEN
                     sc, val <-- read_AddressSpace_AccessLevel_value(p_node)
+                OR e_aid_AccessLevelEx THEN
+                    sc, val <-- read_AddressSpace_AccessLevelEx_value(p_node)
                 OR e_aid_BrowseName THEN
                     sc, val <-- read_AddressSpace_BrowseName_value(p_node)
                 OR e_aid_ContainsNoLoops THEN
