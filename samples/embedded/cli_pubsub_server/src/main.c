@@ -136,7 +136,7 @@ static SOPC_RealTime* gLastReceptionDateMs = NULL;
 /***************************************************/
 /**          CLIENT LINE INTERFACE                 */
 /***************************************************/
-typedef char* WordList;
+typedef char* WordList; // A simple C String
 static int cmd_demo_help(WordList* pList);
 static int cmd_demo_info(WordList* pList);
 static int cmd_demo_log(WordList* pList);
@@ -145,17 +145,20 @@ static int cmd_demo_sub(WordList* pList);
 static int cmd_demo_write(WordList* pList);
 static int cmd_demo_read(WordList* pList);
 static int cmd_demo_cache(WordList* pList);
-static int cmd_demo_kill(WordList* pList);
+static int cmd_demo_quit(WordList* pList);
+
+/** Configuration of a command line */
 typedef struct
 {
     const char* name;
     int (*callback)(WordList* pList);
     const char* description;
 } CLI_config_t;
+
 static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"},
+                                          {"quit", cmd_demo_quit, "Quit demo"},
                                           {"info", cmd_demo_info, "Show demo info"},
                                           {"log", cmd_demo_log, "Set log level"},
-                                          {"kill", cmd_demo_kill, "Kill server"},
                                           {"read", cmd_demo_read, "Print content of  <NodeId>"},
                                           {"write", cmd_demo_write, "Write value to server"},
                                           {"pub", cmd_demo_pub, "Manage Publisher"},
@@ -168,6 +171,7 @@ static void serverStopped_cb(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
 
+    DEBUG("serverStopped_cb");
     SOPC_Atomic_Int_Set(&gStopped, 1);
     WARNING("Server stopped!\n");
 }
@@ -529,27 +533,24 @@ static void setupServer(void)
     SOPC_ASSERT(NULL != authenticationManager && "SOPC_HelperConfigServer_SetLocalServiceAsyncResponse failed");
 
     SOPC_HelperConfigServer_SetShutdownCountdown(1);
-
-    //////////////////////////////////
-    // Start the server
-    SOPC_Atomic_Int_Set(&gStopped, 0);
-    status = SOPC_ServerHelper_StartServer(&serverStopped_cb);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerHelper_StartServer failed");
-
-    // Check for server status after some time. (Start is asynchronous)
-    SOPC_Sleep(100);
-    SOPC_ASSERT(SOPC_Atomic_Int_Get(&gStopped) == 0 && "Server failed to start.");
-    PRINT("########################\n");
-    PRINT("# Server started on <%s>\n", g_epConfig->endpointURL);
 }
 
 /***************************************************/
 static void clearServer(void)
 {
-    /// Note : in current example, the server is already down when reaching this point
-    SOPC_ServerHelper_StopServer();
-
+    DEBUG("SOPC_HelperConfigServer_Clear");
     SOPC_HelperConfigServer_Clear();
+}
+
+/***************************************************/
+static void clearPubSub(void)
+{
+    SOPC_SubScheduler_Stop();
+    gSubStarted = false;
+    SOPC_PubScheduler_Stop();
+    gSubStarted = false;
+
+    Cache_Clear();
 }
 
 /***************************************************/
@@ -702,22 +703,40 @@ int main(int argc, char* arvg[])
     setupServer();
     setupPubSub();
 
-    initializeCacheFromAddrSpace();
-
     /* Create thread for Command Line Input management*/
     status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
 
+    //////////////////////////////////
+    // Start the server
+    SOPC_Atomic_Int_Set(&gStopped, 0);
+    status = SOPC_ServerHelper_StartServer(&serverStopped_cb);
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerHelper_StartServer failed");
+
+    // Check for server status after some time. (Start is asynchronous)
+    SOPC_Sleep(100);
+    SOPC_ASSERT(SOPC_Atomic_Int_Get(&gStopped) == 0 && "Server failed to start.");
+
+    // Setup default values of Cache using AddressSpace content
+    initializeCacheFromAddrSpace();
+
+    // Wait for termination
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
     {
         // Process command line if any
         SOPC_Sleep(50);
     }
 
+    SOPC_Atomic_Int_Set(&gStopped, 1);
+
+    clearPubSub();
+    clearServer();
+
+    DEBUG("SOPC_CommonHelper_Clear");
+    SOPC_CommonHelper_Clear();
+
     SOPC_RealTime_Delete(&gLastReceptionDateMs);
 
-    clearServer();
-    SOPC_CommonHelper_Clear();
     INFO("# Info: Server closed.\n");
     WARNING("# Rebooting in 5 seconds...\n\n");
     SOPC_Sleep(5000);
@@ -859,7 +878,7 @@ static int cmd_demo_sub(WordList* pList)
     }
     if (0 == strcmp(word, "stop"))
     {
-        SOPC_PubScheduler_Stop();
+        SOPC_SubScheduler_Stop();
         gSubStarted = false;
         return 0;
     }
@@ -942,6 +961,7 @@ static int cmd_demo_read(WordList* pList)
     if (NULL == dv)
     {
         PRINT("Failed to read node '%s'\n", nodeIdC);
+        SOPC_NodeId_Clear(&nid);
         return 1;
     }
 
@@ -965,10 +985,10 @@ static int cmd_demo_cache(WordList* pList)
 // TODO JCH #warning "TODO : match cache to addressspace"
 
 /***************************************************/
-static int cmd_demo_kill(WordList* pList)
+static int cmd_demo_quit(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
-    SOPC_Atomic_Int_Set(&gStopped, 1);
+    SOPC_ServerHelper_StopServer();
     WARNING("Server manually stopped!\n");
 
     return 0;
