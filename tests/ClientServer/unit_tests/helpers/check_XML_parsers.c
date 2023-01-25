@@ -710,17 +710,6 @@ static SOPC_ExtensionObject* build_x509_token(char* pathCert)
 
     return extObject;
 }
-const char* usr_expectedTrustedRootIssuers[3] = {"trusted_usr/cacert.der", "trusted_usr/ctt_ca1T.der", NULL};
-const char* usr_expectedTrustedIntermediateIssuers[2] = {"trusted_usr/ctt_ca1I_ca2T.der", NULL};
-
-const char* usr_expectedIssuedCerts[6] = {"issued_usr/ctt_usrT.der",           "issued_usr/ctt_usrTE.der",
-                                          "issued_usr/ctt_usrTSincorrect.der", "issued_usr/ctt_usrTV.der",
-                                          "issued_usr/ctt_ca1I_usrT.der",      NULL};
-const char* usr_expectedUntrustedRootIssuers[2] = {"untrusted_usr/ctt_ca1I.der", NULL};
-const char* usr_expectedUntrustedIntermediateIssuers[2] = {"untrusted_usr/ctt_ca1TC_ca2I.der", NULL};
-const char* usr_expectedIssuersCRLs[6] = {"revoked_usr/cacrl.der",          "revoked_usr/ctt_ca1T.crl",
-                                          "revoked_usr/ctt_ca1I_ca2T.crl",  "revoked_usr/ctt_ca1I.crl",
-                                          "revoked_usr/ctt_ca1TC_ca2I.crl", NULL};
 
 static const SOPC_ExtensionObject anonymousIdentityToken = {
     .Encoding = SOPC_ExtObjBodyEncoding_Object,
@@ -1029,84 +1018,6 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
-    /* Get the parsed pki paths */
-    SOPC_UsersConfig_PKIPaths* pki_paths = NULL;
-    SOPC_UserConfig_GetPKIPaths(authenticationManager, &pki_paths);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert_ptr_nonnull(pki_paths);
-    /* Check trusted CAs */
-    int caCounter = 0;
-    // Root CA
-    for (caCounter = 0;
-         pki_paths->trustedRootIssuersList[caCounter] != NULL && usr_expectedTrustedRootIssuers[caCounter]; caCounter++)
-    {
-        int cmp_res = strcmp(pki_paths->trustedRootIssuersList[caCounter], usr_expectedTrustedRootIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->trustedRootIssuersList[caCounter]);
-    ck_assert_ptr_null(usr_expectedTrustedRootIssuers[caCounter]);
-    // Intermediate CA:
-    for (caCounter = 0; pki_paths->trustedIntermediateIssuersList[caCounter] != NULL &&
-                        usr_expectedTrustedIntermediateIssuers[caCounter];
-         caCounter++)
-    {
-        int cmp_res = strcmp(pki_paths->trustedIntermediateIssuersList[caCounter],
-                             usr_expectedTrustedIntermediateIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->trustedIntermediateIssuersList[caCounter]);
-    ck_assert_ptr_null(usr_expectedTrustedIntermediateIssuers[caCounter]);
-
-    /* Check trusted issued certificates */
-    int issuedCounter = 0;
-    for (issuedCounter = 0;
-         pki_paths->issuedCertificatesList[issuedCounter] != NULL && usr_expectedIssuedCerts[issuedCounter];
-         issuedCounter++)
-    {
-        int cmp_res = strcmp(pki_paths->issuedCertificatesList[issuedCounter], usr_expectedIssuedCerts[issuedCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->issuedCertificatesList[issuedCounter]);
-    ck_assert_ptr_null(usr_expectedIssuedCerts[issuedCounter]);
-
-    /* Check untrusted CAs (used to check issued certificate trust chain) */
-    int untrustedCAcounter = 0;
-    // Root CA:
-    for (untrustedCAcounter = 0; pki_paths->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
-                                 usr_expectedUntrustedRootIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(pki_paths->untrustedRootIssuersList[untrustedCAcounter],
-                             usr_expectedUntrustedRootIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->untrustedRootIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(usr_expectedUntrustedRootIssuers[untrustedCAcounter]);
-    // Intermediate CA:
-    for (untrustedCAcounter = 0; pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
-                                 usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter],
-                             usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->untrustedIntermediateIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(usr_expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-
-    /* Check CRLs */
-    int crlCounter = 0;
-    for (crlCounter = 0;
-         pki_paths->certificateRevocationList[crlCounter] != NULL && usr_expectedIssuersCRLs[crlCounter]; crlCounter++)
-    {
-        int cmp_res = strcmp(pki_paths->certificateRevocationList[crlCounter], usr_expectedIssuersCRLs[crlCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(pki_paths->certificateRevocationList[crlCounter]);
-    ck_assert_ptr_null(usr_expectedIssuersCRLs[crlCounter]);
-
-    SOPC_Free(pki_paths);
-    pki_paths = NULL;
     SOPC_UserWithAuthorization_Free(&invalidNoAccesses);
     SOPC_UserWithAuthorization_Free(&anonNoAccesses);
     SOPC_UserWithAuthorization_Free(&noAccess);
