@@ -142,7 +142,9 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
  * \param userToken              An extension object, containing either an OpcUa_AnonymousIdentityToken, a
  *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
- * \param userTokenCtx           Context for userToken, may be NULL
+ * \param userTokenCtx           Context for X509IdentityToken, expected an allocated SOPC_SerializedAsymmetricKey*
+ *                               which will be deallocated by toolkit.
+ *                               NULL if \p userToken is not a OpcUa_X509IdentityToken extension object.
  *
  * \return                       SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS or
  *                               SOPC_STATUS_OUT_OF_MEMORY otherwise
@@ -204,7 +206,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
     int32_t length_password);
 
 /**
- * \brief Request to activate a session with a x509IdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
+ * \brief Request to activate a session with a x509IdentityToken. See ::SOPC_ToolkitClient_AsyncActivateSession().
  *
  *
  * \param endpointConnectionCfg  Endpoint connection configuration.
@@ -213,17 +215,18 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param policyId               The policy id to use for the identity token, must not be NULL
- * \param path_cert_x509         The zero-terminated string of the x509 certificate path, must not be NULL (DER format)
- * \param path_key_x509          The zero-terminated string of the private key path (PEM format)
+ * \param certX509         Certificate of the X509IdentityToken.
+ * \param key              A valid pointer to the private key of the X509IdentityToken.
+ *                         This object should never be freed by the caller of this function, let the toolkit do it.
  *
- * \return SOPC_STATUS_OK when SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
+ * \return SOPC_STATUS_OK when ::SOPC_ToolkitClient_AsyncActivateSession() is called successfully.
  */
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                                       const char* sessionName,
                                                                       uintptr_t sessionContext,
                                                                       const char* policyId,
-                                                                      const char* path_cert_x509,
-                                                                      const char* path_key_x509);
+                                                                      const SOPC_SerializedCertificate* pCertX509,
+                                                                      SOPC_SerializedAsymmetricKey* pKey);
 
 /**
  * \brief Request to send a service request on given active session.

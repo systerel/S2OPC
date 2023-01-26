@@ -110,9 +110,16 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
         if (NULL == sessionAppContext->userTokenKey)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "AsyncActivateSession: missing x509 UserIdentityToken private key");
+                                   "AsyncActivateSession: missing X509IdentityToken private key");
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
+    }
+    else if (NULL != userTokenCtx)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "AsyncActivateSession: userTokenCtx is provided but not for an X509IdentityToken access");
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
@@ -225,11 +232,10 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_Endpo
                                                                       const char* sessionName,
                                                                       uintptr_t sessionContext,
                                                                       const char* policyId,
-                                                                      const char* path_cert_x509,
-                                                                      const char* path_key_x509)
+                                                                      const SOPC_SerializedCertificate* pCertX509,
+                                                                      SOPC_SerializedAsymmetricKey* pKey)
 {
-    if (NULL == policyId || 0 == strlen(policyId) || NULL == path_cert_x509 || 0 == strlen(path_cert_x509) ||
-        NULL == path_key_x509 || 0 == strlen(path_key_x509))
+    if (NULL == policyId || 0 == strlen(policyId) || NULL == pCertX509 || NULL == pKey)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -237,35 +243,18 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_Endpo
     SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_X509IdentityToken* token = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_SerializedCertificate* serPcert = NULL;
-    SOPC_CertificateList* pCert = NULL;
-    SOPC_SerializedAsymmetricKey* pKeyUserToken = NULL;
 
     if (NULL == user)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(path_key_x509, &pKeyUserToken);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load x509 UserIdentityToken private key.");
-    }
-
     status = SOPC_Encodeable_CreateExtension(user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(path_cert_x509, &serPcert);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_Deserialize(serPcert, &pCert);
-    }
+
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ByteString_Initialize(&token->CertificateData);
-        status = SOPC_KeyManager_Certificate_ToDER(pCert, &token->CertificateData.Data,
-                                                   (uint32_t*) &token->CertificateData.Length);
+        status = SOPC_ByteString_CopyFromBytes(&token->CertificateData, pCertX509->data, (int32_t) pCertX509->length);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -273,8 +262,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_Endpo
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user,
-                                                         pKeyUserToken);
+        status =
+            SOPC_ToolkitClient_AsyncActivateSession(endpointConnectionCfg, sessionName, sessionContext, user, pKey);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -282,9 +271,6 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_Endpo
         SOPC_ExtensionObject_Clear(user);
         SOPC_Free(user);
     }
-
-    SOPC_KeyManager_SerializedCertificate_Delete(serPcert);
-    SOPC_KeyManager_Certificate_Free(pCert);
 
     return status;
 }
