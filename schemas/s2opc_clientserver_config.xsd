@@ -21,7 +21,7 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="anonymous"/>
       <xs:enumeration value="username"/>
-			<xs:enumeration value="certificate"/>
+      <xs:enumeration value="certificate"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="NamespaceType">
@@ -178,14 +178,11 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="policyId"  use="required"/>
-        <xs:attribute type="TokenType" name="tokenType"  use="required">
-          <xs:annotation>
-            <xs:documentation>Available token types are only anonymous and username.</xs:documentation>
-          </xs:annotation>
-        </xs:attribute>
+        <xs:attribute type="TokenType" name="tokenType"  use="required"/>
         <xs:attribute type="SecurityURI" name="securityUri" use="optional">
           <xs:annotation>
             <xs:documentation>It is mandatory when token type is not anonymous. When it is empty the endpoint security policy URI is used (it cannot be None).</xs:documentation>
+            <xs:documentation>Available token types are anonymous, username and x509 certificate.</xs:documentation>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -194,6 +191,9 @@
   <xs:complexType name="UserPoliciesType">
     <xs:sequence>
       <xs:element type="UserPolicyType" name="UserPolicy" maxOccurs="5" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Available token types are only anonymous and x509 certificate.</xs:documentation>
+        </xs:annotation>
       </xs:element>
     </xs:sequence>
   </xs:complexType>
@@ -220,14 +220,14 @@
     </xs:sequence>
     <xs:attribute type="xs:anyURI" name="url" use="required"/>
     <xs:attribute type="xs:boolean" name="hasDiscoveryEndpoint" use="optional" default="true">
-        <xs:annotation>
-          <xs:documentation>By default each endpoint has an implicit discovery endpoint if security mode None is not available. Set to 'false' to deactivate.</xs:documentation>
-        </xs:annotation>
+      <xs:annotation>
+        <xs:documentation>By default each endpoint has an implicit discovery endpoint if security mode None is not available. Set to 'false' to deactivate.</xs:documentation>
+      </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:boolean" name="enableListening" use="optional" default="true">
-        <xs:annotation>
-          <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least one ReverseConnection is defined.</xs:documentation>
-        </xs:annotation>
+      <xs:annotation>
+        <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least one ReverseConnection is defined.</xs:documentation>
+      </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="EndpointsType">

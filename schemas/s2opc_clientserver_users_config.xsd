@@ -31,13 +31,13 @@
     <xs:attribute type="xs:string" name="hash_length" use="required"/>
     <xs:attribute type="xs:string" name="salt_length" use="required"/>
   </xs:complexType>
-	<xs:complexType name="DefaultCertificateAuthorizationType">
+  <xs:complexType name="DefaultCertificateAuthorizationType">
     <xs:attribute type="xs:boolean" name="read" default="false"/>
     <xs:attribute type="xs:boolean" name="write" default="false"/>
     <xs:attribute type="xs:boolean" name="execute" default="false"/>
     <xs:attribute type="xs:boolean" name="addnode" default="false"/>
   </xs:complexType>
-	<xs:complexType name="IssuerType">
+  <xs:complexType name="IssuerType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="cert_path" use="required"/>
@@ -59,10 +59,10 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
-				<xs:attribute type="xs:boolean" name="read" use="optional"/>
-				<xs:attribute type="xs:boolean" name="write" use="optional"/>
-				<xs:attribute type="xs:boolean" name="execute" use="optional"/>
-				<xs:attribute type="xs:boolean" name="addnode" use="optional"/>
+        <xs:attribute type="xs:boolean" name="read" use="optional"/>
+        <xs:attribute type="xs:boolean" name="write" use="optional"/>
+        <xs:attribute type="xs:boolean" name="execute" use="optional"/>
+        <xs:attribute type="xs:boolean" name="addnode" use="optional"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -71,6 +71,7 @@
       <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>One or several explicitly trusted certificates issued by provided issuers or self-signed</xs:documentation>
+          <xs:documentation>If the default rights are not filled in the attribute of IssuedCertificateType then the default rights DefaultCertificateAuthorizationType are applied.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
