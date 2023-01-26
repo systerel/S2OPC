@@ -972,26 +972,8 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    if (OpcUa_UserTokenType_UserName == userPolicy->TokenType)
-    {
-        attr_val = get_attr(ctx, "securityUri", attrs);
-
-        if (attr_val == NULL)
-        {
-            LOG_XML_ERROR(ctx->helper_ctx.parser, "securityUri attribute missing");
-            return false;
-        }
-
-        status = SOPC_String_CopyFromCString(&userPolicy->SecurityPolicyUri, attr_val);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            LOG_MEMORY_ALLOCATION_FAILURE;
-            return false;
-        }
-    }
-
-    if (OpcUa_UserTokenType_Certificate == userPolicy->TokenType)
+    if (OpcUa_UserTokenType_UserName == userPolicy->TokenType ||
+        OpcUa_UserTokenType_Certificate == userPolicy->TokenType)
     {
         attr_val = get_attr(ctx, "securityUri", attrs);
 
