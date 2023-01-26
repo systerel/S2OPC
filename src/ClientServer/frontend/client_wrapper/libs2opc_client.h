@@ -103,17 +103,6 @@ typedef enum
     SOPC_USER_POLICY_ID_USERNAME = 1
 } SOPC_UserPolicyId;
 
-/* The UserTokenType enumeration taken from "sopc_enum_typess.h" */
-typedef enum _OpcUa_UserTokenType
-{
-    OpcUa_UserTokenType_Anonymous = 0,
-    OpcUa_UserTokenType_UserName = 1,
-    OpcUa_UserTokenType_Certificate = 2,
-    OpcUa_UserTokenType_IssuedToken = 3,
-    OpcUa_UserTokenType_Kerberos = 4,
-    OpcUa_UserTokenType_SizeOf = INT32_MAX
-} OpcUa_UserTokenType;
-
 void SOPC_Sleep(unsigned int milliseconds);
 #endif
 
@@ -328,14 +317,24 @@ typedef struct
    Zero-terminated path to the certificate revocation list in the DER format
  @var SOPC_LibSub_ConnectionCfg::policyId
    Zero-terminated policy id. To know which policy id to use, please read a
-   GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
-   AnonymousIdentityToken is used and the policy id must correspond to an
-   anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
-   and the policy id must correspond to an username UserIdentityPolicy.
+   GetEndpointsResponse or a CreateSessionResponse.
+   AnonymousIdentityToken is used when:
+   - username, path_cert_x509_token and path_key_x509_token is NULL
+   - the policy id must correspond to an anonymous UserIdentityPolicy
+   UserNameIdentityToken is used when:
+   - username is not NULL
+   - the policy id must correspond to an username UserIdentityPolicy
+   X509IdentityToken is used when:
+   - username is NULL, path_cert_x509_token and path_key_x509_token is not NULL
+   - the policy id must correspond to a certificate UserIdentityPolicy
  @var SOPC_LibSub_ConnectionCfg::username
-   Zero-terminated username, NULL for anonymous access, see policyId
+   Zero-terminated username, NULL for anonymous or certificate access, see policyId
  @var SOPC_LibSub_ConnectionCfg::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
+ @var SOPC_LibSub_ConnectionCfg::path_cert_x509_token
+   Zero-terminated path to the x509 certificate, NULL for anonymous access, see policyId
+ @var SOPC_LibSub_ConnectionCfg::path_key_x509_token
+   Zero-terminated path to the x509 private key, NULL for anonymous access, see policyId
  @var SOPC_LibSub_ConnectionCfg::publish_period_ms
    The requested publish period for the created subscription (in milliseconds)
  @var SOPC_LibSub_ConnectionCfg::n_max_keepalive
@@ -368,7 +367,6 @@ typedef struct
 
     SOPC_LibSub_CstString server_uri;
     SOPC_LibSub_CstString server_url;
-    OpcUa_UserTokenType token_type;
     SOPC_LibSub_CstString security_policy;
     OpcUa_MessageSecurityMode security_mode;
     uint8_t disable_certificate_verification;

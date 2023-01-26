@@ -222,10 +222,10 @@ void SOPC_ClientCommon_Clear(void)
             SOPC_Free((void*) pCfg->policyId);
             SOPC_Free((void*) pCfg->username);
             SOPC_Free((void*) pCfg->password);
-            OpcUa_GetEndpointsResponse_Clear((void*) pCfg->expected_endpoints);
-            SOPC_Free((void*) pCfg->expected_endpoints);
             SOPC_Free((void*) pCfg->path_cert_x509_token);
             SOPC_Free((void*) pCfg->path_key_x509_token);
+            OpcUa_GetEndpointsResponse_Clear((void*) pCfg->expected_endpoints);
+            SOPC_Free((void*) pCfg->expected_endpoints);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             SOPC_Free(pCfg);
         }
@@ -342,7 +342,6 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
         else
         {
             pCfgCpy->security_mode = pCfg->security_mode;
-            pCfgCpy->token_type = pCfg->token_type;
             pCfgCpy->disable_certificate_verification = pCfg->disable_certificate_verification;
             pCfgCpy->publish_period_ms = pCfg->publish_period_ms;
             pCfgCpy->n_max_keepalive = pCfg->n_max_keepalive;
@@ -581,10 +580,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         ++nCreatedClient;
         clientId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, pCfg->reverse_config_idx, clientId, pCfg->policyId, pCfg->username,
-                                    pCfg->password, pCfg->data_change_callback, (double) pCfg->publish_period_ms,
-                                    pCfg->n_max_keepalive, pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
-                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback,
-                                    pCfg->token_type, pCfg->path_cert_x509_token, pCfg->path_key_x509_token, &pSM);
+                                    pCfg->password, pCfg->path_cert_x509_token, pCfg->path_key_x509_token,
+                                    pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
+                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
+                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */

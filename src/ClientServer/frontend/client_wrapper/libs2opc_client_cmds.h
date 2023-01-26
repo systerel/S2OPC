@@ -92,22 +92,31 @@ typedef void SOPC_ClientHelper_DisconnectCbk(const uint32_t connectionId);
    in the DER format
  @var SOPC_ClientHelper_Security::policyId
    Zero-terminated policy id. To know which policy id to use, please read a
-   GetEndpointsResponse or a CreateSessionResponse. When username is NULL, the
-   AnonymousIdentityToken is used and the policy id must correspond to an
-   anonymous UserIdentityPolicy. Otherwise, the UserNameIdentityToken is used
-   and the policy id must correspond to an username UserIdentityPolicy.
+   GetEndpointsResponse or a CreateSessionResponse.
+   AnonymousIdentityToken is used when:
+   - username, path_cert_x509_token and path_key_x509_token is NULL
+   - the policy id must correspond to an anonymous UserIdentityPolicy
+   UserNameIdentityToken is used when:
+   - username is not NULL
+   - the policy id must correspond to an username UserIdentityPolicy
+   X509IdentityToken is used when:
+   - username is NULL, path_cert_x509_token and path_key_x509_token is not NULL
+   - the policy id must correspond to a certificate UserIdentityPolicy
  @var SOPC_ClientHelper_Security::username
    Zero-terminated username, NULL for anonymous access, see policyId
    The password will be encrypted, or not, depending on the user token security policy associated to the policyId
    or if it is empty depending on the SecureChannel security policy.
  @var SOPC_ClientHelper_Security::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
+ @var SOPC_ClientHelper_Security::path_cert_x509_token
+   Zero-terminated path to the x509 certificate, NULL for anonymous access, see policyId
+ @var SOPC_ClientHelper_Security::path_key_x509_token
+   Zero-terminated path to the x509 private key, NULL for anonymous access, see policyId
 */
 typedef struct
 {
     const char* security_policy;
     OpcUa_MessageSecurityMode security_mode;
-    OpcUa_UserTokenType token_type;
     const char* path_cert_auth;
     const char* path_crl;
     const char* path_cert_srv;

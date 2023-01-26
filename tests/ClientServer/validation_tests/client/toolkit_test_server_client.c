@@ -144,7 +144,6 @@ static int32_t client_create_configuration(void)
     SOPC_ClientHelper_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
-        .token_type = OpcUa_UserTokenType_Certificate,
         .path_cert_auth = "./trusted/cacert.der",
         .path_crl = "./revoked/cacrl.der",
         .path_cert_srv = "./server_public/server_2k_cert.der",

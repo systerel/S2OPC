@@ -637,18 +637,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     {
         return -18;
     }
-    if (OpcUa_UserTokenType_Certificate == security->token_type)
-    {
-        if (NULL == cert_x509_token)
-        {
-            return -19;
-        }
-        if (NULL == key_x509_token)
-        {
-            return -20;
-        }
-    }
-    // TODO RBA: Add check on username password
+
     if (!security_none && (NULL == cert_auth || NULL == ca_crl))
     {
         Helpers_Log(SOPC_LOG_LEVEL_WARNING,
@@ -669,6 +658,8 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->policyId = security->policyId;
     cfg_con->username = security->username;
     cfg_con->password = security->password;
+    cfg_con->path_cert_x509_token = cert_x509_token;
+    cfg_con->path_key_x509_token = key_x509_token;
     cfg_con->publish_period_ms = PUBLISH_PERIOD_MS;
     cfg_con->n_max_keepalive = MAX_KEEP_ALIVE_COUNT;
     cfg_con->n_max_lifetime = MAX_LIFETIME_COUNT;
@@ -678,9 +669,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->token_target = PUBLISH_N_TOKEN;
     cfg_con->generic_response_callback = SOPC_ClientHelper_GenericCallback;
     cfg_con->expected_endpoints = expectedEndpoints;
-    cfg_con->path_cert_x509_token = cert_x509_token;
-    cfg_con->path_key_x509_token = key_x509_token;
-    cfg_con->token_type = security->token_type;
     return 0;
 }
 
@@ -713,12 +701,6 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     if (NULL == connection)
-    {
-        return -1;
-    }
-
-    if (OpcUa_UserTokenType_Certificate != security->token_type &&
-        OpcUa_UserTokenType_Anonymous != security->token_type && OpcUa_UserTokenType_UserName != security->token_type)
     {
         return -1;
     }
