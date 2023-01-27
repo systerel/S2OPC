@@ -39,11 +39,15 @@ KNOWN_BUGS_FILES=known_bugs.cfg
 S2OPC_UACTT_CONFIG=Acceptation_S2OPC
 S2OPC_CERTS_CONFIG=../../../samples/ClientServer/data/cert
 UACTT_PROJECT_PATH=/UACTT_project
+CONFIGURATION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml
 
 if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
     SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.selection.xml
+    # remove methods from configuration
+    sed -r 's/\"ns=1;s=Method[^\"]+\"/\"\"/g' $S2OPC_UACTT_CONFIG/Acceptation_S2OPC.ctt.xml > $S2OPC_UACTT_CONFIG/Acceptation_S2OPC.nano.ctt.xml
+    CONFIGURATION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.ctt.xml
 elif [[ -z "$SOPC_HAS_NODE_MANAGEMENT_SERVICES" ]] || [[ $SOPC_HAS_NODE_MANAGEMENT_SERVICES -eq 0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_server
@@ -130,12 +134,12 @@ then
     export WINEPREFIX="/tmp/wineprefix"
     export WINEARCH="win32"
     # Run windows UACTT with wine: see <uactt>/help/index.htm#t=command_line_interface.htm for parameters
-    echo "Launching Acceptance Test Tool: wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $UACTT_PROJECT_PATH/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE"
-    wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
+    echo "Launching Acceptance Test Tool: wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $CONFIGURATION) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE"
+    wine /opt/uactt/uacompliancetest.exe --settings $(winepath -w $CONFIGURATION) --selection $(winepath -w $SELECTION) --hidden --close --result $(winepath -w ./$LOG_FILE) 2>$UACTT_ERROR_FILE
 else
     # Run linux UACTT
-    echo "Launching Acceptance Test Tool: uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
-    /opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+    echo "Launching Acceptance Test Tool: uacompliancetest -s $CONFIGURATION --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
+    /opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $CONFIGURATION --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
 fi
 
 echo "Closing Acceptance Test Tool"
