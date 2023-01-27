@@ -13825,6 +13825,8 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=17591</Reference>
     </References>
   </UAObject>
+  <!-- Optional: no dictionaries defined in the server and not defined in specification parts 1-14 -->
+  <!--
   <UAObject NodeId="i=17594" BrowseName="Dictionaries">
     <DisplayName>Dictionaries</DisplayName>
     <References>
@@ -13832,6 +13834,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=17591</Reference>
     </References>
   </UAObject>
+  -->
   <UAReferenceType NodeId="i=17597" BrowseName="HasDictionaryEntry">
     <DisplayName>HasDictionaryEntry</DisplayName>
     <References>
@@ -23806,6 +23809,8 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=12620</Reference>
     </References>
   </UAVariable>
+  <!-- Optional: Server Push Management (see part 12) not supported -->
+  <!--
   <UAObject NodeId="i=12637" BrowseName="ServerConfiguration">
     <DisplayName>ServerConfiguration</DisplayName>
     <References>
@@ -25997,6 +26002,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
+  -->
   <UAObjectType NodeId="i=17496" BrowseName="KeyCredentialConfigurationFolderType">
     <DisplayName>KeyCredentialConfigurationFolderType</DisplayName>
     <References>
@@ -26126,6 +26132,8 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
+  <!-- Optional: Server Push Management (see part 12) not supported -->
+  <!--
   <UAObject NodeId="i=18155" BrowseName="KeyCredentialConfiguration">
     <DisplayName>KeyCredentialConfiguration</DisplayName>
     <References>
@@ -26133,6 +26141,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=17496</Reference>
     </References>
   </UAObject>
+  -->
   <UAObjectType NodeId="i=18001" BrowseName="KeyCredentialConfigurationType">
     <DisplayName>KeyCredentialConfigurationType</DisplayName>
     <References>
@@ -26427,6 +26436,8 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=23557</Reference>
     </References>
   </UAVariable>
+  <!-- Optional: Server Authorization Services (see part 12) not supported -->
+  <!--
   <UAObject NodeId="i=17732" BrowseName="AuthorizationServices">
     <DisplayName>AuthorizationServices</DisplayName>
     <References>
@@ -26434,6 +26445,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
+  -->
   <UAObjectType NodeId="i=17852" BrowseName="AuthorizationServiceConfigurationType">
     <DisplayName>AuthorizationServiceConfigurationType</DisplayName>
     <References>
@@ -40597,6 +40609,8 @@
       <Field Name="Denominator" DataType="i=7" />
     </Definition>
   </UADataType>
+  <!-- Optional: no description of server resources + not defined in spec parts 1-14 -->
+  <!--
   <UAObject NodeId="i=24226" BrowseName="Resources">
     <DisplayName>Resources</DisplayName>
     <References>
@@ -40646,6 +40660,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
+  -->
   <UADataType NodeId="i=256" BrowseName="IdType">
     <DisplayName>IdType</DisplayName>
     <Category>Base Info Base Types</Category>
