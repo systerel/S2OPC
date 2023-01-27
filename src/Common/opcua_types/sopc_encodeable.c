@@ -47,7 +47,8 @@ SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** enc
 SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL)
+    if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL &&
+        encTyp == *(SOPC_EncodeableType**) *encObject)
     {
         encTyp->Clear(*encObject);
         SOPC_Free(*encObject);
