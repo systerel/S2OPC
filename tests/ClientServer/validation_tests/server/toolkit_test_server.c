@@ -24,6 +24,7 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_logger.h"

@@ -35,7 +35,6 @@
 
 #include <stdbool.h>
 
-#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"

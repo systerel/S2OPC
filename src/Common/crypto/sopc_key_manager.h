@@ -491,7 +491,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_S
 const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_SerializedCertificate* cert);
 
 /**
- * \brief           Return the SHA-1 thumbprint of a certificate.
+ * \brief           Returns the SHA-1 thumbprint of a certificate.
  *
  * \param pCert     A pointer to a single Certificate to find in the list.
  *

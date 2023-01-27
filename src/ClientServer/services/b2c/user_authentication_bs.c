@@ -24,6 +24,7 @@
 #include "user_authentication_bs.h"
 
 #include "opcua_identifiers.h"
+#include "sopc_assert.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
@@ -210,8 +211,7 @@ void user_authentication_bs__is_valid_username_pwd_authentication(
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
     SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
-    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
-    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
+    SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_userName);
 
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
@@ -254,8 +254,7 @@ void user_authentication_bs__is_valid_user_x509_authentication(
 {
     SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
 
-    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__c_userTokenType_indet);
-    SOPC_ASSERT(user_authentication_bs__p_token_type != constants__e_userTokenType_anonymous);
+    SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_x509);
 
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);

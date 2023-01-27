@@ -215,8 +215,8 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
  * \param sessionContext         A context value, it will be provided in case of session activation or failure
  *                               notification
  * \param policyId               The policy id to use for the identity token, must not be NULL
- * \param certX509         Certificate of the X509IdentityToken.
- * \param key              A valid pointer to the private key of the X509IdentityToken.
+ * \param pCertX509         Certificate of the X509IdentityToken.
+ * \param pKey              A valid pointer to the private key of the X509IdentityToken.
  *                         This object should never be freed by the caller of this function, let the toolkit do it.
  *
  * \return SOPC_STATUS_OK when ::SOPC_ToolkitClient_AsyncActivateSession() is called successfully.

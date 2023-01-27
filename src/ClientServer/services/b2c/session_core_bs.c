@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
@@ -785,7 +786,6 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
         memcpy(pToSign + pServerCert->length, pServerNonce->Data, (size_t) pServerNonce->Length);
 
         /* Sign and store the signature in pSign */
-        SOPC_ByteString_Clear(&pSign->Signature);
         status =
             SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, (uint32_t*) &pSign->Signature.Length);
     }
@@ -814,7 +814,6 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Clear(&pSign->Algorithm);
         status = SOPC_String_CopyFromCString(&pSign->Algorithm,
                                              SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider));
     }
