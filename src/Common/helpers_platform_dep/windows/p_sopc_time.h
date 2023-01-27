@@ -29,6 +29,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "time.h"
+
 /** Definition of SOPC_RealTime */
 typedef struct
 {
