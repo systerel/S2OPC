@@ -94,8 +94,8 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der",          "revoked/c
 // Default certificate paths for X509 Identity tokens
 
 static char* x509_Identity_trusted_root_issuers[] = {
-    "trusted_usr/cacert.der",    /* Demo CA */
-    "trusted_usr/ctt_ca1TC.der", /* Will be ignored because no CRL associated. Tests 042, 043 */
+    "trusted_usr/user_cacert.der", /* Demo CA */
+    "trusted_usr/ctt_ca1TC.der",   /* Will be ignored because no CRL associated. Tests 042, 043 */
     "trusted_usr/ctt_ca1T.der", NULL};
 
 static char* x509_Identity_trusted_intermediate_issuers[] = {"trusted_usr/ctt_ca1I_ca2T.der", NULL};
@@ -126,7 +126,7 @@ static char* x509_Identity_untrusted_root_issuers[] = {
     "untrusted_usr/ctt_ca1I.der", NULL};
 static char* x509_Identity_untrusted_intermediate_issuers[] = {"untrusted_usr/ctt_ca1TC_ca2I.der", /* Test 002 */
                                                                NULL};
-static char* x509_Identity_revoked_certs[] = {"revoked_usr/cacrl.der",          "revoked_usr/ctt_ca1I.crl",
+static char* x509_Identity_revoked_certs[] = {"revoked_usr/user_cacrl.der",     "revoked_usr/ctt_ca1I.crl",
                                               "revoked_usr/ctt_ca1TC_ca2I.crl", "revoked_usr/ctt_ca1I_ca2T.crl",
                                               "revoked_usr/ctt_ca1T.crl",       NULL};
 

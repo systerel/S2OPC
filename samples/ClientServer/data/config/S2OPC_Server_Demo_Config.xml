@@ -37,6 +37,7 @@
               <!-- Available token types are only anonymous and username. Security URI is Basic256Sha256 to encrypt password since secure channel is not encrypted -->
               <UserPolicy policyId="anon" tokenType="anonymous"/>
               <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+              <UserPolicy policyId="x509" tokenType="certificate" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
             </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
@@ -47,6 +48,7 @@
               <!-- Available token types are only anonymous and username. Security URI set is None which is secure since secure channel is already encrypted -->
               <UserPolicy policyId="anon" tokenType="anonymous"/>
               <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+              <UserPolicy policyId="x509" tokenType="certificate" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
             </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep">
@@ -57,6 +59,7 @@
             <UserPolicies>
               <UserPolicy policyId="anon" tokenType="anonymous"/>
               <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep"/>
+              <UserPolicy policyId="x509" tokenType="certificate" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
             </UserPolicies>
           </SecurityPolicy>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss">
@@ -67,6 +70,7 @@
             <UserPolicies>
               <UserPolicy policyId="anon" tokenType="anonymous"/>
               <UserPolicy policyId="user" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss"/>
+              <UserPolicy policyId="x509" tokenType="certificate" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
             </UserPolicies>
           </SecurityPolicy>
         </SecurityPolicies>

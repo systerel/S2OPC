@@ -152,8 +152,8 @@ static int32_t client_create_configuration(void)
         .policyId = SOPC_UserTokenPolicy_X509Basic256Sha256_ID,
         .username = NULL,
         .password = NULL,
-        .path_cert_x509_token = "./client_public/client_2k_cert.der", /* The same cert as the client to test */
-        .path_key_x509_token = "./client_private/client_2k_key.pem",  /* The same key as the client to test */
+        .path_cert_x509_token = "./user_public/user_2k_cert.der",
+        .path_key_x509_token = "./user_private/user_2k_key.pem",
     };
 
     SOPC_ClientHelper_EndpointConnection endpoint = {

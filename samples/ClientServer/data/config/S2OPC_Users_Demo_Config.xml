@@ -17,4 +17,14 @@
       <UserAuthorization write="true" read="true" execute="true" />
     </UserPassword>
   </UserPasswordConfiguration>
+  <UserCertificates>
+		<!-- default right is read only (accepted issued, not configured but evaluated as trustworthy according to trust chain)-->
+		<DefaultCertificateAuthorization write="false" read="true" execute="false" addnode="false"/>
+		<TrustedIssuers>
+			<TrustedIssuer root="true" cert_path="trusted_usr/user_cacert.der" revocation_list_path="revoked_usr/user_cacrl.der"/>
+		</TrustedIssuers>
+		<IssuedCertificates>
+			<IssuedCertificate path="user_public/user_2k_cert.der" write="true" read="true" execute="true" addnode="true"/>
+		</IssuedCertificates>
+  </UserCertificates>
 </S2OPC_Users>
