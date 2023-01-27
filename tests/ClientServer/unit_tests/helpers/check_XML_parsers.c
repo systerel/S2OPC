@@ -928,15 +928,16 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
-    // x509_defaultAccess --> Read only form SOPC_Test_Users.xml
+    // x509_defaultAccess --> Read, execute and addnode rights are set to the default value False because rights are
+    // partialy defined
     status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ,
                                                           &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
+    ck_assert(!authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
                                                           &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
+    ck_assert(authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
         x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

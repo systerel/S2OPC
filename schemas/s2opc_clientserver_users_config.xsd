@@ -59,10 +59,10 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
-        <xs:attribute type="xs:boolean" name="read" use="optional"/>
-        <xs:attribute type="xs:boolean" name="write" use="optional"/>
-        <xs:attribute type="xs:boolean" name="execute" use="optional"/>
-        <xs:attribute type="xs:boolean" name="addnode" use="optional"/>
+        <xs:attribute type="xs:boolean" name="read" default="false"/>
+        <xs:attribute type="xs:boolean" name="write" default="false"/>
+        <xs:attribute type="xs:boolean" name="execute" default="false"/>
+        <xs:attribute type="xs:boolean" name="addnode" default="false"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -71,7 +71,6 @@
       <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>One or several explicitly trusted certificates issued by provided issuers or self-signed</xs:documentation>
-          <xs:documentation>If the default rights are not filled in the attribute of IssuedCertificateType then the default rights DefaultCertificateAuthorizationType are applied.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -87,7 +86,11 @@
   </xs:complexType>
   <xs:complexType name="UserCertificatesType">
     <xs:sequence>
-      <xs:element type="DefaultCertificateAuthorizationType" name="DefaultCertificateAuthorization" />
+      <xs:element type="DefaultCertificateAuthorizationType" name="DefaultCertificateAuthorization">
+        <xs:annotation>
+          <xs:documentation>Default certificate authorization for accepted issued (not configured) evaluated as trustworthy according to trust chain</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
       <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
         <xs:annotation>

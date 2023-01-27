@@ -84,7 +84,6 @@ typedef struct user_password
 typedef struct user_cert
 {
     SOPC_String certThumb;
-    bool has_rights;
     user_rights rights; // mask of SOPC_UserAuthorization_OperationType
 } user_cert;
 
@@ -597,16 +596,6 @@ static bool end_untrusted_issuers(struct parse_context_t* ctx)
     return true;
 }
 
-static bool cert_has_authorization(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* read = get_attr(ctx, "read", attrs);
-    const char* write = get_attr(ctx, "write", attrs);
-    const char* exe = get_attr(ctx, "execute", attrs);
-    const char* addnode = get_attr(ctx, "addnode", attrs);
-
-    return (NULL != read) && (NULL != write) && (NULL != exe) && (NULL != addnode);
-}
-
 static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char** attrs, const char* path)
 {
     SOPC_CertificateList* pCert = NULL;
@@ -682,14 +671,6 @@ static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attr
     }
 
     bool res = set_cert_authorization(ctx, attrs, path);
-    if (res && cert_has_authorization(ctx, attrs))
-    {
-        ctx->currentCert->has_rights = true;
-    }
-    else
-    {
-        ctx->currentCert->has_rights = false;
-    }
 
     ctx->state = PARSE_ISSUED_CERT;
 
@@ -1420,32 +1401,32 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
         user_cert* pUserCert = SOPC_Dict_Get(config->certificates, certThumb, &found);
         if (found)
         {
-            if (!pUserCert->has_rights)
-            {
-                userRights = &config->defaultCertRights;
-            }
-            else
-            {
-                userRights = &pUserCert->rights;
-            }
-            switch (operationType)
-            {
-            case SOPC_USER_AUTHORIZATION_OPERATION_READ:
-                *pbOperationAuthorized = userRights->read;
-                break;
-            case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
-                *pbOperationAuthorized = userRights->write;
-                break;
-            case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
-                *pbOperationAuthorized = userRights->exec;
-                break;
-            case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
-                *pbOperationAuthorized = userRights->addnode;
-                break;
-            default:
-                SOPC_ASSERT(false && "Unknown operation type.");
-                break;
-            }
+            userRights = &pUserCert->rights;
+        }
+        else
+        {
+            /* Default certificate authorization for accepted issued (not configured) evaluated as trustworthy according
+             * to trust chain */
+            userRights = &config->defaultCertRights;
+        }
+
+        switch (operationType)
+        {
+        case SOPC_USER_AUTHORIZATION_OPERATION_READ:
+            *pbOperationAuthorized = userRights->read;
+            break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_WRITE:
+            *pbOperationAuthorized = userRights->write;
+            break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE:
+            *pbOperationAuthorized = userRights->exec;
+            break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
+            *pbOperationAuthorized = userRights->addnode;
+            break;
+        default:
+            SOPC_ASSERT(false && "Unknown operation type.");
+            break;
         }
     }
     else if (SOPC_User_IsAnonymous(pUser))
