@@ -57,6 +57,8 @@
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
+#define TEST_SERVER_XML_ADDRESS_SPACE "TEST_SERVER_XML_ADDRESS_SPACE"
+
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
@@ -268,6 +270,14 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
 #if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES
 static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
 {
+    // Note: address space need to be defined dynamically using
+
+    const char* xml_address_space_config_path = getenv(TEST_SERVER_XML_ADDRESS_SPACE);
+    if(NULL == xml_address_space_config_path){
+        printf("ERROR: "TEST_SERVER_XML_ADDRESS_SPACE" env variable shall be set\n");
+    }
+    ck_assert_ptr_nonnull(xml_address_space_config_path);
+
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_AddNodesResponse* addNodesResp = NULL;
     OpcUa_AddNodesRequest* addNodesReq = NULL;
@@ -330,12 +340,12 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
             status = SOPC_STATUS_NOK;
         }
 
-        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesResponse_EncodeableType, (void**) &addNodesResp);
+        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
         assert(SOPC_STATUS_OK == delStatus);
     }
     else
     {
-    	SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
         assert(SOPC_STATUS_OK == delStatus);
     }
 
@@ -469,7 +479,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 
     // Address space configuration
 
-    const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
+    const char* xml_address_space_config_path = getenv(TEST_SERVER_XML_ADDRESS_SPACE);
     SOPC_AddressSpace* address_space = NULL;
 
     if (NULL != xml_address_space_config_path)
