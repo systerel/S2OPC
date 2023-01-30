@@ -10,6 +10,7 @@ stateOrProvinceName = France
 organizationName    = Systerel
 commonName          = S2OPC Demo Certificate for Server Tests
 emailAddress        = s2opc-support@systerel.fr
+localityName        = Aix-en-Provence
 
 [ server_cert ]
 # Extensions for server certificates (`man x509v3_config`).

@@ -36,6 +36,7 @@ stateOrProvinceName = France
 organizationName    = Systerel
 commonName          = S2OPC Demo Certificate Authority for Tests
 emailAddress        = s2opc-support@systerel.fr
+localityName        = Aix-en-Provence
 
 ####################################################################
 [ ca_extensions ]
