@@ -70,6 +70,7 @@ if(ENABLE_SAMPLES)
 
   target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
   s2opc_pubsub
+  s2opc_clientwrapper
   s2opc_serverwrapper
   s2opc_clientserver
   s2opc_clientserver-loader-embedded)

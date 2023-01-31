@@ -143,6 +143,8 @@ void SOPC_Platform_Shutdown(const bool reboot)
 {
     if (reboot)
     {
+        printk("\n# Rebooting in 5 seconds...\n\n");
+        SOPC_Sleep(5000);
         sys_reboot(SYS_REBOOT_COLD);
     }
 }

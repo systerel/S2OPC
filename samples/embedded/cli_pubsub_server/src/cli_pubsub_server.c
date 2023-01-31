@@ -47,7 +47,6 @@
 // S2OPC includes
 #include "samples_platform_dep.h"
 #include "sopc_assert.h"
-#include "sopc_async_queue.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_logger.h"
@@ -428,6 +427,7 @@ static void setupServer(void)
     // Create endpoints configuration
     SOPC_SecurityPolicy* sp;
 
+    PRINT("Create endpoint '%s'\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
     g_epConfig = SOPC_HelperConfigServer_CreateEndpoint(CONFIG_SOPC_ENDPOINT_ADDRESS, true);
     SOPC_ASSERT(NULL != g_epConfig && "SOPC_HelperConfigServer_CreateEndpoint failed");
 
@@ -641,6 +641,7 @@ static const char* CLI_GetNextWord(WordList* pList)
     }
     return result;
 }
+
 /***************************************************/
 static void* CLI_thread_exec(void* arg)
 {
@@ -680,10 +681,10 @@ static void* CLI_thread_exec(void* arg)
 }
 
 /***************************************************/
-int main(int argc, char* arvg[])
+int main(int argc, char* argv[])
 {
     SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(arvg);
+    SOPC_UNUSED_ARG(argv);
 
     SOPC_ReturnStatus status;
 
@@ -705,10 +706,6 @@ int main(int argc, char* arvg[])
     setupServer();
     setupPubSub();
 
-    /* Create thread for Command Line Input management*/
-    status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
-
     //////////////////////////////////
     // Start the server
     SOPC_Atomic_Int_Set(&gStopped, 0);
@@ -718,6 +715,10 @@ int main(int argc, char* arvg[])
     // Check for server status after some time. (Start is asynchronous)
     SOPC_Sleep(100);
     SOPC_ASSERT(SOPC_Atomic_Int_Get(&gStopped) == 0 && "Server failed to start.");
+
+    /* Create thread for Command Line Input management*/
+    status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
 
     // Setup default values of Cache using AddressSpace content
     initializeCacheFromAddrSpace();
@@ -740,8 +741,6 @@ int main(int argc, char* arvg[])
     SOPC_RealTime_Delete(&gLastReceptionDateMs);
 
     INFO("# Info: Server closed.\n");
-    WARNING("# Rebooting in 5 seconds...\n\n");
-    SOPC_Sleep(5000);
 
     SOPC_Platform_Shutdown(true);
     return 0;

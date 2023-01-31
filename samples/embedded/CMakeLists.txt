@@ -6,6 +6,7 @@ if(NOT S2OPC_COMMON_DEFS_SET)
 endif()
 
 if(NOT S2OPC_PUBSUB_ONLY)
+  add_subdirectory(cli_client)
   if(NOT S2OPC_CLIENTSERVER_ONLY)
     add_subdirectory(cli_pubsub_server)
   endif()
