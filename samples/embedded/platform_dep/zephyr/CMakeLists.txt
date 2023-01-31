@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 # include(${CMAKE_CURRENT_LIST_DIR}/CMakeLists.s2opc.txt)
-set(ENV{CONF_FILE} ${CMAKE_CURRENT_LIST_DIR}/prj.conf)
+set(BOARD_CFG $ENV{BOARD})
+if(BOARD_CFG)
+else()
+message(FATAL_ERROR "BOARD must be set (and exported)")
+endif()
+
+set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/prj.conf;${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
@@ -30,7 +36,6 @@ add_definitions (-Werror)
 # This file is provided here
 
 SET(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../tls_config)
-# target_include_directories(app PRIVATE ${tls_config}) # TODO remove
 zephyr_include_directories(${mbedtls_config})
 
 # =====================

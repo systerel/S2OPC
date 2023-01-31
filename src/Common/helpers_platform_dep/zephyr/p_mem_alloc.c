@@ -30,7 +30,7 @@
 
 #ifdef CONFIG_SOPC_HELPER_IMPL_INSTRUM
 
-static size_t gNbAllocs = 0;
+static int32_t gNbAllocs = 0;
 static inline void INCREASE_NB_ALLOCS(void* res, int i)
 {
     if (res != NULL)

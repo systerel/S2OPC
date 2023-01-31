@@ -198,7 +198,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_DataSetWriter* writer = NULL;
     if (alloc)
     {
-        // TODO : None or Sign&Encrypt
         writer = SOPC_PubSubConfig_SetPubMessageAt(
             connection, 0, MESSAGE_ID, MESSAGE_VERSION, CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, SOPC_SecurityMode_None
             // SOPC_SecurityMode_SignAndEncrypt

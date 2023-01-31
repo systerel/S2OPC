@@ -32,7 +32,9 @@
 /**
  * Specific platform must provide the software entry point
  * that will call the applicative ::SOPC_Platform_Main function.
- * Generally this is the ::main function (but prototype may vary).
+ * Generally this is the ::main function (but name/prototype may vary).
+ *
+ * The ::SOPC_Platform_Main entry point must be defined for each sample.
  */
 extern void SOPC_Platform_Main(void);
 

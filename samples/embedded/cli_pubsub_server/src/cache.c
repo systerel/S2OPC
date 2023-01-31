@@ -40,13 +40,6 @@
  */
 SOPC_Dict* g_cache = NULL;
 Mutex g_lock;
-typedef struct
-{
-    SOPC_NodeId* nid;
-    Cache_SourceVarListener* listener;
-} ListenerNid;
-
-static ListenerNid gListenerNid = {.nid = NULL, .listener = NULL};
 
 static void free_datavalue(void* value)
 {
@@ -223,8 +216,6 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cache already initialized");
         return false;
     }
-    gListenerNid.nid = NULL;
-    gListenerNid.listener = NULL;
 
     SOPC_ReturnStatus status = Mutex_Initialization(&g_lock);
     g_cache = SOPC_NodeId_Dict_Create(true, free_datavalue);
@@ -363,16 +354,6 @@ bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv)
     return SOPC_Dict_Insert(g_cache, nid, dv);
 }
 
-void Cache_SetSourceVarListener(SOPC_NodeId* nid, Cache_SourceVarListener* listener)
-{
-    if (gListenerNid.nid != NULL)
-    {
-        SOPC_NodeId_Clear(gListenerNid.nid);
-    }
-    gListenerNid.nid = nid;
-    gListenerNid.listener = listener;
-}
-
 /* nodesToRead shall be freed by the callee, and returned DataValues will be freed by the caller */
 SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
 {
@@ -399,16 +380,6 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
 
         /* As ownership is given to the caller, we have to copy all values */
         SOPC_DataValue* src = SOPC_Dict_Get(g_cache, &rv->NodeId, NULL);
-        if (gListenerNid.nid != NULL)
-        {
-            int32_t result = -1;
-            // Check listener
-            SOPC_NodeId_Compare(gListenerNid.nid, &rv->NodeId, &result);
-            if (result == 0)
-            {
-                gListenerNid.listener(src);
-            }
-        }
         status = SOPC_DataValue_Copy(dv, src);
 
         /* As we have ownership of the rv, clear it */
@@ -641,11 +612,4 @@ void Cache_Clear(void)
 {
     SOPC_Dict_Delete(g_cache);
     g_cache = NULL;
-    if (gListenerNid.nid != NULL)
-    {
-        SOPC_NodeId_Clear(gListenerNid.nid);
-        SOPC_Free(gListenerNid.nid);
-        gListenerNid.nid = NULL;
-        gListenerNid.listener = NULL;
-    }
 }

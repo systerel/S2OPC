@@ -36,8 +36,8 @@ find_package(PythonInterp 3 REQUIRED)
 
 # Options reserved to samples
 option(ENABLE_SAMPLES "Build the S2OPC PubSub library samples" ON)
-
 option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" ON)
+option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attributes are const" ON)
 
 if(ENABLE_SAMPLES)
 
@@ -68,12 +68,15 @@ if(ENABLE_SAMPLES)
     target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE "WITH_STATIC_SECURITY_DATA")
   endif()
 
-  target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
-  s2opc_pubsub
-  s2opc_clientwrapper
-  s2opc_serverwrapper
-  s2opc_clientserver
-  s2opc_clientserver-loader-embedded)
-
+  if(NOT S2OPC_CLIENTSERVER_ONLY)
+    target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE s2opc_pubsub)
+  endif()
+  if(NOT S2OPC_PUBSUB_ONLY)
+    target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
+      s2opc_clientwrapper
+      s2opc_serverwrapper
+      s2opc_clientserver
+      s2opc_clientserver-loader-embedded)
+  endif()
 
 endif(ENABLE_SAMPLES)

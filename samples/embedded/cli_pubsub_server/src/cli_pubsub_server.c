@@ -125,10 +125,10 @@ static SOPC_RealTime* gLastReceptionDateMs = NULL;
 /***************************************************/
 /**               HELPER LOG MACROS                */
 /***************************************************/
-#define DEBUG(...) SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
-#define INFO(...) SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
-#define WARNING(...) SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
-#define ERROR(...) SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
+#define LOG_DEBUG(...) SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
+#define LOG_INFO(...) SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
+#define LOG_WARNING(...) SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
+#define LOG_ERROR(...) SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, __VA_ARGS__)
 #define PRINT printf
 #define YES_NO(x) ((x) ? "YES" : "NO")
 
@@ -172,9 +172,9 @@ static void serverStopped_cb(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
 
-    DEBUG("serverStopped_cb");
+    LOG_DEBUG("serverStopped_cb");
     SOPC_Atomic_Int_Set(&gStopped, 1);
-    WARNING("Server stopped!\n");
+    LOG_WARNING("Server stopped!\n");
 }
 
 /***************************************************/
@@ -208,17 +208,17 @@ static SOPC_ReturnStatus authentication_check(SOPC_UserAuthentication_Manager* a
         {
             if (pwd->Length == 4 && memcmp(pwd->Data, "pass", 4) == 0)
             {
-                INFO("User <%s> has successfully authenticated", username);
+                LOG_INFO("User <%s> has successfully authenticated", username);
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
             }
             else
             {
-                WARNING("User <%s> entered an invalid password", username);
+                LOG_WARNING("User <%s> entered an invalid password", username);
             }
         }
         else
         {
-            WARNING("Unknown user <%s>", username);
+            LOG_WARNING("Unknown user <%s>", username);
         }
     }
 
@@ -256,15 +256,15 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
     if (SOPC_STATUS_OK == writeStatus)
     {
         char* nodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
-        INFO("A client updated the content of node <%s> with a value of type %d", nodeId,
-             writeValue->Value.Value.BuiltInTypeId);
+        LOG_INFO("A client updated the content of node <%s> with a value of type %d", nodeId,
+                 writeValue->Value.Value.BuiltInTypeId);
         SOPC_Free(nodeId);
         // Synchronize cache for PubSub
         cacheSync_WriteToCache(&writeValue->NodeId, &writeValue->Value);
     }
     else
     {
-        WARNING("Client write failed on server. returned code 0x%08X", writeStatus);
+        LOG_WARNING("Client write failed on server. returned code 0x%08X", writeStatus);
     }
 }
 
@@ -292,7 +292,7 @@ static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* re
             const SOPC_StatusCode status = writeResp->Results[i];
             if (status != 0)
             {
-                WARNING("Internal data update[%d/%d] failed with code 0x%08X", i, writeResp->NoOfResults, status);
+                LOG_WARNING("Internal data update[%d/%d] failed with code 0x%08X", i, writeResp->NoOfResults, status);
             }
         }
     }
@@ -314,7 +314,7 @@ static bool Server_LocalWriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue*
     status = SOPC_WriteRequest_SetWriteValue(request, 0, pNid, SOPC_AttributeId_Value, NULL, pDv);
     if (status != SOPC_STATUS_OK)
     {
-        WARNING("SetWriteValue failed with code  %d", status);
+        LOG_WARNING("SetWriteValue failed with code  %d", status);
         SOPC_Free(request);
     }
     else
@@ -328,7 +328,7 @@ static bool Server_LocalWriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue*
         status = SOPC_ServerHelper_LocalServiceAsync(request, ASYNCH_CONTEXT_PARAM);
         if (status != SOPC_STATUS_OK)
         {
-            WARNING("LocalServiceAsync failed with code  (%d)", status);
+            LOG_WARNING("LocalServiceAsync failed with code  (%d)", status);
             SOPC_Free(request);
         }
     }
@@ -353,14 +353,14 @@ static SOPC_DataValue* Server_LocalReadSingleNode(const SOPC_NodeId* pNid)
     status = SOPC_ReadRequest_SetReadValue(request, 0, pNid, SOPC_AttributeId_Value, NULL);
     if (status != SOPC_STATUS_OK)
     {
-        WARNING("Read Value failed with code  %d", status);
+        LOG_WARNING("Read Value failed with code  %d", status);
         SOPC_Free(request);
         return NULL;
     }
     status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &response);
     if (status != SOPC_STATUS_OK)
     {
-        WARNING("Read Value failed with code  %d", status);
+        LOG_WARNING("Read Value failed with code  %d", status);
         SOPC_ASSERT(NULL == response);
         SOPC_Free(request);
         return NULL;
@@ -497,12 +497,12 @@ static void setupServer(void)
     // Setup AddressSpace
     (void) sopc_embedded_is_const_addspace;
     SOPC_ASSERT(sopc_embedded_is_const_addspace && "Address space must be constant.");
-    INFO("# Loading AddressSpace (%u nodes)...\n", SOPC_Embedded_AddressSpace_nNodes);
+    LOG_INFO("# Loading AddressSpace (%u nodes)...\n", SOPC_Embedded_AddressSpace_nNodes);
     SOPC_AddressSpace* addSpace =
         SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
                                               SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
     SOPC_ASSERT(NULL != addSpace && "SOPC_AddressSpace_Create failed");
-    INFO("# Address space loaded\n");
+    LOG_INFO("# Address space loaded\n");
 
     status = SOPC_HelperConfigServer_SetAddressSpace(addSpace);
     SOPC_ASSERT(NULL != addSpace && "SOPC_HelperConfigServer_SetAddressSpace failed");
@@ -540,7 +540,7 @@ static void setupServer(void)
 /***************************************************/
 static void clearServer(void)
 {
-    DEBUG("SOPC_HelperConfigServer_Clear");
+    LOG_DEBUG("SOPC_HelperConfigServer_Clear");
     SOPC_HelperConfigServer_Clear();
 }
 
@@ -732,12 +732,12 @@ void SOPC_Platform_Main(void)
     clearPubSub();
     clearServer();
 
-    DEBUG("SOPC_CommonHelper_Clear");
+    LOG_DEBUG("SOPC_CommonHelper_Clear");
     SOPC_CommonHelper_Clear();
 
     SOPC_RealTime_Delete(&gLastReceptionDateMs);
 
-    INFO("# Info: Server closed.\n");
+    LOG_INFO("# Info: Server closed.\n");
 
     SOPC_Platform_Shutdown(true);
 }
@@ -989,14 +989,12 @@ static int cmd_demo_cache(WordList* pList)
     return 0;
 }
 
-// TODO JCH #warning "TODO : match cache to addressspace"
-
 /***************************************************/
 static int cmd_demo_quit(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
     SOPC_ServerHelper_StopServer();
-    WARNING("Server manually stopped!\n");
+    LOG_WARNING("Server manually stopped!\n");
 
     return 0;
 }

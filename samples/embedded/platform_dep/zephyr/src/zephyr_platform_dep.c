@@ -161,7 +161,9 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void)
 }
 
 /***************************************************/
-SOPC_Build_Info SOPC_ClientServer_GetBuildInfo() // TODO : generate automatically
+/* Note : could also be generated automatically
+ * See scripts/gen_build_info_file.sh for linux example */
+SOPC_Build_Info SOPC_ClientServer_GetBuildInfo()
 {
     static const SOPC_Build_Info sopc_client_server_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
                                                                   .buildSrcCommit = "Not applicable",
@@ -172,7 +174,9 @@ SOPC_Build_Info SOPC_ClientServer_GetBuildInfo() // TODO : generate automaticall
 }
 
 /***************************************************/
-SOPC_Build_Info SOPC_Common_GetBuildInfo() // TODO : generate automatically
+/* Note : could also be generated automatically
+ * See scripts/gen_build_info_file.sh for linux example */
+SOPC_Build_Info SOPC_Common_GetBuildInfo()
 {
     static const SOPC_Build_Info sopc_common_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
                                                            .buildSrcCommit = "Unknown_Revision",

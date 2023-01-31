@@ -95,18 +95,6 @@ void Cache_Clear(void);
 /** Prints the content of a given NodeId */
 void Cache_Dump_NodeId(const SOPC_NodeId* pNid);
 
-/** Prototype for "listener" event callback. See ::Cache_SetSourceVarListener */
-typedef void(Cache_SourceVarListener)(SOPC_DataValue* pDv);
-
-/** Associates a "listener" to a given nodeId. each time the nodeId is modified
- * in the Cache, the "listener" is called.
- * @restriction In current implementation, only one listener is possible.
- * @param nid The NodeId to monitor. This nid must be allocated before call, and ownership
- *      s taken by current module (nid must be neither deallocated nor reused after call)
- * @param listener The event to call
- */ // TODO JCH remove !
-void Cache_SetSourceVarListener(SOPC_NodeId* nid, Cache_SourceVarListener* listener);
-
 /**
  * Update a variant using a string. The string will be converted to matching type if possible
  */

@@ -240,7 +240,7 @@ build-zephyr:
   stage: build-others
   image: docker.aix.systerel.fr/c838/zephyr_build:v3.2.0@sha256:cd3c4dfe62f866b06917ca16aba7e3ba8856e6e2ae6bfd8dbece625b26e28d8f # digest of zephyr_build :v3.2.0
   script:
-    - 'zephyr/build-zephyr-samples-docker.sh || exit $?'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh || exit $?'
   variables:
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'

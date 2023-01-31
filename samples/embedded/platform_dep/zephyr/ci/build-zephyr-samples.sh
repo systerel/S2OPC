@@ -20,21 +20,29 @@
 
 set -e
 export SCRIPT=build-zephyr-samples-docker.sh
-cd "$(dirname "$0")"/..
+cd "$(dirname "$0")"/../../../../..
 HOST_DIR=$(pwd)
+
+# interactive?
+IS_INTERACTIVE=false
+[ "$1" == "-i" ] && IS_INTERACTIVE=true
 
 source .docker-images.sh
 rm -rf build_zephyr/* 2>/dev/null
 mkdir -p build_zephyr
-chmod a+rw zephyr/samples
-echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
-(docker run --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE} zephyr/${SCRIPT})&
+# chmod a+rw samples/embedded
 
+echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
+$IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_IMAGE}" && \
+    (docker run -it --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE})
+$IS_INTERACTIVE && exit 1
+
+(docker run --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE} samples/embedded/platform_dep/zephyr/ci/${SCRIPT})&
 wait $!
 
 echo "Result = $?"
 # Check results
-EXPECTED_FILES="zephyr_client_stm32h735g_disco.bin  zephyr_pubsub_server_mimxrt1064_evk.bin  zephyr_pubsub_server_stm32h735g_disco.bin"
+EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin"
 RESULT=true
 for f in ${EXPECTED_FILES} ; do
 	[ ! -f build_zephyr/${f} ] && echo "File not build : ${f}" && RESULT=false
@@ -42,8 +50,7 @@ for f in ${EXPECTED_FILES} ; do
 done
 
 if ! ${RESULT} ; then
-	echo "Build failed. To run docker manually:"
-	echo "docker run -it --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE} "
+	echo "Build failed. To run docker manually: $0 -i"
 	exit 200
 fi
 echo "Build Successful"
