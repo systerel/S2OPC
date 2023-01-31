@@ -63,3 +63,9 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void)
 {
     return "";
 }
+
+/***************************************************/
+void SOPC_Platform_Target_Debug(void)
+{
+    // Nothing required
+}

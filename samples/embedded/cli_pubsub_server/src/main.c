@@ -78,9 +78,9 @@ static void log_UserCallback(const char* context, const char* text);
 #define ASYNCH_CONTEXT_CACHE_SYNC 0x12345679u
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
-#define SERVER_DESCRIPTION "S2OPC Zephyr demo Server"
+#define SERVER_DESCRIPTION "S2OPC PubSub+Server demo Server"
 #define LOCALE_ID "en-US"
-static const char* g_userNamespaces[2] = {"urn:S2OPC:zephyr_demo", NULL};
+static const char* g_userNamespaces[2] = {"urn:S2OPC:sopc_demo", NULL};
 static const char* g_localesArray[2] = {LOCALE_ID, NULL};
 
 // generated address space.
@@ -139,6 +139,7 @@ static SOPC_RealTime* gLastReceptionDateMs = NULL;
 typedef char* WordList; // A simple C String
 static int cmd_demo_help(WordList* pList);
 static int cmd_demo_info(WordList* pList);
+static int cmd_demo_dbg(WordList* pList);
 static int cmd_demo_log(WordList* pList);
 static int cmd_demo_pub(WordList* pList);
 static int cmd_demo_sub(WordList* pList);
@@ -158,6 +159,7 @@ typedef struct
 static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"},
                                           {"quit", cmd_demo_quit, "Quit demo"},
                                           {"info", cmd_demo_info, "Show demo info"},
+                                          {"dbg", cmd_demo_dbg, "Show target debug info"},
                                           {"log", cmd_demo_log, "Set log level"},
                                           {"read", cmd_demo_read, "Print content of  <NodeId>"},
                                           {"write", cmd_demo_write, "Write value to server"},
@@ -768,7 +770,7 @@ static int cmd_demo_info(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
-    PRINT("Zephyr S2OPC Server demo status\n");
+    PRINT("S2OPC PubSub+Server demo status\n");
     PRINT("Server endpoint       : %s\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
     PRINT("Server running        : %s\n", YES_NO(gStopped == 0));
     PRINT("Server const@space    : %s\n", YES_NO(sopc_embedded_is_const_addspace));
@@ -786,6 +788,16 @@ static int cmd_demo_info(WordList* pList)
 
     PRINT("NET INTERFACE         : %s\n", SOPC_Platform_Get_Default_Net_Itf());
 
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_dbg(WordList* pList)
+{
+    SOPC_UNUSED_ARG(pList);
+
+    PRINT("S2OPC PubSub+Server target debug informations:\n");
+    SOPC_Platform_Target_Debug();
     return 0;
 }
 

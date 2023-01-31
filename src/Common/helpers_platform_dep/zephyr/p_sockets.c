@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 
@@ -464,6 +465,11 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     {
         result = SOPC_STATUS_WOULD_BLOCK;
     }
+    if (result != SOPC_STATUS_OK)
+    {
+        const int err = errno;
+        printk("[Error] Send FAILED on Sock %d. Err=%d(%s)\n", sock, err, strerror(err));
+    }
     return result;
 }
 
@@ -500,7 +506,8 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
         }
         else
         {
-            SOCKETS_DEBUG(" ** Read Sock %d errno = %d\n", sock, errId);
+            const int err = errno;
+            printk("[Error] Read FAILED on Sock %d. Err= %d(%s)\n", sock, err, strerror(err));
         }
     }
     return result;

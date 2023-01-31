@@ -179,3 +179,26 @@ SOPC_Build_Info SOPC_Common_GetBuildInfo() // TODO : generate automatically
 
     return sopc_common_build_info;
 }
+
+/***************************************************/
+void SOPC_Platform_Target_Debug(void)
+{
+#if CONFIG_SOPC_HELPER_IMPL_INSTRUM
+    // Display stack instrumentation status
+    const uint32_t nbSec = k_uptime_get_32() / 1000;
+    printk("\n=======\nUptime: t=%d m %d s\n", nbSec / 60, nbSec % 60);
+    printk("Nb Allocs: %u\n", SOPC_MemAlloc_Nb_Allocs());
+
+    const SOPC_Thread_Info* pInfos = SOPC_Thread_GetAllThreadsInfo();
+    size_t idx = 0;
+    while (NULL != pInfos && pInfos->stack_size > 0)
+    {
+        idx++;
+        printk("Thr #%02u (%.08s): %05u / %05u bytes used (%02d%%)\n", idx, pInfos->name, pInfos->stack_usage,
+               pInfos->stack_size, (100 * pInfos->stack_usage) / pInfos->stack_size);
+        pInfos++;
+    }
+#else
+    printk("Data unavailable. Set flag CONFIG_SOPC_HELPER_IMPL_INSTRUM to 'y' to enable this feature.\n");
+#endif
+}

@@ -55,4 +55,12 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void);
  */
 char* SOPC_Shell_ReadLine(void);
 
+/**
+ * \brief Display some target-specific debug information.
+ * There are no expectations in this implementation which can be empty.
+ * It is intended to allow the host application to display some OS-internal
+ * informations.
+ */
+void SOPC_Platform_Target_Debug(void);
+
 #endif /* SAMPLES_PLATFORM_DEP_H_ */
