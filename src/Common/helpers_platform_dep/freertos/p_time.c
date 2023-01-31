@@ -41,7 +41,7 @@
 /* Private time api */
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
-#define US_TO_MS 1000
+#define MS_TO_US 1000
 
 /* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
  * There are configTICK_RATE_HZ per second.
@@ -249,7 +249,7 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
     SOPC_UNUSED_ARG(offset_us);
     SOPC_ASSERT(NULL != t);
 
-    t->ticksMs += (uint64_t)(duration_us / (uint64_t) US_TO_MS);
+    t->ticksMs += (uint64_t)(duration_us / (uint64_t) MS_TO_US);
 }
 
 int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
@@ -262,10 +262,10 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
     }
     else
     {
-        t1 = *now;
+        t1 = *t;
     }
 
-    return (((int64_t) t1.ticksMs) - ((int64_t) tRef.ticksMs)) * US_TO_MS;
+    return (((int64_t) t1.ticksMs) - ((int64_t) tRef.ticksMs)) * MS_TO_US;
 }
 
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)

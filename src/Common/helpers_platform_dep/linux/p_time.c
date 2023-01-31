@@ -34,7 +34,7 @@
  * */
 #define SOPC_SECOND_TO_NANOSECONDS 1000000000
 #define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
-#define SOPC_MICROSECOND_TO_SECONDS 1000000
+#define SOPC_SECONDS_TO_MICROSECONDS 1000000
 #define SOPC_MICROSECOND_TO_NANOSECONDS 1000
 
 int64_t SOPC_Time_GetCurrentTimeUTC(void)
@@ -157,9 +157,9 @@ static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
     assert(NULL != t);
 
     /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
-    t->tv_sec += (time_t)(duration_us / SOPC_MICROSECOND_TO_SECONDS);
+    t->tv_sec += (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS);
     /* This may add a negative or positive number */
-    t->tv_nsec += (long) ((duration_us % SOPC_MICROSECOND_TO_SECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
+    t->tv_nsec += (long) ((duration_us % SOPC_SECONDS_TO_MICROSECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
 
     /* Normalize */
     if (t->tv_nsec < 0)
@@ -252,7 +252,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
     int64_t delta_sec = (int64_t) t1.tv_sec - (int64_t) tRef->tv_sec;
     int64_t delta_nsec = (int64_t) t1.tv_nsec - (int64_t) tRef->tv_nsec;
 
-    return delta_sec * SOPC_MICROSECOND_TO_SECONDS + delta_nsec / SOPC_MICROSECOND_TO_NANOSECONDS;
+    return delta_sec * SOPC_SECONDS_TO_MICROSECONDS + delta_nsec / SOPC_MICROSECOND_TO_NANOSECONDS;
 }
 
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)

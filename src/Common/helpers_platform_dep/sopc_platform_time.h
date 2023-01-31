@@ -120,7 +120,7 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t);
 
 /**
- * \brief Convert compare two \p SOPC_RealTime elements into microseconds.
+ * \brief Compare two \p SOPC_RealTime elements into microseconds.
  * \param tRef The reference time. Shall be non-NULL
  * \param t A SOPC_RealTime value (current time is used if NULL).
  * \return the number of microseconds between the reference \p tRef and \p t. Positive if \p t
