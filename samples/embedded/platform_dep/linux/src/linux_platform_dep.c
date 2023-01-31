@@ -69,3 +69,11 @@ void SOPC_Platform_Target_Debug(void)
 {
     // Nothing required
 }
+
+/***************************************************/
+int main(int argc, char* const argv[])
+{
+    SOPC_UNUSED_ARG(argc);
+    SOPC_UNUSED_ARG(argv);
+    SOPC_Platform_Main();
+}

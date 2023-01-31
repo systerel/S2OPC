@@ -681,11 +681,8 @@ static void* CLI_thread_exec(void* arg)
 }
 
 /***************************************************/
-int main(int argc, char* argv[])
+void SOPC_Platform_Main(void)
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
     SOPC_ReturnStatus status;
 
     PRINT("Build date : " __DATE__ " " __TIME__ "\n");
@@ -743,7 +740,6 @@ int main(int argc, char* argv[])
     INFO("# Info: Server closed.\n");
 
     SOPC_Platform_Shutdown(true);
-    return 0;
 }
 
 /*---------------------------------------------------------------------------

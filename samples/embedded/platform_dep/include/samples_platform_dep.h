@@ -30,6 +30,13 @@
 #include <stdlib.h>
 
 /**
+ * Specific platform must provide the software entry point
+ * that will call the applicative ::SOPC_Platform_Main function.
+ * Generally this is the ::main function (but prototype may vary).
+ */
+extern void SOPC_Platform_Main(void);
+
+/**
  * \brief Specific platform setup initialization.
  * Typical usage: setup network if not set-up by O.S.
  * \post The network must be up and interfaces ready.

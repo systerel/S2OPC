@@ -204,3 +204,9 @@ void SOPC_Platform_Target_Debug(void)
     printk("Data unavailable. Set flag CONFIG_SOPC_HELPER_IMPL_INSTRUM to 'y' to enable this feature.\n");
 #endif
 }
+
+/***************************************************/
+void main(void)
+{
+    SOPC_Platform_Main();
+}

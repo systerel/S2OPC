@@ -83,14 +83,11 @@ typedef struct
     const char* description;
 } CLI_config_t;
 
-static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"},
-                                          {"quit", cmd_demo_quit, "Quit demo"},
-                                          {"info", cmd_demo_info, "Show demo info"},
-                                          {"dbg", cmd_demo_dbg, "Show target debug info"},
-                                          {"log", cmd_demo_log, "Set log level"},
-                                          {"conf", cmd_demo_configure, "Configure client [<endpoint>]"},
-                                          {"conn", cmd_demo_connect, "Connect client"},
-                                          {NULL, NULL, NULL}};
+static const CLI_config_t CLI_config[] = {
+    {"help", cmd_demo_help, "Display help"},      {"quit", cmd_demo_quit, "Quit demo"},
+    {"info", cmd_demo_info, "Show demo info"},    {"dbg", cmd_demo_dbg, "Show target debug info"},
+    {"log", cmd_demo_log, "Set log level"},       {"conf", cmd_demo_configure, "Configure client [<endpoint>]"},
+    {"conn", cmd_demo_connect, "Connect client"}, {NULL, NULL, NULL}};
 
 /***************************************************/
 /* This function receives a pointer to a C string.
@@ -233,11 +230,8 @@ static void* CLI_thread_exec(void* arg)
     return NULL;
 }
 /***************************************************/
-int main(int argc, char* const argv[])
+void SOPC_Platform_Main(void)
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
     SOPC_ReturnStatus status;
 
     PRINT("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
@@ -276,7 +270,6 @@ int main(int argc, char* const argv[])
 
     INFO("# Info: Client demo stopped.\n");
     SOPC_Platform_Shutdown(true);
-    return 0;
 }
 
 /*---------------------------------------------------------------------------
@@ -346,9 +339,9 @@ static int cmd_demo_configure(WordList* pList)
     SOPC_ASSERT(epURL != NULL);
 
     SOPC_ClientHelper_EndpointConnection endpoint = {
-            .endpointUrl = epURL,
-            .serverUri = NULL,
-            .reverseConnectionConfigId = 0,
+        .endpointUrl = epURL,
+        .serverUri = NULL,
+        .reverseConnectionConfigId = 0,
     };
 
     /* connect to the endpoint */
