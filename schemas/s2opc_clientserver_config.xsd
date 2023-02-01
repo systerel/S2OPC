@@ -4,6 +4,7 @@
   <xs:simpleType name="ApplicationTypeEnum">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Server"/>
+      <xs:enumeration value="Client"/>
       <xs:enumeration value="ClientAndServer"/>
       <xs:enumeration value="DiscoveryServer"/>
     </xs:restriction>
@@ -55,18 +56,18 @@
       <xs:element type="LocaleType" name="Locale" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ServerCertificateType">
+  <xs:complexType name="CertificateType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  <xs:complexType name="ServerKeyType">
+  <xs:complexType name="KeyType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
-        <xs:attribute type="xs:string" name="encrypted" use="optional"/>
+        <xs:attribute type="xs:string" name="encrypted" use="optional" default="false"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -113,10 +114,23 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ApplicationCertificatesType">
+  <xs:complexType name="ServerApplicationCertificatesType">
     <xs:sequence>
-      <xs:element type="ServerCertificateType" name="ServerCertificate" />
-      <xs:element type="ServerKeyType" name="ServerKey" />
+      <xs:element type="CertificateType" name="ServerCertificate" />
+      <xs:element type="KeyType" name="ServerKey" />
+      <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
+      <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>At least one shall be filled in either TrustedIssuers or IssuedCertificates</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="UntrustedIssuersType" name="UntrustedIssuers" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ClientApplicationCertificatesType">
+    <xs:sequence>
+      <xs:element type="CertificateType" name="ClientCertificate" />
+      <xs:element type="KeyType" name="ClientKey" />
       <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
       <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
         <xs:annotation>
@@ -155,12 +169,20 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  <xs:complexType name="ApplicationDescriptionType">
+  <xs:complexType name="ServerApplicationDescriptionType">
     <xs:sequence>
       <xs:element type="ApplicationURIType" name="ApplicationURI" />
       <xs:element type="ProductURIType" name="ProductURI" />
       <xs:element type="ApplicationNameType" name="ApplicationName" maxOccurs="unbounded"/>
-      <xs:element type="ApplicationTypeType" name="ApplicationType" minOccurs="0"/>
+      <xs:element type="ApplicationTypeType" name="ApplicationType" default="Server" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ClientApplicationDescriptionType">
+    <xs:sequence>
+      <xs:element type="ApplicationURIType" name="ApplicationURI" />
+      <xs:element type="ProductURIType" name="ProductURI" />
+      <xs:element type="ApplicationNameType" name="ApplicationName"/>
+      <xs:element type="ApplicationTypeType" name="ApplicationType" default="Client" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="SecurityModeType">
@@ -187,6 +209,9 @@
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+    <xs:attribute type="SecurityURI" name="uri" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="SimpleSecurityPolicyType">
     <xs:attribute type="SecurityURI" name="uri" use="required"/>
   </xs:complexType>
   <xs:complexType name="UserPolicyType">
@@ -247,7 +272,7 @@
   </xs:complexType>
   <xs:complexType name="EndpointsType">
     <xs:sequence>
-      <xs:element type="EndpointType" name="Endpoint" maxOccurs="254">
+      <xs:element type="EndpointType" name="Endpoint" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>Note: Endpoint no transport URI (only TCP available) and no security level (computed by server)</xs:documentation>
         </xs:annotation>
@@ -258,18 +283,98 @@
     <xs:sequence>
       <xs:element type="NamespacesType" name="Namespaces" />
       <xs:element type="LocalesType" name="Locales" />
-      <xs:element type="ApplicationCertificatesType" name="ApplicationCertificates" minOccurs="0" maxOccurs="1">
+      <xs:element type="ServerApplicationCertificatesType" name="ApplicationCertificates" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation>Certificates not necessary if only security policy None is used</xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element type="ApplicationDescriptionType" name="ApplicationDescription" />
+      <xs:element type="ServerApplicationDescriptionType" name="ApplicationDescription" />
       <xs:element type="EndpointsType" name="Endpoints" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ConnectionUserNameType">
+    <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="ConnectionUserCertType">
+    <xs:attribute type="xs:string" name="cert_path" use="required"/>
+    <xs:attribute type="xs:string" name="key_path" use="required"/>
+    <xs:attribute type="xs:string" name="encrypted" use="optional" default="false"/>
+  </xs:complexType>
+  <xs:complexType name="ConnectionUserPolicyType">
+    <xs:sequence>
+      <xs:element type="ConnectionUserNameType" name="UserName" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Mandatory if tokenType is 'username'</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="ConnectionUserCertType" name="UserX509" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Mandatory if tokenType is 'username'</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="policyId"  use="required"/> <!-- Might be optional in the future if auto-selection --> 
+    <xs:attribute type="TokenType" name="tokenType"  use="required"/>
+    <!-- <xs:attribute type="SecurityURI" name="securityUri" use="optional"/> Determined by policyId until it becames optionnal -->
+  </xs:complexType>
+  <xs:complexType name="ConnectionType">
+    <xs:sequence>
+      <xs:element type="CertificateType" name="ServerCertificate"/>
+      <xs:element type="SimpleSecurityPolicyType" name="SecurityPolicy"/>
+      <xs:element type="SecurityModeType" name="SecurityMode"/>
+      <xs:element type="ConnectionUserPolicyType" name="UserPolicy">
+        <xs:annotation>
+          <xs:documentation>
+            If not defined the user token type is anonymous and no policy id is set.
+            Note: the user policy id might be required by server even in anonymous mode.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute type="xs:anyURI" name="id">
+      <xs:annotation>
+        <xs:documentation>A user defined identifier to retrieve the easily the connection</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:anyURI" name="serverURL" use="required"/>
+    <xs:attribute type="xs:anyURI" name="reverseEndpointURL">
+      <xs:annotation>
+        <xs:documentation>When the attribute is set, the connection uses reverse mechanism.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:anyURI" name="serverURI">
+        <xs:annotation>
+          <xs:documentation>
+            This value shall only be specified if the server is accessed through a gateway server.
+            In this case this value is the applicationUri for the underlying Server.
+            This value might be specified for reverse connection in order to be verified
+            on ReverseHello reception.
+          </xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:unsignedInt" name="reqLifetimeMs" default="3600000"/>
+  </xs:complexType>
+  <xs:complexType name="ConnectionsType">
+    <xs:sequence>
+      <xs:element type="ConnectionType" name="Connection" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ClientConfigurationType">
+    <xs:sequence>
+      <xs:element type="LocalesType" name="PreferredLocales" />
+      <xs:element type="ClientApplicationCertificatesType" name="ApplicationCertificates" minOccurs="0" maxOccurs="1">
+        <xs:annotation>
+          <xs:documentation>Certificates not necessary if only security policy None is used</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element type="ClientApplicationDescriptionType" name="ApplicationDescription" />
+      <xs:element type="ConnectionsType" name="Connections" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S2OPCType">
     <xs:sequence>
-      <xs:element type="ServerConfigurationType" name="ServerConfiguration" />
+      <xs:element type="ServerConfigurationType" name="ServerConfiguration" minOccurs="0"/>
+      <xs:element type="ClientConfigurationType" name="ClientConfiguration" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

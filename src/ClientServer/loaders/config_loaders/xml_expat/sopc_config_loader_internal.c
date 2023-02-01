@@ -306,15 +306,18 @@ bool SOPC_ConfigLoaderInternal_start_cert(bool isServer,
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
+    if (strlen(attr_val) > 0)
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
+        char* path = SOPC_strdup(attr_val);
 
-    *certificate = path;
+        if (path == NULL)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+
+        *certificate = path;
+    }
 
     return true;
 }
@@ -336,15 +339,18 @@ bool SOPC_ConfigLoaderInternal_start_key(bool isServer,
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
+    if (strlen(attr_val) > 0)
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
+        char* path = SOPC_strdup(attr_val);
 
-    *key = path;
+        if (path == NULL)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+
+        *key = path;
+    }
 
     attr_val = SOPC_HelperExpat_GetAttr(ctx, "encrypted", attrs);
     *encrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
