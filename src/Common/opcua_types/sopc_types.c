@@ -15878,9 +15878,10 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256Security
 };
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy = {
-    .TokenType = OpcUa_UserTokenType_Certificate,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_X509Basic256Sha256_ID) - 1, true,
                  (SOPC_Byte*) SOPC_UserTokenPolicy_X509Basic256Sha256_ID},
+    .TokenType = OpcUa_UserTokenType_Certificate,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {sizeof(SOPC_SecurityPolicy_Basic256Sha256_URI) - 1, true,
@@ -15888,8 +15889,9 @@ const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPoli
 };
 
 const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy = {
-    .TokenType = OpcUa_UserTokenType_Certificate,
+    .encodeableType = &OpcUa_UserTokenPolicy_EncodeableType,
     .PolicyId = {sizeof(SOPC_UserTokenPolicy_X509_ID) - 1, true, (SOPC_Byte*) SOPC_UserTokenPolicy_X509_ID},
+    .TokenType = OpcUa_UserTokenType_Certificate,
     .IssuedTokenType = {0, true, NULL},
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {0, true, NULL},
