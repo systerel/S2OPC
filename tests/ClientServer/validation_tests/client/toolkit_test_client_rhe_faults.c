@@ -155,8 +155,8 @@ static bool test_waiting_activate_session_and_close_ep(SOPC_ReverseEndpointConfi
     if (loopCpt * sleepTimeout > loopTimeout2secs)
     {
         // Timeout expected, now close the reverse endpoint
-        SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEndpointConfigIdx);
         SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 1);
+        SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverseEndpointConfigIdx);
     }
     else
     {
@@ -387,8 +387,8 @@ int main(void)
         }
     }
 
-    SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverse_ep_config_idx);
     SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 1);
+    SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverse_ep_config_idx);
 
     // Wait the reverse endpoint to close and activation failure since secure connection was not yet established
     while (SOPC_Atomic_Int_Get(&reverseEpClosed) == 0 && loopCpt * sleepTimeout <= loopTimeout4secs)
