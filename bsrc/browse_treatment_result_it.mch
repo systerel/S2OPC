@@ -72,7 +72,7 @@ OPERATIONS
         browseResult_to_iterate := nextBrowseResult + 1 .. nb_browseResult_max_refs ||
         p_browseResultIdx       := nextBrowseResult ||
         nextBrowseResult        := nextBrowseResult + 1 ||
-        p_continue              := bool(nextBrowseResult /= nb_browseResult_max_refs)
+        p_continue              := bool(nextBrowseResult < nb_browseResult_max_refs)
     END
 
 END
