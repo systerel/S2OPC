@@ -86,12 +86,12 @@ echo -e "\nCRL of the CA:"
 hexdump -ve '/1 "%02x"' cacrl.der
 echo
 
-# CA generation for users X509IdentityToken: generate key, generate self signed certificate# (does not work with 4096 key length)
-# /!\ only for test as no pass phrase is embedeed"
+# CA generation for users X509IdentityToken: generate key, generate self signed certificate
+# /!\ only for test as no pass phrase is embedeed
 openssl genrsa -out $CA_KEY_USR 4096
 openssl req -config $CONF_CA_USR -new -x509 -key $CA_KEY_USR -out $CA_CERT_USR -days $DURATION
 
-# Generate an empty Certificate Revocation List, convert it to DER format for UA stack
+# Generate an empty Certificate Revocation List, convert it to DER format
 openssl ca -config $CONF_CA_USR -gencrl -crldays $DURATION -out user_cacrl.pem
 openssl crl -in user_cacrl.pem -outform der -out user_cacrl.der
 
@@ -103,7 +103,7 @@ openssl req -config $CONF_USR -reqexts user_cert -sha256 -nodes -newkey rsa:4096
 openssl ca -batch -config $CONF_CA_USR -policy signing_policy -extensions user_signing_req -days $DURATION -in user_2k.csr -out user_2k_cert.pem
 openssl ca -batch -config $CONF_CA_USR -policy signing_policy -extensions user_signing_req -days $DURATION -in user_4k.csr -out user_4k_cert.pem
 
-# Output application and user certificates in DER format for UA stack
+# Output application and user certificates in DER format
 for fradix in ca user_ca client_2k_ client_4k_ server_2k_ server_4k_ user_2k_ user_4k_; do
     openssl x509 -in ${fradix}cert.pem -out ${fradix}cert.der -outform der
 done

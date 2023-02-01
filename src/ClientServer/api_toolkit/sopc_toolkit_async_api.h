@@ -142,7 +142,7 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
  * \param userToken              An extension object, containing either an OpcUa_AnonymousIdentityToken, a
  *                               OpcUa_UserNameIdentityToken, or a OpcUa_X509IdentityToken. This object is borrowed by
  *                               the Toolkit and shall not be freed or modified by the caller.
- * \param userTokenCtx           Context for X509IdentityToken, expected an allocated SOPC_SerializedAsymmetricKey*
+ * \param userTokenCtx           Context for X509IdentityToken, an allocated SOPC_SerializedAsymmetricKey* is expected
  *                               which will be deallocated by toolkit.
  *                               NULL if \p userToken is not a OpcUa_X509IdentityToken extension object.
  *
