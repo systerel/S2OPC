@@ -21,7 +21,7 @@ SAMPLES=samples
 TESTS=tests
 XML_FILE_PATHS=(`find $SAMPLES $TESTS -name "*.xml"`)
 
-EXCLUDED_XML_FILE_PATHS=("tests/ClientServer/data/config/S2OPC_Server_UACTT_Config.xml" "tests/ClientServer/data/config/S2OPC_UACTT_Users.xml")
+EXCLUDED_XML_FILE_PATHS=("tests/ClientServer/data/config/S2OPC_Server_UACTT_Config.xml" "tests/ClientServer/data/config/S2OPC_UACTT_Users.xml" "samples/ClientServer/data/address_space/licence.xml")
 
 XSD_DIR="schemas"
 XSD_FILES=("UANodeSet.xsd" "s2opc_clientserver_config.xsd" "s2opc_clientserver_users_config.xsd" "s2opc_pubsub_config.xsd" )

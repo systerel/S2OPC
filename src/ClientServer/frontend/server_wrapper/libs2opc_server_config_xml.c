@@ -132,7 +132,8 @@ static bool SOPC_HelperInternal_LoadServerConfigFromFile(const char* filename)
     {
         return false;
     }
-    bool res = SOPC_Config_Parse(fd, SOPC_CommonHelper_GetConfiguration());
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    bool res = SOPC_ConfigServer_Parse(fd, &pConfig->serverConfig);
     fclose(fd);
 
     if (!res)

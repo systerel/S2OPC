@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_config_loader.h"
 #include "sopc_config_loader_internal.h"
 
@@ -27,68 +26,63 @@
 
 #include "expat.h"
 
-#include "opcua_identifiers.h"
-#include "opcua_statuscodes.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
-#include "sopc_encoder.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
+#define SOPC_DEFAULT_REQ_LIFETIME_MS 3600000
+
 typedef enum
 {
-    PARSE_START,               // Beginning of file
-    PARSE_S2OPC,               // In a S2OPC
-    PARSE_SRVCONFIG,           // ..In a server config tag
-    PARSE_NAMESPACES,          // ....In namespaces
-    PARSE_NAMESPACE,           // ......In namespace
-    PARSE_LOCALES,             // ....In locales
-    PARSE_LOCALE,              // ......In locale
-    PARSE_APPLICATION_DESC,    // ....In application description
-    PARSE_APPLICATION_URI,     // ......Application URI
-    PARSE_PRODUCT_URI,         // ......Product URI
-    PARSE_APPLICATION_NAME,    // ......Application Name
-    PARSE_APPLICATION_TYPE,    // ......Application Type
-    PARSE_APPLICATION_CERT,    // ....In application certificate
-    PARSE_SERVER_CERT,         // ......Server certificate
-    PARSE_SERVER_KEY,          // ......Server key
-    PARSE_TRUSTED_ISSUERS,     // ......Trusted issuer certificates
-    PARSE_TRUSTED_ISSUER,      // ........Trusted issuer certificate + crl
-    PARSE_ISSUED_CERTS,        // ......Trusted issued certificates
-    PARSE_ISSUED_CERT,         // ........Trusted issued certificate
-    PARSE_UNTRUSTED_ISSUERS,   // ......Untrusted issuer certificates
-    PARSE_UNTRUSTED_ISSUER,    // ........Untrusted issuer certificate + crl
-    PARSE_ENDPOINTS,           // ....In an Endpoints tag
-    PARSE_ENDPOINT,            // ......In an Endpoint tag
-    PARSE_REVERSE_CONNECTIONS, // ........In reverse connections tag
-    PARSE_REVERSE_CONNECTION,  // ..........In reverse connection tag
-    PARSE_SECURITY_POLICIES,   // ........In security policies tag
-    PARSE_SECURITY_POLICY,     // ..........In security policy tag
-    PARSE_SECURITY_MODES,      // ............In security modes tag
-    PARSE_SECURITY_MODE,       // ..............In security mode tag
-    PARSE_USER_POLICIES,       // ............In user polcies tag
-    PARSE_USER_POLICY          // ..............In user policy tag
+    PARSE_START,             // Beginning of file
+    PARSE_S2OPC,             // In a S2OPC
+    PARSE_CLICONFIG,         // ..In a client config tag
+    PARSE_PREFERRED_LOCALES, // ....In preferred locales
+    PARSE_LOCALE,            // ......In locale
+    PARSE_APPLICATION_CERT,  // ....In application certificate
+    PARSE_CLIENT_CERT,       // ......Client certificate
+    PARSE_CLIENT_KEY,        // ......Client key
+    PARSE_TRUSTED_ISSUERS,   // ......Trusted issuer certificates
+    PARSE_TRUSTED_ISSUER,    // ........Trusted issuer certificate + crl
+    PARSE_ISSUED_CERTS,      // ......Trusted issued certificates
+    PARSE_ISSUED_CERT,       // ........Trusted issued certificate
+    PARSE_UNTRUSTED_ISSUERS, // ......Untrusted issuer certificates
+    PARSE_UNTRUSTED_ISSUER,  // ........Untrusted issuer certificate + crl
+    PARSE_APPLICATION_DESC,  // ....In application description
+    PARSE_APPLICATION_URI,   // ......Application URI
+    PARSE_PRODUCT_URI,       // ......Product URI
+    PARSE_APPLICATION_NAME,  // ......Application Name
+    PARSE_APPLICATION_TYPE,  // ......Application Type
+    PARSE_CONNECTIONS,       // ....In an Connections tag
+    PARSE_CONNECTION,        // ......In an Connection tag
+    PARSE_SERVER_CERT,       // ........Server certificate
+    PARSE_SECURITY_POLICY,   // ........Security policy
+    PARSE_SECURITY_MODE,     // ........Security mode
+    PARSE_USER_POLICY,       // ........In user policy tag
+    PARSE_USER_NAME,         // ........Username configuration
+    PARSE_USER_CERT,         // ........UserX509 configuration
+    PARSE_SRVCONFIG          //..In a server config tag to skip
 } parse_state_t;
 
 struct parse_context_t
 {
     SOPC_HelperExpatCtx helper_ctx;
 
-    bool namespacesSet;
-    SOPC_Array* namespaces;
+    int32_t srv_skip_depth;
 
     bool localesSet;
-    SOPC_Array* localeIds;
+    SOPC_Array* preferredLocaleIds;
 
     bool appDescSet;
     OpcUa_ApplicationDescription appDesc;
 
     bool appCertSet;
-    char* serverCertificate;
-    char* serverKey;
-    bool serverKeyEncrypted;
+    char* clientCertificate;
+    char* clientKey;
+    bool clientKeyEncrypted;
     bool trustedIssuersSet;
     SOPC_Array* trustedRootIssuers;
     SOPC_Array* trustedIntermediateIssuers;
@@ -100,10 +94,12 @@ struct parse_context_t
     bool crlSet;
     SOPC_Array* crlCertificates;
 
-    bool endpointsSet;
-    SOPC_Array* endpoints;
-    SOPC_Endpoint_Config* currentEpConfig;
-    SOPC_Server_Config* serverConfigPtr;
+    bool connectionsSet;
+    SOPC_SecureConnection_Config* currentSecConnConfig;
+    uint16_t nbConnections;
+    uint16_t nbReverseUrls;
+
+    SOPC_Client_Config* clientConfigPtr;
 
     parse_state_t state;
 };
@@ -151,250 +147,236 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     return SOPC_STATUS_OK;
 }
 
-static bool end_server_config(struct parse_context_t* ctx)
+static bool end_client_config(struct parse_context_t* ctx)
 {
-    if (!ctx->namespacesSet)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no namespaces defined for the server");
-        return false;
-    }
-
     if (!ctx->localesSet)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no locales defined for the server");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no preferred locales defined for the client");
         return false;
     }
 
     if (!ctx->appDescSet)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no application description defined for the server");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no application description defined for the client");
         return false;
     }
 
-    if (!ctx->endpointsSet)
+    if (!ctx->connectionsSet)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no endpoints defined for the server");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no connections defined for the client");
+        return false;
+    }
+
+    if (NULL == ctx->clientCertificate || NULL == ctx->clientKey)
+    {
+        if (NULL == ctx->clientCertificate && NULL == ctx->clientKey)
+        {
+            for (size_t i = 0; i < ctx->nbConnections; i++)
+            {
+                if (OpcUa_MessageSecurityMode_None !=
+                    ctx->clientConfigPtr->secureConnections[i]->scConfig.msgSecurityMode)
+                {
+                    LOG_XML_ERROR(ctx->helper_ctx.parser,
+                                  "client certificate and key not defined whereas security mode is not always None");
+                }
+            }
+        }
+        else
+        {
+            LOG_XML_ERROR(ctx->helper_ctx.parser, "client certificate and key not both NULL");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool end_connections(struct parse_context_t* ctx)
+{
+    if (0 == ctx->nbConnections)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no connection defined for the client");
         return false;
     }
 
     return true;
 }
 
-static bool end_namespaces(struct parse_context_t* ctx)
+static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    if (0 == SOPC_Array_Size(ctx->namespaces))
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "serverURL", attrs);
+
+    if (NULL == attr_val)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no namespace defined for the server");
-        return false;
-    }
-    if (!SOPC_Array_Append_Values(ctx->namespaces, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->namespaces = SOPC_Array_Into_Raw(ctx->namespaces);
-    if (NULL == ctx->serverConfigPtr->namespaces)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->namespaces = NULL;
-    return true;
-}
-
-static bool start_namespace(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
-
-    char* uri = SOPC_strdup(attr_val);
-
-    if (uri == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    if (!SOPC_Array_Append(ctx->namespaces, uri))
-    {
-        SOPC_Free(uri);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    return true;
-}
-
-static bool end_endpoints(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->endpoints))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no endpoint defined for the server");
-        return false;
-    }
-
-    return true;
-}
-
-static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "url", attrs);
-
-    if (attr_val == NULL)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "url attribute missing");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "serverURL attribute missing");
         return false;
     }
 
     char* url = SOPC_strdup(attr_val);
 
-    if (url == NULL)
+    if (NULL == url)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
 
-    SOPC_Endpoint_Config epConfig;
-    memset(&epConfig, 0, sizeof(epConfig));
-
-    epConfig.endpointURL = url;
-
-    // Manage the hasDiscoveryEndpoint flag
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "hasDiscoveryEndpoint", attrs);
-
-    if (attr_val == NULL)
+    SOPC_SecureConnection_Config** ppSecConnConfig = &ctx->clientConfigPtr->secureConnections[ctx->nbConnections];
+    *ppSecConnConfig = SOPC_Calloc(1, sizeof(**ppSecConnConfig));
+    if (NULL == *ppSecConnConfig)
     {
-        epConfig.hasDiscoveryEndpoint = true; // default value
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
     }
-    else
-    {
-        epConfig.hasDiscoveryEndpoint = (strcmp(attr_val, "true") == 0);
-    }
+    SOPC_SecureConnection_Config* pSecConnConfig = *ppSecConnConfig;
 
-    // Manage the enableListening flag
-    bool enableListening = true; // default value
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "enableListening", attrs);
+    pSecConnConfig->scConfig.url = url;
+
+    // Manage reverseEndpointURL
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "reverseEndpointURL", attrs);
+
     if (attr_val != NULL)
     {
-        enableListening = (strcmp(attr_val, "true") == 0);
-    }
-    epConfig.noListening = !enableListening;
-
-    if (!SOPC_Array_Append(ctx->endpoints, epConfig) || SOPC_Array_Size(ctx->endpoints) > UINT8_MAX)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->currentEpConfig = SOPC_Array_Get_Ptr(ctx->endpoints, SOPC_Array_Size(ctx->endpoints) - 1);
-    ctx->currentEpConfig->serverConfigPtr = ctx->serverConfigPtr;
-
-    return true;
-}
-
-static bool end_endpoint(struct parse_context_t* ctx)
-{
-    if (0 == ctx->currentEpConfig->nbSecuConfigs)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no security policy defined for the endpoint");
-        return false;
-    }
-
-    return true;
-}
-
-static bool start_reverse_connection(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    SOPC_Endpoint_Config* epConfig = ctx->currentEpConfig;
-
-    if (epConfig->nbClientsToConnect >= SOPC_MAX_REVERSE_CLIENT_CONNECTIONS)
-    {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Maximum number of reverse connections %d reached",
-                       SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "clientUrl", attrs);
-
-    if (attr_val == NULL)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "clientUrl attribute missing");
-        return false;
-    }
-
-    char* clientUrl = SOPC_strdup(attr_val);
-
-    if (clientUrl == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "clientAppUri", attrs);
-
-    char* clientAppURI = NULL;
-    if (attr_val != NULL)
-    {
-        clientAppURI = SOPC_strdup(attr_val);
-
-        if (clientAppURI == NULL)
+        bool found = false;
+        for (uint16_t i = 0; !found && i < ctx->nbReverseUrls; i++)
         {
-            SOPC_Free(clientUrl);
+            found = (0 == strcmp(attr_val, ctx->clientConfigPtr->reverseEndpointURLs[i]));
+        }
+        if (!found)
+        {
+            ctx->clientConfigPtr->reverseEndpointURLs[ctx->nbReverseUrls] = SOPC_strdup(attr_val);
+            if (NULL == ctx->clientConfigPtr->reverseEndpointURLs[ctx->nbReverseUrls])
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            ctx->nbReverseUrls++;
+        }
+        pSecConnConfig->reverseURL = SOPC_strdup(attr_val);
+        if (NULL == pSecConnConfig->reverseURL)
+        {
             LOG_MEMORY_ALLOCATION_FAILURE;
             return false;
         }
     }
 
-    epConfig->clientsToConnect[epConfig->nbClientsToConnect].clientApplicationURI = clientAppURI;
-    epConfig->clientsToConnect[epConfig->nbClientsToConnect].clientEndpointURL = clientUrl;
-    epConfig->nbClientsToConnect++;
+    // Manage user defined id
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "id", attrs);
+
+    if (attr_val != NULL)
+    {
+        pSecConnConfig->userDefinedId = SOPC_strdup(attr_val);
+        if (NULL == pSecConnConfig->userDefinedId)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    // Manage serverURI
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "serverURI", attrs);
+
+    if (attr_val != NULL)
+    {
+        pSecConnConfig->scConfig.serverUri = SOPC_strdup(attr_val);
+        if (NULL == pSecConnConfig->scConfig.serverUri)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "reqLifetimeMs", attrs);
+
+    if (attr_val != NULL)
+    {
+        bool res = SOPC_strtouint(attr_val, strlen(attr_val), 32, &pSecConnConfig->scConfig.requestedLifetime);
+        if (!res)
+        {
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "client requested secure channel lifetime value invalid %s",
+                           attr_val);
+            return false;
+        }
+    }
+    else
+    {
+        pSecConnConfig->scConfig.requestedLifetime = SOPC_DEFAULT_REQ_LIFETIME_MS;
+    }
+
+    ctx->currentSecConnConfig = pSecConnConfig;
+
+    return true;
+}
+
+static bool end_connection(struct parse_context_t* ctx)
+{
+    if (NULL == ctx->currentSecConnConfig->scConfig.reqSecuPolicyUri)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no security policy defined for the connection");
+        return false;
+    }
+    if (OpcUa_MessageSecurityMode_Invalid == ctx->currentSecConnConfig->scConfig.msgSecurityMode)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no security mode defined for the connection");
+        return false;
+    }
+    if (NULL == ctx->currentSecConnConfig->sessionConfig.userPolicyId)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no user policy id defined for the connection");
+        return false;
+    }
+    if (NULL == ctx->currentSecConnConfig->serverCertPath &&
+        (OpcUa_MessageSecurityMode_None != ctx->currentSecConnConfig->scConfig.msgSecurityMode ||
+         OpcUa_UserTokenType_UserName == ctx->currentSecConnConfig->sessionConfig.userTokenType))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser,
+                      "no server certificate path defined for the connection when security mode is not None or user "
+                      "policy is UserName (certificate needed for password encryption)");
+        return false;
+    }
+
+    ctx->currentSecConnConfig->scConfig.isClientSc = true;
+    ctx->currentSecConnConfig->scConfig.clientConfigPtr = ctx->clientConfigPtr;
+    ctx->currentSecConnConfig->secureConnectionIdx = ctx->nbConnections;
+
+    ctx->nbConnections++;
+
+    return true;
+}
+
+static bool SOPC_end_app_certs(struct parse_context_t* ctx)
+{
+    // Prepare struct to store the certificates paths
+    ctx->clientConfigPtr->configFromPaths = SOPC_Calloc(sizeof(*ctx->clientConfigPtr->configFromPaths), 1);
+    if (NULL == ctx->clientConfigPtr->configFromPaths)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    ctx->clientConfigPtr->isConfigFromPathsNeeded = true;
 
     return true;
 }
 
 static bool start_policy(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    SOPC_Endpoint_Config* epConfig = ctx->currentEpConfig;
-
-    if (epConfig->nbSecuConfigs >= SOPC_MAX_SECU_POLICIES_CFG)
-    {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Maximum number of policies %d reached", SOPC_MAX_SECU_POLICIES_CFG);
-        return false;
-    }
+    SOPC_SecureConnection_Config* secConnConfig = ctx->currentSecConnConfig;
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
 
-    if (attr_val == NULL)
+    if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "uri attribute missing");
         return false;
     }
 
-    SOPC_ReturnStatus status =
-        SOPC_String_CopyFromCString(&epConfig->secuConfigurations[epConfig->nbSecuConfigs].securityPolicy, attr_val);
+    secConnConfig->scConfig.reqSecuPolicyUri = SOPC_strdup(attr_val);
 
-    if (SOPC_STATUS_OK != status)
+    if (NULL == secConnConfig->scConfig.reqSecuPolicyUri)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
 
-    return true;
-}
-
-static bool end_policy(struct parse_context_t* ctx)
-{
-    SOPC_Endpoint_Config* epConfig = ctx->currentEpConfig;
-    if (0 == (SOPC_SECURITY_MODE_ANY_MASK & epConfig->secuConfigurations[epConfig->nbSecuConfigs].securityModes))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "No security mode defined");
-        return false;
-    }
-    if (0 == epConfig->secuConfigurations[epConfig->nbSecuConfigs].nbOfUserTokenPolicies)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "No user token policy defined");
-        return false;
-    }
-    epConfig->nbSecuConfigs++;
     return true;
 }
 
@@ -402,25 +384,23 @@ static bool start_mode(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "mode", attrs);
 
-    if (attr_val == NULL)
+    if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "mode attribute missing");
         return false;
     }
 
-    SOPC_SecurityPolicy* secuPolicy = &ctx->currentEpConfig->secuConfigurations[ctx->currentEpConfig->nbSecuConfigs];
-
     if (strcmp(attr_val, "None") == 0)
     {
-        secuPolicy->securityModes |= SOPC_SECURITY_MODE_NONE_MASK;
+        ctx->currentSecConnConfig->scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_None;
     }
     else if (strcmp(attr_val, "Sign") == 0)
     {
-        secuPolicy->securityModes |= SOPC_SECURITY_MODE_SIGN_MASK;
+        ctx->currentSecConnConfig->scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_Sign;
     }
     else if (strcmp(attr_val, "SignAndEncrypt") == 0)
     {
-        secuPolicy->securityModes |= SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        ctx->currentSecConnConfig->scConfig.msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
     }
     else
     {
@@ -433,29 +413,16 @@ static bool start_mode(struct parse_context_t* ctx, const XML_Char** attrs)
 
 static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    SOPC_SecurityPolicy* secuPolicy = &ctx->currentEpConfig->secuConfigurations[ctx->currentEpConfig->nbSecuConfigs];
-
-    if (secuPolicy->nbOfUserTokenPolicies >= SOPC_MAX_SECU_POLICIES_CFG)
-    {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Maximum number of user policies %d reached",
-                       SOPC_MAX_SECU_POLICIES_CFG);
-        return false;
-    }
-
     const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "policyId", attrs);
 
-    if (attr_val == NULL)
+    if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "policyId attribute missing");
         return false;
     }
 
-    OpcUa_UserTokenPolicy* userPolicy = &secuPolicy->userTokenPolicies[secuPolicy->nbOfUserTokenPolicies];
-    OpcUa_UserTokenPolicy_Initialize(userPolicy);
-
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&userPolicy->PolicyId, attr_val);
-
-    if (SOPC_STATUS_OK != status)
+    ctx->currentSecConnConfig->sessionConfig.userPolicyId = SOPC_strdup(attr_val);
+    if (NULL == ctx->currentSecConnConfig->sessionConfig.userPolicyId)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
@@ -463,7 +430,7 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
 
     attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "tokenType", attrs);
 
-    if (attr_val == NULL)
+    if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "tokenType attribute missing");
         return false;
@@ -471,15 +438,15 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
 
     if (strcmp(attr_val, "anonymous") == 0)
     {
-        userPolicy->TokenType = OpcUa_UserTokenType_Anonymous;
+        ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Anonymous;
     }
     else if (strcmp(attr_val, "username") == 0)
     {
-        userPolicy->TokenType = OpcUa_UserTokenType_UserName;
+        ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_UserName;
     }
     else if (strcmp(attr_val, "certificate") == 0)
     {
-        userPolicy->TokenType = OpcUa_UserTokenType_Certificate;
+        ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Certificate;
     }
     else
     {
@@ -487,22 +454,37 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    if (OpcUa_UserTokenType_UserName == userPolicy->TokenType ||
-        OpcUa_UserTokenType_Certificate == userPolicy->TokenType)
-    {
-        attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "securityUri", attrs);
+    return true;
+}
 
-        if (attr_val == NULL)
+static bool end_user_policy(struct parse_context_t* ctx)
+{
+    if (NULL == ctx->currentSecConnConfig->sessionConfig.userPolicyId &&
+        OpcUa_UserTokenType_Anonymous != ctx->currentSecConnConfig->sessionConfig.userTokenType)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no user policy id defined for the connection");
+        return false;
+    }
+
+    if (OpcUa_UserTokenType_UserName == ctx->currentSecConnConfig->sessionConfig.userTokenType &&
+        (NULL == ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName ||
+         0 == strlen(ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName)))
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no user name defined for the connection");
+        return false;
+    }
+
+    if (OpcUa_UserTokenType_Certificate == ctx->currentSecConnConfig->sessionConfig.userTokenType)
+    {
+        SOPC_Session_UserX509* userX509 = &ctx->currentSecConnConfig->sessionConfig.userToken.userX509;
+        if (NULL == userX509->configFromPaths->userCertPath || 0 == strlen(userX509->configFromPaths->userCertPath))
         {
-            LOG_XML_ERROR(ctx->helper_ctx.parser, "securityUri attribute missing");
+            LOG_XML_ERROR(ctx->helper_ctx.parser, "no user certificate path defined for the connection");
             return false;
         }
-
-        status = SOPC_String_CopyFromCString(&userPolicy->SecurityPolicyUri, attr_val);
-
-        if (SOPC_STATUS_OK != status)
+        if (NULL == userX509->configFromPaths->userKeyPath || 0 == strlen(userX509->configFromPaths->userKeyPath))
         {
-            LOG_MEMORY_ALLOCATION_FAILURE;
+            LOG_XML_ERROR(ctx->helper_ctx.parser, "no user key path defined for the connection");
             return false;
         }
     }
@@ -510,10 +492,71 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
     return true;
 }
 
-static void end_user_policy(struct parse_context_t* ctx)
+static bool start_user_name(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    SOPC_SecurityPolicy* secuPolicy = &ctx->currentEpConfig->secuConfigurations[ctx->currentEpConfig->nbSecuConfigs];
-    secuPolicy->nbOfUserTokenPolicies++;
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "name", attrs);
+
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "user name attribute missing");
+        return false;
+    }
+
+    ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName = SOPC_strdup(attr_val);
+    if (NULL == ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    return true;
+}
+
+static bool start_user_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "cert_path", attrs);
+
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "user cert_path attribute missing");
+        return false;
+    }
+
+    SOPC_Session_UserX509* userX509 = &ctx->currentSecConnConfig->sessionConfig.userToken.userX509;
+    userX509->configFromPaths = SOPC_Calloc(sizeof(*userX509->configFromPaths), 1);
+    if (NULL == userX509->configFromPaths)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    userX509->configFromPaths->userCertPath = SOPC_strdup(attr_val);
+    if (NULL == userX509->configFromPaths->userCertPath)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "key_path", attrs);
+
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "user key_path attribute missing");
+        return false;
+    }
+    userX509->configFromPaths->userKeyPath = SOPC_strdup(attr_val);
+    if (NULL == userX509->configFromPaths->userKeyPath)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "encrypted", attrs);
+    userX509->configFromPaths->userKeyEncrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
+
+    userX509->isConfigFromPathNeeded = true;
+
+    return true;
 }
 
 static void start_element_handler(void* user_data, const XML_Char* name, const XML_Char** attrs)
@@ -534,26 +577,33 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         ctx->state = PARSE_S2OPC;
         return;
     case PARSE_S2OPC:
-        if (strcmp(name, "ServerConfiguration") != 0)
+        if (strcmp(name, "ClientConfiguration") == 0)
+        {
+            ctx->state = PARSE_CLICONFIG;
+        }
+        else if (strcmp(name, "ServerConfiguration") == 0)
+        {
+            ctx->state = PARSE_SRVCONFIG;
+            ctx->srv_skip_depth = 1;
+        }
+        else
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
 
-        ctx->state = PARSE_SRVCONFIG;
         return;
     case PARSE_SRVCONFIG:
+        ctx->srv_skip_depth++;
+
+        return;
+    case PARSE_CLICONFIG:
     {
-        if (strcmp(name, "Namespaces") == 0 && !ctx->namespacesSet)
-        {
-            ctx->namespacesSet = true;
-            ctx->state = PARSE_NAMESPACES;
-        }
-        else if (strcmp(name, "Locales") == 0 && !ctx->localesSet)
+        if (strcmp(name, "PreferredLocales") == 0 && !ctx->localesSet)
         {
             ctx->localesSet = true;
-            ctx->state = PARSE_LOCALES;
+            ctx->state = PARSE_PREFERRED_LOCALES;
         }
         else if (strcmp(name, "ApplicationDescription") == 0 && !ctx->appDescSet)
         {
@@ -565,10 +615,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             ctx->appCertSet = true;
             ctx->state = PARSE_APPLICATION_CERT;
         }
-        else if (strcmp(name, "Endpoints") == 0 && !ctx->endpointsSet)
+        else if (strcmp(name, "Connections") == 0 && !ctx->connectionsSet)
         {
-            ctx->endpointsSet = true;
-            ctx->state = PARSE_ENDPOINTS;
+            ctx->connectionsSet = true;
+            ctx->state = PARSE_CONNECTIONS;
         }
         else
         {
@@ -579,28 +629,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         break;
     }
-    case PARSE_NAMESPACES:
-        if (strcmp(name, "Namespace") == 0)
-        {
-            if (!start_namespace(ctx, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_NAMESPACE;
-        break;
-    case PARSE_LOCALES:
+    case PARSE_PREFERRED_LOCALES:
         if (strcmp(name, "Locale") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_locale(&ctx->helper_ctx, ctx->localeIds, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_locale(&ctx->helper_ctx, ctx->preferredLocaleIds, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -639,7 +671,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         else if (strcmp(name, "ApplicationName") == 0)
         {
             if (!SOPC_ConfigLoaderInternal_start_app_name(true, &ctx->helper_ctx, &ctx->appDesc,
-                                                          ctx->serverConfigPtr->localeIds, attrs))
+                                                          ctx->clientConfigPtr->clientLocaleIds, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -665,25 +697,25 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_APPLICATION_CERT:
-        if (strcmp(name, "ServerCertificate") == 0)
+        if (strcmp(name, "ClientCertificate") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_cert(true, &ctx->helper_ctx, &ctx->serverCertificate, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_cert(true, &ctx->helper_ctx, &ctx->clientCertificate, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
 
-            ctx->state = PARSE_SERVER_CERT;
+            ctx->state = PARSE_CLIENT_CERT;
         }
-        else if (strcmp(name, "ServerKey") == 0)
+        else if (strcmp(name, "ClientKey") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_key(true, &ctx->helper_ctx, &ctx->serverKey, &ctx->serverKeyEncrypted,
+            if (!SOPC_ConfigLoaderInternal_start_key(true, &ctx->helper_ctx, &ctx->clientKey, &ctx->clientKeyEncrypted,
                                                      attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-            ctx->state = PARSE_SERVER_KEY;
+            ctx->state = PARSE_CLIENT_KEY;
         }
         else if (strcmp(name, "TrustedIssuers") == 0 && !ctx->trustedIssuersSet)
         {
@@ -760,10 +792,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         ctx->state = PARSE_UNTRUSTED_ISSUER;
         break;
-    case PARSE_ENDPOINTS:
-        if (strcmp(name, "Endpoint") == 0)
+    case PARSE_CONNECTIONS:
+        if (strcmp(name, "Connection") == 0)
         {
-            if (!start_endpoint(ctx, attrs))
+            if (!start_connection(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -776,101 +808,77 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        ctx->state = PARSE_ENDPOINT;
+        ctx->state = PARSE_CONNECTION;
         break;
-    case PARSE_ENDPOINT:
-        if (strcmp(name, "SecurityPolicies") == 0)
+    case PARSE_CONNECTION:
+        if (strcmp(name, "ServerCertificate") == 0)
         {
-            ctx->state = PARSE_SECURITY_POLICIES;
-        }
-        else if (strcmp(name, "ReverseConnections") == 0)
-        {
-            ctx->state = PARSE_REVERSE_CONNECTIONS;
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-        break;
-    case PARSE_REVERSE_CONNECTIONS:
-        if (strcmp(name, "ReverseConnection") == 0)
-        {
-            if (!start_reverse_connection(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_cert(true, &ctx->helper_ctx,
+                                                      &ctx->currentSecConnConfig->serverCertPath, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
+            else
+            {
+                ctx->currentSecConnConfig->isServerCertFromPathNeeded = true;
+            }
 
-        ctx->state = PARSE_REVERSE_CONNECTION;
-        break;
-    case PARSE_SECURITY_POLICIES:
-        if (strcmp(name, "SecurityPolicy") == 0)
+            ctx->state = PARSE_SERVER_CERT;
+        }
+        else if (strcmp(name, "SecurityPolicy") == 0)
         {
             if (!start_policy(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_SECURITY_POLICY;
         }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-        ctx->state = PARSE_SECURITY_POLICY;
-        break;
-    case PARSE_SECURITY_POLICY:
-        if (strcmp(name, "SecurityModes") == 0)
-        {
-            ctx->state = PARSE_SECURITY_MODES;
-        }
-        else if (strcmp(name, "UserPolicies") == 0)
-        {
-            ctx->state = PARSE_USER_POLICIES;
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-        break;
-    case PARSE_SECURITY_MODES:
-        if (strcmp(name, "SecurityMode") == 0)
+        else if (strcmp(name, "SecurityMode") == 0)
         {
             if (!start_mode(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+            ctx->state = PARSE_SECURITY_MODE;
         }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_SECURITY_MODE;
-        break;
-    case PARSE_USER_POLICIES:
-        if (strcmp(name, "UserPolicy") == 0)
+        else if (strcmp(name, "UserPolicy") == 0)
         {
             if (!start_user_policy(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+            ctx->state = PARSE_USER_POLICY;
+        }
+        else
+        {
+            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
+            XML_StopParser(helperCtx->parser, 0);
+            return;
+        }
+        break;
+    case PARSE_USER_POLICY:
+        if (strcmp(name, "UserName") == 0)
+        {
+            if (!start_user_name(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+            ctx->state = PARSE_USER_NAME;
+        }
+        else if (strcmp(name, "UserX509") == 0)
+        {
+            if (!start_user_cert(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+            ctx->state = PARSE_USER_CERT;
         }
         else
         {
@@ -879,7 +887,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        ctx->state = PARSE_USER_POLICY;
         break;
     default:
         return;
@@ -894,51 +901,44 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
     switch (ctx->state)
     {
-    case PARSE_USER_POLICY:
-        end_user_policy(ctx);
-        ctx->state = PARSE_USER_POLICIES;
+    case PARSE_USER_NAME:
+        ctx->state = PARSE_USER_POLICY;
         break;
-    case PARSE_USER_POLICIES:
-        ctx->state = PARSE_SECURITY_POLICY;
+    case PARSE_USER_CERT:
+        ctx->state = PARSE_USER_POLICY;
         break;
-    case PARSE_SECURITY_MODE:
-        ctx->state = PARSE_SECURITY_MODES;
-        break;
-    case PARSE_SECURITY_MODES:
-        ctx->state = PARSE_SECURITY_POLICY;
-        break;
-    case PARSE_REVERSE_CONNECTION:
-        ctx->state = PARSE_REVERSE_CONNECTIONS;
-        break;
-    case PARSE_REVERSE_CONNECTIONS:
-        ctx->state = PARSE_ENDPOINT;
+    case PARSE_SERVER_CERT:
+        ctx->state = PARSE_CONNECTION;
         break;
     case PARSE_SECURITY_POLICY:
-        if (!end_policy(ctx))
+        ctx->state = PARSE_CONNECTION;
+        break;
+    case PARSE_USER_POLICY:
+        if (!end_user_policy(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->state = PARSE_SECURITY_POLICIES;
+        ctx->state = PARSE_CONNECTION;
         break;
-    case PARSE_SECURITY_POLICIES:
-        ctx->state = PARSE_ENDPOINT;
+    case PARSE_SECURITY_MODE:
+        ctx->state = PARSE_CONNECTION;
         break;
-    case PARSE_ENDPOINT:
-        if (!end_endpoint(ctx))
+    case PARSE_CONNECTION:
+        if (!end_connection(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->state = PARSE_ENDPOINTS;
+        ctx->state = PARSE_CONNECTIONS;
         break;
-    case PARSE_ENDPOINTS:
-        if (!end_endpoints(ctx))
+    case PARSE_CONNECTIONS:
+        if (!end_connections(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->state = PARSE_SRVCONFIG;
+        ctx->state = PARSE_CLICONFIG;
         break;
     case PARSE_TRUSTED_ISSUER:
         ctx->state = PARSE_TRUSTED_ISSUERS;
@@ -977,26 +977,32 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->untrustedIssuersSet = true;
         ctx->state = PARSE_APPLICATION_CERT;
         break;
-    case PARSE_SERVER_KEY:
+    case PARSE_CLIENT_KEY:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
-    case PARSE_SERVER_CERT:
+    case PARSE_CLIENT_CERT:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_APPLICATION_CERT:
+        if (!SOPC_end_app_certs(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
         if (!SOPC_ConfigLoaderInternal_end_application_certificates(
-                true, &ctx->helper_ctx, &ctx->trustedRootIssuers, &ctx->serverConfigPtr->trustedRootIssuersList,
-                &ctx->trustedIntermediateIssuers, &ctx->serverConfigPtr->trustedIntermediateIssuersList,
-                &ctx->issuedCertificates, &ctx->serverConfigPtr->issuedCertificatesList, &ctx->untrustedRootIssuers,
-                &ctx->serverConfigPtr->untrustedRootIssuersList, &ctx->untrustedIntermediateIssuers,
-                &ctx->serverConfigPtr->untrustedIntermediateIssuersList, &ctx->crlCertificates,
-                &ctx->serverConfigPtr->certificateRevocationPathList, ctx->issuedCertificatesSet,
+                true, &ctx->helper_ctx, &ctx->trustedRootIssuers,
+                &ctx->clientConfigPtr->configFromPaths->trustedRootIssuersList, &ctx->trustedIntermediateIssuers,
+                &ctx->clientConfigPtr->configFromPaths->trustedIntermediateIssuersList, &ctx->issuedCertificates,
+                &ctx->clientConfigPtr->configFromPaths->issuedCertificatesList, &ctx->untrustedRootIssuers,
+                &ctx->clientConfigPtr->configFromPaths->untrustedRootIssuersList, &ctx->untrustedIntermediateIssuers,
+                &ctx->clientConfigPtr->configFromPaths->untrustedIntermediateIssuersList, &ctx->crlCertificates,
+                &ctx->clientConfigPtr->configFromPaths->certificateRevocationPathList, ctx->issuedCertificatesSet,
                 ctx->trustedIssuersSet))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->state = PARSE_SRVCONFIG;
+        ctx->state = PARSE_CLICONFIG;
         break;
     case PARSE_APPLICATION_NAME:
         ctx->state = PARSE_APPLICATION_DESC;
@@ -1016,39 +1022,35 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->state = PARSE_SRVCONFIG;
-        break;
-    case PARSE_NAMESPACE:
-        ctx->state = PARSE_NAMESPACES;
-        break;
-    case PARSE_NAMESPACES:
-        if (!end_namespaces(ctx))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->state = PARSE_SRVCONFIG;
+        ctx->state = PARSE_CLICONFIG;
         break;
     case PARSE_LOCALE:
-        ctx->state = PARSE_LOCALES;
+        ctx->state = PARSE_PREFERRED_LOCALES;
         break;
-    case PARSE_LOCALES:
-        if (!SOPC_ConfigLoaderInternal_end_locales(true, &ctx->helper_ctx, ctx->localeIds,
-                                                   &ctx->serverConfigPtr->localeIds))
+    case PARSE_PREFERRED_LOCALES:
+        if (!SOPC_ConfigLoaderInternal_end_locales(true, &ctx->helper_ctx, ctx->preferredLocaleIds,
+                                                   &ctx->clientConfigPtr->clientLocaleIds))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
-        ctx->localeIds = NULL;
-        ctx->state = PARSE_SRVCONFIG;
+        ctx->preferredLocaleIds = NULL;
+        ctx->state = PARSE_CLICONFIG;
         break;
-    case PARSE_SRVCONFIG:
-        if (!end_server_config(ctx))
+    case PARSE_CLICONFIG:
+        if (!end_client_config(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
         ctx->state = PARSE_S2OPC;
+        break;
+    case PARSE_SRVCONFIG:
+        ctx->srv_skip_depth--;
+        if (ctx->srv_skip_depth == 0)
+        {
+            ctx->state = PARSE_S2OPC;
+        }
         break;
     case PARSE_S2OPC:
         break;
@@ -1069,16 +1071,14 @@ static void SOPC_Free_CstringFromPtr(void* data)
     }
 }
 
-bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
+bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
 {
-    SOPC_ASSERT(NULL != config);
-    SOPC_S2OPC_Config_Initialize(config);
-    config->serverConfig.freeCstringsFlag = true; // C strings are allocated during parsing or NULL if undefined
+    SOPC_ASSERT(NULL != clientConfig);
+    SOPC_ClientConfig_Initialize(clientConfig);
+    clientConfig->freeCstringsFlag = true; // C strings are allocated during parsing or NULL if undefined
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
-    SOPC_Array* endpoints = SOPC_Array_Create(sizeof(SOPC_Endpoint_Config), 1, NULL);
-    SOPC_Array* ns = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* locales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
+    SOPC_Array* preferredLocales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* trustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* trustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* issuedCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
@@ -1087,15 +1087,13 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
 
     SOPC_Array* revokedListCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales) || (NULL == trustedRootIssuers) ||
+    if ((NULL == parser) || (NULL == preferredLocales) || (NULL == trustedRootIssuers) ||
         (NULL == trustedIntermediateIssuers) || (NULL == issuedCerts) || (NULL == untrustedRootIssuers) ||
         (NULL == untrustedIntermediateIssuers) || (NULL == revokedListCerts))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
-        SOPC_Array_Delete(endpoints);
-        SOPC_Array_Delete(ns);
-        SOPC_Array_Delete(locales);
+        SOPC_Array_Delete(preferredLocales);
         SOPC_Array_Delete(trustedRootIssuers);
         SOPC_Array_Delete(trustedIntermediateIssuers);
         SOPC_Array_Delete(issuedCerts);
@@ -1111,16 +1109,16 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
 
     ctx.state = PARSE_START;
     ctx.helper_ctx.parser = parser;
-    ctx.endpoints = endpoints;
-    ctx.namespaces = ns;
-    ctx.localeIds = locales;
+    ctx.srv_skip_depth = 0;
+    ctx.nbConnections = 0;
+    ctx.preferredLocaleIds = preferredLocales;
     ctx.trustedRootIssuers = trustedRootIssuers;
     ctx.trustedIntermediateIssuers = trustedIntermediateIssuers;
     ctx.issuedCertificates = issuedCerts;
     ctx.untrustedRootIssuers = untrustedRootIssuers;
     ctx.untrustedIntermediateIssuers = untrustedIntermediateIssuers;
     ctx.crlCertificates = revokedListCerts;
-    ctx.serverConfigPtr = &config->serverConfig;
+    ctx.clientConfigPtr = clientConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
     OpcUa_ApplicationDescription_Initialize(&ctx.appDesc);
@@ -1130,8 +1128,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
 
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
-    SOPC_Array_Delete(ctx.namespaces);
-    SOPC_Array_Delete(ctx.localeIds);
+    SOPC_Array_Delete(ctx.preferredLocaleIds);
     SOPC_Array_Delete(ctx.trustedRootIssuers);
     SOPC_Array_Delete(ctx.trustedIntermediateIssuers);
     SOPC_Array_Delete(ctx.issuedCertificates);
@@ -1139,24 +1136,26 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     SOPC_Array_Delete(ctx.untrustedIntermediateIssuers);
     SOPC_Array_Delete(ctx.crlCertificates);
 
-    size_t nbEndpoints = SOPC_Array_Size(endpoints);
-
-    if (res == SOPC_STATUS_OK && nbEndpoints <= UINT32_MAX)
+    if (res == SOPC_STATUS_OK)
     {
-        config->serverConfig.endpoints = SOPC_Array_Into_Raw(ctx.endpoints);
-        ctx.endpoints = NULL;
-        SOPC_ASSERT(NULL != config->serverConfig.endpoints);
-        config->serverConfig.nbEndpoints = (uint8_t) nbEndpoints;
-        config->serverConfig.serverCertPath = ctx.serverCertificate;
-        config->serverConfig.serverKeyPath = ctx.serverKey;
-        config->serverConfig.serverKeyEncrypted = ctx.serverKeyEncrypted;
-        config->serverConfig.serverDescription = ctx.appDesc;
+        clientConfig->nbSecureConnections = ctx.nbConnections;
+        clientConfig->nbReverseEndpointURLs = ctx.nbReverseUrls;
+        if (clientConfig->isConfigFromPathsNeeded && NULL != clientConfig->configFromPaths)
+        {
+            clientConfig->configFromPaths->clientCertPath = ctx.clientCertificate;
+            clientConfig->configFromPaths->clientKeyPath = ctx.clientKey;
+            clientConfig->configFromPaths->clientKeyEncrypted = ctx.clientKeyEncrypted;
+        }
+        else
+        {
+            SOPC_ASSERT(NULL == ctx.clientCertificate);
+            SOPC_ASSERT(NULL == ctx.clientKey);
+        }
+        clientConfig->clientDescription = ctx.appDesc;
         return true;
     }
     else
     {
-        SOPC_Array_Delete(ctx.endpoints);
         return false;
     }
 }
-#endif
