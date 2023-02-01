@@ -728,6 +728,7 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_ExtensionObject* readExecAddToken = build_user_name_token("user2", "password2");
     SOPC_ExtensionObject* readWriteAddToken = build_user_name_token("user3", "42");
     SOPC_ExtensionObject* readWriteExecToken = build_user_name_token("user4", "user4");
+    SOPC_ExtensionObject* x509_untrustedIssued_defaultAccessToken = build_x509_token("user_public/user_2k_cert.der");
     SOPC_ExtensionObject* x509_defaultAccessToken = build_x509_token("issued_usr/ctt_usrT.der");
     SOPC_ExtensionObject* x509_readExecAddToken = build_x509_token("issued_usr/ctt_usrTE.der");
     SOPC_ExtensionObject* x509_writeExecAddToken = build_x509_token("issued_usr/ctt_usrTSincorrect.der");
@@ -783,6 +784,8 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     ck_assert_ptr_nonnull(readWriteExec);
 
     // x509 token
+    SOPC_UserWithAuthorization* x509_untrustedIssued_defaultAccess = SOPC_UserWithAuthorization_CreateFromIdentityToken(
+        x509_untrustedIssued_defaultAccessToken, authorizationManager);
     SOPC_UserWithAuthorization* x509_defaultAccess =
         SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_defaultAccessToken, authorizationManager);
     ck_assert_ptr_nonnull(x509_defaultAccess);
@@ -928,6 +931,24 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
+    // x509_untrustedIssued_defaultAccess --> dafault issuers rights is used (read only)
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+
     // x509_defaultAccess --> Read, execute and addnode rights are set to the default value False because rights are
     // partialy defined
     status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ,
@@ -1026,6 +1047,7 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_UserWithAuthorization_Free(&readExecAdd);
     SOPC_UserWithAuthorization_Free(&readWriteAdd);
     SOPC_UserWithAuthorization_Free(&readWriteExec);
+    SOPC_UserWithAuthorization_Free(&x509_untrustedIssued_defaultAccess);
     SOPC_UserWithAuthorization_Free(&x509_readWriteExec);
     SOPC_UserWithAuthorization_Free(&x509_readWriteAdd);
     SOPC_UserWithAuthorization_Free(&x509_writeExecAdd);
@@ -1039,6 +1061,7 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_ExtensionObject_Clear(readExecAddToken);
     SOPC_ExtensionObject_Clear(readWriteAddToken);
     SOPC_ExtensionObject_Clear(readWriteExecToken);
+    SOPC_ExtensionObject_Clear(x509_untrustedIssued_defaultAccessToken);
     SOPC_ExtensionObject_Clear(x509_readWriteExecToken);
     SOPC_ExtensionObject_Clear(x509_readWriteAddToken);
     SOPC_ExtensionObject_Clear(x509_writeExecAddToken);
@@ -1052,6 +1075,7 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_Free(readExecAddToken);
     SOPC_Free(readWriteAddToken);
     SOPC_Free(readWriteExecToken);
+    SOPC_Free(x509_untrustedIssued_defaultAccessToken);
     SOPC_Free(x509_readWriteExecToken);
     SOPC_Free(x509_readWriteAddToken);
     SOPC_Free(x509_writeExecAddToken);

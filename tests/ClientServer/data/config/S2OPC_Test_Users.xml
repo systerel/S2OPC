@@ -23,8 +23,7 @@
   </UserPasswordConfiguration>
   <UserCertificates>
 		<!-- default right is read only (accepted issued, not configured but evaluated as trustworthy according to trust chain)-->
-		<DefaultCertificateAuthorization write="false" read="true" execute="false" addnode="false"/>
-		<TrustedIssuers>
+		<TrustedIssuers write="false" read="true" execute="false" addnode="false">
 			<TrustedIssuer root="true" cert_path="trusted_usr/user_cacert.der" revocation_list_path="revoked_usr/user_cacrl.der"/>
 			<TrustedIssuer root="true" cert_path="trusted_usr/ctt_ca1T.der" revocation_list_path="revoked_usr/ctt_ca1T.crl"/>
 			<TrustedIssuer root="false" cert_path="trusted_usr/ctt_ca1I_ca2T.der" revocation_list_path="revoked_usr/ctt_ca1I_ca2T.crl"/>

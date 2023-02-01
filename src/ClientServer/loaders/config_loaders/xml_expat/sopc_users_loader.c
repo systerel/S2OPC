@@ -54,7 +54,6 @@ typedef enum
     PARSE_USERPASSWORD,               // ....In a UserPassword tag
     PARSE_USERAUTHORIZATION,          // ......In a UserAuthorization tag
     PARSE_USERCERTIFICATES,           // ..In userCertificates
-    PARSE_DEFAULT_CERTAUTHORIZATION,  // ....In a DefaultCertificateAuthorization tag
     PARSE_TRUSTED_ISSUERS,            // ....In a TrustedIssuers tag
     PARSE_TRUSTED_ISSUER,             // ......In a TrustedIssuer tag
     PARSE_ISSUED_CERTS,               // ....In a IssuedCertificates tag
@@ -95,7 +94,7 @@ typedef struct _SOPC_UsersConfig
         certificates; // dict{key = hexadecimal certificate thumbprint as SOPC_String; value = user_cert structure}
     user_rights anonRights;
     user_password* rejectedUser;
-    user_rights defaultCertRights;
+    user_rights defaultCertRights; // rigth for accepted issued (not configured / not trusted)
 } SOPC_UsersConfig;
 
 struct parse_context_t
@@ -111,7 +110,6 @@ struct parse_context_t
     user_rights anonymousRights;
 
     bool userCertSet;
-    bool defaultCertRightsSet;
     user_rights defaultCertRights;
     bool trustedIssuersSet;
     SOPC_Array* trustedRootIssuers;
@@ -725,12 +723,6 @@ static bool end_user_certificates(struct parse_context_t* ctx)
         return false;
     }
 
-    /* check if DefaultCertificateAuthorization tag is defined */
-    if (!ctx->defaultCertRightsSet)
-    {
-        LOGF("Warning: <DefaultCertificateAuthorization> tag is missing%c", '.');
-    }
-
     ctx->trustedRootIssuersList = SOPC_Array_Into_Raw(ctx->trustedRootIssuers);
     if (NULL == ctx->trustedRootIssuersList)
     {
@@ -866,17 +858,13 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         break;
     case PARSE_USERCERTIFICATES:
-        if (0 == strcmp(name, "DefaultCertificateAuthorization") && !ctx->defaultCertRightsSet)
+        if (0 == strcmp(name, "TrustedIssuers") && !ctx->trustedIssuersSet)
         {
             if (!start_authorization(ctx, attrs, &ctx->defaultCertRights))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-            ctx->state = PARSE_DEFAULT_CERTAUTHORIZATION;
-        }
-        else if (0 == strcmp(name, "TrustedIssuers") && !ctx->trustedIssuersSet)
-        {
             ctx->state = PARSE_TRUSTED_ISSUERS;
         }
         else if (0 == strcmp(name, "IssuedCertificates") && !ctx->issuedCertificatesSet)
@@ -991,7 +979,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         ctx->state = PARSE_USERAUTHORIZATION;
         break;
     case PARSE_USERAUTHORIZATION:
-    case PARSE_DEFAULT_CERTAUTHORIZATION:
         break;
     default:
         assert(false && "Unknown state.");
@@ -1007,10 +994,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
     switch (ctx->state)
     {
-    case PARSE_DEFAULT_CERTAUTHORIZATION:
-        ctx->defaultCertRightsSet = true;
-        ctx->state = PARSE_USERCERTIFICATES;
-        break;
     case PARSE_USERAUTHORIZATION:
         if (ctx->currentAnonymous)
         {
@@ -1583,7 +1566,6 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     ctx.usrPwdCfgSet = false;
 
     ctx.certificates = certificates;
-    ctx.defaultCertRightsSet = false;
     ctx.defaultCertRights = (user_rights){false, false, false, false};
     ctx.currentCert = NULL;
     ctx.userCertSet = false;
