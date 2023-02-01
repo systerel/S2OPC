@@ -283,8 +283,9 @@ LOCAL_OPERATIONS
             (p_alloc_failed = TRUE => p_continue = FALSE) &
             (p_alloc_failed = FALSE =>
                 nextBrowseResult = out_BrowseResult_nb_References + 1) &
-            (p_continue = TRUE =>
-                nextBrowseResult <= nb_browseResult_max_refs) &
+
+            nextBrowseResult <= nb_browseResult_max_refs &
+
             (p_continue = FALSE & p_alloc_failed = FALSE =>
                 browseResult_to_iterate = {})
         )
@@ -497,8 +498,9 @@ OPERATIONS
                 /* Number of results is maximum number of results in this case */
                 nb_browseResult_max_refs = card(browseResult_iterated)
             ) &
-            (l_continue_bri = TRUE =>
-                nextBrowseResult <= nb_browseResult_max_refs) &
+
+            nextBrowseResult <= nb_browseResult_max_refs &
+
             (l_continue_ref = TRUE => references_to_iterate /= {}) &
             (l_alloc_failed = FALSE =>
                 nextBrowseResult = out_BrowseResult_nb_References + 1) &
