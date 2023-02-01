@@ -36,8 +36,6 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_crypto_provider.h"
 #include "sopc_user.h"
 
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
@@ -180,28 +178,6 @@ struct SOPC_UserAuthorization_Manager
 SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentication_Manager* authenticationManager,
                                                               const SOPC_ExtensionObject* pUser,
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated);
-
-/**
- * \brief Authenticate an X509 certificate user with the chosen authentication manager.
- *
- * \param authenticationManager The SOPC_UserAuthentication_Manager instance.
- * \param pUser The user identity token which was received in the ActivateSession request.
- * \param pUserAuthenticated A valid pointer to the uninitialized result of the operation.
- * \param pUserTokenSignature The userTokenSiganture which was received in the ActivateSession request.
- * \param pServerNonce The server nonce.
- * \param pServerCert The server certificate.
- * \param pUsedSecuPolicy The security policy used.
- *
- * \return SOPC_STATUS_OK when the signature is valid.
- */
-SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
-    SOPC_UserAuthentication_Manager* authenticationManager,
-    const SOPC_ExtensionObject* pUser,
-    SOPC_UserAuthentication_Status* pUserAuthenticated,
-    const OpcUa_SignatureData* pUserTokenSignature,
-    const SOPC_ByteString* pServerNonce,
-    const SOPC_SerializedCertificate* pServerCert,
-    const char* pUsedSecuPolicy);
 
 /**
  * \brief Authorize an operation with the chosen authorization manager.

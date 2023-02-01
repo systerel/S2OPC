@@ -166,6 +166,159 @@ void user_authentication_bs__is_user_token_supported(
     *user_authentication_bs__p_user_security_policy = usedSecuPolicy;
 }
 
+static SOPC_ReturnStatus is_valid_user_token_signature(const SOPC_ExtensionObject* pUser,
+                                                       const OpcUa_SignatureData* pUserTokenSignature,
+                                                       const SOPC_ByteString* pServerNonce,
+                                                       const SOPC_SerializedCertificate* pServerCert,
+                                                       const char* pUsedSecuPolicy)
+{
+    SOPC_ASSERT(&OpcUa_X509IdentityToken_EncodeableType == pUser->Body.Object.ObjType &&
+                "only support x509 certificate");
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pServerNonce);
+    SOPC_ASSERT(NULL != pServerNonce->Data);
+    SOPC_ASSERT(0 < pServerNonce->Length);
+    SOPC_ASSERT(NULL != pServerCert);
+    SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CryptoProvider* provider = NULL;
+    SOPC_CertificateList* pCrtUser = NULL;
+    SOPC_AsymmetricKey* pKeyCrtUser = NULL;
+    OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
+
+    const char* errorReason = "";
+    uint32_t length_nonce = 0;
+    uint32_t verify_len = 0;
+    uint8_t* verify_payload = NULL;
+
+    if (NULL == pUserTokenSignature || NULL == pUserTokenSignature->Algorithm.Data ||
+        NULL == pUserTokenSignature->Signature.Data)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (0 >= pUserTokenSignature->Algorithm.Length || 0 >= pUserTokenSignature->Signature.Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL == x509Token || NULL == x509Token->CertificateData.Data || 0 >= x509Token->CertificateData.Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+            x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtUser, &pKeyCrtUser);
+    }
+
+    provider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+    if (NULL == provider)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    /* retrieve the length nonce */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(provider, &length_nonce);
+    }
+    /* Verify signature algorithm URI */
+    if (SOPC_STATUS_OK == status)
+    {
+        const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
+        int res = strncmp(algorithm, (const char*) pUserTokenSignature->Algorithm.Data,
+                          (uint32_t) pUserTokenSignature->Algorithm.Length);
+        if (NULL == algorithm || 0 != res || (UINT32_MAX - length_nonce) < pServerCert->length ||
+            length_nonce != (uint32_t) pServerNonce->Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        verify_len = pServerCert->length + length_nonce;
+        verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
+        if (NULL != verify_payload)
+        {
+            memcpy(verify_payload, pServerCert->data, pServerCert->length);
+            memcpy(verify_payload + pServerCert->length, pServerNonce->Data, length_nonce);
+
+            status = SOPC_CryptoProvider_AsymmetricVerify(
+                provider, verify_payload, verify_len, pKeyCrtUser, pUserTokenSignature->Signature.Data,
+                (uint32_t) pUserTokenSignature->Signature.Length, &errorReason);
+            SOPC_Free(verify_payload);
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    /* Clear */
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtUser);
+    SOPC_CryptoProvider_Free(provider);
+
+    return status;
+}
+
+static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_ExtensionObject* pUser,
+                                                             const char* pUsedSecuPolicy)
+{
+    SOPC_ASSERT(&OpcUa_X509IdentityToken_EncodeableType == pUser->Body.Object.ObjType &&
+                "only support x509 certificate");
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pUsedSecuPolicy);
+
+    SOPC_CryptoProvider* pProvider = NULL;
+    SOPC_CertificateList* pCrtUser = NULL;
+    OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
+    const SOPC_CryptoProfile* pProfile = NULL;
+
+    pProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
+    if (NULL == pProvider)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+        x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+        if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Let the lib-specific code handle the verification for the current security policy
+        status = pProfile->pFnCertVerify(pProvider, pCrtUser);
+    }
+
+    /* Clear */
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+    SOPC_CryptoProvider_Free(pProvider);
+
+    return status;
+}
+
 static void logs_and_set_b_authentication_status_from_c(
     SOPC_UserAuthentication_Status authnStatus,
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user,
@@ -253,7 +406,6 @@ void user_authentication_bs__is_valid_user_x509_authentication(
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
     SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
-
     SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_x509);
 
     SOPC_Endpoint_Config* epConfig =
@@ -270,18 +422,36 @@ void user_authentication_bs__is_valid_user_x509_authentication(
     SOPC_ASSERT(NULL != pSCCfg);
     SOPC_ASSERT(NULL != pSCCfg->crt_srv);
 
-    status = SOPC_UserAuthentication_IsValidUserIdentity_Certificate(
-        authenticationManager, user_authentication_bs__p_user_token, &authnStatus,
-        user_authentication_bs__p_user_token_signature, user_authentication_bs__p_server_nonce, pSCCfg->crt_srv,
-        usedSecuPolicy);
-    if (SOPC_STATUS_OK != status)
+    status = is_valid_user_token_signature(user_authentication_bs__p_user_token,
+                                           user_authentication_bs__p_user_token_signature,
+                                           user_authentication_bs__p_server_nonce, pSCCfg->crt_srv, usedSecuPolicy);
+    if (SOPC_STATUS_OK == status)
     {
-        /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
-        authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
-        SOPC_Logger_TraceWarning(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
-            user_authentication_bs__p_endpoint_config_idx);
+        status = is_cert_comply_with_security_policy(user_authentication_bs__p_user_token, usedSecuPolicy);
+        if (SOPC_STATUS_OK != status)
+        {
+            authnStatus = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+        }
+    }
+    else
+    {
+        authnStatus = SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager,
+                                                             user_authentication_bs__p_user_token, &authnStatus);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
+            authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
+                user_authentication_bs__p_endpoint_config_idx);
+        }
     }
 
     logs_and_set_b_authentication_status_from_c(authnStatus, user_authentication_bs__p_sc_valid_user,
