@@ -1176,7 +1176,6 @@ OPERATIONS
         l_statusCode_alloc := e_sc_ok;
 
         l_continue <-- init_iter_browsePathSourceIdx(nb_max_ref);
-        l_continue := bool(l_statusCode_alloc = e_sc_ok & l_continue = TRUE);
         l_index := 0;
         WHILE l_continue = TRUE
         DO
