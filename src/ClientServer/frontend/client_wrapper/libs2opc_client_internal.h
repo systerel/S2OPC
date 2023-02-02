@@ -26,10 +26,47 @@
  *
  */
 
-#include <stdbool.h>
-
 #ifndef LIBS2OPC_CLIENT_INTERNAL_H_
 #define LIBS2OPC_CLIENT_INTERNAL_H_
+
+#include <stdbool.h>
+
+#include "libs2opc_new_client.h"
+
+#include "sopc_mutexes.h"
+#include "sopc_user_app_itf.h"
+
+// The client helper dedicated configuration in addition to configuration ::SOPC_S2OPC_Config
+typedef struct SOPC_ClientHelper_Config
+{
+    // Flag atomically set when the structure is initialized during call to SOPC_HelperConfigClient_Initialize
+    // and singleton config is initialized
+    int32_t initialized;
+    Mutex configMutex;
+
+    SOPC_ClientConnection* secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
+    int32_t openedReverseEndpointsIdx[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
+
+    SOPC_ServiceAsyncResp_Fct* asyncRespCb;
+} SOPC_ClientHelper_Config;
+
+// The default value of the configuration structure
+extern const SOPC_ClientHelper_Config sopc_client_helper_config_default;
+
+// The singleton configuration structure
+extern SOPC_ClientHelper_Config sopc_client_helper_config;
+
+// Returns true if the client is initialize, false otherwise
+bool SOPC_ClientInternal_IsInitialized(void);
+
+void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
+                                              uint32_t IdOrStatus,
+                                              void* param,
+                                              uintptr_t appContext);
+
+// Finalize the SecureChannel configuration by parsing the necessary files
+SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const SOPC_Client_Config* cConfig,
+                                                                          SOPC_SecureConnection_Config* secConnConfig);
 
 /**
  * \brief Function to call the callback to retrieve password for decryption of the Client private key.

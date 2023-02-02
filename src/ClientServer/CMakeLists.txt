@@ -204,28 +204,39 @@ export(EXPORT s2opc_clientserver-commonwrapper-export
 
 
 ## Client wrapper library ##
-set(LIBSUBSCRIBE_PATH "frontend/client_wrapper")
-add_library(s2opc_clientwrapper "${LIBSUBSCRIBE_PATH}/libs2opc_client.c"
-                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.c"
-                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.c"
-                                "${LIBSUBSCRIBE_PATH}/libs2opc_client_config.c"
-                                "${LIBSUBSCRIBE_PATH}/toolkit_helpers.c"
-                                "${LIBSUBSCRIBE_PATH}/state_machine.c"
-                                "${LIBSUBSCRIBE_PATH}/pki_permissive.c"
+set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
+# Set empty implementation and dependency if Expat not available
+set(CLIENT_WRAPPER_XML_CONFIG "")
+set(CLIENT_WRAPPER_XML_DEP "")
+if (expat_FOUND)
+  set(CLIENT_WRAPPER_XML_CONFIG "${CLIENTWRAPPER_PATH}/libs2opc_client_config_xml.c")
+  set(CLIENT_WRAPPER_XML_DEP s2opc_clientserver-xml-loaders-expat)
+endif()
+
+add_library(s2opc_clientwrapper "${CLIENTWRAPPER_PATH}/libs2opc_client.c"
+                                "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
+                                "${CLIENTWRAPPER_PATH}/libs2opc_client_cmds.c"
+                                "${CLIENTWRAPPER_PATH}/libs2opc_client_common.c"
+                                "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
+                                "${CLIENTWRAPPER_PATH}/toolkit_helpers.c"
+                                "${CLIENTWRAPPER_PATH}/state_machine.c"
+                                "${CLIENTWRAPPER_PATH}/pki_permissive.c"
+                                ${CLIENT_WRAPPER_XML_CONFIG}
                                 )
-target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_commonwrapper)
+target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_commonwrapper ${CLIENT_WRAPPER_XML_DEP})
 target_compile_options(s2opc_clientwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_clientwrapper
   PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LIBSUBSCRIBE_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
 
-list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${LIBSUBSCRIBE_PATH}/libs2opc_client.h"
-                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_cmds.h"
-                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_common.h"
-                                         "${LIBSUBSCRIBE_PATH}/libs2opc_client_config.h")
+list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
+                                         "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
+                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_cmds.h"
+                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_common.h"
+                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h")
 set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${CLIENT_WRAPPER_INCLUDE_FILES}")
 
 install(TARGETS s2opc_clientwrapper

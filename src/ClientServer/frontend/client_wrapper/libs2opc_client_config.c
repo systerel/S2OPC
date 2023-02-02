@@ -17,10 +17,267 @@
  * under the License.
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "libs2opc_client_config.h"
 #include "libs2opc_client_internal.h"
+#include "libs2opc_common_config.h"
+#include "libs2opc_common_internal.h"
+
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
+#include "sopc_key_manager.h"
 #include "sopc_logger.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
+#include "sopc_toolkit_config.h"
+
+const SOPC_ClientHelper_Config sopc_client_helper_config_default = {
+    .initialized = false,
+    .secureConnections = {NULL},
+    .openedReverseEndpointsIdx = {0},
+    .asyncRespCb = NULL,
+};
+
+SOPC_ClientHelper_Config sopc_client_helper_config;
+
+bool SOPC_ClientInternal_IsInitialized(void)
+{
+    return SOPC_Atomic_Int_Get(&sopc_client_helper_config.initialized);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
+{
+    if (!SOPC_CommonHelper_GetInitialized() || SOPC_ClientInternal_IsInitialized())
+    {
+        // Common wrapper not initialized or client wrapper already initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    // SOPC_CommonHelper_SetClientComEvent done by SOPC_ClientCommon_Initialize
+
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    sopc_client_helper_config = sopc_client_helper_config_default;
+
+    // We only do copies in helper config
+    pConfig->clientConfig.freeCstringsFlag = true;
+
+    // Client state initialization
+    // Mutex_Initialization(&sopc_client_helper_config.stateMutex);
+    // sopc_server_helper_config.state = SOPC_CLIENT_STATE_INITIALIZED;
+
+    SOPC_ReturnStatus mutStatus = Mutex_Initialization(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(SOPC_ClientInternal_ToolkitEventCallback);
+    SOPC_Atomic_Int_Set(&sopc_client_helper_config.initialized, (int32_t) true);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_HelperConfigClient_Clear();
+    }
+    return status;
+}
+
+void SOPC_HelperConfigClient_Clear(void)
+{
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return;
+    }
+    SOPC_ToolkitClient_ClearAllSCs();
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ClientConfig_Clear(&pConfig->clientConfig);
+
+    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = Mutex_Clear(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    SOPC_Atomic_Int_Set(&sopc_client_helper_config.initialized, (int32_t) false);
+
+    return;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const SOPC_Client_Config* cConfig,
+                                                                          SOPC_SecureConnection_Config* secConnConfig)
+{
+    SOPC_ASSERT(NULL != cConfig);
+    SOPC_ASSERT(NULL != secConnConfig);
+    SOPC_ASSERT(secConnConfig == cConfig->secureConnections[secConnConfig->secureConnectionIdx]);
+    SOPC_SecureChannel_Config* scConfig = (SOPC_SecureChannel_Config*) &secConnConfig->scConfig;
+    SOPC_ASSERT(NULL != scConfig);
+    SOPC_ASSERT(scConfig->clientConfigPtr == cConfig);
+
+    if (secConnConfig->finalized)
+    {
+        // Configuration already done
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (cConfig->isConfigFromPathsNeeded)
+    {
+        SOPC_PKIProvider* pki = NULL;
+        SOPC_SerializedCertificate* srvCert = NULL;
+        SOPC_SerializedCertificate* cliCert = NULL;
+        SOPC_SerializedAsymmetricKey* cliKey = NULL;
+
+        SOPC_Client_ConfigFromPaths* configFromPaths = cConfig->configFromPaths;
+        // Configure certificates / PKI / key from paths
+        status = SOPC_PKIProviderStack_CreateFromPaths(
+            configFromPaths->trustedRootIssuersList, configFromPaths->trustedIntermediateIssuersList,
+            configFromPaths->untrustedRootIssuersList, configFromPaths->untrustedIntermediateIssuersList,
+            configFromPaths->issuedCertificatesList, configFromPaths->certificateRevocationPathList, &pki);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Connection[%" PRIu16 "]: Failed to create PKI.",
+                                   secConnConfig->secureConnectionIdx);
+        }
+        if (SOPC_STATUS_OK == status && secConnConfig->isServerCertFromPathNeeded &&
+            NULL != secConnConfig->serverCertPath)
+        {
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(secConnConfig->serverCertPath, &srvCert);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Connection[%" PRIu16 "]: Failed to load server certificate.",
+                                       secConnConfig->secureConnectionIdx);
+            }
+        }
+        if (SOPC_STATUS_OK == status && NULL != configFromPaths->clientCertPath)
+        {
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(configFromPaths->clientCertPath, &cliCert);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Connection[%" PRIu16 "]: Failed to load client certificate.",
+                                       secConnConfig->secureConnectionIdx);
+            }
+        }
+        if (SOPC_STATUS_OK == status && NULL != configFromPaths->clientKeyPath)
+        {
+            char* password = NULL;
+            size_t lenPassword = 0;
+            bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedClientKey();
+            if (clientKeyEncrypted)
+            {
+                bool res = SOPC_ClientInternal_GetClientKeyPassword(&password);
+                if (!res)
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "Connection[%" PRIu16
+                        "]: Failed to retrieve the password of the client's private key from callback.",
+                        secConnConfig->secureConnectionIdx);
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status && NULL != password)
+            {
+                lenPassword = strlen(password);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    configFromPaths->clientKeyPath, &cliKey, password, (uint32_t) lenPassword);
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Connection[%" PRIu16
+                                           "]: Failed to load client private key. Please check the password if the key "
+                                           "is encrypted and check the key format (PEM)",
+                                           secConnConfig->secureConnectionIdx);
+                }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            scConfig->pki = pki;
+            scConfig->crt_srv = srvCert;
+            scConfig->crt_cli = cliCert;
+            scConfig->key_priv_cli = cliKey;
+            secConnConfig->finalized = true;
+        }
+        else
+        {
+            SOPC_PKIProvider_Free(&pki);
+            SOPC_KeyManager_SerializedCertificate_Delete(srvCert);
+            SOPC_KeyManager_SerializedCertificate_Delete(cliCert);
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(cliKey);
+        }
+    }
+
+    return status;
+}
+
+const SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId)
+{
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return NULL;
+    }
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_SecureConnection_Config* res = NULL;
+    for (uint16_t i = 0; NULL == res && i < pConfig->clientConfig.nbSecureConnections; i++)
+    {
+        SOPC_SecureConnection_Config* tmp = pConfig->clientConfig.secureConnections[i];
+        if (NULL != tmp->userDefinedId && 0 == strcmp(tmp->userDefinedId, userDefinedId))
+        {
+            res = tmp;
+        }
+    }
+    return res;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb)
+{
+    if (NULL == asyncRespCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    if (NULL == sopc_client_helper_config.asyncRespCb)
+    {
+        sopc_client_helper_config.asyncRespCb = asyncRespCb;
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
 
 static SOPC_GetPassword_Fct* FctGetClientKeyPassword = NULL;
 static SOPC_GetPassword_Fct* FctGetUserKeyPassword = NULL;

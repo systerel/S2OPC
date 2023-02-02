@@ -1051,17 +1051,19 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
     {
         return req;
     }
-    req->SubscriptionId = subscriptionId;
     req->ItemsToCreate = SOPC_Calloc(nbMonitoredItems, sizeof(*req->ItemsToCreate));
-    req->TimestampsToReturn = ts;
     if (NULL != req->ItemsToCreate)
     {
+        req->SubscriptionId = subscriptionId;
+        req->TimestampsToReturn = ts;
         req->NoOfItemsToCreate = (int32_t) nbMonitoredItems;
     }
     else
     {
+        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
+    return req;
 }
 
 #undef CHECK_ELEMENT_EXISTS
