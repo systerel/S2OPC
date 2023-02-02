@@ -34,6 +34,20 @@
 #include "sopc_user_app_itf.h"
 
 /**
+ * \brief Enumerated values authorized for use with ::SOPC_EndpointConfig_AddSecurityConfig or
+ * ::SOPC_SecureChannelConfig_AddSecurityConfig.
+ * Values are limited to the security policies supported by client/server.
+ */
+typedef enum
+{
+    SOPC_SecurityPolicy_None,                /*!< http://opcfoundation.org/UA/SecurityPolicy#None */
+    SOPC_SecurityPolicy_Basic256,            /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256 */
+    SOPC_SecurityPolicy_Basic256Sha256,      /*!< http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256 */
+    SOPC_SecurityPolicy_Aes128Sha256RsaOaep, /*!< http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep */
+    SOPC_SecurityPolicy_Aes256Sha256RsaPss   /*!< http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss */
+} SOPC_SecurityPolicy_URI;
+
+/**
  * \brief Initialize the S2OPC Client/Server frontend library (start threads, initialize configuration, etc.)
  *        and define a custom log configuration.
  *        Call to ::SOPC_CommonHelper_Initialize is required before any other operation.
