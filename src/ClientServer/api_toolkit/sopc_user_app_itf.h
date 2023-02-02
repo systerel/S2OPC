@@ -353,12 +353,6 @@ typedef enum SOPC_App_AddSpace_Event
  */
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
-/* The context object and properties can only be used during the callback call */
-const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr); // only valid for server event
-OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr);
-const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callContextPtr);
-uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr);
-
 /**
  * \brief Toolkit address space notification events callback type
  */
