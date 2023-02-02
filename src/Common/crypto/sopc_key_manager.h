@@ -96,8 +96,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
  * \param lenPassword  The length of the password.
  *
  * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
- *                  Supported encryption algorithm: AES-128, AES-192 and AES-256, AES-128-CBC, AES-192-CBC and
- *                  AES-256-CBC
+ *                  Supported encryption algorithm: AES-128-CBC, AES-192-CBC and AES-256-CBC
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
@@ -200,8 +199,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const c
  *                      at most \p lenPassword non null chars, and at least \p lenPassword + 1 allocated chars.
  * \param lenPassword   The length of the password.
  *
- * \note                Supported encryption algorithm: AES-128, AES-192 and AES-256, AES-128-CBC, AES-192-CBC and
- *                      AES-256-CBC
+ * \note                Supported encryption algorithm: AES-128-CBC, AES-192-CBC and AES-256-CBC
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
