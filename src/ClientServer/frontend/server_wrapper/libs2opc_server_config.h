@@ -65,7 +65,7 @@ typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
  * \brief Configure server from XML configuration files for: server endpoints, address space
  *        and users credential and rights.
  *
- * If not used or used partially, see libs2opc_config_custom.h to manually configure through API.
+ * If not used or used partially, see libs2opc_server_config_custom.h to manually configure through API.
  *
  * \param serverConfigPath        path to server configuration XML file (s2opc_clientserver_config.xsd schema)
  *                                or NULL for manual configuration.
@@ -220,13 +220,17 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_Cre
  * \param response     An asynchronous response to a local service request sent using
  *                     ::SOPC_ServerHelper_LocalServiceAsync (see authorized requests).
  *                     Response will be a pointer to one of the following types:
- *                     - ::OpcUa_ReadResponse
- *                     - ::OpcUa_WriteResponse
- *                     - ::OpcUa_BrowseResponse
- *                     - ::OpcUa_GetEndpointsResponse
- *                     - ::OpcUa_FindServersResponse
- *                     - ::OpcUa_FindServersOnNetworkResponse
- *                     - ::OpcUa_RegisterServer2Response
+ *                     \li ::OpcUa_ReadResponse
+ *                     \li ::OpcUa_WriteResponse
+ *                     \li ::OpcUa_BrowseResponse
+ *                     \li ::OpcUa_GetEndpointsResponse
+ *                     \li ::OpcUa_FindServersResponse
+ *                     \li ::OpcUa_FindServersOnNetworkResponse
+ *                     \li ::OpcUa_RegisterServer2Response
+ *
+ *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
+ *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ServerHelper_LocalServiceAsync call

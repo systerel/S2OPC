@@ -111,7 +111,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  *
  * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
  *
- * \param request   An instance of on of the following OPC UA request:
+ * \param request   An instance of the following OPC UA requests:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
@@ -149,15 +149,17 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                  - ::OpcUa_RegisterServer2Request
  *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
- *                       - ::OpcUa_ReadResponse
- *                       - ::OpcUa_WriteResponse
- *                       - ::OpcUa_BrowseResponse
- *                       - ::OpcUa_TranslateBrowsePathsToNodeIdsResponse
- *                       - ::OpcUa_GetEndpointsResponse
- *                       - ::OpcUa_FindServersResponse
- *                       - ::OpcUa_FindServersOnNetworkResponse
- *                       - ::OpcUa_RegisterServer2Response
- *                       e.g.: OpcUa_ReadResponse* resp = NULL; SOPC_ServerHelper_LocalServiceSync(request, &resp);
+ *                     \li ::OpcUa_ReadResponse
+ *                     \li ::OpcUa_WriteResponse
+ *                     \li ::OpcUa_BrowseResponse
+ *                     \li ::OpcUa_GetEndpointsResponse
+ *                     \li ::OpcUa_FindServersResponse
+ *                     \li ::OpcUa_FindServersOnNetworkResponse
+ *                     \li ::OpcUa_RegisterServer2Response
+ *
+ *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
+ *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE if the server is not running otherwise
  *         SOPC_STATUS_TIMEOUT if ::SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS is reached before response provided.
