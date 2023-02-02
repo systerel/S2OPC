@@ -287,9 +287,14 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to load configuration from paths:\n");
-            printf("******* \t--> need file (relative path where the server is running):\t./data/users_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t./data/server_config.xml\n");
-            printf("******* \t--> need file (relative path where the server is running):\t./data/address_space.xml\n");
+            printf(
+                "******* \t--> need file (relative path where the server is "
+                "running):\t./S2OPC_Users_Demo_Config.xml\n");
+            printf(
+                "******* \t--> need file (relative path where the server is "
+                "running):\t./S2OPC_Server_Demo_Config.xml\n");
+            printf(
+                "******* \t--> need file (relative path where the server is running):\t./ft_data/address_space.xml\n");
         }
     }
 

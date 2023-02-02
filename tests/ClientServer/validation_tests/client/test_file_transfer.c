@@ -32,6 +32,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
 #include "sopc_file_transfer.h"
+#include "sopc_filesystem.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -40,12 +41,33 @@
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
-#define BUFF_SIZE 20u
 
-static int32_t connectionClosed = false;
-static int32_t endpointClosed = false;
-SOPC_Boolean booleanNotification = false;
-SOPC_Boolean booleanUserCloseCallback = false;
+#define STR_MARGIN_SIZE 50u // To create a C string for temporary file paths
+#define NB_NODE_ATTR_TO_READ 1u
+
+// Bit masks value for opening mode
+#define READ_MASK 0x01u
+#define WRITE_MASK 0x02u
+#define ERASE_EXISTING_MASK 0x04u
+#define APPEND_MASK 0x08u
+#define INVALID_MODE_BIT_4 0x10 // bit 4:7 are reserved for future use
+
+// Initialization values of variables for FileType object
+#define VAR_USER_WRITABLE_INIT true
+#define VAR_WRITABLE_INIT true
+#define VAR_OPENCOUNT_INIT 0u
+#define VAR_SIZE_INIT 0u
+
+#define START_OF_FILE_POS 0u
+
+/*---------------------------------------------------------------------------
+ *                          Global variables for callbacks
+ *---------------------------------------------------------------------------*/
+
+static int32_t g_connectionClosed = false;
+static int32_t g_endpointClosed = false;
+SOPC_Boolean g_booleanNotification = false;
+SOPC_Boolean g_booleanUserCloseCallback = false;
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -56,31 +78,32 @@ static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
     SOPC_FileTransfer_Clear();
-#if TEST_DEBUG_FT
-    printf("<Test_File_Transfer: Server stopped\n");
-#else
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: Server stopped\n");
-#endif
-    SOPC_Atomic_Int_Set(&endpointClosed, true);
+    SOPC_Atomic_Int_Set(&g_endpointClosed, true);
 }
 
 // Client disconnect callback
 static void disconnect_callback(const uint32_t c_id)
 {
     SOPC_UNUSED_ARG(c_id);
-    SOPC_Atomic_Int_Set(&connectionClosed, true);
+    SOPC_Atomic_Int_Set(&g_connectionClosed, true);
 }
 
 // Close file CallBack
 static void(UserCloseCallback)(const char* tmp_file_path)
 {
-    booleanUserCloseCallback = true;
-#if TEST_DEBUG_FT
-    printf("<Test_File_Transfer: tmp file path name: '%s'\n", tmp_file_path);
-#else
+    g_booleanUserCloseCallback = true;
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: tmp file path name: '%s'\n",
                            tmp_file_path);
-#endif
+
+    // Set .log extension to keep file in artifacts (CI)
+    size_t size_tmp_path = strlen(tmp_file_path) + STR_MARGIN_SIZE;
+    char* new_name = SOPC_Calloc(size_tmp_path, sizeof(char));
+    ck_assert("In closing callback: failed to set .log ext." && NULL != new_name);
+    ck_assert("In closing callback, failed to set .log ext." &&
+              0 <= snprintf(new_name, size_tmp_path, "%s.log", tmp_file_path));
+    ck_assert("In closing callback, failed to set .log ext." && 0 == rename(tmp_file_path, new_name));
+    SOPC_Free(new_name);
 }
 
 /*
@@ -90,17 +113,13 @@ static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr
                                           OpcUa_WriteValue* writeValue,
                                           SOPC_StatusCode writeStatus)
 {
-    booleanNotification = true;
+    g_booleanNotification = true;
     const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
     const char* writeSuccess = (SOPC_STATUS_OK == writeStatus ? "success" : "failure");
     char* sNodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
 
-#if TEST_DEBUG_FT
-    printf("Write notification (%s) on node '%s' by user '%s'\n", writeSuccess, sNodeId, SOPC_User_ToCString(user));
-#else
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Write notification (%s) on node '%s' by user '%s'\n",
                            writeSuccess, sNodeId, SOPC_User_ToCString(user));
-#endif
     SOPC_Free(sNodeId);
 }
 
@@ -138,15 +157,15 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
     {
         status = OpcUa_BadUnexpectedError;
     }
-    booleanNotification = true;
+    g_booleanNotification = true;
     return status;
 }
 
 /*---------------------------------------------------------------------------
- *                          Client initialization
+ *                          Client configuration
  *---------------------------------------------------------------------------*/
 
-static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
+static OpcUa_GetEndpointsResponse* g_expectedEndpoints = NULL;
 
 static int32_t client_create_configuration(void)
 {
@@ -171,7 +190,7 @@ static int32_t client_create_configuration(void)
         OpcUa_GetEndpointsRequest* request = SOPC_GetEndpointsRequest_Create(DEFAULT_ENDPOINT_URL);
         if (NULL != request)
         {
-            status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &expectedEndpoints);
+            status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &g_expectedEndpoints);
         }
         else
         {
@@ -204,8 +223,12 @@ static int32_t client_create_configuration(void)
     };
 
     // connect to the endpoint
-    return SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, expectedEndpoints);
+    return SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, g_expectedEndpoints);
 }
+
+/*---------------------------------------------------------------------------
+ *                          Server configuration
+ *---------------------------------------------------------------------------*/
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
@@ -221,147 +244,51 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 }
 
 /*---------------------------------------------------------------------------
- *                   File Transfer Test
+ *                          Global variables for test cases
  *---------------------------------------------------------------------------*/
 
-START_TEST(test_file_transfer_method)
+// FileType configuation
+SOPC_FileType_Config g_item1PreloadFile = {0};
+SOPC_FileType_Config g_item2PreloadFile = {0};
+
+// Client connection Id
+int32_t g_coId = 0;
+
+// Client read 4 variables in PreloadFile (item1 or 2):
+SOPC_ClientHelper_ReadValue g_readValueItem1 = {.attributeId = SOPC_AttributeId_Value, .indexRange = NULL};
+SOPC_ClientHelper_ReadValue g_readValueItem2 = {.attributeId = SOPC_AttributeId_Value, .indexRange = NULL};
+
+// Data which will contain value to read
+SOPC_DataValue g_readValSizeItem1 = {0};
+SOPC_DataValue g_readValOpenCountItem1 = {0};
+SOPC_DataValue g_readValUserWritableItem1 = {0};
+SOPC_DataValue g_readValWritableItem1 = {0};
+SOPC_DataValue g_readValSizeItem2 = {0};
+SOPC_DataValue g_readValOpenCountItem2 = {0};
+
+// Pointer to these values:
+SOPC_Boolean* g_pUserWritableItem1 = &g_readValUserWritableItem1.Value.Value.Boolean;
+SOPC_Boolean* g_pWritableItem1 = &g_readValWritableItem1.Value.Value.Boolean;
+uint64_t* g_pSizeItem1 = &g_readValSizeItem1.Value.Value.Uint64;
+uint16_t* g_pOpenCountItem1 = &g_readValOpenCountItem1.Value.Value.Uint16;
+uint64_t* g_pSizeItem2 = &g_readValSizeItem2.Value.Value.Uint64;
+uint16_t* g_pOpenCountItem2 = &g_readValOpenCountItem2.Value.Value.Uint16;
+
+// S2OPC CallRequest and CallResult structure for item 1 and 2:
+SOPC_ClientHelper_CallMethodRequest g_callRequestsItem1 = {0};
+SOPC_ClientHelper_CallMethodResult g_callResultsItem1 = {0};
+SOPC_ClientHelper_CallMethodRequest g_callRequestsItem2 = {0};
+SOPC_ClientHelper_CallMethodResult g_callResultsItem2 = {0};
+
+// API specific test:
+const char* g_bin_file_path = "./ft_data/bin_file_TC_33_34.a"; // TC_SOPC_FileTransfer_033 and TC_SOPC_FileTransfer_034
+char* g_remoteResetId = "ns=1;i=15789";
+char* g_met_remoteResetId = "ns=1;i=15790";
+SOPC_ClientHelper_CallMethodRequest g_callRequestsClient = {0};
+SOPC_ClientHelper_CallMethodResult g_callResultsClient = {0};
+
+static void configure_client_server(const char* log_path)
 {
-    SOPC_FileType_Config item1PreloadFile = {.file_path = "/tmp/item1",
-                                             .fileType_nodeId = "ns=1;i=15478",
-                                             .met_openId = "ns=1;i=15484",
-                                             .met_closeId = "ns=1;i=15487",
-                                             .met_readId = "ns=1;i=15489",
-                                             .met_writeId = "ns=1;i=15492",
-                                             .met_getposId = "ns=1;i=15494",
-                                             .met_setposId = "ns=1;i=15497",
-                                             .var_sizeId = "ns=1;i=15479",
-                                             .var_openCountId = "ns=1;i=15482",
-                                             .var_userWritableId = "ns=1;i=15481",
-                                             .var_writableId = "ns=1;i=15480",
-                                             .pFunc_UserCloseCallback = &UserCloseCallback};
-
-    SOPC_FileType_Config item2PreloadFile = {.file_path = "/tmp/item2",
-                                             .fileType_nodeId = "ns=1;i=15529",
-                                             .met_openId = "ns=1;i=15535",
-                                             .met_closeId = "ns=1;i=15538",
-                                             .met_readId = "ns=1;i=15540",
-                                             .met_writeId = "ns=1;i=15543",
-                                             .met_getposId = "ns=1;i=15545",
-                                             .met_setposId = "ns=1;i=15548",
-                                             .var_sizeId = "ns=1;i=15530",
-                                             .var_openCountId = "ns=1;i=15533",
-                                             .var_userWritableId = "ns=1;i=15532",
-                                             .var_writableId = "ns=1;i=15531",
-                                             .pFunc_UserCloseCallback = &UserCloseCallback};
-
-    // Client read 4 variables in PreloadFile (item1 or 2):
-    SOPC_ClientHelper_ReadValue readValueItem1 = {.attributeId = SOPC_AttributeId_Value, .indexRange = NULL};
-    SOPC_ClientHelper_ReadValue readValueItem2 = {.attributeId = SOPC_AttributeId_Value, .indexRange = NULL};
-
-    // Data which will contain value read
-    SOPC_DataValue readValSizeItem1;
-    SOPC_DataValue readValOpenCountItem1;
-    SOPC_DataValue readValUserWritableItem1;
-    SOPC_DataValue readValWritableItem1;
-    SOPC_DataValue readValSizeItem2;
-    SOPC_DataValue readValOpenCountItem2;
-    SOPC_DataValue_Initialize(&readValSizeItem1);
-    SOPC_DataValue_Initialize(&readValOpenCountItem1);
-    SOPC_DataValue_Initialize(&readValUserWritableItem1);
-    SOPC_DataValue_Initialize(&readValWritableItem1);
-    SOPC_DataValue_Initialize(&readValSizeItem2);
-    SOPC_DataValue_Initialize(&readValOpenCountItem2);
-
-    // Pointer to these values:
-    SOPC_Boolean* pUserWritableItem1 = &readValUserWritableItem1.Value.Value.Boolean;
-    SOPC_Boolean* pWritableItem1 = &readValWritableItem1.Value.Value.Boolean;
-    uint64_t* pSizeItem1 = &readValSizeItem1.Value.Value.Uint64;
-    uint16_t* pOpenCountItem1 = &readValOpenCountItem1.Value.Value.Uint16;
-    uint64_t* pSizeItem2 = &readValSizeItem2.Value.Value.Uint64;
-    uint16_t* pOpenCountItem2 = &readValOpenCountItem2.Value.Value.Uint16;
-    size_t nbElements = 1;
-
-    // Method write input parameters:
-    SOPC_ByteString dataToWrite;
-    SOPC_ByteString_Initialize(&dataToWrite);
-    uint8_t ABCDString[4] = {0x41, 0x42, 0x43, 0x44};
-    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
-    SOPC_ByteString dataToCompare;
-    SOPC_ByteString_Initialize(&dataToCompare);
-    uint8_t CDString[2] = {0x43, 0x44};
-    status = SOPC_ByteString_CopyFromBytes(&dataToCompare, CDString, 2);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
-
-    SOPC_ByteString dataWriteItem1;
-    SOPC_ByteString_Initialize(&dataWriteItem1);
-    uint8_t stringItem1[8] = {0x70, 0x72, 0x65, 0x6C, 0x6F, 0x61, 0x64, 0x31};
-    status = SOPC_ByteString_CopyFromBytes(&dataWriteItem1, stringItem1, 8);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
-
-    SOPC_ByteString dataWriteItem2;
-    SOPC_ByteString_Initialize(&dataWriteItem2);
-    uint8_t stringItem2[5] = {0x49, 0x74, 0x65, 0x6D, 0x32};
-    status = SOPC_ByteString_CopyFromBytes(&dataWriteItem2, stringItem2, 5);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
-
-    // Method Open, Read, GetPosition, SetPosition input parameters:
-    SOPC_Byte mode = 0;
-    int32_t nbOfBytesToRead = 0;
-    uint64_t setPositionItem1 = 0;
-    uint64_t setPositionItem2 = 0;
-    uint64_t getPositionItem1 = 0;
-    uint64_t getPositionItem2 = 0;
-    uint32_t fileHandleItem1 = 0;
-    uint32_t fileHandleItem2 = 0;
-    SOPC_StatusCode statusMethodItem1 = 0;
-    SOPC_StatusCode statusMethodItem2 = 0;
-
-    // S2OPC CallRequest and CallResult structure for item 1 and 2:
-    SOPC_ClientHelper_CallMethodRequest callRequestsItem1;
-    SOPC_ClientHelper_CallMethodResult callResultsItem1;
-    SOPC_ClientHelper_CallMethodRequest callRequestsItem2;
-    SOPC_ClientHelper_CallMethodResult callResultsItem2;
-    memset(&callRequestsItem1, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
-    memset(&callResultsItem1, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
-    memset(&callRequestsItem2, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
-    memset(&callResultsItem2, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
-    // Node ID of the object on which method are called
-    callRequestsItem1.objectNodeId = item1PreloadFile.fileType_nodeId;
-    callRequestsItem2.objectNodeId = item2PreloadFile.fileType_nodeId;
-
-    // Fonctional test: PHASE 1: declaration variables (TC_033 and TC_034):
-    const char* bin_file_path = "./ft_data/bin_file_TC_33_34.a";
-    FILE* bin_file_fp = NULL;
-    int filedes = -1;
-    int ret = -1;
-    size_t read_count = 0;
-    int32_t comparison = -1;
-    SOPC_ByteString bin_buffer_write;
-    SOPC_ByteString bin_buffer_write_tmp;
-    SOPC_ByteString bin_buffer_read;
-    SOPC_ByteString_Initialize(&bin_buffer_write);
-    SOPC_ByteString_Initialize(&bin_buffer_write_tmp);
-    SOPC_ByteString_Initialize(&bin_buffer_read);
-
-    // Fonctional test: PHASE 3: declaration variables:
-    char* remoteResetId = "ns=1;i=15789";
-    char* met_remoteResetId = "ns=1;i=15790";
-    SOPC_ClientHelper_WriteValue writeValueClient = {.indexRange = NULL};
-    SOPC_DataValue readValClient;
-    SOPC_DataValue writeValClient;
-    SOPC_DataValue_Initialize(&readValClient);
-    SOPC_DataValue_Initialize(writeValueClient.value);
-    SOPC_String* pHelloWorldString = &writeValClient.Value.Value.String;
-    SOPC_String_Initialize(pHelloWorldString);
-    SOPC_String_AttachFromCstring(pHelloWorldString, "Hello World");
-    int32_t clientResultCode = 0;
-
-    SOPC_ClientHelper_CallMethodRequest callRequestsClient;
-    SOPC_ClientHelper_CallMethodResult callResultsClient;
-    memset(&callRequestsClient, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
-    memset(&callResultsClient, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
-
     // Configure the server to support message size of 128 Mo
     SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
     encConf.buffer_size = 2097152;
@@ -379,555 +306,1180 @@ START_TEST(test_file_transfer_method)
     // Get default log config and set the custom path
     SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_file_transfer_logs/";
-    status = SOPC_CommonHelper_Initialize(&log_config);
+    log_config.logSysConfig.fileSystemLogConfig.logDirPath = log_path;
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigServer_Initialize();
     }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_Server_Client: Failed initializing\n");
-    }
-    else
-    {
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: Server initialized\n");
-    }
+
+    ck_assert("Server intialization failed" && SOPC_STATUS_OK == status);
 
     // load config from XML file :
-    if (SOPC_STATUS_OK == status)
-    {
-        status = Server_LoadServerConfigurationFromPaths();
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperConfigServer_SetWriteNotifCallback(&UserWriteNotificationCallback);
-    }
+    status = Server_LoadServerConfigurationFromPaths();
+    ck_assert("Load config from XML failed" && SOPC_STATUS_OK == status);
+    status = SOPC_HelperConfigServer_SetWriteNotifCallback(&UserWriteNotificationCallback);
+    ck_assert("Unable to configure write notification callback" && SOPC_STATUS_OK == status);
 
     // INITIALIZE FILE TRANSFER API :
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_FileTransfer_Initialize();
-        ck_assert_int_eq(status, SOPC_STATUS_OK);
-        status = SOPC_FileTransfer_Add_File(&item1PreloadFile);
-        ck_assert_int_eq(status, SOPC_STATUS_OK);
-        status = SOPC_FileTransfer_Add_File(&item2PreloadFile);
-        ck_assert_int_eq(status, SOPC_STATUS_OK);
-        status = SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test",
-                                                   met_remoteResetId);
-        ck_assert_int_eq(status, SOPC_STATUS_OK);
-    }
+    g_item1PreloadFile.fileType_nodeId = "ns=1;i=15478";
+    g_item1PreloadFile.met_openId = "ns=1;i=15484";
+    g_item1PreloadFile.met_closeId = "ns=1;i=15487";
+    g_item1PreloadFile.met_readId = "ns=1;i=15489";
+    g_item1PreloadFile.met_writeId = "ns=1;i=15492";
+    g_item1PreloadFile.met_getposId = "ns=1;i=15494";
+    g_item1PreloadFile.met_setposId = "ns=1;i=15497";
+    g_item1PreloadFile.var_sizeId = "ns=1;i=15479";
+    g_item1PreloadFile.var_openCountId = "ns=1;i=15482";
+    g_item1PreloadFile.var_userWritableId = "ns=1;i=15481";
+    g_item1PreloadFile.var_writableId = "ns=1;i=15480";
+    g_item1PreloadFile.pFunc_UserCloseCallback = &UserCloseCallback;
+
+    g_item2PreloadFile.fileType_nodeId = "ns=1;i=15529";
+    g_item2PreloadFile.met_openId = "ns=1;i=15535";
+    g_item2PreloadFile.met_closeId = "ns=1;i=15538";
+    g_item2PreloadFile.met_readId = "ns=1;i=15540";
+    g_item2PreloadFile.met_writeId = "ns=1;i=15543";
+    g_item2PreloadFile.met_getposId = "ns=1;i=15545";
+    g_item2PreloadFile.met_setposId = "ns=1;i=15548";
+    g_item2PreloadFile.var_sizeId = "ns=1;i=15530";
+    g_item2PreloadFile.var_openCountId = "ns=1;i=15533";
+    g_item2PreloadFile.var_userWritableId = "ns=1;i=15532";
+    g_item2PreloadFile.var_writableId = "ns=1;i=15531";
+    g_item2PreloadFile.pFunc_UserCloseCallback = &UserCloseCallback;
+
+    // Store the FileTransfer temporary files in a sub-folder for each test case.
+    size_t size_tmp_path = strlen(log_path) + STR_MARGIN_SIZE;
+    char* tmp_file_path_item1 = SOPC_Calloc(size_tmp_path, sizeof(char));
+    char* tmp_file_path_item2 = SOPC_Calloc(size_tmp_path, sizeof(char));
+    ck_assert("FileTransfer API: calloc function failed for item1" && NULL != tmp_file_path_item1);
+    ck_assert("FileTransfer API: calloc function failed for item2" && NULL != tmp_file_path_item2);
+    int res_1 = snprintf(tmp_file_path_item1, size_tmp_path, "%sitem1", log_path);
+    int res_2 = snprintf(tmp_file_path_item2, size_tmp_path, "%sitem2", log_path);
+    ck_assert("FileTransfer API: snprintf function has failed for item1" && 0 <= res_1);
+    ck_assert("FileTransfer API: snprintf function has failed for item2" && 0 <= res_2);
+    g_item1PreloadFile.file_path = tmp_file_path_item1;
+    g_item2PreloadFile.file_path = tmp_file_path_item2;
+
+    status = SOPC_FileTransfer_Initialize();
+    ck_assert("FileTransfer API: intialization failed" && status == SOPC_STATUS_OK);
+    status = SOPC_FileTransfer_Add_File(&g_item1PreloadFile);
+    ck_assert("FileTransfer API: add g_item1PreloadFile failed" && status == SOPC_STATUS_OK);
+    status = SOPC_FileTransfer_Add_File(&g_item2PreloadFile);
+    ck_assert("FileTransfer API: add g_item2PreloadFile failed" && status == SOPC_STATUS_OK);
+    status = SOPC_FileTransfer_Add_MethodItems(&RemoteExecution_Method_Test, "RemoteExecution_Method_Test",
+                                               g_met_remoteResetId);
+    ck_assert("FileTransfer API: add RemoteExecution_Method_Test failed" && status == SOPC_STATUS_OK);
+
+    SOPC_Free(tmp_file_path_item1);
+    SOPC_Free(tmp_file_path_item2);
 
     // START SERVER :
     status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: Failed to start server ...\n");
-        SOPC_FileTransfer_Clear();
-    }
+    ck_assert("FileTransfer API: server startup failed" && status == SOPC_STATUS_OK);
 
     // Create client configuration
     int32_t clientCfgId = -1;
-    if (SOPC_STATUS_OK == status)
-    {
-        clientCfgId = client_create_configuration();
-        if (clientCfgId > 0)
-        {
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: created configuration\n");
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<Test_File_Transfer: Failed to create configuration\n");
-        }
-    }
+    clientCfgId = client_create_configuration();
+    ck_assert("Client configuration failed" && clientCfgId > 0);
 
     // Connect client to server
-    int32_t coId = 0;
-    if (SOPC_STATUS_OK == status)
-    {
-        coId = SOPC_ClientHelper_CreateConnection(clientCfgId);
+    g_coId = SOPC_ClientHelper_CreateConnection(clientCfgId);
+    ck_assert("Client configuration failed" && g_coId > 0);
 
-        if (coId <= 0)
-        {
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<Test_File_Transfer: failed to establish connection\n");
-        }
-        else
-        {
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: connection established\n");
-        }
-    }
+    SOPC_DataValue_Initialize(&g_readValSizeItem1);
+    SOPC_DataValue_Initialize(&g_readValOpenCountItem1);
+    SOPC_DataValue_Initialize(&g_readValUserWritableItem1);
+    SOPC_DataValue_Initialize(&g_readValWritableItem1);
+    SOPC_DataValue_Initialize(&g_readValSizeItem2);
+    SOPC_DataValue_Initialize(&g_readValOpenCountItem2);
 
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 0:\n");
+    memset(&g_callRequestsItem1, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
+    memset(&g_callResultsItem1, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
+    memset(&g_callRequestsItem2, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
+    memset(&g_callResultsItem2, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
 
-    // TC_SOPC_FileTransfer_001:
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_writableId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValWritableItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_userWritableId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValUserWritableItem1);
-    ck_assert("TC_SOPC_FileTransfer_001" && 0 == *pSizeItem1 && 0 == *pOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_001" && true == *pUserWritableItem1 && true == *pWritableItem1);
+    memset(&g_callRequestsClient, 0, sizeof(SOPC_ClientHelper_CallMethodRequest));
+    memset(&g_callResultsClient, 0, sizeof(SOPC_ClientHelper_CallMethodResult));
+    g_callRequestsClient.objectNodeId = g_remoteResetId;
+    g_callRequestsClient.methodNodeId = g_met_remoteResetId;
 
-    // TC_SOPC_FileTransfer_002:
-    nbOfBytesToRead = 100;
-    fileHandleItem1 = 1500;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    ck_assert("TC_SOPC_FileTransfer_002" && OpcUa_BadInvalidArgument == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_002" && NULL == callResultsItem1.outputParams);
+    // Node ID of the object on which method are called
+    g_callRequestsItem1.objectNodeId = g_item1PreloadFile.fileType_nodeId;
+    g_callRequestsItem2.objectNodeId = g_item2PreloadFile.fileType_nodeId;
+}
 
-    // TC_SOPC_FileTransfer_003:
-    statusMethodItem1 = SOPC_TEST_FileTransfer_WriteMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
-    ck_assert("TC_SOPC_FileTransfer_003" && OpcUa_BadInvalidArgument == statusMethodItem1);
+static inline void teardown_client_server(void)
+{
+    SOPC_ClientHelper_Disconnect(g_coId);
+    SOPC_ClientHelper_Finalize();
+    SOPC_FileTransfer_Clear();
+}
 
-    // TC_SOPC_FileTransfer_004:
-    SOPC_TEST_FileTransfer_GetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                             item1PreloadFile.met_getposId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_004" && OpcUa_BadInvalidArgument == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_004" && NULL == callResultsItem1.outputParams);
+/*---------------------------------------------------------------------------
+ *                   File Transfer Test
+ *---------------------------------------------------------------------------*/
+static inline void setup_001(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_001/");
+}
+START_TEST(TC_SOPC_FileTransfer_001)
+{
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_writableId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValWritableItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_userWritableId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValUserWritableItem1);
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem1 && VAR_OPENCOUNT_INIT == *g_pOpenCountItem1);
+    ck_assert(VAR_USER_WRITABLE_INIT == *g_pUserWritableItem1 && VAR_WRITABLE_INIT == *g_pWritableItem1);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_005:
-    setPositionItem1 = 650;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                 item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
-    ck_assert("TC_SOPC_FileTransfer_005" && OpcUa_BadInvalidArgument == statusMethodItem1);
+static inline void setup_002(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_002/");
+}
+START_TEST(TC_SOPC_FileTransfer_002)
+{
+    int32_t nbOfBytesToRead = 100;
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+    ck_assert(NULL == g_callResultsItem1.outputParams);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_006:
-    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_closeId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_006" && OpcUa_BadInvalidArgument == statusMethodItem1);
+static inline void setup_003(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_003/");
+}
+START_TEST(TC_SOPC_FileTransfer_003)
+{
+    SOPC_ByteString dataToWrite;
+    uint8_t ABCDString[4] = {0x41, 0x42, 0x43, 0x44};
+    SOPC_ByteString_Initialize(&dataToWrite);
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4); // Free by the methodCall
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
 
-    // TC_SOPC_FileTransfer_007:
-    mode = 16;
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_007" && OpcUa_BadInvalidArgument == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_007" && 0 == *pOpenCountItem1 && 0 == fileHandleItem1);
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_008:
-    mode = 4;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_008" && OpcUa_BadInvalidArgument == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_008" && 0 == *pOpenCountItem1 && 0 == fileHandleItem1);
+static inline void setup_004(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_004/");
+}
+START_TEST(TC_SOPC_FileTransfer_004)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+    ck_assert(NULL == g_callResultsItem1.outputParams);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_009:
-    mode = 1;
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
+static inline void setup_005(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_005/");
+}
+START_TEST(TC_SOPC_FileTransfer_005)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint64_t setPositionItem1 = 650;
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+}
+END_TEST
+
+static inline void setup_006(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_006/");
+}
+START_TEST(TC_SOPC_FileTransfer_006)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+}
+END_TEST
+
+static inline void setup_007(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_007/");
+}
+START_TEST(TC_SOPC_FileTransfer_007)
+{
+    SOPC_Byte mode = INVALID_MODE_BIT_4; // bits 4:7 are reserved for future use
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(VAR_OPENCOUNT_INIT == *g_pOpenCountItem1 && INVALID_FILE_HANDLE == fileHandleItem1);
+}
+END_TEST
+
+static inline void setup_008(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_008/");
+}
+START_TEST(TC_SOPC_FileTransfer_008)
+{
+    SOPC_Byte mode = ERASE_EXISTING_MASK; // This bit can only be set if the file is opened for writing
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(VAR_OPENCOUNT_INIT == *g_pOpenCountItem1 && INVALID_FILE_HANDLE == fileHandleItem1);
+}
+END_TEST
+
+static inline void setup_009(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_009/");
+}
+START_TEST(TC_SOPC_FileTransfer_009)
+{
+    SOPC_Byte mode = READ_MASK; // Reading
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
     uint32_t tmpFileHandle = fileHandleItem1;
-    mode = 8; // try to open a second time with a different mode
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_009" && OpcUa_BadNotWritable == callResultsItem1.status);
-    ck_assert("TC_SOPC_FileTransfer_009" && 1 == *pOpenCountItem1 && 0 == fileHandleItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       tmpFileHandle);
+    mode = APPEND_MASK; // Try to open a second time with a different mode (writing into appening)
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                        g_item1PreloadFile.met_openId, mode);
+    ck_assert(OpcUa_BadNotWritable == g_callResultsItem1.status);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(1 == *g_pOpenCountItem1 && INVALID_FILE_HANDLE == fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, tmpFileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_010:
-    mode = 10;
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    tmpFileHandle = fileHandleItem1;
-    mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_010" && OpcUa_BadNotReadable == callResultsItem1.status);
-    ck_assert("TC_SOPC_FileTransfer_010" && 1 == *pOpenCountItem1 && 0 == fileHandleItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       tmpFileHandle);
+static inline void setup_010(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_010/");
+}
+START_TEST(TC_SOPC_FileTransfer_010)
+{
+    SOPC_Byte mode = APPEND_MASK | WRITE_MASK; // Writing into appening mode
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    uint32_t tmpFileHandle = fileHandleItem1;
+    mode = READ_MASK; // Reading
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                        g_item1PreloadFile.met_openId, mode);
+    ck_assert(OpcUa_BadNotReadable == g_callResultsItem1.status);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(1 == *g_pOpenCountItem1 && INVALID_FILE_HANDLE == fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, tmpFileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_011:
-    // need to send again ABCD String into data to avoid double free
-    SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
+static inline void setup_011(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_011/");
+}
+START_TEST(TC_SOPC_FileTransfer_011)
+{
+    SOPC_ByteString dataToWrite;
+    uint8_t ABCDString[4] = {0x41, 0x42, 0x43, 0x44};
+    SOPC_ByteString_Initialize(&dataToWrite); // Free by the methodCall
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
     ck_assert_int_eq(status, SOPC_STATUS_OK);
-    mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    statusMethodItem1 = SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_011" && OpcUa_BadInvalidState == statusMethodItem1);
 
-    // TC_SOPC_FileTransfer_012:
-    mode = 2;
-    nbOfBytesToRead = 100;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_012" && OpcUa_BadInvalidState == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_012" && NULL == callResultsItem1.outputParams);
+    SOPC_Byte mode = READ_MASK;
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
+    ck_assert(OpcUa_BadInvalidState == g_callResultsItem1.status);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 1:\n");
+static inline void setup_012(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_012/");
+}
+START_TEST(TC_SOPC_FileTransfer_012)
+{
+    SOPC_Byte mode = WRITE_MASK;
+    int32_t nbOfBytesToRead = 100;
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
+    ck_assert(OpcUa_BadInvalidState == g_callResultsItem1.status);
+    ck_assert(NULL == g_callResultsItem1.outputParams);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
 
-    // TC_SOPC_FileTransfer_013:
-    /* Manual check to do with UA Expert:
-     *      - The old temporary file has been deleted (deviation Alstom)
-     *      - A new temporary file was created (deviation Alstom)
-     */
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    mode = 1; // try to open a second time with a different mode
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_013" && SOPC_GoodGenericStatus == callResultsItem1.status);
-    ck_assert("TC_SOPC_FileTransfer_013" && 0 != fileHandleItem1 && 1 == *pOpenCountItem1);
+static inline void setup_013(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_013/");
+}
+START_TEST(TC_SOPC_FileTransfer_013)
+{
+    /* This test has to be done manualy:
+    The purpose is to verify that only one temporary file is created
+    (the first tmp file is deleted during the second open but the two fileHandle's are still valid)*/
 
-    // TC_SOPC_FileTransfer_014:
-    mode = 3;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                                item1PreloadFile.met_getposId, fileHandleItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_014" && SOPC_GoodGenericStatus == callResultsItem1.status && 0 == getPositionItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_Byte mode = READ_MASK; // Reading
+    uint32_t firstFileHandle = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    mode = READ_MASK; // try to open a second time with the same mode
+    uint32_t newFileHandle = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                               g_item1PreloadFile.met_openId, mode);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(INVALID_FILE_HANDLE != newFileHandle && 1 == *g_pOpenCountItem1);
+    // first fileHandle is still valid:
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, firstFileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(START_OF_FILE_POS == pos);
+    // close the file with the new fileHandle
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, newFileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
 
-    // TC_SOPC_FileTransfer_015:
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    mode = 3;
-    SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
+static inline void setup_014(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_014/");
+}
+START_TEST(TC_SOPC_FileTransfer_014)
+{
+    SOPC_Byte mode = READ_MASK | WRITE_MASK; // Reading and writing
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    uint64_t getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && START_OF_FILE_POS == getPositionItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
+
+static void check_015(uint32_t* fileHandle)
+{
+    SOPC_ByteString dataToWrite;
+    uint8_t ABCDString[4] = {0x41, 0x42, 0x43, 0x44};
+    SOPC_ByteString_Initialize(&dataToWrite);
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4); // Free by the methodCall
     ck_assert_int_eq(status, SOPC_STATUS_OK);
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    statusMethodItem1 = SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    ck_assert("TC_SOPC_FileTransfer_015" && SOPC_GoodGenericStatus == statusMethodItem1 && 0 == *pSizeItem1);
 
-    // TC_SOPC_FileTransfer_016:
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                                item1PreloadFile.met_getposId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_016" && SOPC_GoodGenericStatus == callResultsItem1.status && 4 == getPositionItem1);
+    SOPC_Byte mode = READ_MASK | WRITE_MASK; // Reading and writing
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
+    // Size is updated only when the read method is called
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && VAR_SIZE_INIT == *g_pSizeItem1);
 
-    // TC_SOPC_FileTransfer_017:
-    nbOfBytesToRead = 4;
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    SOPC_VariantValue* pVariantOutput = &callResultsItem1.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_017" && SOPC_GoodGenericStatus == callResultsItem1.status);
-    ck_assert("TC_SOPC_FileTransfer_017" && 4 == *pSizeItem1 && NULL == pVariantOutput->Bstring.Data);
+    *fileHandle = fileHandleItem1;
+}
 
-    // TC_SOPC_FileTransfer_018:
-    setPositionItem1 = 2;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                 item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
-    ck_assert("TC_SOPC_FileTransfer_018" && SOPC_GoodGenericStatus == statusMethodItem1);
+static inline void setup_015(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_015/");
+}
+START_TEST(TC_SOPC_FileTransfer_015)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_015(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_019:
-    nbOfBytesToRead = -1;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    ck_assert("TC_SOPC_FileTransfer_019" && OpcUa_BadInvalidArgument == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_019" && NULL == callResultsItem1.outputParams);
+static inline void setup_016(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_016/");
+}
+START_TEST(TC_SOPC_FileTransfer_016)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_015(&fileHandleItem1);
+    uint64_t getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 4 == getPositionItem1);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    // Size is updated only when the read method is called
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_020:
-    nbOfBytesToRead = 2; // "CD"
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    pVariantOutput = &callResultsItem1.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_020" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_020" && true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
+static inline void setup_017(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_017/");
+}
+START_TEST(TC_SOPC_FileTransfer_017)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_015(&fileHandleItem1);
 
-    // TC_SOPC_FileTransfer_021:
+    // Current position = 4
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 4 == pos);
+
+    int32_t nbOfBytesToRead = 2;
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    SOPC_VariantValue* pVariantOutput = &g_callResultsItem1.outputParams->Value;
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    // Size is updated after the read methodl call
+    ck_assert(4 == *g_pSizeItem1 && NULL == pVariantOutput->Bstring.Data);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
+
+static void check_018(uint32_t* fileHandle)
+{
+    check_015(fileHandle);
+
+    // Current position = 4
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, *fileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 4 == pos);
+
+    // Set position = 2
+    uint64_t setPositionItem1 = 2;
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_setposId, *fileHandle, setPositionItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+static inline void setup_018(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_018/");
+}
+START_TEST(TC_SOPC_FileTransfer_018)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_018(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
+
+static inline void setup_019(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_019/");
+}
+START_TEST(TC_SOPC_FileTransfer_019)
+{
+    int32_t nbOfBytesToRead = -1;
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_018(&fileHandleItem1);
+
+    // Current position = 2
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 2 == pos);
+
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
+    ck_assert(OpcUa_BadInvalidArgument == g_callResultsItem1.status);
+    ck_assert(NULL == g_callResultsItem1.outputParams);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
+
+static inline void setup_020(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_020/");
+}
+START_TEST(TC_SOPC_FileTransfer_020)
+{
+    int32_t nbOfBytesToRead = 2; // "CD"
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_018(&fileHandleItem1);
+
+    SOPC_ByteString* dataToCompare = SOPC_ByteString_Create();
+    ck_assert(NULL != dataToCompare);
+    uint8_t CDString[2] = {0x43, 0x44};
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(dataToCompare, CDString, 2);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+
+    // Current position = 2
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 2 == pos);
+
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
+    SOPC_VariantValue* pVariantOutput = &g_callResultsItem1.outputParams->Value;
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, dataToCompare));
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+
+    SOPC_ByteString_Delete(dataToCompare);
+}
+END_TEST
+
+static inline void check_021(uint32_t* fileHandle)
+{
+    check_018(fileHandle);
+    SOPC_ByteString toWrite;
     uint8_t EString[1] = {0x45};
-    SOPC_ByteString_CopyFromBytes(&dataToWrite, EString, 1);
+    SOPC_ByteString_Initialize(&toWrite);
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&toWrite, EString, 1); // Free by the methodCall
     ck_assert_int_eq(status, SOPC_STATUS_OK);
-    setPositionItem1 = 2;
-    SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                             item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
-    statusMethodItem1 = SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_writeId, fileHandleItem1, &dataToWrite);
-    ck_assert("TC_SOPC_FileTransfer_021" && SOPC_GoodGenericStatus == statusMethodItem1);
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, *fileHandle, &toWrite);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
 
-    // TC_SOPC_FileTransfer_022:
-    setPositionItem1 = 2;
-    SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                             item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
-    nbOfBytesToRead = 1; // "E"
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    status = SOPC_ByteString_CopyFromBytes(&dataToCompare, EString, 1);
+static inline void setup_021(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_021/");
+}
+START_TEST(TC_SOPC_FileTransfer_021)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_021(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
+
+static void check_022(uint32_t* fileHandle)
+{
+    check_021(fileHandle);
+
+    uint64_t setPositionItem1 = 2;
+    uint8_t estring[1] = {0x45}; // E
+    SOPC_ByteString* toCompare = SOPC_ByteString_Create();
+    ck_assert(NULL != toCompare);
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(toCompare, estring, 1);
     ck_assert_int_eq(status, SOPC_STATUS_OK);
-    pVariantOutput = &callResultsItem1.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_022" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_022" && true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
 
-    // TC_SOPC_FileTransfer_023:
-    SOPC_TEST_FileTransfer_CloseMethod(coId, false, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_023" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_023" && 4 == *pSizeItem1 && 0 == *pOpenCountItem1);
+    // Current position = 3
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                            g_item1PreloadFile.met_getposId, *fileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status && 3 == pos);
 
-    // TC_SOPC_FileTransfer_024:
-    mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_024" && 0 == *pSizeItem1 && 1 == *pOpenCountItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1, item1PreloadFile.met_closeId,
-                                       fileHandleItem1);
+    // Set position = 2
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_setposId, *fileHandle, setPositionItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      *fileHandle, 1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_VariantValue* pVariantOutput = &g_callResultsItem1.outputParams->Value;
+    ck_assert(true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, toCompare));
 
-    // TC_SOPC_FileTransfer_033:
-    /* Manual check to do with UA Expert
-        - Call the close method and manually open the tmp_path that was created.
-        - Check that the data written are the expected ones.
-    */
-    SOPC_TEST_FileTransfer_SetTestCaseNumber(33);
+    SOPC_ByteString_Delete(toCompare);
+}
+static inline void setup_022(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_022/");
+}
+START_TEST(TC_SOPC_FileTransfer_022)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_022(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    bin_file_fp = fopen(bin_file_path, "rb+");
-    ck_assert("TC_SOPC_FileTransfer_033: the fopen function has failed (./ft_data/bin_file_TC_33_34.a may missing)" &&
-              NULL != bin_file_fp);
-    filedes = fileno(bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fileno function has failed (./ft_data/bin_file_TC_33_34.a)" &&
-              -1 != filedes);
-    struct stat sb;
-    ret = fstat(filedes, &sb);
-    ck_assert("TC_SOPC_FileTransfer_033: the fstat function has failed (./ft_data/bin_file_TC_33_34.a)" && -1 != ret);
-    bin_buffer_write.Length = (int32_t) sb.st_size;
-    bin_buffer_write.Data = SOPC_Malloc((size_t) bin_buffer_write.Length);
-    read_count = fread(bin_buffer_write.Data, 1, (size_t) bin_buffer_write.Length, bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fread function has failed (./ft_data/bin_file_TC_33_34.a)" &&
-              read_count == (size_t) bin_buffer_write.Length);
-    // bin_buffer_write is clear by the after the callRequests
-    SOPC_ByteString_Copy(&bin_buffer_write_tmp, &bin_buffer_write);
-    ret = fclose(bin_file_fp);
-    ck_assert("TC_SOPC_FileTransfer_033: the fclose function has failed (./ft_data/bin_file_TC_33_34.a)" && 0 == ret);
-    mode = 3;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                                item1PreloadFile.met_getposId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_033" && 0 == *pSizeItem1);
-    ck_assert("TC_SOPC_FileTransfer_033" && 1 == *pOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_033" && 0 == getPositionItem1);
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                           item1PreloadFile.met_writeId, fileHandleItem1, &bin_buffer_write);
-    ck_assert("TC_SOPC_FileTransfer_033" && SOPC_GoodGenericStatus == statusMethodItem1);
+static inline void setup_023(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_023/");
+}
+START_TEST(TC_SOPC_FileTransfer_023)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_022(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    // Size variable is reset only if the file is open again
+    ck_assert(4 == *g_pSizeItem1 && VAR_OPENCOUNT_INIT == *g_pOpenCountItem1);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_034:
-    /* Manual check to do with UA Expert
-        - Check that the data read are the expected ones.
-    */
-    setPositionItem1 = 0;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                 item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
-    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == statusMethodItem1);
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                                item1PreloadFile.met_getposId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_034" && 0 == getPositionItem1);
-    nbOfBytesToRead = bin_buffer_write.Length;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-    pVariantOutput = &callResultsItem1.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == callResultsItem1.status);
-    bin_buffer_read = pVariantOutput->Bstring;
-    SOPC_ByteString_Compare(&bin_buffer_write_tmp, &bin_buffer_read, &comparison);
-    ck_assert("TC_SOPC_FileTransfer_034" && 0 == comparison);
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_034" && bin_buffer_write_tmp.Length == (int32_t) *pSizeItem1);
-    ck_assert("TC_SOPC_FileTransfer_034" && 1 == *pOpenCountItem1);
-    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_closeId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_034" && SOPC_GoodGenericStatus == callResultsItem1.status);
+static inline void setup_024(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_024/");
+}
+START_TEST(TC_SOPC_FileTransfer_024)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    check_022(&fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
 
-    SOPC_Free(bin_buffer_write_tmp.Data);
-    SOPC_ByteString_Initialize(&bin_buffer_write_tmp);
+    // Size variable is reset only if the file is open again
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    ck_assert(4 == *g_pSizeItem1);
 
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 2:\n");
+    SOPC_Byte mode = READ_MASK; // Reading
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                        g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    // The Size variable is reset
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem1 && 1 == *g_pOpenCountItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_025:
-    SOPC_TEST_FileTransfer_SetTestCaseNumber(25);
-    mode = 3;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    fileHandleItem2 = SOPC_TEST_FileTransfer_OpenMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                                        item2PreloadFile.met_openId, mode);
+static void check_025(uint32_t* fileHandleItem1, uint32_t* fileHandleItem2)
+{
+    SOPC_ByteString dataWriteItem1;
+    SOPC_ByteString_Initialize(&dataWriteItem1);
+    uint8_t stringItem1[8] = {0x70, 0x72, 0x65, 0x6C, 0x6F, 0x61, 0x64, 0x31}; //  stringItem1 = "preload1"
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataWriteItem1, stringItem1, 8); // Free by the methodCall
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
 
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                           item1PreloadFile.met_writeId, fileHandleItem1, &dataWriteItem1);
+    SOPC_ByteString dataWriteItem2;
+    SOPC_ByteString_Initialize(&dataWriteItem2);
+    uint8_t stringItem2[5] = {0x49, 0x74, 0x65, 0x6D, 0x32};                 // stringItem2 = "Item2"
+    status = SOPC_ByteString_CopyFromBytes(&dataWriteItem2, stringItem2, 5); // Free by the methodCall
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
 
-    statusMethodItem2 =
-        SOPC_TEST_FileTransfer_WriteMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                           item2PreloadFile.met_writeId, fileHandleItem2, &dataWriteItem2);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    readValueItem2.nodeId = item2PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    SOPC_ClientHelper_Read(coId, &readValueItem2, nbElements, &readValOpenCountItem2);
-    readValueItem1.nodeId = item1PreloadFile.var_sizeId;
-    readValueItem2.nodeId = item2PreloadFile.var_sizeId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    SOPC_ClientHelper_Read(coId, &readValueItem2, nbElements, &readValSizeItem2);
-    ck_assert("TC_SOPC_FileTransfer_025" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_025" && SOPC_GoodGenericStatus == statusMethodItem2);
-    ck_assert("TC_SOPC_FileTransfer_025" && 0 != fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_025" && 0 != fileHandleItem2);
-    ck_assert("TC_SOPC_FileTransfer_025" && 0 == *pSizeItem1 && 1 == *pOpenCountItem1);
-    ck_assert("TC_SOPC_FileTransfer_025" && 0 == *pSizeItem2 && 1 == *pOpenCountItem2);
+    SOPC_Byte mode = READ_MASK | WRITE_MASK; // Reading and writing
+    *fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                         g_item1PreloadFile.met_openId, mode);
+    *fileHandleItem2 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                                         g_item2PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, *fileHandleItem1, &dataWriteItem1);
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_writeId, *fileHandleItem2, &dataWriteItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
 
-    // TC_SOPC_FileTransfer_026:
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                                item1PreloadFile.met_getposId, fileHandleItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    g_readValueItem2.nodeId = g_item2PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem2, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem2);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    g_readValueItem2.nodeId = g_item2PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem2, NB_NODE_ATTR_TO_READ, &g_readValSizeItem2);
+    ck_assert(INVALID_FILE_HANDLE != *fileHandleItem1);
+    ck_assert(INVALID_FILE_HANDLE != *fileHandleItem2);
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem1 && 1 == *g_pOpenCountItem1);
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem2 && 1 == *g_pOpenCountItem2);
+}
+static inline void setup_025(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_025/");
+}
+START_TEST(TC_SOPC_FileTransfer_025)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint32_t fileHandleItem2 = INVALID_FILE_HANDLE;
+    check_025(&fileHandleItem1, &fileHandleItem2);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_closeId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+}
+END_TEST
 
-    getPositionItem2 = SOPC_TEST_FileTransfer_GetPositionMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                                                item2PreloadFile.met_getposId, fileHandleItem2);
-    ck_assert("TC_SOPC_FileTransfer_026" && 8 == getPositionItem1);
-    ck_assert("TC_SOPC_FileTransfer_026" && 5 == getPositionItem2);
+static inline void setup_026(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_026/");
+}
+START_TEST(TC_SOPC_FileTransfer_026)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint32_t fileHandleItem2 = INVALID_FILE_HANDLE;
+    check_025(&fileHandleItem1, &fileHandleItem2);
+    uint64_t getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_getposId, fileHandleItem1);
+    uint64_t getPositionItem2 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem2, &g_callResultsItem2, g_item2PreloadFile.met_getposId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+    ck_assert(8 == getPositionItem1); // End of file for item1
+    ck_assert(5 == getPositionItem2); // End of file for item2
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_closeId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_027:
-    setPositionItem1 = 3;
-    setPositionItem2 = 2;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_SetPositionMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                 item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
+static void check_027(uint32_t* fileHandleItem1, uint32_t* fileHandleItem2)
+{
+    check_025(fileHandleItem1, fileHandleItem2);
+    uint64_t setPositionItem1 = 3;
+    uint64_t setPositionItem2 = 2;
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_setposId, *fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                             g_item2PreloadFile.met_setposId, *fileHandleItem2, setPositionItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+}
+static inline void setup_027(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_027/");
+}
+START_TEST(TC_SOPC_FileTransfer_027)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint32_t fileHandleItem2 = INVALID_FILE_HANDLE;
+    check_027(&fileHandleItem1, &fileHandleItem2);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_closeId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+}
+END_TEST
 
-    statusMethodItem2 =
-        SOPC_TEST_FileTransfer_SetPositionMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                                 item2PreloadFile.met_setposId, fileHandleItem2, setPositionItem2);
-    ck_assert("TC_SOPC_FileTransfer_027" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_027" && SOPC_GoodGenericStatus == statusMethodItem2);
+static inline void setup_028(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_028/");
+}
+START_TEST(TC_SOPC_FileTransfer_028)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint32_t fileHandleItem2 = INVALID_FILE_HANDLE;
+    check_027(&fileHandleItem1, &fileHandleItem2);
 
-    // TC_SOPC_FileTransfer_028:
-    nbOfBytesToRead = 4;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                          item1PreloadFile.met_readId, fileHandleItem1, nbOfBytesToRead);
-
+    int32_t nbOfBytesToRead = 4;
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, nbOfBytesToRead);
     nbOfBytesToRead = 3;
-    statusMethodItem1 =
-        SOPC_TEST_FileTransfer_ReadMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                          item2PreloadFile.met_readId, fileHandleItem2, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2, g_item2PreloadFile.met_readId,
+                                      fileHandleItem2, nbOfBytesToRead);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
 
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValSizeItem1);
-    SOPC_ClientHelper_Read(coId, &readValueItem2, nbElements, &readValSizeItem2);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem2, NB_NODE_ATTR_TO_READ, &g_readValSizeItem2);
 
     uint8_t loadString[4] = {0x6C, 0x6F, 0x61, 0x64}; // "load"
     uint8_t em2String[3] = {0x65, 0x6D, 0x32};        // "em2"
-    SOPC_ByteString_CopyFromBytes(&dataToCompare, loadString, 4);
-    pVariantOutput = &callResultsItem1.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_028" && true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
-    SOPC_ByteString_CopyFromBytes(&dataToCompare, em2String, 3);
-    pVariantOutput = &callResultsItem2.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_028" && true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
-    ck_assert("TC_SOPC_FileTransfer_028" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_028" && SOPC_GoodGenericStatus == statusMethodItem2);
-    ck_assert("TC_SOPC_FileTransfer_028" && 8 == *pSizeItem1 && 5 == *pSizeItem2);
+    SOPC_ByteString* dataToCompareItem1 = SOPC_ByteString_Create();
+    SOPC_ByteString* dataToCompareItem2 = SOPC_ByteString_Create();
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(dataToCompareItem1, loadString, 4);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+    status = SOPC_ByteString_CopyFromBytes(dataToCompareItem2, em2String, 3);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+    SOPC_VariantValue* pVariantOutputItem1 = &g_callResultsItem1.outputParams->Value;
+    SOPC_VariantValue* pVariantOutputItem2 = &g_callResultsItem2.outputParams->Value;
 
-    // TC_SOPC_FileTransfer_029:
-    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(true == SOPC_ByteString_Equal(&pVariantOutputItem1->Bstring, dataToCompareItem1));
+    ck_assert(true == SOPC_ByteString_Equal(&pVariantOutputItem2->Bstring, dataToCompareItem2));
+    ck_assert(8 == *g_pSizeItem1 && 5 == *g_pSizeItem2);
 
-    statusMethodItem2 = SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem2, &callResultsItem2,
-                                                           item2PreloadFile.met_closeId, fileHandleItem2);
-    readValueItem1.nodeId = item1PreloadFile.var_openCountId;
-    readValueItem2.nodeId = item2PreloadFile.var_openCountId;
-    SOPC_ClientHelper_Read(coId, &readValueItem1, nbElements, &readValOpenCountItem1);
-    SOPC_ClientHelper_Read(coId, &readValueItem2, nbElements, &readValOpenCountItem2);
-    ck_assert("TC_SOPC_FileTransfer_029" && 0 == *pOpenCountItem1 && 0 == *pOpenCountItem2);
-    ck_assert("TC_SOPC_FileTransfer_029" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_029" && SOPC_GoodGenericStatus == statusMethodItem2);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_closeId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
 
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 3:\n");
-    SOPC_TEST_FileTransfer_SetTestCaseNumber(30);
+    SOPC_ByteString_Delete(dataToCompareItem1);
+    SOPC_ByteString_Delete(dataToCompareItem2);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_030:
-    booleanNotification = false;
-    callRequestsClient.objectNodeId = remoteResetId;
-    callRequestsClient.methodNodeId = met_remoteResetId;
-    clientResultCode = SOPC_ClientHelper_CallMethod(coId, &callRequestsClient, nbElements, &callResultsClient);
-    pVariantOutput = &callResultsClient.outputParams->Value;
-    ck_assert("TC_SOPC_FileTransfer_030" && 0 == clientResultCode);
-    ck_assert("TC_SOPC_FileTransfer_030" && 0 == callResultsClient.status);
-    ck_assert("TC_SOPC_FileTransfer_030" && true == pVariantOutput->Boolean);
-    ck_assert("TC_SOPC_FileTransfer_030" && true == booleanNotification); // Check if callback notification is called
+static inline void setup_029(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_029/");
+}
+START_TEST(TC_SOPC_FileTransfer_029)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    uint32_t fileHandleItem2 = INVALID_FILE_HANDLE;
+    check_025(&fileHandleItem1, &fileHandleItem2);
+    ck_assert(false == g_booleanUserCloseCallback);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem2, &g_callResultsItem2,
+                                       g_item2PreloadFile.met_closeId, fileHandleItem2);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem2.status);
+    ck_assert(true == g_booleanUserCloseCallback);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    g_readValueItem2.nodeId = g_item2PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem2, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem2);
+    ck_assert(VAR_OPENCOUNT_INIT == *g_pOpenCountItem1 && VAR_OPENCOUNT_INIT == *g_pOpenCountItem2);
+}
+END_TEST
 
-    // TC_SOPC_FileTransfer_031 (automatic test of the notification to the user during the closing process):
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(coId, false, &callRequestsItem1, &callResultsItem1,
-                                                        item1PreloadFile.met_openId, mode);
-    ck_assert("TC_SOPC_FileTransfer_031" && SOPC_GoodGenericStatus == statusMethodItem1);
-    booleanUserCloseCallback = false;
-    statusMethodItem1 = SOPC_TEST_FileTransfer_CloseMethod(coId, true, &callRequestsItem1, &callResultsItem1,
-                                                           item1PreloadFile.met_closeId, fileHandleItem1);
-    ck_assert("TC_SOPC_FileTransfer_031" && SOPC_GoodGenericStatus == statusMethodItem1);
-    ck_assert("TC_SOPC_FileTransfer_031" && true == booleanUserCloseCallback);
+static inline void setup_030(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_030/");
+}
+START_TEST(TC_SOPC_FileTransfer_030)
+{
+    ck_assert(false == g_booleanNotification);
+    int32_t clientResultCode = SOPC_ClientHelper_CallMethod(g_coId, &g_callRequestsClient, 1, &g_callResultsClient);
+    SOPC_VariantValue* pVariantOutput = &g_callResultsClient.outputParams->Value;
+    ck_assert(0 == clientResultCode);
+    ck_assert(0 == g_callResultsClient.status);
+    ck_assert(true == pVariantOutput->Boolean);
+    ck_assert(true == g_booleanNotification); // Check if callback notification is called
+}
+END_TEST
 
-    /*---------------------------------------------------------------------------
-     *        Clear the client/server toolkit library & FileTransfer API
-     *---------------------------------------------------------------------------*/
-    SOPC_ClientHelper_Disconnect(coId);
-    SOPC_FileTransfer_Clear();
-    SOPC_ClientHelper_Finalize();
-    SOPC_ServerHelper_StopServer();
-    SOPC_HelperConfigServer_Clear();
-    SOPC_CommonHelper_Clear();
+static inline void setup_031(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_031/");
+}
+START_TEST(TC_SOPC_FileTransfer_031)
+{
+    uint32_t fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                                 g_item1PreloadFile.met_openId, 3);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(false == g_booleanUserCloseCallback);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(true == g_booleanUserCloseCallback);
+}
+END_TEST
+
+static void check_033(uint32_t* fileHandle, SOPC_ByteString** ppDataToCompare)
+{
+    FILE* bin_file_fp = fopen(g_bin_file_path, "rb+");
+    ck_assert("The fopen function has failed (./ft_data/bin_file_TC_33_34.a may missing)" && NULL != bin_file_fp);
+    int filedes = fileno(bin_file_fp);
+    ck_assert("The fileno function has failed (./ft_data/bin_file_TC_33_34.a)" && -1 != filedes);
+    struct stat sb;
+    int ret = fstat(filedes, &sb);
+    ck_assert("The fstat function has failed (./ft_data/bin_file_TC_33_34.a)" && -1 != ret);
+
+    SOPC_ByteString bin_buffer_write;
+    bin_buffer_write.Length = (int32_t) sb.st_size;
+    bin_buffer_write.Data = SOPC_Malloc((size_t) bin_buffer_write.Length);
+    ck_assert(NULL != bin_buffer_write.Data);
+    size_t read_count = fread(bin_buffer_write.Data, 1, (size_t) bin_buffer_write.Length, bin_file_fp);
+
+    ck_assert("The fread function has failed (./ft_data/bin_file_TC_33_34.a)" &&
+              read_count == (size_t) bin_buffer_write.Length);
+    // bin_buffer_write is clear by the after the callRequests
+    SOPC_ByteString* buffer = SOPC_ByteString_Create();
+    SOPC_ReturnStatus status = SOPC_ByteString_Copy(buffer, &bin_buffer_write);
+    ck_assert(NULL != buffer);
+    ck_assert(SOPC_STATUS_OK == status);
+    *ppDataToCompare = buffer;
+    ret = fclose(bin_file_fp);
+    ck_assert("The fclose function has failed (./ft_data/bin_file_TC_33_34.a)" && 0 == ret);
+    SOPC_Byte mode = READ_MASK | WRITE_MASK; // Reading and writing
+    *fileHandle = SOPC_TEST_FileTransfer_OpenMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                                    g_item1PreloadFile.met_openId, mode);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    uint64_t getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_getposId, *fileHandle);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(VAR_SIZE_INIT == *g_pSizeItem1);
+    ck_assert(1 == *g_pOpenCountItem1);
+    ck_assert(START_OF_FILE_POS == getPositionItem1);
+    SOPC_TEST_FileTransfer_WriteMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_writeId, *fileHandle, &bin_buffer_write);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+}
+static inline void setup_033(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_033/");
+}
+START_TEST(TC_SOPC_FileTransfer_033)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_ByteString* buffer = NULL;
+    check_033(&fileHandleItem1, &buffer);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_ByteString_Delete(buffer);
+}
+END_TEST
+
+static inline void setup_034(void)
+{
+    configure_client_server("./toolkit_test_file_transfer_logs/TC_SOPC_FileTransfer_034/");
+}
+START_TEST(TC_SOPC_FileTransfer_034)
+{
+    uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
+    SOPC_ByteString* ppDataToCompare = NULL;
+    check_033(&fileHandleItem1, &ppDataToCompare);
+
+    uint64_t setPositionItem1 = 0;
+    SOPC_TEST_FileTransfer_SetPositionMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                             g_item1PreloadFile.met_setposId, fileHandleItem1, setPositionItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    uint64_t getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(
+        g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_getposId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    ck_assert(START_OF_FILE_POS == getPositionItem1);
+    SOPC_TEST_FileTransfer_ReadMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1, g_item1PreloadFile.met_readId,
+                                      fileHandleItem1, ppDataToCompare->Length);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+    SOPC_VariantValue* pVariantOutput = &g_callResultsItem1.outputParams->Value;
+    ck_assert(true == SOPC_ByteString_Equal(&pVariantOutput->Bstring, ppDataToCompare));
+
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_sizeId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValSizeItem1);
+    g_readValueItem1.nodeId = g_item1PreloadFile.var_openCountId;
+    SOPC_ClientHelper_Read(g_coId, &g_readValueItem1, NB_NODE_ATTR_TO_READ, &g_readValOpenCountItem1);
+    ck_assert(ppDataToCompare->Length == (int32_t) *g_pSizeItem1 && 1 == *g_pOpenCountItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(g_coId, &g_callRequestsItem1, &g_callResultsItem1,
+                                       g_item1PreloadFile.met_closeId, fileHandleItem1);
+    ck_assert(SOPC_GoodGenericStatus == g_callResultsItem1.status);
+
+    SOPC_ByteString_Delete(ppDataToCompare);
 }
 END_TEST
 
 static Suite* tests_file_transfer(void)
 {
     Suite* s;
-    TCase* tc_file_transfer_method;
+    TCase *tc_001 = NULL, *tc_002 = NULL, *tc_003 = NULL, *tc_004 = NULL, *tc_005 = NULL, *tc_006 = NULL,
+          *tc_007 = NULL, *tc_008 = NULL, *tc_009 = NULL, *tc_010 = NULL, *tc_011 = NULL, *tc_012 = NULL,
+          *tc_013 = NULL, *tc_014 = NULL, *tc_015 = NULL, *tc_016 = NULL, *tc_017 = NULL, *tc_018 = NULL,
+          *tc_019 = NULL, *tc_020 = NULL, *tc_021 = NULL, *tc_022 = NULL, *tc_023 = NULL, *tc_024 = NULL,
+          *tc_025 = NULL, *tc_026 = NULL, *tc_027 = NULL, *tc_028 = NULL, *tc_029 = NULL, *tc_030 = NULL,
+          *tc_031 = NULL, *tc_033 = NULL, *tc_034 = NULL;
 
     s = suite_create("Test file transfer");
-    tc_file_transfer_method = tcase_create("test file transfer method:");
-    tcase_add_test(tc_file_transfer_method, test_file_transfer_method);
-    suite_add_tcase(s, tc_file_transfer_method);
-    /* All tests are run with a timeout, the default being 4 seconds. If the test is not finished within that time, it
-     * is killed and logged as an error. */
-    // tcase_set_timeout(tc_file_transfer_method, 10); // 10 seconds
+    tc_001 = tcase_create("Test service");
+    tc_002 = tcase_create("Test service");
+    tc_003 = tcase_create("Test service");
+    tc_004 = tcase_create("Test service");
+    tc_005 = tcase_create("Test service");
+    tc_006 = tcase_create("Test service");
+    tc_007 = tcase_create("Test service");
+    tc_008 = tcase_create("Test service");
+    tc_009 = tcase_create("Test service");
+    tc_010 = tcase_create("Test service");
+    tc_011 = tcase_create("Test service");
+    tc_012 = tcase_create("Test service");
+    tc_013 = tcase_create("Test service");
+    tc_014 = tcase_create("Test service");
+    tc_015 = tcase_create("Test service");
+    tc_016 = tcase_create("Test service");
+    tc_017 = tcase_create("Test service");
+    tc_018 = tcase_create("Test service");
+    tc_019 = tcase_create("Test service");
+    tc_020 = tcase_create("Test service");
+    tc_021 = tcase_create("Test service");
+    tc_022 = tcase_create("Test service");
+    tc_023 = tcase_create("Test service");
+    tc_024 = tcase_create("Test service");
+    tc_025 = tcase_create("Test service");
+    tc_026 = tcase_create("Test service");
+    tc_027 = tcase_create("Test service");
+    tc_028 = tcase_create("Test service");
+    tc_029 = tcase_create("Test service");
+    tc_030 = tcase_create("Test API");
+    tc_031 = tcase_create("Test API");
+    tc_033 = tcase_create("Test API");
+    tc_034 = tcase_create("Test API");
+
+    suite_add_tcase(s, tc_001);
+    tcase_add_checked_fixture(tc_001, setup_001, teardown_client_server);
+    tcase_add_test(tc_001, TC_SOPC_FileTransfer_001);
+
+    suite_add_tcase(s, tc_002);
+    tcase_add_checked_fixture(tc_002, setup_002, teardown_client_server);
+    tcase_add_test(tc_002, TC_SOPC_FileTransfer_002);
+
+    suite_add_tcase(s, tc_003);
+    tcase_add_checked_fixture(tc_003, setup_003, teardown_client_server);
+    tcase_add_test(tc_003, TC_SOPC_FileTransfer_003);
+
+    suite_add_tcase(s, tc_004);
+    tcase_add_checked_fixture(tc_004, setup_004, teardown_client_server);
+    tcase_add_test(tc_004, TC_SOPC_FileTransfer_004);
+
+    suite_add_tcase(s, tc_005);
+    tcase_add_checked_fixture(tc_005, setup_005, teardown_client_server);
+    tcase_add_test(tc_005, TC_SOPC_FileTransfer_005);
+
+    suite_add_tcase(s, tc_006);
+    tcase_add_checked_fixture(tc_006, setup_006, teardown_client_server);
+    tcase_add_test(tc_006, TC_SOPC_FileTransfer_006);
+
+    suite_add_tcase(s, tc_007);
+    tcase_add_checked_fixture(tc_007, setup_007, teardown_client_server);
+    tcase_add_test(tc_007, TC_SOPC_FileTransfer_007);
+
+    suite_add_tcase(s, tc_008);
+    tcase_add_checked_fixture(tc_008, setup_008, teardown_client_server);
+    tcase_add_test(tc_008, TC_SOPC_FileTransfer_008);
+
+    suite_add_tcase(s, tc_009);
+    tcase_add_checked_fixture(tc_009, setup_009, teardown_client_server);
+    tcase_add_test(tc_009, TC_SOPC_FileTransfer_009);
+
+    suite_add_tcase(s, tc_010);
+    tcase_add_checked_fixture(tc_010, setup_010, teardown_client_server);
+    tcase_add_test(tc_010, TC_SOPC_FileTransfer_010);
+
+    suite_add_tcase(s, tc_011);
+    tcase_add_checked_fixture(tc_011, setup_011, teardown_client_server);
+    tcase_add_test(tc_011, TC_SOPC_FileTransfer_011);
+
+    suite_add_tcase(s, tc_012);
+    tcase_add_checked_fixture(tc_012, setup_012, teardown_client_server);
+    tcase_add_test(tc_012, TC_SOPC_FileTransfer_012);
+
+    suite_add_tcase(s, tc_013);
+    tcase_add_checked_fixture(tc_013, setup_013, teardown_client_server);
+    tcase_add_test(tc_013, TC_SOPC_FileTransfer_013);
+
+    suite_add_tcase(s, tc_014);
+    tcase_add_checked_fixture(tc_014, setup_014, teardown_client_server);
+    tcase_add_test(tc_014, TC_SOPC_FileTransfer_014);
+
+    suite_add_tcase(s, tc_015);
+    tcase_add_checked_fixture(tc_015, setup_015, teardown_client_server);
+    tcase_add_test(tc_015, TC_SOPC_FileTransfer_015);
+
+    suite_add_tcase(s, tc_016);
+    tcase_add_checked_fixture(tc_016, setup_016, teardown_client_server);
+    tcase_add_test(tc_016, TC_SOPC_FileTransfer_016);
+
+    suite_add_tcase(s, tc_017);
+    tcase_add_checked_fixture(tc_017, setup_017, teardown_client_server);
+    tcase_add_test(tc_017, TC_SOPC_FileTransfer_017);
+
+    suite_add_tcase(s, tc_018);
+    tcase_add_checked_fixture(tc_018, setup_018, teardown_client_server);
+    tcase_add_test(tc_018, TC_SOPC_FileTransfer_018);
+
+    suite_add_tcase(s, tc_019);
+    tcase_add_checked_fixture(tc_019, setup_019, teardown_client_server);
+    tcase_add_test(tc_019, TC_SOPC_FileTransfer_019);
+
+    suite_add_tcase(s, tc_020);
+    tcase_add_checked_fixture(tc_020, setup_020, teardown_client_server);
+    tcase_add_test(tc_020, TC_SOPC_FileTransfer_020);
+
+    suite_add_tcase(s, tc_021);
+    tcase_add_checked_fixture(tc_021, setup_021, teardown_client_server);
+    tcase_add_test(tc_021, TC_SOPC_FileTransfer_021);
+
+    suite_add_tcase(s, tc_022);
+    tcase_add_checked_fixture(tc_022, setup_022, teardown_client_server);
+    tcase_add_test(tc_022, TC_SOPC_FileTransfer_022);
+
+    suite_add_tcase(s, tc_023);
+    tcase_add_checked_fixture(tc_023, setup_023, teardown_client_server);
+    tcase_add_test(tc_023, TC_SOPC_FileTransfer_023);
+
+    suite_add_tcase(s, tc_024);
+    tcase_add_checked_fixture(tc_024, setup_024, teardown_client_server);
+    tcase_add_test(tc_024, TC_SOPC_FileTransfer_024);
+
+    suite_add_tcase(s, tc_025);
+    tcase_add_checked_fixture(tc_025, setup_025, teardown_client_server);
+    tcase_add_test(tc_025, TC_SOPC_FileTransfer_025);
+
+    suite_add_tcase(s, tc_026);
+    tcase_add_checked_fixture(tc_026, setup_026, teardown_client_server);
+    tcase_add_test(tc_026, TC_SOPC_FileTransfer_026);
+
+    suite_add_tcase(s, tc_027);
+    tcase_add_checked_fixture(tc_027, setup_027, teardown_client_server);
+    tcase_add_test(tc_027, TC_SOPC_FileTransfer_027);
+
+    suite_add_tcase(s, tc_028);
+    tcase_add_checked_fixture(tc_028, setup_028, teardown_client_server);
+    tcase_add_test(tc_028, TC_SOPC_FileTransfer_028);
+
+    suite_add_tcase(s, tc_029);
+    tcase_add_checked_fixture(tc_029, setup_029, teardown_client_server);
+    tcase_add_test(tc_029, TC_SOPC_FileTransfer_029);
+
+    suite_add_tcase(s, tc_030);
+    tcase_add_checked_fixture(tc_030, setup_030, teardown_client_server);
+    tcase_add_test(tc_030, TC_SOPC_FileTransfer_030);
+
+    suite_add_tcase(s, tc_031);
+    tcase_add_checked_fixture(tc_031, setup_031, teardown_client_server);
+    tcase_add_test(tc_031, TC_SOPC_FileTransfer_031);
+
+    suite_add_tcase(s, tc_033);
+    tcase_add_checked_fixture(tc_033, setup_033, teardown_client_server);
+    tcase_add_test(tc_033, TC_SOPC_FileTransfer_033);
+
+    suite_add_tcase(s, tc_034);
+    tcase_add_checked_fixture(tc_034, setup_034, teardown_client_server);
+    tcase_add_test(tc_034, TC_SOPC_FileTransfer_034);
 
     return s;
 }
@@ -936,6 +1488,22 @@ int main(void)
 {
     int number_failed;
     SRunner* sr;
+
+#if SOPC_HAS_FILESYSTEM
+    // Set common folder for log
+    SOPC_FileSystem_CreationResult res = SOPC_FileSystem_mkdir("./toolkit_test_file_transfer_logs/");
+    if (SOPC_FileSystem_Creation_Error_PathAlreadyExists == res)
+    {
+        fprintf(stderr, "WARNING: path <./toolkit_test_file_transfer_logs/> already exists\n");
+    }
+    if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != res && SOPC_FileSystem_Creation_OK != res)
+    {
+        fprintf(stderr, "ERROR: Cannot create log directory <./toolkit_test_file_transfer_logs/>\n");
+    }
+#else /* SOPC_HAS_FILESYSTEM */
+    fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
+    return -1;
+#endif
 
     sr = srunner_create(tests_file_transfer());
 

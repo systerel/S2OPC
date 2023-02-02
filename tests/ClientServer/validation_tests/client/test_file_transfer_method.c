@@ -24,25 +24,12 @@
 #include <string.h>
 
 #include "libs2opc_common_config.h"
+#include "sopc_assert.h"
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "test_file_transfer_method.h"
-
-// Assessors : getter and setter for the global variable
-static int32_t testCaseNum = 1;
-
-static int32_t SOPC_GetTestCaseNumber(void)
-{
-    return testCaseNum;
-}
-
-static int32_t SOPC_IncrementTestCaseNumber(int32_t increment)
-{
-    testCaseNum = testCaseNum + increment;
-    return testCaseNum;
-}
 
 // These following function ease the assignment for method call function:
 static void SOPC_Initialize_CallMethodRequest(SOPC_ClientHelper_CallMethodRequest* pCallRequest,
@@ -66,29 +53,14 @@ static void SOPC_Initialize_VariantCallMethodRequest(SOPC_Variant* pVariant,
     pVariant->Value = Value;
 }
 
-int32_t SOPC_TEST_FileTransfer_GetTestCaseNumber(void)
-{
-    return testCaseNum;
-}
-
-void SOPC_TEST_FileTransfer_SetTestCaseNumber(int32_t number)
-{
-    testCaseNum = number;
-}
-
 uint32_t SOPC_TEST_FileTransfer_OpenMethod(int32_t connectionId,
-                                           bool sameTestCase,
                                            SOPC_ClientHelper_CallMethodRequest* pCallRequest,
                                            SOPC_ClientHelper_CallMethodResult* pCallResults,
                                            char* met_openId,
                                            SOPC_Byte mode)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
     int32_t nbOfInputParams = 1;
-    uint32_t fileHandle = 0;
+    uint32_t fileHandle = INVALID_FILE_HANDLE;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
     SOPC_Variant* pVariantCallRequest = SOPC_Variant_Create();
@@ -99,59 +71,20 @@ uint32_t SOPC_TEST_FileTransfer_OpenMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_openId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
+    if (0 == statusMethodCall && 0 == pCallResults->status)
     {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": open method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": open method failed.\n", SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": open method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": open method failed: Result code: 0x%08" PRIX32
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-        }
-        else
-        {
-            SOPC_Variant* pVariantCallResult = pCallResults->outputParams;
-            fileHandle = pVariantCallResult->Value.Uint32;
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": open method succeed: fileHandle is: %" PRIu32 "\n",
-                   SOPC_GetTestCaseNumber(), fileHandle);
-#else
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": open method succeed: fileHandle is: %" PRIu32
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), fileHandle);
-#endif
-        }
+        SOPC_Variant* pVariantCallResult = pCallResults->outputParams;
+        fileHandle = pVariantCallResult->Value.Uint32;
     }
     return fileHandle;
 }
 
-SOPC_StatusCode SOPC_TEST_FileTransfer_CloseMethod(int32_t connectionId,
-                                                   bool sameTestCase,
-                                                   SOPC_ClientHelper_CallMethodRequest* pCallRequest,
-                                                   SOPC_ClientHelper_CallMethodResult* pCallResults,
-                                                   char* met_closeId,
-                                                   uint32_t fileHandle)
+void SOPC_TEST_FileTransfer_CloseMethod(int32_t connectionId,
+                                        SOPC_ClientHelper_CallMethodRequest* pCallRequest,
+                                        SOPC_ClientHelper_CallMethodResult* pCallResults,
+                                        char* met_closeId,
+                                        uint32_t fileHandle)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
-    SOPC_StatusCode status = 0xFF; // invalid value
     int32_t nbOfInputParams = 1;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
@@ -163,58 +96,16 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_CloseMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_closeId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
-    {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": close method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": close method failed.\n", SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": close method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": close method failed: Result code: 0x%08" PRIX32
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-            status = pCallResults->status;
-        }
-        else
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": close method succeed.\n", SOPC_GetTestCaseNumber());
-#else
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": close method succeed.\n",
-                                   SOPC_GetTestCaseNumber());
-#endif
-            status = SOPC_GoodGenericStatus;
-        }
-    }
-    return status;
+    SOPC_ASSERT(0 == statusMethodCall);
 }
 
-SOPC_StatusCode SOPC_TEST_FileTransfer_WriteMethod(int32_t connectionId,
-                                                   bool sameTestCase,
-                                                   SOPC_ClientHelper_CallMethodRequest* pCallRequest,
-                                                   SOPC_ClientHelper_CallMethodResult* pCallResults,
-                                                   char* met_writeId,
-                                                   uint32_t fileHandle,
-                                                   SOPC_ByteString* dataToWrite)
+void SOPC_TEST_FileTransfer_WriteMethod(int32_t connectionId,
+                                        SOPC_ClientHelper_CallMethodRequest* pCallRequest,
+                                        SOPC_ClientHelper_CallMethodResult* pCallResults,
+                                        char* met_writeId,
+                                        uint32_t fileHandle,
+                                        SOPC_ByteString* dataToWrite)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
-    SOPC_StatusCode status = 0xFF; // invalid value
     int32_t nbOfInputParams = 2;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
@@ -231,58 +122,16 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_WriteMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_writeId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
-    {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": write method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": write method failed.\n", SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": write method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": write method failed: Result code: 0x%08" PRIX32
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-            status = pCallResults->status;
-        }
-        else
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": write method succeed.\n", SOPC_GetTestCaseNumber());
-#else
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": write method succeed.\n",
-                                   SOPC_GetTestCaseNumber());
-#endif
-            status = SOPC_GoodGenericStatus;
-        }
-    }
-    return status;
+    SOPC_ASSERT(0 == statusMethodCall);
 }
 
-SOPC_StatusCode SOPC_TEST_FileTransfer_ReadMethod(int32_t connectionId,
-                                                  bool sameTestCase,
-                                                  SOPC_ClientHelper_CallMethodRequest* pCallRequest,
-                                                  SOPC_ClientHelper_CallMethodResult* pCallResults,
-                                                  char* met_readId,
-                                                  uint32_t fileHandle,
-                                                  int32_t length)
+void SOPC_TEST_FileTransfer_ReadMethod(int32_t connectionId,
+                                       SOPC_ClientHelper_CallMethodRequest* pCallRequest,
+                                       SOPC_ClientHelper_CallMethodResult* pCallResults,
+                                       char* met_readId,
+                                       uint32_t fileHandle,
+                                       int32_t length)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
-    SOPC_StatusCode status = 0xFF; // invalid value
     int32_t nbOfInputParams = 2;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
@@ -299,75 +148,16 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_ReadMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_readId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
-    {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": read method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": read method failed.\n", SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": read method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": read method failed: Result code: 0x%08" PRIX32
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-            status = pCallResults->status;
-        }
-        else
-        {
-            if (pCallResults->outputParams->Value.Array.Length < 0)
-            {
-#if TEST_DEBUG_FT
-                printf("<TC_SOPC_FileTransfer_%03" PRId32
-                       ": read method failed: no bytes to read or no access granted.\n",
-                       SOPC_GetTestCaseNumber());
-#else
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "<TC_SOPC_FileTransfer_%03" PRId32
-                                       ": read method failed: no bytes to read or no access granted.\n",
-                                       SOPC_GetTestCaseNumber());
-#endif
-            }
-            else
-            {
-#if TEST_DEBUG_FT
-                printf("<TC_SOPC_FileTransfer_%03" PRId32 ": read method succeed.\n", SOPC_GetTestCaseNumber());
-                SOPC_Variant_Print(pCallResults->outputParams);
-#else
-                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "<TC_SOPC_FileTransfer_%03" PRId32 ": read method succeed.\n",
-                                       SOPC_GetTestCaseNumber());
-#endif
-                status = SOPC_GoodGenericStatus;
-            }
-        }
-    }
-    return status;
+    SOPC_ASSERT(0 == statusMethodCall);
 }
 
-SOPC_StatusCode SOPC_TEST_FileTransfer_SetPositionMethod(int32_t connectionId,
-                                                         bool sameTestCase,
-                                                         SOPC_ClientHelper_CallMethodRequest* pCallRequest,
-                                                         SOPC_ClientHelper_CallMethodResult* pCallResults,
-                                                         char* met_setposId,
-                                                         uint32_t fileHandle,
-                                                         uint64_t position)
+void SOPC_TEST_FileTransfer_SetPositionMethod(int32_t connectionId,
+                                              SOPC_ClientHelper_CallMethodRequest* pCallRequest,
+                                              SOPC_ClientHelper_CallMethodResult* pCallResults,
+                                              char* met_setposId,
+                                              uint32_t fileHandle,
+                                              uint64_t position)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
-    SOPC_StatusCode status = 0xFF; // invalid value
     int32_t nbOfInputParams = 2;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
@@ -384,60 +174,16 @@ SOPC_StatusCode SOPC_TEST_FileTransfer_SetPositionMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_setposId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
-    {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": set position method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": set position method failed.\n",
-                               SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": set position method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32
-                                   ": set position method failed: Result code: 0x%08" PRIX32 "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-            status = pCallResults->status;
-        }
-        else
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": succeed: set the cursor position to: %" PRIu64 "\n",
-                   SOPC_GetTestCaseNumber(), position);
-#else
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": succeed: set the cursor position to: %" PRIu64
-                                   "\n",
-                                   SOPC_GetTestCaseNumber(), position);
-#endif
-            status = SOPC_GoodGenericStatus;
-        }
-    }
-    return status;
+    SOPC_ASSERT(0 == statusMethodCall);
 }
 
 uint64_t SOPC_TEST_FileTransfer_GetPositionMethod(int32_t connectionId,
-                                                  bool sameTestCase,
                                                   SOPC_ClientHelper_CallMethodRequest* pCallRequest,
                                                   SOPC_ClientHelper_CallMethodResult* pCallResults,
                                                   char* met_getposId,
                                                   uint32_t fileHandle)
 {
-    if (false == sameTestCase)
-    {
-        SOPC_IncrementTestCaseNumber(1);
-    }
-    uint64_t getPosition = 0;
+    uint64_t getPosition = INVALID_POSITION;
     int32_t nbOfInputParams = 1;
     size_t nbOfElements = 1;
     SOPC_VariantValue valueCallRequest;
@@ -449,44 +195,10 @@ uint64_t SOPC_TEST_FileTransfer_GetPositionMethod(int32_t connectionId,
 
     SOPC_Initialize_CallMethodRequest(pCallRequest, met_getposId, nbOfInputParams, pVariantCallRequest);
     int32_t statusMethodCall = SOPC_ClientHelper_CallMethod(connectionId, pCallRequest, nbOfElements, pCallResults);
-    if (statusMethodCall < 0)
+    if (0 == statusMethodCall && 0 == pCallResults->status)
     {
-#if TEST_DEBUG_FT
-        printf("<TC_SOPC_FileTransfer_%03" PRId32 ": get position method failed.\n", SOPC_GetTestCaseNumber());
-#else
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "<TC_SOPC_FileTransfer_%03" PRId32 ": get position method failed.\n",
-                               SOPC_GetTestCaseNumber());
-#endif
-    }
-    else
-    {
-        if (0 != pCallResults->status)
-        {
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": get position method failed: Result code: 0x%08" PRIX32 "\n",
-                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#else
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32
-                                   ": set position method failed: Result code: 0x%08" PRIX32 "\n",
-                                   SOPC_GetTestCaseNumber(), pCallResults->status);
-#endif
-            getPosition = 0xFF; // invalid value
-        }
-        else
-        {
-            SOPC_Variant* pVariantCallResult = pCallResults->outputParams;
-            getPosition = pVariantCallResult->Value.Uint64;
-#if TEST_DEBUG_FT
-            printf("<TC_SOPC_FileTransfer_%03" PRId32 ": get position returned value: %" PRIu64 "\n",
-                   SOPC_GetTestCaseNumber(), getPosition);
-#else
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "<TC_SOPC_FileTransfer_%03" PRId32 ": get position returned value: %" PRIu64 "\n",
-                                   SOPC_GetTestCaseNumber(), getPosition);
-#endif
-        }
+        SOPC_Variant* pVariantCallResult = pCallResults->outputParams;
+        getPosition = pVariantCallResult->Value.Uint64;
     }
     return getPosition;
 }

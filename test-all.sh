@@ -57,6 +57,7 @@ secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
 toolkit_test_server_client.tap
 toolkit_test_server_local_service.tap
+toolkit_test_file_transfer.tap
 toolkit_test_suite_client.tap
 validation.tap
 s2opc_write.tap
