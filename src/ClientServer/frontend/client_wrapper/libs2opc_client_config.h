@@ -27,7 +27,117 @@
 #define LIBS2OPC_CLIENT_CONFIG_H_
 
 #include <stdbool.h>
-#include "sopc_builtintypes.h"
+#include "sopc_enums.h"
+#include "sopc_user_app_itf.h"
+/**
+ * \brief Initialize the S2OPC client frontend configuration
+ *        Call to ::SOPC_HelperConfigClient_Initialize is required before any other operation
+ *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
+ *
+ * The default log configuration is provided by the ::SOPC_Common_GetDefaultLogConfiguration function. \n
+ * By default, the log configuration is : \n
+ *  .logLevel     = \a SOPC_LOG_LEVEL_INFO \n
+ *  .logSystem    = \a SOPC_LOG_SYSTEM_FILE \n
+ *  .logSysConfig = {.fileSystemLogConfig = {.logDirPath = "", .logMaxBytes = 1048576, .logMaxFiles = 50}}
+ *
+ * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
+ */
+SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void);
+
+/**
+ * \brief Clear the S2OPC client frontend configuration
+ *        It shall be done before a call to ::SOPC_CommonHelper_Clear
+ */
+void SOPC_HelperConfigClient_Clear(void);
+
+/**
+ * \brief
+ *   Structure reserved for future use in order to custom the configuration through XML.
+ *   e.g.: PKI provider alternative, etc.
+ */
+typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
+
+/**
+ * \brief Configure client from XML configuration files for: client connections
+ *
+ * If not used or used partially, see libs2opc_client_config_custom.h to manually configure through API.
+ *
+ * \param clientConfigPath        Path to server configuration XML file (s2opc_clientserver_config.xsd schema)
+ * \param customConfig            Shall be NULL. Reserved for future customization of configuration from XML
+ *                                (PKI provider, etc.).
+ * \param nbScConfigs[out]        Number of secure connection configurations parsed in the XML configuration
+ * \param scConfig[out]           Pointer to the array of secure connection configurations of length \p nbScConfigs.
+ *
+ *
+ * \return     SOPC_STATUS_OK in case of success,
+ *             otherwise SOPC_STATUS_INVALID_PARAMETERS if a path is invalid or all paths are NULL or
+ *             SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *             (toolkit not initialized, server already started).
+ */
+SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientConfigPath,
+                                                           SOPC_ConfigClientXML_Custom* customConfig,
+                                                           size_t* nbScConfigs,
+                                                           SOPC_SecureConnection_Config*** scConfigArray);
+
+/**
+ * \brief Returns the secure connection configuration which has the given user defined identifier.
+ *        The user defined identifier is the id attribute of the connection in XML configuration.
+ *
+ * \note If several connection have the same identifier, the first match will be returned.
+ *
+ * \param userDefinedId  The identifier searched for in secure connections configured
+ *
+ * \return The (first) secure connection configuration for which configured id match \p userDefinedId
+ *         or NULL if none is found.
+ *
+ */
+const SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId);
+
+/**
+ * \brief Type of callback to provide asynchronous service response
+ *
+ * \param response     An asynchronous response to a local service request sent using
+ *                     ::SOPC_ClientHelper_ServiceAsync
+ *                     Response will be a pointer to the service response corresponding to sent request:
+ *                     \li ::OpcUa_ReadResponse
+ *                     \li ::OpcUa_WriteResponse
+ *                     \li ::OpcUa_BrowseResponse
+ *                     \li ::OpcUa_GetEndpointsResponse
+ *                     \li ::OpcUa_FindServersResponse
+ *                     \li ::OpcUa_FindServersOnNetworkResponse
+ *                     \li ::OpcUa_RegisterServer2Response
+ *
+ *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
+ *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
+ *                     In case of sending failure the response is NULL.
+ *
+ *                     TODO: keep it const ? or provide a "copy" ?
+ *
+ * \param userContext  The context that was provided with the corresponding request provided on
+ *                     ::SOPC_ClientHelper_ServiceAsync call
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of response, data change notification, etc.).
+ */
+typedef void SOPC_ServiceAsyncResp_Fct(SOPC_EncodeableType* type, const void* response, uintptr_t userContext);
+
+/**
+ * \brief Define the service response callback to be used.
+ *
+ * This is optional if not used or only synchronous version used.
+ * This shall be defined before starting the server and using ::SOPC_ClientHelper_ServiceAsync.
+ *
+ * \param asyncRespCb  The service asynchronous response callback to be used
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p asyncRespCb is invalid
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *         (toolkit not initialized, client connection initiated).
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of data change notification, service sync/async response, etc.).
+ */
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb);
 
 /**
  * \brief Type of callback to retrieve password for decryption of the client application private key
@@ -57,6 +167,7 @@ typedef bool SOPC_GetPassword_Fct(char** outPassword);
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
 
+/* TODO: remove replaced by  the two following functions */
 /**
  * \brief Define the callback to retrieve password for decryption of the user X509 token private key.
  *
@@ -70,5 +181,25 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetP
  * \note    This function must be called before the configuration of the secure channel.
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getUserKeyPassword);
+
+/**
+ * \brief Type of callback to retrieve password for username or password for decryption of the user private key
+ *
+ * \param      userId        user ID which might be a username or a user certificate thumbprint
+ * \param[out] outPassword   out parameter, the newly allocated password which shall be a zero-terminated string in case
+ *                           of success.
+ *
+ * \return true in case of success, otherwise false.
+ *
+ * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
+ * failure.
+ */
+typedef bool SOPC_GetClientUserPassword_Fct(const char* userId, char** outPassword);
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUsernamePasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientUsernamePassword);
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientX509userKeyPassword);
 
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */
