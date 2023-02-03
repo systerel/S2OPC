@@ -372,14 +372,13 @@ void user_authentication_bs__is_valid_username_pwd_authentication(
 
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
 
-    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
     SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(
         authenticationManager, user_authentication_bs__p_user_token, &authnStatus);
     if (SOPC_STATUS_OK != status)
     {
         /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
-        authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
         SOPC_Logger_TraceWarning(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
@@ -412,7 +411,7 @@ void user_authentication_bs__is_valid_user_x509_authentication(
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     SOPC_ASSERT(NULL != epConfig);
 
-    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_OK;
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
 
@@ -446,7 +445,6 @@ void user_authentication_bs__is_valid_user_x509_authentication(
         if (SOPC_STATUS_OK != status)
         {
             /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
-            authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
