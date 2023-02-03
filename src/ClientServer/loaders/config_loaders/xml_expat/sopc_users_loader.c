@@ -408,28 +408,6 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
 
     return true;
 }
-static bool end_usercertificate(struct parse_context_t* ctx)
-{
-    bool found = false;
-    SOPC_Dict_Get(ctx->users, (SOPC_String*) &ctx->currentCert->thumbprint, &found);
-    if (found)
-    {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Duplicated thumbprint %s found in XML",
-                       SOPC_String_GetRawCString((SOPC_String*) &ctx->currentCert->thumbprint));
-        return false;
-    }
-
-    bool res = SOPC_Dict_Insert(ctx->users, (SOPC_String*) &ctx->currentCert->thumbprint, NULL);
-    if (!res)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    // Reset current user
-    ctx->currentCert = NULL;
-
-    return true;
-}
 
 static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** attrs)
 {
@@ -1217,8 +1195,6 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
     SOPC_ASSERT(NULL != authn && NULL != authn->pData && NULL != token && NULL != authenticated);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UsersConfig* config = authn->pData;
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
@@ -1612,7 +1588,8 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
                 ctx.untrustedIntermediateIssuersList, ctx.issuedCertificatesList, ctx.certificateRevocationList,
                 &pX509_UserIdentity_PKI);
         }
-        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status || SOPC_STATUS_OK != res)
+        if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status ||
+            SOPC_STATUS_OK != res)
         {
             SOPC_Free(*authentication);
             *authentication = NULL;
