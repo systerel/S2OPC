@@ -1179,8 +1179,7 @@ OPERATIONS
 
     p_bool <-- is_QualifiedNames_Empty(name) =
     PRE
-        name: t_QualifiedName_i &
-        name: t_QualifiedName
+        name: t_QualifiedName_i
     THEN
         p_bool := bool(name = c_QualifiedName_indet)
     END
