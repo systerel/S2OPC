@@ -2,19 +2,18 @@
 <S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
   <Anonymous>
     <!-- Anonymous is read only -->
-    <UserAuthorization write="false" read="true" execute="false" />
+    <UserAuthorization write="false" read="true" execute="false" addnode="false"/>
   </Anonymous>
   <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- "user1" pwd=password cannot call methods of address space -->
     <UserPassword user="user1" hash="55c6b4d28fffb9ff1bc8951560eb8d07665aa41a25cd7687a2588c7381814195" salt="c64fd08487e0dc2706583c4416a2e17f">
-      <UserAuthorization write="true" read="true" execute="false" />
+      <UserAuthorization write="true" read="true" execute="false" addnode="false"/>
     </UserPassword>
     <!-- "me" pwd=1234 has all right accesses.
         note: still restricted by nodes static access rights in address space.
-        note: if base64="false" or missing then hex encoding is used
     -->
     <UserPassword user="me" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
-      <UserAuthorization write="true" read="true" execute="true" />
+      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
     </UserPassword>
   </UserPasswordConfiguration>
   <UserCertificates>
