@@ -195,6 +195,7 @@ LOCAL_OPERATIONS
         IsDecoded = TRUE &
         relativePathElt : t_RelativePathElt_i &
         relativePathElt : t_RelativePathElt   &
+        relativePathElt : s_RelativePathElt   &
         index : NAT1
     THEN
         statusCode_operation,
@@ -654,6 +655,7 @@ LOCAL_OPERATIONS
         IsDecoded = TRUE &
         rel_path_elt : t_RelativePathElt_i &
         rel_path_elt : t_RelativePathElt   &
+        rel_path_elt : s_RelativePathElt   &
         index : NAT1 &
         continue : BOOL
     THEN
