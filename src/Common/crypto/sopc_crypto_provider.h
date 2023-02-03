@@ -1102,9 +1102,4 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error);
 
-/* ------------------------------------------------------------------------------------------------
- * Asymmetric Signature validation (payload + nonce secret)
- * ------------------------------------------------------------------------------------------------
- */
-
 #endif /* SOPC_CRYPTO_PROVIDER_H_ */
