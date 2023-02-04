@@ -155,7 +155,7 @@ DEFINITIONS
 
 LOCAL_OPERATIONS
 
-    statusCode_operation <-- treat_one_relative_path_element_1(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
+    statusCode_operation <-- treat_one_relative_path_element_2(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
     PRE
         statusCode_init : t_StatusCode_i &
         loop_index : NAT1 &
@@ -186,6 +186,37 @@ LOCAL_OPERATIONS
         )
     END
     ;
+
+    statusCode_operation <-- treat_one_relative_path_element_1(browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
+    PRE
+        browseDirection : t_BrowseDirection_i &
+        browseDirection : t_BrowseDirection &
+        referenceTypeId : t_NodeId_i &
+        referenceTypeId : t_NodeId &
+        includedSubtypes : BOOL &
+        index : NAT1 &
+        targetName : t_QualifiedName_i &
+        targetName : t_QualifiedName
+    THEN
+        statusCode_operation,
+        BrowsePathResult,
+        BrowsePathRemainingNodeId,
+        BrowsePathRemainingIndex
+        :(  statusCode_operation : t_StatusCode_i &
+
+            BrowsePathResult : seq(t_ExpandedNodeId_i)          &
+            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
+            BrowsePathRemainingIndex  : seq(NAT1)
+        ) ||
+
+        d_var_browse_value_in,
+        d_var_browse_result_out:(
+            d_inv_browse_value_in &
+            d_inv_browse_result_out
+        )
+    END
+    ;
+
 
     /* Fill BrowsePathResult with filtered browse result node
        Node in BrowsePathResult are a copy an should be freed
@@ -748,7 +779,7 @@ OPERATIONS
     ;
 
     /* LOCAL_OPERATION */
-    statusCode_operation <-- treat_one_relative_path_element_1(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
+    statusCode_operation <-- treat_one_relative_path_element_2(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
     VAR
         l_source,
         l_translate_statusCode,
@@ -776,6 +807,46 @@ OPERATIONS
                 ;
                 clear_browse_result
             END
+        END
+    END
+    ;
+
+    statusCode_operation <-- treat_one_relative_path_element_1(browseDirection, referenceTypeId, includedSubtypes, index, targetName) =
+    VAR
+        l_size,
+        l_index,
+        l_continue_source,
+        l_translate_statusCode,
+        l_includedSubtypes,
+        l_targetName
+    IN
+        statusCode_operation := e_sc_bad_nothing_to_do;
+        l_size <--get_BrowsePathSourceSize;
+        l_continue_source <-- init_iter_browsePathSourceIdx(l_size);
+        l_translate_statusCode := statusCode_operation;
+
+        WHILE l_continue_source = TRUE
+        DO
+            l_continue_source, l_index <-- continue_iter_browsePathSourceIdx;
+
+            statusCode_operation <--
+                treat_one_relative_path_element_2(l_translate_statusCode,
+                                                  l_index, browseDirection,
+                                                  referenceTypeId,
+                                                  includedSubtypes,
+                                                  index, targetName);
+            l_translate_statusCode := statusCode_operation
+        INVARIANT
+
+            browsePathSourceIdx_to_iterate <: NAT1 &
+            browsePathSourceIdx_iterated   <: NAT1 &
+            browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
+            l_size = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
+            browsePathSourceIdx_iterated = 1 .. l_index &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            l_continue_source = bool(l_index + 1 < l_size)
+        VARIANT
+            l_size - l_index
         END
     END
     ;
@@ -817,35 +888,9 @@ OPERATIONS
         IF l_name_empty = TRUE THEN
             statusCode_operation := e_sc_bad_browse_name_invalid
         ELSE
-            statusCode_operation := e_sc_bad_nothing_to_do;
-            l_size <--get_BrowsePathSourceSize;
-            l_continue_source <-- init_iter_browsePathSourceIdx(l_size);
-
-            l_translate_statusCode := statusCode_operation;
-            WHILE l_continue_source = TRUE
-            DO
-                l_continue_source, l_index <-- continue_iter_browsePathSourceIdx;
-
-                statusCode_operation <--
-                    treat_one_relative_path_element_1(l_translate_statusCode,
-                                                      l_index, l_browseDirection,
-                                                      l_referenceTypeId,
-                                                      l_includedSubtypes,
-                                                      index, l_targetName);
-                l_translate_statusCode := statusCode_operation
-
-            INVARIANT
-
-                browsePathSourceIdx_to_iterate <: NAT1 &
-                browsePathSourceIdx_iterated   <: NAT1 &
-                browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
-                l_size = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-                browsePathSourceIdx_iterated = 1 .. l_index &
-                browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
-                l_continue_source = bool(l_index + 1 < l_size)
-            VARIANT
-                l_size - l_index
-            END
+            statusCode_operation <--
+                treat_one_relative_path_element_1(l_browseDirection, l_referenceTypeId,
+                                                  l_includedSubtypes, index, l_targetName)
         END
     END
     ;
