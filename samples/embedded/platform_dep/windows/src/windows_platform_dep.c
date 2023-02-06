@@ -28,6 +28,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
 #define LINE_MAX_LEN 256u
 
@@ -47,17 +48,20 @@ void SOPC_Platform_Shutdown(const bool reboot)
 /***************************************************/
 char* SOPC_Shell_ReadLine(void)
 {
-    char* line = SOPC_Malloc(LINE_MAX_LEN);
+    char* line = SOPC_Calloc(LINE_MAX_LEN, 1);
     SOPC_ASSERT(NULL != line);
 
-    fgets(line, LINE_MAX_LEN, stdin);
-    size_t len = strlen(line);
-
-    // Remove EOL chars
-    while (NULL != line && len > 0 && line[len - 1] < ' ')
+    char* res = fgets(line, LINE_MAX_LEN, stdin);
+    if (NULL != res)
     {
-        len--;
-        line[len] = 0;
+        size_t len = strlen(line);
+
+        // Remove EOL chars
+        while (NULL != line && len > 0 && line[len - 1] < ' ')
+        {
+            len--;
+            line[len] = 0;
+        }
     }
     return line;
 }

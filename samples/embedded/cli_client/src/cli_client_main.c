@@ -45,7 +45,6 @@
 #include "libs2opc_common_config.h"
 
 // project includes
-#include "static_security_data.h"
 #include "test_config.h"
 
 static int stopSignal = 0;

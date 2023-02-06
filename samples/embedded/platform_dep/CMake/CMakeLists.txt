@@ -7,7 +7,7 @@ cmake_minimum_required (VERSION 3.5)
 # Demo CLI-PubSub-Server
 set(SAMPLE_PTF_DEP ${CMAKE_CURRENT_LIST_DIR}/../../platform_dep)
 
-# Handle ZEPHYR case forsample build
+# Handle ZEPHYR case for sample build
 set(ZEPHYR_BASE_EXIST $ENV{ZEPHYR_BASE})
 if(ZEPHYR_BASE_EXIST)
   include(../platform_dep/zephyr/CMakeLists.txt)
@@ -75,7 +75,6 @@ if(ENABLE_SAMPLES)
     target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
       s2opc_clientwrapper
       s2opc_serverwrapper
-      s2opc_clientserver
       s2opc_clientserver-loader-embedded)
   endif()
 

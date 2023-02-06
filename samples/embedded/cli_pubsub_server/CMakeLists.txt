@@ -6,13 +6,12 @@ SET(SAMPLE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(../platform_dep/CMake/CMakeLists.txt)
 
-project (S2OPC_CLI_PubSub_Server LANGUAGES C)
+project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
 
 find_package(PythonInterp 3 REQUIRED)
 
 ######################################################
 # Generate test_address_space.c from pubsub_server.xml
-set(S2OPC_ROOT_PATH ${SAMPLE_SRC_DIR}/../../..)
 set(c_aspace_file_name ${SAMPLE_SRC_DIR}/src/test_address_space.c)
 set(xml_uanodeset_path ${SAMPLE_SRC_DIR}/xml/pubsub_server.xml)
 

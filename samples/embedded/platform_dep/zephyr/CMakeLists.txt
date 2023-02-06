@@ -9,6 +9,8 @@ endif()
 
 set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/prj.conf;${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
 
+set(S2OPC_ROOT_PATH ${SAMPLE_SRC_DIR}/../../..)
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(${SAMPLE_PROJECT_NAME})
@@ -35,7 +37,7 @@ add_definitions (-Werror)
 # See CONFIG_MBEDTLS_USER_CONFIG_FILE
 # This file is provided here
 
-SET(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../tls_config)
+SET(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../mbedtls_config)
 zephyr_include_directories(${mbedtls_config})
 
 # =====================

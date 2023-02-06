@@ -713,12 +713,12 @@ void SOPC_Platform_Main(void)
     SOPC_Sleep(100);
     SOPC_ASSERT(SOPC_Atomic_Int_Get(&gStopped) == 0 && "Server failed to start.");
 
+    // Setup default values of Cache using AddressSpace content
+    initializeCacheFromAddrSpace();
+
     /* Create thread for Command Line Input management*/
     status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
-
-    // Setup default values of Cache using AddressSpace content
-    initializeCacheFromAddrSpace();
 
     // Wait for termination
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
@@ -750,7 +750,7 @@ static int cmd_demo_help(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
-    PRINT("S2OPC Server demo commands:\n");
+    PRINT("S2OPC PubSub+Server demo commands:\n");
 
     for (const CLI_config_t* pConfig = &CLI_config[0]; pConfig->name != NULL && pConfig->description != NULL; pConfig++)
     {
