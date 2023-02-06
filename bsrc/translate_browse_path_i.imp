@@ -209,6 +209,13 @@ LOCAL_OPERATIONS
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         :(  statusCode_operation : t_StatusCode_i &
+            statusCode_operation : { e_sc_ok, c_StatusCode_indet,
+                e_sc_bad_no_match,
+                e_sc_bad_node_id_unknown,
+                e_sc_bad_nothing_to_do,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_query_too_complex,
+                e_sc_uncertain_reference_out_of_server} &
 
             BrowsePathResult : seq(t_ExpandedNodeId_i)          &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
