@@ -247,6 +247,7 @@ LOCAL_OPERATIONS
             statusCode_operation : {e_sc_ok, e_sc_bad_node_id_unknown,
                 e_sc_bad_query_too_complex, e_sc_bad_no_match,
                 e_sc_bad_browse_name_invalid} &
+
             BrowsePathResult: seq(t_ExpandedNodeId_i) &
             ( statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
                 =>
@@ -572,7 +573,11 @@ LOCAL_OPERATIONS
         nbReferences
         :(
             statusCode_operation : t_StatusCode_i &
-            statusCode_operation :  {e_sc_ok, e_sc_bad_node_id_unknown, e_sc_bad_query_too_complex, c_StatusCode_indet} &
+            statusCode_operation :  {e_sc_ok,
+                e_sc_bad_no_match,
+                e_sc_bad_node_id_unknown,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_query_too_complex} &
 
             nbReferences : NAT &
             nbReferences <= k_n_BrowseTarget_max
