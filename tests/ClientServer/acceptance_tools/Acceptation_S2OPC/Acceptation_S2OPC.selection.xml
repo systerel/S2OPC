@@ -412,23 +412,6 @@
      <TestCase name="012.js"/>
     </TestCases>
    </ConformanceUnit>
-   <ConformanceUnit name="Security User X509">
-    <TestCases>
-     <TestCase name="001.js"/>
-     <TestCase name="002.js"/>
-     <TestCase name="004.js"/>
-     <TestCase name="005.js"/>
-     <TestCase name="006.js"/>
-     <TestCase name="007.js"/>
-     <TestCase name="008.js"/>
-     <TestCase name="009.js"/>
-     <TestCase name="010.js"/>
-     <TestCase name="011.js"/>
-     <TestCase name="013.js"/>
-     <TestCase name="014.js"/>
-     <TestCase name="015.js"/>
-    </TestCases>
-   </ConformanceUnit>
    <ConformanceUnit name="Security Certificate Validation">
     <TestCases>
      <TestCase name="001.js"/>

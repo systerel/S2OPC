@@ -680,6 +680,7 @@
     <TestCases>
      <TestCase name="001.js"/>
      <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
      <TestCase name="004.js"/>
      <TestCase name="005.js"/>
      <TestCase name="Err-001.js"/>
