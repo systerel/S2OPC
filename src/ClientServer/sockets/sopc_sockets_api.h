@@ -32,7 +32,7 @@
 
 #include "sopc_event_handler.h"
 
-/* Sockets input events */
+/* Sockets input events from Secure Channel layer */
 typedef enum
 {
     /* External events */
@@ -52,6 +52,7 @@ typedef enum
                                  params = (SOPC_Buffer*) message buffer */
 } SOPC_Sockets_InputEvent;
 
+/* Sockets output events to Secure Channel layer */
 typedef enum
 {
     SOCKET_LISTENER_OPENED = 0x100, /* id = endpoint description config index,

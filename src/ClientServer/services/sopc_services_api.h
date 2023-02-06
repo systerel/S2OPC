@@ -32,6 +32,9 @@
 
 #include "sopc_event_handler.h"
 
+/**
+ * Services events input events from application, services layer it-self or timer manager
+ */
 typedef enum SOPC_Services_Event
 {
     /* Services to services events */

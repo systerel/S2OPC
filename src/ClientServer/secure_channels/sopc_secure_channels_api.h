@@ -33,8 +33,8 @@
 #include "sopc_event_handler.h"
 
 /**
- *  \brief Secure channel input events
- *  */
+ *  \brief Secure channel input events from services layer
+ */
 typedef enum
 {
     EP_OPEN = 0x200,    /* id = endpoint description configuration index */
@@ -59,6 +59,9 @@ typedef enum
                          */
 } SOPC_SecureChannels_InputEvent;
 
+/**
+ *  \brief Secure channel output events to services layer
+ */
 typedef enum
 {
     EP_CONNECTED = 0x300,  /* id = endpoint description config index,
