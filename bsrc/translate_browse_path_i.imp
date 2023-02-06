@@ -257,7 +257,6 @@ LOCAL_OPERATIONS
 
             size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
             size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
-            size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
             size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
             statusCode_operation : t_StatusCode_i &
@@ -265,7 +264,6 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex, e_sc_bad_no_match,
                 e_sc_bad_browse_name_invalid} &
 
-            BrowsePathResult: seq(t_ExpandedNodeId_i) &
             ( statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
                 =>
                 /* all target in BrowsePathResult has browse name equal to TargetName and
