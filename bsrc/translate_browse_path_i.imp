@@ -181,6 +181,7 @@ LOCAL_OPERATIONS
                 e_sc_uncertain_reference_out_of_server} &
 
             BrowsePathResult : seq(t_ExpandedNodeId_i)          &
+            c_ExpandedNodeId_indet /: ran(BrowsePathResult)     &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
@@ -218,6 +219,7 @@ LOCAL_OPERATIONS
                 e_sc_uncertain_reference_out_of_server} &
 
             BrowsePathResult : seq(t_ExpandedNodeId_i)          &
+            c_ExpandedNodeId_indet /: ran(BrowsePathResult)     &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
@@ -249,8 +251,10 @@ LOCAL_OPERATIONS
         :(
 
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
+            c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1) &
+
             size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
             size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
             size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
@@ -687,6 +691,7 @@ LOCAL_OPERATIONS
             BrowsePathSource : seq(t_NodeId_i) &
 
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
+            c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex : seq(NAT1)
         ) ||
@@ -724,6 +729,7 @@ LOCAL_OPERATIONS
 
             BrowsePathSource : seq(t_NodeId_i) &
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
+            c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
