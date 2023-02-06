@@ -44,11 +44,8 @@ DEFINITIONS
     size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
     size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
-    !(node).(
-        node : ran(BrowsePathResult)
-        =>
-        node /= c_ExpandedNodeId_indet &
-        node : dom(conv_ExpandedNodeId_NodeId))
+    c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
+    ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId)
 
 ABSTRACT_VARIABLES
     d_variables
