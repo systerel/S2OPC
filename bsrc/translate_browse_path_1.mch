@@ -41,7 +41,6 @@ DEFINITIONS
     size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
 
     size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
-    size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
     size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
     c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
