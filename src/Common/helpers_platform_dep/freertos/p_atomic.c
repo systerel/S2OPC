@@ -58,7 +58,7 @@ void* SOPC_Atomic_Ptr_Get(void** atomic)
 #elif SOPC_PTR_SIZE == 8
     return (void*) __atomic_load_8(atomic, __ATOMIC_SEQ_CST);
 #else
-#error "Unsupported pointer size"
+#error "Unsupported pointer size or SOPC_PTR_SIZE not defined"
 #endif // SOPC_PTR_SIZE
 
 #else
@@ -76,7 +76,7 @@ void SOPC_Atomic_Ptr_Set(void** atomic, void* val)
 #elif SOPC_PTR_SIZE == 8
     __atomic_store_8(atomic, (uintptr_t) val, __ATOMIC_SEQ_CST);
 #else
-#error "Unsupported pointer size"
+#error "Unsupported pointer size or SOPC_PTR_SIZE not defined"
 #endif // SOPC_PTR_SIZE
 
 #else

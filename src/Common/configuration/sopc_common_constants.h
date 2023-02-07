@@ -158,20 +158,6 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
 #endif
 
-/* Check uintptr_t has a maximum value compatible with pointer size. Since it is an insufficient check
- * to ensure same size, check at runtime on actual size is also done by SOPC_Internal_Common_Constants_RuntimeCheck */
-#if SOPC_POINTER_SIZE == 4
-#if UINTPTR_MAX != UINT32_MAX
-#error "UINTPTR_MAX != UINT32_MAX whereas it is expected to have pointer size for other language binding"
-#endif
-#elif SOPC_POINTER_SIZE == 8
-#if UINTPTR_MAX != UINT64_MAX
-#error "UINTPTR_MAX != UINT64_MAX whereas it is expected to have pointer size for other language binding"
-#else
-#error "Unsupported SOPC_POINTER_SIZE size"
-#endif
-#endif
-
 /* Check casts from uint32_t / int32_t to size_t are valid without verification */
 #if SIZE_MAX < UINT32_MAX
 #error "SIZE_MAX < UINT32_MAX whereas uint32_t are casted to size_t values"
