@@ -41,12 +41,12 @@ S2OPC_CERTS_CONFIG=../../../samples/ClientServer/data/cert
 UACTT_PROJECT_PATH=/UACTT_project
 CONFIGURATION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.ctt.xml
 
+NODE_MGT_SELECTION_FILE=Acceptation_S2OPC.node_mgt.selection.xml
+
 if [[ -z "$WITH_NANO_EXTENDED" ]] || [[ $WITH_NANO_EXTENDED -eq  0 ]]
 then
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
     SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.selection.xml
-    # remove methods from configuration
-    sed -r 's/\"ns=1;s=Method[^\"]+\"/\"\"/g' $S2OPC_UACTT_CONFIG/Acceptation_S2OPC.ctt.xml > $S2OPC_UACTT_CONFIG/Acceptation_S2OPC.nano.ctt.xml
     CONFIGURATION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.ctt.xml
 elif [[ -z "$SOPC_HAS_NODE_MANAGEMENT_SERVICES" ]] || [[ $SOPC_HAS_NODE_MANAGEMENT_SERVICES -eq 0 ]]
 then
@@ -54,11 +54,14 @@ then
     SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml    
 else
     TOOLKIT_TEST_SERVER=./toolkit_test_server
-    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.node_mgt.selection.xml
+    SELECTION=$UACTT_PROJECT_PATH/$NODE_MGT_SELECTION_FILE
 fi
 
 # Copy the local S2OPC UACTT configuration files to the UACTT project (overwrite ones in docker)
 echo "Copy the S2OPC repository configuration files into UACTT project (overwrite)"
+pushd $S2OPC_UACTT_CONFIG/
+./gen_other_configs.sh
+popd
 cp -v $S2OPC_UACTT_CONFIG/* $UACTT_PROJECT_PATH/
 if [ $? -ne 0 ]
 then
