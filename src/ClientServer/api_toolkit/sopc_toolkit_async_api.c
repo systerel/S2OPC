@@ -81,6 +81,9 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
 {
     if (0 == endpointConnectionCfg.secureChannelConfigIdx)
     {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "AsyncActivateSession: endpointConnectionCfg content is invalid (secureChannelConfigIdx = 0)");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_Internal_SessionAppContext* sessionAppContext = SOPC_Calloc(1, sizeof(*sessionAppContext));
@@ -88,6 +91,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     sessionAppContext->userToken = userToken;
     if (NULL != sessionName)
     {
@@ -96,41 +100,55 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
         if (NULL != sessionAppContext->sessionName)
         {
             sessionAppContext->sessionName = strncpy(sessionAppContext->sessionName, sessionName, len - 1);
+            status = SOPC_STATUS_OK;
         }
         else
         {
-            SOPC_Free(sessionAppContext);
-            return SOPC_STATUS_OUT_OF_MEMORY;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-    }
-
-    if (&OpcUa_X509IdentityToken_EncodeableType == userToken->Body.Object.ObjType)
-    {
-        sessionAppContext->userTokenKey = (SOPC_SerializedAsymmetricKey*) userTokenCtx;
-        if (NULL == sessionAppContext->userTokenKey)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "AsyncActivateSession: missing X509IdentityToken private key");
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    else if (NULL != userTokenCtx)
-    {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "AsyncActivateSession: userTokenCtx is provided but not for an X509IdentityToken access");
-        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
-        sessionAppContext->userTokenKey = NULL;
+        status = SOPC_STATUS_OK;
     }
 
-    sessionAppContext->userSessionContext = sessionContext;
-    SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionCfg.secureChannelConfigIdx,
-                               (uintptr_t) endpointConnectionCfg.reverseEndpointConfigIdx,
-                               (uintptr_t) sessionAppContext);
-    return SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        if (&OpcUa_X509IdentityToken_EncodeableType == userToken->Body.Object.ObjType)
+        {
+            sessionAppContext->userTokenKey = (SOPC_SerializedAsymmetricKey*) userTokenCtx;
+            if (NULL == sessionAppContext->userTokenKey)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "AsyncActivateSession: missing X509IdentityToken private key");
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+        }
+        else if (NULL != userTokenCtx)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "AsyncActivateSession: userTokenCtx is provided but not for an X509IdentityToken access");
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            sessionAppContext->userTokenKey = NULL;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sessionAppContext->userSessionContext = sessionContext;
+        SOPC_Services_EnqueueEvent(APP_TO_SE_ACTIVATE_SESSION, endpointConnectionCfg.secureChannelConfigIdx,
+                                   (uintptr_t) endpointConnectionCfg.reverseEndpointConfigIdx,
+                                   (uintptr_t) sessionAppContext);
+    }
+    else
+    {
+        SOPC_Free(sessionAppContext);
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_EndpointConnectionCfg endpointConnectionCfg,
