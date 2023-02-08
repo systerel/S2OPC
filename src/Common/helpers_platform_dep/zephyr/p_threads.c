@@ -31,6 +31,7 @@
  * See SOPC_Thread_GetAllThreadsInfo
  */
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -341,12 +342,13 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
     }
     if (priority < 0 || priority >= (CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES))
     {
-        PRINTK_DEBUG("Invalid priority %d\n", priority);
+        printk("\n!!Invalid priority %d\n", priority);
         return false;
     }
     if (NULL == pCfg)
     {
-        PRINTK_DEBUG("Cannot create task <%s>. (No free slots)\n", STRING_SECURE(taskName));
+        printk("\n!!Cannot create task <%s>. (No free slots). Consider revising CONFIG_SOPC_MAX_USER_TASKS\n",
+               STRING_SECURE(taskName));
         return false;
     }
     tThreadWks* pWks = pCfg->pWks;
@@ -371,7 +373,7 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
         k_sem_reset(&pWks->kSemThreadEnded);
         memset(pWks, 0, sizeof(tThreadWks));
         pCfg = NULL;
-        PRINTK_DEBUG("Create task %s failed \n", STRING_SECURE(taskName));
+        printk("\n!!Create task %s failed \n", STRING_SECURE(taskName));
         DEBUG_DELETE_THREAD(pWks);
     }
     else

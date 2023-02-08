@@ -138,6 +138,12 @@ bool Network_Initialize(const char* overrideEthAddr)
             return false;
         }
 
+        printk("Waiting for the network to be up\n");
+        while (net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET)) == NULL)
+        {
+            k_sleep(K_MSEC(100));
+        }
+
         priv_P_SOCKET_networkConfigStatus = true;
     }
     return priv_P_SOCKET_networkConfigStatus;

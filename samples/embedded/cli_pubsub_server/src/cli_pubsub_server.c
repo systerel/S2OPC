@@ -684,8 +684,10 @@ static void* CLI_thread_exec(void* arg)
 void SOPC_Platform_Main(void)
 {
     SOPC_ReturnStatus status;
-
     PRINT("Build date : " __DATE__ " " __TIME__ "\n");
+
+    /* Setup platform-dependant features (network, ...)*/
+    SOPC_Platform_Setup();
 
     /* Configure the server logger (user logger) */
     SOPC_Log_Configuration logConfig;
@@ -696,9 +698,6 @@ void SOPC_Platform_Main(void)
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_CommonHelper_Initialize failed");
 
     gLastReceptionDateMs = SOPC_RealTime_Create(NULL);
-
-    /* Setup platform-dependant features (network, ...)*/
-    SOPC_Platform_Setup();
 
     setupServer();
     setupPubSub();
@@ -902,7 +901,8 @@ static int cmd_demo_write(WordList* pList)
     if (dvC[0] == 0)
     {
         PRINT("usage: demo write <nodeid> <value>\n");
-        PRINT("<value> must be prefixed by b for a BOOL s for a String; i for a 32 bit INT.\n");
+        PRINT("<value> must be prefixed by b for a BOOL, s for a String, B for a byte,\n");
+        PRINT("        i for a INT32, u for a UINT32\n");
         PRINT("Other formats not implemented here.\n");
         return 0;
     }
@@ -924,6 +924,12 @@ static int cmd_demo_write(WordList* pList)
         dv.Value.BuiltInTypeId = SOPC_Boolean_Id;
 
         dv.Value.Value.Boolean = (bool) atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'B')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Byte_Id;
+
+        dv.Value.Value.Byte = (SOPC_Byte) atoi(dvC + 1);
     }
     else if (dvC[0] == 'i')
     {
