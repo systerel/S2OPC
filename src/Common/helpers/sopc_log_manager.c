@@ -93,20 +93,22 @@ static void SOPC_Log_InstanceFileClose(SOPC_Log_File* pLogFile)
             pLogFile->pFile = NULL;
         }
     }
+#else
+    SOPC_UNUSED_ARG(pLogFile);
 #endif
 }
 
+#if SOPC_HAS_FILESYSTEM
 static FILE* SOPC_Log_InstanceFileOpen(const char* filename)
 {
     FILE* result = NULL;
-#if SOPC_HAS_FILESYSTEM
     if (NULL != filename)
     {
         result = fopen(filename, "w");
     }
-#endif
     return result;
 }
+#endif
 
 static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
 {
@@ -115,6 +117,8 @@ static void SOPC_Log_Flush(SOPC_Log_File* pLogFile)
     {
         fflush(pLogFile->pFile);
     }
+#else
+    SOPC_UNUSED_ARG(pLogFile);
 #endif
 }
 
@@ -361,6 +365,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
                                                uint16_t maxFiles)
 {
     SOPC_Log_Instance* result = NULL;
+#if SOPC_HAS_FILESYSTEM
     SOPC_Log_File* file = NULL;
     char* filePath = NULL;
     int res = 0;
@@ -458,7 +463,13 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             result = NULL;
         }
     }
-
+#else
+    SOPC_UNUSED_ARG(logDirPath);
+    SOPC_UNUSED_ARG(logFileName);
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(maxBytes);
+    SOPC_UNUSED_ARG(maxFiles);
+#endif
     return result;
 }
 
@@ -625,6 +636,8 @@ static void SOPC_Log_CheckFileChangeNoLock(SOPC_Log_Instance* pLogInst)
             pLogInst->file->nbBytes = 0;
         }
     }
+#else
+    SOPC_UNUSED_ARG(pLogInst);
 #endif
 }
 

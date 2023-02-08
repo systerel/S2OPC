@@ -46,10 +46,6 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     const SOPC_Log_System logSystem = (NULL == logConfiguration) ? SOPC_LOG_SYSTEM_NO_LOG : logConfiguration->logSystem;
 
     bool result = false;
-    int cmpRes = 0;
-    SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
-    const SOPC_LogSystem_File_Configuration* pFileConfig = NULL;
-    const char* logPath = NULL;
 
     SOPC_Log_Initialize();
 
@@ -57,6 +53,11 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     {
     case SOPC_LOG_SYSTEM_FILE:
 #if SOPC_HAS_FILESYSTEM
+    {
+        int cmpRes = 0;
+        SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
+        const SOPC_LogSystem_File_Configuration* pFileConfig = NULL;
+        const char* logPath = NULL;
         pFileConfig = &logConfiguration->logSysConfig.fileSystemLogConfig;
         logPath = pFileConfig->logDirPath;
         if (NULL != logPath)
@@ -85,12 +86,14 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
         secuAudit = SOPC_Log_CreateFileInstance(logPath, "Trace", SOPC_Log_SecuAuditCategory, pFileConfig->logMaxBytes,
                                                 pFileConfig->logMaxFiles);
         result = SOPC_Logger_AuditInitialize();
+    }
+
 #else /* SOPC_HAS_FILESYSTEM */
         /* Status stays OK given that we don't have other alternatives for now */
         fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
         result = SOPC_STATUS_NOT_SUPPORTED;
 #endif
-        break;
+    break;
 
     case SOPC_LOG_SYSTEM_USER:
         secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory,

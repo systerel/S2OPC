@@ -22,6 +22,8 @@
 #include <string.h>
 
 #include "sopc_buffer.h"
+#include "sopc_common_constants.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
@@ -373,6 +375,7 @@ int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n)
     return (int64_t) n;
 }
 
+#if SOPC_HAS_FILESYSTEM
 static long get_file_size(FILE* fd)
 {
     if (fseek(fd, 0, SEEK_END) == -1)
@@ -452,3 +455,12 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
     *buf = buffer;
     return SOPC_STATUS_OK;
 }
+#else
+SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
+{
+    SOPC_UNUSED_ARG(path);
+    SOPC_UNUSED_ARG(buf);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+#endif

@@ -156,13 +156,13 @@ struct tThreadHandle
 static bool gInitialized = false;
 static struct k_mutex gLock;
 
+#define STRING_SECURE(s) ((s) ? (s) : "<NULL>")
+
 ////////////////////////////////////////////////////////
 /////////// DEBUG SECTION //////////////////////////////
 ////////////////////////////////////////////////////////
 #if CONFIG_SOPC_HELPER_IMPL_INSTRUM
 #define PRINTK_DEBUG printk
-
-#define STRING_SECURE(s) ((s) ? (s) : "<NULL>")
 
 // Start stack marker value at any random value, It is incremented for each task, so that
 // each task stack will be filled with an unique remarkable value.
