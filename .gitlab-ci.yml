@@ -310,11 +310,11 @@ test-build-from-export:
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
     - 'cmake --build .'
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
     - 'cmake --build .'
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
     - 'cmake --build .'
   artifacts:
