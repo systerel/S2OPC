@@ -257,7 +257,11 @@ rm -f $TMP_FILE
 echo "Test report generated"
 
 n_err=$(grep -c "^not ok" $TAP_FILE)
-echo "There were $n_err not oks"
+echo "There were $n_err not oks:"
+if [ $n_err -ne 0 ]
+then
+    grep "^not ok" $TAP_FILE
+fi
 
 # check TAP file
 mv $TAP_FILE ${ROOT_DIR}/build/bin/
@@ -267,6 +271,3 @@ if grep -q '==' $SERVER_ERROR; then
     echo "ERROR: Asan issues detected"
     exit 2
 fi
-
-
-
