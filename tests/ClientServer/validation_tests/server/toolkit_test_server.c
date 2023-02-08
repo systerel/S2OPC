@@ -289,11 +289,11 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
  *---------------------------------------------------*/
 
 /*
- * Configure the cryptographic parameters of the endpoint:
+ * Configure the applications authentication parameters of the endpoint:
  * - Server certificate and key
  * - Public Key Infrastructure: using a single certificate as Certificate Authority or Trusted Certificate
  */
-static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
+static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -566,7 +566,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
      */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SetDefaultCryptographicConfig();
+        status = Server_SetDefaultAppsAuthConfig();
     }
 
     if (!SOPC_EndpointConfig_AddClientToConnect(ep, NULL, DEFAULT_CLIENT_REVERSE_ENDPOINT_URL))
@@ -717,10 +717,31 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
+#ifdef WITH_STATIC_SECURITY_DATA
+    SOPC_SerializedCertificate* serializedUserCAcert = NULL;
+    SOPC_CRLList* serializedUserCAcrl = NULL;
+
+    status =
+        SOPC_KeyManager_SerializedCertificate_CreateFromDER(user_cacert, sizeof(user_cacert), &serializedUserCAcert);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(user_cacrl, sizeof(user_cacrl), &serializedUserCAcrl);
+    }
+
+    /* Create the PKI (Public Key Infrastructure) provider */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProviderStack_Create(serializedUserCAcert, serializedUserCAcrl, &pX509_UserIdentity_PKI);
+    }
+    SOPC_KeyManager_SerializedCertificate_Delete(serializedUserCAcert);
+#else
     status = SOPC_PKIProviderStack_CreateFromPaths(
         x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
         x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers, x509_Identity_issued_certs,
         x509_Identity_revoked_certs, &pX509_UserIdentity_PKI);
+#endif
+
     if (SOPC_STATUS_OK == status)
     {
         authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
