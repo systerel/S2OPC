@@ -1211,37 +1211,41 @@ static SOPC_ReturnStatus check_signature(const char* channelSecurityPolicy,
     /* retrieve the length nonce */
     uint32_t length_nonce = 0;
     SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_SecureChannelNonce(provider, &length_nonce);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
 
     /* Verify signature algorithm URI */
-    const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
-
-    int res =
-        strncmp(algorithm, (const char*) requestedSecurityPolicy->Data, (uint32_t) requestedSecurityPolicy->Length);
-    if (NULL == algorithm || 0 != res || (UINT32_MAX - length_nonce) < payload->length ||
-        length_nonce != (uint32_t) nonce->Length)
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_NOK;
+        const char* algorithm = SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(provider);
+        int res = -1;
+        if (NULL != algorithm)
+        {
+            res = strncmp(algorithm, (const char*) requestedSecurityPolicy->Data,
+                          (uint32_t) requestedSecurityPolicy->Length);
+        }
+        if (0 != res || (UINT32_MAX - length_nonce) < payload->length || length_nonce != (uint32_t) nonce->Length)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
-    uint32_t verify_len = payload->length + length_nonce;
-    uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
-
-    if (NULL != verify_payload)
+    if (SOPC_STATUS_OK == status)
     {
-        memcpy(verify_payload, payload->data, payload->length);
-        memcpy(verify_payload + payload->length, nonce->Data, length_nonce);
+        uint32_t verify_len = payload->length + length_nonce;
+        uint8_t* verify_payload = SOPC_Calloc(verify_len, sizeof(uint8_t));
 
-        status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey, signature->Data,
-                                                      (uint32_t) signature->Length, errorReason);
-        SOPC_Free(verify_payload);
-    }
-    else
-    {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        if (NULL != verify_payload)
+        {
+            memcpy(verify_payload, payload->data, payload->length);
+            memcpy(verify_payload + payload->length, nonce->Data, length_nonce);
+
+            status = SOPC_CryptoProvider_AsymmetricVerify(provider, verify_payload, verify_len, publicKey,
+                                                          signature->Data, (uint32_t) signature->Length, errorReason);
+            SOPC_Free(verify_payload);
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
     SOPC_CryptoProvider_Free(provider);
