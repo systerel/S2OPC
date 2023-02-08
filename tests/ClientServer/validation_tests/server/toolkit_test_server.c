@@ -708,12 +708,12 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 
-    /* Create an user authorization manager which accepts any user.
+    /* Create an user authorization manager which allow all rights to any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
     authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
     if (NULL == authorizationManager)
     {
-        printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+        printf("<Test_Server_Toolkit: Failed to create the user authorization manager\n");
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
@@ -745,14 +745,7 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     if (SOPC_STATUS_OK == status)
     {
         authenticationManager = SOPC_Calloc(1, sizeof(SOPC_UserAuthentication_Manager));
-        if (NULL == authenticationManager)
-        {
-            /* clear */
-            SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
-            SOPC_UserAuthorization_FreeManager(&authorizationManager);
-            printf("<Test_Server_Toolkit: Failed to create the user manager\n");
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        status = NULL == authenticationManager ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -762,6 +755,13 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         authenticationManager->pData = pX509_UserIdentity_PKI;
         SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
         SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
+    }
+    else
+    {
+        /* clear */
+        SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
+        SOPC_UserAuthorization_FreeManager(&authorizationManager);
+        printf("<Test_Server_Toolkit: Failed to create the user authentication manager: %d\n", status);
     }
 
     return status;
