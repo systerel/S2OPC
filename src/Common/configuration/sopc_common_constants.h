@@ -27,6 +27,7 @@
 #ifndef SOPC_COMMON_CONSTANTS_H_
 #define SOPC_COMMON_CONSTANTS_H_
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 
