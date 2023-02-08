@@ -19,7 +19,6 @@
 
 #include <stddef.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "sopc_assert.h"
 #include "sopc_helper_string.h"
