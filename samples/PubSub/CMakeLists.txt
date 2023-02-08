@@ -15,6 +15,8 @@ endif()
 # use find_package onto s2opc in case we built s2opc and sample separately
 find_package(s2opc)
 
+# Options reserved to samples
+option(ENABLE_SAMPLES "Build the S2OPC PubSub library samples" ON)
 
 if(ENABLE_SAMPLES)
   # Demo PubSub
