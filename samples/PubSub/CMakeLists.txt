@@ -26,7 +26,7 @@ if(ENABLE_SAMPLES)
   target_compile_options(pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(pubsub PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")
 
-  target_link_libraries(pubsub PRIVATE s2opc_pubsub s2opc_clientserver-xml-loaders-expat)
+  target_link_libraries(pubsub PRIVATE s2opc_pubsub)
   target_include_directories(pubsub PRIVATE pubsub)
 
   # Demo TSN PubSub server
