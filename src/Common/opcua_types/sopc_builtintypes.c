@@ -5425,12 +5425,19 @@ SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
     }
 }
 
+/**
+ * A flattened range defines a range [start;end] in flattened 1-dimension array
+ */
 typedef struct _SOPC_FlattenedRange
 {
     uint32_t start; // Inclusive
     uint32_t end;   // Inclusive
 } SOPC_FlattenedRange;
 
+/**
+ * Flattened ranges provides <N> ranges in the flattened 1-dimension array.
+ * It is the flattened representation in a 1-dimension array of the ::SOPC_NumericRange in a matrix.
+ */
 typedef struct _SOPC_FlattenedRanges
 {
     size_t n_ranges;
@@ -5915,7 +5922,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
     // Now we just have to do copies between the two flattened arrays using flattened ranges
     for (uint32_t i = 0; i < franges.n_ranges && SOPC_STATUS_OK == status; i++)
     {
-        SOPC_FlattenedRange* frange = &franges.ranges[i];
+        const SOPC_FlattenedRange* frange = &franges.ranges[i];
         for (uint32_t j = frange->start; j <= frange->end && SOPC_STATUS_OK == status; j++)
         {
             // j represents the index in the source flattened array
