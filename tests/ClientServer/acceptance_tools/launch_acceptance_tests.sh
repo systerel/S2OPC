@@ -263,12 +263,27 @@ rm -f $TMP_FILE
 
 echo "Test report generated"
 
+n_ok=$(grep -c "^ok" $TAP_FILE)
 n_err=$(grep -c "^not ok" $TAP_FILE)
-echo "There were $n_err not oks:"
+echo "
+-----------------------------------"
 if [ $n_err -ne 0 ]
 then
+    echo "TESTS KO:"   
     grep "^not ok" $TAP_FILE
+else
+    echo "Remaining known bugs:"
+    grep "TODO Known bug" $TAP_FILE
+    echo "-----------------------------------"
+    echo "FIXED known bugs / skipped tests:"
+    grep "FIXED" $TAP_FILE
 fi
+echo "-----------------------------------
+"
+echo "
+There were $n_ok OKs and $n_err KOs.
+"
+echo "-----------------------------------"
 
 # check TAP file
 mv $TAP_FILE ${ROOT_DIR}/build/bin/
