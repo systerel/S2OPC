@@ -5455,6 +5455,8 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
                                                  const SOPC_Dimension* dimension)
 {
     assert(src->Length >= 0);
+    SOPC_String_Initialize(dst);
+
     const uint32_t src_length = (uint32_t) src->Length;
     const uint32_t start = dimension->start;
 
@@ -5489,8 +5491,6 @@ static SOPC_ReturnStatus get_range_string(SOPC_Variant* dst, const SOPC_String* 
     dst->BuiltInTypeId = SOPC_String_Id;
     dst->DoNotClear = false;
 
-    SOPC_String_Initialize(&dst->Value.String);
-
     return get_range_string_helper(&dst->Value.String, src, dimension);
 }
 
@@ -5501,8 +5501,6 @@ static SOPC_ReturnStatus get_range_bytestring(SOPC_Variant* dst,
     dst->ArrayType = SOPC_VariantArrayType_SingleValue;
     dst->BuiltInTypeId = SOPC_ByteString_Id;
     dst->DoNotClear = false;
-
-    SOPC_ByteString_Initialize(&dst->Value.Bstring);
 
     return get_range_string_helper(&dst->Value.Bstring, src, dimension);
 }
