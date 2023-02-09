@@ -101,11 +101,6 @@
 #error "Maximum subscription lifetime intervals < 3 * SOPC_MAX_KEEPALIVE_PUBLISH_INTERVALS"
 #endif
 
-/** @brief Maximum number of monitored items per subscription */
-#if SOPC_MAX_MONITORED_ITEM > INT32_MAX
-#error "Maximum number of monitored items> INT32_MAX"
-#endif
-
 /* Maximum number of operations representable */
 #if SOPC_MAX_OPERATIONS_PER_MSG > INT32_MAX
 #error "Maximum number of operations per message cannot be > INT32_MAX"
