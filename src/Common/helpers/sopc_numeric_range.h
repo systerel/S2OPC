@@ -40,7 +40,8 @@ typedef struct _SOPC_NumericRange
 /**
  * \brief Parses a numeric range as described in Part 4 § 7.22
  *
- * \param range   the string describing the range
+ * \param range   the string describing the range, range validity is checked
+ *                (the first integer shall have a lower value than the second)
  * \param result  the allocated parsed range in case of success, or NULL in case
  *                of failure
  *

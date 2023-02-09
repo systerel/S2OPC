@@ -1018,8 +1018,26 @@ void SOPC_Variant_InitializeAux(void* value);
 SOPC_ReturnStatus SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
 
-// Note: writeRange shall be set to true in case of range evaluation for a write operation,
-//       in this case range shall be strictly included. If not set, only the range(s) start index shall be included.
+/**
+ * \brief Checks if the given range is valid for the given variant:
+ *        - the number of dimensions is compatible with the variant value
+ *        - range(s) start is valid for variant value
+ *        - range(s) end is valid for variant value if not for a write operation
+ *
+ * \note  Intrinsic range validity was already checked by ::SOPC_NumericRange_Parse
+ *        (the first integer shall have a lower value than the second).
+ *
+ *
+ * \param      variant     The variant for which the range is checked
+ * \param      range       The range to check for given variant
+ * \param      writeRange  Flag that shall be true if the verification is done for a write operation, false otherwise.
+ *                         In case of write operation the range shall be strictly included
+ *                         otherwise only start index shall be included.
+ * \param[out] hasRange    The result pointer parameter, the result is true if the range is valid for the given variant
+ *                         and false otherwise
+ *
+ * \return                 SOPC_STATUS_INVALID_PARAMETERS if the number of dimensions is 0, SOPC_STATUS_OK otherwise.
+ */
 SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
                                         const SOPC_NumericRange* range,
                                         bool writeRange,
