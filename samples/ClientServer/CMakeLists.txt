@@ -8,16 +8,6 @@ endif()
 
 #### S2OPC client/server samples ####
 
-### Dependencies ###
-
-# EXPAT dependency managed in CommonDefs
-
-# use find_package onto s2opc in case we built s2opc and sample separately
-find_package(s2opc)
-
-# Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
-
 #### Samples for S2OPC library and extension libraries ####
 
 # Options reserved to tests / samples
@@ -26,6 +16,13 @@ option(ENABLE_SAMPLES "Build the S2OPC library and extention libraries samples" 
 ### Samples of S2OPC library and extension libraries use ###
 
 if(ENABLE_SAMPLES)
+  ### Dependencies ###
+  # EXPAT dependency managed in CommonDefs
+  # use find_package onto s2opc in case we built s2opc and sample separately
+  find_package(s2opc)
+  # Python3 is mandatory for compilation
+  find_package(PythonInterp 3 REQUIRED)
+
   enable_testing()
 
   # Demo server
@@ -206,57 +203,59 @@ if(ENABLE_SAMPLES)
   endif()
 
   #Following binaries test : s2opc_write, s2opc_read, s2opc_browse, s2opc_discovery.
-  #write
-  add_test(NAME "validation::s2opc_write"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;s=Byte_001" -t 3 42)
-  set_tests_properties("validation::s2opc_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
-  )
+  if (expat_FOUND)
+    #write
+    add_test(NAME "validation::s2opc_write"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+      "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+      "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+      "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;s=Byte_001" -t 3 42)
+    set_tests_properties("validation::s2opc_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+      )
 
-  #read
-  add_test(NAME "validation::s2opc_read"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_read>" -a 1 -n "ns=1;s=Array_Boolean_097")
-  set_tests_properties("validation::s2opc_read" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_read.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
-  )
+    #read
+    add_test(NAME "validation::s2opc_read"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+      "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+      "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+      "$<TARGET_FILE:s2opc_read>" -a 1 -n "ns=1;s=Array_Boolean_097")
+    set_tests_properties("validation::s2opc_read" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_read.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+      )
 
-  #browse
-  add_test(NAME "validation::s2opc_browse"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002")
-  set_tests_properties("validation::s2opc_browse" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_browse.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
-  )
+    #browse
+    add_test(NAME "validation::s2opc_browse"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+      "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+      "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+      "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002")
+    set_tests_properties("validation::s2opc_browse" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_browse.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+      )
 
-  #discovery
-  add_test(NAME "validation::s2opc_discovery"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_discovery>" --none)
-  set_tests_properties("validation::s2opc_discovery" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_discovery.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
-  )
+    #discovery
+    add_test(NAME "validation::s2opc_discovery"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+      "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+      "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+      "$<TARGET_FILE:s2opc_discovery>" --none)
+    set_tests_properties("validation::s2opc_discovery" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_discovery.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+      )
+  endif()
 
   ## PyS2OPC library samples tests ##
 

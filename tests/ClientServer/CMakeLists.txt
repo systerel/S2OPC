@@ -8,17 +8,17 @@ endif()
 
 #### S2OPC client/server tests ####
 
-### Dependencies ###
-
-# EXPAT dependency managed in CommonDefs
-
-# use find_package onto s2opc in case we built s2opc and tests separately
-
-# Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
-
 # We always link check statically, so that our test binaries are standalone
 if(ENABLE_TESTING)
+  ### Dependencies ###
+
+  # EXPAT dependency managed in CommonDefs
+
+  # use find_package onto s2opc in case we built s2opc and tests separately
+
+  # Python3 is mandatory for compilation
+  find_package(PythonInterp 3 REQUIRED)
+
   find_package(check REQUIRED)
 endif()
 

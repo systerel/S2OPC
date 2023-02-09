@@ -14,20 +14,19 @@ endif()
 set(PYS2OPC_WHEEL_NAME "pys2opc-1.3.0-cp36-cp36m-linux_x86_64.whl" CACHE STRING
     "The guessed name of the produced Python 3 Wheel. It must be set to the correct name of the wheel that will be produced in build/lib for tests to run.")
 
-### Dependencies ###
-
-# EXPAT dependency managed in CommonDefs
-
-# use find_package onto s2opc in case we build s2opc and PyS2OPC separately
-find_package(s2opc)
-
-# Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
-
 # The library is built by python. It may use the shared library but it must not be built with ASan.
 # The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
 # The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
 if(WITH_PYS2OPC)
+
+  ### Dependencies ###
+
+  # EXPAT dependency managed in CommonDefs
+  # use find_package onto s2opc in case we build s2opc and PyS2OPC separately
+  find_package(s2opc)
+  # Python3 is mandatory for compilation
+  find_package(PythonInterp 3 REQUIRED)
+
   # TODO:
   # - find how to predict the wheel name and remove the PYS2OPC_WHEEL_NAME option
   # - do a pys2opc_build.py.in to configure the lib through CMake, remove manual copy of pys2opc
