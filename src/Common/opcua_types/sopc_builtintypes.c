@@ -5299,14 +5299,15 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     }
 }
 
-static bool has_range_string(const SOPC_String* str, const SOPC_Dimension* dimension, bool writeRange)
+static inline bool is_array_valid_range(int32_t arrayLength, const SOPC_Dimension* dimension, bool writeRange)
 {
-    if (str->Length <= 0)
+    if (arrayLength <= 0)
     {
         return false;
     }
+    const uint32_t uLen = (uint32_t) arrayLength;
 
-    return dimension->start < ((uint32_t) str->Length) && (!writeRange || dimension->end < ((uint32_t) str->Length));
+    return dimension->start < uLen && (!writeRange || dimension->end < uLen);
 }
 
 static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
@@ -5318,11 +5319,11 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
         // Dereferencing scalars is allowed for strings and bytestrings
         if (variant->BuiltInTypeId == SOPC_String_Id)
         {
-            return has_range_string(&variant->Value.String, &range->dimensions[0], writeRange);
+            return is_array_valid_range(variant->Value.String.Length, &range->dimensions[0], writeRange);
         }
         else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return has_range_string(&variant->Value.Bstring, &range->dimensions[0], writeRange);
+            return is_array_valid_range(variant->Value.Bstring.Length, &range->dimensions[0], writeRange);
         }
     }
 
@@ -5339,8 +5340,7 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
      *       if (ArrayDimension[0] != 0 && range->dimensions[0].start >= ArrayDimension[0]) return false
      */
 
-    return range->dimensions[0].start < ((uint32_t) variant->Value.Array.Length) &&
-           (!writeRange || range->dimensions[0].end < ((uint32_t) variant->Value.Array.Length));
+    return is_array_valid_range(variant->Value.Array.Length, &range->dimensions[0], writeRange);
 }
 
 static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
@@ -5370,13 +5370,13 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
         {
             return false;
         }
-        // First range dimension limit the strings concerned in the string array
-        has_range = range->dimensions[0].start < (uint32_t) variant->Value.Array.Length;
+        // First range dimension limits the strings concerned in the string array
+        has_range = is_array_valid_range(variant->Value.Array.Length, &range->dimensions[0], false);
         for (uint32_t i = range->dimensions[0].start;
              i <= range->dimensions[0].end && i < (uint32_t) variant->Value.Array.Length && has_range; i++)
         {
-            // Second range dimension limit the part of the string concerned
-            has_range &= has_range_string(&strArray[i], &range->dimensions[1], writeRange);
+            // Second range dimension limits the part of the string concerned
+            has_range &= is_array_valid_range(strArray[i].Length, &range->dimensions[1], writeRange);
         }
     }
     else
@@ -5393,11 +5393,8 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
 
         for (size_t i = 0; i < range->n_dimensions && has_range; i++)
         {
-            has_range &= range->dimensions[i].start < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
-            if (writeRange)
-            {
-                has_range &= range->dimensions[i].end < (uint32_t) variant->Value.Matrix.ArrayDimensions[i];
-            }
+            has_range &=
+                is_array_valid_range(variant->Value.Matrix.ArrayDimensions[i], &range->dimensions[i], writeRange);
         }
     }
     /* Note: we might also detect static range invalid cases but we need the ArrayDimension attribute of Variable node.
