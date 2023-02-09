@@ -269,7 +269,7 @@ echo "
 -----------------------------------"
 if [ $n_err -ne 0 ]
 then
-    echo "TESTS KO:"   
+    echo "TESTS KO:"
     grep "^not ok" $TAP_FILE
 else
     echo "Remaining known bugs:"
@@ -277,6 +277,7 @@ else
     echo "-----------------------------------"
     echo "FIXED known bugs / skipped tests:"
     grep "FIXED" $TAP_FILE
+    grep "NEW SUPPORTED" $TAP_FILE
 fi
 echo "-----------------------------------
 "
