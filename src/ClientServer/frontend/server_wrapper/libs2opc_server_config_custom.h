@@ -357,9 +357,9 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
 
 /**
  * \brief Get the server configured address space.
- *        Note: it might be used after base NodeSet XML parsing to modify / extends it before server starts
+ *        Note: it might be used after base NodeSet XML parsing to modify / extend it before server starts
  *
- *  \return NULL if toolkit not initialized,
+ *  \return NULL if toolkit is not initialized,
  *          address space not defined or server already started,
  *          the configured address space otherwise.
  */
